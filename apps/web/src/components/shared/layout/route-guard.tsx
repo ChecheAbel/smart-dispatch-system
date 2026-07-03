@@ -4,17 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Lock, ShieldAlert } from "lucide-react";
-import { useAdminNavigation } from "@/components/admin/admin-navigation-context";
+import { useNavigation } from "@/components/shared/providers/navigation-context";
 import { ADMIN_DASHBOARD_PATH } from "@/lib/auth-paths";
-import {
-  getDefaultAllowedPath,
-  isPathAllowed,
-} from "@/lib/admin-navigation";
-import {
-  adminBadgeGoldClass,
-  adminCardClass,
-  adminHeadingClass,
-} from "@/lib/admin-theme";
+import { getDefaultAllowedPath, isPathAllowed } from "@/lib/admin-navigation";
+import { adminBadgeGoldClass, adminCardClass, adminHeadingClass } from "@/lib/admin-theme";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -26,7 +19,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-function AdminRouteLoading() {
+function RouteLoading() {
   return (
     <div className="space-y-4">
       <Skeleton className="h-8 w-48" />
@@ -35,7 +28,7 @@ function AdminRouteLoading() {
   );
 }
 
-function AdminAccessDenied({ fallbackPath }: { fallbackPath: string | null }) {
+function AccessDenied({ fallbackPath }: { fallbackPath: string | null }) {
   return (
     <Card className={`${adminCardClass} max-w-xl`}>
       <CardHeader>
@@ -73,10 +66,10 @@ function AdminAccessDenied({ fallbackPath }: { fallbackPath: string | null }) {
   );
 }
 
-export default function AdminRouteGuard({ children }: { children: React.ReactNode }) {
+export function RouteGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { menus, loading, error } = useAdminNavigation();
+  const { menus, loading, error } = useNavigation();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
   const allowed = isPathAllowed(pathname, menus);
@@ -100,17 +93,15 @@ export default function AdminRouteGuard({ children }: { children: React.ReactNod
   }, [allowed, fallbackPath, loading, pathname, router]);
 
   if (loading || isRedirecting) {
-    return <AdminRouteLoading />;
+    return <RouteLoading />;
   }
 
   if (error && !menus.length) {
-    return (
-      <AdminAccessDenied fallbackPath={ADMIN_DASHBOARD_PATH} />
-    );
+    return <AccessDenied fallbackPath={ADMIN_DASHBOARD_PATH} />;
   }
 
   if (!allowed) {
-    return <AdminAccessDenied fallbackPath={fallbackPath} />;
+    return <AccessDenied fallbackPath={fallbackPath} />;
   }
 
   return <>{children}</>;

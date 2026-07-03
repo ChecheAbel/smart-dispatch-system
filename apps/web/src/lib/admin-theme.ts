@@ -33,3 +33,31 @@ export const adminHeaderIconButtonClass =
 
 export const adminHeaderControlClass =
   "h-9 gap-2 rounded-lg border-0 bg-transparent px-2.5 text-[#1C3A34] shadow-none hover:bg-[#f8fafb]";
+
+export const adminInputClass =
+  "h-10 rounded-lg border-slate-200 bg-white px-3.5 text-sm shadow-sm";
+
+export const adminSearchInputClass =
+  "h-10 rounded-lg border-slate-200 bg-white py-2 pl-10 pr-3.5 text-sm shadow-sm";
+
+export const adminButtonClass = "h-10 gap-2 rounded-lg px-4 text-sm font-medium";
+
+export const adminPrimaryButtonClass =
+  "h-10 gap-2 rounded-lg bg-[#1C3A34] px-4 text-sm font-medium text-white hover:bg-[#162e29]";
+
+export const adminPaginationButtonClass =
+  "h-9 min-w-9 gap-1.5 rounded-lg border-slate-200 bg-white px-3 text-sm text-[#1C3A34] shadow-sm hover:bg-[#f8fafb]";
+
+export const adminPaginationIconButtonClass =
+  "size-9 rounded-lg border-slate-200 bg-white text-[#1C3A34] shadow-sm hover:bg-[#f8fafb]";
+
+export const adminToastClass =
+  "rounded-lg border border-slate-200/80 bg-white shadow-lg";
+
+export const adminToastTitleClass = "text-sm font-semibold text-[#1C3A34]";
+
+export const adminToastDescriptionClass = "text-sm text-slate-500";
+
+export const adminToastSuccessClass = "border-l-[3px] border-l-[#C9B87A]";
+
+export const adminToastErrorClass = "border-l-[3px] border-l-red-400";

@@ -9,15 +9,15 @@ import {
   type SupportedLocale,
 } from "@/lib/locale";
 
-type AdminLocaleContextValue = {
+type LocaleContextValue = {
   locale: SupportedLocale;
   localeLabel: string;
   setLocale: (locale: SupportedLocale) => void;
 };
 
-const AdminLocaleContext = createContext<AdminLocaleContextValue | null>(null);
+const LocaleContext = createContext<LocaleContextValue | null>(null);
 
-export function AdminLocaleProvider({ children }: { children: React.ReactNode }) {
+export function LocaleProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<SupportedLocale>(DEFAULT_LOCALE);
 
   useEffect(() => {
@@ -34,7 +34,7 @@ export function AdminLocaleProvider({ children }: { children: React.ReactNode })
   }
 
   return (
-    <AdminLocaleContext.Provider
+    <LocaleContext.Provider
       value={{
         locale,
         localeLabel: getLocaleLabel(locale),
@@ -42,14 +42,14 @@ export function AdminLocaleProvider({ children }: { children: React.ReactNode })
       }}
     >
       {children}
-    </AdminLocaleContext.Provider>
+    </LocaleContext.Provider>
   );
 }
 
-export function useAdminLocale() {
-  const context = useContext(AdminLocaleContext);
+export function useLocale() {
+  const context = useContext(LocaleContext);
   if (!context) {
-    throw new Error("useAdminLocale must be used within AdminLocaleProvider.");
+    throw new Error("useLocale must be used within LocaleProvider.");
   }
   return context;
 }

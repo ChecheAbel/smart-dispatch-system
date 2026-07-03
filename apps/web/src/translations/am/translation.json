@@ -1,0 +1,104 @@
+{
+  "common": {
+    "deleteModal": {
+      "eyebrow": "መሰረዝ አረጋግጥ",
+      "title": "{name} ይሰረዝ?",
+      "description": "ይህ እርምጃ መመለስ አይችልም።",
+      "fallbackName": "ይህ ንጥል",
+      "cancel": "ተው",
+      "confirm": "ሰርዝ",
+      "deleting": "በመሰረዝ ላይ...",
+      "errors": {
+        "deleteFailed": "መሰረዝ አልተሳካም። እባክዎ እንደገና ይሞክሩ።"
+      }
+    }
+  },
+  "adminRoles": {
+    "eyebrow": "የመዳረሻ ቁጥጥር",
+    "title": "ሚናዎች",
+    "description": "የመድረክ ሚናዎችን እና የተተረጎሙ ስሞችን ይመልከቱ። የሚና ፈቃዶችን እና መመደቦችን ከ API ማስተዳደር ይቻላል።",
+    "searchPlaceholder": "በስም ወይም slug ፈልግ...",
+    "newRole": "አዲስ ሚና",
+    "itemLabel": "ሚና",
+    "columns": {
+      "name": "ስም",
+      "slug": "Slug",
+      "description": "መግለጫ",
+      "created": "ተፈጥሯል",
+      "actions": "ድርጊቶች"
+    },
+    "empty": {
+      "title": "ምንም ሚና አልተገኘም",
+      "description": "ሚናዎች ከተፈጠሩ በኋላ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "actions": {
+      "view": "እይታ",
+      "edit": "አርትዕ",
+      "delete": "ሰርዝ",
+      "menuLabel": "ለ {name} ድርጊቶች"
+    },
+    "stats": {
+      "title": "ጠቅላላ ሚናዎች",
+      "description": "በመድረኩ ላይ የተገለጹ ሁሉም ሚናዎች"
+    },
+    "form": {
+      "createTitle": "አዲስ ሚና",
+      "editTitle": "ሚና አርትዕ",
+      "createDescription": "ልዩ slug እና ቢያንስ የእንግሊዝኛ ትርጉም ያለው ሚና ይፍጠሩ።",
+      "editDescription": "የሚናውን slug እና የተተረጎሙ ስሞችን እና መግለጫዎችን ያዘምኑ።",
+      "slug": "Slug",
+      "slugHelp": "በፈቃዶች እና በ API ውስጥ የሚጠቀመው የትንሽ ፊደል መለያ።",
+      "slugPlaceholder": "fleet-manager",
+      "name": "ስም",
+      "description": "መግለጫ",
+      "descriptionPlaceholder": "አማራጭ መግለጫ",
+      "optional": "(አማራጭ)",
+      "cancel": "ሰርዝ",
+      "create": "ሚና ፍጠር",
+      "creating": "በመፍጠር ላይ...",
+      "save": "ለውጦችን አስቀምጥ",
+      "saving": "በመቀመጥ ላይ...",
+      "loading": "ሚና በመጫን ላይ...",
+      "namePlaceholderEn": "Fleet Manager",
+      "namePlaceholderAm": "የመኪና አስተዳዳሪ",
+      "errors": {
+        "slugRequired": "Slug ያስፈልጋል።",
+        "enNameRequired": "የእንግሊዝኛ ስም ያስፈልጋል።",
+        "createFailed": "ሚና መፍጠር አልተሳካም።",
+        "updateFailed": "ሚና ማዘመን አልተሳካም።",
+        "loadFailed": "ሚና መጫን አልተሳካም።"
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "ሚና ተፈጥሯል",
+        "description": "አዲሱ ሚና በመድረኩ ላይ አሁን ይገኛል።"
+      },
+      "updateSuccess": {
+        "title": "ሚና ተዘምኗል",
+        "description": "ለውጦችዎ በተሳካ ሁኔታ ተቀምጠዋል።"
+      },
+      "deleteSuccess": {
+        "title": "ሚና ተሰርዟል",
+        "description": "{name} ከመድረኩ ተሰርዟል።"
+      },
+      "loadFailed": {
+        "title": "ሚና መጫን አልተቻለም",
+        "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+      },
+      "createFailed": {
+        "title": "ሚና መፍጠር አልተቻለም",
+        "description": "ቅጹን ያረጋግጡና እንደገና ይሞክሩ።"
+      },
+      "updateFailed": {
+        "title": "ሚና ማዘመን አልተቻለም",
+        "description": "ቅጹን ያረጋግጡና እንደገና ይሞክሩ።"
+      },
+      "deleteFailed": {
+        "title": "ሚና መሰረዝ አልተቻለም",
+        "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
+      }
+    }
+  }
+}

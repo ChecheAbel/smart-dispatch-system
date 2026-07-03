@@ -2,7 +2,7 @@ import Link from "next/link";
 import { adminTheme } from "@/lib/admin-theme";
 import { Separator } from "@/components/ui/separator";
 
-export default function AdminFooter() {
+export function DashboardFooter() {
   return (
     <footer className="mt-auto border-t border-slate-200/80 bg-white">
       <div className="flex flex-col gap-3 px-4 py-4 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">

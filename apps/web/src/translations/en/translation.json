@@ -1,0 +1,104 @@
+{
+  "common": {
+    "deleteModal": {
+      "eyebrow": "Confirm deletion",
+      "title": "Delete {name}?",
+      "description": "This action cannot be undone.",
+      "fallbackName": "this item",
+      "cancel": "Cancel",
+      "confirm": "Delete",
+      "deleting": "Deleting...",
+      "errors": {
+        "deleteFailed": "Failed to delete. Please try again."
+      }
+    }
+  },
+  "adminRoles": {
+    "eyebrow": "Access control",
+    "title": "Roles",
+    "description": "View platform roles and their localized names. Role permissions and assignments can be managed from the API.",
+    "searchPlaceholder": "Search by name or slug...",
+    "newRole": "New role",
+    "itemLabel": "role",
+    "columns": {
+      "name": "Name",
+      "slug": "Slug",
+      "description": "Description",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "empty": {
+      "title": "No roles found",
+      "description": "Roles will appear here once they are created.",
+      "searchDescription": "Try a different search term."
+    },
+    "actions": {
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete",
+      "menuLabel": "Actions for {name}"
+    },
+    "stats": {
+      "title": "Total roles",
+      "description": "All roles defined in the platform"
+    },
+    "form": {
+      "createTitle": "New role",
+      "editTitle": "Edit role",
+      "createDescription": "Create a role with a unique slug and at least an English translation.",
+      "editDescription": "Update the role slug and its localized names and descriptions.",
+      "slug": "Slug",
+      "slugHelp": "Lowercase identifier used in permissions and APIs.",
+      "slugPlaceholder": "fleet-manager",
+      "name": "Name",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "optional": "(optional)",
+      "cancel": "Cancel",
+      "create": "Create role",
+      "creating": "Creating...",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "loading": "Loading role...",
+      "namePlaceholderEn": "Fleet Manager",
+      "namePlaceholderAm": "የመኪና አስተዳዳሪ",
+      "errors": {
+        "slugRequired": "Slug is required.",
+        "enNameRequired": "English name is required.",
+        "createFailed": "Failed to create role.",
+        "updateFailed": "Failed to update role.",
+        "loadFailed": "Failed to load role."
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "Role created",
+        "description": "The new role is now available in the platform."
+      },
+      "updateSuccess": {
+        "title": "Role updated",
+        "description": "Your changes have been saved successfully."
+      },
+      "deleteSuccess": {
+        "title": "Role deleted",
+        "description": "{name} was removed from the platform."
+      },
+      "loadFailed": {
+        "title": "Could not load role",
+        "description": "Please try again or refresh the page."
+      },
+      "createFailed": {
+        "title": "Could not create role",
+        "description": "Please check the form and try again."
+      },
+      "updateFailed": {
+        "title": "Could not update role",
+        "description": "Please check the form and try again."
+      },
+      "deleteFailed": {
+        "title": "Could not delete role",
+        "description": "Please try again in a moment."
+      }
+    }
+  }
+}

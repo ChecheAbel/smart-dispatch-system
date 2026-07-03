@@ -2,11 +2,8 @@
 
 import Link from "next/link";
 import BrandLogo from "@/components/landing/BrandLogo";
-import AdminSidebarNav from "@/components/admin/AdminSidebarNav";
-import {
-  adminBadgeGoldClass,
-  adminEyebrowClass,
-} from "@/lib/admin-theme";
+import { DashboardSidebarNav } from "@/components/shared/layout/dashboard-sidebar-nav";
+import { adminBadgeGoldClass, adminEyebrowClass } from "@/lib/admin-theme";
 import {
   Sidebar,
   SidebarContent,
@@ -19,7 +16,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 
-export default function AdminSidebar() {
+export function DashboardSidebar() {
   return (
     <Sidebar collapsible="icon" className="border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border p-4">
@@ -41,7 +38,7 @@ export default function AdminSidebar() {
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <AdminSidebarNav />
+            <DashboardSidebarNav />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

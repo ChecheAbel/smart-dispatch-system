@@ -2,11 +2,11 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Menu } from "@smart-dispatch/types";
-import { useAdminLocale } from "@/components/admin/admin-locale-context";
+import { useLocale } from "@/components/shared/providers/locale-context";
 import { flattenMenus, getPageTitleFromMenus } from "@/lib/admin-navigation";
 import { fetchNavigationMenus } from "@/lib/menu-api";
 
-type AdminNavigationContextValue = {
+type NavigationContextValue = {
   menus: Menu[];
   flatMenus: Menu[];
   loading: boolean;
@@ -15,10 +15,10 @@ type AdminNavigationContextValue = {
   getPageTitle: (pathname: string) => string;
 };
 
-const AdminNavigationContext = createContext<AdminNavigationContextValue | null>(null);
+const NavigationContext = createContext<NavigationContextValue | null>(null);
 
-export function AdminNavigationProvider({ children }: { children: React.ReactNode }) {
-  const { locale } = useAdminLocale();
+export function NavigationProvider({ children }: { children: React.ReactNode }) {
+  const { locale } = useLocale();
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +50,7 @@ export function AdminNavigationProvider({ children }: { children: React.ReactNod
   );
 
   return (
-    <AdminNavigationContext.Provider
+    <NavigationContext.Provider
       value={{
         menus,
         flatMenus,
@@ -61,14 +61,14 @@ export function AdminNavigationProvider({ children }: { children: React.ReactNod
       }}
     >
       {children}
-    </AdminNavigationContext.Provider>
+    </NavigationContext.Provider>
   );
 }
 
-export function useAdminNavigation() {
-  const context = useContext(AdminNavigationContext);
+export function useNavigation() {
+  const context = useContext(NavigationContext);
   if (!context) {
-    throw new Error("useAdminNavigation must be used within AdminNavigationProvider.");
+    throw new Error("useNavigation must be used within NavigationProvider.");
   }
   return context;
 }

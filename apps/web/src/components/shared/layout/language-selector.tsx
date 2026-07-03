@@ -1,7 +1,7 @@
 "use client";
 
 import { Languages } from "lucide-react";
-import { useAdminLocale } from "@/components/admin/admin-locale-context";
+import { useLocale } from "@/components/shared/providers/locale-context";
 import { adminHeaderIconButtonClass } from "@/lib/admin-theme";
 import { LOCALE_OPTIONS, type SupportedLocale } from "@/lib/locale";
 import { Button } from "@/components/ui/button";
@@ -14,8 +14,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export default function AdminLanguageSelector() {
-  const { locale, setLocale } = useAdminLocale();
+export function LanguageSelector() {
+  const { locale, setLocale } = useLocale();
 
   return (
     <DropdownMenu>

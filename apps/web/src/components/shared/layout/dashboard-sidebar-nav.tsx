@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import type { Menu } from "@smart-dispatch/types";
-import { useAdminNavigation } from "@/components/admin/admin-navigation-context";
+import { useNavigation } from "@/components/shared/providers/navigation-context";
 import { isAdminNavActive } from "@/lib/admin-navigation";
 import { adminNavButtonClass } from "@/lib/admin-theme";
 import { getMenuIcon } from "@/lib/menu-icons";
@@ -88,7 +88,7 @@ function ParentMenuItem({ item, pathname }: { item: Menu; pathname: string }) {
   );
 }
 
-function AdminSidebarMenuItems({ items, pathname }: { items: Menu[]; pathname: string }) {
+function SidebarMenuItems({ items, pathname }: { items: Menu[]; pathname: string }) {
   return (
     <>
       {items.map((item) => {
@@ -120,9 +120,9 @@ function AdminSidebarMenuItems({ items, pathname }: { items: Menu[]; pathname: s
   );
 }
 
-export default function AdminSidebarNav() {
+export function DashboardSidebarNav() {
   const pathname = usePathname();
-  const { menus, loading, error } = useAdminNavigation();
+  const { menus, loading, error } = useNavigation();
 
   if (loading) {
     return (
@@ -154,7 +154,7 @@ export default function AdminSidebarNav() {
 
   return (
     <SidebarMenu>
-      <AdminSidebarMenuItems items={menus} pathname={pathname} />
+      <SidebarMenuItems items={menus} pathname={pathname} />
     </SidebarMenu>
   );
 }

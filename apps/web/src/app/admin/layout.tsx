@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import AdminDashboardShell from "@/components/admin/AdminDashboardShell";
+import { DashboardShell } from "@/components/shared/layout";
 
 export const metadata: Metadata = {
   title: "Admin Console | Smart Dispatch",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return <AdminDashboardShell>{children}</AdminDashboardShell>;
+  return <DashboardShell>{children}</DashboardShell>;
 }

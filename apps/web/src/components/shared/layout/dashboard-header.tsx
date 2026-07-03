@@ -2,9 +2,9 @@
 
 import { usePathname } from "next/navigation";
 import { LogOut, UserRound } from "lucide-react";
-import { getUserInitials, useAdminAuth } from "@/components/admin/admin-auth-context";
-import AdminLanguageSelector from "@/components/admin/AdminLanguageSelector";
-import { useAdminNavigation } from "@/components/admin/admin-navigation-context";
+import { getUserInitials, useAuth } from "@/components/shared/providers/auth-context";
+import { LanguageSelector } from "@/components/shared/layout/language-selector";
+import { useNavigation } from "@/components/shared/providers/navigation-context";
 import {
   adminBadgeGoldClass,
   adminEyebrowClass,
@@ -28,10 +28,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
-export default function AdminHeader() {
+export function DashboardHeader() {
   const pathname = usePathname();
-  const { user, signOut } = useAdminAuth();
-  const { getPageTitle } = useAdminNavigation();
+  const { user, signOut } = useAuth();
+  const { getPageTitle } = useNavigation();
   const pageTitle = getPageTitle(pathname);
 
   return (
@@ -46,7 +46,7 @@ export default function AdminHeader() {
       </div>
 
       <div className={adminHeaderActionsClass}>
-        <AdminLanguageSelector />
+        <LanguageSelector />
 
         <DropdownMenu>
           <DropdownMenuTrigger
