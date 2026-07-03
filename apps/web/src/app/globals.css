@@ -126,10 +126,82 @@
     background-color: #ffffff;
     color: #1a1a1a;
     font-family: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+    overflow-x: hidden;
   }
   html {
     font-family: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
     /* Force light mode — never inherit system dark mode */
     color-scheme: light;
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+
+  section[id] {
+    scroll-margin-top: 4.5rem;
+  }
+
+  @media (min-width: 640px) {
+    section[id] {
+      scroll-margin-top: 5.5rem;
+    }
+  }
+}
+
+@keyframes landing-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(1.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-nav-down {
+  from {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landing-page-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  .animate-landing-fade-up {
+    animation: landing-fade-up 0.85s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .animate-landing-nav {
+    animation: landing-nav-down 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .animate-landing-page-in {
+    animation: landing-page-in 0.5s ease-out both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .animate-landing-fade-up,
+  .animate-landing-nav,
+  .animate-landing-page-in {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

@@ -10,8 +10,11 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Smart Dispatch System | EIH",
-  description: "Unified Fleet & Logistics Operations Platform for Ethiopian Investment Holdings",
+  title: "Smart Dispatch | Premium Mobility Platform",
+  description: "All-in-one platform for booking, dispatch, fleet management, driver management, billing, and invoicing.",
+  icons: {
+    icon: "/logo.webp",
+  },
 };
 
 export default function RootLayout({
