@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { apiReference } from '@scalar/express-api-reference';
+import { registerAuthRoutes } from './auth';
 
 dotenv.config();
 
@@ -10,6 +11,8 @@ const port = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
+
+registerAuthRoutes(app);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Smart Dispatch System API is running' });
