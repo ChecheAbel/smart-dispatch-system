@@ -24,6 +24,13 @@ services:
     environment:
       - NODE_ENV=production
       - DATABASE_URL=postgres://postgres:password@postgres:5432/dispatch_db
+      - JWT_SECRET=change-this-in-production
+      - APP_URL=http://localhost:3000
+      - SEED_ADMIN_EMAIL=admin@example.com
+      - SEED_ADMIN_PASSWORD=changeme123
+      - SEED_ADMIN_FIRST_NAME=System
+      - SEED_ADMIN_LAST_NAME=Administrator
+      - SEED_ADMIN_MOBILE=+251900000000
     depends_on:
       - postgres
 

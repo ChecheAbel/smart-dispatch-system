@@ -1,5 +1,82 @@
+export type RoleSlug = "admin" | "dispatcher" | "driver";
+
+export type AccountStatus = "active" | "suspended" | "deactivated";
+
+export type AccountActivation = "pending" | "activated";
+
+export interface RoleTranslation {
+  locale: string;
+  name: string;
+  description: string | null;
+}
+
+export interface Role {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  locale: string;
+  created_at: string;
+  translations?: RoleTranslation[];
+}
+
+/** Public user returned by auth endpoints (no password). */
 export interface User {
   id: string;
-  name: string;
-  role: 'admin' | 'dispatcher' | 'driver';
+  email: string;
+  first_name: string;
+  middle_name: string | null;
+  last_name: string;
+  mobile_number: string;
+  account_status: AccountStatus;
+  account_activation: AccountActivation;
+  roles: RoleSlug[];
 }
+
+export interface AuthRole {
+  user_id: string;
+  role_id: string;
+  assigned_at: string;
+  user?: User;
+  role?: Role;
+}
+
+export interface AuthTokenResponse {
+  access_token: string;
+  refresh_token: string;
+  token_type: "Bearer";
+  expires_in: number;
+  user: User;
+}
+
+export interface ApiSuccessResponse<T> {
+  success: true;
+  data: T;
+  message?: string;
+}
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  total_pages: number;
+  has_next: boolean;
+  has_prev: boolean;
+}
+
+export interface ApiPaginatedResponse<T> {
+  success: true;
+  data: T[];
+  pagination: PaginationMeta;
+  message?: string;
+}
+
+export interface ApiErrorResponse {
+  success: false;
+  error: string;
+}
+
+export type ApiResponse<T> =
+  | ApiSuccessResponse<T>
+  | ApiPaginatedResponse<T>
+  | ApiErrorResponse;

@@ -37,6 +37,7 @@ USER expressjs
 
 COPY --from=installer /app/apps/api/package.json .
 COPY --from=installer /app/apps/api/dist ./dist
+COPY --from=installer /app/apps/api/prisma ./prisma
 COPY --from=installer /app/node_modules ./node_modules
 
 CMD node dist/index.js

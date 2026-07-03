@@ -1,8 +1,14 @@
-import express from 'express';
-import cors from 'cors';
-import dotenv from 'dotenv';
-import { apiReference } from '@scalar/express-api-reference';
-import { registerAuthRoutes } from './auth';
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import { apiReference } from "@scalar/express-api-reference";
+import { openApiSpec } from "./docs/openapi";
+import { migrate } from "./db/migrate";
+import { registerAuthRoleRoutes } from "./routes/auth-role.routes";
+import { registerAuthRoutes } from "./routes/auth.routes";
+import { registerRoleRoutes } from "./routes/role.routes";
+import { registerUserRoutes } from "./routes/user.routes";
+import { sendSuccess } from "./utils/response";
 
 dotenv.config();
 
@@ -13,51 +19,32 @@ app.use(cors());
 app.use(express.json());
 
 registerAuthRoutes(app);
+registerUserRoutes(app);
+registerRoleRoutes(app);
+registerAuthRoleRoutes(app);
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Smart Dispatch System API is running' });
+app.get("/api/health", (_req, res) => {
+  sendSuccess(res, { status: "ok" }, { message: "Smart Dispatch System API is running" });
 });
 
-// Serve API Documentation via Scalar
 app.use(
-  '/api/docs',
+  "/api/docs",
   apiReference({
-    theme: 'default',
+    theme: "default",
     spec: {
-      content: {
-        openapi: '3.1.0',
-        info: {
-          title: 'Smart Dispatch System API',
-          version: '1.0.0',
-        },
-        paths: {
-          '/api/health': {
-            get: {
-              summary: 'Health check',
-              responses: {
-                '200': {
-                  description: 'Successful response',
-                  content: {
-                    'application/json': {
-                      schema: {
-                        type: 'object',
-                        properties: {
-                          status: { type: 'string', example: 'ok' },
-                          message: { type: 'string', example: 'Smart Dispatch System API is running' }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  })
+      content: openApiSpec,
+    },
+  }),
 );
 
-app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
+async function start() {
+  await migrate();
+  app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+}
+
+start().catch((error) => {
+  console.error("Failed to start API server:", error);
+  process.exit(1);
 });
