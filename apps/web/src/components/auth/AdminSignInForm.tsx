@@ -26,10 +26,10 @@ export default function AdminSignInForm() {
 
     async function checkExistingSession() {
       try {
-        const user = await resumeAdminSession();
+        const session = await resumeAdminSession();
         if (cancelled) return;
 
-        if (user) {
+        if (session) {
           router.replace(ADMIN_DASHBOARD_PATH);
           return;
         }

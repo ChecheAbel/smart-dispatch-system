@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { User } from "@smart-dispatch/types";
+import type { AuthMeResponse } from "@smart-dispatch/types";
 import { DashboardFooter } from "@/components/shared/layout/dashboard-footer";
 import { DashboardHeader } from "@/components/shared/layout/dashboard-header";
 import { DashboardSidebar } from "@/components/shared/layout/dashboard-sidebar";
@@ -46,7 +46,7 @@ function DashboardLoadingShell() {
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<AuthMeResponse | null>(null);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -58,16 +58,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     let cancelled = false;
 
     async function verifySession() {
-      const user = await resumeAdminSession();
+      const nextSession = await resumeAdminSession();
 
       if (cancelled) return;
 
-      if (!user) {
+      if (!nextSession) {
         router.replace(ADMIN_SIGN_IN_PATH);
         return;
       }
 
-      setUser(user);
+      setSession(nextSession);
       setReady(true);
     }
 
@@ -83,12 +83,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     router.replace(ADMIN_SIGN_IN_PATH);
   }
 
-  if (!ready || !user) {
+  if (!ready || !session) {
     return <DashboardLoadingShell />;
   }
 
   return (
-    <AuthProvider user={user} signOut={signOut}>
+    <AuthProvider
+      user={session.user}
+      permissions={session.permissions}
+      signOut={signOut}
+    >
       <LocaleProvider>
         <NavigationProvider>
           <TooltipProvider>

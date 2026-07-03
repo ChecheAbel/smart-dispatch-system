@@ -1,8 +1,9 @@
-import type { AuthTokenResponse, User } from "@smart-dispatch/types";
+import type { AuthMeResponse, AuthTokenResponse, Permission, User } from "@smart-dispatch/types";
 
 const ACCESS_TOKEN_KEY = "sds_access_token";
 const REFRESH_TOKEN_KEY = "sds_refresh_token";
 const USER_KEY = "sds_user";
+const PERMISSIONS_KEY = "sds_permissions";
 
 function getStorage(persistent: boolean) {
   if (typeof window === "undefined") return null;
@@ -13,6 +14,7 @@ function clearStorage(storage: Storage) {
   storage.removeItem(ACCESS_TOKEN_KEY);
   storage.removeItem(REFRESH_TOKEN_KEY);
   storage.removeItem(USER_KEY);
+  storage.removeItem(PERMISSIONS_KEY);
 }
 
 export function saveAuthSession(response: AuthTokenResponse, remember: boolean) {
@@ -26,6 +28,7 @@ export function saveAuthSession(response: AuthTokenResponse, remember: boolean) 
   storage.setItem(ACCESS_TOKEN_KEY, response.access_token);
   storage.setItem(REFRESH_TOKEN_KEY, response.refresh_token);
   storage.setItem(USER_KEY, JSON.stringify(response.user));
+  storage.setItem(PERMISSIONS_KEY, JSON.stringify(response.permissions ?? []));
 }
 
 export function getAccessToken() {
@@ -58,6 +61,21 @@ export function getStoredUser(): User | null {
   }
 }
 
+export function getStoredPermissions(): Permission[] {
+  if (typeof window === "undefined") return [];
+
+  const raw =
+    window.sessionStorage.getItem(PERMISSIONS_KEY) ??
+    window.localStorage.getItem(PERMISSIONS_KEY);
+  if (!raw) return [];
+
+  try {
+    return JSON.parse(raw) as Permission[];
+  } catch {
+    return [];
+  }
+}
+
 function getActiveStorage() {
   if (typeof window === "undefined") return null;
   if (window.localStorage.getItem(ACCESS_TOKEN_KEY)) return window.localStorage;
@@ -68,6 +86,13 @@ function getActiveStorage() {
 export function hasPersistentSession() {
   if (typeof window === "undefined") return false;
   return window.localStorage.getItem(ACCESS_TOKEN_KEY) !== null;
+}
+
+export function updateStoredSession(session: AuthMeResponse) {
+  const storage = getActiveStorage();
+  if (!storage) return;
+  storage.setItem(USER_KEY, JSON.stringify(session.user));
+  storage.setItem(PERMISSIONS_KEY, JSON.stringify(session.permissions));
 }
 
 export function updateStoredUser(user: User) {

@@ -1,6 +1,7 @@
 import type { Express, Request, Response } from "express";
 import { authenticate, type AuthenticatedRequest } from "../middleware/authenticate";
 import {
+  getUserPermissions,
   loginWithPassword,
   logout,
   refreshAccessToken,
@@ -56,8 +57,18 @@ export function registerAuthRoutes(app: Express) {
     }
   });
 
-  app.get("/api/auth/me", authenticate, (req: AuthenticatedRequest, res: Response) => {
-    return sendSuccess(res, { user: req.user });
+  app.get("/api/auth/me", authenticate, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      const permissions = await getUserPermissions(userId);
+      return sendSuccess(res, { user: req.user, permissions });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
   });
 
   app.post("/api/auth/forgot-password", async (req: Request, res: Response) => {

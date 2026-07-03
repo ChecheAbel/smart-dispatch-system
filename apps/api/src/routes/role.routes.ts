@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import { authenticate } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
+import { requirePermission } from "../middleware/require-permission";
 import { toPublicRole } from "../mappers/role.mapper";
 import {
   countRoles,
@@ -30,7 +31,7 @@ function getRequestLocale(req: Request) {
   return parseLocale(req.query, req.headers["accept-language"]);
 }
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", requirePermission("roles.read"), async (req: Request, res: Response) => {
   try {
     const locale = getRequestLocale(req);
     const pagination = parsePaginationQuery(req.query);
@@ -54,7 +55,7 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/slug/:slug", async (req: Request, res: Response) => {
+router.get("/slug/:slug", requirePermission("roles.read"), async (req: Request, res: Response) => {
   try {
     const locale = getRequestLocale(req);
     const role = await findRoleBySlug(req.params.slug);
@@ -70,7 +71,7 @@ router.get("/slug/:slug", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/:id/permissions", async (req: Request, res: Response) => {
+router.get("/:id/permissions", requirePermission("roles.read"), async (req: Request, res: Response) => {
   try {
     const role = await findRoleById(req.params.id);
     if (!role) {
@@ -86,7 +87,7 @@ router.get("/:id/permissions", async (req: Request, res: Response) => {
   }
 });
 
-router.put("/:id/permissions", async (req: Request, res: Response) => {
+router.put("/:id/permissions", requirePermission("roles.write"), async (req: Request, res: Response) => {
   try {
     const role = await findRoleById(req.params.id);
     if (!role) {
@@ -104,7 +105,7 @@ router.put("/:id/permissions", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/:id", requirePermission("roles.read"), async (req: Request, res: Response) => {
   try {
     const locale = getRequestLocale(req);
     const role = await findRoleById(req.params.id);
@@ -120,7 +121,7 @@ router.get("/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/:id/users", async (req: Request, res: Response) => {
+router.get("/:id/users", requirePermission("roles.read"), async (req: Request, res: Response) => {
   try {
     const users = await findUsersByRoleId(req.params.id);
     return sendSuccess(res, {
@@ -131,7 +132,7 @@ router.get("/:id/users", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", requirePermission("roles.write"), async (req: Request, res: Response) => {
   try {
     const slug = getString(req.body?.slug);
     const translations = getRoleTranslations(req.body?.translations);
@@ -160,7 +161,7 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
-router.patch("/:id", async (req: Request, res: Response) => {
+router.patch("/:id", requirePermission("roles.write"), async (req: Request, res: Response) => {
   try {
     const translations = getRoleTranslations(req.body?.translations);
     const role = await updateRole(req.params.id, {
@@ -176,7 +177,7 @@ router.patch("/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/:id", async (req: Request, res: Response) => {
+router.delete("/:id", requirePermission("roles.delete"), async (req: Request, res: Response) => {
   try {
     await deleteRole(req.params.id);
     return sendSuccess(res, { message: "Role deleted successfully." });

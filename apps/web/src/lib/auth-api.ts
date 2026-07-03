@@ -1,4 +1,4 @@
-import type { AuthTokenResponse, User } from "@smart-dispatch/types";
+import type { AuthMeResponse, AuthTokenResponse } from "@smart-dispatch/types";
 import { apiClient } from "./api-client";
 import { unwrapApiResponse } from "./api-response";
 import {
@@ -6,7 +6,7 @@ import {
   getAccessToken,
   getRefreshToken,
   updateAuthSession,
-  updateStoredUser,
+  updateStoredSession,
 } from "./auth-session";
 
 export async function login(email: string, password: string) {
@@ -14,9 +14,9 @@ export async function login(email: string, password: string) {
   return unwrapApiResponse<AuthTokenResponse>(data);
 }
 
-export async function getCurrentUser() {
+export async function getCurrentSession() {
   const { data } = await apiClient.get("/api/auth/me");
-  return unwrapApiResponse<{ user: User }>(data).user;
+  return unwrapApiResponse<AuthMeResponse>(data);
 }
 
 export async function refreshSession(refreshToken: string) {
@@ -27,8 +27,8 @@ export async function refreshSession(refreshToken: string) {
   return unwrapApiResponse<AuthTokenResponse>(data);
 }
 
-/** Validates stored credentials with the API and returns the user when still authorized. */
-export async function resumeAdminSession(): Promise<User | null> {
+/** Validates stored credentials with the API and returns the session when still authorized. */
+export async function resumeAdminSession(): Promise<AuthMeResponse | null> {
   const accessToken = getAccessToken();
   const refreshToken = getRefreshToken();
 
@@ -38,14 +38,14 @@ export async function resumeAdminSession(): Promise<User | null> {
 
   if (accessToken) {
     try {
-      const user = await getCurrentUser();
-      if (!user.roles.includes("admin")) {
+      const session = await getCurrentSession();
+      if (!session.user.roles.includes("admin")) {
         clearAuthSession();
         return null;
       }
 
-      updateStoredUser(user);
-      return user;
+      updateStoredSession(session);
+      return session;
     } catch {
       // Access token expired or invalid — try refresh below.
     }
@@ -53,14 +53,17 @@ export async function resumeAdminSession(): Promise<User | null> {
 
   if (refreshToken) {
     try {
-      const session = await refreshSession(refreshToken);
-      if (!session.user.roles.includes("admin")) {
+      const tokenResponse = await refreshSession(refreshToken);
+      if (!tokenResponse.user.roles.includes("admin")) {
         clearAuthSession();
         return null;
       }
 
-      updateAuthSession(session);
-      return session.user;
+      updateAuthSession(tokenResponse);
+      return {
+        user: tokenResponse.user,
+        permissions: tokenResponse.permissions ?? [],
+      };
     } catch {
       clearAuthSession();
       return null;

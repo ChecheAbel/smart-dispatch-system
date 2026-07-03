@@ -9,8 +9,10 @@ import {
   revokeUserTokensByType,
 } from "../models/token.model";
 import type { DbUser } from "../db/types";
-import type { AuthTokenResponse, RoleSlug, User } from "@smart-dispatch/types";
+import type { AuthTokenResponse, Permission, RoleSlug, User } from "@smart-dispatch/types";
 import { findUserByEmail, findUserById, updateUserPassword } from "../models/user.model";
+import { findPermissionsByUserId } from "../models/permission.model";
+import { toPublicPermission } from "../mappers/permission.mapper";
 
 const ACCESS_TOKEN_TTL_SECONDS = 60 * 15;
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -67,8 +69,14 @@ function signAccessToken(user: User) {
   );
 }
 
+export async function getUserPermissions(userId: string): Promise<Permission[]> {
+  const permissions = await findPermissionsByUserId(userId);
+  return permissions.map((permission) => toPublicPermission(permission));
+}
+
 async function issueTokenPair(user: DbUser): Promise<AuthTokenResponse> {
   const safeUser = await toSafeUser(user);
+  const permissions = await getUserPermissions(user.id);
   const accessToken = signAccessToken(safeUser);
   const refreshToken = generateOpaqueToken();
 
@@ -86,6 +94,7 @@ async function issueTokenPair(user: DbUser): Promise<AuthTokenResponse> {
     token_type: "Bearer",
     expires_in: ACCESS_TOKEN_TTL_SECONDS,
     user: safeUser,
+    permissions,
   };
 }
 

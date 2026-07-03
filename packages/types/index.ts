@@ -90,6 +90,12 @@ export interface AuthTokenResponse {
   token_type: "Bearer";
   expires_in: number;
   user: User;
+  permissions: Permission[];
+}
+
+export interface AuthMeResponse {
+  user: User;
+  permissions: Permission[];
 }
 
 export interface ApiSuccessResponse<T> {
