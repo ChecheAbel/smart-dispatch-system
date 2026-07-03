@@ -80,7 +80,10 @@ async function seedAdminUser() {
   console.log(`[Seed] Administrator account created for ${email}`);
 }
 
+import { seedAccessControl } from "./seed-access";
+
 export async function seedDatabase() {
   await seedRoles();
+  await seedAccessControl();
   await seedAdminUser();
 }

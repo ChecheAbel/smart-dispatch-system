@@ -41,6 +41,49 @@ export interface AuthRole {
   role?: Role;
 }
 
+export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+
+export interface Permission {
+  id: string;
+  slug: string;
+  module: string;
+  action: string;
+  description: string | null;
+  created_at: string;
+}
+
+export interface MenuTranslation {
+  locale: string;
+  label: string;
+}
+
+export interface Menu {
+  id: string;
+  slug: string;
+  label: string;
+  locale: string;
+  path: string | null;
+  icon: string | null;
+  parent_id: string | null;
+  sort_order: number;
+  permission_id: string | null;
+  is_active: boolean;
+  created_at: string;
+  translations?: MenuTranslation[];
+  children?: Menu[];
+}
+
+export interface Endpoint {
+  id: string;
+  slug: string;
+  method: HttpMethod;
+  path: string;
+  description: string | null;
+  permission_id: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
 export interface AuthTokenResponse {
   access_token: string;
   refresh_token: string;

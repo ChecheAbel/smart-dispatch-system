@@ -4,7 +4,7 @@ export const openApiSpec = {
     title: "Smart Dispatch System API",
     version: "1.0.0",
     description:
-      "REST API for the Smart Dispatch System. All successful responses use `{ success: true, data }`. Errors use `{ success: false, error }`. Paginated lists include a `pagination` object. Role labels support multiple languages (`en`, `am`) via a `translations` array in requests; responses resolve `name` and `description` using `?locale=` or `Accept-Language`.",
+      "REST API for the Smart Dispatch System. All successful responses use `{ success: true, data }`. Errors use `{ success: false, error }`. Paginated lists include a `pagination` object. Role and menu labels support multiple languages (`en`, `am`) via a `translations` array in requests; responses resolve localized fields using `?locale=` or `Accept-Language`.",
   },
   tags: [
     { name: "Health", description: "Service health checks" },
@@ -12,6 +12,9 @@ export const openApiSpec = {
     { name: "Users", description: "User management (admin only)" },
     { name: "Roles", description: "Role management (admin only)" },
     { name: "Auth Roles", description: "User–role assignments (admin only)" },
+    { name: "Permissions", description: "Permission management (admin only)" },
+    { name: "Menus", description: "Navigation menu management" },
+    { name: "Endpoints", description: "API endpoint registry (admin only)" },
   ],
   components: {
     securitySchemes: {
@@ -117,6 +120,64 @@ export const openApiSpec = {
           user: { $ref: "#/components/schemas/User" },
         },
       },
+      Permission: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          slug: { type: "string", example: "users.read" },
+          module: { type: "string", example: "users" },
+          action: { type: "string", example: "read" },
+          description: { type: "string", nullable: true },
+          created_at: { type: "string", format: "date-time" },
+        },
+      },
+      MenuTranslation: {
+        type: "object",
+        required: ["locale", "label"],
+        properties: {
+          locale: { type: "string", enum: ["en", "am"] },
+          label: { type: "string", example: "Users" },
+        },
+      },
+      Menu: {
+        type: "object",
+        description:
+          "Menu slug is language-neutral. Localized `label` is resolved from stored translations for the requested locale. Detail responses include the full `translations` array. Navigation responses may include nested `children`.",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          slug: { type: "string", example: "users" },
+          label: { type: "string", example: "Users" },
+          locale: { type: "string", enum: ["en", "am"] },
+          path: { type: "string", nullable: true, example: "/admin/users" },
+          icon: { type: "string", nullable: true },
+          parent_id: { type: "string", format: "uuid", nullable: true },
+          sort_order: { type: "integer" },
+          permission_id: { type: "string", format: "uuid", nullable: true },
+          is_active: { type: "boolean" },
+          created_at: { type: "string", format: "date-time" },
+          translations: {
+            type: "array",
+            items: { $ref: "#/components/schemas/MenuTranslation" },
+          },
+          children: {
+            type: "array",
+            items: { $ref: "#/components/schemas/Menu" },
+          },
+        },
+      },
+      Endpoint: {
+        type: "object",
+        properties: {
+          id: { type: "string", format: "uuid" },
+          slug: { type: "string", example: "users.list" },
+          method: { type: "string", enum: ["GET", "POST", "PUT", "PATCH", "DELETE"] },
+          path: { type: "string", example: "/api/users" },
+          description: { type: "string", nullable: true },
+          permission_id: { type: "string", format: "uuid", nullable: true },
+          is_active: { type: "boolean" },
+          created_at: { type: "string", format: "date-time" },
+        },
+      },
       MessageResponse: {
         type: "object",
         properties: {
@@ -141,7 +202,7 @@ export const openApiSpec = {
         name: "locale",
         in: "query",
         schema: { type: "string", enum: ["en", "am"], default: "en" },
-        description: "Preferred language for localized role fields",
+        description: "Preferred language for localized role and menu fields",
       },
       UserId: {
         name: "id",
@@ -1211,6 +1272,97 @@ export const openApiSpec = {
         },
       },
     },
+    "/api/roles/{id}/permissions": {
+      get: {
+        tags: ["Roles"],
+        summary: "List permissions assigned to role",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ $ref: "#/components/parameters/RoleId" }],
+        responses: {
+          "200": {
+            description: "Permissions granted to the role",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "object",
+                      properties: {
+                        permissions: {
+                          type: "array",
+                          items: { $ref: "#/components/schemas/Permission" },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+      put: {
+        tags: ["Roles"],
+        summary: "Replace role permissions",
+        description: "Replaces all permissions for the role with the provided list. Pass an empty array to revoke every permission.",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ $ref: "#/components/parameters/RoleId" }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["permission_ids"],
+                properties: {
+                  permission_ids: {
+                    type: "array",
+                    items: { type: "string", format: "uuid" },
+                    example: [
+                      "550e8400-e29b-41d4-a716-446655440001",
+                      "550e8400-e29b-41d4-a716-446655440002",
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Role permissions updated",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "object",
+                      properties: {
+                        permissions: {
+                          type: "array",
+                          items: { $ref: "#/components/schemas/Permission" },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+    },
     "/api/auth-roles": {
       get: {
         tags: ["Auth Roles"],
@@ -1365,6 +1517,850 @@ export const openApiSpec = {
         responses: {
           "200": {
             description: "Assignment removed",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: { $ref: "#/components/schemas/MessageResponse" },
+                  },
+                },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+    },
+    "/api/permissions": {
+      get: {
+        tags: ["Permissions"],
+        summary: "List permissions",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { $ref: "#/components/parameters/Page" },
+          { $ref: "#/components/parameters/Limit" },
+          {
+            name: "search",
+            in: "query",
+            schema: { type: "string" },
+            description: "Search slug, module, action, or description",
+          },
+          {
+            name: "module",
+            in: "query",
+            schema: { type: "string", example: "users" },
+            description: "Filter by module name",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Paginated permission list",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "array",
+                      items: { $ref: "#/components/schemas/Permission" },
+                    },
+                    pagination: { $ref: "#/components/schemas/PaginationMeta" },
+                  },
+                },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+        },
+      },
+      post: {
+        tags: ["Permissions"],
+        summary: "Create permission",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["slug", "module", "action"],
+                properties: {
+                  slug: { type: "string", example: "users.read" },
+                  module: { type: "string", example: "users" },
+                  action: { type: "string", example: "read" },
+                  description: {
+                    type: "string",
+                    nullable: true,
+                    example: "View users",
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": {
+            description: "Permission created",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "object",
+                      properties: {
+                        permission: { $ref: "#/components/schemas/Permission" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "409": { $ref: "#/components/responses/Conflict" },
+        },
+      },
+    },
+    "/api/permissions/slug/{slug}": {
+      get: {
+        tags: ["Permissions"],
+        summary: "Get permission by slug",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "slug",
+            in: "path",
+            required: true,
+            schema: { type: "string", example: "users.read" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Permission details",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "object",
+                      properties: {
+                        permission: { $ref: "#/components/schemas/Permission" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+    },
+    "/api/permissions/{id}": {
+      get: {
+        tags: ["Permissions"],
+        summary: "Get permission",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Permission details",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "object",
+                      properties: {
+                        permission: { $ref: "#/components/schemas/Permission" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+      patch: {
+        tags: ["Permissions"],
+        summary: "Update permission",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  slug: { type: "string", example: "users.read" },
+                  module: { type: "string", example: "users" },
+                  action: { type: "string", example: "read" },
+                  description: { type: "string", nullable: true, example: "View users" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Permission updated",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "object",
+                      properties: {
+                        permission: { $ref: "#/components/schemas/Permission" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+          "409": { $ref: "#/components/responses/Conflict" },
+        },
+      },
+      delete: {
+        tags: ["Permissions"],
+        summary: "Delete permission",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Permission deleted",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: { $ref: "#/components/schemas/MessageResponse" },
+                  },
+                },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+    },
+    "/api/menus/navigation": {
+      get: {
+        tags: ["Menus"],
+        summary: "Navigation tree for current user",
+        description:
+          "Returns active menu items the authenticated user may see, based on permissions assigned to their roles. Items without a linked permission are visible to all authenticated users. Response is a nested tree ordered by `sort_order`.",
+        security: [{ bearerAuth: [] }],
+        parameters: [{ $ref: "#/components/parameters/Locale" }],
+        responses: {
+          "200": {
+            description: "Filtered navigation menu tree",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "object",
+                      properties: {
+                        menus: {
+                          type: "array",
+                          items: { $ref: "#/components/schemas/Menu" },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+        },
+      },
+    },
+    "/api/menus": {
+      get: {
+        tags: ["Menus"],
+        summary: "List menus",
+        description: "Admin-only flat list of all menus (not nested).",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { $ref: "#/components/parameters/Page" },
+          { $ref: "#/components/parameters/Limit" },
+          { $ref: "#/components/parameters/Locale" },
+          {
+            name: "search",
+            in: "query",
+            schema: { type: "string" },
+            description: "Search slug or path",
+          },
+          {
+            name: "is_active",
+            in: "query",
+            schema: { type: "boolean" },
+            description: "Filter by active status",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Paginated menu list",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "array",
+                      items: { $ref: "#/components/schemas/Menu" },
+                    },
+                    pagination: { $ref: "#/components/schemas/PaginationMeta" },
+                  },
+                },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+        },
+      },
+      post: {
+        tags: ["Menus"],
+        summary: "Create menu",
+        description: "Requires at least one translation, including `en`.",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["slug", "translations"],
+                properties: {
+                  slug: { type: "string", example: "users" },
+                  path: { type: "string", nullable: true, example: "/admin/users" },
+                  icon: { type: "string", nullable: true, example: "users" },
+                  parent_id: { type: "string", format: "uuid", nullable: true },
+                  sort_order: { type: "integer", example: 10 },
+                  permission_id: { type: "string", format: "uuid", nullable: true },
+                  is_active: { type: "boolean", default: true },
+                  translations: {
+                    type: "array",
+                    minItems: 1,
+                    items: { $ref: "#/components/schemas/MenuTranslation" },
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": {
+            description: "Menu created",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "object",
+                      properties: { menu: { $ref: "#/components/schemas/Menu" } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "409": { $ref: "#/components/responses/Conflict" },
+        },
+      },
+    },
+    "/api/menus/slug/{slug}": {
+      get: {
+        tags: ["Menus"],
+        summary: "Get menu by slug",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "slug",
+            in: "path",
+            required: true,
+            schema: { type: "string", example: "users" },
+          },
+          { $ref: "#/components/parameters/Locale" },
+        ],
+        responses: {
+          "200": {
+            description: "Menu details with all translations",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "object",
+                      properties: { menu: { $ref: "#/components/schemas/Menu" } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+    },
+    "/api/menus/{id}": {
+      get: {
+        tags: ["Menus"],
+        summary: "Get menu",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+          { $ref: "#/components/parameters/Locale" },
+        ],
+        responses: {
+          "200": {
+            description: "Menu details with all translations",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "object",
+                      properties: { menu: { $ref: "#/components/schemas/Menu" } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+      patch: {
+        tags: ["Menus"],
+        summary: "Update menu",
+        description: "Upserts any translations provided in the request body.",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  slug: { type: "string", example: "users" },
+                  path: { type: "string", nullable: true, example: "/admin/users" },
+                  icon: { type: "string", nullable: true, example: "users" },
+                  parent_id: { type: "string", format: "uuid", nullable: true },
+                  sort_order: { type: "integer", example: 10 },
+                  permission_id: { type: "string", format: "uuid", nullable: true },
+                  is_active: { type: "boolean" },
+                  translations: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/MenuTranslation" },
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Menu updated",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "object",
+                      properties: { menu: { $ref: "#/components/schemas/Menu" } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+          "409": { $ref: "#/components/responses/Conflict" },
+        },
+      },
+      delete: {
+        tags: ["Menus"],
+        summary: "Delete menu",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Menu deleted",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: { $ref: "#/components/schemas/MessageResponse" },
+                  },
+                },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+    },
+    "/api/endpoints": {
+      get: {
+        tags: ["Endpoints"],
+        summary: "List endpoints",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          { $ref: "#/components/parameters/Page" },
+          { $ref: "#/components/parameters/Limit" },
+          {
+            name: "search",
+            in: "query",
+            schema: { type: "string" },
+            description: "Search slug, path, or description",
+          },
+          {
+            name: "method",
+            in: "query",
+            schema: {
+              type: "string",
+              enum: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+            },
+            description: "Filter by HTTP method",
+          },
+          {
+            name: "is_active",
+            in: "query",
+            schema: { type: "boolean" },
+            description: "Filter by active status",
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Paginated endpoint list",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "array",
+                      items: { $ref: "#/components/schemas/Endpoint" },
+                    },
+                    pagination: { $ref: "#/components/schemas/PaginationMeta" },
+                  },
+                },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+        },
+      },
+      post: {
+        tags: ["Endpoints"],
+        summary: "Create endpoint",
+        security: [{ bearerAuth: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["slug", "method", "path"],
+                properties: {
+                  slug: { type: "string", example: "users.list" },
+                  method: {
+                    type: "string",
+                    enum: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+                    example: "GET",
+                  },
+                  path: { type: "string", example: "/api/users" },
+                  description: {
+                    type: "string",
+                    nullable: true,
+                    example: "List users",
+                  },
+                  permission_id: { type: "string", format: "uuid", nullable: true },
+                  is_active: { type: "boolean", default: true },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "201": {
+            description: "Endpoint created",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "object",
+                      properties: {
+                        endpoint: { $ref: "#/components/schemas/Endpoint" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "409": { $ref: "#/components/responses/Conflict" },
+        },
+      },
+    },
+    "/api/endpoints/slug/{slug}": {
+      get: {
+        tags: ["Endpoints"],
+        summary: "Get endpoint by slug",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "slug",
+            in: "path",
+            required: true,
+            schema: { type: "string", example: "users.list" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Endpoint details",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "object",
+                      properties: {
+                        endpoint: { $ref: "#/components/schemas/Endpoint" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+    },
+    "/api/endpoints/{id}": {
+      get: {
+        tags: ["Endpoints"],
+        summary: "Get endpoint",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Endpoint details",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "object",
+                      properties: {
+                        endpoint: { $ref: "#/components/schemas/Endpoint" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+        },
+      },
+      patch: {
+        tags: ["Endpoints"],
+        summary: "Update endpoint",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  slug: { type: "string", example: "users.list" },
+                  method: {
+                    type: "string",
+                    enum: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+                  },
+                  path: { type: "string", example: "/api/users" },
+                  description: { type: "string", nullable: true, example: "List users" },
+                  permission_id: { type: "string", format: "uuid", nullable: true },
+                  is_active: { type: "boolean" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "Endpoint updated",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "object",
+                      properties: {
+                        endpoint: { $ref: "#/components/schemas/Endpoint" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/BadRequest" },
+          "401": { $ref: "#/components/responses/Unauthorized" },
+          "403": { $ref: "#/components/responses/Forbidden" },
+          "404": { $ref: "#/components/responses/NotFound" },
+          "409": { $ref: "#/components/responses/Conflict" },
+        },
+      },
+      delete: {
+        tags: ["Endpoints"],
+        summary: "Delete endpoint",
+        security: [{ bearerAuth: [] }],
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "string", format: "uuid" },
+          },
+        ],
+        responses: {
+          "200": {
+            description: "Endpoint deleted",
             content: {
               "application/json": {
                 schema: {

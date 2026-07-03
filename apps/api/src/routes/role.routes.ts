@@ -13,9 +13,12 @@ import {
   listRoles,
   updateRole,
 } from "../models/role.model";
+import { findPermissionsByRoleId } from "../models/permission.model";
+import { setRolePermissions } from "../models/role-permission.model";
+import { toPublicPermission } from "../mappers/permission.mapper";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
-import { getOptionalString, getString, getRoleTranslations } from "../utils/validation";
+import { getOptionalString, getString, getRoleTranslations, getStringArray } from "../utils/validation";
 import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
 import { toPublicUser } from "../mappers/user.mapper";
 
@@ -61,6 +64,40 @@ router.get("/slug/:slug", async (req: Request, res: Response) => {
 
     return sendSuccess(res, {
       role: toPublicRole(role, { locale, includeAllTranslations: true }),
+    });
+  } catch (error) {
+    return handleRouteError(res, error);
+  }
+});
+
+router.get("/:id/permissions", async (req: Request, res: Response) => {
+  try {
+    const role = await findRoleById(req.params.id);
+    if (!role) {
+      return sendError(res, "Role not found.", 404);
+    }
+
+    const permissions = await findPermissionsByRoleId(req.params.id);
+    return sendSuccess(res, {
+      permissions: permissions.map((permission) => toPublicPermission(permission)),
+    });
+  } catch (error) {
+    return handleRouteError(res, error);
+  }
+});
+
+router.put("/:id/permissions", async (req: Request, res: Response) => {
+  try {
+    const role = await findRoleById(req.params.id);
+    if (!role) {
+      return sendError(res, "Role not found.", 404);
+    }
+
+    const permissionIds = getStringArray(req.body?.permission_ids);
+    const permissions = await setRolePermissions(req.params.id, permissionIds);
+
+    return sendSuccess(res, {
+      permissions: permissions.map((permission) => toPublicPermission(permission)),
     });
   } catch (error) {
     return handleRouteError(res, error);
