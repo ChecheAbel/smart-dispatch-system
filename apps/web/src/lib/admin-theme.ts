@@ -25,3 +25,11 @@ export const adminBadgeSuccessClass =
 
 export const adminNavButtonClass =
   "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:font-semibold";
+
+export const adminHeaderActionsClass = "flex items-center gap-2";
+
+export const adminHeaderIconButtonClass =
+  "size-9 rounded-full border-0 bg-transparent p-0 text-[#1C3A34] shadow-none hover:bg-[#1C3A34]/6";
+
+export const adminHeaderControlClass =
+  "h-9 gap-2 rounded-lg border-0 bg-transparent px-2.5 text-[#1C3A34] shadow-none hover:bg-[#f8fafb]";
