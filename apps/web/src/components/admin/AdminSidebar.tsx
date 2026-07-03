@@ -1,13 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import BrandLogo from "@/components/landing/BrandLogo";
-import { ADMIN_NAV_ITEMS, isAdminNavActive } from "@/components/admin/admin-nav";
+import AdminSidebarNav from "@/components/admin/AdminSidebarNav";
 import {
   adminBadgeGoldClass,
   adminEyebrowClass,
-  adminNavButtonClass,
 } from "@/lib/admin-theme";
 import {
   Sidebar,
@@ -17,16 +15,11 @@ import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
 
 export default function AdminSidebar() {
-  const pathname = usePathname();
-
   return (
     <Sidebar collapsible="icon" className="border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border p-4">
@@ -48,25 +41,7 @@ export default function AdminSidebar() {
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
-              {ADMIN_NAV_ITEMS.map((item) => {
-                const active = isAdminNavActive(pathname, item.href);
-
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton
-                      isActive={active}
-                      tooltip={item.title}
-                      className={adminNavButtonClass}
-                      render={<Link href={item.href} />}
-                    >
-                      <item.icon />
-                      <span>{item.title}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
+            <AdminSidebarNav />
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { LogOut, UserRound } from "lucide-react";
 import { getUserInitials, useAdminAuth } from "@/components/admin/admin-auth-context";
 import AdminLanguageSelector from "@/components/admin/AdminLanguageSelector";
-import { ADMIN_NAV_ITEMS } from "@/components/admin/admin-nav";
+import { useAdminNavigation } from "@/components/admin/admin-navigation-context";
 import {
   adminBadgeGoldClass,
   adminEyebrowClass,
@@ -28,17 +28,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
-function getPageTitle(pathname: string) {
-  const match = ADMIN_NAV_ITEMS.find((item) =>
-    item.href === "/admin" ? pathname === "/admin" : pathname.startsWith(item.href),
-  );
-
-  return match?.title ?? "Dashboard";
-}
-
 export default function AdminHeader() {
   const pathname = usePathname();
   const { user, signOut } = useAdminAuth();
+  const { getPageTitle } = useAdminNavigation();
   const pageTitle = getPageTitle(pathname);
 
   return (
