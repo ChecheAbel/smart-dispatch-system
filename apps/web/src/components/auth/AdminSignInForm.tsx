@@ -2,17 +2,46 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import AuthShell from "@/components/auth/AuthShell";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { ADMIN_FORGOT_PASSWORD_PATH } from "@/lib/auth-paths";
+import { login } from "@/lib/auth-api";
+import { ADMIN_DASHBOARD_PATH, ADMIN_FORGOT_PASSWORD_PATH } from "@/lib/auth-paths";
+import { clearAuthSession, saveAuthSession } from "@/lib/auth-session";
 
 export default function AdminSignInForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    setIsSubmitting(true);
+
+    try {
+      const session = await login(email.trim(), password);
+
+      if (!session.user.roles.includes("admin")) {
+        clearAuthSession();
+        setError("This account does not have administrator access.");
+        return;
+      }
+
+      saveAuthSession(session, remember);
+      router.push(ADMIN_DASHBOARD_PATH);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Sign in failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <AuthShell
@@ -37,12 +66,7 @@ export default function AdminSignInForm() {
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 sm:p-8">
-        <form
-          className="space-y-5"
-          onSubmit={(e) => {
-            e.preventDefault();
-          }}
-        >
+        <form className="space-y-5" onSubmit={handleSubmit}>
           <div>
             <label
               htmlFor="email"
@@ -59,7 +83,8 @@ export default function AdminSignInForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all"
+                disabled={isSubmitting}
+                className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all disabled:opacity-70"
                 placeholder="admin@company.com"
               />
             </div>
@@ -81,7 +106,8 @@ export default function AdminSignInForm() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all"
+                disabled={isSubmitting}
+                className="w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all disabled:opacity-70"
                 placeholder="••••••••"
               />
               <button
@@ -100,7 +126,8 @@ export default function AdminSignInForm() {
               <Checkbox
                 id="remember"
                 checked={remember}
-                onCheckedChange={(checked) => setRemember(checked)}
+                onCheckedChange={(checked) => setRemember(checked === true)}
+                disabled={isSubmitting}
                 className="data-checked:border-[#1C3A34] data-checked:bg-[#1C3A34] data-checked:text-white"
               />
               <Label htmlFor="remember" className="text-sm text-slate-500 font-normal cursor-pointer">
@@ -115,11 +142,23 @@ export default function AdminSignInForm() {
             </Link>
           </div>
 
+          {error && (
+            <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>
+          )}
+
           <button
             type="submit"
-            className="w-full bg-[#1C3A34] hover:bg-[#162e29] text-white font-bold text-[15px] py-4 rounded-xl border-b-[3px] border-[#C9B87A] tracking-wide transition-all duration-200 hover:shadow-xl hover:shadow-[#1C3A34]/10 hover:-translate-y-0.5 mt-2"
+            disabled={isSubmitting}
+            className="w-full bg-[#1C3A34] hover:bg-[#162e29] disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold text-[15px] py-4 rounded-xl border-b-[3px] border-[#C9B87A] tracking-wide transition-all duration-200 hover:shadow-xl hover:shadow-[#1C3A34]/10 hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2"
           >
-            Sign In
+            {isSubmitting ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Signing in…
+              </>
+            ) : (
+              "Sign In"
+            )}
           </button>
         </form>
       </div>
