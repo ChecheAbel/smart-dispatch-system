@@ -24,6 +24,7 @@ const DEFAULT_MENUS = [
     icon: "layout-dashboard",
     sortOrder: 0,
     permissionSlug: null,
+    parentSlug: null,
     translations: [
       { locale: "en", label: "Dashboard" },
       { locale: "am", label: "ዳሽቦርድ" },
@@ -35,17 +36,31 @@ const DEFAULT_MENUS = [
     icon: "users",
     sortOrder: 10,
     permissionSlug: "users.read",
+    parentSlug: null,
     translations: [
       { locale: "en", label: "Users" },
       { locale: "am", label: "ተጠቃሚዎች" },
     ],
   },
   {
+    slug: "access-control",
+    path: null,
+    icon: "shield-check",
+    sortOrder: 20,
+    permissionSlug: null,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "Access Control" },
+      { locale: "am", label: "የመዳረሻ ቁጥጥር" },
+    ],
+  },
+  {
     slug: "roles",
     path: "/admin/roles",
     icon: "shield",
-    sortOrder: 20,
+    sortOrder: 10,
     permissionSlug: "roles.read",
+    parentSlug: "access-control",
     translations: [
       { locale: "en", label: "Roles" },
       { locale: "am", label: "ሚናዎች" },
@@ -55,8 +70,9 @@ const DEFAULT_MENUS = [
     slug: "permissions",
     path: "/admin/permissions",
     icon: "key",
-    sortOrder: 30,
+    sortOrder: 20,
     permissionSlug: "permissions.read",
+    parentSlug: "access-control",
     translations: [
       { locale: "en", label: "Permissions" },
       { locale: "am", label: "ፈቃዶች" },
@@ -66,8 +82,9 @@ const DEFAULT_MENUS = [
     slug: "menus",
     path: "/admin/menus",
     icon: "menu",
-    sortOrder: 40,
+    sortOrder: 30,
     permissionSlug: "menus.read",
+    parentSlug: "access-control",
     translations: [
       { locale: "en", label: "Menus" },
       { locale: "am", label: "ሜኑዎች" },
@@ -77,8 +94,9 @@ const DEFAULT_MENUS = [
     slug: "endpoints",
     path: "/admin/endpoints",
     icon: "route",
-    sortOrder: 50,
+    sortOrder: 40,
     permissionSlug: "endpoints.read",
+    parentSlug: "access-control",
     translations: [
       { locale: "en", label: "Endpoints" },
       { locale: "am", label: "ኤንድፖይንቶች" },
@@ -123,17 +141,24 @@ async function seedPermissions() {
 async function seedMenus() {
   const permissions = await prisma.permission.findMany();
   const permissionBySlug = new Map(permissions.map((permission) => [permission.slug, permission.id]));
+  const menuIdBySlug = new Map<string, string>();
 
-  for (const menu of DEFAULT_MENUS) {
+  const parentMenus = DEFAULT_MENUS.filter((menu) => !menu.parentSlug);
+  const childMenus = DEFAULT_MENUS.filter((menu) => menu.parentSlug);
+
+  for (const menu of [...parentMenus, ...childMenus]) {
     const translations = menuTranslationInputsToMap(
       menu.translations.map((translation) => ({ ...translation })),
     ) as Prisma.InputJsonValue;
 
-    await prisma.menu.upsert({
+    const parentId = menu.parentSlug ? menuIdBySlug.get(menu.parentSlug) ?? null : null;
+
+    const record = await prisma.menu.upsert({
       where: { slug: menu.slug },
       update: {
         path: menu.path,
         icon: menu.icon,
+        parentId,
         sortOrder: menu.sortOrder,
         permissionId: menu.permissionSlug ? permissionBySlug.get(menu.permissionSlug) ?? null : null,
         translations,
@@ -143,12 +168,15 @@ async function seedMenus() {
         slug: menu.slug,
         path: menu.path,
         icon: menu.icon,
+        parentId,
         sortOrder: menu.sortOrder,
         permissionId: menu.permissionSlug ? permissionBySlug.get(menu.permissionSlug) ?? null : null,
         translations,
         isActive: true,
       },
     });
+
+    menuIdBySlug.set(menu.slug, record.id);
   }
 }
 

@@ -75,7 +75,16 @@ export function buildMenuTree(menus: Menu[]): Menu[] {
     roots.push(menu);
   }
 
-  return roots;
+  return pruneEmptyGroupMenus(roots);
+}
+
+function pruneEmptyGroupMenus(menus: Menu[]): Menu[] {
+  return menus
+    .map((menu) => ({
+      ...menu,
+      children: menu.children?.length ? pruneEmptyGroupMenus(menu.children) : undefined,
+    }))
+    .filter((menu) => menu.path || (menu.children && menu.children.length > 0));
 }
 
 export function toPublicMenuTranslation(

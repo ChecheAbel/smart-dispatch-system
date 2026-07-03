@@ -7,6 +7,7 @@ import {
   Route,
   Settings,
   Shield,
+  ShieldCheck,
   Users,
 } from "lucide-react";
 
@@ -15,6 +16,7 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   dashboard: LayoutDashboard,
   users: Users,
   shield: Shield,
+  "shield-check": ShieldCheck,
   roles: Shield,
   key: Key,
   permissions: Key,
@@ -23,6 +25,7 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   route: Route,
   endpoints: Route,
   settings: Settings,
+  "access-control": ShieldCheck,
 };
 
 export function getMenuIcon(icon?: string | null): LucideIcon {
