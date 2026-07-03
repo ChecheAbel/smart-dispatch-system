@@ -39,7 +39,8 @@ export default function Navbar() {
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
 
         if (visible[0]?.target.id) {
-          setActiveSection(visible[0].target.id);
+          const next = visible[0].target.id;
+          setActiveSection((prev) => (prev === next ? prev : next));
         }
       },
       { rootMargin: "-40% 0px -50% 0px", threshold: [0, 0.25, 0.5] },
@@ -50,9 +51,13 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = mobileMenuOpen ? "hidden" : "";
+    if (!mobileMenuOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
     };
   }, [mobileMenuOpen]);
 
@@ -62,10 +67,10 @@ export default function Navbar() {
     <>
       <header
         className={cn(
-          "sticky top-0 z-50 w-full transition-all duration-300 animate-landing-nav",
+          "sticky top-0 z-50 w-full transition-all duration-300",
           scrolled
             ? "border-b border-white/10 bg-[#1C3A34]/95 shadow-lg shadow-black/10 backdrop-blur-md"
-            : "border-b border-[#C9B87A]/15 bg-[#1C3A34]",
+            : "border-b border-transparent bg-[#1C3A34]",
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[72px] flex items-center justify-between gap-4">
@@ -123,13 +128,11 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Mobile menu overlay */}
+      {/* Mobile menu overlay — only mounted while open to avoid blocking scroll */}
+      {mobileMenuOpen && (
       <div
-        className={cn(
-          "fixed inset-0 z-40 lg:hidden transition-opacity duration-300",
-          mobileMenuOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none",
-        )}
-        aria-hidden={!mobileMenuOpen}
+        className="fixed inset-0 z-40 lg:hidden"
+        aria-hidden={false}
       >
         <button
           type="button"
@@ -138,12 +141,7 @@ export default function Navbar() {
           aria-label="Close menu"
         />
 
-        <div
-          className={cn(
-            "absolute top-[72px] left-0 right-0 max-h-[calc(100dvh-72px)] overflow-y-auto border-b border-white/10 bg-[#162e29] shadow-2xl transition-all duration-300 ease-out",
-            mobileMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0",
-          )}
-        >
+        <div className="absolute top-[72px] left-0 right-0 max-h-[calc(100dvh-72px)] overflow-y-auto border-b border-white/10 bg-[#162e29] shadow-2xl">
           <nav className="px-4 py-5 space-y-1" aria-label="Mobile navigation">
             {NAV_LINKS.map((link) => {
               const id = link.href.slice(1);
@@ -181,6 +179,7 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+      )}
     </>
   );
 }

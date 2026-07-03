@@ -10,9 +10,11 @@ import Reveal      from "@/components/landing/Reveal";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white text-[#1a1a1a] antialiased animate-landing-page-in overflow-x-hidden">
-      <Navbar />
-      <Hero />
+    <div className="min-h-screen bg-white text-[#1a1a1a] antialiased">
+      <div className="bg-[#1C3A34] animate-landing-page-in">
+        <Navbar />
+        <Hero />
+      </div>
       <Reveal>
         <LiveView />
       </Reveal>

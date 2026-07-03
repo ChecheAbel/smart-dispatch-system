@@ -1,6 +1,6 @@
 export default function Hero() {
   return (
-    <section className="relative w-full min-h-[calc(100dvh-72px)] flex items-center justify-center overflow-hidden bg-[#1C3A34] py-12 sm:py-16">
+    <section className="relative w-full min-h-[calc(100dvh-72px)] flex items-center justify-center overflow-hidden bg-transparent py-12 sm:py-16 -mt-px">
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-[0.07]">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_#C9B87A_0%,_transparent_65%)]" />
