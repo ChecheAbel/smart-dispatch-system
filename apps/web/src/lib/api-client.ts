@@ -1,5 +1,6 @@
 import axios from "axios";
 import { getAccessToken } from "./auth-session";
+import { getStoredLocale } from "./locale";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
@@ -15,6 +16,8 @@ apiClient.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  config.headers["Accept-Language"] = getStoredLocale();
   return config;
 });
 

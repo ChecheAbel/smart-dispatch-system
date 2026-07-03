@@ -175,11 +175,23 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
+  @media (prefers-reduced-motion: reduce) {
   .animate-landing-fade-up,
   .animate-landing-page-in {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;
   }
+}
+
+/* Admin console — overrides shadcn sidebar tokens (including portaled mobile sheet) */
+.admin-theme {
+  --sidebar: #1c3a34;
+  --sidebar-foreground: #ffffff;
+  --sidebar-primary: #c9b87a;
+  --sidebar-primary-foreground: #1c3a34;
+  --sidebar-accent: color-mix(in srgb, #ffffff 12%, #1c3a34);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: color-mix(in srgb, #ffffff 14%, transparent);
+  --sidebar-ring: #c9b87a;
 }

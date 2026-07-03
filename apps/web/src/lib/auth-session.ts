@@ -58,6 +58,28 @@ export function getStoredUser(): User | null {
   }
 }
 
+function getActiveStorage() {
+  if (typeof window === "undefined") return null;
+  if (window.localStorage.getItem(ACCESS_TOKEN_KEY)) return window.localStorage;
+  if (window.sessionStorage.getItem(ACCESS_TOKEN_KEY)) return window.sessionStorage;
+  return null;
+}
+
+export function hasPersistentSession() {
+  if (typeof window === "undefined") return false;
+  return window.localStorage.getItem(ACCESS_TOKEN_KEY) !== null;
+}
+
+export function updateStoredUser(user: User) {
+  const storage = getActiveStorage();
+  if (!storage) return;
+  storage.setItem(USER_KEY, JSON.stringify(user));
+}
+
+export function updateAuthSession(response: AuthTokenResponse) {
+  saveAuthSession(response, hasPersistentSession());
+}
+
 export function clearAuthSession() {
   if (typeof window === "undefined") return;
   clearStorage(window.sessionStorage);

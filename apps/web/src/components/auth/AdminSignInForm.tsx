@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 import AuthShell from "@/components/auth/AuthShell";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { login } from "@/lib/auth-api";
+import { login, resumeAdminSession } from "@/lib/auth-api";
 import { ADMIN_DASHBOARD_PATH, ADMIN_FORGOT_PASSWORD_PATH } from "@/lib/auth-paths";
 import { clearAuthSession, saveAuthSession } from "@/lib/auth-session";
 
@@ -18,7 +18,36 @@ export default function AdminSignInForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function checkExistingSession() {
+      try {
+        const user = await resumeAdminSession();
+        if (cancelled) return;
+
+        if (user) {
+          router.replace(ADMIN_DASHBOARD_PATH);
+          return;
+        }
+
+        setIsCheckingSession(false);
+      } catch {
+        if (!cancelled) {
+          setIsCheckingSession(false);
+        }
+      }
+    }
+
+    void checkExistingSession();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -41,6 +70,31 @@ export default function AdminSignInForm() {
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (isCheckingSession) {
+    return (
+      <AuthShell
+        mobileTitle="Administrator Sign In"
+        desktopEyebrow="— Administrator Portal —"
+        desktopTitle={
+          <>
+            Smart Dispatch{" "}
+            <span className="bg-gradient-to-r from-[#C9B87A] via-[#e8d69a] to-[#C9B87A] bg-clip-text text-transparent">
+              Control Center
+            </span>
+          </>
+        }
+        desktopDescription="Secure access for platform administrators to manage bookings, dispatch, fleet operations, and billing."
+      >
+        <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-xl">
+          <div className="flex items-center gap-3 text-sm text-slate-500">
+            <Loader2 className="h-5 w-5 animate-spin text-[#1C3A34]" />
+            Checking your session…
+          </div>
+        </div>
+      </AuthShell>
+    );
   }
 
   return (

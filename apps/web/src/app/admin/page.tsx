@@ -1,77 +1,116 @@
-"use client";
+import { Activity, ShieldCheck, Users, Waypoints } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  adminBadgeGoldClass,
+  adminBadgeSuccessClass,
+  adminCardClass,
+  adminHeadingClass,
+  adminIconBoxClass,
+} from "@/lib/admin-theme";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import type { User } from "@smart-dispatch/types";
-import { ADMIN_SIGN_IN_PATH } from "@/lib/auth-paths";
-import { clearAuthSession, getStoredUser } from "@/lib/auth-session";
+const overviewCards = [
+  {
+    title: "Active Users",
+    value: "—",
+    description: "Platform accounts currently active",
+    icon: Users,
+  },
+  {
+    title: "Dispatch Queue",
+    value: "—",
+    description: "Trips awaiting assignment",
+    icon: Waypoints,
+  },
+  {
+    title: "Fleet Online",
+    value: "—",
+    description: "Drivers available right now",
+    icon: Activity,
+  },
+  {
+    title: "Admin Access",
+    value: "Enabled",
+    description: "Role-based permissions active",
+    icon: ShieldCheck,
+  },
+] as const;
 
 export default function AdminDashboardPage() {
-  const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-
-  useEffect(() => {
-    const storedUser = getStoredUser();
-
-    if (!storedUser || !storedUser.roles.includes("admin")) {
-      router.replace(ADMIN_SIGN_IN_PATH);
-      return;
-    }
-
-    setUser(storedUser);
-  }, [router]);
-
-  function handleSignOut() {
-    clearAuthSession();
-    router.replace(ADMIN_SIGN_IN_PATH);
-  }
-
-  if (!user) {
-    return (
-      <main className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <p className="text-sm text-slate-500">Loading…</p>
-      </main>
-    );
-  }
-
   return (
-    <main className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9B87A]">Admin Console</p>
-            <h1 className="text-xl font-extrabold text-[#1C3A34]">Smart Dispatch</h1>
-          </div>
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-[#1C3A34] hover:border-[#1C3A34] transition-colors"
-          >
-            Sign out
-          </button>
-        </div>
-      </header>
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <Badge className={adminBadgeGoldClass}>Overview</Badge>
+        <h2 className={`text-2xl font-extrabold tracking-tight ${adminHeadingClass}`}>Dashboard</h2>
+        <p className="max-w-2xl text-sm text-slate-500">
+          Welcome to the Smart Dispatch admin console. Use the sidebar to manage users, roles,
+          permissions, menus, and API endpoints.
+        </p>
+      </div>
 
-      <section className="mx-auto max-w-5xl px-6 py-10">
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-          <h2 className="text-2xl font-bold text-[#1C3A34]">
-            Welcome, {user.first_name} {user.last_name}
-          </h2>
-          <p className="mt-2 text-slate-500">
-            You are signed in as <span className="font-medium text-slate-700">{user.email}</span>.
-          </p>
-          <p className="mt-6 text-sm text-slate-500">
-            The admin dashboard modules will appear here. Navigation and permissions can be loaded from the API next.
-          </p>
-          <Link
-            href="/"
-            className="mt-8 inline-block text-sm font-semibold text-[#1C3A34] hover:text-[#C9B87A] transition-colors"
-          >
-            ← Back to home
-          </Link>
-        </div>
-      </section>
-    </main>
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {overviewCards.map((card) => (
+          <Card key={card.title} className={adminCardClass}>
+            <CardHeader className="pb-2">
+              <div className="flex items-center justify-between gap-3">
+                <CardTitle className={`text-sm font-semibold ${adminHeadingClass}`}>
+                  {card.title}
+                </CardTitle>
+                <div className={adminIconBoxClass}>
+                  <card.icon className="size-4" />
+                </div>
+              </div>
+              <CardDescription className="text-slate-500">{card.description}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className={`text-3xl font-extrabold ${adminHeadingClass}`}>{card.value}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <Card className={adminCardClass}>
+          <CardHeader>
+            <CardTitle className={adminHeadingClass}>Getting started</CardTitle>
+            <CardDescription className="text-slate-500">
+              Core admin modules are ready for API integration.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm text-slate-500">
+            <p>• Users, roles, and permissions can be managed from the sidebar.</p>
+            <p>• Navigation menus can later be loaded from `/api/menus/navigation`.</p>
+            <p>• Endpoint permissions can be mapped to UI actions such as view, edit, and delete.</p>
+          </CardContent>
+        </Card>
+
+        <Card className={adminCardClass}>
+          <CardHeader>
+            <CardTitle className={adminHeadingClass}>System status</CardTitle>
+            <CardDescription className="text-slate-500">Current platform health</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-[#f8fafb] px-3 py-2">
+              <span className="text-sm text-slate-500">API</span>
+              <Badge className={adminBadgeSuccessClass}>Connected</Badge>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-[#f8fafb] px-3 py-2">
+              <span className="text-sm text-slate-500">Auth session</span>
+              <Badge className={adminBadgeSuccessClass}>Active</Badge>
+            </div>
+            <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-[#f8fafb] px-3 py-2">
+              <span className="text-sm text-slate-500">RBAC</span>
+              <Badge className={adminBadgeSuccessClass}>Enabled</Badge>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }
