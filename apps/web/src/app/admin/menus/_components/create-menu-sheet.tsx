@@ -1,18 +1,35 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import type { Menu, Permission } from "@smart-dispatch/types";
 import { createMenu, fetchMenuById, fetchMenus, updateMenu } from "@/lib/menu-api";
+import { generateSlugFromText } from "@/lib/slug";
 import { fetchPermissions } from "@/lib/permission-api";
-import { adminHeadingClass, adminInputClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
+import { adminHeadingClass, adminInputClass, adminPrimaryButtonClass, adminCardClass } from "@/lib/admin-theme";
 import { LOCALE_OPTIONS } from "@/lib/locale";
 import { useLocale } from "@/components/shared/providers";
-import { getAdminMenusMessages } from "@/translations";
+import { getAdminMenusMessages, getAdminRolesMessages } from "@/translations";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { MenuPermissionPicker, getPermissionModuleOptions, inferPermissionModule } from "./menu-permission-picker";
+import {
+  Card,
+  CardAction,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   Sheet,
   SheetContent,
@@ -34,12 +51,11 @@ type CreateMenuSheetProps = {
 };
 
 type MenuFormState = {
-  slug: string;
   path: string;
   icon: string;
   sortOrder: string;
   parentId: string;
-  permissionId: string;
+  permissionIds: string[];
   isActive: boolean;
   enLabel: string;
   amLabel: string;
@@ -48,36 +64,26 @@ type MenuFormState = {
 type FieldErrors = Partial<Record<keyof MenuFormState, string>>;
 
 const emptyForm: MenuFormState = {
-  slug: "",
   path: "",
   icon: "",
   sortOrder: "0",
   parentId: "",
-  permissionId: "",
+  permissionIds: [],
   isActive: true,
   enLabel: "",
   amLabel: "",
 };
-
-function normalizeSlug(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
 
 function mapMenuToForm(menu: Menu): MenuFormState {
   const en = menu.translations?.find((translation) => translation.locale === "en");
   const am = menu.translations?.find((translation) => translation.locale === "am");
 
   return {
-    slug: menu.slug,
     path: menu.path ?? "",
     icon: menu.icon ?? "",
     sortOrder: String(menu.sort_order),
     parentId: menu.parent_id ?? "",
-    permissionId: menu.permission_id ?? "",
+    permissionIds: menu.permission_ids ?? [],
     isActive: menu.is_active,
     enLabel: en?.label ?? menu.label ?? "",
     amLabel: am?.label ?? "",
@@ -87,7 +93,7 @@ function mapMenuToForm(menu: Menu): MenuFormState {
 const fieldClassName = adminInputClass;
 const fieldErrorClassName =
   "border-red-300 bg-red-50/60 text-red-900 placeholder:text-red-400 focus-visible:border-red-400 focus-visible:ring-red-200/60";
-const selectClassName = cn(fieldClassName, "w-full");
+const selectTriggerClassName = cn(fieldClassName, "w-full");
 
 export function CreateMenuSheet({
   open,
@@ -98,6 +104,7 @@ export function CreateMenuSheet({
 }: CreateMenuSheetProps) {
   const { locale } = useLocale();
   const copy = getAdminMenusMessages(locale);
+  const roleCopy = getAdminRolesMessages(locale);
   const formCopy = copy.form;
   const toastCopy = copy.toast;
   const isEdit = mode === "edit";
@@ -109,6 +116,7 @@ export function CreateMenuSheet({
   const [loading, setLoading] = useState(false);
   const [parentMenus, setParentMenus] = useState<Menu[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
+  const [permissionModule, setPermissionModule] = useState("");
   const [optionsLoading, setOptionsLoading] = useState(false);
 
   useEffect(() => {
@@ -120,6 +128,7 @@ export function CreateMenuSheet({
       setLoading(false);
       setParentMenus([]);
       setPermissions([]);
+      setPermissionModule("");
       setOptionsLoading(false);
       return;
     }
@@ -214,21 +223,31 @@ export function CreateMenuSheet({
     setError(null);
   }
 
+  function updatePermissionModule(module: string) {
+    setPermissionModule(module);
+    setForm((current) => ({ ...current, permissionIds: [] }));
+    setError(null);
+  }
+
+  useEffect(() => {
+    if (!open || !permissions.length || !form.permissionIds.length) {
+      return;
+    }
+
+    setPermissionModule((current) =>
+      current || inferPermissionModule(form.permissionIds, permissions),
+    );
+  }, [open, form.permissionIds, permissions]);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
     setFieldErrors({});
 
-    const slug = normalizeSlug(form.slug);
     const enLabel = form.enLabel.trim();
     const amLabel = form.amLabel.trim();
     const sortOrderValue = form.sortOrder.trim();
     const parsedSortOrder = sortOrderValue === "" ? 0 : Number(sortOrderValue);
-
-    if (!slug) {
-      setFieldErrors({ slug: formCopy.errors.slugRequired });
-      return;
-    }
 
     if (!enLabel) {
       setFieldErrors({ enLabel: formCopy.errors.enLabelRequired });
@@ -247,15 +266,24 @@ export function CreateMenuSheet({
     }
 
     const payload = {
-      slug,
       translations,
       path: form.path.trim() || null,
       icon: form.icon.trim() || null,
       parent_id: form.parentId || null,
-      permission_id: form.permissionId || null,
+      permission_ids: form.permissionIds,
       sort_order: parsedSortOrder,
       is_active: form.isActive,
     };
+
+    let createSlug: string | undefined;
+
+    if (!isEdit) {
+      createSlug = generateSlugFromText(enLabel);
+      if (!createSlug) {
+        setFieldErrors({ enLabel: formCopy.errors.enLabelRequired });
+        return;
+      }
+    }
 
     setSubmitting(true);
 
@@ -264,7 +292,7 @@ export function CreateMenuSheet({
         await updateMenu(menuId, payload);
         showSuccessToast(toastCopy.updateSuccess);
       } else {
-        await createMenu(payload);
+        await createMenu({ slug: createSlug!, ...payload });
         showSuccessToast(toastCopy.createSuccess);
       }
 
@@ -287,44 +315,46 @@ export function CreateMenuSheet({
   const enLabel = LOCALE_OPTIONS.find((option) => option.value === "en")?.label ?? "English";
   const amLabel = LOCALE_OPTIONS.find((option) => option.value === "am")?.nativeLabel ?? "Amharic";
   const availableParentMenus = parentMenus.filter((menu) => menu.id !== menuId);
+  const parentMenuItems = [
+    { label: formCopy.noneOption, value: null },
+    ...availableParentMenus.map((menu) => ({
+      label: `${menu.label} (${menu.slug})`,
+      value: menu.id,
+    })),
+  ];
+  const permissionModuleItems = useMemo(
+    () => [
+      { label: formCopy.noneOption, value: null },
+      ...getPermissionModuleOptions(permissions).map((module) => ({
+        label:
+          roleCopy.permissions.modules[
+            module as keyof typeof roleCopy.permissions.modules
+          ] ?? module,
+        value: module,
+      })),
+    ],
+    [formCopy.noneOption, permissions, roleCopy.permissions.modules],
+  );
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
-        <SheetHeader>
+      <SheetContent
+        side="right"
+        className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-xl lg:max-w-2xl"
+      >
+        <SheetHeader className="border-b border-slate-100 px-6 py-5">
           <SheetTitle className={adminHeadingClass}>
             {isEdit ? formCopy.editTitle : formCopy.createTitle}
           </SheetTitle>
-          <SheetDescription>
+          <SheetDescription className="leading-relaxed">
             {isEdit ? formCopy.editDescription : formCopy.createDescription}
           </SheetDescription>
         </SheetHeader>
 
         {loading ? (
-          <div className="px-4 py-8 text-sm text-slate-500">{formCopy.loading}</div>
+          <div className="px-6 py-8 text-sm text-slate-500">{formCopy.loading}</div>
         ) : (
-          <form id={formId} onSubmit={handleSubmit} className="space-y-6 px-4">
-            <div className="space-y-2">
-              <Label htmlFor="menu-slug" className={fieldErrors.slug ? "text-red-700" : undefined}>
-                {formCopy.slug}
-              </Label>
-              <Input
-                id="menu-slug"
-                value={form.slug}
-                onChange={(event) => updateField("slug", event.target.value)}
-                onBlur={() => updateField("slug", normalizeSlug(form.slug))}
-                placeholder={formCopy.slugPlaceholder}
-                className={cn(fieldClassName, fieldErrors.slug && fieldErrorClassName)}
-                aria-invalid={Boolean(fieldErrors.slug)}
-                autoComplete="off"
-              />
-              {fieldErrors.slug ? (
-                <p className="text-xs text-red-600">{fieldErrors.slug}</p>
-              ) : (
-                <p className="text-xs text-slate-500">{formCopy.slugHelp}</p>
-              )}
-            </div>
-
+          <form id={formId} onSubmit={handleSubmit} className="space-y-6 px-6 py-5">
             <div className="space-y-2">
               <Label htmlFor="menu-path">{formCopy.path}</Label>
               <Input
@@ -372,54 +402,90 @@ export function CreateMenuSheet({
 
             <div className="space-y-2">
               <Label htmlFor="menu-parent-id">{formCopy.parentId}</Label>
-              <select
-                id="menu-parent-id"
-                value={form.parentId}
-                onChange={(event) => updateField("parentId", event.target.value)}
+              <Select
+                items={parentMenuItems}
+                value={form.parentId || null}
+                onValueChange={(value) => updateField("parentId", value ?? "")}
                 disabled={optionsLoading}
-                className={selectClassName}
               >
-                <option value="">{formCopy.noneOption}</option>
-                {availableParentMenus.map((menu) => (
-                  <option key={menu.id} value={menu.id}>
-                    {menu.label} ({menu.slug})
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger id="menu-parent-id" className={selectTriggerClassName}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {parentMenuItems.map((item) => (
+                      <SelectItem key={item.value ?? "none"} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="menu-permission-id">{formCopy.permissionId}</Label>
-              <select
-                id="menu-permission-id"
-                value={form.permissionId}
-                onChange={(event) => updateField("permissionId", event.target.value)}
-                disabled={optionsLoading}
-                className={selectClassName}
-              >
-                <option value="">{formCopy.noneOption}</option>
-                {permissions.map((permission) => (
-                  <option key={permission.id} value={permission.id}>
-                    {permission.slug}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <div className="space-y-4 rounded-lg border border-slate-200 bg-[#f8fafb]/60 p-5">
+              <div className="space-y-2">
+                <Label htmlFor="menu-permission-module">{formCopy.permissionModule}</Label>
+                <Select
+                  items={permissionModuleItems}
+                  value={permissionModule || null}
+                  onValueChange={(value) => updatePermissionModule(value ?? "")}
+                  disabled={optionsLoading}
+                >
+                  <SelectTrigger id="menu-permission-module" className={selectTriggerClassName}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {permissionModuleItems.map((item) => (
+                        <SelectItem key={item.value ?? "none"} value={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
 
-            <div className="flex items-center gap-2.5">
-              <Checkbox
-                id="menu-is-active"
-                checked={form.isActive}
-                onCheckedChange={(checked) => updateField("isActive", checked === true)}
-                disabled={submitting || loading}
-                className="data-checked:border-[#1C3A34] data-checked:bg-[#1C3A34] data-checked:text-white"
+              <MenuPermissionPicker
+                module={permissionModule || null}
+                permissions={permissions}
+                selectedIds={form.permissionIds}
+                onChange={(permissionIds) => updateField("permissionIds", permissionIds)}
+                disabled={optionsLoading || submitting || loading}
+                moduleLabels={roleCopy.permissions.modules}
+                actionLabels={roleCopy.permissions.actions}
+                helpText={formCopy.permissionsHelp}
+                emptyModuleText={formCopy.permissionsModuleHelp}
               />
-              <Label htmlFor="menu-is-active" className="cursor-pointer font-normal text-slate-700">
-                {formCopy.isActive}
-              </Label>
             </div>
 
-            <div className="space-y-4 rounded-lg border border-slate-200 bg-[#f8fafb]/60 p-4">
+            <Card className={cn(adminCardClass, "gap-0 py-0 shadow-none ring-0")}>
+              <CardHeader className="flex-row items-center gap-4 px-4 py-4">
+                <div className="min-w-0 flex-1 space-y-1">
+                  <CardTitle className={cn("text-sm font-semibold", adminHeadingClass)}>
+                    {formCopy.isActiveTitle}
+                  </CardTitle>
+                  <CardDescription className="text-xs leading-relaxed text-slate-500">
+                    {form.isActive ? formCopy.isActiveOn : formCopy.isActiveOff}
+                  </CardDescription>
+                </div>
+                <CardAction className="row-span-1 self-center">
+                  <Switch
+                    id="menu-is-active"
+                    checked={form.isActive}
+                    onCheckedChange={(checked) => updateField("isActive", checked)}
+                    disabled={submitting || loading}
+                    aria-label={formCopy.isActive}
+                  />
+                </CardAction>
+              </CardHeader>
+              <div className="border-t border-slate-100 px-4 py-3">
+                <p className="text-xs leading-relaxed text-slate-500">{formCopy.isActiveDescription}</p>
+              </div>
+            </Card>
+
+            <div className="space-y-4 rounded-lg border border-slate-200 bg-[#f8fafb]/60 p-5">
               <p className={`text-sm font-semibold ${adminHeadingClass}`}>{enLabel}</p>
 
               <div className="space-y-2">
@@ -443,7 +509,7 @@ export function CreateMenuSheet({
               </div>
             </div>
 
-            <div className="space-y-4 rounded-lg border border-slate-200 bg-[#f8fafb]/60 p-4">
+            <div className="space-y-4 rounded-lg border border-slate-200 bg-[#f8fafb]/60 p-5">
               <p className={`text-sm font-semibold ${adminHeadingClass}`}>
                 {amLabel}
                 <span className="ml-2 text-xs font-normal text-slate-500">{formCopy.optional}</span>
@@ -469,7 +535,7 @@ export function CreateMenuSheet({
           </form>
         )}
 
-        <SheetFooter className="flex-row justify-end gap-2">
+        <SheetFooter className="mt-auto flex-row justify-end gap-2 border-t border-slate-100 bg-white px-6 py-4">
           <Button
             type="button"
             variant="outline"

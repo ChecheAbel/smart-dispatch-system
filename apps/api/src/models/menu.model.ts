@@ -9,8 +9,20 @@ import {
 } from "../types/menu-translations";
 import { DEFAULT_LOCALE, normalizeLocale } from "../utils/locale";
 import { findPermissionsByUserId } from "./permission.model";
+import { setMenuPermissions } from "./menu-permission.model";
 
 export type { MenuTranslationInput };
+
+const menuWithPermissionsInclude = {
+  menuPermissions: {
+    select: { permissionId: true },
+    orderBy: { permissionId: "asc" as const },
+  },
+} satisfies Prisma.MenuInclude;
+
+type MenuWithPermissions = Prisma.MenuGetPayload<{
+  include: typeof menuWithPermissionsInclude;
+}>;
 
 export type CreateMenuInput = {
   slug: string;
@@ -18,7 +30,7 @@ export type CreateMenuInput = {
   icon?: string | null;
   parentId?: string | null;
   sortOrder?: number;
-  permissionId?: string | null;
+  permissionIds?: string[];
   translations: MenuTranslationInput[];
   isActive?: boolean;
 };
@@ -29,7 +41,7 @@ export type UpdateMenuInput = {
   icon?: string | null;
   parentId?: string | null;
   sortOrder?: number;
-  permissionId?: string | null;
+  permissionIds?: string[];
   translations?: MenuTranslationInput[];
   isActive?: boolean;
 };
@@ -47,12 +59,22 @@ function toJsonTranslations(translations: MenuTranslationsMap): Prisma.InputJson
   return translations as Prisma.InputJsonValue;
 }
 
+export function getMenuPermissionIds(menu: MenuWithPermissions) {
+  return menu.menuPermissions.map((entry) => entry.permissionId);
+}
+
 export async function findMenuById(id: string) {
-  return prisma.menu.findUnique({ where: { id } });
+  return prisma.menu.findUnique({
+    where: { id },
+    include: menuWithPermissionsInclude,
+  });
 }
 
 export async function findMenuBySlug(slug: string) {
-  return prisma.menu.findUnique({ where: { slug: normalizeSlug(slug) } });
+  return prisma.menu.findUnique({
+    where: { slug: normalizeSlug(slug) },
+    include: menuWithPermissionsInclude,
+  });
 }
 
 export async function listMenus(
@@ -77,6 +99,7 @@ export async function listMenus(
           : {},
       ],
     },
+    include: menuWithPermissionsInclude,
     skip,
     take,
     orderBy: [{ sortOrder: "asc" }, { slug: "asc" }],
@@ -106,6 +129,7 @@ export async function countMenus(filter?: ListMenusFilter) {
 export async function listActiveMenus() {
   return prisma.menu.findMany({
     where: { isActive: true },
+    include: menuWithPermissionsInclude,
     orderBy: [{ sortOrder: "asc" }, { slug: "asc" }],
   });
 }
@@ -118,25 +142,40 @@ export async function listMenusForUser(userId: string) {
 
   const permissionIds = new Set(permissions.map((permission) => permission.id));
 
-  return menus.filter(
-    (menu) => !menu.permissionId || permissionIds.has(menu.permissionId),
-  );
+  return menus.filter((menu) => {
+    const menuPermissionIds = getMenuPermissionIds(menu);
+    if (!menuPermissionIds.length) {
+      return true;
+    }
+
+    return menuPermissionIds.some((permissionId) => permissionIds.has(permissionId));
+  });
 }
 
 export async function createMenu(input: CreateMenuInput) {
   const translations = menuTranslationInputsToMap(input.translations);
 
-  return prisma.menu.create({
-    data: {
-      slug: normalizeSlug(input.slug),
-      path: input.path?.trim() || null,
-      icon: input.icon?.trim() || null,
-      parentId: input.parentId ?? null,
-      sortOrder: input.sortOrder ?? 0,
-      permissionId: input.permissionId ?? null,
-      translations: toJsonTranslations(translations),
-      isActive: input.isActive ?? true,
-    },
+  return prisma.$transaction(async (tx) => {
+    const menu = await tx.menu.create({
+      data: {
+        slug: normalizeSlug(input.slug),
+        path: input.path?.trim() || null,
+        icon: input.icon?.trim() || null,
+        parentId: input.parentId ?? null,
+        sortOrder: input.sortOrder ?? 0,
+        translations: toJsonTranslations(translations),
+        isActive: input.isActive ?? true,
+      },
+    });
+
+    if (input.permissionIds?.length) {
+      await setMenuPermissions(menu.id, input.permissionIds, tx);
+    }
+
+    return tx.menu.findUniqueOrThrow({
+      where: { id: menu.id },
+      include: menuWithPermissionsInclude,
+    });
   });
 }
 
@@ -152,20 +191,30 @@ export async function updateMenu(menuId: string, input: UpdateMenuInput) {
     );
   }
 
-  return prisma.menu.update({
-    where: { id: menuId },
-    data: {
-      slug: input.slug === undefined ? undefined : normalizeSlug(input.slug),
-      path: input.path === undefined ? undefined : input.path?.trim() || null,
-      icon: input.icon === undefined ? undefined : input.icon?.trim() || null,
-      parentId: input.parentId === undefined ? undefined : input.parentId,
-      sortOrder: input.sortOrder,
-      permissionId: input.permissionId === undefined ? undefined : input.permissionId,
-      translations: translationsUpdate
-        ? toJsonTranslations(translationsUpdate)
-        : undefined,
-      isActive: input.isActive,
-    },
+  return prisma.$transaction(async (tx) => {
+    const menu = await tx.menu.update({
+      where: { id: menuId },
+      data: {
+        slug: input.slug === undefined ? undefined : normalizeSlug(input.slug),
+        path: input.path === undefined ? undefined : input.path?.trim() || null,
+        icon: input.icon === undefined ? undefined : input.icon?.trim() || null,
+        parentId: input.parentId === undefined ? undefined : input.parentId,
+        sortOrder: input.sortOrder,
+        translations: translationsUpdate
+          ? toJsonTranslations(translationsUpdate)
+          : undefined,
+        isActive: input.isActive,
+      },
+    });
+
+    if (input.permissionIds !== undefined) {
+      await setMenuPermissions(menu.id, input.permissionIds, tx);
+    }
+
+    return tx.menu.findUniqueOrThrow({
+      where: { id: menu.id },
+      include: menuWithPermissionsInclude,
+    });
   });
 }
 

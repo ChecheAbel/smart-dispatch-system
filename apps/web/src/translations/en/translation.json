@@ -16,7 +16,7 @@
   "adminRoles": {
     "eyebrow": "Access control",
     "title": "Roles",
-    "description": "View platform roles and their localized names. Role permissions and assignments can be managed from the API.",
+    "description": "Manage platform roles and assign module permissions for each role.",
     "searchPlaceholder": "Search by name or slug...",
     "newRole": "New role",
     "itemLabel": "role",
@@ -35,6 +35,7 @@
     "actions": {
       "view": "View",
       "edit": "Edit",
+      "permissions": "Permissions",
       "delete": "Delete",
       "menuLabel": "Actions for {name}"
     },
@@ -68,6 +69,46 @@
         "createFailed": "Failed to create role.",
         "updateFailed": "Failed to update role.",
         "loadFailed": "Failed to load role."
+      }
+    },
+    "permissions": {
+      "title": "Role permissions",
+      "description": "Choose which modules and actions {name} can access.",
+      "descriptionFallback": "Choose which modules and actions this role can access.",
+      "loading": "Loading permissions...",
+      "save": "Save permissions",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "selectedSummary": "{selected} of {total} permissions selected",
+      "selectAll": "Select all",
+      "clearAll": "Clear all",
+      "moduleSelected": "{selected}/{total}",
+      "actions": {
+        "read": "View",
+        "write": "Create & edit",
+        "delete": "Delete"
+      },
+      "modules": {
+        "users": "Users",
+        "roles": "Roles",
+        "menus": "Menus"
+      },
+      "errors": {
+        "loadFailed": "Failed to load permissions."
+      },
+      "toast": {
+        "updateSuccess": {
+          "title": "Permissions updated",
+          "description": "This role's access has been saved successfully."
+        },
+        "updateFailed": {
+          "title": "Could not update permissions",
+          "description": "Please try again in a moment."
+        },
+        "loadFailed": {
+          "title": "Could not load permissions",
+          "description": "Please try again or refresh the page."
+        }
       }
     },
     "toast": {
@@ -150,9 +191,16 @@
       "sortOrder": "Sort order",
       "sortOrderPlaceholder": "0",
       "parentId": "Parent menu",
-      "permissionId": "Permission",
+      "permissionId": "Permissions",
+      "permissionModule": "Page module",
+      "permissionsHelp": "Choose which actions are required to access this menu page.",
+      "permissionsModuleHelp": "Select the module this page belongs to, then pick one or more actions below.",
       "noneOption": "None",
       "isActive": "Active",
+      "isActiveTitle": "Menu visibility",
+      "isActiveDescription": "Control whether this item appears in the sidebar for authorized users.",
+      "isActiveOn": "This menu is visible in navigation.",
+      "isActiveOff": "This menu is hidden from navigation.",
       "label": "Label",
       "optional": "(optional)",
       "cancel": "Cancel",

@@ -66,7 +66,7 @@ export interface Menu {
   icon: string | null;
   parent_id: string | null;
   sort_order: number;
-  permission_id: string | null;
+  permission_ids: string[];
   is_active: boolean;
   created_at: string;
   translations?: MenuTranslation[];

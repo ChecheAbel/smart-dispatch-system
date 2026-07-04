@@ -152,7 +152,10 @@ export const openApiSpec = {
           icon: { type: "string", nullable: true },
           parent_id: { type: "string", format: "uuid", nullable: true },
           sort_order: { type: "integer" },
-          permission_id: { type: "string", format: "uuid", nullable: true },
+          permission_ids: {
+            type: "array",
+            items: { type: "string", format: "uuid" },
+          },
           is_active: { type: "boolean" },
           created_at: { type: "string", format: "date-time" },
           translations: {
@@ -1894,7 +1897,10 @@ export const openApiSpec = {
                   icon: { type: "string", nullable: true, example: "users" },
                   parent_id: { type: "string", format: "uuid", nullable: true },
                   sort_order: { type: "integer", example: 10 },
-                  permission_id: { type: "string", format: "uuid", nullable: true },
+                  permission_ids: {
+            type: "array",
+            items: { type: "string", format: "uuid" },
+          },
                   is_active: { type: "boolean", default: true },
                   translations: {
                     type: "array",
@@ -2030,7 +2036,10 @@ export const openApiSpec = {
                   icon: { type: "string", nullable: true, example: "users" },
                   parent_id: { type: "string", format: "uuid", nullable: true },
                   sort_order: { type: "integer", example: 10 },
-                  permission_id: { type: "string", format: "uuid", nullable: true },
+                  permission_ids: {
+            type: "array",
+            items: { type: "string", format: "uuid" },
+          },
                   is_active: { type: "boolean" },
                   translations: {
                     type: "array",

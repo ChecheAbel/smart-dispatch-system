@@ -6,7 +6,6 @@ import { openApiSpec } from "./docs/openapi";
 import { migrate } from "./db/migrate";
 import { registerAuthRoleRoutes } from "./routes/auth-role.routes";
 import { registerAuthRoutes } from "./routes/auth.routes";
-import { registerEndpointRoutes } from "./routes/endpoint.routes";
 import { registerMenuRoutes } from "./routes/menu.routes";
 import { registerPermissionRoutes } from "./routes/permission.routes";
 import { registerRoleRoutes } from "./routes/role.routes";
@@ -27,7 +26,6 @@ registerRoleRoutes(app);
 registerAuthRoleRoutes(app);
 registerPermissionRoutes(app);
 registerMenuRoutes(app);
-registerEndpointRoutes(app);
 
 app.get("/api/health", (_req, res) => {
   sendSuccess(res, { status: "ok" }, { message: "Smart Dispatch System API is running" });

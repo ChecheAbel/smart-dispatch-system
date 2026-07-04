@@ -4,12 +4,6 @@ import { useCallback, useMemo, useState } from "react";
 import { Menu, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
 import type { Menu as MenuRecord } from "@smart-dispatch/types";
 import { useLocale, useAuth, useNavigation } from "@/components/shared/providers";
-import {
-  DataTable,
-  type DataTableColumn,
-  type DataTableFetchParams,
-  type DataTableRowContext,
-} from "@/components/shared/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatMessage, getAdminMenusMessages, type AdminMenusMessages } from "@/translations";
-import { deleteMenu, fetchMenus } from "@/lib/menu-api";
+import { deleteMenu } from "@/lib/menu-api";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import {
   adminBadgeGoldClass,
@@ -33,6 +27,7 @@ import { PERMISSIONS } from "@/lib/permissions";
 import { DeleteConfirmModal } from "@/components/shared/delete-confirm-modal";
 import { CreateMenuSheet } from "./create-menu-sheet";
 import { MenuStats } from "./menu-stats";
+import { MenuTreeTable } from "./menu-tree-table";
 
 function MenuRowActions({
   menu,
@@ -122,36 +117,24 @@ export function MenusPage() {
     setDeleteOpen(true);
   }, []);
 
-  const menuColumns = useMemo<DataTableColumn<MenuRecord>[]>(
+  const menuColumns = useMemo(
     () => [
-      {
-        id: "label",
-        header: copy.columns.label,
-        cellClassName: `font-medium ${adminHeadingClass}`,
-        cell: (menu) => menu.label,
-      },
-      {
-        id: "slug",
-        header: copy.columns.slug,
-        cellClassName: "text-slate-500",
-        cell: (menu) => menu.slug,
-      },
       {
         id: "path",
         header: copy.columns.path,
         cellClassName: "text-slate-500",
-        cell: (menu) => menu.path || "—",
+        cell: (menu: MenuRecord) => menu.path || "—",
       },
       {
         id: "sort_order",
         header: copy.columns.sortOrder,
-        cellClassName: "text-slate-500",
-        cell: (menu) => menu.sort_order,
+        cellClassName: "text-slate-500 tabular-nums",
+        cell: (menu: MenuRecord) => menu.sort_order,
       },
       {
         id: "status",
         header: copy.columns.status,
-        cell: (menu) =>
+        cell: (menu: MenuRecord) =>
           menu.is_active ? (
             <Badge className={adminBadgeSuccessClass}>{copy.status.active}</Badge>
           ) : (
@@ -162,19 +145,8 @@ export function MenusPage() {
     [copy],
   );
 
-  const loadMenus = useCallback(
-    ({ page, limit, search }: DataTableFetchParams) =>
-      fetchMenus({
-        page,
-        limit,
-        search: search || undefined,
-        locale,
-      }),
-    [locale],
-  );
-
   const renderRowActions = useCallback(
-    (menu: MenuRecord, _context: DataTableRowContext<MenuRecord>) => (
+    (menu: MenuRecord) => (
       <MenuRowActions
         menu={menu}
         labels={copy.actions}
@@ -191,18 +163,17 @@ export function MenusPage() {
     <div className="space-y-6">
       <MenuStats locale={locale} refreshKey={refreshKey} />
 
-      <DataTable
+      <MenuTreeTable
         key={locale}
+        locale={locale}
         eyebrow={<Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>}
         title={copy.title}
         titleClassName="text-2xl font-extrabold tracking-tight"
         description={copy.description}
         searchPlaceholder={copy.searchPlaceholder}
         itemLabel={copy.itemLabel}
+        labelHeader={copy.columns.label}
         columns={menuColumns}
-        fetchData={loadMenus}
-        getRowKey={(menu) => menu.id}
-        showIndexColumn
         renderRowActions={showRowActions ? renderRowActions : undefined}
         actionsColumnHeader={copy.columns.actions}
         toolbarActions={
@@ -217,7 +188,6 @@ export function MenusPage() {
             </Button>
           ) : undefined
         }
-        minTableWidth="880px"
         emptyIcon={Menu}
         emptyTitle={copy.empty.title}
         emptyDescription={copy.empty.description}

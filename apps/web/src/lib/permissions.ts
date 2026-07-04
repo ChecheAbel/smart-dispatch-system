@@ -11,16 +11,6 @@ export const PERMISSIONS = {
     write: "menus.write",
     delete: "menus.delete",
   },
-  permissions: {
-    read: "permissions.read",
-    write: "permissions.write",
-    delete: "permissions.delete",
-  },
-  endpoints: {
-    read: "endpoints.read",
-    write: "endpoints.write",
-    delete: "endpoints.delete",
-  },
 } as const;
 
 export function createPermissionChecker(permissions: Permission[]) {

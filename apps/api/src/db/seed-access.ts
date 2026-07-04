@@ -1,5 +1,6 @@
 import type { HttpMethod } from "../generated/prisma";
 import { prisma } from "../db/prisma";
+import { setMenuPermissions } from "../models/menu-permission.model";
 import { menuTranslationInputsToMap } from "../types/menu-translations";
 import type { Prisma } from "../generated/prisma";
 
@@ -10,15 +11,21 @@ const DEFAULT_PERMISSIONS = [
   { slug: "roles.read", module: "roles", action: "read", description: "View roles" },
   { slug: "roles.write", module: "roles", action: "write", description: "Create and update roles" },
   { slug: "roles.delete", module: "roles", action: "delete", description: "Delete roles" },
-  { slug: "permissions.read", module: "permissions", action: "read", description: "View permissions" },
-  { slug: "permissions.write", module: "permissions", action: "write", description: "Create and update permissions" },
-  { slug: "permissions.delete", module: "permissions", action: "delete", description: "Delete permissions" },
   { slug: "menus.read", module: "menus", action: "read", description: "View menus" },
   { slug: "menus.write", module: "menus", action: "write", description: "Create and update menus" },
   { slug: "menus.delete", module: "menus", action: "delete", description: "Delete menus" },
-  { slug: "endpoints.read", module: "endpoints", action: "read", description: "View API endpoints" },
-  { slug: "endpoints.write", module: "endpoints", action: "write", description: "Create and update endpoints" },
-  { slug: "endpoints.delete", module: "endpoints", action: "delete", description: "Delete endpoints" },
+] as const;
+
+const REMOVED_MENU_SLUGS = ["permissions", "endpoints"] as const;
+
+const REMOVED_ENDPOINT_SLUGS = [
+  "permissions.create",
+  "permissions.update",
+  "permissions.delete",
+  "endpoints.list",
+  "endpoints.create",
+  "endpoints.update",
+  "endpoints.delete",
 ] as const;
 
 const DEFAULT_MENUS = [
@@ -27,7 +34,7 @@ const DEFAULT_MENUS = [
     path: "/admin",
     icon: "layout-dashboard",
     sortOrder: 0,
-    permissionSlug: null,
+    permissionSlugs: null as string[] | null,
     parentSlug: null,
     translations: [
       { locale: "en", label: "Dashboard" },
@@ -39,7 +46,7 @@ const DEFAULT_MENUS = [
     path: "/admin/users",
     icon: "users",
     sortOrder: 10,
-    permissionSlug: "users.read",
+    permissionSlugs: ["users.read", "users.write", "users.delete"],
     parentSlug: null,
     translations: [
       { locale: "en", label: "Users" },
@@ -51,7 +58,7 @@ const DEFAULT_MENUS = [
     path: null,
     icon: "shield-check",
     sortOrder: 20,
-    permissionSlug: null,
+    permissionSlugs: null as string[] | null,
     parentSlug: null,
     translations: [
       { locale: "en", label: "Access Control" },
@@ -63,7 +70,7 @@ const DEFAULT_MENUS = [
     path: "/admin/roles",
     icon: "shield",
     sortOrder: 10,
-    permissionSlug: "roles.read",
+    permissionSlugs: ["roles.read", "roles.write", "roles.delete"],
     parentSlug: "access-control",
     translations: [
       { locale: "en", label: "Roles" },
@@ -71,39 +78,15 @@ const DEFAULT_MENUS = [
     ],
   },
   {
-    slug: "permissions",
-    path: "/admin/permissions",
-    icon: "key",
-    sortOrder: 20,
-    permissionSlug: "permissions.read",
-    parentSlug: "access-control",
-    translations: [
-      { locale: "en", label: "Permissions" },
-      { locale: "am", label: "ፈቃዶች" },
-    ],
-  },
-  {
     slug: "menus",
     path: "/admin/menus",
     icon: "menu",
     sortOrder: 30,
-    permissionSlug: "menus.read",
+    permissionSlugs: ["menus.read", "menus.write", "menus.delete"],
     parentSlug: "access-control",
     translations: [
       { locale: "en", label: "Menus" },
       { locale: "am", label: "ሜኑዎች" },
-    ],
-  },
-  {
-    slug: "endpoints",
-    path: "/admin/endpoints",
-    icon: "route",
-    sortOrder: 40,
-    permissionSlug: "endpoints.read",
-    parentSlug: "access-control",
-    translations: [
-      { locale: "en", label: "Endpoints" },
-      { locale: "am", label: "ኤንድፖይንቶች" },
     ],
   },
 ] as const;
@@ -121,19 +104,12 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "roles.create", method: "POST", path: "/api/roles", description: "Create role", permissionSlug: "roles.write" },
   { slug: "roles.update", method: "PATCH", path: "/api/roles/:id", description: "Update role", permissionSlug: "roles.write" },
   { slug: "roles.delete", method: "DELETE", path: "/api/roles/:id", description: "Delete role", permissionSlug: "roles.delete" },
-  { slug: "permissions.list", method: "GET", path: "/api/permissions", description: "List permissions", permissionSlug: "permissions.read" },
-  { slug: "permissions.create", method: "POST", path: "/api/permissions", description: "Create permission", permissionSlug: "permissions.write" },
-  { slug: "permissions.update", method: "PATCH", path: "/api/permissions/:id", description: "Update permission", permissionSlug: "permissions.write" },
-  { slug: "permissions.delete", method: "DELETE", path: "/api/permissions/:id", description: "Delete permission", permissionSlug: "permissions.delete" },
+  { slug: "permissions.list", method: "GET", path: "/api/permissions", description: "List permissions", permissionSlug: "menus.read" },
   { slug: "menus.list", method: "GET", path: "/api/menus", description: "List menus", permissionSlug: "menus.read" },
   { slug: "menus.create", method: "POST", path: "/api/menus", description: "Create menu", permissionSlug: "menus.write" },
   { slug: "menus.update", method: "PATCH", path: "/api/menus/:id", description: "Update menu", permissionSlug: "menus.write" },
   { slug: "menus.delete", method: "DELETE", path: "/api/menus/:id", description: "Delete menu", permissionSlug: "menus.delete" },
   { slug: "menus.navigation", method: "GET", path: "/api/menus/navigation", description: "Navigation menu for current user", permissionSlug: "menus.read" },
-  { slug: "endpoints.list", method: "GET", path: "/api/endpoints", description: "List endpoints", permissionSlug: "endpoints.read" },
-  { slug: "endpoints.create", method: "POST", path: "/api/endpoints", description: "Create endpoint", permissionSlug: "endpoints.write" },
-  { slug: "endpoints.update", method: "PATCH", path: "/api/endpoints/:id", description: "Update endpoint", permissionSlug: "endpoints.write" },
-  { slug: "endpoints.delete", method: "DELETE", path: "/api/endpoints/:id", description: "Delete endpoint", permissionSlug: "endpoints.delete" },
 ];
 
 async function seedPermissions() {
@@ -177,7 +153,6 @@ async function seedMenus() {
         icon: menu.icon,
         parentId,
         sortOrder: menu.sortOrder,
-        permissionId: menu.permissionSlug ? permissionBySlug.get(menu.permissionSlug) ?? null : null,
         translations,
         isActive: true,
       },
@@ -187,11 +162,16 @@ async function seedMenus() {
         icon: menu.icon,
         parentId,
         sortOrder: menu.sortOrder,
-        permissionId: menu.permissionSlug ? permissionBySlug.get(menu.permissionSlug) ?? null : null,
         translations,
         isActive: true,
       },
     });
+
+    const menuPermissionIds = (menu.permissionSlugs ?? [])
+      .map((slug) => permissionBySlug.get(slug))
+      .filter((id): id is string => Boolean(id));
+
+    await setMenuPermissions(record.id, menuPermissionIds);
 
     menuIdBySlug.set(menu.slug, record.id);
   }
@@ -223,11 +203,22 @@ async function seedEndpoints() {
   }
 }
 
+async function deleteRemovedMenus() {
+  await prisma.menu.deleteMany({
+    where: { slug: { in: [...REMOVED_MENU_SLUGS] } },
+  });
+}
+
+async function deleteRemovedEndpoints() {
+  await prisma.endpoint.deleteMany({
+    where: { slug: { in: [...REMOVED_ENDPOINT_SLUGS] } },
+  });
+}
+
 async function seedAdminRolePermissions(permissionIds: string[]) {
   const adminRole = await prisma.role.findUnique({ where: { slug: "admin" } });
   if (!adminRole) return;
 
-  await prisma.rolePermission.deleteMany({ where: { roleId: adminRole.id } });
   await prisma.rolePermission.createMany({
     data: permissionIds.map((permissionId) => ({
       roleId: adminRole.id,
@@ -240,6 +231,8 @@ async function seedAdminRolePermissions(permissionIds: string[]) {
 export async function seedAccessControl() {
   const permissionIds = await seedPermissions();
   await seedMenus();
+  await deleteRemovedMenus();
   await seedEndpoints();
+  await deleteRemovedEndpoints();
   await seedAdminRolePermissions(permissionIds);
 }

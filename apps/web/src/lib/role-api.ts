@@ -1,4 +1,4 @@
-import type { Role, RoleTranslation } from "@smart-dispatch/types";
+import type { Permission, Role, RoleTranslation } from "@smart-dispatch/types";
 import { apiClient } from "./api-client";
 import { unwrapApiResponse, unwrapPaginatedApiResponse } from "./api-response";
 
@@ -47,4 +47,16 @@ export async function updateRole(id: string, input: UpdateRoleInput) {
 export async function deleteRole(id: string) {
   const { data } = await apiClient.delete(`/api/roles/${id}`);
   return unwrapApiResponse<{ message: string }>(data);
+}
+
+export async function fetchRolePermissions(roleId: string) {
+  const { data } = await apiClient.get(`/api/roles/${roleId}/permissions`);
+  return unwrapApiResponse<{ permissions: Permission[] }>(data).permissions;
+}
+
+export async function setRolePermissions(roleId: string, permissionIds: string[]) {
+  const { data } = await apiClient.put(`/api/roles/${roleId}/permissions`, {
+    permission_ids: permissionIds,
+  });
+  return unwrapApiResponse<{ permissions: Permission[] }>(data).permissions;
 }

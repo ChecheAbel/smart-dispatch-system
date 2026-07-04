@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { MoreHorizontal, Pencil, Plus, Shield, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Plus, Shield, ShieldCheck, Trash2 } from "lucide-react";
 import type { Role } from "@smart-dispatch/types";
 import { useLocale, useAuth } from "@/components/shared/providers";
 import {
@@ -27,6 +27,7 @@ import { adminBadgeGoldClass, adminHeadingClass, adminPrimaryButtonClass } from 
 import { PERMISSIONS } from "@/lib/permissions";
 import { DeleteConfirmModal } from "@/components/shared/delete-confirm-modal";
 import { CreateRoleSheet } from "./create-role-sheet";
+import { RolePermissionsSheet } from "./role-permissions-sheet";
 import { RoleStats } from "./role-stats";
 
 function formatDate(value: string, locale: string) {
@@ -41,6 +42,7 @@ function RoleRowActions({
   role,
   labels,
   onEdit,
+  onPermissions,
   onDelete,
   canEdit,
   canDelete,
@@ -48,6 +50,7 @@ function RoleRowActions({
   role: Role;
   labels: AdminRolesMessages["actions"];
   onEdit: (role: Role) => void;
+  onPermissions: (role: Role) => void;
   onDelete: (role: Role) => void;
   canEdit: boolean;
   canDelete: boolean;
@@ -75,6 +78,12 @@ function RoleRowActions({
               {labels.edit}
             </DropdownMenuItem>
           ) : null}
+          {canEdit ? (
+            <DropdownMenuItem onClick={() => onPermissions(role)}>
+              <ShieldCheck />
+              {labels.permissions}
+            </DropdownMenuItem>
+          ) : null}
           {canEdit && canDelete ? <DropdownMenuSeparator /> : null}
           {canDelete ? (
             <DropdownMenuItem variant="destructive" onClick={() => onDelete(role)}>
@@ -100,6 +109,8 @@ export function RolesPage() {
   const [editingRoleId, setEditingRoleId] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletingRole, setDeletingRole] = useState<Role | null>(null);
+  const [permissionsOpen, setPermissionsOpen] = useState(false);
+  const [permissionsRole, setPermissionsRole] = useState<Role | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
 
   function openCreateSheet() {
@@ -117,6 +128,11 @@ export function RolesPage() {
   const openDeleteModal = useCallback((role: Role) => {
     setDeletingRole(role);
     setDeleteOpen(true);
+  }, []);
+
+  const openPermissionsSheet = useCallback((role: Role) => {
+    setPermissionsRole(role);
+    setPermissionsOpen(true);
   }, []);
 
   const roleColumns = useMemo<DataTableColumn<Role>[]>(
@@ -160,12 +176,13 @@ export function RolesPage() {
         role={role}
         labels={copy.actions}
         onEdit={openEditSheet}
+        onPermissions={openPermissionsSheet}
         onDelete={openDeleteModal}
         canEdit={canWrite}
         canDelete={canDelete}
       />
     ),
-    [copy.actions, openEditSheet, openDeleteModal, canWrite, canDelete],
+    [copy.actions, openEditSheet, openPermissionsSheet, openDeleteModal, canWrite, canDelete],
   );
 
   return (
@@ -212,6 +229,15 @@ export function RolesPage() {
           onOpenChange={setSheetOpen}
           mode={sheetMode}
           roleId={editingRoleId}
+          onSuccess={() => setRefreshKey((current) => current + 1)}
+        />
+      ) : null}
+
+      {canWrite ? (
+        <RolePermissionsSheet
+          open={permissionsOpen}
+          onOpenChange={setPermissionsOpen}
+          role={permissionsRole}
           onSuccess={() => setRefreshKey((current) => current + 1)}
         />
       ) : null}

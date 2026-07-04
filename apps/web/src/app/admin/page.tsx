@@ -49,8 +49,8 @@ export default function AdminDashboardPage() {
         <Badge className={adminBadgeGoldClass}>Overview</Badge>
         <h2 className={`text-2xl font-extrabold tracking-tight ${adminHeadingClass}`}>Dashboard</h2>
         <p className="max-w-2xl text-sm text-slate-500">
-          Welcome to the Smart Dispatch admin console. Use the sidebar to manage users, roles,
-          permissions, menus, and API endpoints.
+          Welcome to the Smart Dispatch admin console. Use the sidebar to manage users, roles, and
+          navigation menus.
         </p>
       </div>
 
@@ -84,9 +84,9 @@ export default function AdminDashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-slate-500">
-            <p>• Users, roles, and permissions can be managed from the sidebar.</p>
-            <p>• Navigation menus can later be loaded from `/api/menus/navigation`.</p>
-            <p>• Endpoint permissions can be mapped to UI actions such as view, edit, and delete.</p>
+            <p>• Users and roles can be managed from the sidebar.</p>
+            <p>• Navigation menus are loaded from `/api/menus/navigation`.</p>
+            <p>• Permissions and API endpoints are managed automatically by the backend.</p>
           </CardContent>
         </Card>
 

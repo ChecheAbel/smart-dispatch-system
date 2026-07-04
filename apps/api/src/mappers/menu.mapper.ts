@@ -14,10 +14,10 @@ type DbMenu = {
   icon: string | null;
   parentId: string | null;
   sortOrder: number;
-  permissionId: string | null;
   isActive: boolean;
   createdAt: Date;
   translations: Prisma.JsonValue;
+  menuPermissions?: Array<{ permissionId: string }>;
 };
 
 export function pickMenuTranslation(map: MenuTranslationsMap, locale?: string) {
@@ -49,7 +49,7 @@ export function toPublicMenu(
     icon: menu.icon,
     parent_id: menu.parentId,
     sort_order: menu.sortOrder,
-    permission_id: menu.permissionId,
+    permission_ids: menu.menuPermissions?.map((entry) => entry.permissionId) ?? [],
     is_active: menu.isActive,
     created_at: menu.createdAt.toISOString(),
   };

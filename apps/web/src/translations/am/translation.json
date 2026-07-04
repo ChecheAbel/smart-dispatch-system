@@ -16,7 +16,7 @@
   "adminRoles": {
     "eyebrow": "የመዳረሻ ቁጥጥር",
     "title": "ሚናዎች",
-    "description": "የመድረክ ሚናዎችን እና የተተረጎሙ ስሞችን ይመልከቱ። የሚና ፈቃዶችን እና መመደቦችን ከ API ማስተዳደር ይቻላል።",
+    "description": "የመድረክ ሚናዎችን ያስተዳድሩ እና ለእያንዳንዱ ሚና የሞጁል ፈቃዶችን ይመድቡ።",
     "searchPlaceholder": "በስም ወይም slug ፈልግ...",
     "newRole": "አዲስ ሚና",
     "itemLabel": "ሚና",
@@ -35,6 +35,7 @@
     "actions": {
       "view": "እይታ",
       "edit": "አርትዕ",
+      "permissions": "ፈቃዶች",
       "delete": "ሰርዝ",
       "menuLabel": "ለ {name} ድርጊቶች"
     },
@@ -68,6 +69,46 @@
         "createFailed": "ሚና መፍጠር አልተሳካም።",
         "updateFailed": "ሚና ማዘመን አልተሳካም።",
         "loadFailed": "ሚና መጫን አልተሳካም።"
+      }
+    },
+    "permissions": {
+      "title": "የሚና ፈቃዶች",
+      "description": "{name} ሊደርስባቸው የሚችሉትን ሞጁሎች እና ድርጊቶች ይምረጡ።",
+      "descriptionFallback": "ይህ ሚና ሊደርስባቸው የሚችሉትን ሞጁሎች እና ድርጊቶች ይምረጡ።",
+      "loading": "ፈቃዶች በመጫን ላይ...",
+      "save": "ፈቃዶችን አስቀምጥ",
+      "saving": "በመቀመጥ ላይ...",
+      "cancel": "ሰርዝ",
+      "selectedSummary": "{selected} ከ {total} ፈቃዶች ተመርጠዋል",
+      "selectAll": "ሁሉንም ምረጥ",
+      "clearAll": "ሁሉንም አጽዳ",
+      "moduleSelected": "{selected}/{total}",
+      "actions": {
+        "read": "እይታ",
+        "write": "ፍጠር እና አርትዕ",
+        "delete": "ሰርዝ"
+      },
+      "modules": {
+        "users": "ተጠቃሚዎች",
+        "roles": "ሚናዎች",
+        "menus": "ሜኑዎች"
+      },
+      "errors": {
+        "loadFailed": "ፈቃዶችን መጫን አልተሳካም።"
+      },
+      "toast": {
+        "updateSuccess": {
+          "title": "ፈቃዶች ተዘምነዋል",
+          "description": "የዚህ ሚና መዳረሻ በተሳካ ሁኔታ ተቀምጧል።"
+        },
+        "updateFailed": {
+          "title": "ፈቃዶችን ማዘመን አልተቻለም",
+          "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
+        },
+        "loadFailed": {
+          "title": "ፈቃዶችን መጫን አልተቻለም",
+          "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+        }
       }
     },
     "toast": {
@@ -150,9 +191,16 @@
       "sortOrder": "የመደብ ቅደም ተከተል",
       "sortOrderPlaceholder": "0",
       "parentId": "የወላጅ ሜኑ",
-      "permissionId": "ፈቃድ",
+      "permissionId": "ፈቃዶች",
+      "permissionModule": "የገጽ ሞጁል",
+      "permissionsHelp": "ይህን ሜኑ ለመድረስ የሚያስፈልጉ ድርጊቶችን ይምረጡ።",
+      "permissionsModuleHelp": "ገጹ የሚሆነበትን ሞጁል ይምረጡ፣ ከዚያ ከታች አንድ ወይም ተጨማሪ ድርጊቶችን ይምረጡ።",
       "noneOption": "ምንም",
       "isActive": "ንቁ",
+      "isActiveTitle": "የሜኑ ታይነት",
+      "isActiveDescription": "ይህ ንጥል ለተፈቀዱ ተጠቃሚዎች በጎን መስመር ውስጥ እንዲታይ ይቆጣጠሩ።",
+      "isActiveOn": "ይህ ሜኑ በዳሰሳ ላይ ይታያል።",
+      "isActiveOff": "ይህ ሜኑ ከዳሰሳ ተደብቋል።",
       "label": "መለያ",
       "optional": "(አማራጭ)",
       "cancel": "ተው",

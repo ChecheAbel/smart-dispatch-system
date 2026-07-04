@@ -20,6 +20,7 @@ import {
   getMenuTranslations,
   getOptionalString,
   getString,
+  getStringArray,
   parseBoolean,
 } from "../utils/validation";
 import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
@@ -132,7 +133,7 @@ router.post("/", requirePermission("menus.write"), async (req: Request, res: Res
       parentId: getOptionalString(req.body?.parent_id),
       sortOrder:
         typeof req.body?.sort_order === "number" ? req.body.sort_order : undefined,
-      permissionId: getOptionalString(req.body?.permission_id),
+      permissionIds: getStringArray(req.body?.permission_ids),
       translations,
       isActive: parseBoolean(req.body?.is_active),
     });
@@ -158,10 +159,10 @@ router.patch("/:id", requirePermission("menus.write"), async (req: Request, res:
         req.body?.parent_id === undefined ? undefined : getOptionalString(req.body?.parent_id),
       sortOrder:
         typeof req.body?.sort_order === "number" ? req.body.sort_order : undefined,
-      permissionId:
-        req.body?.permission_id === undefined
+      permissionIds:
+        req.body?.permission_ids === undefined
           ? undefined
-          : getOptionalString(req.body?.permission_id),
+          : getStringArray(req.body?.permission_ids),
       translations: translations.length ? translations : undefined,
       isActive: parseBoolean(req.body?.is_active),
     });

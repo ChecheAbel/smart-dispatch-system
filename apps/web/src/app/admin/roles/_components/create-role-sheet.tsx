@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import type { Role } from "@smart-dispatch/types";
 import { createRole, fetchRoleById, updateRole } from "@/lib/role-api";
+import { generateSlugFromText } from "@/lib/slug";
 import { adminHeadingClass, adminInputClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
 import { LOCALE_OPTIONS } from "@/lib/locale";
 import { useLocale } from "@/components/shared/providers";
@@ -32,7 +33,6 @@ type CreateRoleSheetProps = {
 };
 
 type RoleFormState = {
-  slug: string;
   enName: string;
   enDescription: string;
   amName: string;
@@ -42,27 +42,17 @@ type RoleFormState = {
 type FieldErrors = Partial<Record<keyof RoleFormState, string>>;
 
 const emptyForm: RoleFormState = {
-  slug: "",
   enName: "",
   enDescription: "",
   amName: "",
   amDescription: "",
 };
 
-function normalizeSlug(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
-
 function mapRoleToForm(role: Role): RoleFormState {
   const en = role.translations?.find((translation) => translation.locale === "en");
   const am = role.translations?.find((translation) => translation.locale === "am");
 
   return {
-    slug: role.slug,
     enName: en?.name ?? "",
     enDescription: en?.description ?? "",
     amName: am?.name ?? "",
@@ -166,14 +156,8 @@ export function CreateRoleSheet({
     setError(null);
     setFieldErrors({});
 
-    const slug = normalizeSlug(form.slug);
     const enName = form.enName.trim();
     const amName = form.amName.trim();
-
-    if (!slug) {
-      setFieldErrors({ slug: formCopy.errors.slugRequired });
-      return;
-    }
 
     if (!enName) {
       setFieldErrors({ enName: formCopy.errors.enNameRequired });
@@ -196,14 +180,24 @@ export function CreateRoleSheet({
       });
     }
 
+    let createSlug: string | undefined;
+
+    if (!isEdit) {
+      createSlug = generateSlugFromText(enName);
+      if (!createSlug) {
+        setFieldErrors({ enName: formCopy.errors.enNameRequired });
+        return;
+      }
+    }
+
     setSubmitting(true);
 
     try {
       if (isEdit && roleId) {
-        await updateRole(roleId, { slug, translations });
+        await updateRole(roleId, { translations });
         showSuccessToast(toastCopy.updateSuccess);
       } else {
-        await createRole({ slug, translations });
+        await createRole({ slug: createSlug!, translations });
         showSuccessToast(toastCopy.createSuccess);
       }
 
@@ -242,27 +236,6 @@ export function CreateRoleSheet({
           <div className="px-4 py-8 text-sm text-slate-500">{formCopy.loading}</div>
         ) : (
           <form id={formId} onSubmit={handleSubmit} className="space-y-6 px-4">
-            <div className="space-y-2">
-              <Label htmlFor="role-slug" className={fieldErrors.slug ? "text-red-700" : undefined}>
-                {formCopy.slug}
-              </Label>
-              <Input
-                id="role-slug"
-                value={form.slug}
-                onChange={(event) => updateField("slug", event.target.value)}
-                onBlur={() => updateField("slug", normalizeSlug(form.slug))}
-                placeholder={formCopy.slugPlaceholder}
-                className={cn(fieldClassName, fieldErrors.slug && fieldErrorClassName)}
-                aria-invalid={Boolean(fieldErrors.slug)}
-                autoComplete="off"
-              />
-              {fieldErrors.slug ? (
-                <p className="text-xs text-red-600">{fieldErrors.slug}</p>
-              ) : (
-                <p className="text-xs text-slate-500">{formCopy.slugHelp}</p>
-              )}
-            </div>
-
             <div className="space-y-4 rounded-lg border border-slate-200 bg-[#f8fafb]/60 p-4">
               <p className={`text-sm font-semibold ${adminHeadingClass}`}>{enLabel}</p>
 
