@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import type { NotificationChannel } from "@smart-dispatch/types";
+import { auditMutations } from "../middleware/audit-mutation";
 import { authenticate } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
 import { requirePermission } from "../middleware/require-permission";
@@ -18,7 +19,7 @@ import { handleRouteError, sendError, sendSuccess } from "../utils/response";
 
 const router = Router();
 
-router.use(authenticate, authorize("admin"));
+router.use(authenticate, authorize("admin"), auditMutations());
 
 const CHANNELS = new Set<NotificationChannel>(["email", "sms"]);
 

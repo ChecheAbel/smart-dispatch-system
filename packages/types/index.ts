@@ -49,6 +49,35 @@ export interface AuthRole {
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
+export type AuditAction =
+  | "create"
+  | "update"
+  | "delete"
+  | "login"
+  | "logout"
+  | "assign"
+  | "revoke"
+  | "test";
+
+export interface AuditLog {
+  id: string;
+  actor_user_id: string | null;
+  actor_email: string | null;
+  actor_name: string | null;
+  action: AuditAction;
+  module: string;
+  entity_type: string;
+  entity_id: string | null;
+  entity_label: string | null;
+  summary: string | null;
+  metadata: Record<string, unknown>;
+  ip_address: string | null;
+  user_agent: string | null;
+  request_method: string | null;
+  request_path: string | null;
+  created_at: string;
+}
+
 export type NotificationChannel = "email" | "sms";
 
 export interface NotificationConfiguration {

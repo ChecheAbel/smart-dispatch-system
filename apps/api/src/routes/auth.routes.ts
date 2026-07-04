@@ -8,6 +8,7 @@ import {
   requestPasswordReset,
   resetPasswordWithToken,
 } from "../services/auth.service";
+import { recordAuditLog } from "../services/audit-log.service";
 import { handleRouteError, sendError, sendSuccess } from "../utils/response";
 
 export function registerAuthRoutes(app: Express) {
@@ -16,6 +17,18 @@ export function registerAuthRoutes(app: Express) {
       const email = typeof req.body?.email === "string" ? req.body.email : "";
       const password = typeof req.body?.password === "string" ? req.body.password : "";
       const result = await loginWithPassword(email, password);
+
+      await recordAuditLog({
+        req,
+        actorUserId: result.user.id,
+        action: "login",
+        module: "auth",
+        entityType: "user",
+        entityId: result.user.id,
+        entityLabel: result.user.email,
+        summary: "User signed in",
+      });
+
       return sendSuccess(res, result);
     } catch (error) {
       return handleRouteError(res, error);
@@ -30,6 +43,18 @@ export function registerAuthRoutes(app: Express) {
         const email = typeof req.body?.email === "string" ? req.body.email : "";
         const password = typeof req.body?.password === "string" ? req.body.password : "";
         const result = await loginWithPassword(email, password);
+
+        await recordAuditLog({
+          req,
+          actorUserId: result.user.id,
+          action: "login",
+          module: "auth",
+          entityType: "user",
+          entityId: result.user.id,
+          entityLabel: result.user.email,
+          summary: "User signed in",
+        });
+
         return sendSuccess(res, result);
       }
 

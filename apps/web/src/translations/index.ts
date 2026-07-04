@@ -2,6 +2,7 @@ import type { SupportedLocale } from "@/lib/locale";
 import am from "./am/translation.json";
 import en from "./en/translation.json";
 import type {
+  AdminAuditLogsMessages,
   AdminMenusMessages,
   AdminNotificationsEmailMessages,
   AdminNotificationsSmsMessages,
@@ -16,6 +17,7 @@ const translations: Record<SupportedLocale, Translations> = {
 };
 
 export type {
+  AdminAuditLogsMessages,
   AdminMenusMessages,
   AdminNotificationsEmailMessages,
   AdminNotificationsSmsMessages,
@@ -31,6 +33,10 @@ export function getTranslations(locale: SupportedLocale): Translations {
 
 export function getAdminRolesMessages(locale: SupportedLocale): AdminRolesMessages {
   return getTranslations(locale).adminRoles;
+}
+
+export function getAdminAuditLogsMessages(locale: SupportedLocale): AdminAuditLogsMessages {
+  return getTranslations(locale).adminAuditLogs;
 }
 
 export function getAdminMenusMessages(locale: SupportedLocale): AdminMenusMessages {

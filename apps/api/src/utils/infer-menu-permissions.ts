@@ -1,4 +1,4 @@
-const ADMIN_MODULES = ["users", "roles", "menus", "notifications"] as const;
+const ADMIN_MODULES = ["users", "roles", "menus", "notifications", "audit_logs"] as const;
 
 type AdminModule = (typeof ADMIN_MODULES)[number];
 
@@ -15,7 +15,11 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
   }
 
   if (normalizedSlug === "access-control") {
-    return ["roles.read", "menus.read"];
+    return ["roles.read", "menus.read", "audit_logs.read"];
+  }
+
+  if (normalizedSlug === "audit-logs") {
+    return ["audit_logs.read"];
   }
 
   if (isAdminModule(normalizedSlug)) {

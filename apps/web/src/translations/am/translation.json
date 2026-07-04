@@ -104,7 +104,8 @@
         "users": "ተጠቃሚዎች",
         "roles": "ሚናዎች",
         "menus": "ሜኑዎች",
-        "notifications": "ማሳወቂያዎች"
+        "notifications": "ማሳወቂያዎች",
+        "audit_logs": "የኦዲት መዝገቦች"
       },
       "errors": {
         "loadFailed": "ፈቃዶችን መጫን አልተሳካም።"
@@ -640,6 +641,87 @@
         "title": "የሙከራ ኤስኤምኤስ አልተሳካም",
         "description": "እባክዎ ቅንብርዎን ያረጋግጡና እንደገና ይሞክሩ።"
       }
+    }
+  },
+  "adminAuditLogs": {
+    "eyebrow": "የመዳረሻ ቁጥጥር",
+    "title": "የኦዲት መዝገቦች",
+    "description": "በመድረኩ ላይ የተጠቃሚ እና የአስተዳዳሪ እንቅስቃሴዎችን ይመልከቱ።",
+    "searchPlaceholder": "በተጠቃሚ፣ በማጠቃለያ፣ በመንገድ ወይም በታርጌት ፈልግ...",
+    "itemLabel": "መዝገብ",
+    "filters": {
+      "module": "ሞጁል",
+      "moduleAll": "ሁሉም ሞጁሎች",
+      "action": "ድርጊት",
+      "actionAll": "ሁሉም ድርጊቶች",
+      "dateFrom": "ከቀን",
+      "dateTo": "እስከ ቀን",
+      "pickDate": "ቀን ይምረጡ",
+      "clearDate": "አጽዳ",
+      "today": "ዛሬ",
+      "clearDates": "ቀኖችን አጽዳ"
+    },
+    "columns": {
+      "time": "ጊዜ",
+      "actor": "ተጠቃሚ",
+      "action": "ድርጊት",
+      "module": "ሞጁል",
+      "summary": "ማጠቃለያ",
+      "target": "ታርጌት",
+      "actions": "ድርጊቶች"
+    },
+    "actions": {
+      "view": "ዝርዝር ይመልከቱ",
+      "menuLabel": "ለኦዲት መዝገብ ድርጊቶች"
+    },
+    "actionLabels": {
+      "create": "መፍጠር",
+      "update": "ማዘመን",
+      "delete": "መሰረዝ",
+      "login": "መግባት",
+      "logout": "መውጣት",
+      "assign": "መመደብ",
+      "revoke": "ማስወገድ",
+      "test": "ሙከራ"
+    },
+    "moduleLabels": {
+      "users": "ተጠቃሚዎች",
+      "roles": "ሚናዎች",
+      "menus": "ሜኑዎች",
+      "notifications": "ማሳወቂያዎች",
+      "auth": "ማረጋገጫ",
+      "audit_logs": "የኦዲት መዝገቦች"
+    },
+    "empty": {
+      "title": "የኦዲት መዝገቦች አልተገኙም",
+      "description": "ተጠቃሚዎች ድርጊት ሲፈጽሙ እንቅስቃሴ እዚህ ይታያል።",
+      "searchDescription": "ሌላ ፍለጋ ወይም ማጣሪያ ይሞክሩ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የኦዲት መዝገቦችን የእይታ መዳረሻ ያስፈልጋል። አስተዳዳሪው ሚናዎ ላይ audit_logs.read ፈቃድ እንዲሰጥዎት ይጠይቁ።",
+      "sessionHint": "ፈቃዶች ቀርፊው ከተቀየሩ በኋላ ክፍለ ጊዜዎን ለማደስ ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
+    "detail": {
+      "title": "የኦዲት መዝገብ ዝርዝር",
+      "description": "ለዚህ የተመዘገበ ድርጊት ሙሉ አውድ።",
+      "actor": "ተጠቃሚ",
+      "action": "ድርጊት",
+      "module": "ሞጁል",
+      "target": "ታርጌት",
+      "summary": "ማጠቃለያ",
+      "request": "ጥያቄ",
+      "ipAddress": "IP አድራሻ",
+      "userAgent": "የተጠቃሚ አገልጋይ",
+      "metadata": "ሜታዳታ",
+      "systemActor": "ስርዓት",
+      "close": "ዝጋ"
+    },
+    "errors": {
+      "loadFailed": "የኦዲት መዝገብ ዝርዝር መጫን አልተሳካም።"
     }
   },
   "adminPermissions": {

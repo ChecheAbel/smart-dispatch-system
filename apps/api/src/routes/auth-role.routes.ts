@@ -1,4 +1,5 @@
 import { Router, type Request, type Response } from "express";
+import { auditMutations } from "../middleware/audit-mutation";
 import { authenticate } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
 import { toPublicAuthRole } from "../mappers/auth-role.mapper";
@@ -16,7 +17,7 @@ import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "
 
 const router = Router();
 
-router.use(authenticate, authorize("admin"));
+router.use(authenticate, authorize("admin"), auditMutations());
 
 function getRequestLocale(req: Request) {
   return parseLocale(req.query, req.headers["accept-language"]);

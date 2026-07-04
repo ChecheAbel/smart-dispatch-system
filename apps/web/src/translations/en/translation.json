@@ -104,7 +104,8 @@
         "users": "Users",
         "roles": "Roles",
         "menus": "Menus",
-        "notifications": "Notifications"
+        "notifications": "Notifications",
+        "audit_logs": "Audit logs"
       },
       "errors": {
         "loadFailed": "Failed to load permissions."
@@ -640,6 +641,87 @@
         "title": "Test SMS failed",
         "description": "Please verify your configuration and try again."
       }
+    }
+  },
+  "adminAuditLogs": {
+    "eyebrow": "Access control",
+    "title": "Audit logs",
+    "description": "Review user and admin activity across the platform.",
+    "searchPlaceholder": "Search by actor, summary, path, or target...",
+    "itemLabel": "entry",
+    "filters": {
+      "module": "Module",
+      "moduleAll": "All modules",
+      "action": "Action",
+      "actionAll": "All actions",
+      "dateFrom": "From date",
+      "dateTo": "To date",
+      "pickDate": "Pick a date",
+      "clearDate": "Clear",
+      "today": "Today",
+      "clearDates": "Clear dates"
+    },
+    "columns": {
+      "time": "Time",
+      "actor": "Actor",
+      "action": "Action",
+      "module": "Module",
+      "summary": "Summary",
+      "target": "Target",
+      "actions": "Actions"
+    },
+    "actions": {
+      "view": "View details",
+      "menuLabel": "Actions for audit entry"
+    },
+    "actionLabels": {
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete",
+      "login": "Login",
+      "logout": "Logout",
+      "assign": "Assign",
+      "revoke": "Revoke",
+      "test": "Test"
+    },
+    "moduleLabels": {
+      "users": "Users",
+      "roles": "Roles",
+      "menus": "Menus",
+      "notifications": "Notifications",
+      "auth": "Authentication",
+      "audit_logs": "Audit logs"
+    },
+    "empty": {
+      "title": "No audit entries found",
+      "description": "Activity will appear here as users perform actions.",
+      "searchDescription": "Try a different search or filter."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to audit logs is required to open this page. Ask an administrator to grant the audit_logs.read permission for your role.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "detail": {
+      "title": "Audit entry details",
+      "description": "Full context for this recorded action.",
+      "actor": "Actor",
+      "action": "Action",
+      "module": "Module",
+      "target": "Target",
+      "summary": "Summary",
+      "request": "Request",
+      "ipAddress": "IP address",
+      "userAgent": "User agent",
+      "metadata": "Metadata",
+      "systemActor": "System",
+      "close": "Close"
+    },
+    "errors": {
+      "loadFailed": "Failed to load audit log details."
     }
   },
   "adminPermissions": {

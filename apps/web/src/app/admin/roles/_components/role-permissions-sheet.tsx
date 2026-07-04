@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Bell, LayoutList, Menu, Shield, Users } from "lucide-react";
+import { Bell, LayoutList, Menu, ScrollText, Shield, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { Permission, Role } from "@smart-dispatch/types";
 import { fetchPermissions } from "@/lib/permission-api";
@@ -56,6 +56,7 @@ const MODULE_ICONS: Record<string, LucideIcon> = {
   roles: Shield,
   menus: Menu,
   notifications: Bell,
+  audit_logs: ScrollText,
 };
 
 function getModuleLabel(module: string, labels: Record<string, string>) {

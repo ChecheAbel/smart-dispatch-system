@@ -1,4 +1,5 @@
 import { Router, type Request, type Response } from "express";
+import { auditMutations } from "../middleware/audit-mutation";
 import { authenticate, type AuthenticatedRequest } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
 import { requirePermission } from "../middleware/require-permission";
@@ -54,7 +55,7 @@ router.get("/navigation", authenticate, async (req: AuthenticatedRequest, res: R
   }
 });
 
-router.use(authenticate, authorize("admin"));
+router.use(authenticate, authorize("admin"), auditMutations());
 
 router.get("/", requirePermission("menus.read"), async (req: Request, res: Response) => {
   try {

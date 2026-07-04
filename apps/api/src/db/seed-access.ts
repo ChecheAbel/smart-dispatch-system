@@ -19,6 +19,7 @@ const DEFAULT_PERMISSIONS = [
   { slug: "notifications.read", module: "notifications", action: "read", description: "View notification settings" },
   { slug: "notifications.write", module: "notifications", action: "write", description: "Manage notification settings" },
   { slug: "notifications.delete", module: "notifications", action: "delete", description: "Delete notification resources" },
+  { slug: "audit_logs.read", module: "audit_logs", action: "read", description: "View audit logs" },
 ] as const;
 
 const REMOVED_MENU_SLUGS = ["permissions", "endpoints"] as const;
@@ -99,6 +100,17 @@ const DEFAULT_MENUS = [
     ],
   },
   {
+    slug: "audit-logs",
+    path: "/admin/audit-logs",
+    icon: "scroll-text",
+    sortOrder: 40,
+    parentSlug: "access-control",
+    translations: [
+      { locale: "en", label: "Audit Logs" },
+      { locale: "am", label: "የኦዲት መዝገቦች" },
+    ],
+  },
+  {
     slug: "notifications",
     path: null,
     icon: "bell",
@@ -157,6 +169,8 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "notifications.sms.get", method: "GET", path: "/api/notifications/sms", description: "Get SMS notification configuration", permissionSlug: "notifications.read" },
   { slug: "notifications.sms.update", method: "PATCH", path: "/api/notifications/sms", description: "Update SMS notification configuration", permissionSlug: "notifications.write" },
   { slug: "notifications.sms.test", method: "POST", path: "/api/notifications/sms/test", description: "Send test SMS", permissionSlug: "notifications.write" },
+  { slug: "audit_logs.list", method: "GET", path: "/api/audit-logs", description: "List audit logs", permissionSlug: "audit_logs.read" },
+  { slug: "audit_logs.get", method: "GET", path: "/api/audit-logs/:id", description: "Get audit log entry", permissionSlug: "audit_logs.read" },
 ];
 
 async function seedPermissions() {

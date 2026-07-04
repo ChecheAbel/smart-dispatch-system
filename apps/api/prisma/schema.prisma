@@ -123,6 +123,7 @@ model User {
   updatedAt         DateTime          @updatedAt @map("updated_at") @db.Timestamptz
   authRoles         AuthRole[]
   tokens            Token[]
+  auditLogs         AuditLog[]
 
   @@index([email])
   @@index([mobileNumber])
@@ -181,4 +182,42 @@ model Token {
   @@index([userId])
   @@index([tokenHash])
   @@map("tokens")
+}
+
+enum AuditAction {
+  create
+  update
+  delete
+  login
+  logout
+  assign
+  revoke
+  test
+
+  @@map("audit_action")
+}
+
+model AuditLog {
+  id            String      @id @default(uuid()) @db.Uuid
+  actorUserId   String?     @map("actor_user_id") @db.Uuid
+  action        AuditAction
+  module        String      @db.VarChar(50)
+  entityType    String      @map("entity_type") @db.VarChar(50)
+  entityId      String?     @map("entity_id") @db.VarChar(255)
+  entityLabel   String?     @map("entity_label") @db.VarChar(255)
+  summary       String?     @db.VarChar(500)
+  metadata      Json        @default("{}") @db.JsonB
+  ipAddress     String?     @map("ip_address") @db.VarChar(45)
+  userAgent     String?     @map("user_agent") @db.VarChar(512)
+  requestMethod String?     @map("request_method") @db.VarChar(10)
+  requestPath   String?     @map("request_path") @db.VarChar(255)
+  createdAt     DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  actor         User?       @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt(sort: Desc)])
+  @@index([actorUserId])
+  @@index([module])
+  @@index([action])
+  @@index([entityType, entityId])
+  @@map("audit_logs")
 }

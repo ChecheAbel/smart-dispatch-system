@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { apiReference } from "@scalar/express-api-reference";
 import { openApiSpec } from "./docs/openapi";
 import { migrate } from "./db/migrate";
+import { registerAuditLogRoutes } from "./routes/audit-log.routes";
 import { registerAuthRoleRoutes } from "./routes/auth-role.routes";
 import { registerAuthRoutes } from "./routes/auth.routes";
 import { registerMenuRoutes } from "./routes/menu.routes";
@@ -28,6 +29,7 @@ registerAuthRoleRoutes(app);
 registerPermissionRoutes(app);
 registerMenuRoutes(app);
 registerNotificationRoutes(app);
+registerAuditLogRoutes(app);
 
 app.get("/api/health", (_req, res) => {
   sendSuccess(res, { status: "ok" }, { message: "Smart Dispatch System API is running" });

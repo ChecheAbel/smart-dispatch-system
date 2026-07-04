@@ -37,6 +37,17 @@ export const adminHeaderControlClass =
 export const adminInputClass =
   "h-10 rounded-lg border-slate-200 bg-white px-3.5 text-sm shadow-sm";
 
+export const adminFilterLabelClass = "text-sm font-medium text-slate-600";
+
+export const adminDatePickerTriggerClass =
+  "h-10 w-full justify-start gap-2.5 rounded-lg border border-slate-200 bg-white px-3 text-sm font-normal shadow-sm transition-colors hover:border-[#C9B87A]/50 hover:bg-[#f8fafb] focus-visible:border-[#1C3A34]/30 focus-visible:ring-3 focus-visible:ring-[#1C3A34]/10 data-[empty=true]:text-slate-400 data-[state=open]:border-[#C9B87A]/60 data-[state=open]:ring-3 data-[state=open]:ring-[#1C3A34]/8";
+
+export const adminDatePickerPopoverClass =
+  "w-auto overflow-hidden rounded-xl border border-[#C9B87A]/25 bg-white p-0 shadow-lg";
+
+export const adminDatePickerCalendarClass =
+  "p-4 [&_button[data-slot=button]]:min-h-10 [&_button[data-slot=button]]:min-w-10 [&_button[data-slot=button]]:text-sm [&_[data-selected-single=true]]:bg-[#1C3A34] [&_[data-selected-single=true]]:text-white [&_[data-selected-single=true]:hover]:bg-[#162e29] [&_[data-range-end=true]]:bg-[#1C3A34] [&_[data-range-start=true]]:bg-[#1C3A34] [&_button[data-slot=button]:hover]:bg-[#1C3A34]/8 [&_button[data-slot=button]:hover]:text-[#1C3A34]";
+
 export const adminSearchInputClass =
   "h-10 rounded-lg border-slate-200 bg-white py-2 pl-10 pr-3.5 text-sm shadow-sm";
 

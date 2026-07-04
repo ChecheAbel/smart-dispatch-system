@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { ADMIN_ROLE_SLUG, isProtectedSystemRole } from "@smart-dispatch/types";
+import { auditMutations } from "../middleware/audit-mutation";
 import { authenticate } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
 import { requirePermission } from "../middleware/require-permission";
@@ -26,7 +27,7 @@ import { toPublicUser } from "../mappers/user.mapper";
 
 const router = Router();
 
-router.use(authenticate, authorize("admin"));
+router.use(authenticate, authorize("admin"), auditMutations());
 
 function getRequestLocale(req: Request) {
   return parseLocale(req.query, req.headers["accept-language"]);

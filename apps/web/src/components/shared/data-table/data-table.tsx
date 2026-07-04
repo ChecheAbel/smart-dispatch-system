@@ -59,6 +59,7 @@ type DataTableProps<T> = {
   renderRowActions?: (row: T, context: DataTableRowContext<T>) => ReactNode;
   actionsColumnHeader?: string;
   toolbarActions?: ReactNode;
+  filterBar?: ReactNode;
   className?: string;
 };
 
@@ -111,6 +112,7 @@ export function DataTable<T>({
   renderRowActions,
   actionsColumnHeader = "Actions",
   toolbarActions,
+  filterBar,
   className,
 }: DataTableProps<T>) {
   const [rows, setRows] = useState<T[]>([]);
@@ -202,6 +204,10 @@ export function DataTable<T>({
         <CardDescription className="max-w-2xl text-sm text-slate-500">
           {description ?? totalLabel}
         </CardDescription>
+
+        {filterBar ? (
+          <div className="rounded-lg border border-slate-200 bg-slate-50/80 p-4 sm:p-5">{filterBar}</div>
+        ) : null}
       </CardHeader>
 
       <CardContent className="space-y-4">
