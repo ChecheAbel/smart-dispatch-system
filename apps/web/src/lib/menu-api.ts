@@ -17,7 +17,6 @@ export type CreateMenuInput = {
   icon?: string | null;
   parent_id?: string | null;
   sort_order?: number;
-  permission_ids?: string[];
   is_active?: boolean;
 };
 
@@ -28,7 +27,6 @@ export type UpdateMenuInput = {
   icon?: string | null;
   parent_id?: string | null;
   sort_order?: number;
-  permission_ids?: string[];
   is_active?: boolean;
 };
 

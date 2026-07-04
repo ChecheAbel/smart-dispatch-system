@@ -1803,7 +1803,7 @@ export const openApiSpec = {
         tags: ["Menus"],
         summary: "Navigation tree for current user",
         description:
-          "Returns active menu items the authenticated user may see, based on permissions assigned to their roles. Items without a linked permission are visible to all authenticated users. Response is a nested tree ordered by `sort_order`.",
+          "Returns active menu items the authenticated user may see, based on permissions assigned to their roles. Items without a linked permission are hidden from navigation. Response is a nested tree ordered by `sort_order`.",
         security: [{ bearerAuth: [] }],
         parameters: [{ $ref: "#/components/parameters/Locale" }],
         responses: {

@@ -13,6 +13,7 @@ import {
   listMenus,
   listMenusForUser,
   updateMenu,
+  validateMenuSidebarAccess,
 } from "../models/menu.model";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
@@ -20,7 +21,6 @@ import {
   getMenuTranslations,
   getOptionalString,
   getString,
-  getStringArray,
   parseBoolean,
 } from "../utils/validation";
 import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
@@ -29,6 +29,10 @@ const router = Router();
 
 function getRequestLocale(req: Request) {
   return parseLocale(req.query, req.headers["accept-language"]);
+}
+
+function normalizeMenuPath(path: string | null | undefined) {
+  return path?.trim() || null;
 }
 
 router.get("/navigation", authenticate, async (req: AuthenticatedRequest, res: Response) => {
@@ -126,16 +130,22 @@ router.post("/", requirePermission("menus.write"), async (req: Request, res: Res
       return sendError(res, "An English (en) translation is required.", 400);
     }
 
+    const path = normalizeMenuPath(getOptionalString(req.body?.path));
+    const isActive = parseBoolean(req.body?.is_active) ?? true;
+    const accessError = validateMenuSidebarAccess(slug, path, isActive);
+    if (accessError) {
+      return sendError(res, accessError, 400);
+    }
+
     const menu = await createMenu({
       slug,
-      path: getOptionalString(req.body?.path),
+      path,
       icon: getOptionalString(req.body?.icon),
       parentId: getOptionalString(req.body?.parent_id),
       sortOrder:
         typeof req.body?.sort_order === "number" ? req.body.sort_order : undefined,
-      permissionIds: getStringArray(req.body?.permission_ids),
       translations,
-      isActive: parseBoolean(req.body?.is_active),
+      isActive,
     });
 
     return sendSuccess(
@@ -150,21 +160,36 @@ router.post("/", requirePermission("menus.write"), async (req: Request, res: Res
 
 router.patch("/:id", requirePermission("menus.write"), async (req: Request, res: Response) => {
   try {
+    const existingMenu = await findMenuById(req.params.id);
+    if (!existingMenu) {
+      return sendError(res, "Menu not found.", 404);
+    }
+
     const translations = getMenuTranslations(req.body?.translations);
+    const slug = getOptionalString(req.body?.slug) ?? existingMenu.slug;
+    const path =
+      req.body?.path === undefined
+        ? existingMenu.path
+        : normalizeMenuPath(getOptionalString(req.body?.path));
+    const isActive =
+      req.body?.is_active === undefined
+        ? existingMenu.isActive
+        : (parseBoolean(req.body?.is_active) ?? existingMenu.isActive);
+    const accessError = validateMenuSidebarAccess(slug, path, isActive);
+    if (accessError) {
+      return sendError(res, accessError, 400);
+    }
+
     const menu = await updateMenu(req.params.id, {
       slug: getOptionalString(req.body?.slug) ?? undefined,
-      path: req.body?.path === undefined ? undefined : getOptionalString(req.body?.path),
+      path: req.body?.path === undefined ? undefined : normalizeMenuPath(getOptionalString(req.body?.path)),
       icon: req.body?.icon === undefined ? undefined : getOptionalString(req.body?.icon),
       parentId:
         req.body?.parent_id === undefined ? undefined : getOptionalString(req.body?.parent_id),
       sortOrder:
         typeof req.body?.sort_order === "number" ? req.body.sort_order : undefined,
-      permissionIds:
-        req.body?.permission_ids === undefined
-          ? undefined
-          : getStringArray(req.body?.permission_ids),
       translations: translations.length ? translations : undefined,
-      isActive: parseBoolean(req.body?.is_active),
+      isActive: req.body?.is_active === undefined ? undefined : isActive,
     });
 
     return sendSuccess(res, {

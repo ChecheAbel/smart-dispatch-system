@@ -2,6 +2,7 @@ import type { HttpMethod } from "../generated/prisma";
 import { prisma } from "../db/prisma";
 import { setMenuPermissions } from "../models/menu-permission.model";
 import { setRolePermissions } from "../models/role-permission.model";
+import { inferMenuPermissionSlugs } from "../utils/infer-menu-permissions";
 import { menuTranslationInputsToMap } from "../types/menu-translations";
 import type { Prisma } from "../generated/prisma";
 
@@ -44,7 +45,6 @@ const DEFAULT_MENUS = [
     path: "/admin",
     icon: "layout-dashboard",
     sortOrder: 0,
-    permissionSlugs: null as string[] | null,
     parentSlug: null,
     translations: [
       { locale: "en", label: "Dashboard" },
@@ -56,7 +56,6 @@ const DEFAULT_MENUS = [
     path: "/admin/users",
     icon: "users",
     sortOrder: 10,
-    permissionSlugs: ["users.read"],
     parentSlug: null,
     translations: [
       { locale: "en", label: "Users" },
@@ -68,7 +67,6 @@ const DEFAULT_MENUS = [
     path: null,
     icon: "shield-check",
     sortOrder: 20,
-    permissionSlugs: null as string[] | null,
     parentSlug: null,
     translations: [
       { locale: "en", label: "Access Control" },
@@ -80,7 +78,6 @@ const DEFAULT_MENUS = [
     path: "/admin/roles",
     icon: "shield",
     sortOrder: 10,
-    permissionSlugs: ["roles.read"],
     parentSlug: "access-control",
     translations: [
       { locale: "en", label: "Roles" },
@@ -92,7 +89,6 @@ const DEFAULT_MENUS = [
     path: "/admin/menus",
     icon: "menu",
     sortOrder: 30,
-    permissionSlugs: ["menus.read"],
     parentSlug: "access-control",
     translations: [
       { locale: "en", label: "Menus" },
@@ -177,7 +173,7 @@ async function seedMenus() {
       },
     });
 
-    const menuPermissionIds = (menu.permissionSlugs ?? [])
+    const menuPermissionIds = inferMenuPermissionSlugs(menu.slug, menu.path)
       .map((slug) => permissionBySlug.get(slug))
       .filter((id): id is string => Boolean(id));
 

@@ -10,6 +10,10 @@ import {
 import { DEFAULT_LOCALE, normalizeLocale } from "../utils/locale";
 import { findPermissionsByUserId } from "./permission.model";
 import { setMenuPermissions } from "./menu-permission.model";
+import {
+  inferMenuPermissionSlugs,
+  MENU_PERMISSION_INFERENCE_ERROR,
+} from "../utils/infer-menu-permissions";
 
 export type { MenuTranslationInput };
 
@@ -30,7 +34,6 @@ export type CreateMenuInput = {
   icon?: string | null;
   parentId?: string | null;
   sortOrder?: number;
-  permissionIds?: string[];
   translations: MenuTranslationInput[];
   isActive?: boolean;
 };
@@ -41,7 +44,6 @@ export type UpdateMenuInput = {
   icon?: string | null;
   parentId?: string | null;
   sortOrder?: number;
-  permissionIds?: string[];
   translations?: MenuTranslationInput[];
   isActive?: boolean;
 };
@@ -61,6 +63,36 @@ function toJsonTranslations(translations: MenuTranslationsMap): Prisma.InputJson
 
 export function getMenuPermissionIds(menu: MenuWithPermissions) {
   return menu.menuPermissions.map((entry) => entry.permissionId);
+}
+
+async function resolveMenuPermissionIds(
+  slug: string,
+  path: string | null,
+  client: Prisma.TransactionClient | typeof prisma = prisma,
+) {
+  const permissionSlugs = inferMenuPermissionSlugs(slug, path);
+  if (!permissionSlugs.length) {
+    return [];
+  }
+
+  const permissions = await client.permission.findMany({
+    where: { slug: { in: permissionSlugs } },
+    orderBy: { slug: "asc" },
+  });
+
+  return permissions.map((permission) => permission.id);
+}
+
+export function validateMenuSidebarAccess(slug: string, path: string | null, isActive: boolean) {
+  if (!isActive) {
+    return null;
+  }
+
+  if (inferMenuPermissionSlugs(slug, path).length) {
+    return null;
+  }
+
+  return MENU_PERMISSION_INFERENCE_ERROR;
 }
 
 export async function findMenuById(id: string) {
@@ -145,7 +177,7 @@ export async function listMenusForUser(userId: string) {
   return menus.filter((menu) => {
     const menuPermissionIds = getMenuPermissionIds(menu);
     if (!menuPermissionIds.length) {
-      return true;
+      return false;
     }
 
     return menuPermissionIds.some((permissionId) => permissionIds.has(permissionId));
@@ -154,23 +186,30 @@ export async function listMenusForUser(userId: string) {
 
 export async function createMenu(input: CreateMenuInput) {
   const translations = menuTranslationInputsToMap(input.translations);
+  const slug = normalizeSlug(input.slug);
+  const path = input.path?.trim() || null;
+  const isActive = input.isActive ?? true;
+  const accessError = validateMenuSidebarAccess(slug, path, isActive);
+
+  if (accessError) {
+    throw new Error(accessError);
+  }
 
   return prisma.$transaction(async (tx) => {
     const menu = await tx.menu.create({
       data: {
-        slug: normalizeSlug(input.slug),
-        path: input.path?.trim() || null,
+        slug,
+        path,
         icon: input.icon?.trim() || null,
         parentId: input.parentId ?? null,
         sortOrder: input.sortOrder ?? 0,
         translations: toJsonTranslations(translations),
-        isActive: input.isActive ?? true,
+        isActive,
       },
     });
 
-    if (input.permissionIds?.length) {
-      await setMenuPermissions(menu.id, input.permissionIds, tx);
-    }
+    const permissionIds = await resolveMenuPermissionIds(slug, path, tx);
+    await setMenuPermissions(menu.id, permissionIds, tx);
 
     return tx.menu.findUniqueOrThrow({
       where: { id: menu.id },
@@ -180,23 +219,36 @@ export async function createMenu(input: CreateMenuInput) {
 }
 
 export async function updateMenu(menuId: string, input: UpdateMenuInput) {
+  const existing = await prisma.menu.findUnique({ where: { id: menuId } });
+  if (!existing) {
+    throw new Error("Menu not found.");
+  }
+
   let translationsUpdate: MenuTranslationsMap | undefined;
 
   if (input.translations?.length) {
-    const existing = await prisma.menu.findUnique({ where: { id: menuId } });
-    const currentTranslations = parseMenuTranslationsMap(existing?.translations);
+    const currentTranslations = parseMenuTranslationsMap(existing.translations);
     translationsUpdate = mergeMenuTranslations(
       currentTranslations,
       menuTranslationInputsToMap(input.translations),
     );
   }
 
+  const slug = input.slug === undefined ? existing.slug : normalizeSlug(input.slug);
+  const path = input.path === undefined ? existing.path : input.path?.trim() || null;
+  const isActive = input.isActive === undefined ? existing.isActive : input.isActive;
+  const accessError = validateMenuSidebarAccess(slug, path, isActive);
+
+  if (accessError) {
+    throw new Error(accessError);
+  }
+
   return prisma.$transaction(async (tx) => {
     const menu = await tx.menu.update({
       where: { id: menuId },
       data: {
-        slug: input.slug === undefined ? undefined : normalizeSlug(input.slug),
-        path: input.path === undefined ? undefined : input.path?.trim() || null,
+        slug: input.slug === undefined ? undefined : slug,
+        path: input.path === undefined ? undefined : path,
         icon: input.icon === undefined ? undefined : input.icon?.trim() || null,
         parentId: input.parentId === undefined ? undefined : input.parentId,
         sortOrder: input.sortOrder,
@@ -207,9 +259,8 @@ export async function updateMenu(menuId: string, input: UpdateMenuInput) {
       },
     });
 
-    if (input.permissionIds !== undefined) {
-      await setMenuPermissions(menu.id, input.permissionIds, tx);
-    }
+    const permissionIds = await resolveMenuPermissionIds(slug, path, tx);
+    await setMenuPermissions(menu.id, permissionIds, tx);
 
     return tx.menu.findUniqueOrThrow({
       where: { id: menu.id },

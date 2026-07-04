@@ -1,17 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
-import type { Menu, Permission } from "@smart-dispatch/types";
+import { useEffect, useState, type FormEvent } from "react";
+import type { Menu } from "@smart-dispatch/types";
 import { createMenu, fetchMenuById, fetchMenus, updateMenu } from "@/lib/menu-api";
 import { generateSlugFromText } from "@/lib/slug";
-import { fetchPermissions } from "@/lib/permission-api";
 import { adminHeadingClass, adminInputClass, adminPrimaryButtonClass, adminCardClass } from "@/lib/admin-theme";
 import { LOCALE_OPTIONS } from "@/lib/locale";
 import { useLocale } from "@/components/shared/providers";
-import { getAdminMenusMessages, getAdminRolesMessages } from "@/translations";
+import { getAdminMenusMessages } from "@/translations";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
-import { MenuPermissionPicker, getPermissionModuleOptions, inferPermissionModule } from "./menu-permission-picker";
 import {
   Card,
   CardAction,
@@ -55,7 +53,6 @@ type MenuFormState = {
   icon: string;
   sortOrder: string;
   parentId: string;
-  permissionIds: string[];
   isActive: boolean;
   enLabel: string;
   amLabel: string;
@@ -68,7 +65,6 @@ const emptyForm: MenuFormState = {
   icon: "",
   sortOrder: "0",
   parentId: "",
-  permissionIds: [],
   isActive: true,
   enLabel: "",
   amLabel: "",
@@ -83,7 +79,6 @@ function mapMenuToForm(menu: Menu): MenuFormState {
     icon: menu.icon ?? "",
     sortOrder: String(menu.sort_order),
     parentId: menu.parent_id ?? "",
-    permissionIds: menu.permission_ids ?? [],
     isActive: menu.is_active,
     enLabel: en?.label ?? menu.label ?? "",
     amLabel: am?.label ?? "",
@@ -104,7 +99,6 @@ export function CreateMenuSheet({
 }: CreateMenuSheetProps) {
   const { locale } = useLocale();
   const copy = getAdminMenusMessages(locale);
-  const roleCopy = getAdminRolesMessages(locale);
   const formCopy = copy.form;
   const toastCopy = copy.toast;
   const isEdit = mode === "edit";
@@ -115,8 +109,6 @@ export function CreateMenuSheet({
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [parentMenus, setParentMenus] = useState<Menu[]>([]);
-  const [permissions, setPermissions] = useState<Permission[]>([]);
-  const [permissionModule, setPermissionModule] = useState("");
   const [optionsLoading, setOptionsLoading] = useState(false);
 
   useEffect(() => {
@@ -127,8 +119,6 @@ export function CreateMenuSheet({
       setSubmitting(false);
       setLoading(false);
       setParentMenus([]);
-      setPermissions([]);
-      setPermissionModule("");
       setOptionsLoading(false);
       return;
     }
@@ -139,19 +129,14 @@ export function CreateMenuSheet({
       setOptionsLoading(true);
 
       try {
-        const [menusResult, permissionsResult] = await Promise.all([
-          fetchMenus({ page: 1, limit: 100, locale }),
-          fetchPermissions({ page: 1, limit: 100 }),
-        ]);
+        const menusResult = await fetchMenus({ page: 1, limit: 100, locale });
 
         if (!cancelled) {
           setParentMenus(menusResult.data);
-          setPermissions(permissionsResult.data);
         }
       } catch {
         if (!cancelled) {
           setParentMenus([]);
-          setPermissions([]);
         }
       } finally {
         if (!cancelled) {
@@ -223,22 +208,6 @@ export function CreateMenuSheet({
     setError(null);
   }
 
-  function updatePermissionModule(module: string) {
-    setPermissionModule(module);
-    setForm((current) => ({ ...current, permissionIds: [] }));
-    setError(null);
-  }
-
-  useEffect(() => {
-    if (!open || !permissions.length || !form.permissionIds.length) {
-      return;
-    }
-
-    setPermissionModule((current) =>
-      current || inferPermissionModule(form.permissionIds, permissions),
-    );
-  }, [open, form.permissionIds, permissions]);
-
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
@@ -270,7 +239,6 @@ export function CreateMenuSheet({
       path: form.path.trim() || null,
       icon: form.icon.trim() || null,
       parent_id: form.parentId || null,
-      permission_ids: form.permissionIds,
       sort_order: parsedSortOrder,
       is_active: form.isActive,
     };
@@ -322,19 +290,6 @@ export function CreateMenuSheet({
       value: menu.id,
     })),
   ];
-  const permissionModuleItems = useMemo(
-    () => [
-      { label: formCopy.noneOption, value: null },
-      ...getPermissionModuleOptions(permissions).map((module) => ({
-        label:
-          roleCopy.permissions.modules[
-            module as keyof typeof roleCopy.permissions.modules
-          ] ?? module,
-        value: module,
-      })),
-    ],
-    [formCopy.noneOption, permissions, roleCopy.permissions.modules],
-  );
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -421,43 +376,6 @@ export function CreateMenuSheet({
                   </SelectGroup>
                 </SelectContent>
               </Select>
-            </div>
-
-            <div className="space-y-4 rounded-lg border border-slate-200 bg-[#f8fafb]/60 p-5">
-              <div className="space-y-2">
-                <Label htmlFor="menu-permission-module">{formCopy.permissionModule}</Label>
-                <Select
-                  items={permissionModuleItems}
-                  value={permissionModule || null}
-                  onValueChange={(value) => updatePermissionModule(value ?? "")}
-                  disabled={optionsLoading}
-                >
-                  <SelectTrigger id="menu-permission-module" className={selectTriggerClassName}>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {permissionModuleItems.map((item) => (
-                        <SelectItem key={item.value ?? "none"} value={item.value}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <MenuPermissionPicker
-                module={permissionModule || null}
-                permissions={permissions}
-                selectedIds={form.permissionIds}
-                onChange={(permissionIds) => updateField("permissionIds", permissionIds)}
-                disabled={optionsLoading || submitting || loading}
-                moduleLabels={roleCopy.permissions.modules}
-                actionLabels={roleCopy.permissions.actions}
-                helpText={formCopy.permissionsHelp}
-                emptyModuleText={formCopy.permissionsModuleHelp}
-              />
             </div>
 
             <Card className={cn(adminCardClass, "gap-0 py-0 shadow-none ring-0")}>
