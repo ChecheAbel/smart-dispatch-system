@@ -99,6 +99,8 @@ import { seedAccessControl } from "./seed-access";
 import { seedNotifications } from "./seed-notifications";
 import { seedRegions } from "./seed-regions";
 import { seedLocations } from "./seed-locations";
+import { seedVehicleTypes } from "./seed-vehicle-types";
+import { seedVehicles } from "./seed-vehicles";
 
 export async function seedDatabase() {
   await seedRoles();
@@ -106,5 +108,7 @@ export async function seedDatabase() {
   await seedNotifications();
   await seedRegions();
   await seedLocations();
+  await seedVehicleTypes();
+  await seedVehicles();
   await seedAdminUser();
 }

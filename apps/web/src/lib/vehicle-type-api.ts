@@ -7,17 +7,16 @@ export type FetchVehicleTypesParams = {
   limit?: number;
   search?: string;
   locale?: string;
+  is_active?: boolean;
 };
 
 export type CreateVehicleTypeInput = {
-  slug: string;
   translations: VehicleTypeTranslation[];
   passenger_capacity?: number | null;
   is_active?: boolean;
 };
 
 export type UpdateVehicleTypeInput = {
-  slug?: string;
   translations?: VehicleTypeTranslation[];
   passenger_capacity?: number | null;
   is_active?: boolean;
@@ -26,6 +25,13 @@ export type UpdateVehicleTypeInput = {
 export async function fetchVehicleTypes(params: FetchVehicleTypesParams = {}) {
   const { data } = await apiClient.get("/api/vehicle-types", { params });
   return unwrapPaginatedApiResponse<VehicleType>(data);
+}
+
+export async function fetchVehicleTypeCount(
+  params: Pick<FetchVehicleTypesParams, "is_active"> = {},
+) {
+  const result = await fetchVehicleTypes({ page: 1, limit: 1, ...params });
+  return result.pagination.total;
 }
 
 export async function fetchActiveVehicleTypes(locale?: string) {

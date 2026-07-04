@@ -8,18 +8,17 @@ import {
   type VehicleTypeTranslationsMap,
 } from "../types/vehicle-type-translations";
 import { DEFAULT_LOCALE, normalizeLocale } from "../utils/locale";
+import { generateSlugFromText } from "../utils/slug";
 
 export type { VehicleTypeTranslationInput };
 
 export type CreateVehicleTypeInput = {
-  slug: string;
   translations: VehicleTypeTranslationInput[];
   passengerCapacity?: number | null;
   isActive?: boolean;
 };
 
 export type UpdateVehicleTypeInput = {
-  slug?: string;
   translations?: VehicleTypeTranslationInput[];
   passengerCapacity?: number | null;
   isActive?: boolean;
@@ -36,6 +35,26 @@ function normalizeSlug(slug: string) {
 
 function toJsonTranslations(translations: VehicleTypeTranslationsMap): Prisma.InputJsonValue {
   return translations as Prisma.InputJsonValue;
+}
+
+export function slugFromVehicleTypeTranslations(translations: VehicleTypeTranslationInput[]) {
+  const englishName = translations.find(
+    (translation) => normalizeLocale(translation.locale) === DEFAULT_LOCALE,
+  )?.name;
+
+  return englishName ? generateSlugFromText(englishName) : "";
+}
+
+async function ensureUniqueVehicleTypeSlug(baseSlug: string) {
+  let candidate = baseSlug;
+  let suffix = 2;
+
+  while (await prisma.vehicleType.findUnique({ where: { slug: candidate } })) {
+    candidate = `${baseSlug}-${suffix}`;
+    suffix += 1;
+  }
+
+  return candidate;
 }
 
 export async function findVehicleTypeById(id: string) {
@@ -93,10 +112,17 @@ export async function listActiveVehicleTypes() {
 
 export async function createVehicleType(input: CreateVehicleTypeInput) {
   const translations = vehicleTypeTranslationInputsToMap(input.translations);
+  const baseSlug = slugFromVehicleTypeTranslations(input.translations);
+
+  if (!baseSlug) {
+    throw new Error("VEHICLE_TYPE_SLUG_REQUIRED");
+  }
+
+  const slug = await ensureUniqueVehicleTypeSlug(baseSlug);
 
   return prisma.vehicleType.create({
     data: {
-      slug: normalizeSlug(input.slug),
+      slug,
       translations: toJsonTranslations(translations),
       passengerCapacity: input.passengerCapacity ?? null,
       isActive: input.isActive ?? true,
@@ -119,7 +145,6 @@ export async function updateVehicleType(id: string, input: UpdateVehicleTypeInpu
   return prisma.vehicleType.update({
     where: { id },
     data: {
-      slug: input.slug === undefined ? undefined : normalizeSlug(input.slug),
       translations: translationsUpdate
         ? toJsonTranslations(translationsUpdate)
         : undefined,

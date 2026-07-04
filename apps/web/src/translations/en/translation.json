@@ -651,7 +651,7 @@
     "eyebrow": "Vehicle management",
     "title": "Vehicle types",
     "description": "Define vehicle categories such as sedan, minibus, or truck.",
-    "searchPlaceholder": "Search by name or slug...",
+    "searchPlaceholder": "Search by name...",
     "newType": "New vehicle type",
     "itemLabel": "vehicle type",
     "columns": {
@@ -684,10 +684,18 @@
       "delete": "Delete",
       "menuLabel": "Actions for {name}"
     },
+    "stats": {
+      "title": "Total vehicle types",
+      "description": "All vehicle categories in the fleet catalog",
+      "activeTitle": "Active types",
+      "activeDescription": "Types available when registering vehicles",
+      "inactiveTitle": "Inactive types",
+      "inactiveDescription": "Types hidden from new vehicle registration"
+    },
     "form": {
       "createTitle": "New vehicle type",
       "editTitle": "Edit vehicle type",
-      "createDescription": "Create a vehicle type with a unique slug and at least an English name.",
+      "createDescription": "Create a vehicle type with at least an English name.",
       "editDescription": "Update the vehicle type details and translations.",
       "slug": "Slug",
       "slugPlaceholder": "minibus",
@@ -786,13 +794,60 @@
       "delete": "Delete",
       "menuLabel": "Actions for {name}"
     },
+    "stats": {
+      "title": "Total vehicles",
+      "description": "All registered fleet vehicles",
+      "activeTitle": "Active vehicles",
+      "activeDescription": "Vehicles ready for dispatch",
+      "maintenanceTitle": "In maintenance",
+      "maintenanceDescription": "Vehicles temporarily out of service",
+      "assignedTitle": "Assigned vehicles",
+      "assignedDescription": "Vehicles linked to a driver"
+    },
     "form": {
       "createTitle": "New vehicle",
       "editTitle": "Edit vehicle",
       "createDescription": "Register a vehicle with a plate number and vehicle type.",
       "editDescription": "Update vehicle details and operational status.",
       "plateNumber": "Plate number",
-      "platePlaceholder": "AA-12345",
+      "plateRegion": "Region",
+      "plateRegionPlaceholder": "Select region",
+      "plateCode": "Code",
+      "plateCodePlaceholder": "Select code",
+      "plateLicense": "License number",
+      "plateLicensePlaceholder": "31209",
+      "platePreview": "Full plate",
+      "plateRegions": {
+        "AA": "Addis Ababa",
+        "DD": "Dire Dawa",
+        "TI": "Tigray",
+        "AF": "Afar",
+        "AM": "Amhara",
+        "OR": "Oromia",
+        "SO": "Somali",
+        "BG": "Benishangul-Gumuz",
+        "GA": "Gambela",
+        "HA": "Harari",
+        "SD": "Sidama"
+      },
+      "plateCodes": {
+        "1": "Private / government",
+        "2": "Commercial",
+        "3": "Taxi / public transport",
+        "4": "Bus",
+        "5": "Motorcycle"
+      },
+      "sections": {
+        "plate": "Plate registration",
+        "plateDescription": "Ethiopian license plate format: region, category code, and serial number.",
+        "platePreviewEmpty": "AA-1-31209",
+        "classification": "Classification",
+        "classificationDescription": "Vehicle category and operational status.",
+        "assignment": "Driver assignment",
+        "assignmentDescription": "Optionally link an active driver to this vehicle.",
+        "details": "Vehicle details",
+        "detailsDescription": "Manufacturer information and optional fleet notes."
+      },
       "vehicleType": "Vehicle type",
       "vehicleTypePlaceholder": "Select type",
       "assignedDriver": "Assigned driver",
@@ -816,6 +871,10 @@
       "loading": "Loading vehicle...",
       "errors": {
         "plateRequired": "Plate number is required.",
+        "plateRegionRequired": "Region code is required.",
+        "plateCodeRequired": "Plate code is required.",
+        "plateLicenseRequired": "License number is required.",
+        "plateInvalid": "Enter a valid plate in the format AA-1-31209.",
         "typeRequired": "Vehicle type is required.",
         "createFailed": "Failed to create vehicle.",
         "updateFailed": "Failed to update vehicle.",

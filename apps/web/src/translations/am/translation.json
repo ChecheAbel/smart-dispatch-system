@@ -651,7 +651,7 @@
     "eyebrow": "የተሽከርካሪ አስተዳደር",
     "title": "የተሽከርካሪ አይነቶች",
     "description": "ሴዳን፣ ሚኒ ባስ ወይም ትራክ ያሉ የተሽከርካሪ ምድቦችን ያስገቡ።",
-    "searchPlaceholder": "በስም ወይም ስላግ ይፈልጉ...",
+    "searchPlaceholder": "በስም ይፈልጉ...",
     "newType": "አዲስ የተሽከርካሪ አይነት",
     "itemLabel": "የተሽከርካሪ አይነት",
     "columns": {
@@ -684,10 +684,18 @@
       "delete": "ሰርዝ",
       "menuLabel": "ለ {name} ድርጊቶች"
     },
+    "stats": {
+      "title": "ጠቅላላ የተሽከርካሪ አይነቶች",
+      "description": "በመኪና ብዛት ዝርዝር ውስጥ ያሉ ሁሉም የተሽከርካሪ ምድቦች",
+      "activeTitle": "ንቁ አይነቶች",
+      "activeDescription": "ተሽከርካሪ ሲመዘገብ የሚገኙ አይነቶች",
+      "inactiveTitle": "እንቅስቃሴ የሌላቸው አይነቶች",
+      "inactiveDescription": "ከአዲስ ተሽከርካሪ ምዝገባ የተደበቁ አይነቶች"
+    },
     "form": {
       "createTitle": "አዲስ የተሽከርካሪ አይነት",
       "editTitle": "የተሽከርካሪ አይነት አርትዕ",
-      "createDescription": "ልዩ ስላግ እና ቢያንስ የእንግሊዝኛ ስም ያለው የተሽከርካሪ አይነት ይፍጠሩ።",
+      "createDescription": "ቢያንስ የእንግሊዝኛ ስም ያለው የተሽከርካሪ አይነት ይፍጠሩ።",
       "editDescription": "የተሽከርካሪ አይነት ዝርዝሮችን እና ትርጉሞችን ያዘምኑ።",
       "slug": "ስላግ",
       "slugPlaceholder": "minibus",
@@ -786,13 +794,60 @@
       "delete": "ሰርዝ",
       "menuLabel": "ለ {name} ድርጊቶች"
     },
+    "stats": {
+      "title": "ጠቅላላ ተሽከርካሪዎች",
+      "description": "የተመዘገቡ ሁሉም የመኪና ብዛት ተሽከርካሪዎች",
+      "activeTitle": "ንቁ ተሽከርካሪዎች",
+      "activeDescription": "ለዲስፓች የተዘጋጁ ተሽከርካሪዎች",
+      "maintenanceTitle": "በጥገና ላይ",
+      "maintenanceDescription": "ለጊዜው ከአገልግሎት ውጭ ያሉ ተሽከርካሪዎች",
+      "assignedTitle": "የተመደቡ ተሽከርካሪዎች",
+      "assignedDescription": "ከሹፌር ጋር የተገናኙ ተሽከርካሪዎች"
+    },
     "form": {
       "createTitle": "አዲስ ተሽከርካሪ",
       "editTitle": "ተሽከርካሪ አርትዕ",
       "createDescription": "የሰሌዳ ቁጥር እና የተሽከርካሪ አይነት ያለው ተሽከርካሪ ይመዝግቡ።",
       "editDescription": "የተሽከርካሪ ዝርዝሮችን እና የክወና ሁኔታን ያዘምኑ።",
       "plateNumber": "የሰሌዳ ቁጥር",
-      "platePlaceholder": "AA-12345",
+      "plateRegion": "ክልል",
+      "plateRegionPlaceholder": "ክልል ይምረጡ",
+      "plateCode": "ኮድ",
+      "plateCodePlaceholder": "ኮድ ይምረጡ",
+      "plateLicense": "የፍቃድ ቁጥር",
+      "plateLicensePlaceholder": "31209",
+      "platePreview": "ሙሉ ሰሌዳ",
+      "plateRegions": {
+        "AA": "አዲስ አበባ",
+        "DD": "ድሬ ዳዋ",
+        "TI": "ትግራይ",
+        "AF": "አፋር",
+        "AM": "አማራ",
+        "OR": "ኦሮሚያ",
+        "SO": "ሶማሌ",
+        "BG": "ቤንሻንጉል ጉሙዝ",
+        "GA": "ጋምቤላ",
+        "HA": "ሐረሪ",
+        "SD": "ሲዳማ"
+      },
+      "plateCodes": {
+        "1": "የግል / የመንግስት",
+        "2": "የንግድ",
+        "3": "ታክሲ / የህዝብ ትራንስፖርት",
+        "4": "አውቶቡስ",
+        "5": "ሞተርሳይክል"
+      },
+      "sections": {
+        "plate": "የሰሌዳ ምዝገባ",
+        "plateDescription": "የኢትዮጵያ የሰሌዳ ቅርጸት፡ ክልል፣ የምድብ ኮድ እና ተከታታይ ቁጥር።",
+        "platePreviewEmpty": "AA-1-31209",
+        "classification": "ምድብ",
+        "classificationDescription": "የተሽከርካሪ አይነት እና የክወና ሁኔታ።",
+        "assignment": "የሹፌር መመደብ",
+        "assignmentDescription": "አማራጭ ሆኖ ንቁ ሹፌር ከዚህ ተሽከርካሪ ጋር ያገናኙ።",
+        "details": "የተሽከርካሪ ዝርዝሮች",
+        "detailsDescription": "የአምራች መረጃ እና አማራጭ የመኪና ብዛት ማስታወሻዎች።"
+      },
       "vehicleType": "የተሽከርካሪ አይነት",
       "vehicleTypePlaceholder": "አይነት ይምረጡ",
       "assignedDriver": "የተመደበ ሹፌር",
@@ -816,6 +871,10 @@
       "loading": "ተሽከርካሪ በመጫን ላይ...",
       "errors": {
         "plateRequired": "የሰሌዳ ቁጥር ያስፈልጋል።",
+        "plateRegionRequired": "የክልል ኮድ ያስፈልጋል።",
+        "plateCodeRequired": "የሰሌዳ ኮድ ያስፈልጋል።",
+        "plateLicenseRequired": "የፍቃድ ቁጥር ያስፈልጋል።",
+        "plateInvalid": "በ AA-1-31209 ቅርጸት ትክክለኛ ሰሌዳ ያስገቡ።",
         "typeRequired": "የተሽከርካሪ አይነት ያስፈልጋል።",
         "createFailed": "ተሽከርካሪ መፍጠር አልተሳካም።",
         "updateFailed": "ተሽከርካሪ ማዘመን አልተሳካም።",

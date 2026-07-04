@@ -37,7 +37,6 @@ type CreateVehicleTypeSheetProps = {
 };
 
 type VehicleTypeFormState = {
-  slug: string;
   enName: string;
   enDescription: string;
   amName: string;
@@ -49,7 +48,6 @@ type VehicleTypeFormState = {
 type FieldErrors = Partial<Record<keyof VehicleTypeFormState, string>>;
 
 const emptyForm: VehicleTypeFormState = {
-  slug: "",
   enName: "",
   enDescription: "",
   amName: "",
@@ -63,7 +61,6 @@ function mapVehicleTypeToForm(vehicleType: VehicleType): VehicleTypeFormState {
   const am = vehicleType.translations?.find((translation) => translation.locale === "am");
 
   return {
-    slug: vehicleType.slug,
     enName: en?.name ?? vehicleType.name,
     enDescription: en?.description ?? vehicleType.description ?? "",
     amName: am?.name ?? "",
@@ -173,15 +170,10 @@ export function CreateVehicleTypeSheet({
     setError(null);
     setFieldErrors({});
 
-    const slug = form.slug.trim();
     const enName = form.enName.trim();
     const amName = form.amName.trim();
 
     const nextErrors: FieldErrors = {};
-
-    if (!slug) {
-      nextErrors.slug = formCopy.errors.slugRequired;
-    }
 
     if (!enName) {
       nextErrors.enName = formCopy.errors.enNameRequired;
@@ -216,7 +208,6 @@ export function CreateVehicleTypeSheet({
     try {
       if (isEdit && vehicleTypeId) {
         const vehicleType = await updateVehicleType(vehicleTypeId, {
-          slug,
           translations,
           passenger_capacity,
           is_active: form.isActive,
@@ -229,7 +220,6 @@ export function CreateVehicleTypeSheet({
         });
       } else {
         const vehicleType = await createVehicleType({
-          slug,
           translations,
           passenger_capacity,
           is_active: form.isActive,
@@ -277,22 +267,6 @@ export function CreateVehicleTypeSheet({
           <div className="px-4 py-8 text-sm text-slate-500">{formCopy.loading}</div>
         ) : (
           <form id={formId} onSubmit={handleSubmit} className="space-y-6 px-4">
-            <div className="space-y-2">
-              <Label htmlFor="vehicle-type-slug" className={fieldErrors.slug ? "text-red-700" : undefined}>
-                {formCopy.slug}
-              </Label>
-              <Input
-                id="vehicle-type-slug"
-                value={form.slug}
-                onChange={(event) => updateField("slug", event.target.value)}
-                placeholder={formCopy.slugPlaceholder}
-                className={cn(fieldClassName, fieldErrors.slug && fieldErrorClassName)}
-                aria-invalid={Boolean(fieldErrors.slug)}
-                autoComplete="off"
-              />
-              {fieldErrors.slug ? <p className="text-xs text-red-600">{fieldErrors.slug}</p> : null}
-            </div>
-
             <div className="space-y-4 rounded-lg border border-slate-200 bg-[#f8fafb]/60 p-4">
               <p className={`text-sm font-semibold ${adminHeadingClass}`}>{enLabel}</p>
 

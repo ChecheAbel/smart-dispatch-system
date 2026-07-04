@@ -36,6 +36,7 @@ import { PERMISSIONS } from "@/lib/permissions";
 import { DeleteConfirmModal } from "@/components/shared/delete-confirm-modal";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { CreateVehicleTypeSheet } from "./create-vehicle-type-sheet";
+import { VehicleTypeStats } from "./vehicle-type-stats";
 
 function formatDate(value: string, locale: string) {
   return new Date(value).toLocaleDateString(locale, {
@@ -137,12 +138,6 @@ export function VehicleTypesPage() {
         cell: (vehicleType) => vehicleType.name,
       },
       {
-        id: "slug",
-        header: copy.columns.slug,
-        cellClassName: "font-mono text-sm text-slate-500",
-        cell: (vehicleType) => vehicleType.slug,
-      },
-      {
         id: "capacity",
         header: copy.columns.capacity,
         cellClassName: "text-slate-500 tabular-nums",
@@ -205,6 +200,8 @@ export function VehicleTypesPage() {
 
   return (
     <div className="space-y-6">
+      <VehicleTypeStats locale={locale} refreshKey={refreshKey} />
+
       <DataTable
         key={locale}
         eyebrow={<Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>}

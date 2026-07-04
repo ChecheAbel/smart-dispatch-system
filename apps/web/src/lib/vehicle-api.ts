@@ -31,6 +31,16 @@ export async function fetchVehicles(params: FetchVehiclesParams = {}) {
   return unwrapPaginatedApiResponse<Vehicle>(data);
 }
 
+export async function fetchVehicleCount(
+  params: Pick<
+    FetchVehiclesParams,
+    "status" | "assigned_only" | "unassigned_only" | "vehicle_type_id"
+  > = {},
+) {
+  const result = await fetchVehicles({ page: 1, limit: 1, ...params });
+  return result.pagination.total;
+}
+
 export async function fetchVehicleDriverOptions(search?: string) {
   const { data } = await apiClient.get("/api/vehicles/driver-options", {
     params: search ? { search } : undefined,

@@ -13,12 +13,12 @@ import {
   hasDefaultLocaleTranslation,
   listActiveVehicleTypes,
   listVehicleTypes,
+  slugFromVehicleTypeTranslations,
   updateVehicleType,
 } from "../models/vehicle-type.model";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
 import {
-  getOptionalString,
   getRoleTranslations,
   getString,
   parseBoolean,
@@ -97,14 +97,9 @@ router.get("/:id", requirePermission("vehicle_types.read"), async (req: Request,
 
 router.post("/", requirePermission("vehicle_types.write"), async (req: Request, res: Response) => {
   try {
-    const slug = getString(req.body?.slug);
     const translations = getRoleTranslations(req.body?.translations);
     const passengerCapacity = parsePassengerCapacity(req.body?.passenger_capacity);
     const isActive = parseBoolean(req.body?.is_active);
-
-    if (!slug) {
-      return sendError(res, "Slug is required.", 400);
-    }
 
     if (!translations.length) {
       return sendError(res, "At least one translation is required.", 400);
@@ -114,8 +109,11 @@ router.post("/", requirePermission("vehicle_types.write"), async (req: Request, 
       return sendError(res, "An English (en) translation is required.", 400);
     }
 
+    if (!slugFromVehicleTypeTranslations(translations)) {
+      return sendError(res, "English name is required to generate a vehicle type identifier.", 400);
+    }
+
     const vehicleType = await createVehicleType({
-      slug,
       translations,
       passengerCapacity: passengerCapacity ?? null,
       isActive: isActive ?? true,
@@ -127,6 +125,10 @@ router.post("/", requirePermission("vehicle_types.write"), async (req: Request, 
       { status: 201 },
     );
   } catch (error) {
+    if (error instanceof Error && error.message === "VEHICLE_TYPE_SLUG_REQUIRED") {
+      return sendError(res, "English name is required to generate a vehicle type identifier.", 400);
+    }
+
     return handleRouteError(res, error);
   }
 });
@@ -143,7 +145,6 @@ router.patch("/:id", requirePermission("vehicle_types.write"), async (req: Reque
     const isActive = parseBoolean(req.body?.is_active);
 
     const vehicleType = await updateVehicleType(req.params.id, {
-      slug: getOptionalString(req.body?.slug) ?? undefined,
       translations: translations.length ? translations : undefined,
       passengerCapacity,
       isActive,

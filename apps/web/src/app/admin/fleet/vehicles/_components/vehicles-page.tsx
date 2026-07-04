@@ -47,6 +47,7 @@ import { cn } from "@/lib/utils";
 import { DeleteConfirmModal } from "@/components/shared/delete-confirm-modal";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { CreateVehicleSheet } from "./create-vehicle-sheet";
+import { VehicleStats } from "./vehicle-stats";
 
 const VEHICLE_STATUSES: VehicleStatus[] = ["active", "maintenance", "retired"];
 
@@ -278,6 +279,8 @@ export function VehiclesPage() {
 
   return (
     <div className="space-y-6">
+      <VehicleStats locale={locale} refreshKey={refreshKey} />
+
       <DataTable
         key={locale}
         eyebrow={<Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>}
