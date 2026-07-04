@@ -194,6 +194,12 @@ export function VehiclesPage() {
         cell: (vehicle) => vehicle.plate_number,
       },
       {
+        id: "chassis",
+        header: copy.columns.chassis,
+        cellClassName: "font-mono text-xs text-slate-600 tracking-wide",
+        cell: (vehicle) => vehicle.chassis_number ?? "—",
+      },
+      {
         id: "type",
         header: copy.columns.type,
         cellClassName: "text-slate-600",

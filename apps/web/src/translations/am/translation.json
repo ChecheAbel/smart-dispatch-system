@@ -838,7 +838,7 @@
     "eyebrow": "የተሽከርካሪ አስተዳደር",
     "title": "ተሽከርካሪዎች",
     "description": "የመኪና ብዛት፣ የሰሌዳ ቁጥሮች እና የክወና ሁኔታን ያስተዳድሩ።",
-    "searchPlaceholder": "በሰሌዳ፣ በማምረት፣ በሞዴል ወይም በሹፌር ይፈልጉ...",
+    "searchPlaceholder": "በሰሌዳ፣ በቻሲስ፣ በማምረት፣ በሞዴል ወይም በሹፌር ይፈልጉ...",
     "newVehicle": "አዲስ ተሽከርካሪ",
     "itemLabel": "ተሽከርካሪ",
     "filters": {
@@ -853,6 +853,7 @@
     },
     "columns": {
       "plate": "የሰሌዳ ቁጥር",
+      "chassis": "የቻሲስ ቁጥር",
       "type": "አይነት",
       "driver": "የተመደበ ሹፌር",
       "makeModel": "ማምረት / ሞዴል",
@@ -935,13 +936,16 @@
         "assignment": "የሹፌር መመደብ",
         "assignmentDescription": "አማራጭ ሆኖ ንቁ ሹፌር ከዚህ ተሽከርካሪ ጋር ያገናኙ።",
         "details": "የተሽከርካሪ ዝርዝሮች",
-        "detailsDescription": "የአምራች መረጃ እና አማራጭ የመኪና ብዛት ማስታወሻዎች።"
+        "detailsDescription": "መለያ፣ የአምራች መረጃ እና አማራጭ የመኪና ብዛት ማስታወሻዎች።"
       },
       "vehicleType": "የተሽከርካሪ አይነት",
       "vehicleTypePlaceholder": "አይነት ይምረጡ",
       "assignedDriver": "የተመደበ ሹፌር",
       "assignedDriverPlaceholder": "ሹፌር ይምረጡ",
       "noDriver": "ሹፌር አልተመደበም",
+      "chassisNumber": "የቻሲስ ቁጥር",
+      "chassisNumberPlaceholder": "JTDBT923X12345678",
+      "chassisNumberHint": "የተሽከርካሪ መለያ ቁጥር (VIN) ወይም የቻሲስ ሴሪያል።",
       "make": "ማምረት",
       "makePlaceholder": "Toyota",
       "model": "ሞዴል",
@@ -965,6 +969,7 @@
         "plateLicenseRequired": "የፍቃድ ቁጥር ያስፈልጋል።",
         "plateInvalid": "በ AA-1-31209 ቅርጸት ትክክለኛ ሰሌዳ ያስገቡ።",
         "typeRequired": "የተሽከርካሪ አይነት ያስፈልጋል።",
+        "chassisNumberRequired": "የቻሲስ ቁጥር ያስፈልጋል።",
         "createFailed": "ተሽከርካሪ መፍጠር አልተሳካም።",
         "updateFailed": "ተሽከርካሪ ማዘመን አልተሳካም።",
         "loadFailed": "ተሽከርካሪ መጫን አልተሳካም።"

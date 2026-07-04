@@ -62,6 +62,7 @@ type VehicleFormState = {
   plateLicense: string;
   vehicleTypeId: string;
   assignedDriverUserId: string;
+  chassisNumber: string;
   make: string;
   model: string;
   year: string;
@@ -77,6 +78,7 @@ const emptyForm: VehicleFormState = {
   plateLicense: "",
   vehicleTypeId: "",
   assignedDriverUserId: "",
+  chassisNumber: "",
   make: "",
   model: "",
   year: "",
@@ -93,6 +95,7 @@ function mapVehicleToForm(vehicle: Vehicle): VehicleFormState {
     plateLicense: plate.license,
     vehicleTypeId: vehicle.vehicle_type_id,
     assignedDriverUserId: vehicle.assigned_driver_user_id ?? "",
+    chassisNumber: vehicle.chassis_number ?? "",
     make: vehicle.make ?? "",
     model: vehicle.model ?? "",
     year: vehicle.year != null ? String(vehicle.year) : "",
@@ -404,6 +407,11 @@ export function CreateVehicleSheet({
       nextErrors.vehicleTypeId = formCopy.errors.typeRequired;
     }
 
+    const chassisNumber = form.chassisNumber.trim().toUpperCase();
+    if (!chassisNumber) {
+      nextErrors.chassisNumber = formCopy.errors.chassisNumberRequired;
+    }
+
     if (Object.keys(nextErrors).length > 0) {
       setFieldErrors(nextErrors);
       return;
@@ -416,6 +424,7 @@ export function CreateVehicleSheet({
       plate_number: plateNumber,
       vehicle_type_id: vehicleTypeId,
       assigned_driver_user_id: form.assignedDriverUserId || null,
+      chassis_number: chassisNumber,
       make: form.make.trim() || null,
       model: form.model.trim() || null,
       year,
@@ -721,6 +730,31 @@ export function CreateVehicleSheet({
               title={sectionCopy.details}
               description={sectionCopy.detailsDescription}
             >
+              <div className="space-y-2">
+                <Label
+                  htmlFor="vehicle-chassis-number"
+                  className={fieldErrors.chassisNumber ? "text-red-700" : undefined}
+                >
+                  {formCopy.chassisNumber}
+                </Label>
+                <Input
+                  id="vehicle-chassis-number"
+                  value={form.chassisNumber}
+                  onChange={(event) =>
+                    updateField("chassisNumber", event.target.value.toUpperCase().replace(/\s+/g, ""))
+                  }
+                  placeholder={formCopy.chassisNumberPlaceholder}
+                  className={cn(
+                    "w-full font-mono tracking-wide",
+                    fieldClassName,
+                    fieldErrors.chassisNumber && fieldErrorClassName,
+                  )}
+                  aria-invalid={Boolean(fieldErrors.chassisNumber)}
+                  autoComplete="off"
+                />
+                <FieldHint error={fieldErrors.chassisNumber}>{formCopy.chassisNumberHint}</FieldHint>
+              </div>
+
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
                   <Label htmlFor="vehicle-make">{formCopy.make}</Label>

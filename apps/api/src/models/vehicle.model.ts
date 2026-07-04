@@ -4,6 +4,7 @@ import { findUserByIdWithRoles } from "./user.model";
 
 export type CreateVehicleInput = {
   plateNumber: string;
+  chassisNumber?: string | null;
   vehicleTypeId: string;
   assignedDriverUserId?: string | null;
   make?: string | null;
@@ -15,6 +16,7 @@ export type CreateVehicleInput = {
 
 export type UpdateVehicleInput = {
   plateNumber?: string;
+  chassisNumber?: string | null;
   vehicleTypeId?: string;
   assignedDriverUserId?: string | null;
   make?: string | null;
@@ -40,6 +42,10 @@ const vehicleInclude = {
 
 function normalizePlateNumber(plateNumber: string) {
   return plateNumber.trim().toUpperCase();
+}
+
+function normalizeChassisNumber(chassisNumber: string) {
+  return chassisNumber.trim().toUpperCase();
 }
 
 export async function assertAssignableDriver(userId: string) {
@@ -92,6 +98,7 @@ function buildVehicleWhere(filter?: ListVehiclesFilter) {
       ? {
           OR: [
             { plateNumber: { contains: search, mode: "insensitive" as const } },
+            { chassisNumber: { contains: search, mode: "insensitive" as const } },
             { make: { contains: search, mode: "insensitive" as const } },
             { model: { contains: search, mode: "insensitive" as const } },
             {
@@ -140,6 +147,9 @@ export async function createVehicle(input: CreateVehicleInput) {
   return prisma.vehicle.create({
     data: {
       plateNumber: normalizePlateNumber(input.plateNumber),
+      chassisNumber: input.chassisNumber?.trim()
+        ? normalizeChassisNumber(input.chassisNumber)
+        : null,
       vehicleTypeId: input.vehicleTypeId,
       assignedDriverUserId: input.assignedDriverUserId ?? null,
       make: input.make?.trim() || null,
@@ -165,6 +175,12 @@ export async function updateVehicle(id: string, input: UpdateVehicleInput) {
         input.plateNumber === undefined
           ? undefined
           : normalizePlateNumber(input.plateNumber),
+      chassisNumber:
+        input.chassisNumber === undefined
+          ? undefined
+          : input.chassisNumber?.trim()
+            ? normalizeChassisNumber(input.chassisNumber)
+            : null,
       vehicleTypeId: input.vehicleTypeId,
       assignedDriverUserId: input.assignedDriverUserId,
       make: input.make,

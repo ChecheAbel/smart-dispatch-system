@@ -262,6 +262,7 @@ model VehicleType {
 model Vehicle {
   id                   String        @id @default(uuid()) @db.Uuid
   plateNumber          String        @unique @map("plate_number") @db.VarChar(30)
+  chassisNumber        String?       @unique @map("chassis_number") @db.VarChar(50)
   vehicleTypeId        String        @map("vehicle_type_id") @db.Uuid
   assignedDriverUserId String?       @unique @map("assigned_driver_user_id") @db.Uuid
   make                 String?       @db.VarChar(100)

@@ -15,6 +15,7 @@ export type FetchVehiclesParams = {
 
 export type CreateVehicleInput = {
   plate_number: string;
+  chassis_number: string;
   vehicle_type_id: string;
   assigned_driver_user_id?: string | null;
   make?: string | null;

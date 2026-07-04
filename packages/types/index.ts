@@ -156,6 +156,7 @@ export type VehicleStatus = "active" | "maintenance" | "retired";
 export interface Vehicle {
   id: string;
   plate_number: string;
+  chassis_number: string | null;
   vehicle_type_id: string;
   vehicle_type?: {
     id: string;

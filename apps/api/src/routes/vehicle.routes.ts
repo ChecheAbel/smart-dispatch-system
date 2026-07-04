@@ -114,6 +114,7 @@ router.post("/", requirePermission("vehicles.write"), async (req: Request, res: 
   try {
     const locale = getRequestLocale(req);
     const plateNumber = getString(req.body?.plate_number);
+    const chassisNumber = getString(req.body?.chassis_number);
     const vehicleTypeId = getString(req.body?.vehicle_type_id);
     const status = parseVehicleStatus(req.body?.status);
     const year = parseYear(req.body?.year);
@@ -121,6 +122,10 @@ router.post("/", requirePermission("vehicles.write"), async (req: Request, res: 
 
     if (!plateNumber) {
       return sendError(res, "Plate number is required.", 400);
+    }
+
+    if (!chassisNumber) {
+      return sendError(res, "Chassis number is required.", 400);
     }
 
     if (!vehicleTypeId) {
@@ -134,6 +139,7 @@ router.post("/", requirePermission("vehicles.write"), async (req: Request, res: 
 
     const vehicle = await createVehicle({
       plateNumber,
+      chassisNumber,
       vehicleTypeId,
       assignedDriverUserId,
       make: getOptionalString(req.body?.make),
@@ -175,8 +181,13 @@ router.patch("/:id", requirePermission("vehicles.write"), async (req: Request, r
 
     const assignedDriverUserId = parseAssignedDriverUserId(req.body?.assigned_driver_user_id);
 
+    if (req.body?.chassis_number !== undefined && !getString(req.body?.chassis_number)) {
+      return sendError(res, "Chassis number is required.", 400);
+    }
+
     const vehicle = await updateVehicle(req.params.id, {
       plateNumber: getOptionalString(req.body?.plate_number) ?? undefined,
+      chassisNumber: getOptionalString(req.body?.chassis_number),
       vehicleTypeId: vehicleTypeId ?? undefined,
       assignedDriverUserId,
       make: getOptionalString(req.body?.make),

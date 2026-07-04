@@ -838,7 +838,7 @@
     "eyebrow": "Vehicle management",
     "title": "Vehicles",
     "description": "Manage fleet vehicles, plate numbers, and operational status.",
-    "searchPlaceholder": "Search by plate, make, model, or driver...",
+    "searchPlaceholder": "Search by plate, chassis, make, model, or driver...",
     "newVehicle": "New vehicle",
     "itemLabel": "vehicle",
     "filters": {
@@ -853,6 +853,7 @@
     },
     "columns": {
       "plate": "Plate number",
+      "chassis": "Chassis number",
       "type": "Type",
       "driver": "Assigned driver",
       "makeModel": "Make / model",
@@ -935,13 +936,16 @@
         "assignment": "Driver assignment",
         "assignmentDescription": "Optionally link an active driver to this vehicle.",
         "details": "Vehicle details",
-        "detailsDescription": "Manufacturer information and optional fleet notes."
+        "detailsDescription": "Identification, manufacturer information, and optional fleet notes."
       },
       "vehicleType": "Vehicle type",
       "vehicleTypePlaceholder": "Select type",
       "assignedDriver": "Assigned driver",
       "assignedDriverPlaceholder": "Select driver",
       "noDriver": "No driver assigned",
+      "chassisNumber": "Chassis number",
+      "chassisNumberPlaceholder": "JTDBT923X12345678",
+      "chassisNumberHint": "Vehicle identification number (VIN) or chassis serial.",
       "make": "Make",
       "makePlaceholder": "Toyota",
       "model": "Model",
@@ -965,6 +969,7 @@
         "plateLicenseRequired": "License number is required.",
         "plateInvalid": "Enter a valid plate in the format AA-1-31209.",
         "typeRequired": "Vehicle type is required.",
+        "chassisNumberRequired": "Chassis number is required.",
         "createFailed": "Failed to create vehicle.",
         "updateFailed": "Failed to update vehicle.",
         "loadFailed": "Failed to load vehicle."

@@ -14,6 +14,7 @@ type DbDriver = {
 type DbVehicle = {
   id: string;
   plateNumber: string;
+  chassisNumber: string | null;
   vehicleTypeId: string;
   assignedDriverUserId: string | null;
   make: string | null;
@@ -45,6 +46,7 @@ export function toPublicVehicle(vehicle: DbVehicle, options?: { locale?: string 
   return {
     id: vehicle.id,
     plate_number: vehicle.plateNumber,
+    chassis_number: vehicle.chassisNumber,
     vehicle_type_id: vehicle.vehicleTypeId,
     vehicle_type: {
       id: vehicleType.id,
