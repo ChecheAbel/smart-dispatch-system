@@ -24,6 +24,7 @@ apps/api/src/generated
 # misc
 .DS_Store
 *.pem
+apps/api/uploads/
 
 # debug
 npm-debug.log*

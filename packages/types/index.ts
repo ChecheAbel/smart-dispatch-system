@@ -26,6 +26,12 @@ export interface Role {
   translations?: RoleTranslation[];
 }
 
+/** Driver-specific profile linked to a user account. */
+export interface DriverProfile {
+  license_number: string;
+  license_photo_url: string | null;
+}
+
 /** Public user returned by auth endpoints (no password). */
 export interface User {
   id: string;
@@ -34,6 +40,7 @@ export interface User {
   middle_name: string | null;
   last_name: string;
   mobile_number: string;
+  driver: DriverProfile | null;
   account_status: AccountStatus;
   account_activation: AccountActivation;
   roles: RoleSlug[];

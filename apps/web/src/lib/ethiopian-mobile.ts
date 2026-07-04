@@ -1,5 +1,14 @@
 const ETHIOPIA_COUNTRY_CODE = "+251";
+/** Ethio Telecom local numbers start with 9; Safaricom Ethiopia starts with 7. */
 const LOCAL_MOBILE_PATTERN = /^[79]\d{8}$/;
+
+export const ETHIOPIAN_MOBILE_HELP =
+  "Ethio Telecom (9…) or Safaricom (7…). Enter 9 digits without the leading zero.";
+
+export const ETHIOPIAN_MOBILE_INVALID_MESSAGE =
+  "Enter a valid 9-digit number starting with 9 (Ethio Telecom) or 7 (Safaricom).";
+
+export const ETHIOPIAN_MOBILE_PLACEHOLDER = "912345678 or 712345678";
 
 export function sanitizeEthiopianMobileInput(value: string) {
   const digits = value.replace(/\D/g, "");

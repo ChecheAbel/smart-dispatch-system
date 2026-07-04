@@ -83,3 +83,33 @@ export async function resetPassword(token: string, password: string) {
   const { data } = await apiClient.post("/api/auth/reset-password", { token, password });
   return unwrapApiResponse<{ message: string }>(data);
 }
+
+export type RegisterDriverInput = {
+  email: string;
+  password: string;
+  first_name: string;
+  middle_name?: string | null;
+  last_name: string;
+  mobile_number: string;
+  driver_license_number: string;
+  driver_license_photo: File;
+};
+
+export async function registerDriverApplication(input: RegisterDriverInput) {
+  const formData = new FormData();
+  formData.append("email", input.email);
+  formData.append("password", input.password);
+  formData.append("first_name", input.first_name);
+  if (input.middle_name) {
+    formData.append("middle_name", input.middle_name);
+  }
+  formData.append("last_name", input.last_name);
+  formData.append("mobile_number", input.mobile_number);
+  formData.append("driver_license_number", input.driver_license_number);
+  formData.append("driver_license_photo", input.driver_license_photo);
+
+  const { data } = await apiClient.post("/api/auth/register-driver", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return unwrapApiResponse<{ message: string }>(data);
+}

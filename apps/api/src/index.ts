@@ -17,6 +17,7 @@ import { registerRegionRoutes } from "./routes/region.routes";
 import { registerVehicleRoutes } from "./routes/vehicle.routes";
 import { registerVehicleTypeRoutes } from "./routes/vehicle-type.routes";
 import { registerFarePlanRoutes } from "./routes/fare-plan.routes";
+import { ensureDriverLicenseUploadDir, getDriverLicenseUploadDir } from "./utils/driver-license-upload";
 import { sendSuccess } from "./utils/response";
 
 dotenv.config();
@@ -26,6 +27,8 @@ const port = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(express.json());
+ensureDriverLicenseUploadDir();
+app.use("/uploads/driver-licenses", express.static(getDriverLicenseUploadDir()));
 
 registerAuthRoutes(app);
 registerUserRoutes(app);

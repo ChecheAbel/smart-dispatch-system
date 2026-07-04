@@ -29,11 +29,12 @@ export type ListUsersFilter = {
   roleSlug?: string;
 };
 
-const userWithRolesInclude = {
+const userWithRelationsInclude = {
   authRoles: {
     include: { role: true },
     orderBy: { role: { slug: "asc" as const } },
   },
+  driverProfile: true,
 } satisfies Prisma.UserInclude;
 
 function normalizeEmail(email: string) {
@@ -96,7 +97,7 @@ export async function findUserByMobileNumber(mobileNumber: string) {
 export async function findUserByIdWithRoles(id: string) {
   return prisma.user.findUnique({
     where: { id },
-    include: userWithRolesInclude,
+    include: userWithRelationsInclude,
   });
 }
 
@@ -111,7 +112,7 @@ export async function listUsers(
     skip: options?.skip,
     take: options?.take,
     orderBy: { createdAt: "desc" },
-    include: userWithRolesInclude,
+    include: userWithRelationsInclude,
   });
 }
 
@@ -131,7 +132,7 @@ export async function createUser(input: CreateUserInput) {
       accountStatus: input.accountStatus,
       accountActivation: input.accountActivation,
     },
-    include: userWithRolesInclude,
+    include: userWithRelationsInclude,
   });
 }
 
@@ -149,7 +150,7 @@ export async function updateUser(userId: string, input: UpdateUserInput) {
   return prisma.user.update({
     where: { id: userId },
     data,
-    include: userWithRolesInclude,
+    include: userWithRelationsInclude,
   });
 }
 
@@ -164,7 +165,7 @@ export async function updateUserAccountStatus(userId: string, accountStatus: Acc
   return prisma.user.update({
     where: { id: userId },
     data: { accountStatus },
-    include: userWithRolesInclude,
+    include: userWithRelationsInclude,
   });
 }
 
@@ -175,7 +176,7 @@ export async function updateUserAccountActivation(
   return prisma.user.update({
     where: { id: userId },
     data: { accountActivation },
-    include: userWithRolesInclude,
+    include: userWithRelationsInclude,
   });
 }
 

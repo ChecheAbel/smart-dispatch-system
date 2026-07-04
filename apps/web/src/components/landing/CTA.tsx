@@ -24,7 +24,7 @@ export default function CTA() {
           </a>
           <a
             href="#features"
-            className="w-full sm:w-auto border border-white/20 hover:border-[#C9B87A]/50 text-white font-semibold text-[15px] px-9 py-3.5 sm:py-4 rounded-full tracking-wide transition-all duration-200 hover:bg-white/5 text-center"
+            className="w-full sm:w-auto border border-white/15 hover:border-white/30 text-white/80 font-semibold text-[15px] px-9 py-3.5 sm:py-4 rounded-full tracking-wide transition-all duration-200 hover:bg-white/5 text-center"
           >
             Explore Features
           </a>

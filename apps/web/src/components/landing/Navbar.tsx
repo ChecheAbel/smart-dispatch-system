@@ -1,14 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import BrandLogo from "@/components/landing/BrandLogo";
+import { DRIVER_APPLY_PATH } from "@/lib/auth-paths";
 
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
   { label: "Console", href: "#live-view" },
   { label: "Platform", href: "#platform" },
+  { label: "Drivers", href: "#drivers" },
   { label: "Contact", href: "#contact" },
 ] as const;
 
@@ -106,7 +109,13 @@ export default function Navbar() {
           </nav>
 
           {/* Desktop actions */}
-          <div className="hidden lg:flex items-center shrink-0">
+          <div className="hidden lg:flex items-center gap-2 shrink-0">
+            <Link
+              href={DRIVER_APPLY_PATH}
+              className="inline-flex items-center gap-2 border border-white/15 hover:border-[#C9B87A]/50 text-white font-semibold text-[13px] px-4 py-2.5 rounded-full tracking-wide transition-all duration-200 hover:bg-white/5"
+            >
+              Apply to Drive
+            </Link>
             <a
               href="#contact"
               className="inline-flex items-center gap-2 bg-[#C9B87A] hover:bg-[#d9ca8e] text-[#1C3A34] font-bold text-[13px] px-5 py-2.5 rounded-full tracking-wide transition-all duration-200 hover:shadow-lg hover:shadow-[#C9B87A]/25 hover:-translate-y-px"
@@ -168,7 +177,14 @@ export default function Navbar() {
             })}
           </nav>
 
-          <div className="px-4 pb-6 pt-2 border-t border-white/10">
+          <div className="px-4 pb-6 pt-2 border-t border-white/10 space-y-2">
+            <Link
+              href={DRIVER_APPLY_PATH}
+              onClick={closeMobileMenu}
+              className="flex items-center justify-center w-full border border-white/15 text-white font-semibold text-sm py-3.5 rounded-xl hover:bg-white/5 transition-colors"
+            >
+              Apply to Drive
+            </Link>
             <a
               href="#contact"
               onClick={closeMobileMenu}

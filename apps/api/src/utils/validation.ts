@@ -91,3 +91,37 @@ export function parseAccountActivation(value: unknown): AccountActivation | unde
 export function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
+
+const ETHIOPIAN_MOBILE_LOCAL_PATTERN = /^[79]\d{8}$/;
+
+export function normalizeEthiopianMobileNumber(value: string) {
+  const digits = value.replace(/\D/g, "");
+  const withoutCountryCode = digits.startsWith("251") ? digits.slice(3) : digits;
+  const withoutLeadingZero = withoutCountryCode.startsWith("0")
+    ? withoutCountryCode.slice(1)
+    : withoutCountryCode;
+
+  if (!ETHIOPIAN_MOBILE_LOCAL_PATTERN.test(withoutLeadingZero)) {
+    return undefined;
+  }
+
+  return `+251${withoutLeadingZero}`;
+}
+
+export function isValidEthiopianMobileNumber(value: string) {
+  return Boolean(normalizeEthiopianMobileNumber(value));
+}
+
+const DRIVER_LICENSE_PATTERN = /^[A-Z0-9-]{5,30}$/;
+
+export function normalizeDriverLicenseNumber(value: string) {
+  const normalized = value.trim().toUpperCase().replace(/\s+/g, "");
+  if (!DRIVER_LICENSE_PATTERN.test(normalized)) {
+    return undefined;
+  }
+  return normalized;
+}
+
+export function isValidDriverLicenseNumber(value: string) {
+  return Boolean(normalizeDriverLicenseNumber(value));
+}

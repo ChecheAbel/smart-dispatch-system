@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
-import { findRolesByUserId } from "../models/role.model";
+import { findRoleBySlug, findRolesByUserId } from "../models/role.model";
 import {
   createToken,
   findValidTokenByHash,
@@ -10,9 +10,12 @@ import {
 } from "../models/token.model";
 import type { DbUser } from "../db/types";
 import type { AuthTokenResponse, Permission, RoleSlug, User } from "@smart-dispatch/types";
-import { findUserByEmail, findUserById, updateUserPassword } from "../models/user.model";
+import { findUserByEmail, findUserById, findUserByMobileNumber, updateUserPassword } from "../models/user.model";
+import { findDriverByLicenseNumber, findDriverByUserId } from "../models/driver.model";
 import { findPermissionsByUserId } from "../models/permission.model";
 import { toPublicPermission } from "../mappers/permission.mapper";
+import { toPublicDriverProfile } from "../mappers/driver.mapper";
+import { prisma } from "../db/prisma";
 
 const ACCESS_TOKEN_TTL_SECONDS = 60 * 15;
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -43,7 +46,11 @@ function isAccountUsable(user: DbUser) {
 }
 
 async function toSafeUser(user: DbUser): Promise<User> {
-  const roles = await findRolesByUserId(user.id);
+  const [roles, driverProfile] = await Promise.all([
+    findRolesByUserId(user.id),
+    findDriverByUserId(user.id),
+  ]);
+
   return {
     id: user.id,
     email: user.email,
@@ -51,6 +58,7 @@ async function toSafeUser(user: DbUser): Promise<User> {
     middle_name: user.middleName,
     last_name: user.lastName,
     mobile_number: user.mobileNumber,
+    driver: driverProfile ? toPublicDriverProfile(driverProfile) : null,
     account_status: user.accountStatus,
     account_activation: user.accountActivation,
     roles: roles.map((role) => role.slug as RoleSlug),
@@ -200,6 +208,96 @@ export async function resetPasswordWithToken(token: string, password: string) {
   await revokeUserTokensByType(tokenRecord.userId, "refresh");
 
   return { message: "Your password has been reset. You can now sign in." };
+}
+
+export async function registerDriverApplication(input: {
+  email: string;
+  password: string;
+  firstName: string;
+  middleName?: string | null;
+  lastName: string;
+  mobileNumber: string;
+  driverLicenseNumber: string;
+  driverLicensePhotoUrl: string;
+}) {
+  const email = input.email.trim().toLowerCase();
+  const firstName = input.firstName.trim();
+  const lastName = input.lastName.trim();
+  const mobileNumber = input.mobileNumber.trim();
+  const middleName = input.middleName?.trim() || null;
+  const driverLicenseNumber = input.driverLicenseNumber.trim().toUpperCase();
+  const driverLicensePhotoUrl = input.driverLicensePhotoUrl.trim();
+
+  if (!isValidEmail(email)) {
+    throw new AuthError("A valid email address is required.", 400);
+  }
+
+  if (!input.password || input.password.length < 8) {
+    throw new AuthError("Password must be at least 8 characters.", 400);
+  }
+
+  if (!firstName || !lastName || !mobileNumber || !driverLicenseNumber || !driverLicensePhotoUrl) {
+    throw new AuthError(
+      "First name, last name, mobile number, driver license number, and license photo are required.",
+      400,
+    );
+  }
+
+  const driverRole = await findRoleBySlug("driver");
+  if (!driverRole) {
+    throw new AuthError("Driver registration is temporarily unavailable.", 503);
+  }
+
+  const existingEmail = await findUserByEmail(email);
+  if (existingEmail) {
+    throw new AuthError("An account with this email already exists.", 409);
+  }
+
+  const existingMobile = await findUserByMobileNumber(mobileNumber);
+  if (existingMobile) {
+    throw new AuthError("This mobile number is already registered.", 409);
+  }
+
+  const existingLicense = await findDriverByLicenseNumber(driverLicenseNumber);
+  if (existingLicense) {
+    throw new AuthError("This driver license number is already registered.", 409);
+  }
+
+  const passwordHash = await bcrypt.hash(input.password, 12);
+  await prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({
+      data: {
+        email,
+        passwordHash,
+        firstName,
+        middleName,
+        lastName,
+        mobileNumber,
+        accountStatus: "active",
+        accountActivation: "pending",
+      },
+    });
+
+    await tx.authRole.create({
+      data: {
+        userId: user.id,
+        roleId: driverRole.id,
+      },
+    });
+
+    await tx.driver.create({
+      data: {
+        userId: user.id,
+        licenseNumber: driverLicenseNumber,
+        licensePhotoUrl: driverLicensePhotoUrl,
+      },
+    });
+  });
+
+  return {
+    message:
+      "Your application has been submitted. We will review your details and notify you once your account is activated.",
+  };
 }
 
 export async function getUserFromAccessToken(accessToken: string) {

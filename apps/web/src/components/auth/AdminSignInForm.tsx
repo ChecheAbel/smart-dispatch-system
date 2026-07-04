@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { login, resumeAdminSession } from "@/lib/auth-api";
 import { ADMIN_DASHBOARD_PATH, ADMIN_FORGOT_PASSWORD_PATH } from "@/lib/auth-paths";
 import { clearAuthSession, saveAuthSession } from "@/lib/auth-session";
+import { showErrorToast } from "@/lib/toast";
 
 export default function AdminSignInForm() {
   const router = useRouter();
@@ -19,7 +20,6 @@ export default function AdminSignInForm() {
   const [remember, setRemember] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
-  const [error, setError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -51,7 +51,6 @@ export default function AdminSignInForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
     setIsSubmitting(true);
 
     try {
@@ -59,14 +58,22 @@ export default function AdminSignInForm() {
 
       if (!session.user.roles.includes("admin")) {
         clearAuthSession();
-        setError("This account does not have administrator access.");
+        showErrorToast({
+          title: "Access denied",
+          description: "This account does not have administrator access.",
+        });
         return;
       }
 
       saveAuthSession(session, remember);
       router.push(ADMIN_DASHBOARD_PATH);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Sign in failed. Please try again.");
+      const message =
+        err instanceof Error ? err.message : "Sign in failed. Please try again.";
+      showErrorToast({
+        title: "Could not sign in",
+        description: message,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -195,10 +202,6 @@ export default function AdminSignInForm() {
               Forgot password?
             </Link>
           </div>
-
-          {error && (
-            <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>
-          )}
 
           <button
             type="submit"

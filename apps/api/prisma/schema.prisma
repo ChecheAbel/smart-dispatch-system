@@ -124,11 +124,25 @@ model User {
   authRoles         AuthRole[]
   tokens            Token[]
   auditLogs         AuditLog[]
+  driverProfile     Driver?
   assignedVehicle   Vehicle?   @relation("VehicleAssignedDriver")
 
   @@index([email])
   @@index([mobileNumber])
   @@map("users")
+}
+
+model Driver {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @unique @map("user_id") @db.Uuid
+  licenseNumber   String   @unique @map("license_number") @db.VarChar(50)
+  licensePhotoUrl String?  @map("license_photo_url") @db.VarChar(500)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([licenseNumber])
+  @@map("drivers")
 }
 
 model AuthRole {
