@@ -440,7 +440,7 @@ export function CreateUserSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-2xl lg:max-w-3xl"
+        className="flex w-full flex-col gap-0 overflow-y-auto p-0 data-[side=right]:sm:max-w-2xl data-[side=right]:lg:max-w-3xl"
       >
         <SheetHeader className="border-b border-slate-100 px-6 py-5">
           <SheetTitle className={adminHeadingClass}>
