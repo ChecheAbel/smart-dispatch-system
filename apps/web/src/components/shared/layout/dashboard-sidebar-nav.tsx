@@ -25,21 +25,42 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 
-function ParentMenuItem({ item, pathname }: { item: Menu; pathname: string }) {
+function getActiveParentMenuId(items: Menu[], pathname: string) {
+  for (const item of items) {
+    if (!item.children?.length) {
+      continue;
+    }
+
+    const childActive = item.children.some(
+      (child) => child.path && isAdminNavActive(pathname, child.path),
+    );
+
+    if (childActive) {
+      return item.id;
+    }
+  }
+
+  return null;
+}
+
+function ParentMenuItem({
+  item,
+  pathname,
+  open,
+  onOpenChange,
+}: {
+  item: Menu;
+  pathname: string;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
   const childActive = Boolean(
     item.children?.some((child) => child.path && isAdminNavActive(pathname, child.path)),
   );
-  const [open, setOpen] = useState(childActive);
   const Icon = getMenuIcon(item.icon);
 
-  useEffect(() => {
-    if (childActive) {
-      setOpen(true);
-    }
-  }, [childActive]);
-
   return (
-    <Collapsible open={open} onOpenChange={setOpen} className="group/collapsible">
+    <Collapsible open={open} onOpenChange={onOpenChange} className="group/collapsible">
       <SidebarMenuItem>
         <CollapsibleTrigger
           render={
@@ -89,6 +110,14 @@ function ParentMenuItem({ item, pathname }: { item: Menu; pathname: string }) {
 }
 
 function SidebarMenuItems({ items, pathname }: { items: Menu[]; pathname: string }) {
+  const [expandedParentId, setExpandedParentId] = useState<string | null>(() =>
+    getActiveParentMenuId(items, pathname),
+  );
+
+  useEffect(() => {
+    setExpandedParentId(getActiveParentMenuId(items, pathname));
+  }, [items, pathname]);
+
   return (
     <>
       {items.map((item) => {
@@ -97,7 +126,17 @@ function SidebarMenuItems({ items, pathname }: { items: Menu[]; pathname: string
         const Icon = getMenuIcon(item.icon);
 
         if (hasChildren) {
-          return <ParentMenuItem key={item.id} item={item} pathname={pathname} />;
+          return (
+            <ParentMenuItem
+              key={item.id}
+              item={item}
+              pathname={pathname}
+              open={expandedParentId === item.id}
+              onOpenChange={(nextOpen) => {
+                setExpandedParentId(nextOpen ? item.id : null);
+              }}
+            />
+          );
         }
 
         if (!href) return null;
@@ -109,6 +148,7 @@ function SidebarMenuItems({ items, pathname }: { items: Menu[]; pathname: string
               tooltip={item.label}
               className={adminNavButtonClass}
               render={<Link href={href} />}
+              onClick={() => setExpandedParentId(null)}
             >
               <Icon />
               <span>{item.label}</span>
