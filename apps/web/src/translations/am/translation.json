@@ -32,10 +32,19 @@
       "description": "ሚናዎች ከተፈጠሩ በኋላ እዚህ ይታያሉ።",
       "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
     },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የሚናዎችን የእይታ መዳረሻ ያስፈልጋል። አስተዳዳሪው ሚናዎ ላይ roles.read ፈቃድ እንዲሰጥዎት ይጠይቁ።",
+      "sessionHint": "ፈቃዶች ቀርፊው ከተቀየሩ በኋላ ክፍለ ጊዜዎን ለማደስ ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
     "actions": {
       "view": "እይታ",
       "edit": "አርትዕ",
       "permissions": "ፈቃዶች",
+      "viewPermissions": "ፈቃዶችን ይመልከቱ",
       "delete": "ሰርዝ",
       "menuLabel": "ለ {name} ድርጊቶች"
     },
@@ -73,12 +82,15 @@
     },
     "permissions": {
       "title": "የሚና ፈቃዶች",
+      "readOnlyTitle": "የአስተዳዳሪ ፈቃዶች",
+      "readOnlyDescription": "የአስተዳዳሪ ሚና በስርዓቱ ይተዳደራል። ፈቃዶቹን እዚህ ማየት ይቻላል ነገር ግን ከአስተዳዳሪ ኮንሶል መቀየር አይችሉም።",
       "description": "{name} ሊደርስባቸው የሚችሉትን ሞጁሎች እና ድርጊቶች ይምረጡ።",
       "descriptionFallback": "ይህ ሚና ሊደርስባቸው የሚችሉትን ሞጁሎች እና ድርጊቶች ይምረጡ።",
       "loading": "ፈቃዶች በመጫን ላይ...",
       "save": "ፈቃዶችን አስቀምጥ",
       "saving": "በመቀመጥ ላይ...",
       "cancel": "ሰርዝ",
+      "close": "ዝጋ",
       "selectedSummary": "{selected} ከ {total} ፈቃዶች ተመርጠዋል",
       "selectAll": "ሁሉንም ምረጥ",
       "clearAll": "ሁሉንም አጽዳ",
@@ -171,6 +183,14 @@
       "title": "ምንም ተጠቃሚ አልተገኘም",
       "description": "ተጠቃሚዎች ከተፈጠሩ በኋላ እዚህ ይታያሉ።",
       "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የተጠቃሚዎችን የእይታ መዳረሻ ያስፈልጋል። አስተዳዳሪው ሚናዎ ላይ users.read ፈቃድ እንዲሰጥዎት ይጠይቁ።",
+      "sessionHint": "ፈቃዶች ቀርፊው ከተቀየሩ በኋላ ክፍለ ጊዜዎን ለማደስ ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
     },
     "actions": {
       "edit": "አርትዕ",
@@ -324,6 +344,14 @@
       "title": "ምንም ሜኑ አልተገኘም",
       "description": "የአሰሳ ሜኑዎች ከተፈጠሩ በኋላ እዚህ ይታያሉ።",
       "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የሜኑዎችን የእይታ መዳረሻ ያስፈልጋል። አስተዳዳሪው ሚናዎ ላይ menus.read ፈቃድ እንዲሰጥዎት ይጠይቁ።",
+      "sessionHint": "ፈቃዶች ቀርፊው ከተቀየሩ በኋላ ክፍለ ጊዜዎን ለማደስ ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
     },
     "actions": {
       "view": "እይታ",

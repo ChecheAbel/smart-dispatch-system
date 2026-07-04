@@ -5,6 +5,7 @@ import { LayoutList, Menu, Shield, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { Permission } from "@smart-dispatch/types";
 import { groupPermissionsByModule } from "@/lib/permission-groups";
+import { filterAdminAssignablePermissions } from "@/lib/permissions";
 import { adminCardClass, adminHeadingClass, adminIconBoxClass } from "@/lib/admin-theme";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
@@ -159,7 +160,9 @@ export function MenuPermissionPicker({
 }
 
 export function getPermissionModuleOptions(permissions: Permission[]) {
-  return groupPermissionsByModule(permissions).map((group) => group.module);
+  return groupPermissionsByModule(filterAdminAssignablePermissions(permissions)).map(
+    (group) => group.module,
+  );
 }
 
 export function inferPermissionModule(

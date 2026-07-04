@@ -1,4 +1,5 @@
 import { Router, type Request, type Response } from "express";
+import { ADMIN_ROLE_SLUG, isProtectedSystemRole } from "@smart-dispatch/types";
 import { authenticate } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
 import { requirePermission } from "../middleware/require-permission";
@@ -94,6 +95,10 @@ router.put("/:id/permissions", requirePermission("roles.write"), async (req: Req
       return sendError(res, "Role not found.", 404);
     }
 
+    if (isProtectedSystemRole(role)) {
+      return sendError(res, "The Administrator role permissions cannot be changed.", 403);
+    }
+
     const permissionIds = getStringArray(req.body?.permission_ids);
     const permissions = await setRolePermissions(req.params.id, permissionIds);
 
@@ -141,6 +146,10 @@ router.post("/", requirePermission("roles.write"), async (req: Request, res: Res
       return sendError(res, "Slug is required.", 400);
     }
 
+    if (slug === ADMIN_ROLE_SLUG) {
+      return sendError(res, "The Administrator role slug is reserved.", 400);
+    }
+
     if (!translations.length) {
       return sendError(res, "At least one translation is required.", 400);
     }
@@ -163,9 +172,23 @@ router.post("/", requirePermission("roles.write"), async (req: Request, res: Res
 
 router.patch("/:id", requirePermission("roles.write"), async (req: Request, res: Response) => {
   try {
+    const existingRole = await findRoleById(req.params.id);
+    if (!existingRole) {
+      return sendError(res, "Role not found.", 404);
+    }
+
+    if (isProtectedSystemRole(existingRole)) {
+      return sendError(res, "The Administrator role cannot be modified.", 403);
+    }
+
+    const nextSlug = getOptionalString(req.body?.slug) ?? undefined;
+    if (nextSlug === ADMIN_ROLE_SLUG) {
+      return sendError(res, "The Administrator role slug is reserved.", 400);
+    }
+
     const translations = getRoleTranslations(req.body?.translations);
     const role = await updateRole(req.params.id, {
-      slug: getOptionalString(req.body?.slug) ?? undefined,
+      slug: nextSlug,
       translations: translations.length ? translations : undefined,
     });
 
@@ -179,6 +202,15 @@ router.patch("/:id", requirePermission("roles.write"), async (req: Request, res:
 
 router.delete("/:id", requirePermission("roles.delete"), async (req: Request, res: Response) => {
   try {
+    const role = await findRoleById(req.params.id);
+    if (!role) {
+      return sendError(res, "Role not found.", 404);
+    }
+
+    if (isProtectedSystemRole(role)) {
+      return sendError(res, "The Administrator role cannot be deleted.", 403);
+    }
+
     await deleteRole(req.params.id);
     return sendSuccess(res, { message: "Role deleted successfully." });
   } catch (error) {

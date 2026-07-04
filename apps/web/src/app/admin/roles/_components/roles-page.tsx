@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { MoreHorizontal, Pencil, Plus, Shield, ShieldCheck, Trash2 } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil, Plus, Shield, ShieldCheck, Trash2 } from "lucide-react";
 import type { Role } from "@smart-dispatch/types";
+import { isProtectedSystemRole } from "@smart-dispatch/types";
 import { useLocale, useAuth } from "@/components/shared/providers";
 import {
   DataTable,
@@ -26,6 +27,7 @@ import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { adminBadgeGoldClass, adminHeadingClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
 import { PERMISSIONS } from "@/lib/permissions";
 import { DeleteConfirmModal } from "@/components/shared/delete-confirm-modal";
+import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { CreateRoleSheet } from "./create-role-sheet";
 import { RolePermissionsSheet } from "./role-permissions-sheet";
 import { RoleStats } from "./role-stats";
@@ -46,6 +48,7 @@ function RoleRowActions({
   onDelete,
   canEdit,
   canDelete,
+  canViewPermissions,
 }: {
   role: Role;
   labels: AdminRolesMessages["actions"];
@@ -54,7 +57,10 @@ function RoleRowActions({
   onDelete: (role: Role) => void;
   canEdit: boolean;
   canDelete: boolean;
+  canViewPermissions: boolean;
 }) {
+  const isProtected = isProtectedSystemRole(role);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
@@ -70,18 +76,18 @@ function RoleRowActions({
       >
         <MoreHorizontal className="size-4" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40">
+      <DropdownMenuContent align="end" className="w-44">
         <DropdownMenuGroup>
+          {canViewPermissions ? (
+            <DropdownMenuItem onClick={() => onPermissions(role)}>
+              {isProtected ? <Eye /> : <ShieldCheck />}
+              {isProtected ? labels.viewPermissions : labels.permissions}
+            </DropdownMenuItem>
+          ) : null}
           {canEdit ? (
             <DropdownMenuItem onClick={() => onEdit(role)}>
               <Pencil />
               {labels.edit}
-            </DropdownMenuItem>
-          ) : null}
-          {canEdit ? (
-            <DropdownMenuItem onClick={() => onPermissions(role)}>
-              <ShieldCheck />
-              {labels.permissions}
             </DropdownMenuItem>
           ) : null}
           {canEdit && canDelete ? <DropdownMenuSeparator /> : null}
@@ -101,9 +107,10 @@ export function RolesPage() {
   const { locale } = useLocale();
   const { hasPermission } = useAuth();
   const copy = getAdminRolesMessages(locale);
+  const canRead = hasPermission(PERMISSIONS.roles.read);
   const canWrite = hasPermission(PERMISSIONS.roles.write);
   const canDelete = hasPermission(PERMISSIONS.roles.delete);
-  const showRowActions = canWrite || canDelete;
+  const showRowActions = canRead || canWrite || canDelete;
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetMode, setSheetMode] = useState<"create" | "edit">("create");
   const [editingRoleId, setEditingRoleId] = useState<string | null>(null);
@@ -171,19 +178,35 @@ export function RolesPage() {
   );
 
   const renderRowActions = useCallback(
-    (role: Role, _context: DataTableRowContext<Role>) => (
-      <RoleRowActions
-        role={role}
-        labels={copy.actions}
-        onEdit={openEditSheet}
-        onPermissions={openPermissionsSheet}
-        onDelete={openDeleteModal}
-        canEdit={canWrite}
-        canDelete={canDelete}
-      />
-    ),
-    [copy.actions, openEditSheet, openPermissionsSheet, openDeleteModal, canWrite, canDelete],
+    (role: Role, _context: DataTableRowContext<Role>) => {
+      const isProtected = isProtectedSystemRole(role);
+      const canEditRole = canWrite && !isProtected;
+      const canDeleteRole = canDelete && !isProtected;
+      const canViewPermissions = isProtected ? canRead || canWrite : canWrite;
+
+      if (!canEditRole && !canDeleteRole && !canViewPermissions) {
+        return null;
+      }
+
+      return (
+        <RoleRowActions
+          role={role}
+          labels={copy.actions}
+          onEdit={openEditSheet}
+          onPermissions={openPermissionsSheet}
+          onDelete={openDeleteModal}
+          canEdit={canEditRole}
+          canDelete={canDeleteRole}
+          canViewPermissions={canViewPermissions}
+        />
+      );
+    },
+    [copy.actions, openEditSheet, openPermissionsSheet, openDeleteModal, canRead, canWrite, canDelete],
   );
+
+  if (!canRead) {
+    return <PageAccessDenied copy={copy.accessDenied} />;
+  }
 
   return (
     <div className="space-y-6">
@@ -233,11 +256,12 @@ export function RolesPage() {
         />
       ) : null}
 
-      {canWrite ? (
+      {canRead || canWrite ? (
         <RolePermissionsSheet
           open={permissionsOpen}
           onOpenChange={setPermissionsOpen}
           role={permissionsRole}
+          readOnly={permissionsRole ? isProtectedSystemRole(permissionsRole) : false}
           onSuccess={() => setRefreshKey((current) => current + 1)}
         />
       ) : null}

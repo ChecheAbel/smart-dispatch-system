@@ -1,4 +1,5 @@
 import { prisma } from "../src/db/prisma";
+import { restoreAdminRolePermissions } from "../src/db/seed-access";
 
 async function restoreAdminRole(emailArg?: string) {
   const email = (emailArg ?? process.env.SEED_ADMIN_EMAIL)?.trim().toLowerCase();
@@ -41,6 +42,8 @@ async function restoreAdminRole(emailArg?: string) {
     });
   }
 
+  const permissionCount = await restoreAdminRolePermissions();
+
   await prisma.user.update({
     where: { id: user.id },
     data: {
@@ -57,6 +60,7 @@ async function restoreAdminRole(emailArg?: string) {
 
   console.log(`[Restore] Administrator access restored for ${email}`);
   console.log(`[Restore] Roles: ${roles.map((entry) => entry.role.slug).join(", ") || "none"}`);
+  console.log(`[Restore] Admin role permissions restored: ${permissionCount}`);
 }
 
 const email = process.argv[2];

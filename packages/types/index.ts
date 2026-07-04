@@ -1,5 +1,11 @@
 export type RoleSlug = "admin" | "dispatcher" | "driver";
 
+export const ADMIN_ROLE_SLUG: RoleSlug = "admin";
+
+export function isProtectedSystemRole(role: Pick<Role, "slug">) {
+  return role.slug === ADMIN_ROLE_SLUG;
+}
+
 export type AccountStatus = "active" | "suspended" | "deactivated";
 
 export type AccountActivation = "pending" | "activated";

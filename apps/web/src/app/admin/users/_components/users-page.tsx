@@ -23,9 +23,14 @@ import {
 import { formatMessage, getAdminUsersMessages, type AdminUsersMessages } from "@/translations";
 import { deleteUser, fetchUsers } from "@/lib/user-api";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import { adminBadgeGoldClass, adminHeadingClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
+import {
+  adminBadgeGoldClass,
+  adminHeadingClass,
+  adminPrimaryButtonClass,
+} from "@/lib/admin-theme";
 import { PERMISSIONS } from "@/lib/permissions";
 import { DeleteConfirmModal } from "@/components/shared/delete-confirm-modal";
+import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { CreateUserSheet } from "./create-user-sheet";
 import { UserStats } from "./user-stats";
 import { cn } from "@/lib/utils";
@@ -110,6 +115,7 @@ export function UsersPage() {
   const { locale } = useLocale();
   const { hasPermission } = useAuth();
   const copy = getAdminUsersMessages(locale);
+  const canRead = hasPermission(PERMISSIONS.users.read);
   const canWrite = hasPermission(PERMISSIONS.users.write);
   const canDelete = hasPermission(PERMISSIONS.users.delete);
   const showRowActions = canWrite || canDelete;
@@ -218,6 +224,10 @@ export function UsersPage() {
     ),
     [copy.actions, openEditSheet, openDeleteModal, canWrite, canDelete],
   );
+
+  if (!canRead) {
+    return <PageAccessDenied copy={copy.accessDenied} />;
+  }
 
   return (
     <div className="space-y-6">

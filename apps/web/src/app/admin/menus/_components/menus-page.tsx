@@ -25,6 +25,7 @@ import {
 } from "@/lib/admin-theme";
 import { PERMISSIONS } from "@/lib/permissions";
 import { DeleteConfirmModal } from "@/components/shared/delete-confirm-modal";
+import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { CreateMenuSheet } from "./create-menu-sheet";
 import { MenuStats } from "./menu-stats";
 import { MenuTreeTable } from "./menu-tree-table";
@@ -85,6 +86,7 @@ export function MenusPage() {
   const { hasPermission } = useAuth();
   const { refreshMenus } = useNavigation();
   const copy = getAdminMenusMessages(locale);
+  const canRead = hasPermission(PERMISSIONS.menus.read);
   const canWrite = hasPermission(PERMISSIONS.menus.write);
   const canDelete = hasPermission(PERMISSIONS.menus.delete);
   const showRowActions = canWrite || canDelete;
@@ -158,6 +160,10 @@ export function MenusPage() {
     ),
     [copy.actions, openEditSheet, openDeleteModal, canWrite, canDelete],
   );
+
+  if (!canRead) {
+    return <PageAccessDenied copy={copy.accessDenied} />;
+  }
 
   return (
     <div className="space-y-6">

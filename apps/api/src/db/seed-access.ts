@@ -1,6 +1,7 @@
 import type { HttpMethod } from "../generated/prisma";
 import { prisma } from "../db/prisma";
 import { setMenuPermissions } from "../models/menu-permission.model";
+import { setRolePermissions } from "../models/role-permission.model";
 import { menuTranslationInputsToMap } from "../types/menu-translations";
 import type { Prisma } from "../generated/prisma";
 
@@ -17,6 +18,15 @@ const DEFAULT_PERMISSIONS = [
 ] as const;
 
 const REMOVED_MENU_SLUGS = ["permissions", "endpoints"] as const;
+
+const REMOVED_PERMISSION_SLUGS = [
+  "permissions.read",
+  "permissions.write",
+  "permissions.delete",
+  "endpoints.read",
+  "endpoints.write",
+  "endpoints.delete",
+] as const;
 
 const REMOVED_ENDPOINT_SLUGS = [
   "permissions.create",
@@ -46,7 +56,7 @@ const DEFAULT_MENUS = [
     path: "/admin/users",
     icon: "users",
     sortOrder: 10,
-    permissionSlugs: ["users.read", "users.write", "users.delete"],
+    permissionSlugs: ["users.read"],
     parentSlug: null,
     translations: [
       { locale: "en", label: "Users" },
@@ -70,7 +80,7 @@ const DEFAULT_MENUS = [
     path: "/admin/roles",
     icon: "shield",
     sortOrder: 10,
-    permissionSlugs: ["roles.read", "roles.write", "roles.delete"],
+    permissionSlugs: ["roles.read"],
     parentSlug: "access-control",
     translations: [
       { locale: "en", label: "Roles" },
@@ -82,7 +92,7 @@ const DEFAULT_MENUS = [
     path: "/admin/menus",
     icon: "menu",
     sortOrder: 30,
-    permissionSlugs: ["menus.read", "menus.write", "menus.delete"],
+    permissionSlugs: ["menus.read"],
     parentSlug: "access-control",
     translations: [
       { locale: "en", label: "Menus" },
@@ -209,6 +219,12 @@ async function deleteRemovedMenus() {
   });
 }
 
+async function deleteRemovedPermissions() {
+  await prisma.permission.deleteMany({
+    where: { slug: { in: [...REMOVED_PERMISSION_SLUGS] } },
+  });
+}
+
 async function deleteRemovedEndpoints() {
   await prisma.endpoint.deleteMany({
     where: { slug: { in: [...REMOVED_ENDPOINT_SLUGS] } },
@@ -219,13 +235,30 @@ async function seedAdminRolePermissions(permissionIds: string[]) {
   const adminRole = await prisma.role.findUnique({ where: { slug: "admin" } });
   if (!adminRole) return;
 
-  await prisma.rolePermission.createMany({
-    data: permissionIds.map((permissionId) => ({
-      roleId: adminRole.id,
-      permissionId,
-    })),
-    skipDuplicates: true,
+  await setRolePermissions(adminRole.id, permissionIds);
+  console.log(`[Seed] Administrator role synced with ${permissionIds.length} permissions`);
+}
+
+/** Re-assigns every default platform permission to the admin role. */
+export async function restoreAdminRolePermissions() {
+  const adminRole = await prisma.role.findUnique({ where: { slug: "admin" } });
+  if (!adminRole) {
+    throw new Error('Role with slug "admin" was not found. Run pnpm db:seed first.');
+  }
+
+  const permissions = await prisma.permission.findMany({
+    where: {
+      slug: { in: DEFAULT_PERMISSIONS.map((permission) => permission.slug) },
+    },
+    orderBy: { slug: "asc" },
   });
+
+  await setRolePermissions(
+    adminRole.id,
+    permissions.map((permission) => permission.id),
+  );
+
+  return permissions.length;
 }
 
 export async function seedAccessControl() {
@@ -234,5 +267,6 @@ export async function seedAccessControl() {
   await deleteRemovedMenus();
   await seedEndpoints();
   await deleteRemovedEndpoints();
+  await deleteRemovedPermissions();
   await seedAdminRolePermissions(permissionIds);
 }

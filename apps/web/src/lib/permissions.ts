@@ -18,6 +18,16 @@ export const PERMISSIONS = {
   },
 } as const;
 
+export const ADMIN_PERMISSION_MODULES = Object.keys(PERMISSIONS) as Array<keyof typeof PERMISSIONS>;
+
+export function isAdminAssignablePermission(permission: Permission) {
+  return ADMIN_PERMISSION_MODULES.includes(permission.module as keyof typeof PERMISSIONS);
+}
+
+export function filterAdminAssignablePermissions(permissions: Permission[]) {
+  return permissions.filter(isAdminAssignablePermission);
+}
+
 export function createPermissionChecker(permissions: Permission[]) {
   const granted = new Set(permissions.map((permission) => permission.slug));
 

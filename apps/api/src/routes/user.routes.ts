@@ -2,6 +2,7 @@ import { Router, type Request, type Response } from "express";
 import bcrypt from "bcrypt";
 import { authenticate } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
+import { requirePermission } from "../middleware/require-permission";
 import { toPublicUser } from "../mappers/user.mapper";
 import {
   assignRoleToUser,
@@ -40,7 +41,7 @@ function getRequestLocale(req: Request) {
   return parseLocale(req.query, req.headers["accept-language"]);
 }
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", requirePermission("users.read"), async (req: Request, res: Response) => {
   try {
     const pagination = parsePaginationQuery(req.query);
     const filter = {
@@ -65,7 +66,7 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/:id", requirePermission("users.read"), async (req: Request, res: Response) => {
   try {
     const user = await findUserByIdWithRoles(req.params.id);
     if (!user) {
@@ -78,7 +79,7 @@ router.get("/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", requirePermission("users.write"), async (req: Request, res: Response) => {
   try {
     const email = getString(req.body?.email);
     const password = getString(req.body?.password);
@@ -116,7 +117,7 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
-router.patch("/:id", async (req: Request, res: Response) => {
+router.patch("/:id", requirePermission("users.write"), async (req: Request, res: Response) => {
   try {
     const user = await updateUser(req.params.id, {
       email: getOptionalString(req.body?.email) ?? undefined,
@@ -137,7 +138,7 @@ router.patch("/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.patch("/:id/account-status", async (req: Request, res: Response) => {
+router.patch("/:id/account-status", requirePermission("users.write"), async (req: Request, res: Response) => {
   try {
     const accountStatus = parseAccountStatus(req.body?.account_status);
     if (!accountStatus) {
@@ -151,7 +152,7 @@ router.patch("/:id/account-status", async (req: Request, res: Response) => {
   }
 });
 
-router.patch("/:id/account-activation", async (req: Request, res: Response) => {
+router.patch("/:id/account-activation", requirePermission("users.write"), async (req: Request, res: Response) => {
   try {
     const accountActivation = parseAccountActivation(req.body?.account_activation);
     if (!accountActivation) {
@@ -165,7 +166,7 @@ router.patch("/:id/account-activation", async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/:id", async (req: Request, res: Response) => {
+router.delete("/:id", requirePermission("users.delete"), async (req: Request, res: Response) => {
   try {
     await deleteUser(req.params.id);
     return sendSuccess(res, { message: "User deleted successfully." });
@@ -174,7 +175,7 @@ router.delete("/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/:id/roles", async (req: Request, res: Response) => {
+router.get("/:id/roles", requirePermission("users.read"), async (req: Request, res: Response) => {
   try {
     const locale = getRequestLocale(req);
     const authRoles = await listAuthRolesByUserId(req.params.id);
@@ -186,7 +187,7 @@ router.get("/:id/roles", async (req: Request, res: Response) => {
   }
 });
 
-router.put("/:id/roles", async (req: Request, res: Response) => {
+router.put("/:id/roles", requirePermission("users.write"), async (req: Request, res: Response) => {
   try {
     const locale = getRequestLocale(req);
     const roleIds = getStringArray(req.body?.role_ids);
@@ -200,7 +201,7 @@ router.put("/:id/roles", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/:id/roles", async (req: Request, res: Response) => {
+router.post("/:id/roles", requirePermission("users.write"), async (req: Request, res: Response) => {
   try {
     const locale = getRequestLocale(req);
     const roleId = getString(req.body?.role_id);
@@ -219,7 +220,7 @@ router.post("/:id/roles", async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/:id/roles/:roleId", async (req: Request, res: Response) => {
+router.delete("/:id/roles/:roleId", requirePermission("users.write"), async (req: Request, res: Response) => {
   try {
     await removeRoleFromUser(req.params.id, req.params.roleId);
     return sendSuccess(res, { message: "Role removed from user." });

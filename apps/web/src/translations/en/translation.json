@@ -32,10 +32,19 @@
       "description": "Roles will appear here once they are created.",
       "searchDescription": "Try a different search term."
     },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to roles is required to open this page. Ask an administrator to grant the roles.read permission for your role.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
     "actions": {
       "view": "View",
       "edit": "Edit",
       "permissions": "Permissions",
+      "viewPermissions": "View permissions",
       "delete": "Delete",
       "menuLabel": "Actions for {name}"
     },
@@ -73,12 +82,15 @@
     },
     "permissions": {
       "title": "Role permissions",
+      "readOnlyTitle": "Administrator permissions",
+      "readOnlyDescription": "The Administrator role is system-managed. Its permissions can be viewed here but cannot be changed from the admin console.",
       "description": "Choose which modules and actions {name} can access.",
       "descriptionFallback": "Choose which modules and actions this role can access.",
       "loading": "Loading permissions...",
       "save": "Save permissions",
       "saving": "Saving...",
       "cancel": "Cancel",
+      "close": "Close",
       "selectedSummary": "{selected} of {total} permissions selected",
       "selectAll": "Select all",
       "clearAll": "Clear all",
@@ -171,6 +183,14 @@
       "title": "No users found",
       "description": "Users will appear here once they are created.",
       "searchDescription": "Try a different search term."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to users is required to open this page. Ask an administrator to grant the users.read permission for your role.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
     },
     "actions": {
       "edit": "Edit",
@@ -324,6 +344,14 @@
       "title": "No menus found",
       "description": "Navigation menus will appear here once they are created.",
       "searchDescription": "Try a different search term."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to menus is required to open this page. Ask an administrator to grant the menus.read permission for your role.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
     },
     "actions": {
       "view": "View",

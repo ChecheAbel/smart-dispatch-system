@@ -8,6 +8,10 @@ import { fetchPermissions } from "@/lib/permission-api";
 import { groupPermissionsByModule } from "@/lib/permission-groups";
 import { fetchRolePermissions, setRolePermissions } from "@/lib/role-api";
 import {
+  filterAdminAssignablePermissions,
+  isAdminAssignablePermission,
+} from "@/lib/permissions";
+import {
   adminBadgeGoldClass,
   adminCardClass,
   adminHeadingClass,
@@ -43,6 +47,7 @@ type RolePermissionsSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   role: Role | null;
+  readOnly?: boolean;
   onSuccess?: () => void;
 };
 
@@ -170,6 +175,7 @@ export function RolePermissionsSheet({
   open,
   onOpenChange,
   role,
+  readOnly = false,
   onSuccess,
 }: RolePermissionsSheetProps) {
   const { locale } = useLocale();
@@ -182,13 +188,26 @@ export function RolePermissionsSheet({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const permissionGroups = useMemo(
-    () => groupPermissionsByModule(allPermissions),
+  const assignablePermissions = useMemo(
+    () => filterAdminAssignablePermissions(allPermissions),
     [allPermissions],
   );
 
-  const selectedCount = selectedIds.size;
-  const totalCount = allPermissions.length;
+  const permissionGroups = useMemo(
+    () => groupPermissionsByModule(assignablePermissions),
+    [assignablePermissions],
+  );
+
+  const assignablePermissionIds = useMemo(
+    () => new Set(assignablePermissions.map((permission) => permission.id)),
+    [assignablePermissions],
+  );
+
+  const selectedCount = useMemo(
+    () => assignablePermissions.filter((permission) => selectedIds.has(permission.id)).length,
+    [assignablePermissions, selectedIds],
+  );
+  const totalCount = assignablePermissions.length;
 
   useEffect(() => {
     if (!open || !role) {
@@ -215,7 +234,13 @@ export function RolePermissionsSheet({
 
         if (!cancelled) {
           setAllPermissions(permissionsResult.data);
-          setSelectedIds(new Set(rolePermissions.map((permission) => permission.id)));
+          setSelectedIds(
+            new Set(
+              rolePermissions
+                .filter(isAdminAssignablePermission)
+                .map((permission) => permission.id),
+            ),
+          );
         }
       } catch (err) {
         if (!cancelled) {
@@ -270,7 +295,7 @@ export function RolePermissionsSheet({
   }
 
   function selectAll() {
-    setSelectedIds(new Set(allPermissions.map((permission) => permission.id)));
+    setSelectedIds(new Set(assignablePermissions.map((permission) => permission.id)));
     setError(null);
   }
 
@@ -280,7 +305,7 @@ export function RolePermissionsSheet({
   }
 
   async function handleSave() {
-    if (!role) {
+    if (!role || readOnly) {
       return;
     }
 
@@ -288,7 +313,10 @@ export function RolePermissionsSheet({
     setError(null);
 
     try {
-      await setRolePermissions(role.id, [...selectedIds]);
+      await setRolePermissions(
+        role.id,
+        [...selectedIds].filter((permissionId) => assignablePermissionIds.has(permissionId)),
+      );
       showSuccessToast(permissionsCopy.toast.updateSuccess);
       onSuccess?.();
       onOpenChange(false);
@@ -312,11 +340,15 @@ export function RolePermissionsSheet({
         className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-2xl lg:max-w-3xl"
       >
         <SheetHeader className="border-b border-slate-100 px-6 py-5">
-          <SheetTitle className={adminHeadingClass}>{permissionsCopy.title}</SheetTitle>
+          <SheetTitle className={adminHeadingClass}>
+            {readOnly ? permissionsCopy.readOnlyTitle : permissionsCopy.title}
+          </SheetTitle>
           <SheetDescription className="leading-relaxed break-words">
-            {role
-              ? formatMessage(permissionsCopy.description, { name: role.name })
-              : permissionsCopy.descriptionFallback}
+            {readOnly
+              ? permissionsCopy.readOnlyDescription
+              : role
+                ? formatMessage(permissionsCopy.description, { name: role.name })
+                : permissionsCopy.descriptionFallback}
           </SheetDescription>
         </SheetHeader>
 
@@ -347,29 +379,33 @@ export function RolePermissionsSheet({
             ) : null}
 
             <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={selectAll}
-                disabled={submitting || selectedCount === totalCount}
-                className="border-slate-200"
-              >
-                {permissionsCopy.selectAll}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={clearAll}
-                disabled={submitting || selectedCount === 0}
-                className="border-slate-200"
-              >
-                {permissionsCopy.clearAll}
-              </Button>
+              {!readOnly ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={selectAll}
+                    disabled={submitting || selectedCount === totalCount}
+                    className="border-slate-200"
+                  >
+                    {permissionsCopy.selectAll}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={clearAll}
+                    disabled={submitting || selectedCount === 0}
+                    className="border-slate-200"
+                  >
+                    {permissionsCopy.clearAll}
+                  </Button>
+                </>
+              ) : null}
             </div>
 
-            <Separator className="bg-slate-100" />
+            {!readOnly ? <Separator className="bg-slate-100" /> : null}
 
             <div className="space-y-4">
               {permissionGroups.map((group) => (
@@ -381,7 +417,7 @@ export function RolePermissionsSheet({
                   moduleLabels={permissionsCopy.modules}
                   actionLabels={permissionsCopy.actions}
                   moduleSelectedLabel={permissionsCopy.moduleSelected}
-                  disabled={submitting}
+                  disabled={submitting || readOnly}
                   onTogglePermission={togglePermission}
                   onToggleModule={toggleModule}
                 />
@@ -404,16 +440,18 @@ export function RolePermissionsSheet({
             disabled={submitting || loading}
             className="border-slate-200"
           >
-            {permissionsCopy.cancel}
+            {readOnly ? permissionsCopy.close : permissionsCopy.cancel}
           </Button>
-          <Button
-            type="button"
-            onClick={() => void handleSave()}
-            disabled={submitting || loading || !role}
-            className={adminPrimaryButtonClass}
-          >
-            {submitting ? permissionsCopy.saving : permissionsCopy.save}
-          </Button>
+          {!readOnly ? (
+            <Button
+              type="button"
+              onClick={() => void handleSave()}
+              disabled={submitting || loading || !role}
+              className={adminPrimaryButtonClass}
+            >
+              {submitting ? permissionsCopy.saving : permissionsCopy.save}
+            </Button>
+          ) : null}
         </SheetFooter>
       </SheetContent>
     </Sheet>
