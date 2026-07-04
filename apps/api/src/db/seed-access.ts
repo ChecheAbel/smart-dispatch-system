@@ -11,11 +11,14 @@ const DEFAULT_PERMISSIONS = [
   { slug: "roles.write", module: "roles", action: "write", description: "Create and update roles" },
   { slug: "roles.delete", module: "roles", action: "delete", description: "Delete roles" },
   { slug: "permissions.read", module: "permissions", action: "read", description: "View permissions" },
-  { slug: "permissions.write", module: "permissions", action: "write", description: "Manage permissions" },
+  { slug: "permissions.write", module: "permissions", action: "write", description: "Create and update permissions" },
+  { slug: "permissions.delete", module: "permissions", action: "delete", description: "Delete permissions" },
   { slug: "menus.read", module: "menus", action: "read", description: "View menus" },
-  { slug: "menus.write", module: "menus", action: "write", description: "Manage menus" },
+  { slug: "menus.write", module: "menus", action: "write", description: "Create and update menus" },
+  { slug: "menus.delete", module: "menus", action: "delete", description: "Delete menus" },
   { slug: "endpoints.read", module: "endpoints", action: "read", description: "View API endpoints" },
-  { slug: "endpoints.write", module: "endpoints", action: "write", description: "Manage API endpoints" },
+  { slug: "endpoints.write", module: "endpoints", action: "write", description: "Create and update endpoints" },
+  { slug: "endpoints.delete", module: "endpoints", action: "delete", description: "Delete endpoints" },
 ] as const;
 
 const DEFAULT_MENUS = [
@@ -119,8 +122,18 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "roles.update", method: "PATCH", path: "/api/roles/:id", description: "Update role", permissionSlug: "roles.write" },
   { slug: "roles.delete", method: "DELETE", path: "/api/roles/:id", description: "Delete role", permissionSlug: "roles.delete" },
   { slug: "permissions.list", method: "GET", path: "/api/permissions", description: "List permissions", permissionSlug: "permissions.read" },
+  { slug: "permissions.create", method: "POST", path: "/api/permissions", description: "Create permission", permissionSlug: "permissions.write" },
+  { slug: "permissions.update", method: "PATCH", path: "/api/permissions/:id", description: "Update permission", permissionSlug: "permissions.write" },
+  { slug: "permissions.delete", method: "DELETE", path: "/api/permissions/:id", description: "Delete permission", permissionSlug: "permissions.delete" },
+  { slug: "menus.list", method: "GET", path: "/api/menus", description: "List menus", permissionSlug: "menus.read" },
+  { slug: "menus.create", method: "POST", path: "/api/menus", description: "Create menu", permissionSlug: "menus.write" },
+  { slug: "menus.update", method: "PATCH", path: "/api/menus/:id", description: "Update menu", permissionSlug: "menus.write" },
+  { slug: "menus.delete", method: "DELETE", path: "/api/menus/:id", description: "Delete menu", permissionSlug: "menus.delete" },
   { slug: "menus.navigation", method: "GET", path: "/api/menus/navigation", description: "Navigation menu for current user", permissionSlug: "menus.read" },
   { slug: "endpoints.list", method: "GET", path: "/api/endpoints", description: "List endpoints", permissionSlug: "endpoints.read" },
+  { slug: "endpoints.create", method: "POST", path: "/api/endpoints", description: "Create endpoint", permissionSlug: "endpoints.write" },
+  { slug: "endpoints.update", method: "PATCH", path: "/api/endpoints/:id", description: "Update endpoint", permissionSlug: "endpoints.write" },
+  { slug: "endpoints.delete", method: "DELETE", path: "/api/endpoints/:id", description: "Delete endpoint", permissionSlug: "endpoints.delete" },
 ];
 
 async function seedPermissions() {

@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import { authenticate } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
+import { requirePermission } from "../middleware/require-permission";
 import { toPublicPermission } from "../mappers/permission.mapper";
 import {
   countPermissions,
@@ -19,7 +20,7 @@ const router = Router();
 
 router.use(authenticate, authorize("admin"));
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", requirePermission("permissions.read"), async (req: Request, res: Response) => {
   try {
     const pagination = parsePaginationQuery(req.query);
     const filter = {
@@ -43,7 +44,7 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/slug/:slug", async (req: Request, res: Response) => {
+router.get("/slug/:slug", requirePermission("permissions.read"), async (req: Request, res: Response) => {
   try {
     const permission = await findPermissionBySlug(req.params.slug);
     if (!permission) {
@@ -56,7 +57,7 @@ router.get("/slug/:slug", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/:id", requirePermission("permissions.read"), async (req: Request, res: Response) => {
   try {
     const permission = await findPermissionById(req.params.id);
     if (!permission) {
@@ -69,7 +70,7 @@ router.get("/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", requirePermission("permissions.write"), async (req: Request, res: Response) => {
   try {
     const slug = getString(req.body?.slug);
     const module = getString(req.body?.module);
@@ -96,7 +97,7 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
-router.patch("/:id", async (req: Request, res: Response) => {
+router.patch("/:id", requirePermission("permissions.write"), async (req: Request, res: Response) => {
   try {
     const permission = await updatePermission(req.params.id, {
       slug: getOptionalString(req.body?.slug) ?? undefined,
@@ -114,7 +115,7 @@ router.patch("/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/:id", async (req: Request, res: Response) => {
+router.delete("/:id", requirePermission("permissions.delete"), async (req: Request, res: Response) => {
   try {
     await deletePermission(req.params.id);
     return sendSuccess(res, { message: "Permission deleted successfully." });

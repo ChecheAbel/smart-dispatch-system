@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import { authenticate } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
+import { requirePermission } from "../middleware/require-permission";
 import { toPublicEndpoint } from "../mappers/endpoint.mapper";
 import {
   countEndpoints,
@@ -24,7 +25,7 @@ const router = Router();
 
 router.use(authenticate, authorize("admin"));
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", requirePermission("endpoints.read"), async (req: Request, res: Response) => {
   try {
     const pagination = parsePaginationQuery(req.query);
     const filter = {
@@ -49,7 +50,7 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/slug/:slug", async (req: Request, res: Response) => {
+router.get("/slug/:slug", requirePermission("endpoints.read"), async (req: Request, res: Response) => {
   try {
     const endpoint = await findEndpointBySlug(req.params.slug);
     if (!endpoint) {
@@ -62,7 +63,7 @@ router.get("/slug/:slug", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/:id", requirePermission("endpoints.read"), async (req: Request, res: Response) => {
   try {
     const endpoint = await findEndpointById(req.params.id);
     if (!endpoint) {
@@ -75,7 +76,7 @@ router.get("/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", requirePermission("endpoints.write"), async (req: Request, res: Response) => {
   try {
     const slug = getString(req.body?.slug);
     const method = parseHttpMethod(req.body?.method);
@@ -104,7 +105,7 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
-router.patch("/:id", async (req: Request, res: Response) => {
+router.patch("/:id", requirePermission("endpoints.write"), async (req: Request, res: Response) => {
   try {
     const method = parseHttpMethod(req.body?.method);
     const endpoint = await updateEndpoint(req.params.id, {
@@ -128,7 +129,7 @@ router.patch("/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/:id", async (req: Request, res: Response) => {
+router.delete("/:id", requirePermission("endpoints.delete"), async (req: Request, res: Response) => {
   try {
     await deleteEndpoint(req.params.id);
     return sendSuccess(res, { message: "Endpoint deleted successfully." });

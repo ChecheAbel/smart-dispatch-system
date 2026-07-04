@@ -1,6 +1,7 @@
 import { Router, type Request, type Response } from "express";
 import { authenticate, type AuthenticatedRequest } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
+import { requirePermission } from "../middleware/require-permission";
 import { buildMenuTree, toPublicMenu } from "../mappers/menu.mapper";
 import {
   countMenus,
@@ -50,7 +51,7 @@ router.get("/navigation", authenticate, async (req: AuthenticatedRequest, res: R
 
 router.use(authenticate, authorize("admin"));
 
-router.get("/", async (req: Request, res: Response) => {
+router.get("/", requirePermission("menus.read"), async (req: Request, res: Response) => {
   try {
     const locale = getRequestLocale(req);
     const pagination = parsePaginationQuery(req.query);
@@ -75,7 +76,7 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/slug/:slug", async (req: Request, res: Response) => {
+router.get("/slug/:slug", requirePermission("menus.read"), async (req: Request, res: Response) => {
   try {
     const locale = getRequestLocale(req);
     const menu = await findMenuBySlug(req.params.slug);
@@ -91,7 +92,7 @@ router.get("/slug/:slug", async (req: Request, res: Response) => {
   }
 });
 
-router.get("/:id", async (req: Request, res: Response) => {
+router.get("/:id", requirePermission("menus.read"), async (req: Request, res: Response) => {
   try {
     const locale = getRequestLocale(req);
     const menu = await findMenuById(req.params.id);
@@ -107,7 +108,7 @@ router.get("/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/", async (req: Request, res: Response) => {
+router.post("/", requirePermission("menus.write"), async (req: Request, res: Response) => {
   try {
     const slug = getString(req.body?.slug);
     const translations = getMenuTranslations(req.body?.translations);
@@ -146,7 +147,7 @@ router.post("/", async (req: Request, res: Response) => {
   }
 });
 
-router.patch("/:id", async (req: Request, res: Response) => {
+router.patch("/:id", requirePermission("menus.write"), async (req: Request, res: Response) => {
   try {
     const translations = getMenuTranslations(req.body?.translations);
     const menu = await updateMenu(req.params.id, {
@@ -173,7 +174,7 @@ router.patch("/:id", async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/:id", async (req: Request, res: Response) => {
+router.delete("/:id", requirePermission("menus.delete"), async (req: Request, res: Response) => {
   try {
     await deleteMenu(req.params.id);
     return sendSuccess(res, { message: "Menu deleted successfully." });

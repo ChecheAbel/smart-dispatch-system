@@ -100,5 +100,292 @@
         "description": "Please try again in a moment."
       }
     }
+  },
+  "adminMenus": {
+    "eyebrow": "Navigation",
+    "title": "Menus",
+    "description": "Manage sidebar and navigation menu items with localized labels, routes, and access permissions.",
+    "searchPlaceholder": "Search by label or slug...",
+    "newMenu": "New menu",
+    "itemLabel": "menu",
+    "columns": {
+      "label": "Label",
+      "slug": "Slug",
+      "path": "Path",
+      "sortOrder": "Sort order",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "empty": {
+      "title": "No menus found",
+      "description": "Navigation menus will appear here once they are created.",
+      "searchDescription": "Try a different search term."
+    },
+    "actions": {
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete",
+      "menuLabel": "Actions for {name}"
+    },
+    "stats": {
+      "title": "Total menus",
+      "description": "All navigation items defined in the platform"
+    },
+    "form": {
+      "createTitle": "New menu",
+      "editTitle": "Edit menu",
+      "createDescription": "Create a navigation menu item with a unique slug and at least an English label.",
+      "editDescription": "Update the menu slug, route, and its localized labels.",
+      "slug": "Slug",
+      "slugHelp": "Lowercase identifier used in navigation and APIs.",
+      "slugPlaceholder": "fleet-overview",
+      "path": "Path",
+      "pathPlaceholder": "/admin/fleet",
+      "icon": "Icon",
+      "iconPlaceholder": "LayoutDashboard",
+      "sortOrder": "Sort order",
+      "sortOrderPlaceholder": "0",
+      "parentId": "Parent menu",
+      "permissionId": "Permission",
+      "noneOption": "None",
+      "isActive": "Active",
+      "label": "Label",
+      "optional": "(optional)",
+      "cancel": "Cancel",
+      "create": "Create menu",
+      "creating": "Creating...",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "loading": "Loading menu...",
+      "labelPlaceholderEn": "Fleet Overview",
+      "labelPlaceholderAm": "የመኪና አጠቃላይ እይታ",
+      "errors": {
+        "slugRequired": "Slug is required.",
+        "enLabelRequired": "English label is required.",
+        "sortOrderInvalid": "Sort order must be a valid number.",
+        "createFailed": "Failed to create menu.",
+        "updateFailed": "Failed to update menu.",
+        "loadFailed": "Failed to load menu."
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "Menu created",
+        "description": "The new menu item is now available in navigation."
+      },
+      "updateSuccess": {
+        "title": "Menu updated",
+        "description": "Your changes have been saved successfully."
+      },
+      "deleteSuccess": {
+        "title": "Menu deleted",
+        "description": "{name} was removed from navigation."
+      },
+      "loadFailed": {
+        "title": "Could not load menu",
+        "description": "Please try again or refresh the page."
+      },
+      "createFailed": {
+        "title": "Could not create menu",
+        "description": "Please check the form and try again."
+      },
+      "updateFailed": {
+        "title": "Could not update menu",
+        "description": "Please check the form and try again."
+      },
+      "deleteFailed": {
+        "title": "Could not delete menu",
+        "description": "Please try again in a moment."
+      }
+    }
+  },
+  "adminPermissions": {
+    "eyebrow": "Access control",
+    "title": "Permissions",
+    "description": "View and manage permission slugs used for role-based access control across the platform.",
+    "searchPlaceholder": "Search by slug, module, action, or description...",
+    "newPermission": "New permission",
+    "itemLabel": "permission",
+    "columns": {
+      "slug": "Slug",
+      "module": "Module",
+      "action": "Action",
+      "description": "Description",
+      "actions": "Actions"
+    },
+    "empty": {
+      "title": "No permissions found",
+      "description": "Permissions will appear here once they are created.",
+      "searchDescription": "Try a different search term."
+    },
+    "actions": {
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete",
+      "menuLabel": "Actions for {name}"
+    },
+    "stats": {
+      "title": "Total permissions",
+      "description": "All permissions defined in the platform"
+    },
+    "form": {
+      "createTitle": "New permission",
+      "editTitle": "Edit permission",
+      "createDescription": "Create a permission with a unique slug, module, and action.",
+      "editDescription": "Update the permission slug, module, action, and description.",
+      "slug": "Slug",
+      "slugHelp": "Lowercase identifier, typically module.action (e.g. roles.read).",
+      "slugPlaceholder": "roles.read",
+      "module": "Module",
+      "modulePlaceholder": "roles",
+      "action": "Action",
+      "actionPlaceholder": "read",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "cancel": "Cancel",
+      "create": "Create permission",
+      "creating": "Creating...",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "loading": "Loading permission...",
+      "errors": {
+        "slugRequired": "Slug is required.",
+        "moduleRequired": "Module is required.",
+        "actionRequired": "Action is required.",
+        "createFailed": "Failed to create permission.",
+        "updateFailed": "Failed to update permission.",
+        "loadFailed": "Failed to load permission."
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "Permission created",
+        "description": "The new permission is now available in the platform."
+      },
+      "updateSuccess": {
+        "title": "Permission updated",
+        "description": "Your changes have been saved successfully."
+      },
+      "deleteSuccess": {
+        "title": "Permission deleted",
+        "description": "{name} was removed from the platform."
+      },
+      "loadFailed": {
+        "title": "Could not load permission",
+        "description": "Please try again or refresh the page."
+      },
+      "createFailed": {
+        "title": "Could not create permission",
+        "description": "Please check the form and try again."
+      },
+      "updateFailed": {
+        "title": "Could not update permission",
+        "description": "Please check the form and try again."
+      },
+      "deleteFailed": {
+        "title": "Could not delete permission",
+        "description": "Please try again in a moment."
+      }
+    }
+  },
+  "adminEndpoints": {
+    "eyebrow": "API access",
+    "title": "Endpoints",
+    "description": "View and manage API route definitions, HTTP methods, and linked permissions.",
+    "searchPlaceholder": "Search by path, slug, or method...",
+    "newEndpoint": "New endpoint",
+    "itemLabel": "endpoint",
+    "columns": {
+      "method": "Method",
+      "path": "Path",
+      "slug": "Slug",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "empty": {
+      "title": "No endpoints found",
+      "description": "Endpoints will appear here once they are registered.",
+      "searchDescription": "Try a different search term."
+    },
+    "actions": {
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete",
+      "menuLabel": "Actions for {name}"
+    },
+    "stats": {
+      "title": "Total endpoints",
+      "description": "All API routes registered in the platform"
+    },
+    "form": {
+      "createTitle": "New endpoint",
+      "editTitle": "Edit endpoint",
+      "createDescription": "Register an API route with a unique slug, HTTP method, and path.",
+      "editDescription": "Update the endpoint slug, method, path, permission, and status.",
+      "slug": "Slug",
+      "slugHelp": "Lowercase identifier used to reference this endpoint.",
+      "slugPlaceholder": "list-roles",
+      "method": "Method",
+      "path": "Path",
+      "pathHelp": "Route path as defined in the API (e.g. /api/roles).",
+      "pathPlaceholder": "/api/roles",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "permission": "Permission",
+      "permissionHelp": "Optional permission required to access this endpoint.",
+      "noPermission": "No permission",
+      "isActive": "Active",
+      "cancel": "Cancel",
+      "create": "Create endpoint",
+      "creating": "Creating...",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "loading": "Loading endpoint...",
+      "errors": {
+        "slugRequired": "Slug is required.",
+        "pathRequired": "Path is required.",
+        "createFailed": "Failed to create endpoint.",
+        "updateFailed": "Failed to update endpoint.",
+        "loadFailed": "Failed to load endpoint."
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "Endpoint created",
+        "description": "The new endpoint is now registered in the platform."
+      },
+      "updateSuccess": {
+        "title": "Endpoint updated",
+        "description": "Your changes have been saved successfully."
+      },
+      "deleteSuccess": {
+        "title": "Endpoint deleted",
+        "description": "{name} was removed from the platform."
+      },
+      "loadFailed": {
+        "title": "Could not load endpoint",
+        "description": "Please try again or refresh the page."
+      },
+      "createFailed": {
+        "title": "Could not create endpoint",
+        "description": "Please check the form and try again."
+      },
+      "updateFailed": {
+        "title": "Could not update endpoint",
+        "description": "Please check the form and try again."
+      },
+      "deleteFailed": {
+        "title": "Could not delete endpoint",
+        "description": "Please try again in a moment."
+      }
+    }
   }
 }

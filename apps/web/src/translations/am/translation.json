@@ -100,5 +100,292 @@
         "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
       }
     }
+  },
+  "adminMenus": {
+    "eyebrow": "አሰሳ",
+    "title": "ሜኑዎች",
+    "description": "የጎን አሞሌ እና የአሰሳ ሜኑ ንጥሎችን በተተረጎሙ መለያዎች፣ በመንገዶች እና በመዳረሻ ፈቃዶች ያስተዳድሩ።",
+    "searchPlaceholder": "በመለያ ወይም slug ፈልግ...",
+    "newMenu": "አዲስ ሜኑ",
+    "itemLabel": "ሜኑ",
+    "columns": {
+      "label": "መለያ",
+      "slug": "Slug",
+      "path": "መንገድ",
+      "sortOrder": "የመደብ ቅደም ተከተል",
+      "status": "ሁኔታ",
+      "actions": "ድርጊቶች"
+    },
+    "status": {
+      "active": "ንቁ",
+      "inactive": "እንቅስቃሴ የለውም"
+    },
+    "empty": {
+      "title": "ምንም ሜኑ አልተገኘም",
+      "description": "የአሰሳ ሜኑዎች ከተፈጠሩ በኋላ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "actions": {
+      "view": "እይታ",
+      "edit": "አርትዕ",
+      "delete": "ሰርዝ",
+      "menuLabel": "ለ {name} ድርጊቶች"
+    },
+    "stats": {
+      "title": "ጠቅላላ ሜኑዎች",
+      "description": "በመድረኩ ላይ የተገለጹ ሁሉም የአሰሳ ንጥሎች"
+    },
+    "form": {
+      "createTitle": "አዲስ ሜኑ",
+      "editTitle": "ሜኑ አርትዕ",
+      "createDescription": "ልዩ slug እና ቢያንስ የእንግሊዝኛ መለያ ያለው የአሰሳ ሜኑ ይፍጠሩ።",
+      "editDescription": "የሜኑውን slug፣ መንገድ እና የተተረጎሙ መለያዎችን ያዘምኑ።",
+      "slug": "Slug",
+      "slugHelp": "በአሰሳ እና በ API ውስጥ የሚጠቀመው የትንሽ ፊደል መለያ።",
+      "slugPlaceholder": "fleet-overview",
+      "path": "መንገድ",
+      "pathPlaceholder": "/admin/fleet",
+      "icon": "አዶ",
+      "iconPlaceholder": "LayoutDashboard",
+      "sortOrder": "የመደብ ቅደም ተከተል",
+      "sortOrderPlaceholder": "0",
+      "parentId": "የወላጅ ሜኑ",
+      "permissionId": "ፈቃድ",
+      "noneOption": "ምንም",
+      "isActive": "ንቁ",
+      "label": "መለያ",
+      "optional": "(አማራጭ)",
+      "cancel": "ተው",
+      "create": "ሜኑ ፍጠር",
+      "creating": "በመፍጠር ላይ...",
+      "save": "ለውጦችን አስቀምጥ",
+      "saving": "በመቀመጥ ላይ...",
+      "loading": "ሜኑ በመጫን ላይ...",
+      "labelPlaceholderEn": "Fleet Overview",
+      "labelPlaceholderAm": "የመኪና አጠቃላይ እይታ",
+      "errors": {
+        "slugRequired": "Slug ያስፈልጋል።",
+        "enLabelRequired": "የእንግሊዝኛ መለያ ያስፈልጋል።",
+        "sortOrderInvalid": "የመደብ ቅደም ተከተል ትክክለኛ ቁጥር መሆን አለበት።",
+        "createFailed": "ሜኑ መፍጠር አልተሳካም።",
+        "updateFailed": "ሜኑ ማዘመን አልተሳካም።",
+        "loadFailed": "ሜኑ መጫን አልተሳካም።"
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "ሜኑ ተፈጥሯል",
+        "description": "አዲሱ የሜኑ ንጥል አሁን በአሰሳ ውስጥ ይገኛል።"
+      },
+      "updateSuccess": {
+        "title": "ሜኑ ተዘምኗል",
+        "description": "ለውጦችዎ በተሳካ ሁኔታ ተቀምጠዋል።"
+      },
+      "deleteSuccess": {
+        "title": "ሜኑ ተሰርዟል",
+        "description": "{name} ከአሰሳ ተሰርዟል።"
+      },
+      "loadFailed": {
+        "title": "ሜኑ መጫን አልተቻለም",
+        "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+      },
+      "createFailed": {
+        "title": "ሜኑ መፍጠር አልተቻለም",
+        "description": "ቅጹን ያረጋግጡና እንደገና ይሞክሩ።"
+      },
+      "updateFailed": {
+        "title": "ሜኑ ማዘመን አልተቻለም",
+        "description": "ቅጹን ያረጋግጡና እንደገና ይሞክሩ።"
+      },
+      "deleteFailed": {
+        "title": "ሜኑ መሰረዝ አልተቻለም",
+        "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
+      }
+    }
+  },
+  "adminPermissions": {
+    "eyebrow": "የመዳረሻ ቁጥጥር",
+    "title": "ፈቃዶች",
+    "description": "በመድረኩ ላይ ለሚና ላይ የተመሰረተ መዳረሻ ቁጥጥር የሚያገለግሉ የፈቃድ slug ይመልከቱ እና ያስተዳድሩ።",
+    "searchPlaceholder": "በ slug፣ ሞጁል፣ ድርጊት ወይም መግለጫ ፈልግ...",
+    "newPermission": "አዲስ ፈቃድ",
+    "itemLabel": "ፈቃድ",
+    "columns": {
+      "slug": "Slug",
+      "module": "ሞጁል",
+      "action": "ድርጊት",
+      "description": "መግለጫ",
+      "actions": "ድርጊቶች"
+    },
+    "empty": {
+      "title": "ምንም ፈቃድ አልተገኘም",
+      "description": "ፈቃዶች ከተፈጠሩ በኋላ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "actions": {
+      "view": "እይታ",
+      "edit": "አርትዕ",
+      "delete": "ሰርዝ",
+      "menuLabel": "ለ {name} ድርጊቶች"
+    },
+    "stats": {
+      "title": "ጠቅላላ ፈቃዶች",
+      "description": "በመድረኩ ላይ የተገለጹ ሁሉም ፈቃዶች"
+    },
+    "form": {
+      "createTitle": "አዲስ ፈቃድ",
+      "editTitle": "ፈቃድ አርትዕ",
+      "createDescription": "ልዩ slug፣ ሞጁል እና ድርጊት ያለው ፈቃድ ይፍጠሩ።",
+      "editDescription": "የፈቃዱን slug፣ ሞጁል፣ ድርጊት እና መግለጫ ያዘምኑ።",
+      "slug": "Slug",
+      "slugHelp": "በተለምዶ module.action የሆነ የትንሽ ፊደል መለያ (ለምሳሌ roles.read)።",
+      "slugPlaceholder": "roles.read",
+      "module": "ሞጁል",
+      "modulePlaceholder": "roles",
+      "action": "ድርጊት",
+      "actionPlaceholder": "read",
+      "description": "መግለጫ",
+      "descriptionPlaceholder": "አማራጭ መግለጫ",
+      "cancel": "ተው",
+      "create": "ፈቃድ ፍጠር",
+      "creating": "በመፍጠር ላይ...",
+      "save": "ለውጦችን አስቀምጥ",
+      "saving": "በመቀመጥ ላይ...",
+      "loading": "ፈቃድ በመጫን ላይ...",
+      "errors": {
+        "slugRequired": "Slug ያስፈልጋል።",
+        "moduleRequired": "ሞጁል ያስፈልጋል።",
+        "actionRequired": "ድርጊት ያስፈልጋል።",
+        "createFailed": "ፈቃድ መፍጠር አልተሳካም።",
+        "updateFailed": "ፈቃድ ማዘመን አልተሳካም።",
+        "loadFailed": "ፈቃድ መጫን አልተሳካም።"
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "ፈቃድ ተፈጥሯል",
+        "description": "አዲሱ ፈቃድ በመድረኩ ላይ አሁን ይገኛል።"
+      },
+      "updateSuccess": {
+        "title": "ፈቃድ ተዘምኗል",
+        "description": "ለውጦችዎ በተሳካ ሁኔታ ተቀምጠዋል።"
+      },
+      "deleteSuccess": {
+        "title": "ፈቃድ ተሰርዟል",
+        "description": "{name} ከመድረኩ ተሰርዟል።"
+      },
+      "loadFailed": {
+        "title": "ፈቃድ መጫን አልተቻለም",
+        "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+      },
+      "createFailed": {
+        "title": "ፈቃድ መፍጠር አልተቻለም",
+        "description": "ቅጹን ያረጋግጡና እንደገና ይሞክሩ።"
+      },
+      "updateFailed": {
+        "title": "ፈቃድ ማዘመን አልተቻለም",
+        "description": "ቅጹን ያረጋግጡና እንደገና ይሞክሩ።"
+      },
+      "deleteFailed": {
+        "title": "ፈቃድ መሰረዝ አልተቻለም",
+        "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
+      }
+    }
+  },
+  "adminEndpoints": {
+    "eyebrow": "API መዳረሻ",
+    "title": "Endpoints",
+    "description": "የ API መንገድ تعريفاتን፣ HTTP methods እና የተያያዙ ፈቃዶችን ይመልከቱ እና ያስተዳድሩ።",
+    "searchPlaceholder": "በ path፣ slug ወይም method ፈልግ...",
+    "newEndpoint": "አዲስ endpoint",
+    "itemLabel": "endpoint",
+    "columns": {
+      "method": "Method",
+      "path": "Path",
+      "slug": "Slug",
+      "status": "ሁኔታ",
+      "actions": "ድርጊቶች"
+    },
+    "status": {
+      "active": "ንቁ",
+      "inactive": "ቦዝ"
+    },
+    "empty": {
+      "title": "ምንም endpoint አልተገኘም",
+      "description": "Endpoints ከተመዘገቡ በኋላ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "actions": {
+      "view": "እይታ",
+      "edit": "አርትዕ",
+      "delete": "ሰርዝ",
+      "menuLabel": "ለ {name} ድርጊቶች"
+    },
+    "stats": {
+      "title": "ጠቅላላ endpoints",
+      "description": "በመድረኩ ላይ የተመዘገቡ ሁሉም API routes"
+    },
+    "form": {
+      "createTitle": "አዲስ endpoint",
+      "editTitle": "Endpoint አርትዕ",
+      "createDescription": "ልዩ slug፣ HTTP method እና path ያለው API route ይመዝግቡ።",
+      "editDescription": "Endpoint slug፣ method፣ path፣ ፈቃድ እና ሁኔታን ያዘምኑ።",
+      "slug": "Slug",
+      "slugHelp": "ይህን endpoint ለመጥቀስ የሚያገለግል የትንሽ ፊደል መለያ።",
+      "slugPlaceholder": "list-roles",
+      "method": "Method",
+      "path": "Path",
+      "pathHelp": "በ API ውስጥ እንደተገለጸው route path (ለምሳሌ /api/roles)።",
+      "pathPlaceholder": "/api/roles",
+      "description": "መግለጫ",
+      "descriptionPlaceholder": "አማራጭ መግለጫ",
+      "permission": "ፈቃድ",
+      "permissionHelp": "ይህን endpoint ለመድረስ አማራጭ ፈቃድ።",
+      "noPermission": "ፈቃድ የለም",
+      "isActive": "ንቁ",
+      "cancel": "ተው",
+      "create": "Endpoint ፍጠር",
+      "creating": "በመፍጠር ላይ...",
+      "save": "ለውጦችን አስቀምጥ",
+      "saving": "በመቀመጥ ላይ...",
+      "loading": "Endpoint በመጫን ላይ...",
+      "errors": {
+        "slugRequired": "Slug ያስፈልጋል።",
+        "pathRequired": "Path ያስፈልጋል።",
+        "createFailed": "Endpoint መፍጠር አልተሳካም።",
+        "updateFailed": "Endpoint ማዘመን አልተሳካም።",
+        "loadFailed": "Endpoint መጫን አልተሳካም።"
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "Endpoint ተፈጥሯል",
+        "description": "አዲሱ endpoint በመድረኩ ላይ ተመዝግቧል።"
+      },
+      "updateSuccess": {
+        "title": "Endpoint ተዘምኗል",
+        "description": "ለውጦችዎ በተሳካ ሁኔታ ተቀምጠዋል።"
+      },
+      "deleteSuccess": {
+        "title": "Endpoint ተሰርዟል",
+        "description": "{name} ከመድረኩ ተሰርዟል።"
+      },
+      "loadFailed": {
+        "title": "Endpoint መጫን አልተቻለም",
+        "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+      },
+      "createFailed": {
+        "title": "Endpoint መፍጠር አልተቻለም",
+        "description": "ቅጹን ያረጋግጡና እንደገና ይሞክሩ።"
+      },
+      "updateFailed": {
+        "title": "Endpoint ማዘመን አልተቻለም",
+        "description": "ቅጹን ያረጋግጡና እንደገና ይሞክሩ።"
+      },
+      "deleteFailed": {
+        "title": "Endpoint መሰረዝ አልተቻለም",
+        "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
+      }
+    }
   }
 }
