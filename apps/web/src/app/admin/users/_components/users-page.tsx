@@ -25,7 +25,6 @@ import { deleteUser, fetchUsers } from "@/lib/user-api";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import {
   adminBadgeGoldClass,
-  adminHeadingClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
 import { PERMISSIONS } from "@/lib/permissions";
@@ -148,7 +147,7 @@ export function UsersPage() {
       {
         id: "name",
         header: copy.columns.name,
-        cellClassName: `font-medium ${adminHeadingClass}`,
+        cellClassName: "text-slate-700",
         cell: (user) => formatUserName(user),
       },
       {

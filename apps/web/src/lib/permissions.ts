@@ -24,6 +24,26 @@ export const PERMISSIONS = {
   audit_logs: {
     read: "audit_logs.read",
   },
+  vehicle_types: {
+    read: "vehicle_types.read",
+    write: "vehicle_types.write",
+    delete: "vehicle_types.delete",
+  },
+  vehicles: {
+    read: "vehicles.read",
+    write: "vehicles.write",
+    delete: "vehicles.delete",
+  },
+  regions: {
+    read: "regions.read",
+    write: "regions.write",
+    delete: "regions.delete",
+  },
+  locations: {
+    read: "locations.read",
+    write: "locations.write",
+    delete: "locations.delete",
+  },
 } as const;
 
 export const ADMIN_PERMISSION_MODULES = Object.keys(PERMISSIONS) as Array<keyof typeof PERMISSIONS>;

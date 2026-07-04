@@ -105,7 +105,11 @@
         "roles": "Roles",
         "menus": "Menus",
         "notifications": "Notifications",
-        "audit_logs": "Audit logs"
+        "audit_logs": "Audit logs",
+        "vehicle_types": "Vehicle types",
+        "vehicles": "Vehicles",
+        "regions": "Regions",
+        "locations": "Locations"
       },
       "errors": {
         "loadFailed": "Failed to load permissions."
@@ -643,6 +647,436 @@
       }
     }
   },
+  "adminVehicleTypes": {
+    "eyebrow": "Vehicle management",
+    "title": "Vehicle types",
+    "description": "Define vehicle categories such as sedan, minibus, or truck.",
+    "searchPlaceholder": "Search by name or slug...",
+    "newType": "New vehicle type",
+    "itemLabel": "vehicle type",
+    "columns": {
+      "name": "Name",
+      "slug": "Slug",
+      "capacity": "Capacity",
+      "status": "Status",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "empty": {
+      "title": "No vehicle types found",
+      "description": "Vehicle types will appear here once they are created.",
+      "searchDescription": "Try a different search term."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to vehicle types is required to open this page.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "menuLabel": "Actions for {name}"
+    },
+    "form": {
+      "createTitle": "New vehicle type",
+      "editTitle": "Edit vehicle type",
+      "createDescription": "Create a vehicle type with a unique slug and at least an English name.",
+      "editDescription": "Update the vehicle type details and translations.",
+      "slug": "Slug",
+      "slugPlaceholder": "minibus",
+      "name": "Name",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "capacity": "Passenger capacity",
+      "capacityPlaceholder": "e.g. 12",
+      "active": "Active",
+      "optional": "(optional)",
+      "cancel": "Cancel",
+      "create": "Create type",
+      "creating": "Creating...",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "loading": "Loading vehicle type...",
+      "namePlaceholderEn": "Minibus",
+      "namePlaceholderAm": "ሚኒ ባስ",
+      "errors": {
+        "slugRequired": "Slug is required.",
+        "enNameRequired": "English name is required.",
+        "createFailed": "Failed to create vehicle type.",
+        "updateFailed": "Failed to update vehicle type.",
+        "loadFailed": "Failed to load vehicle type."
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "Vehicle type created",
+        "description": "{name} was added successfully."
+      },
+      "updateSuccess": {
+        "title": "Vehicle type updated",
+        "description": "{name} was saved successfully."
+      },
+      "deleteSuccess": {
+        "title": "Vehicle type deleted",
+        "description": "{name} was removed."
+      },
+      "deleteFailed": {
+        "title": "Delete failed",
+        "description": "Could not delete the vehicle type."
+      },
+      "loadFailed": {
+        "title": "Load failed",
+        "description": "Could not load the vehicle type."
+      }
+    }
+  },
+  "adminVehicles": {
+    "eyebrow": "Vehicle management",
+    "title": "Vehicles",
+    "description": "Manage fleet vehicles, plate numbers, and operational status.",
+    "searchPlaceholder": "Search by plate, make, model, or driver...",
+    "newVehicle": "New vehicle",
+    "itemLabel": "vehicle",
+    "filters": {
+      "type": "Vehicle type",
+      "typeAll": "All types",
+      "status": "Status",
+      "statusAll": "All statuses",
+      "assignment": "Assignment",
+      "assigned": "Assigned",
+      "unassigned": "Unassigned",
+      "all": "All vehicles"
+    },
+    "columns": {
+      "plate": "Plate number",
+      "type": "Type",
+      "driver": "Assigned driver",
+      "makeModel": "Make / model",
+      "year": "Year",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "maintenance": "Maintenance",
+      "retired": "Retired"
+    },
+    "empty": {
+      "title": "No vehicles found",
+      "description": "Vehicles will appear here once they are registered.",
+      "searchDescription": "Try a different search term."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to vehicles is required to open this page.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "menuLabel": "Actions for {name}"
+    },
+    "form": {
+      "createTitle": "New vehicle",
+      "editTitle": "Edit vehicle",
+      "createDescription": "Register a vehicle with a plate number and vehicle type.",
+      "editDescription": "Update vehicle details and operational status.",
+      "plateNumber": "Plate number",
+      "platePlaceholder": "AA-12345",
+      "vehicleType": "Vehicle type",
+      "vehicleTypePlaceholder": "Select type",
+      "assignedDriver": "Assigned driver",
+      "assignedDriverPlaceholder": "Select driver",
+      "noDriver": "No driver assigned",
+      "make": "Make",
+      "makePlaceholder": "Toyota",
+      "model": "Model",
+      "modelPlaceholder": "Hiace",
+      "year": "Year",
+      "yearPlaceholder": "2024",
+      "status": "Status",
+      "notes": "Notes",
+      "notesPlaceholder": "Optional notes",
+      "optional": "(optional)",
+      "cancel": "Cancel",
+      "create": "Create vehicle",
+      "creating": "Creating...",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "loading": "Loading vehicle...",
+      "errors": {
+        "plateRequired": "Plate number is required.",
+        "typeRequired": "Vehicle type is required.",
+        "createFailed": "Failed to create vehicle.",
+        "updateFailed": "Failed to update vehicle.",
+        "loadFailed": "Failed to load vehicle."
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "Vehicle created",
+        "description": "{name} was added successfully."
+      },
+      "updateSuccess": {
+        "title": "Vehicle updated",
+        "description": "{name} was saved successfully."
+      },
+      "deleteSuccess": {
+        "title": "Vehicle deleted",
+        "description": "{name} was removed."
+      },
+      "deleteFailed": {
+        "title": "Delete failed",
+        "description": "Could not delete the vehicle."
+      },
+      "loadFailed": {
+        "title": "Load failed",
+        "description": "Could not load the vehicle."
+      }
+    }
+  },
+  "adminRegions": {
+    "eyebrow": "Location management",
+    "title": "Regions",
+    "description": "Define administrative regions used to group dispatch locations.",
+    "searchPlaceholder": "Search by name...",
+    "newRegion": "New region",
+    "itemLabel": "region",
+    "columns": {
+      "name": "Name",
+      "status": "Status",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "empty": {
+      "title": "No regions found",
+      "description": "Regions will appear here once they are created.",
+      "searchDescription": "Try a different search term."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to regions is required to open this page.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "menuLabel": "Actions for {name}"
+    },
+    "stats": {
+      "title": "Total regions",
+      "description": "All administrative regions in the platform",
+      "activeTitle": "Active regions",
+      "activeDescription": "Regions available for location assignment",
+      "inactiveTitle": "Inactive regions",
+      "inactiveDescription": "Regions hidden from new assignments"
+    },
+    "form": {
+      "createTitle": "New region",
+      "editTitle": "Edit region",
+      "createDescription": "Create a region with at least an English name.",
+      "editDescription": "Update the region details and translations.",
+      "name": "Name",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "active": "Active",
+      "optional": "(optional)",
+      "cancel": "Cancel",
+      "create": "Create region",
+      "creating": "Creating...",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "loading": "Loading region...",
+      "namePlaceholderEn": "Addis Ababa",
+      "namePlaceholderAm": "አዲስ አበባ",
+      "errors": {
+        "enNameRequired": "English name is required.",
+        "createFailed": "Failed to create region.",
+        "updateFailed": "Failed to update region.",
+        "loadFailed": "Failed to load region."
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "Region created",
+        "description": "{name} was added successfully."
+      },
+      "updateSuccess": {
+        "title": "Region updated",
+        "description": "{name} was saved successfully."
+      },
+      "deleteSuccess": {
+        "title": "Region deleted",
+        "description": "{name} was removed."
+      },
+      "deleteFailed": {
+        "title": "Delete failed",
+        "description": "Could not delete the region."
+      },
+      "loadFailed": {
+        "title": "Load failed",
+        "description": "Could not load the region."
+      }
+    }
+  },
+  "adminLocations": {
+    "eyebrow": "Location management",
+    "title": "Locations",
+    "description": "Manage pickup and drop-off points with GPS coordinates.",
+    "searchPlaceholder": "Search by name or address...",
+    "newLocation": "New location",
+    "itemLabel": "location",
+    "filters": {
+      "region": "Region",
+      "regionAll": "All regions"
+    },
+    "columns": {
+      "name": "Name",
+      "region": "Region",
+      "coordinates": "GPS coordinates",
+      "address": "Address",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "empty": {
+      "title": "No locations found",
+      "description": "Locations will appear here once they are created.",
+      "searchDescription": "Try a different search term."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to locations is required to open this page.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "menuLabel": "Actions for {name}"
+    },
+    "stats": {
+      "title": "Total locations",
+      "description": "All pickup and drop-off points in the platform",
+      "activeTitle": "Active locations",
+      "activeDescription": "Locations available for dispatch",
+      "inactiveTitle": "Inactive locations",
+      "inactiveDescription": "Locations hidden from dispatch selection"
+    },
+    "mapView": {
+      "button": "View on map",
+      "title": "All locations",
+      "description": "{count} locations on the map",
+      "loading": "Loading map...",
+      "empty": "No locations to display",
+      "emptyDescription": "Add locations with GPS coordinates to see them on the map.",
+      "loadFailed": "Could not load locations for the map.",
+      "recenter": "Fit all",
+      "popup": {
+        "eyebrow": "Location",
+        "region": "Region",
+        "address": "Address",
+        "coordinates": "Coordinates"
+      }
+    },
+    "form": {
+      "createTitle": "New location",
+      "editTitle": "Edit location",
+      "createDescription": "Add a location with a region and GPS coordinates.",
+      "editDescription": "Update location details, region, and coordinates.",
+      "region": "Region",
+      "regionPlaceholder": "Select region",
+      "latitude": "Latitude",
+      "latitudePlaceholder": "8.9806",
+      "longitude": "Longitude",
+      "longitudePlaceholder": "38.7578",
+      "address": "Address",
+      "addressPlaceholder": "Optional street address",
+      "name": "Name",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "active": "Active",
+      "optional": "(optional)",
+      "cancel": "Cancel",
+      "create": "Create location",
+      "creating": "Creating...",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "loading": "Loading location...",
+      "namePlaceholderEn": "Bole Airport",
+      "namePlaceholderAm": "ቦሌ አውሮፕላን ማረፊያ",
+      "sections": {
+        "identity": "Location name",
+        "identityDescription": "How this location appears in dispatch lists and reports.",
+        "placement": "Placement",
+        "placementDescription": "Assign a region and optional street address.",
+        "coordinates": "GPS coordinates",
+        "coordinatesDescription": "Latitude and longitude used for routing and map display.",
+        "coordinatesPreview": "Coordinate preview",
+        "mapPickerHint": "Click the map or drag the pin to set the location. You can fine-tune the values below.",
+        "mapLoading": "Loading map...",
+        "mapEmpty": "Click the map to set a location",
+        "mapRecenter": "Recenter",
+        "isActiveTitle": "Active location",
+        "isActiveOn": "This location is available for dispatch.",
+        "isActiveOff": "This location is hidden from dispatch.",
+        "isActiveDescription": "Inactive locations remain in the system but cannot be selected for new dispatches."
+      },
+      "errors": {
+        "regionRequired": "Region is required.",
+        "enNameRequired": "English name is required.",
+        "latitudeRequired": "Valid latitude is required (-90 to 90).",
+        "longitudeRequired": "Valid longitude is required (-180 to 180).",
+        "createFailed": "Failed to create location.",
+        "updateFailed": "Failed to update location.",
+        "loadFailed": "Failed to load location."
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "Location created",
+        "description": "{name} was added successfully."
+      },
+      "updateSuccess": {
+        "title": "Location updated",
+        "description": "{name} was saved successfully."
+      },
+      "deleteSuccess": {
+        "title": "Location deleted",
+        "description": "{name} was removed."
+      },
+      "deleteFailed": {
+        "title": "Delete failed",
+        "description": "Could not delete the location."
+      },
+      "loadFailed": {
+        "title": "Load failed",
+        "description": "Could not load the location."
+      }
+    }
+  },
   "adminAuditLogs": {
     "eyebrow": "Access control",
     "title": "Audit logs",
@@ -690,7 +1124,11 @@
       "menus": "Menus",
       "notifications": "Notifications",
       "auth": "Authentication",
-      "audit_logs": "Audit logs"
+      "audit_logs": "Audit logs",
+      "vehicle_types": "Vehicle types",
+      "vehicles": "Vehicles",
+      "regions": "Regions",
+      "locations": "Locations"
     },
     "empty": {
       "title": "No audit entries found",

@@ -1,0 +1,15 @@
+.dispatch-map-marker.leaflet-marker-icon {
+  overflow: visible !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.dispatch-map-pin {
+  display: block;
+  pointer-events: none;
+}
+
+.dispatch-map-pin--legend {
+  width: 14px;
+  height: 18px;
+}

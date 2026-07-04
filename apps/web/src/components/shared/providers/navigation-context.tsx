@@ -39,8 +39,35 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   }, [locale]);
 
   useEffect(() => {
-    void loadMenus();
-  }, [loadMenus]);
+    let cancelled = false;
+
+    async function load() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const nextMenus = await fetchNavigationMenus(locale);
+        if (!cancelled) {
+          setMenus(nextMenus);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setMenus([]);
+          setError(err instanceof Error ? err.message : "Failed to load navigation.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    void load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [locale]);
 
   const flatMenus = useMemo(() => flattenMenus(menus), [menus]);
 

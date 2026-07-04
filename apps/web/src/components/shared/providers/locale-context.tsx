@@ -2,9 +2,9 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import {
-  DEFAULT_LOCALE,
   getLocaleLabel,
   getStoredLocale,
+  normalizeLocale,
   saveLocale,
   type SupportedLocale,
 } from "@/lib/locale";
@@ -18,19 +18,22 @@ type LocaleContextValue = {
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<SupportedLocale>(DEFAULT_LOCALE);
-
-  useEffect(() => {
-    setLocaleState(getStoredLocale());
-  }, []);
+  const [locale, setLocaleState] = useState<SupportedLocale>(() => getStoredLocale());
 
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);
 
   function setLocale(next: SupportedLocale) {
-    saveLocale(next);
-    setLocaleState(next);
+    const normalized = normalizeLocale(next);
+    setLocaleState((current) => {
+      if (current === normalized) {
+        return current;
+      }
+
+      saveLocale(normalized);
+      return normalized;
+    });
   }
 
   return (

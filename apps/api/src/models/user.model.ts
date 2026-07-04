@@ -26,6 +26,7 @@ export type ListUsersFilter = {
   search?: string;
   accountStatus?: AccountStatus;
   accountActivation?: AccountActivation;
+  roleSlug?: string;
 };
 
 const userWithRolesInclude = {
@@ -61,6 +62,16 @@ function buildUserWhere(filter?: ListUsersFilter): Prisma.UserWhereInput {
       { lastName: { contains: search, mode: "insensitive" } },
       { mobileNumber: { contains: search, mode: "insensitive" } },
     ];
+  }
+
+  if (filter.roleSlug?.trim()) {
+    where.authRoles = {
+      some: {
+        role: {
+          slug: filter.roleSlug.trim().toLowerCase(),
+        },
+      },
+    };
   }
 
   return where;
@@ -166,6 +177,18 @@ export async function updateUserAccountActivation(
     data: { accountActivation },
     include: userWithRolesInclude,
   });
+}
+
+export async function listDrivers(options?: { search?: string; take?: number }) {
+  return listUsers(
+    {
+      roleSlug: "driver",
+      accountStatus: "active",
+      accountActivation: "activated",
+      search: options?.search,
+    },
+    { skip: 0, take: options?.take ?? 200 },
+  );
 }
 
 export async function deleteUser(userId: string) {

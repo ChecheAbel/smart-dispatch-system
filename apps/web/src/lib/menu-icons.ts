@@ -3,8 +3,11 @@ import {
   Bell,
   Circle,
   Key,
+  Layers,
   LayoutDashboard,
   Mail,
+  Map,
+  MapPin,
   Menu,
   MessageSquare,
   Route,
@@ -12,6 +15,7 @@ import {
   Settings,
   Shield,
   ShieldCheck,
+  Truck,
   Users,
 } from "lucide-react";
 
@@ -36,6 +40,16 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   notifications: Bell,
   mail: Mail,
   "message-square": MessageSquare,
+  truck: Truck,
+  fleet: Truck,
+  "fleet-vehicles": Truck,
+  layers: Layers,
+  "vehicle-types": Layers,
+  map: Map,
+  "map-pin": MapPin,
+  "location-management": Map,
+  "location-regions": Map,
+  "location-sites": MapPin,
 };
 
 export function getMenuIcon(icon?: string | null): LucideIcon {

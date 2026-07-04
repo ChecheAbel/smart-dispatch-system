@@ -97,10 +97,14 @@ async function seedAdminUser() {
 
 import { seedAccessControl } from "./seed-access";
 import { seedNotifications } from "./seed-notifications";
+import { seedRegions } from "./seed-regions";
+import { seedLocations } from "./seed-locations";
 
 export async function seedDatabase() {
   await seedRoles();
   await seedAccessControl();
   await seedNotifications();
+  await seedRegions();
+  await seedLocations();
   await seedAdminUser();
 }

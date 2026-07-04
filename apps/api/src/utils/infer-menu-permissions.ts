@@ -1,4 +1,14 @@
-const ADMIN_MODULES = ["users", "roles", "menus", "notifications", "audit_logs"] as const;
+const ADMIN_MODULES = [
+  "users",
+  "roles",
+  "menus",
+  "notifications",
+  "audit_logs",
+  "vehicle_types",
+  "vehicles",
+  "regions",
+  "locations",
+] as const;
 
 type AdminModule = (typeof ADMIN_MODULES)[number];
 
@@ -20,6 +30,30 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
 
   if (normalizedSlug === "audit-logs") {
     return ["audit_logs.read"];
+  }
+
+  if (normalizedSlug === "fleet") {
+    return ["vehicle_types.read", "vehicles.read"];
+  }
+
+  if (normalizedSlug === "vehicle-types") {
+    return ["vehicle_types.read"];
+  }
+
+  if (normalizedSlug === "fleet-vehicles") {
+    return ["vehicles.read"];
+  }
+
+  if (normalizedSlug === "location-management") {
+    return ["regions.read", "locations.read"];
+  }
+
+  if (normalizedSlug === "location-regions") {
+    return ["regions.read"];
+  }
+
+  if (normalizedSlug === "location-sites") {
+    return ["locations.read"];
   }
 
   if (isAdminModule(normalizedSlug)) {

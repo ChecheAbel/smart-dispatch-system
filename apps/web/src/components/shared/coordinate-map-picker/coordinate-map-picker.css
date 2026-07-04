@@ -1,0 +1,18 @@
+.coordinate-map-picker .leaflet-container {
+  font-family: inherit;
+  background: #e8eef0;
+}
+
+.coordinate-map-picker .leaflet-control-attribution {
+  margin: 0;
+  padding: 4px 8px;
+  border-radius: 8px 0 0 0;
+  background: rgba(255, 255, 255, 0.92);
+  color: #64748b;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.coordinate-map-picker .leaflet-control-attribution a {
+  color: #1c3a34;
+}

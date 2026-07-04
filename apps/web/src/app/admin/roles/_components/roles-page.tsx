@@ -24,7 +24,7 @@ import {
 import { formatMessage, getAdminRolesMessages, type AdminRolesMessages } from "@/translations";
 import { deleteRole, fetchRoles } from "@/lib/role-api";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import { adminBadgeGoldClass, adminHeadingClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
+import { adminBadgeGoldClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
 import { PERMISSIONS } from "@/lib/permissions";
 import { DeleteConfirmModal } from "@/components/shared/delete-confirm-modal";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
@@ -147,7 +147,7 @@ export function RolesPage() {
       {
         id: "name",
         header: copy.columns.name,
-        cellClassName: `font-medium ${adminHeadingClass}`,
+        cellClassName: "text-slate-700",
         cell: (role) => role.name,
       },
       {

@@ -125,6 +125,101 @@ export interface Menu {
   children?: Menu[];
 }
 
+export interface VehicleTypeTranslation {
+  locale: string;
+  name: string;
+  description: string | null;
+}
+
+export interface VehicleType {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  locale: string;
+  passenger_capacity: number | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  translations?: VehicleTypeTranslation[];
+}
+
+export type VehicleStatus = "active" | "maintenance" | "retired";
+
+export interface Vehicle {
+  id: string;
+  plate_number: string;
+  vehicle_type_id: string;
+  vehicle_type?: {
+    id: string;
+    slug: string;
+    name: string;
+  };
+  assigned_driver_user_id: string | null;
+  assigned_driver: {
+    id: string;
+    name: string;
+    email: string;
+    mobile_number: string;
+  } | null;
+  make: string | null;
+  model: string | null;
+  year: number | null;
+  status: VehicleStatus;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VehicleDriverOption {
+  id: string;
+  name: string;
+  email: string;
+  mobile_number: string;
+}
+
+export interface RegionTranslation {
+  locale: string;
+  name: string;
+  description: string | null;
+}
+
+export interface Region {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  locale: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  translations?: RegionTranslation[];
+}
+
+export interface LocationTranslation {
+  locale: string;
+  name: string;
+  description: string | null;
+}
+
+export interface Location {
+  id: string;
+  region_id: string;
+  region?: {
+    id: string;
+    slug: string;
+    name: string;
+  };
+  name: string;
+  latitude: number;
+  longitude: number;
+  address: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  translations?: LocationTranslation[];
+}
+
 export interface Endpoint {
   id: string;
   slug: string;

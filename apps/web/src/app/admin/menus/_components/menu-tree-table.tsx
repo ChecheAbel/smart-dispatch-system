@@ -84,7 +84,7 @@ function MenuLabelCell({ menu, depth }: { menu: Menu; depth: number }) {
         <Icon className="size-4" />
       </div>
       <div className="min-w-0">
-        <p className="truncate font-medium text-[#1C3A34]">{menu.label}</p>
+        <p className="truncate text-slate-700">{menu.label}</p>
         {isGroup ? (
           <p className="truncate text-xs text-slate-400">Group</p>
         ) : null}

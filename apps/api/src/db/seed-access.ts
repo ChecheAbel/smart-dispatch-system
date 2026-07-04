@@ -20,6 +20,18 @@ const DEFAULT_PERMISSIONS = [
   { slug: "notifications.write", module: "notifications", action: "write", description: "Manage notification settings" },
   { slug: "notifications.delete", module: "notifications", action: "delete", description: "Delete notification resources" },
   { slug: "audit_logs.read", module: "audit_logs", action: "read", description: "View audit logs" },
+  { slug: "vehicle_types.read", module: "vehicle_types", action: "read", description: "View vehicle types" },
+  { slug: "vehicle_types.write", module: "vehicle_types", action: "write", description: "Create and update vehicle types" },
+  { slug: "vehicle_types.delete", module: "vehicle_types", action: "delete", description: "Delete vehicle types" },
+  { slug: "vehicles.read", module: "vehicles", action: "read", description: "View vehicles" },
+  { slug: "vehicles.write", module: "vehicles", action: "write", description: "Create and update vehicles" },
+  { slug: "vehicles.delete", module: "vehicles", action: "delete", description: "Delete vehicles" },
+  { slug: "regions.read", module: "regions", action: "read", description: "View regions" },
+  { slug: "regions.write", module: "regions", action: "write", description: "Create and update regions" },
+  { slug: "regions.delete", module: "regions", action: "delete", description: "Delete regions" },
+  { slug: "locations.read", module: "locations", action: "read", description: "View locations" },
+  { slug: "locations.write", module: "locations", action: "write", description: "Create and update locations" },
+  { slug: "locations.delete", module: "locations", action: "delete", description: "Delete locations" },
 ] as const;
 
 const REMOVED_MENU_SLUGS = ["permissions", "endpoints"] as const;
@@ -143,6 +155,72 @@ const DEFAULT_MENUS = [
       { locale: "am", label: "ኤስኤምኤስ" },
     ],
   },
+  {
+    slug: "fleet",
+    path: null,
+    icon: "truck",
+    sortOrder: 40,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "Vehicle Management" },
+      { locale: "am", label: "የተሽከርካሪ አስተዳደር" },
+    ],
+  },
+  {
+    slug: "vehicle-types",
+    path: "/admin/fleet/vehicle-types",
+    icon: "layers",
+    sortOrder: 10,
+    parentSlug: "fleet",
+    translations: [
+      { locale: "en", label: "Vehicle Types" },
+      { locale: "am", label: "የተሽከርካሪ አይነቶች" },
+    ],
+  },
+  {
+    slug: "fleet-vehicles",
+    path: "/admin/fleet/vehicles",
+    icon: "truck",
+    sortOrder: 20,
+    parentSlug: "fleet",
+    translations: [
+      { locale: "en", label: "Vehicles" },
+      { locale: "am", label: "ተሽከርካሪዎች" },
+    ],
+  },
+  {
+    slug: "location-management",
+    path: null,
+    icon: "map",
+    sortOrder: 50,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "Location Management" },
+      { locale: "am", label: "የቦታ አስተዳደር" },
+    ],
+  },
+  {
+    slug: "location-regions",
+    path: "/admin/locations/regions",
+    icon: "map",
+    sortOrder: 10,
+    parentSlug: "location-management",
+    translations: [
+      { locale: "en", label: "Regions" },
+      { locale: "am", label: "ክልሎች" },
+    ],
+  },
+  {
+    slug: "location-sites",
+    path: "/admin/locations/sites",
+    icon: "map-pin",
+    sortOrder: 20,
+    parentSlug: "location-management",
+    translations: [
+      { locale: "en", label: "Locations" },
+      { locale: "am", label: "ቦታዎች" },
+    ],
+  },
 ] as const;
 
 const DEFAULT_ENDPOINTS: Array<{
@@ -171,6 +249,27 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "notifications.sms.test", method: "POST", path: "/api/notifications/sms/test", description: "Send test SMS", permissionSlug: "notifications.write" },
   { slug: "audit_logs.list", method: "GET", path: "/api/audit-logs", description: "List audit logs", permissionSlug: "audit_logs.read" },
   { slug: "audit_logs.get", method: "GET", path: "/api/audit-logs/:id", description: "Get audit log entry", permissionSlug: "audit_logs.read" },
+  { slug: "vehicle_types.list", method: "GET", path: "/api/vehicle-types", description: "List vehicle types", permissionSlug: "vehicle_types.read" },
+  { slug: "vehicle_types.active", method: "GET", path: "/api/vehicle-types/active", description: "List active vehicle types", permissionSlug: "vehicle_types.read" },
+  { slug: "vehicle_types.create", method: "POST", path: "/api/vehicle-types", description: "Create vehicle type", permissionSlug: "vehicle_types.write" },
+  { slug: "vehicle_types.update", method: "PATCH", path: "/api/vehicle-types/:id", description: "Update vehicle type", permissionSlug: "vehicle_types.write" },
+  { slug: "vehicle_types.delete", method: "DELETE", path: "/api/vehicle-types/:id", description: "Delete vehicle type", permissionSlug: "vehicle_types.delete" },
+  { slug: "vehicles.list", method: "GET", path: "/api/vehicles", description: "List vehicles", permissionSlug: "vehicles.read" },
+  { slug: "vehicles.driver_options", method: "GET", path: "/api/vehicles/driver-options", description: "List assignable drivers", permissionSlug: "vehicles.read" },
+  { slug: "vehicles.get", method: "GET", path: "/api/vehicles/:id", description: "Get vehicle", permissionSlug: "vehicles.read" },
+  { slug: "vehicles.create", method: "POST", path: "/api/vehicles", description: "Create vehicle", permissionSlug: "vehicles.write" },
+  { slug: "vehicles.update", method: "PATCH", path: "/api/vehicles/:id", description: "Update vehicle", permissionSlug: "vehicles.write" },
+  { slug: "vehicles.delete", method: "DELETE", path: "/api/vehicles/:id", description: "Delete vehicle", permissionSlug: "vehicles.delete" },
+  { slug: "regions.list", method: "GET", path: "/api/regions", description: "List regions", permissionSlug: "regions.read" },
+  { slug: "regions.active", method: "GET", path: "/api/regions/active", description: "List active regions", permissionSlug: "regions.read" },
+  { slug: "regions.create", method: "POST", path: "/api/regions", description: "Create region", permissionSlug: "regions.write" },
+  { slug: "regions.update", method: "PATCH", path: "/api/regions/:id", description: "Update region", permissionSlug: "regions.write" },
+  { slug: "regions.delete", method: "DELETE", path: "/api/regions/:id", description: "Delete region", permissionSlug: "regions.delete" },
+  { slug: "locations.list", method: "GET", path: "/api/locations", description: "List locations", permissionSlug: "locations.read" },
+  { slug: "locations.get", method: "GET", path: "/api/locations/:id", description: "Get location", permissionSlug: "locations.read" },
+  { slug: "locations.create", method: "POST", path: "/api/locations", description: "Create location", permissionSlug: "locations.write" },
+  { slug: "locations.update", method: "PATCH", path: "/api/locations/:id", description: "Update location", permissionSlug: "locations.write" },
+  { slug: "locations.delete", method: "DELETE", path: "/api/locations/:id", description: "Delete location", permissionSlug: "locations.delete" },
 ];
 
 async function seedPermissions() {

@@ -20,7 +20,6 @@ import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import {
   adminBadgeGoldClass,
   adminBadgeSuccessClass,
-  adminHeadingClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
 import { PERMISSIONS } from "@/lib/permissions";

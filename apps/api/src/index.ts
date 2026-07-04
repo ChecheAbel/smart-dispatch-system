@@ -12,6 +12,10 @@ import { registerNotificationRoutes } from "./routes/notification.routes";
 import { registerPermissionRoutes } from "./routes/permission.routes";
 import { registerRoleRoutes } from "./routes/role.routes";
 import { registerUserRoutes } from "./routes/user.routes";
+import { registerLocationRoutes } from "./routes/location.routes";
+import { registerRegionRoutes } from "./routes/region.routes";
+import { registerVehicleRoutes } from "./routes/vehicle.routes";
+import { registerVehicleTypeRoutes } from "./routes/vehicle-type.routes";
 import { sendSuccess } from "./utils/response";
 
 dotenv.config();
@@ -30,6 +34,10 @@ registerPermissionRoutes(app);
 registerMenuRoutes(app);
 registerNotificationRoutes(app);
 registerAuditLogRoutes(app);
+registerVehicleTypeRoutes(app);
+registerVehicleRoutes(app);
+registerRegionRoutes(app);
+registerLocationRoutes(app);
 
 app.get("/api/health", (_req, res) => {
   sendSuccess(res, { status: "ok" }, { message: "Smart Dispatch System API is running" });

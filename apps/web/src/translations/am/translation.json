@@ -105,7 +105,11 @@
         "roles": "ሚናዎች",
         "menus": "ሜኑዎች",
         "notifications": "ማሳወቂያዎች",
-        "audit_logs": "የኦዲት መዝገቦች"
+        "audit_logs": "የኦዲት መዝገቦች",
+        "vehicle_types": "የተሽከርካሪ አይነቶች",
+        "vehicles": "ተሽከርካሪዎች",
+        "regions": "ክልሎች",
+        "locations": "ቦታዎች"
       },
       "errors": {
         "loadFailed": "ፈቃዶችን መጫን አልተሳካም።"
@@ -643,6 +647,436 @@
       }
     }
   },
+  "adminVehicleTypes": {
+    "eyebrow": "የተሽከርካሪ አስተዳደር",
+    "title": "የተሽከርካሪ አይነቶች",
+    "description": "ሴዳን፣ ሚኒ ባስ ወይም ትራክ ያሉ የተሽከርካሪ ምድቦችን ያስገቡ።",
+    "searchPlaceholder": "በስም ወይም ስላግ ይፈልጉ...",
+    "newType": "አዲስ የተሽከርካሪ አይነት",
+    "itemLabel": "የተሽከርካሪ አይነት",
+    "columns": {
+      "name": "ስም",
+      "slug": "ስላግ",
+      "capacity": "አቅም",
+      "status": "ሁኔታ",
+      "created": "ተፈጥሯል",
+      "actions": "ድርጊቶች"
+    },
+    "status": {
+      "active": "ንቁ",
+      "inactive": "እንቅስቃሴ የለውም"
+    },
+    "empty": {
+      "title": "ምንም የተሽከርካሪ አይነት አልተገኘም",
+      "description": "የተሽከርካሪ አይነቶች ከተፈጠሩ በኋላ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የተሽከርካሪ አይነቶችን ለማየት ፈቃድ ያስፈልጋል።",
+      "sessionHint": "ፈቃዶች ተለውጠው ከሆነ፣ ክፍያውን ለማደስ ይውጡና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶች ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
+    "actions": {
+      "edit": "አርትዕ",
+      "delete": "ሰርዝ",
+      "menuLabel": "ለ {name} ድርጊቶች"
+    },
+    "form": {
+      "createTitle": "አዲስ የተሽከርካሪ አይነት",
+      "editTitle": "የተሽከርካሪ አይነት አርትዕ",
+      "createDescription": "ልዩ ስላግ እና ቢያንስ የእንግሊዝኛ ስም ያለው የተሽከርካሪ አይነት ይፍጠሩ።",
+      "editDescription": "የተሽከርካሪ አይነት ዝርዝሮችን እና ትርጉሞችን ያዘምኑ።",
+      "slug": "ስላግ",
+      "slugPlaceholder": "minibus",
+      "name": "ስም",
+      "description": "መግለጫ",
+      "descriptionPlaceholder": "አማራጭ መግለጫ",
+      "capacity": "የተሳተፍ አቅም",
+      "capacityPlaceholder": "ለምሳሌ 12",
+      "active": "ንቁ",
+      "optional": "(አማራጭ)",
+      "cancel": "ሰርዝ",
+      "create": "አይነት ፍጠር",
+      "creating": "በመፍጠር ላይ...",
+      "save": "ለውጦችን አስቀምጥ",
+      "saving": "በማስቀመጥ ላይ...",
+      "loading": "የተሽከርካሪ አይነት በመጫን ላይ...",
+      "namePlaceholderEn": "Minibus",
+      "namePlaceholderAm": "ሚኒ ባስ",
+      "errors": {
+        "slugRequired": "ስላግ ያስፈልጋል።",
+        "enNameRequired": "የእንግሊዝኛ ስም ያስፈልጋል።",
+        "createFailed": "የተሽከርካሪ አይነት መፍጠር አልተሳካም።",
+        "updateFailed": "የተሽከርካሪ አይነት ማዘመን አልተሳካም።",
+        "loadFailed": "የተሽከርካሪ አይነት መጫን አልተሳካም።"
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "የተሽከርካሪ አይነት ተፈጥሯል",
+        "description": "{name} በተሳካ ሁኔታ ታክሏል።"
+      },
+      "updateSuccess": {
+        "title": "የተሽከርካሪ አይነት ተዘምኗል",
+        "description": "{name} በተሳካ ሁኔታ ተስቀምጧል።"
+      },
+      "deleteSuccess": {
+        "title": "የተሽከርካሪ አይነት ተሰርዟል",
+        "description": "{name} ተወግዷል።"
+      },
+      "deleteFailed": {
+        "title": "ማጥፋት አልተሳካም",
+        "description": "የተሽከርካሪ አይነት ማጥፋት አልተቻለም።"
+      },
+      "loadFailed": {
+        "title": "መጫን አልተሳካም",
+        "description": "የተሽከርካሪ አይነት መጫን አልተቻለም።"
+      }
+    }
+  },
+  "adminVehicles": {
+    "eyebrow": "የተሽከርካሪ አስተዳደር",
+    "title": "ተሽከርካሪዎች",
+    "description": "የመኪና ብዛት፣ የሰሌዳ ቁጥሮች እና የክወና ሁኔታን ያስተዳድሩ።",
+    "searchPlaceholder": "በሰሌዳ፣ በማምረት፣ በሞዴል ወይም በሹፌር ይፈልጉ...",
+    "newVehicle": "አዲስ ተሽከርካሪ",
+    "itemLabel": "ተሽከርካሪ",
+    "filters": {
+      "type": "የተሽከርካሪ አይነት",
+      "typeAll": "ሁሉም አይነቶች",
+      "status": "ሁኔታ",
+      "statusAll": "ሁሉም ሁኔታዎች",
+      "assignment": "መመደብ",
+      "assigned": "ተመድቧል",
+      "unassigned": "አልተመደበም",
+      "all": "ሁሉም ተሽከርካሪዎች"
+    },
+    "columns": {
+      "plate": "የሰሌዳ ቁጥር",
+      "type": "አይነት",
+      "driver": "የተመደበ ሹፌር",
+      "makeModel": "ማምረት / ሞዴል",
+      "year": "ዓመት",
+      "status": "ሁኔታ",
+      "actions": "ድርጊቶች"
+    },
+    "status": {
+      "active": "ንቁ",
+      "maintenance": "ጥገና",
+      "retired": "ከአገልግሎት ውጭ"
+    },
+    "empty": {
+      "title": "ምንም ተሽከርካሪ አልተገኘም",
+      "description": "ተሽከርካሪዎች ከተመዘገቡ በኋላ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት ተሽከርካሪዎችን ለማየት ፈቃድ ያስፈልጋል።",
+      "sessionHint": "ፈቃዶች ተለውጠው ከሆነ፣ ክፍያውን ለማደስ ይውጡና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶች ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
+    "actions": {
+      "edit": "አርትዕ",
+      "delete": "ሰርዝ",
+      "menuLabel": "ለ {name} ድርጊቶች"
+    },
+    "form": {
+      "createTitle": "አዲስ ተሽከርካሪ",
+      "editTitle": "ተሽከርካሪ አርትዕ",
+      "createDescription": "የሰሌዳ ቁጥር እና የተሽከርካሪ አይነት ያለው ተሽከርካሪ ይመዝግቡ።",
+      "editDescription": "የተሽከርካሪ ዝርዝሮችን እና የክወና ሁኔታን ያዘምኑ።",
+      "plateNumber": "የሰሌዳ ቁጥር",
+      "platePlaceholder": "AA-12345",
+      "vehicleType": "የተሽከርካሪ አይነት",
+      "vehicleTypePlaceholder": "አይነት ይምረጡ",
+      "assignedDriver": "የተመደበ ሹፌር",
+      "assignedDriverPlaceholder": "ሹፌር ይምረጡ",
+      "noDriver": "ሹፌር አልተመደበም",
+      "make": "ማምረት",
+      "makePlaceholder": "Toyota",
+      "model": "ሞዴል",
+      "modelPlaceholder": "Hiace",
+      "year": "ዓመት",
+      "yearPlaceholder": "2024",
+      "status": "ሁኔታ",
+      "notes": "ማስታወሻዎች",
+      "notesPlaceholder": "አማራጭ ማስታወሻዎች",
+      "optional": "(አማራጭ)",
+      "cancel": "ሰርዝ",
+      "create": "ተሽከርካሪ ፍጠር",
+      "creating": "በመፍጠር ላይ...",
+      "save": "ለውጦችን አስቀምጥ",
+      "saving": "በማስቀመጥ ላይ...",
+      "loading": "ተሽከርካሪ በመጫን ላይ...",
+      "errors": {
+        "plateRequired": "የሰሌዳ ቁጥር ያስፈልጋል።",
+        "typeRequired": "የተሽከርካሪ አይነት ያስፈልጋል።",
+        "createFailed": "ተሽከርካሪ መፍጠር አልተሳካም።",
+        "updateFailed": "ተሽከርካሪ ማዘመን አልተሳካም።",
+        "loadFailed": "ተሽከርካሪ መጫን አልተሳካም።"
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "ተሽከርካሪ ተፈጥሯል",
+        "description": "{name} በተሳካ ሁኔታ ታክሏል።"
+      },
+      "updateSuccess": {
+        "title": "ተሽከርካሪ ተዘምኗል",
+        "description": "{name} በተሳካ ሁኔታ ተስቀምጧል።"
+      },
+      "deleteSuccess": {
+        "title": "ተሽከርካሪ ተሰርዟል",
+        "description": "{name} ተወግዷል።"
+      },
+      "deleteFailed": {
+        "title": "ማጥፋት አልተሳካም",
+        "description": "ተሽከርካሪ ማጥፋት አልተቻለም።"
+      },
+      "loadFailed": {
+        "title": "መጫን አልተሳካም",
+        "description": "ተሽከርካሪ መጫን አልተቻለም።"
+      }
+    }
+  },
+  "adminRegions": {
+    "eyebrow": "የቦታ አስተዳደር",
+    "title": "ክልሎች",
+    "description": "የመላኪያ ቦታዎችን ለመመደብ የሚያገለግሉ አስተዳደራዊ ክልሎችን ይግለጹ።",
+    "searchPlaceholder": "በስም ፈልግ...",
+    "newRegion": "አዲስ ክልል",
+    "itemLabel": "ክልል",
+    "columns": {
+      "name": "ስም",
+      "status": "ሁኔታ",
+      "created": "ተፈጥሯል",
+      "actions": "ድርጊቶች"
+    },
+    "status": {
+      "active": "ንቁ",
+      "inactive": "እንቅስቃሴ የለውም"
+    },
+    "empty": {
+      "title": "ምንም ክልል አልተገኘም",
+      "description": "ክልሎች ከተፈጠሩ በኋላ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የክልሎችን የእይታ መዳረሻ ያስፈልጋል።",
+      "sessionHint": "ፈቃዶች ቀርፊው ከተቀየሩ በኋላ ክፍለ ጊዜዎን ለማደስ ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
+    "actions": {
+      "edit": "አርትዕ",
+      "delete": "ሰርዝ",
+      "menuLabel": "ለ {name} ድርጊቶች"
+    },
+    "stats": {
+      "title": "ጠቅላላ ክልሎች",
+      "description": "በመድረኩ ውስጥ ያሉ ሁሉም አስተዳደራዊ ክልሎች",
+      "activeTitle": "ንቁ ክልሎች",
+      "activeDescription": "ለቦታ መመደብ የሚገኙ ክልሎች",
+      "inactiveTitle": "እንቅስቃሴ የሌላቸው ክልሎች",
+      "inactiveDescription": "ከአዲስ መመደብ የተደበቁ ክልሎች"
+    },
+    "form": {
+      "createTitle": "አዲስ ክልል",
+      "editTitle": "ክልል አርትዕ",
+      "createDescription": "ቢያንስ የእንግሊዝኛ ስም ያለው ክልል ይፍጠሩ።",
+      "editDescription": "የክልል ዝርዝሮችን እና ትርጉሞችን ያዘምኑ።",
+      "name": "ስም",
+      "description": "መግለጫ",
+      "descriptionPlaceholder": "አማራጭ መግለጫ",
+      "active": "ንቁ",
+      "optional": "(አማራጭ)",
+      "cancel": "ሰርዝ",
+      "create": "ክልል ፍጠር",
+      "creating": "በመፍጠር ላይ...",
+      "save": "ለውጦችን አስቀምጥ",
+      "saving": "በማስቀመጥ ላይ...",
+      "loading": "ክልል በመጫን ላይ...",
+      "namePlaceholderEn": "Addis Ababa",
+      "namePlaceholderAm": "አዲስ አበባ",
+      "errors": {
+        "enNameRequired": "የእንግሊዝኛ ስም ያስፈልጋል።",
+        "createFailed": "ክልል መፍጠር አልተሳካም።",
+        "updateFailed": "ክልል ማዘመን አልተሳካም።",
+        "loadFailed": "ክልል መጫን አልተሳካም።"
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "ክልል ተፈጥሯል",
+        "description": "{name} በተሳካ ሁኔታ ታክሏል።"
+      },
+      "updateSuccess": {
+        "title": "ክልል ተዘምኗል",
+        "description": "{name} በተሳካ ሁኔታ ተቀምጧል።"
+      },
+      "deleteSuccess": {
+        "title": "ክልል ተሰርዟል",
+        "description": "{name} ተወግዷል።"
+      },
+      "deleteFailed": {
+        "title": "ማጥፋት አልተሳካም",
+        "description": "ክልል ማጥፋት አልተቻለም።"
+      },
+      "loadFailed": {
+        "title": "መጫን አልተሳካም",
+        "description": "ክልል መጫን አልተቻለም።"
+      }
+    }
+  },
+  "adminLocations": {
+    "eyebrow": "የቦታ አስተዳደር",
+    "title": "ቦታዎች",
+    "description": "የ GPS መጋጠሚያዎች ያላቸው የመላኪያ እና የመውረድ ቦታዎችን ያስተዳድሩ።",
+    "searchPlaceholder": "በስም ወይም በአድራሻ ፈልግ...",
+    "newLocation": "አዲስ ቦታ",
+    "itemLabel": "ቦታ",
+    "filters": {
+      "region": "ክልል",
+      "regionAll": "ሁሉም ክልሎች"
+    },
+    "columns": {
+      "name": "ስም",
+      "region": "ክልል",
+      "coordinates": "የ GPS መጋጠሚያ",
+      "address": "አድራሻ",
+      "status": "ሁኔታ",
+      "actions": "ድርጊቶች"
+    },
+    "status": {
+      "active": "ንቁ",
+      "inactive": "እንቅስቃሴ የለውም"
+    },
+    "empty": {
+      "title": "ምንም ቦታ አልተገኘም",
+      "description": "ቦታዎች ከተፈጠሩ በኋላ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የቦታዎችን የእይታ መዳረሻ ያስፈልጋል።",
+      "sessionHint": "ፈቃዶች ቀርፊው ከተቀየሩ በኋላ ክፍለ ጊዜዎን ለማደስ ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
+    "actions": {
+      "edit": "አርትዕ",
+      "delete": "ሰርዝ",
+      "menuLabel": "ለ {name} ድርጊቶች"
+    },
+    "stats": {
+      "title": "ጠቅላላ ቦታዎች",
+      "description": "በመድረኩ ውስጥ ያሉ ሁሉም የመላኪያ እና የመውረድ ቦታዎች",
+      "activeTitle": "ንቁ ቦታዎች",
+      "activeDescription": "ለመላኪያ የሚገኙ ቦታዎች",
+      "inactiveTitle": "እንቅስቃሴ የሌላቸው ቦታዎች",
+      "inactiveDescription": "ከመላኪያ ምርጫ የተደበቁ ቦታዎች"
+    },
+    "mapView": {
+      "button": "በካርታ ይመልከቱ",
+      "title": "ሁሉም ቦታዎች",
+      "description": "{count} ቦታዎች በካርታው ላይ",
+      "loading": "ካርታ በመጫን ላይ...",
+      "empty": "ለማሳየት ቦታ የለም",
+      "emptyDescription": "በካርታ ላይ ለማየት የ GPS መጋጠሚያ ያላቸው ቦታዎችን ይጨምሩ።",
+      "loadFailed": "ለካርታ ቦታዎችን መጫን አልተቻለም።",
+      "recenter": "ሁሉንም አሳይ",
+      "popup": {
+        "eyebrow": "ቦታ",
+        "region": "ክልል",
+        "address": "አድራሻ",
+        "coordinates": "መጋጠሚያዎች"
+      }
+    },
+    "form": {
+      "createTitle": "አዲስ ቦታ",
+      "editTitle": "ቦታ አርትዕ",
+      "createDescription": "ክልል እና የ GPS መጋጠሚያዎች ያለው ቦታ ይጨምሩ።",
+      "editDescription": "የቦታ ዝርዝሮችን፣ ክልልን እና መጋጠሚያዎችን ያዘምኑ።",
+      "region": "ክልል",
+      "regionPlaceholder": "ክልል ይምረጡ",
+      "latitude": "ኬላት",
+      "latitudePlaceholder": "8.9806",
+      "longitude": "ሎንጂትዩድ",
+      "longitudePlaceholder": "38.7578",
+      "address": "አድራሻ",
+      "addressPlaceholder": "አማራጭ የመንገድ አድራሻ",
+      "name": "ስም",
+      "description": "መግለጫ",
+      "descriptionPlaceholder": "አማራጭ መግለጫ",
+      "active": "ንቁ",
+      "optional": "(አማራጭ)",
+      "cancel": "ሰርዝ",
+      "create": "ቦታ ፍጠር",
+      "creating": "በመፍጠር ላይ...",
+      "save": "ለውጦችን አስቀምጥ",
+      "saving": "በማስቀመጥ ላይ...",
+      "loading": "ቦታ በመጫን ላይ...",
+      "namePlaceholderEn": "Bole Airport",
+      "namePlaceholderAm": "ቦሌ አውሮፕላን ማረፊያ",
+      "sections": {
+        "identity": "የቦታ ስም",
+        "identityDescription": "ቦታው በመላኪያ ዝርዝሮች እና በሪፖርቶች ላይ እንዴት እንደሚታይ ይግለጹ።",
+        "placement": "ቦታ መመደብ",
+        "placementDescription": "ክልል ይምረጡ እና አማራጭ የመንገድ አድራሻ ይጨምሩ።",
+        "coordinates": "የ GPS መጋጠሚያ",
+        "coordinatesDescription": "ለመንገድ መምሪያ እና ለካርታ ማሳያ የሚያገለግሉ ኬላት እና ሎንጂትዩድ።",
+        "coordinatesPreview": "የመጋጠሚያ ቅድመ እይታ",
+        "mapPickerHint": "ቦታውን ለመምረጥ ካርታውን ይጫኑ ወይም ፒኑን ይጎትቱ። ከታች ያሉትን እሴቶች ለትክክለኛ ማስተካከል ይችላሉ።",
+        "mapLoading": "ካርታ በመጫን ላይ...",
+        "mapEmpty": "ቦታ ለመምረጥ ካርታውን ይጫኑ",
+        "mapRecenter": "እንደገና ያተኩሩ",
+        "isActiveTitle": "ንቁ ቦታ",
+        "isActiveOn": "ይህ ቦታ ለመላኪያ ይገኛል።",
+        "isActiveOff": "ይህ ቦታ ከመላኪያ ተደብቋል።",
+        "isActiveDescription": "እንቅስቃሴ የሌላቸው ቦታዎች በስርዓቱ ይቆያሉ፣ ነገር ግን ለአዲስ መላኪያ ሊመረጡ አይችሉም።"
+      },
+      "errors": {
+        "regionRequired": "ክልል ያስፈልጋል።",
+        "enNameRequired": "የእንግሊዝኛ ስም ያስፈልጋል።",
+        "latitudeRequired": "ትክክለኛ ኬላት ያስፈልጋል (-90 እስከ 90)።",
+        "longitudeRequired": "ትክክለኛ ሎንጂትዩድ ያስፈልጋል (-180 እስከ 180)።",
+        "createFailed": "ቦታ መፍጠር አልተሳካም።",
+        "updateFailed": "ቦታ ማዘመን አልተሳካም።",
+        "loadFailed": "ቦታ መጫን አልተሳካም።"
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "ቦታ ተፈጥሯል",
+        "description": "{name} በተሳካ ሁኔታ ታክሏል።"
+      },
+      "updateSuccess": {
+        "title": "ቦታ ተዘምኗል",
+        "description": "{name} በተሳካ ሁኔታ ተቀምጧል።"
+      },
+      "deleteSuccess": {
+        "title": "ቦታ ተሰርዟል",
+        "description": "{name} ተወግዷል።"
+      },
+      "deleteFailed": {
+        "title": "ማጥፋት አልተሳካም",
+        "description": "ቦታ ማጥፋት አልተቻለም።"
+      },
+      "loadFailed": {
+        "title": "መጫን አልተሳካም",
+        "description": "ቦታ መጫን አልተቻለም።"
+      }
+    }
+  },
   "adminAuditLogs": {
     "eyebrow": "የመዳረሻ ቁጥጥር",
     "title": "የኦዲት መዝገቦች",
@@ -690,7 +1124,11 @@
       "menus": "ሜኑዎች",
       "notifications": "ማሳወቂያዎች",
       "auth": "ማረጋገጫ",
-      "audit_logs": "የኦዲት መዝገቦች"
+      "audit_logs": "የኦዲት መዝገቦች",
+      "vehicle_types": "የተሽከርካሪ አይነቶች",
+      "vehicles": "ተሽከርካሪዎች",
+      "regions": "ክልሎች",
+      "locations": "ቦታዎች"
     },
     "empty": {
       "title": "የኦዲት መዝገቦች አልተገኙም",

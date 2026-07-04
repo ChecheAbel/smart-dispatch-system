@@ -8,6 +8,10 @@ import type {
   AdminNotificationsSmsMessages,
   AdminRolesMessages,
   AdminUsersMessages,
+  AdminVehicleTypesMessages,
+  AdminVehiclesMessages,
+  AdminRegionsMessages,
+  AdminLocationsMessages,
   Translations,
 } from "./types";
 
@@ -23,6 +27,10 @@ export type {
   AdminNotificationsSmsMessages,
   AdminRolesMessages,
   AdminUsersMessages,
+  AdminVehicleTypesMessages,
+  AdminVehiclesMessages,
+  AdminRegionsMessages,
+  AdminLocationsMessages,
   Translations,
 };
 export { formatMessage } from "./format";
@@ -57,4 +65,22 @@ export function getAdminNotificationsSmsMessages(
   locale: SupportedLocale,
 ): AdminNotificationsSmsMessages {
   return getTranslations(locale).adminNotificationsSms;
+}
+
+export function getAdminVehicleTypesMessages(
+  locale: SupportedLocale,
+): AdminVehicleTypesMessages {
+  return getTranslations(locale).adminVehicleTypes;
+}
+
+export function getAdminVehiclesMessages(locale: SupportedLocale): AdminVehiclesMessages {
+  return getTranslations(locale).adminVehicles;
+}
+
+export function getAdminRegionsMessages(locale: SupportedLocale): AdminRegionsMessages {
+  return getTranslations(locale).adminRegions;
+}
+
+export function getAdminLocationsMessages(locale: SupportedLocale): AdminLocationsMessages {
+  return getTranslations(locale).adminLocations;
 }

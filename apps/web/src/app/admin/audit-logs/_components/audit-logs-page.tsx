@@ -44,7 +44,7 @@ import { PERMISSIONS } from "@/lib/permissions";
 import { getAdminAuditLogsMessages } from "@/translations";
 import { cn } from "@/lib/utils";
 
-const MODULE_OPTIONS = ["users", "roles", "menus", "notifications", "auth", "audit_logs"] as const;
+const MODULE_OPTIONS = ["users", "roles", "menus", "notifications", "auth", "audit_logs", "vehicle_types", "vehicles", "regions", "locations"] as const;
 const ACTION_OPTIONS: AuditAction[] = [
   "create",
   "update",
@@ -226,7 +226,7 @@ export function AuditLogsPage() {
         header: copy.columns.actor,
         cell: (log) => (
           <div className="min-w-0">
-            <p className={cn("truncate font-medium", adminHeadingClass)}>
+            <p className="truncate text-slate-700">
               {log.actor_name ?? copy.detail.systemActor}
             </p>
             <p className="truncate text-xs text-slate-500">{log.actor_email ?? "—"}</p>
