@@ -1,6 +1,11 @@
 import type { Permission } from "@smart-dispatch/types";
 
 export const PERMISSIONS = {
+  users: {
+    read: "users.read",
+    write: "users.write",
+    delete: "users.delete",
+  },
   roles: {
     read: "roles.read",
     write: "roles.write",

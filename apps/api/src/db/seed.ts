@@ -54,11 +54,26 @@ async function seedAdminUser() {
 
   if (!email || !password) return;
 
-  const existing = await prisma.user.findUnique({ where: { email } });
-  if (existing) return;
-
   const adminRole = await prisma.role.findUnique({ where: { slug: "admin" } });
   if (!adminRole) return;
+
+  const existing = await prisma.user.findUnique({ where: { email } });
+  if (existing) {
+    await prisma.authRole.upsert({
+      where: {
+        userId_roleId: {
+          userId: existing.id,
+          roleId: adminRole.id,
+        },
+      },
+      update: {},
+      create: {
+        userId: existing.id,
+        roleId: adminRole.id,
+      },
+    });
+    return;
+  }
 
   const passwordHash = await bcrypt.hash(password, 12);
   await prisma.user.create({

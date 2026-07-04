@@ -142,6 +142,165 @@
       }
     }
   },
+  "adminUsers": {
+    "eyebrow": "ሰዎች",
+    "title": "ተጠቃሚዎች",
+    "description": "የመድረክ መለያዎችን፣ የመዳረሻ ሁኔታን እና የሚና መመደቦችን ያስተዳድሩ።",
+    "searchPlaceholder": "በስም፣ ኢሜይል ወይም ስልክ ፈልግ...",
+    "newUser": "አዲስ ተጠቃሚ",
+    "itemLabel": "ተጠቃሚ",
+    "columns": {
+      "name": "ስም",
+      "email": "ኢሜይል",
+      "mobile": "ስልክ",
+      "roles": "ሚናዎች",
+      "status": "ሁኔታ",
+      "activation": "ማግበር",
+      "actions": "እርምጃዎች"
+    },
+    "status": {
+      "active": "ንቁ",
+      "suspended": "ታግዷል",
+      "deactivated": "ተሰናክሏል"
+    },
+    "activation": {
+      "pending": "በመጠባበቅ ላይ",
+      "activated": "ተገብቷል"
+    },
+    "empty": {
+      "title": "ምንም ተጠቃሚ አልተገኘም",
+      "description": "ተጠቃሚዎች ከተፈጠሩ በኋላ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "actions": {
+      "edit": "አርትዕ",
+      "roles": "ሚናዎች",
+      "delete": "ሰርዝ",
+      "menuLabel": "ለ {name} እርምጃዎች"
+    },
+    "stats": {
+      "title": "ጠቅላላ ተጠቃሚዎች",
+      "description": "በመድረኩ ላይ የተመዘገቡ ሁሉም መለያዎች",
+      "activeTitle": "ንቁ መለያዎች",
+      "activeDescription": "ንቁ ሁኔታ ያላቸው እና መግባት የሚችሉ ተጠቃሚዎች",
+      "inactiveTitle": "እንቅስቃሴ የሌላቸው መለያዎች",
+      "inactiveDescription": "ታግደው ወይም ተሰናክለው ያሉ ተጠቃሚዎች"
+    },
+    "form": {
+      "createTitle": "አዲስ ተጠቃሚ",
+      "editTitle": "ተጠቃሚ አርትዕ",
+      "createDescription": "የመጀመሪያ የይለፍ ቃል ያለው የመድረክ መለያ ይፍጠሩ።",
+      "editDescription": "የመለያ ዝርዝሮችን እና የመዳረሻ ሁኔታን ያዘምኑ።",
+      "email": "ኢሜይል",
+      "emailPlaceholder": "user@example.com",
+      "password": "የይለፍ ቃል",
+      "passwordPlaceholder": "ቢያንስ 8 ቁምፊዎች",
+      "firstName": "የመጀመሪያ ስም",
+      "firstNamePlaceholder": "አበበ",
+      "middleName": "የአባት ስም",
+      "middleNamePlaceholder": "አማራጭ",
+      "lastName": "የአያት ስም",
+      "lastNamePlaceholder": "ከበደ",
+      "mobile": "ስልክ ቁጥር",
+      "mobilePlaceholder": "912345678",
+      "mobileHelp": "ኢትዮ ቴሌኮም (9…) ወይም ሳፋሪኮም (7…)። ያለ ዜሮ መጀመሪያ 9 አሃዝ ቁጥሮችን ያስገቡ።",
+      "accountStatus": "የመለያ ሁኔታ",
+      "accountActivation": "ማግበር",
+      "accountSection": "የመለያ ምስክር ወረቀቶች",
+      "accountSectionDescription": "ለአዲሱ መለያ የመግቢያ ኢሜይል እና የመጀመሪያ የይለፍ ቃል።",
+      "profileSection": "መገለጫ",
+      "profileSectionDescription": "በመድረኩ ላይ የሚታዩ የግል ዝርዝሮች።",
+      "accessSection": "የመዳረሻ ሁኔታ",
+      "accessSectionDescription": "መለያው መግባት እና መድረኩን መጠቀም እንደሚችል ይቆጣጠሩ።",
+      "activationTitle": "የመለያ ማግበር",
+      "activationOn": "ይህ ተጠቃሚ መለያውን አግብቷል።",
+      "activationOff": "ለዚህ ተጠቃሚ ማግበር አሁንም በመጠባበቅ ላይ ነው።",
+      "statusDescriptions": {
+        "active": "ተጠቃሚ መግባት እና መድረኩን በመደበኛ ሁኔታ መጠቀም ይችላል።",
+        "suspended": "መለያው እስኪመለስ ድረስ መግቢያ ታግዷል።",
+        "deactivated": "መለያው ተሰናክሏል እና ከንቁ አጠቃቀም ውጭ ነው።"
+      },
+      "rolesSection": "ሚናዎች",
+      "rolesSectionDescription": "ይህ ተጠቃሚ ምን ሞጁሎች እና እርምጃዎች መድረስ እንደሚችል ሚናዎችን ይመድቡ።",
+      "roleNoneOption": "ምንም ሚና አልተመደበም",
+      "optional": "(አማራጭ)",
+      "cancel": "ሰርዝ",
+      "create": "ተጠቃሚ ፍጠር",
+      "creating": "በመፍጠር ላይ...",
+      "save": "ለውጦችን አስቀምጥ",
+      "saving": "በማስቀመጥ ላይ...",
+      "loading": "ተጠቃሚ በመጫን ላይ...",
+      "errors": {
+        "emailRequired": "ኢሜይል ያስፈልጋል።",
+        "passwordRequired": "የይለፍ ቃል ያስፈልጋል።",
+        "passwordMinLength": "የይለፍ ቃል ቢያንስ 8 ቁምፊ መሆን አለበት።",
+        "firstNameRequired": "የመጀመሪያ ስም ያስፈልጋል።",
+        "lastNameRequired": "የአያት ስም ያስፈልጋል።",
+        "mobileRequired": "ስልክ ቁጥር ያስፈልጋል።",
+        "mobileInvalid": "በ 9 (ኢትዮ ቴሌኮም) ወይም በ 7 (ሳፋሪኮም) የሚጀምር ትክክለኛ 9-አሃዝ ቁጥር ያስገቡ።",
+        "createFailed": "ተጠቃሚ መፍጠር አልተቻለም።",
+        "updateFailed": "ተጠቃሚ ማዘመን አልተቻለም።",
+        "loadFailed": "ተጠቃሚ መጫን አልተቻለም።"
+      }
+    },
+    "roles": {
+      "title": "የተጠቃሚ ሚናዎች",
+      "description": "{name} የተመደቡባቸውን ሚናዎች ይምረጡ።",
+      "descriptionFallback": "ለዚህ ተጠቃሚ የተመደቡ ሚናዎችን ይምረጡ።",
+      "loading": "ሚናዎች በመጫን ላይ...",
+      "save": "ሚናዎችን አስቀምጥ",
+      "saving": "በማስቀመጥ ላይ...",
+      "cancel": "ሰርዝ",
+      "selectedSummary": "{selected} ከ {total} ሚናዎች ተመርጠዋል",
+      "errors": {
+        "loadFailed": "ሚናዎች መጫን አልተቻለም።"
+      },
+      "toast": {
+        "updateSuccess": {
+          "title": "ሚናዎች ተዘምነዋል",
+          "description": "የተጠቃሚው ሚናዎች በተሳካ ሁኔታ ተቀምጠዋል።"
+        },
+        "updateFailed": {
+          "title": "ሚናዎች ማዘመን አልተቻለም",
+          "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
+        },
+        "loadFailed": {
+          "title": "ሚናዎች መጫን አልተቻለም",
+          "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+        }
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "ተጠቃሚ ተፈጥሯል",
+        "description": "አዲሱ መለያ በመድረኩ ላይ አሁን ይገኛል።"
+      },
+      "updateSuccess": {
+        "title": "ተጠቃሚ ተዘምኗል",
+        "description": "ለውጦችዎ በተሳካ ሁኔታ ተቀምጠዋል።"
+      },
+      "deleteSuccess": {
+        "title": "ተጠቃሚ ተሰርዟል",
+        "description": "{name} ከመድረኩ ተሰርዟል።"
+      },
+      "loadFailed": {
+        "title": "ተጠቃሚ መጫን አልተቻለም",
+        "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+      },
+      "createFailed": {
+        "title": "ተጠቃሚ መፍጠር አልተቻለም",
+        "description": "ቅጹን ያረጋግጡና እንደገና ይሞክሩ።"
+      },
+      "updateFailed": {
+        "title": "ተጠቃሚ ማዘመን አልተቻለም",
+        "description": "ቅጹን ያረጋግጡና እንደገና ይሞክሩ።"
+      },
+      "deleteFailed": {
+        "title": "ተጠቃሚ መሰረዝ አልተቻለም",
+        "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
+      }
+    }
+  },
   "adminMenus": {
     "eyebrow": "አሰሳ",
     "title": "ሜኑዎች",

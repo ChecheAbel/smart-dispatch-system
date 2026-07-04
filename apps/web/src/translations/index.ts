@@ -4,6 +4,7 @@ import en from "./en/translation.json";
 import type {
   AdminMenusMessages,
   AdminRolesMessages,
+  AdminUsersMessages,
   Translations,
 } from "./types";
 
@@ -15,6 +16,7 @@ const translations: Record<SupportedLocale, Translations> = {
 export type {
   AdminMenusMessages,
   AdminRolesMessages,
+  AdminUsersMessages,
   Translations,
 };
 export { formatMessage } from "./format";
@@ -29,4 +31,8 @@ export function getAdminRolesMessages(locale: SupportedLocale): AdminRolesMessag
 
 export function getAdminMenusMessages(locale: SupportedLocale): AdminMenusMessages {
   return getTranslations(locale).adminMenus;
+}
+
+export function getAdminUsersMessages(locale: SupportedLocale): AdminUsersMessages {
+  return getTranslations(locale).adminUsers;
 }

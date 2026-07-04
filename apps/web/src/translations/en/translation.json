@@ -142,6 +142,165 @@
       }
     }
   },
+  "adminUsers": {
+    "eyebrow": "People",
+    "title": "Users",
+    "description": "Manage platform accounts, access status, and role assignments.",
+    "searchPlaceholder": "Search by name, email, or mobile...",
+    "newUser": "New user",
+    "itemLabel": "user",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "mobile": "Mobile",
+      "roles": "Roles",
+      "status": "Status",
+      "activation": "Activation",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "deactivated": "Deactivated"
+    },
+    "activation": {
+      "pending": "Pending",
+      "activated": "Activated"
+    },
+    "empty": {
+      "title": "No users found",
+      "description": "Users will appear here once they are created.",
+      "searchDescription": "Try a different search term."
+    },
+    "actions": {
+      "edit": "Edit",
+      "roles": "Roles",
+      "delete": "Delete",
+      "menuLabel": "Actions for {name}"
+    },
+    "stats": {
+      "title": "Total users",
+      "description": "All accounts registered in the platform",
+      "activeTitle": "Active accounts",
+      "activeDescription": "Users who can sign in with an active status",
+      "inactiveTitle": "Inactive accounts",
+      "inactiveDescription": "Suspended or deactivated users"
+    },
+    "form": {
+      "createTitle": "New user",
+      "editTitle": "Edit user",
+      "createDescription": "Create a platform account with profile details and an initial password.",
+      "editDescription": "Update account details and access status.",
+      "email": "Email",
+      "emailPlaceholder": "user@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "firstName": "First name",
+      "firstNamePlaceholder": "Abebe",
+      "middleName": "Middle name",
+      "middleNamePlaceholder": "Optional",
+      "lastName": "Last name",
+      "lastNamePlaceholder": "Kebede",
+      "mobile": "Mobile number",
+      "mobilePlaceholder": "912345678",
+      "mobileHelp": "Ethio Telecom (9…) or Safaricom (7…). Enter 9 digits without the leading zero.",
+      "accountStatus": "Account status",
+      "accountActivation": "Activation",
+      "accountSection": "Account credentials",
+      "accountSectionDescription": "Sign-in email and initial password for the new account.",
+      "profileSection": "Profile",
+      "profileSectionDescription": "Personal details shown across the platform.",
+      "accessSection": "Access status",
+      "accessSectionDescription": "Control whether the account can sign in and use the platform.",
+      "activationTitle": "Account activation",
+      "activationOn": "This user has completed account activation.",
+      "activationOff": "Activation is still pending for this user.",
+      "statusDescriptions": {
+        "active": "User can sign in and access the platform normally.",
+        "suspended": "Sign-in is blocked until the account is restored.",
+        "deactivated": "Account is disabled and removed from active use."
+      },
+      "rolesSection": "Roles",
+      "rolesSectionDescription": "Assign roles to control what modules and actions this user can access.",
+      "roleNoneOption": "No role assigned",
+      "optional": "(optional)",
+      "cancel": "Cancel",
+      "create": "Create user",
+      "creating": "Creating...",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "loading": "Loading user...",
+      "errors": {
+        "emailRequired": "Email is required.",
+        "passwordRequired": "Password is required.",
+        "passwordMinLength": "Password must be at least 8 characters.",
+        "firstNameRequired": "First name is required.",
+        "lastNameRequired": "Last name is required.",
+        "mobileRequired": "Mobile number is required.",
+        "mobileInvalid": "Enter a valid 9-digit number starting with 9 (Ethio Telecom) or 7 (Safaricom).",
+        "createFailed": "Failed to create user.",
+        "updateFailed": "Failed to update user.",
+        "loadFailed": "Failed to load user."
+      }
+    },
+    "roles": {
+      "title": "User roles",
+      "description": "Choose which roles {name} is assigned.",
+      "descriptionFallback": "Choose which roles this user is assigned.",
+      "loading": "Loading roles...",
+      "save": "Save roles",
+      "saving": "Saving...",
+      "cancel": "Cancel",
+      "selectedSummary": "{selected} of {total} roles selected",
+      "errors": {
+        "loadFailed": "Failed to load roles."
+      },
+      "toast": {
+        "updateSuccess": {
+          "title": "Roles updated",
+          "description": "This user's roles have been saved successfully."
+        },
+        "updateFailed": {
+          "title": "Could not update roles",
+          "description": "Please try again in a moment."
+        },
+        "loadFailed": {
+          "title": "Could not load roles",
+          "description": "Please try again or refresh the page."
+        }
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "User created",
+        "description": "The new account is now available in the platform."
+      },
+      "updateSuccess": {
+        "title": "User updated",
+        "description": "Your changes have been saved successfully."
+      },
+      "deleteSuccess": {
+        "title": "User deleted",
+        "description": "{name} was removed from the platform."
+      },
+      "loadFailed": {
+        "title": "Could not load user",
+        "description": "Please try again or refresh the page."
+      },
+      "createFailed": {
+        "title": "Could not create user",
+        "description": "Please check the form and try again."
+      },
+      "updateFailed": {
+        "title": "Could not update user",
+        "description": "Please check the form and try again."
+      },
+      "deleteFailed": {
+        "title": "Could not delete user",
+        "description": "Please try again in a moment."
+      }
+    }
+  },
   "adminMenus": {
     "eyebrow": "Navigation",
     "title": "Menus",
