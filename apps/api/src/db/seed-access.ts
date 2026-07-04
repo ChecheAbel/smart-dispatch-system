@@ -16,6 +16,9 @@ const DEFAULT_PERMISSIONS = [
   { slug: "menus.read", module: "menus", action: "read", description: "View menus" },
   { slug: "menus.write", module: "menus", action: "write", description: "Create and update menus" },
   { slug: "menus.delete", module: "menus", action: "delete", description: "Delete menus" },
+  { slug: "notifications.read", module: "notifications", action: "read", description: "View notification settings" },
+  { slug: "notifications.write", module: "notifications", action: "write", description: "Manage notification settings" },
+  { slug: "notifications.delete", module: "notifications", action: "delete", description: "Delete notification resources" },
 ] as const;
 
 const REMOVED_MENU_SLUGS = ["permissions", "endpoints"] as const;
@@ -95,6 +98,39 @@ const DEFAULT_MENUS = [
       { locale: "am", label: "ሜኑዎች" },
     ],
   },
+  {
+    slug: "notifications",
+    path: null,
+    icon: "bell",
+    sortOrder: 30,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "Notifications" },
+      { locale: "am", label: "ማሳወቂያዎች" },
+    ],
+  },
+  {
+    slug: "notifications-email",
+    path: "/admin/notifications/email",
+    icon: "mail",
+    sortOrder: 10,
+    parentSlug: "notifications",
+    translations: [
+      { locale: "en", label: "Email" },
+      { locale: "am", label: "ኢሜይል" },
+    ],
+  },
+  {
+    slug: "notifications-sms",
+    path: "/admin/notifications/sms",
+    icon: "message-square",
+    sortOrder: 20,
+    parentSlug: "notifications",
+    translations: [
+      { locale: "en", label: "SMS" },
+      { locale: "am", label: "ኤስኤምኤስ" },
+    ],
+  },
 ] as const;
 
 const DEFAULT_ENDPOINTS: Array<{
@@ -116,6 +152,11 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "menus.update", method: "PATCH", path: "/api/menus/:id", description: "Update menu", permissionSlug: "menus.write" },
   { slug: "menus.delete", method: "DELETE", path: "/api/menus/:id", description: "Delete menu", permissionSlug: "menus.delete" },
   { slug: "menus.navigation", method: "GET", path: "/api/menus/navigation", description: "Navigation menu for current user", permissionSlug: "menus.read" },
+  { slug: "notifications.email.get", method: "GET", path: "/api/notifications/email", description: "Get email notification configuration", permissionSlug: "notifications.read" },
+  { slug: "notifications.email.update", method: "PATCH", path: "/api/notifications/email", description: "Update email notification configuration", permissionSlug: "notifications.write" },
+  { slug: "notifications.sms.get", method: "GET", path: "/api/notifications/sms", description: "Get SMS notification configuration", permissionSlug: "notifications.read" },
+  { slug: "notifications.sms.update", method: "PATCH", path: "/api/notifications/sms", description: "Update SMS notification configuration", permissionSlug: "notifications.write" },
+  { slug: "notifications.sms.test", method: "POST", path: "/api/notifications/sms/test", description: "Send test SMS", permissionSlug: "notifications.write" },
 ];
 
 async function seedPermissions() {

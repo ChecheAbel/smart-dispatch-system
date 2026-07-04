@@ -103,7 +103,8 @@
       "modules": {
         "users": "Users",
         "roles": "Roles",
-        "menus": "Menus"
+        "menus": "Menus",
+        "notifications": "Notifications"
       },
       "errors": {
         "loadFailed": "Failed to load permissions."
@@ -436,6 +437,208 @@
       "deleteFailed": {
         "title": "Could not delete menu",
         "description": "Please try again in a moment."
+      }
+    }
+  },
+  "adminNotificationsEmail": {
+    "eyebrow": "Notifications",
+    "title": "Email configuration",
+    "description": "Configure outbound email delivery settings for platform notifications.",
+    "loading": "Loading email configuration...",
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to notifications is required to open this page. Ask an administrator to grant the notifications.read permission for your role.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "providers": [
+      { "value": "smtp", "label": "SMTP" },
+      { "value": "sendgrid", "label": "SendGrid" },
+      { "value": "mailgun", "label": "Mailgun" }
+    ],
+    "providerDescriptions": {
+      "smtp": "Deliver email through a standard SMTP server.",
+      "sendgrid": "Deliver email using the SendGrid API.",
+      "mailgun": "Deliver email using the Mailgun API."
+    },
+    "sections": {
+      "configuration": {
+        "title": "Email configuration",
+        "description": "Choose your email provider and configure sender details and credentials."
+      },
+      "credentials": {
+        "note": "Credentials are encrypted at rest and only used for outbound email delivery."
+      }
+    },
+    "form": {
+      "statusTitle": "Email notifications",
+      "statusDescription": "Enable or disable email delivery for the platform.",
+      "enabled": "Enabled",
+      "provider": "Provider",
+      "providerHint": "Select how outbound notification emails are delivered.",
+      "fromEmail": "From email",
+      "fromEmailHint": "Address used as the sender on outbound emails.",
+      "fromEmailPlaceholder": "noreply@yourdomain.com",
+      "fromName": "From name",
+      "fromNameHint": "Display name recipients see in their inbox.",
+      "fromNamePlaceholder": "Your organization name",
+      "replyTo": "Reply-to email",
+      "replyToHint": "Optional address for replies to notification emails.",
+      "replyToPlaceholder": "support@yourdomain.com",
+      "smtpHost": "SMTP host",
+      "smtpHostHint": "Hostname of your SMTP server.",
+      "smtpHostPlaceholder": "smtp.yourdomain.com",
+      "smtpPort": "SMTP port",
+      "smtpPortHint": "Usually 587 for TLS or 465 for SSL.",
+      "smtpPortPlaceholder": "587",
+      "smtpUsername": "SMTP username",
+      "smtpUsernameHint": "Login username for SMTP authentication.",
+      "smtpUsernamePlaceholder": "smtp-user",
+      "smtpPassword": "SMTP password",
+      "smtpPasswordHint": "Password for SMTP authentication.",
+      "smtpPasswordPlaceholder": "Enter SMTP password",
+      "apiKey": "API key",
+      "apiKeyHint": "API key from your email provider dashboard.",
+      "apiKeyPlaceholder": "Enter provider API key",
+      "credentialSavedPlaceholder": "Saved — leave blank to keep current value",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "showApiKey": "Show API key",
+      "hideApiKey": "Hide API key",
+      "save": "Save configuration",
+      "saving": "Saving..."
+    },
+    "errors": {
+      "loadFailed": "Failed to load email configuration."
+    },
+    "validation": {
+      "title": "Check required fields",
+      "description": "Please fix the highlighted fields before saving.",
+      "fromEmailRequired": "From email is required.",
+      "fromEmailInvalid": "Enter a valid from email address.",
+      "fromNameRequired": "From name is required.",
+      "replyToInvalid": "Enter a valid reply-to email address.",
+      "smtpHostRequired": "SMTP host is required.",
+      "smtpPortRequired": "SMTP port is required.",
+      "smtpPortInvalid": "SMTP port must be a number between 1 and 65535.",
+      "smtpUsernameRequired": "SMTP username is required.",
+      "smtpPasswordRequired": "SMTP password is required.",
+      "apiKeyRequired": "API key is required."
+    },
+    "toast": {
+      "updateSuccess": {
+        "title": "Email configuration saved",
+        "description": "Your email notification settings have been updated."
+      },
+      "updateFailed": {
+        "title": "Could not save email configuration",
+        "description": "Please check the form and try again."
+      },
+      "loadFailed": {
+        "title": "Could not load email configuration",
+        "description": "Please try again or refresh the page."
+      }
+    }
+  },
+  "adminNotificationsSms": {
+    "eyebrow": "Notifications",
+    "title": "SMS configuration",
+    "description": "Configure AfroSMS (AfroMessage) for outbound SMS delivery in Ethiopia.",
+    "loading": "Loading SMS configuration...",
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to notifications is required to open this page. Ask an administrator to grant the notifications.read permission for your role.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "provider": {
+      "name": "AfroSMS",
+      "description": "Ethiopian SMS gateway powered by AfroMessage. Messages are sent via GET with your identifier, sender name, and API token."
+    },
+    "status": {
+      "enabled": "SMS enabled",
+      "disabled": "SMS disabled",
+      "credentialsConfigured": "Credentials saved"
+    },
+    "sections": {
+      "delivery": {
+        "title": "AfroSMS configuration",
+        "description": "Set your AfroMessage identifier, sender name, and API token.",
+        "fromIdHint": "UUID identifier from your AfroMessage dashboard (the from parameter).",
+        "senderHint": "Registered sender name shown on outbound messages (the sender parameter)."
+      },
+      "credentials": {
+        "title": "API credentials",
+        "description": "Store your AfroMessage API token securely. Leave blank to keep the existing saved value.",
+        "authTokenHint": "Bearer token from AfroMessage used to authorize send requests.",
+        "note": "Credentials are encrypted at rest and only used for AfroSMS delivery."
+      },
+      "test": {
+        "title": "Send test SMS",
+        "description": "Send a test message using your saved configuration. SMS does not need to be enabled for testing.",
+        "phone": "Recipient phone number",
+        "phoneHint": "Ethiopian mobile number including country code, e.g. +2519XXXXXXXX.",
+        "phonePlaceholder": "+2519XXXXXXXX",
+        "fixedMessageLabel": "Test message",
+        "fixedMessage": "Smart Dispatch test message. SMS configuration is working.",
+        "fixedMessageNote": "A fixed test message is sent to prevent abuse.",
+        "send": "Send test SMS",
+        "sending": "Sending...",
+        "saveFirst": "Save your identifier, sender name, and API token before sending a test."
+      }
+    },
+    "form": {
+      "statusTitle": "SMS notifications",
+      "statusDescription": "Enable or disable SMS delivery for the platform.",
+      "enabled": "Enabled",
+      "fromId": "Identifier (from)",
+      "fromIdPlaceholder": "Your AfroMessage identifier",
+      "sender": "Sender name",
+      "senderPlaceholder": "Your registered sender name",
+      "authToken": "API token",
+      "authTokenPlaceholder": "Paste your AfroMessage API token",
+      "showToken": "Show API token",
+      "hideToken": "Hide API token",
+      "credentialSavedPlaceholder": "Saved — leave blank to keep current value",
+      "save": "Save configuration",
+      "saving": "Saving..."
+    },
+    "errors": {
+      "loadFailed": "Failed to load SMS configuration."
+    },
+    "validation": {
+      "title": "Check required fields",
+      "description": "Please fix the highlighted fields before saving.",
+      "fromIdRequired": "AfroMessage identifier is required.",
+      "senderRequired": "Sender name is required.",
+      "authTokenRequired": "API token is required.",
+      "testPhoneRequired": "Recipient phone number is required.",
+      "testPhoneInvalid": "Enter a valid phone number with country code."
+    },
+    "toast": {
+      "updateSuccess": {
+        "title": "SMS configuration saved",
+        "description": "Your SMS notification settings have been updated."
+      },
+      "updateFailed": {
+        "title": "Could not save SMS configuration",
+        "description": "Please check the form and try again."
+      },
+      "loadFailed": {
+        "title": "Could not load SMS configuration",
+        "description": "Please try again or refresh the page."
+      },
+      "testSuccess": {
+        "title": "Test SMS sent",
+        "description": "Check the recipient phone for your test message."
+      },
+      "testFailed": {
+        "title": "Test SMS failed",
+        "description": "Please verify your configuration and try again."
       }
     }
   },

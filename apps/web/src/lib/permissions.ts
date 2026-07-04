@@ -16,6 +16,11 @@ export const PERMISSIONS = {
     write: "menus.write",
     delete: "menus.delete",
   },
+  notifications: {
+    read: "notifications.read",
+    write: "notifications.write",
+    delete: "notifications.delete",
+  },
 } as const;
 
 export const ADMIN_PERMISSION_MODULES = Object.keys(PERMISSIONS) as Array<keyof typeof PERMISSIONS>;

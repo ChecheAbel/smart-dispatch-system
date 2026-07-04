@@ -1,4 +1,4 @@
-const ADMIN_MODULES = ["users", "roles", "menus"] as const;
+const ADMIN_MODULES = ["users", "roles", "menus", "notifications"] as const;
 
 type AdminModule = (typeof ADMIN_MODULES)[number];
 

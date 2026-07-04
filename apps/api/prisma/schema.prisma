@@ -145,6 +145,29 @@ enum TokenType {
   password_reset
 }
 
+enum NotificationChannel {
+  email
+  sms
+
+  @@map("notification_channel")
+}
+
+model NotificationConfiguration {
+  id        String              @id @default(uuid()) @db.Uuid
+  channel   NotificationChannel @unique
+  isEnabled Boolean             @default(false) @map("is_enabled")
+  provider  String?             @db.VarChar(100)
+  fromEmail String?             @map("from_email") @db.VarChar(255)
+  fromName  String?             @map("from_name") @db.VarChar(255)
+  replyTo   String?             @map("reply_to") @db.VarChar(255)
+  senderId  String?             @map("sender_id") @db.VarChar(100)
+  settings  Json                @default("{}") @db.JsonB
+  createdAt DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime            @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("notification_configurations")
+}
+
 model Token {
   id        String    @id @default(uuid()) @db.Uuid
   userId    String    @map("user_id") @db.Uuid

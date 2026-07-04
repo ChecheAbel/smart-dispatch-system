@@ -1,9 +1,12 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Bell,
   Circle,
   Key,
   LayoutDashboard,
+  Mail,
   Menu,
+  MessageSquare,
   Route,
   Settings,
   Shield,
@@ -26,6 +29,10 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   endpoints: Route,
   settings: Settings,
   "access-control": ShieldCheck,
+  bell: Bell,
+  notifications: Bell,
+  mail: Mail,
+  "message-square": MessageSquare,
 };
 
 export function getMenuIcon(icon?: string | null): LucideIcon {

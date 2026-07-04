@@ -49,6 +49,23 @@ export interface AuthRole {
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
+export type NotificationChannel = "email" | "sms";
+
+export interface NotificationConfiguration {
+  id: string;
+  channel: NotificationChannel;
+  is_enabled: boolean;
+  provider: string | null;
+  from_email: string | null;
+  from_name: string | null;
+  reply_to: string | null;
+  sender_id: string | null;
+  settings: Record<string, unknown>;
+  has_credentials: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Permission {
   id: string;
   slug: string;

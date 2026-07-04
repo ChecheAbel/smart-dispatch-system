@@ -103,7 +103,8 @@
       "modules": {
         "users": "ተጠቃሚዎች",
         "roles": "ሚናዎች",
-        "menus": "ሜኑዎች"
+        "menus": "ሜኑዎች",
+        "notifications": "ማሳወቂያዎች"
       },
       "errors": {
         "loadFailed": "ፈቃዶችን መጫን አልተሳካም።"
@@ -436,6 +437,208 @@
       "deleteFailed": {
         "title": "ሜኑ መሰረዝ አልተቻለም",
         "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
+      }
+    }
+  },
+  "adminNotificationsEmail": {
+    "eyebrow": "ማሳወቂያዎች",
+    "title": "የኢሜይል ቅንብር",
+    "description": "ለመድረክ ማሳወቂያዎች የወጪ ኢሜይል መላኪያ ቅንብሮችን ያዋቅሩ።",
+    "loading": "የኢሜይል ቅንብር በመጫን ላይ...",
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የማሳወቂያዎችን የእይታ መዳረሻ ያስፈልጋል። አስተዳዳሪው ሚናዎ ላይ notifications.read ፈቃድ እንዲሰጥዎት ይጠይቁ።",
+      "sessionHint": "ፈቃዶች ቀርፊው ከተቀየሩ በኋላ ክፍለ ጊዜዎን ለማደስ ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
+    "providers": [
+      { "value": "smtp", "label": "SMTP" },
+      { "value": "sendgrid", "label": "SendGrid" },
+      { "value": "mailgun", "label": "Mailgun" }
+    ],
+    "providerDescriptions": {
+      "smtp": "ኢሜይል በመደበኛ SMTP አገልጋይ ይላኩ።",
+      "sendgrid": "ኢሜይል በ SendGrid API ይላኩ።",
+      "mailgun": "ኢሜይል በ Mailgun API ይላኩ።"
+    },
+    "sections": {
+      "configuration": {
+        "title": "የኢሜይል ቅንብር",
+        "description": "የኢሜይል አቅራቢዎን ይምረጡ እና የመላኪያ ዝርዝሮችን እና ማረጋገጫዎችን ያዘጋጁ።"
+      },
+      "credentials": {
+        "note": "ማረጋገጫዎች በእረምጃ ይቀመጣሉ እና ለወጪ ኢሜይል መላኪያ ብቻ ይጠቅማሉ።"
+      }
+    },
+    "form": {
+      "statusTitle": "የኢሜይል ማሳወቂያዎች",
+      "statusDescription": "ለመድረክ የኢሜይል መላኪያን ያንቁ ወይም ያጥፉ።",
+      "enabled": "ንቁ",
+      "provider": "አቅራቢ",
+      "providerHint": "የወጪ ማሳወቂያ ኢሜይሎች እንዴት እንደሚላኩ ይምረጡ።",
+      "fromEmail": "የመላኪያ ኢሜይል",
+      "fromEmailHint": "በወጪ ኢሜይሎች ላይ እንደ መላኪያ የሚያገለግል አድራሻ።",
+      "fromEmailPlaceholder": "noreply@yourdomain.com",
+      "fromName": "የመላኪያ ስም",
+      "fromNameHint": "ተቀባዮች በገቢ ሳጥናቸው የሚያዩት የማሳወቂያ ስም።",
+      "fromNamePlaceholder": "የድርጅትዎ ስም",
+      "replyTo": "የመልስ ኢሜይል",
+      "replyToHint": "ለማሳወቂያ ኢሜይሎች መልስ የሚሰጥ አድራሻ (አማራጭ)።",
+      "replyToPlaceholder": "support@yourdomain.com",
+      "smtpHost": "SMTP ጋሻ",
+      "smtpHostHint": "የ SMTP አገልጋይዎ ስም።",
+      "smtpHostPlaceholder": "smtp.yourdomain.com",
+      "smtpPort": "SMTP ፖርት",
+      "smtpPortHint": "ብዙውን ጊዜ 587 ለ TLS ወይም 465 ለ SSL።",
+      "smtpPortPlaceholder": "587",
+      "smtpUsername": "SMTP ተጠቃሚ ስም",
+      "smtpUsernameHint": "ለ SMTP ማረጋገጫ የመግቢያ ተጠቃሚ ስም።",
+      "smtpUsernamePlaceholder": "smtp-user",
+      "smtpPassword": "SMTP የይለፍ ቃል",
+      "smtpPasswordHint": "ለ SMTP ማረጋገጫ የይለፍ ቃል።",
+      "smtpPasswordPlaceholder": "የSMTP የይለፍ ቃል ያስገቡ",
+      "apiKey": "API ቁልፍ",
+      "apiKeyHint": "ከኢሜይል አቅራቢ ዳሽቦርድ የሚገኘው API ቁልፍ።",
+      "apiKeyPlaceholder": "የአቅራቢ API ቁልፍ ያስገቡ",
+      "credentialSavedPlaceholder": "ተቀምጧል — ያለውን ለመጠበቅ ባዶ ይተዉት",
+      "showPassword": "የይለፍ ቃል አሳይ",
+      "hidePassword": "የይለፍ ቃል ደብቅ",
+      "showApiKey": "API ቁልፍ አሳይ",
+      "hideApiKey": "API ቁልፍ ደብቅ",
+      "save": "ቅንብር አስቀምጥ",
+      "saving": "በመቀመጥ ላይ..."
+    },
+    "errors": {
+      "loadFailed": "የኢሜይል ቅንብር መጫን አልተሳካም።"
+    },
+    "validation": {
+      "title": "አስፈላጊ መስኮችን ያረጋግጡ",
+      "description": "ከመቀመጥዎ በፊት የተደመቁትን መስኮች ያስተካክሉ።",
+      "fromEmailRequired": "የመላኪያ ኢሜይል ያስፈልጋል።",
+      "fromEmailInvalid": "ትክክለኛ የመላኪያ ኢሜይል ያስገቡ።",
+      "fromNameRequired": "የመላኪያ ስም ያስፈልጋል።",
+      "replyToInvalid": "ትክክለኛ የመልስ ኢሜይል ያስገቡ።",
+      "smtpHostRequired": "SMTP ጋሻ ያስፈልጋል።",
+      "smtpPortRequired": "SMTP ፖርት ያስፈልጋል።",
+      "smtpPortInvalid": "SMTP ፖርት በ 1 እና 65535 መካከል ቁጥር መሆን አለበት።",
+      "smtpUsernameRequired": "SMTP ተጠቃሚ ስም ያስፈልጋል።",
+      "smtpPasswordRequired": "SMTP የይለፍ ቃል ያስፈልጋል።",
+      "apiKeyRequired": "API ቁልፍ ያስፈልጋል።"
+    },
+    "toast": {
+      "updateSuccess": {
+        "title": "የኢሜይል ቅንብር ተቀምጧል",
+        "description": "የኢሜይል ማሳወቂያ ቅንብሮችዎ ተዘምነዋል።"
+      },
+      "updateFailed": {
+        "title": "የኢሜይል ቅንብር ማስቀመጥ አልተቻለም",
+        "description": "እባክዎ ቅጹን ይመልከቱና እንደገና ይሞክሩ።"
+      },
+      "loadFailed": {
+        "title": "የኢሜይል ቅንብር መጫን አልተቻለም",
+        "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+      }
+    }
+  },
+  "adminNotificationsSms": {
+    "eyebrow": "ማሳወቂያዎች",
+    "title": "የኤስኤምኤስ ቅንብር",
+    "description": "በኢትዮጵያ ለወጪ ኤስኤምኤስ መላኪያ AfroSMS (AfroMessage) ያዋቅሩ።",
+    "loading": "የኤስኤምኤስ ቅንብር በመጫን ላይ...",
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የማሳወቂያዎችን የእይታ መዳረሻ ያስፈልጋል። አስተዳዳሪው ሚናዎ ላይ notifications.read ፈቃድ እንዲሰጥዎት ይጠይቁ።",
+      "sessionHint": "ፈቃዶች ቀርፊው ከተቀየሩ በኋላ ክፍለ ጊዜዎን ለማደስ ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
+    "provider": {
+      "name": "AfroSMS",
+      "description": "በአፍሮመሴጅ የሚሰራ የኢትዮጵያ ኤስኤምኤስ መስመር። መልዕክቶች በመለያዎ፣ በመላኪያ ስም እና በ API ቶከን በ GET ይላካሉ።"
+    },
+    "status": {
+      "enabled": "ኤስኤምኤስ ንቁ",
+      "disabled": "ኤስኤምኤስ ተሰናክሏል",
+      "credentialsConfigured": "ማረጋገጫዎች ተቀምጠዋል"
+    },
+    "sections": {
+      "delivery": {
+        "title": "የ AfroSMS ቅንብር",
+        "description": "የአፍሮመሴጅ መለያዎን፣ የመላኪያ ስምዎን እና API ቶከንዎን ያዘጋጁ።",
+        "fromIdHint": "ከአፍሮመሴጅ ዳሽቦርድ የሚገኘው UUID መለያ (from ባሪያ)።",
+        "senderHint": "በወጪ መልዕክቶች ላይ የሚታየው የተመዘገበ የመላኪያ ስም (sender ባሪያ)።"
+      },
+      "credentials": {
+        "title": "API ማረጋገጫዎች",
+        "description": "የአፍሮመሴጅ API ቶከን በደህንነት ያስቀምጡ። ያለውን የተቀመጠ እሴት ለመጠበቅ ባዶ ይተዉ።",
+        "authTokenHint": "የመላኪያ ጥያቄዎችን ለማረጋገጥ ከአፍሮመሴጅ የሚገኘው Bearer ቶከን።",
+        "note": "ማረጋገጫዎች በእረምጃ ይቀመጣሉ እና ለ AfroSMS መላኪያ ብቻ ይጠቅማሉ።"
+      },
+      "test": {
+        "title": "የሙከራ ኤስኤምኤስ ላክ",
+        "description": "በተቀመጠው ቅንብር የሙከራ መልዕክት ይላኩ። ለሙከራ ኤስኤምኤስ ንቁ መሆን አያስፈልግም።",
+        "phone": "የተቀባይ ስልክ ቁጥር",
+        "phoneHint": "የኢትዮጵያ ሞባይል ቁጥር ከሀገር ኮድ ጋር፣ ለምሳሌ +2519XXXXXXXX።",
+        "phonePlaceholder": "+2519XXXXXXXX",
+        "fixedMessageLabel": "የሙከራ መልዕክት",
+        "fixedMessage": "Smart Dispatch test message. SMS configuration is working.",
+        "fixedMessageNote": "ጥቅም ላይ ከመዋል ለመከላከል ቋሚ የሙከራ መልዕክት ይላካል።",
+        "send": "የሙከራ ኤስኤምኤስ ላክ",
+        "sending": "በመላክ ላይ...",
+        "saveFirst": "ሙከራ ከመላክዎ በፊት መለያዎን፣ የመላኪያ ስምዎን እና API ቶከንዎን ያስቀምጡ።"
+      }
+    },
+    "form": {
+      "statusTitle": "የኤስኤምኤስ ማሳወቂያዎች",
+      "statusDescription": "ለመድረክ የኤስኤምኤስ መላኪያን ያንቁ ወይም ያጥፉ።",
+      "enabled": "ንቁ",
+      "fromId": "መለያ (from)",
+      "fromIdPlaceholder": "የአፍሮመሴጅ መለያዎ",
+      "sender": "የመላኪያ ስም",
+      "senderPlaceholder": "የተመዘገበ የመላኪያ ስምዎ",
+      "authToken": "API ቶከን",
+      "authTokenPlaceholder": "የአፍሮመሴጅ API ቶከን ያስገቡ",
+      "showToken": "API ቶከን አሳይ",
+      "hideToken": "API ቶከን ደብቅ",
+      "credentialSavedPlaceholder": "ተቀምጧል — ያለውን ለመጠበቅ ባዶ ይተዉት",
+      "save": "ቅንብር አስቀምጥ",
+      "saving": "በመቀመጥ ላይ..."
+    },
+    "errors": {
+      "loadFailed": "የኤስኤምኤስ ቅንብር መጫን አልተሳካም።"
+    },
+    "validation": {
+      "title": "አስፈላጊ መስኮችን ያረጋግጡ",
+      "description": "ከመቀመጥዎ በፊት የተደመቁትን መስኮች ያስተካክሉ።",
+      "fromIdRequired": "የአፍሮመሴጅ መለያ ያስፈልጋል።",
+      "senderRequired": "የመላኪያ ስም ያስፈልጋል።",
+      "authTokenRequired": "API ቶከን ያስፈልጋል።",
+      "testPhoneRequired": "የተቀባይ ስልክ ቁጥር ያስፈልጋል።",
+      "testPhoneInvalid": "ከሀገር ኮድ ጋር ትክክለኛ ስልክ ቁጥር ያስገቡ።"
+    },
+    "toast": {
+      "updateSuccess": {
+        "title": "የኤስኤምኤስ ቅንብር ተቀምጧል",
+        "description": "የኤስኤምኤስ ማሳወቂያ ቅንብሮችዎ ተዘምነዋል።"
+      },
+      "updateFailed": {
+        "title": "የኤስኤምኤስ ቅንብር ማስቀመጥ አልተቻለም",
+        "description": "እባክዎ ቅጹን ይመልከቱና እንደገና ይሞክሩ።"
+      },
+      "loadFailed": {
+        "title": "የኤስኤምኤስ ቅንብር መጫን አልተቻለም",
+        "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+      },
+      "testSuccess": {
+        "title": "የሙከራ ኤስኤምኤስ ተልኳል",
+        "description": "የሙከራ መልዕክቱን ለተቀባይ ስልኩ ይመልከቱ።"
+      },
+      "testFailed": {
+        "title": "የሙከራ ኤስኤምኤስ አልተሳካም",
+        "description": "እባክዎ ቅንብርዎን ያረጋግጡና እንደገና ይሞክሩ።"
       }
     }
   },
