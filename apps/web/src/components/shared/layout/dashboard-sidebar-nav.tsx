@@ -69,6 +69,7 @@ function ParentMenuItem({
             <SidebarMenuButton
               isActive={childActive}
               tooltip={item.label}
+              size="lg"
               className={adminNavButtonClass}
             />
           }
@@ -85,7 +86,7 @@ function ParentMenuItem({
 
         <CollapsibleContent className="overflow-hidden data-ending-style:animate-out data-starting-style:animate-in">
           {item.children && (
-            <SidebarMenuSub>
+            <SidebarMenuSub className="gap-1.5 py-1">
               {item.children.map((child) => {
                 if (!child.path) return null;
                 const ChildIcon = getMenuIcon(child.icon);
@@ -94,7 +95,8 @@ function ParentMenuItem({
                   <SidebarMenuSubItem key={child.id}>
                     <SidebarMenuSubButton
                       isActive={isAdminNavActive(pathname, child.path)}
-                      className={adminNavButtonClass}
+                      size="md"
+                      className={cn(adminNavButtonClass, "h-9 px-3")}
                       render={<Link href={child.path} />}
                     >
                       <ChildIcon />
@@ -148,6 +150,7 @@ function SidebarMenuItems({ items, pathname }: { items: Menu[]; pathname: string
             <SidebarMenuButton
               isActive={isAdminNavActive(pathname, href)}
               tooltip={item.label}
+              size="lg"
               className={adminNavButtonClass}
               render={<Link href={href} />}
               onClick={() => setExpandedParentId(null)}
@@ -170,7 +173,7 @@ export function DashboardSidebarNav() {
 
   if (loading) {
     return (
-      <SidebarMenu>
+      <SidebarMenu className="gap-1.5 px-2 py-2">
         {Array.from({ length: 6 }).map((_, index) => (
           <SidebarMenuItem key={index}>
             <SidebarMenuSkeleton showIcon />
@@ -197,7 +200,7 @@ export function DashboardSidebarNav() {
   }
 
   return (
-    <SidebarMenu>
+    <SidebarMenu className="gap-1.5 px-2 py-2">
       <SidebarMenuItems items={menus} pathname={pathname} />
     </SidebarMenu>
   );

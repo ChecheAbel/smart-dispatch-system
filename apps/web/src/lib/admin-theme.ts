@@ -6,6 +6,7 @@ export const adminTheme = {
   goldDark: "#8f7d45",
   goldSoft: "#e8d69a",
   surface: "#f8fafb",
+  sidebarWidth: "18.5rem",
 } as const;
 
 export const adminEyebrowClass =
@@ -24,7 +25,7 @@ export const adminBadgeSuccessClass =
   "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50";
 
 export const adminNavButtonClass =
-  "text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:font-semibold";
+  "rounded-lg px-3 text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-foreground data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:font-semibold";
 
 export const adminHeaderActionsClass = "flex items-center gap-2";
 

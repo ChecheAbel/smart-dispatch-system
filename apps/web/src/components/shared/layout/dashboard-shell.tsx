@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 import type { AuthMeResponse } from "@smart-dispatch/types";
 import { DashboardFooter } from "@/components/shared/layout/dashboard-footer";
@@ -23,8 +23,8 @@ function DashboardLoadingShell() {
   return (
     <div className="admin-theme flex min-h-svh" style={{ backgroundColor: adminTheme.surface }}>
       <div
-        className="hidden w-64 border-r border-white/10 p-4 md:block"
-        style={{ backgroundColor: adminTheme.brand }}
+        className="hidden border-r border-white/10 p-4 md:block"
+        style={{ width: adminTheme.sidebarWidth, backgroundColor: adminTheme.brand }}
       >
         <Skeleton className="h-8 w-40 bg-white/15" />
         <div className="mt-8 space-y-3">
@@ -96,7 +96,10 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       <LocaleProvider>
         <NavigationProvider>
           <TooltipProvider>
-            <SidebarProvider className="admin-theme bg-[#f8fafb]">
+            <SidebarProvider
+              className="admin-theme bg-[#f8fafb]"
+              style={{ "--sidebar-width": adminTheme.sidebarWidth } as CSSProperties}
+            >
               <DashboardSidebar />
               <SidebarInset className="flex min-h-svh flex-col bg-[#f8fafb]">
                 <DashboardHeader />

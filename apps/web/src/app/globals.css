@@ -194,6 +194,12 @@
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: color-mix(in srgb, #ffffff 14%, transparent);
   --sidebar-ring: #c9b87a;
+  --sidebar-width: 18.5rem;
+}
+
+html.admin-theme [data-slot="sidebar"][data-mobile="true"] {
+  width: var(--sidebar-width) !important;
+  max-width: var(--sidebar-width) !important;
 }
 
 .admin-theme [data-sonner-toaster] {

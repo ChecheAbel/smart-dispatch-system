@@ -37,12 +37,12 @@ export function DashboardSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/45 group-data-[collapsible=icon]:hidden">
+      <SidebarContent className="px-1">
+        <SidebarGroup className="p-3">
+          <SidebarGroupLabel className="mb-1 px-2 text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/45 group-data-[collapsible=icon]:hidden">
             {copy.sidebar.navigationLabel}
           </SidebarGroupLabel>
-          <SidebarGroupContent>
+          <SidebarGroupContent className="px-1">
             <DashboardSidebarNav />
           </SidebarGroupContent>
         </SidebarGroup>
