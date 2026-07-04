@@ -1,4 +1,5 @@
 import type { Menu } from "@smart-dispatch/types";
+import { ADMIN_PROFILE_PATH } from "./auth-paths";
 
 export function isAdminNavActive(pathname: string, href: string) {
   if (href === "/admin") {
@@ -117,6 +118,10 @@ export function getPageTitleFromMenus(pathname: string, menus: Menu[]) {
 }
 
 export function isPathAllowed(pathname: string, menus: Menu[]) {
+  if (pathname === ADMIN_PROFILE_PATH || pathname.startsWith(`${ADMIN_PROFILE_PATH}/`)) {
+    return true;
+  }
+
   const flatMenus = flattenMenus(menus).filter((menu) => menu.path);
 
   return flatMenus.some((menu) => isAdminNavActive(pathname, menu.path!));

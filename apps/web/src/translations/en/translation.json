@@ -102,6 +102,94 @@
       "rbacEnabled": "Enforced"
     }
   },
+  "adminProfile": {
+    "eyebrow": "Account",
+    "title": "Profile",
+    "description": "Update your personal details and sign-in password.",
+    "profile": {
+      "title": "Personal details",
+      "description": "Your name, email, and mobile number used across the admin console.",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "firstName": "First name",
+      "firstNamePlaceholder": "Abebe",
+      "middleName": "Middle name",
+      "middleNamePlaceholder": "Optional",
+      "lastName": "Last name",
+      "lastNamePlaceholder": "Kebede",
+      "mobile": "Mobile number",
+      "mobilePlaceholder": "912345678 or 712345678",
+      "mobileHelp": "Ethio Telecom (9…) or Safaricom (7…). Enter 9 digits without the leading zero.",
+      "optional": "(optional)",
+      "save": "Save profile",
+      "saving": "Saving...",
+      "discard": "Discard changes",
+      "errors": {
+        "emailRequired": "Email is required.",
+        "emailInvalid": "Enter a valid email address.",
+        "firstNameRequired": "First name is required.",
+        "lastNameRequired": "Last name is required.",
+        "mobileRequired": "Mobile number is required.",
+        "mobileInvalid": "Enter a valid 9-digit number starting with 9 (Ethio Telecom) or 7 (Safaricom)."
+      }
+    },
+    "account": {
+      "title": "Account access",
+      "description": "Roles and account status are managed by your administrator.",
+      "roles": "Roles",
+      "noRoles": "No roles assigned",
+      "statusLabel": "Account status",
+      "activationLabel": "Activation",
+      "status": {
+        "active": "Active",
+        "suspended": "Suspended",
+        "deactivated": "Deactivated"
+      },
+      "activation": {
+        "pending": "Pending",
+        "activated": "Activated"
+      },
+      "adminNote": "Roles and account status can only be changed by an administrator."
+    },
+    "password": {
+      "title": "Change password",
+      "description": "Use a strong password with at least 8 characters.",
+      "current": "Current password",
+      "currentPlaceholder": "Enter your current password",
+      "new": "New password",
+      "newPlaceholder": "At least 8 characters",
+      "newHint": "At least 8 characters.",
+      "confirm": "Confirm new password",
+      "confirmPlaceholder": "Re-enter your new password",
+      "update": "Update password",
+      "updating": "Updating...",
+      "errors": {
+        "currentRequired": "Current password is required.",
+        "newRequired": "New password is required.",
+        "newMinLength": "Password must be at least 8 characters.",
+        "confirmRequired": "Please confirm your new password.",
+        "confirmMismatch": "Passwords do not match."
+      }
+    },
+    "toast": {
+      "profileUpdated": {
+        "title": "Profile updated",
+        "description": "Your profile details have been saved."
+      },
+      "profileUpdateFailed": {
+        "title": "Could not update profile",
+        "description": "Please check the form and try again."
+      },
+      "passwordUpdated": {
+        "title": "Password updated",
+        "description": "Your password has been changed successfully."
+      },
+      "passwordUpdateFailed": {
+        "title": "Could not update password",
+        "description": "Please check your current password and try again."
+      }
+    }
+  },
   "adminRoles": {
     "eyebrow": "Access control",
     "title": "Roles",

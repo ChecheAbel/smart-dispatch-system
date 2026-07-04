@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import multer from "multer";
 import { authenticate, type AuthenticatedRequest } from "../middleware/authenticate";
 import {
+  changeMyPassword,
   getUserPermissions,
   loginWithPassword,
   logout,
@@ -9,6 +10,7 @@ import {
   registerDriverApplication,
   requestPasswordReset,
   resetPasswordWithToken,
+  updateMyProfile,
 } from "../services/auth.service";
 import { recordAuditLog } from "../services/audit-log.service";
 import { handleRouteError, sendError, sendSuccess } from "../utils/response";
@@ -183,6 +185,46 @@ export function registerAuthRoutes(app: Express) {
 
       const permissions = await getUserPermissions(userId);
       return sendSuccess(res, { user: req.user, permissions });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  });
+
+  app.patch("/api/auth/me", authenticate, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      const result = await updateMyProfile(userId, {
+        email: getString(req.body?.email),
+        firstName: getString(req.body?.first_name),
+        middleName: getOptionalString(req.body?.middle_name),
+        lastName: getString(req.body?.last_name),
+        mobileNumber: getString(req.body?.mobile_number),
+      });
+
+      return sendSuccess(res, result);
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  });
+
+  app.patch("/api/auth/password", authenticate, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      const result = await changeMyPassword(
+        userId,
+        getString(req.body?.current_password),
+        getString(req.body?.new_password),
+      );
+
+      return sendSuccess(res, result, { message: result.message });
     } catch (error) {
       return handleRouteError(res, error);
     }

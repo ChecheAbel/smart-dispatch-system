@@ -15,3 +15,4 @@ export type AdminLocationsMessages = Translations["adminLocations"];
 export type AdminFarePlansMessages = Translations["adminFarePlans"];
 export type AdminShellMessages = Translations["adminShell"];
 export type AdminDashboardMessages = Translations["adminDashboard"];
+export type AdminProfileMessages = Translations["adminProfile"];

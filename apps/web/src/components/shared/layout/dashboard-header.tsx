@@ -1,12 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut, UserRound } from "lucide-react";
 import { getUserInitials, useAuth } from "@/components/shared/providers/auth-context";
 import { LanguageSelector } from "@/components/shared/layout/language-selector";
 import { useNavigation } from "@/components/shared/providers/navigation-context";
+import { ADMIN_PROFILE_PATH } from "@/lib/auth-paths";
 import {
-  adminBadgeGoldClass,
   adminEyebrowClass,
   adminHeaderActionsClass,
   adminHeaderIconButtonClass,
@@ -14,7 +15,6 @@ import {
   adminTheme,
 } from "@/lib/admin-theme";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -77,12 +77,9 @@ export function DashboardHeader() {
                 </p>
                 <p className="truncate text-xs text-slate-500">{user.email}</p>
               </DropdownMenuLabel>
-              <DropdownMenuItem disabled className="rounded-md">
+              <DropdownMenuItem className="rounded-md" render={<Link href={ADMIN_PROFILE_PATH} />}>
                 <UserRound />
                 Profile
-                <Badge variant="outline" className={`ml-auto text-[10px] ${adminBadgeGoldClass}`}>
-                  Soon
-                </Badge>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />

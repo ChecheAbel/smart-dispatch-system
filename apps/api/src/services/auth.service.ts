@@ -10,12 +10,16 @@ import {
 } from "../models/token.model";
 import type { DbUser } from "../db/types";
 import type { AuthTokenResponse, Permission, RoleSlug, User } from "@smart-dispatch/types";
-import { findUserByEmail, findUserById, findUserByMobileNumber, updateUserPassword } from "../models/user.model";
+import { findUserByEmail, findUserById, findUserByMobileNumber, updateUser, updateUserPassword } from "../models/user.model";
 import { findDriverByLicenseNumber, findDriverByUserId } from "../models/driver.model";
 import { findPermissionsByUserId } from "../models/permission.model";
 import { toPublicPermission } from "../mappers/permission.mapper";
 import { toPublicDriverProfile } from "../mappers/driver.mapper";
 import { prisma } from "../db/prisma";
+import {
+  isValidEmail,
+  normalizeEthiopianMobileNumber,
+} from "../utils/validation";
 
 const ACCESS_TOKEN_TTL_SECONDS = 60 * 15;
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
@@ -35,10 +39,6 @@ function hashToken(token: string) {
 
 function generateOpaqueToken() {
   return crypto.randomBytes(48).toString("hex");
-}
-
-function isValidEmail(email: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function isAccountUsable(user: DbUser) {
@@ -317,6 +317,93 @@ export async function getUserFromAccessToken(accessToken: string) {
     if (error instanceof AuthError) throw error;
     throw new AuthError("Invalid or expired access token.", 401);
   }
+}
+
+export async function updateMyProfile(
+  userId: string,
+  input: {
+    email: string;
+    firstName: string;
+    middleName?: string | null;
+    lastName: string;
+    mobileNumber: string;
+  },
+) {
+  const email = input.email.trim().toLowerCase();
+  const firstName = input.firstName.trim();
+  const lastName = input.lastName.trim();
+  const middleName = input.middleName?.trim() || null;
+  const mobileNumber = normalizeEthiopianMobileNumber(input.mobileNumber);
+
+  if (!isValidEmail(email)) {
+    throw new AuthError("A valid email address is required.", 400);
+  }
+
+  if (!firstName || !lastName) {
+    throw new AuthError("First name and last name are required.", 400);
+  }
+
+  if (!mobileNumber) {
+    throw new AuthError("A valid mobile number is required.", 400);
+  }
+
+  const existingEmail = await findUserByEmail(email);
+  if (existingEmail && existingEmail.id !== userId) {
+    throw new AuthError("An account with this email already exists.", 409);
+  }
+
+  const existingMobile = await findUserByMobileNumber(mobileNumber);
+  if (existingMobile && existingMobile.id !== userId) {
+    throw new AuthError("This mobile number is already registered.", 409);
+  }
+
+  await updateUser(userId, {
+    email,
+    firstName,
+    middleName,
+    lastName,
+    mobileNumber,
+  });
+
+  const user = await findUserById(userId);
+  if (!user) {
+    throw new AuthError("User not found.", 404);
+  }
+
+  return {
+    user: await toSafeUser(user),
+    permissions: await getUserPermissions(userId),
+  };
+}
+
+export async function changeMyPassword(
+  userId: string,
+  currentPassword: string,
+  newPassword: string,
+) {
+  if (!currentPassword) {
+    throw new AuthError("Current password is required.", 400);
+  }
+
+  if (!newPassword || newPassword.length < 8) {
+    throw new AuthError("Password must be at least 8 characters.", 400);
+  }
+
+  const user = await findUserById(userId);
+  if (!user) {
+    throw new AuthError("User not found.", 404);
+  }
+
+  const passwordMatches = await bcrypt.compare(currentPassword, user.passwordHash);
+  if (!passwordMatches) {
+    throw new AuthError("Current password is incorrect.", 400);
+  }
+
+  const passwordHash = await bcrypt.hash(newPassword, 12);
+  await updateUserPassword(userId, passwordHash);
+  await revokeUserTokensByType(userId, "refresh");
+
+  return { message: "Password updated successfully." };
 }
 
 export class AuthError extends Error {

@@ -1,6 +1,7 @@
 import type { AuthMeResponse, AuthTokenResponse } from "@smart-dispatch/types";
 import { apiClient } from "./api-client";
 import { unwrapApiResponse } from "./api-response";
+import { performTokenRefresh } from "./auth-token-refresh";
 import {
   clearAuthSession,
   getAccessToken,
@@ -20,11 +21,11 @@ export async function getCurrentSession() {
 }
 
 export async function refreshSession(refreshToken: string) {
-  const { data } = await apiClient.post("/api/auth/token", {
-    grant_type: "refresh_token",
-    refresh_token: refreshToken,
-  });
-  return unwrapApiResponse<AuthTokenResponse>(data);
+  const result = await performTokenRefresh(refreshToken);
+  if (!result) {
+    throw new Error("Invalid or expired refresh token.");
+  }
+  return result;
 }
 
 /** Validates stored credentials with the API and returns the session when still authorized. */

@@ -102,6 +102,94 @@
       "rbacEnabled": "የተጣራ"
     }
   },
+  "adminProfile": {
+    "eyebrow": "መለያ",
+    "title": "መገለጫ",
+    "description": "የግል መረጃዎን እና የመግቢያ የይለፍ ቃልዎን ያዘምኑ።",
+    "profile": {
+      "title": "የግል መረጃ",
+      "description": "በአስተዳዳሪ ኮንሶል ውስጥ የሚያገለግሉት ስም፣ ኢሜይል እና የሞባይል ቁጥር።",
+      "email": "ኢሜይል",
+      "emailPlaceholder": "you@example.com",
+      "firstName": "የመጀመሪያ ስም",
+      "firstNamePlaceholder": "አበበ",
+      "middleName": "የአባት ስም",
+      "middleNamePlaceholder": "አማራጭ",
+      "lastName": "የአያት ስም",
+      "lastNamePlaceholder": "ከበደ",
+      "mobile": "የሞባይል ቁጥር",
+      "mobilePlaceholder": "912345678 ወይም 712345678",
+      "mobileHelp": "Ethio Telecom (9…) ወይም Safaricom (7…)። 9 አሃዞችን ያለመጀመሪያው 0 ያስገቡ።",
+      "optional": "(አማራጭ)",
+      "save": "መገለጫ አስቀምጥ",
+      "saving": "በመቀመጥ ላይ...",
+      "discard": "ለውጦችን ተው",
+      "errors": {
+        "emailRequired": "ኢሜይል ያስፈልጋል።",
+        "emailInvalid": "ትክክለኛ ኢሜይል ያስገቡ።",
+        "firstNameRequired": "የመጀመሪያ ስም ያስፈልጋል።",
+        "lastNameRequired": "የአያት ስም ያስፈልጋል።",
+        "mobileRequired": "የሞባይል ቁጥር ያስፈልጋል።",
+        "mobileInvalid": "በ 9 (Ethio Telecom) ወይም 7 (Safaricom) የሚبدأ ትክክለኛ 9-አሃዝ ቁጥር ያስገቡ።"
+      }
+    },
+    "account": {
+      "title": "የመለያ መዳረሻ",
+      "description": "ሚናዎች እና የመለያ ሁኔታ በአስተዳዳሪዎ ይተዳደራሉ።",
+      "roles": "ሚናዎች",
+      "noRoles": "ምንም ሚና አልተመደበም",
+      "statusLabel": "የመለያ ሁኔታ",
+      "activationLabel": "ማግበር",
+      "status": {
+        "active": "ንቁ",
+        "suspended": "ታግዷል",
+        "deactivated": "ተሰናክሏል"
+      },
+      "activation": {
+        "pending": "በመጠባበቅ ላይ",
+        "activated": "ተግባራዊ"
+      },
+      "adminNote": "ሚናዎች እና የመለያ ሁኔታ በአስተዳዳሪ ብቻ ሊቀየሩ ይችላሉ።"
+    },
+    "password": {
+      "title": "የይለፍ ቃል ቀይር",
+      "description": "ቢያንስ 8 ቁምፊዎች ያለው ጠንካራ የይለፍ ቃል ይጠቀሙ።",
+      "current": "የአሁኑ የይለፍ ቃል",
+      "currentPlaceholder": "የአሁኑ የይለፍ ቃልዎን ያስገቡ",
+      "new": "አዲስ የይለፍ ቃል",
+      "newPlaceholder": "ቢያንስ 8 ቁምፊዎች",
+      "newHint": "ቢያንስ 8 ቁምፊዎች።",
+      "confirm": "አዲስ የይለፍ ቃል አረጋግጥ",
+      "confirmPlaceholder": "አዲስ የይለፍ ቃልዎን እንደገና ያስገቡ",
+      "update": "የይለፍ ቃል አዘምን",
+      "updating": "በመዘመን ላይ...",
+      "errors": {
+        "currentRequired": "የአሁኑ የይለፍ ቃል ያስፈልጋል።",
+        "newRequired": "አዲስ የይለፍ ቃል ያስፈልጋል።",
+        "newMinLength": "የይለፍ ቃል ቢያንስ 8 ቁምፊዎች መሆን አለበት።",
+        "confirmRequired": "አዲስ የይለፍ ቃልዎን ያረጋግጡ።",
+        "confirmMismatch": "የይለፍ ቃሎች አይዛመዱም።"
+      }
+    },
+    "toast": {
+      "profileUpdated": {
+        "title": "መገለጫ ተዘምኗል",
+        "description": "የመገለጫ መረጃዎ ተቀምጧል።"
+      },
+      "profileUpdateFailed": {
+        "title": "መገለጫ መዘመን አልተሳካም",
+        "description": "ቅጹን ይመልከቱ እና እንደገና ይሞክሩ።"
+      },
+      "passwordUpdated": {
+        "title": "የይለፍ ቃል ተዘምኗል",
+        "description": "የይለፍ ቃልዎ በተሳካ ሁኔታ ተቀይሯል።"
+      },
+      "passwordUpdateFailed": {
+        "title": "የይለፍ ቃል መዘመን አልተሳካም",
+        "description": "የአሁኑ የይለፍ ቃልዎን ይመልከቱ እና እንደገና ይሞክሩ።"
+      }
+    }
+  },
   "adminRoles": {
     "eyebrow": "የመዳረሻ ቁጥጥር",
     "title": "ሚናዎች",

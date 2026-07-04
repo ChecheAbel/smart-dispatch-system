@@ -4,7 +4,9 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { Menu } from "@smart-dispatch/types";
 import { useLocale } from "@/components/shared/providers/locale-context";
 import { flattenMenus, getPageTitleFromMenus } from "@/lib/admin-navigation";
+import { ADMIN_PROFILE_PATH } from "@/lib/auth-paths";
 import { fetchNavigationMenus } from "@/lib/menu-api";
+import { getAdminProfileMessages } from "@/translations";
 
 type NavigationContextValue = {
   menus: Menu[];
@@ -72,8 +74,13 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
   const flatMenus = useMemo(() => flattenMenus(menus), [menus]);
 
   const getPageTitle = useCallback(
-    (pathname: string) => getPageTitleFromMenus(pathname, menus),
-    [menus],
+    (pathname: string) => {
+      if (pathname === ADMIN_PROFILE_PATH) {
+        return getAdminProfileMessages(locale).title;
+      }
+      return getPageTitleFromMenus(pathname, menus);
+    },
+    [locale, menus],
   );
 
   return (

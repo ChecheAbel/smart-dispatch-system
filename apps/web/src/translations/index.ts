@@ -15,6 +15,7 @@ import type {
   AdminFarePlansMessages,
   AdminShellMessages,
   AdminDashboardMessages,
+  AdminProfileMessages,
   Translations,
 } from "./types";
 
@@ -37,6 +38,7 @@ export type {
   AdminFarePlansMessages,
   AdminShellMessages,
   AdminDashboardMessages,
+  AdminProfileMessages,
   Translations,
 };
 export { formatMessage } from "./format";
@@ -101,4 +103,8 @@ export function getAdminShellMessages(locale: SupportedLocale): AdminShellMessag
 
 export function getAdminDashboardMessages(locale: SupportedLocale): AdminDashboardMessages {
   return getTranslations(locale).adminDashboard;
+}
+
+export function getAdminProfileMessages(locale: SupportedLocale): AdminProfileMessages {
+  return getTranslations(locale).adminProfile;
 }
