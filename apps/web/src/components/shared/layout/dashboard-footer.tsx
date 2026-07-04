@@ -1,14 +1,25 @@
+"use client";
+
 import Link from "next/link";
+import { useLocale } from "@/components/shared/providers";
 import { adminTheme } from "@/lib/admin-theme";
 import { Separator } from "@/components/ui/separator";
+import { formatMessage, getAdminShellMessages } from "@/translations";
+
+const APP_VERSION = "1.0.0";
 
 export function DashboardFooter() {
+  const { locale } = useLocale();
+  const copy = getAdminShellMessages(locale);
+
   return (
     <footer className="mt-auto border-t border-slate-200/80 bg-white">
       <div className="flex flex-col gap-3 px-4 py-4 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="space-y-1">
-          <p className="font-medium text-[#1C3A34]">© {new Date().getFullYear()} Cheche Technologies</p>
-          <p>Smart Dispatch System — Ethiopian Investment Holdings</p>
+          <p className="font-medium text-[#1C3A34]">
+            {formatMessage(copy.footer.copyright, { year: new Date().getFullYear() })}
+          </p>
+          <p>{copy.footer.tagline}</p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -17,10 +28,10 @@ export function DashboardFooter() {
             className="font-medium transition-colors hover:text-[#C9B87A]"
             style={{ color: adminTheme.brand }}
           >
-            Back to website
+            {copy.footer.backToWebsite}
           </Link>
           <Separator orientation="vertical" className="hidden h-4 sm:block" />
-          <span>Version 1.0.0</span>
+          <span>{formatMessage(copy.footer.version, { version: APP_VERSION })}</span>
         </div>
       </div>
     </footer>

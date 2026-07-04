@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import type { Menu } from "@smart-dispatch/types";
 import { useNavigation } from "@/components/shared/providers/navigation-context";
+import { useLocale } from "@/components/shared/providers";
 import { isAdminNavActive } from "@/lib/admin-navigation";
 import { adminNavButtonClass } from "@/lib/admin-theme";
 import { getMenuIcon } from "@/lib/menu-icons";
@@ -24,6 +25,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { getAdminShellMessages } from "@/translations";
 
 function getActiveParentMenuId(items: Menu[], pathname: string) {
   for (const item of items) {
@@ -162,6 +164,8 @@ function SidebarMenuItems({ items, pathname }: { items: Menu[]; pathname: string
 
 export function DashboardSidebarNav() {
   const pathname = usePathname();
+  const { locale } = useLocale();
+  const copy = getAdminShellMessages(locale);
   const { menus, loading, error } = useNavigation();
 
   if (loading) {
@@ -187,7 +191,7 @@ export function DashboardSidebarNav() {
   if (!menus.length) {
     return (
       <p className="px-3 py-2 text-xs text-sidebar-foreground/60 group-data-[collapsible=icon]:hidden">
-        No navigation items available.
+        {copy.sidebar.noNavigation}
       </p>
     );
   }

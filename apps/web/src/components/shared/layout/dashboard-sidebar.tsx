@@ -3,6 +3,7 @@
 import Link from "next/link";
 import BrandLogo from "@/components/landing/BrandLogo";
 import { DashboardSidebarNav } from "@/components/shared/layout/dashboard-sidebar-nav";
+import { useLocale } from "@/components/shared/providers";
 import { adminBadgeGoldClass, adminEyebrowClass } from "@/lib/admin-theme";
 import {
   Sidebar,
@@ -15,8 +16,12 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
+import { getAdminShellMessages } from "@/translations";
 
 export function DashboardSidebar() {
+  const { locale } = useLocale();
+  const copy = getAdminShellMessages(locale);
+
   return (
     <Sidebar collapsible="icon" className="border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border p-4">
@@ -27,15 +32,15 @@ export function DashboardSidebar() {
           <BrandLogo className="brightness-0 invert" />
         </Link>
         <div className="px-1 pt-3 group-data-[collapsible=icon]:hidden">
-          <p className={adminEyebrowClass}>Control Center</p>
-          <p className="mt-1 text-xs text-sidebar-foreground/70">Administrator console</p>
+          <p className={adminEyebrowClass}>{copy.sidebar.eyebrow}</p>
+          <p className="mt-1 text-xs text-sidebar-foreground/70">{copy.sidebar.subtitle}</p>
         </div>
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="text-[10px] uppercase tracking-[0.18em] text-sidebar-foreground/45 group-data-[collapsible=icon]:hidden">
-            Navigation
+            {copy.sidebar.navigationLabel}
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <DashboardSidebarNav />
@@ -46,11 +51,11 @@ export function DashboardSidebar() {
       <SidebarFooter className="border-t border-sidebar-border p-4 group-data-[collapsible=icon]:p-2">
         <div className="rounded-xl border border-sidebar-border bg-sidebar-accent px-3 py-3 group-data-[collapsible=icon]:hidden">
           <div className="flex items-center justify-between gap-2">
-            <p className="text-xs font-semibold text-sidebar-foreground">Smart Dispatch</p>
-            <Badge className={adminBadgeGoldClass}>Admin</Badge>
+            <p className="text-xs font-semibold text-sidebar-foreground">{copy.sidebar.footerTitle}</p>
+            <Badge className={adminBadgeGoldClass}>{copy.sidebar.footerBadge}</Badge>
           </div>
           <p className="mt-1 text-[11px] leading-relaxed text-sidebar-foreground/65">
-            Premium mobility platform for EIH.
+            {copy.sidebar.footerDescription}
           </p>
         </div>
       </SidebarFooter>

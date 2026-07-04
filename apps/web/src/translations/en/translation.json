@@ -13,6 +13,95 @@
       }
     }
   },
+  "adminShell": {
+    "sidebar": {
+      "eyebrow": "Control Center",
+      "subtitle": "Administrator console",
+      "navigationLabel": "Navigation",
+      "footerTitle": "Smart Dispatch",
+      "footerBadge": "Admin",
+      "footerDescription": "Premium mobility platform for EIH.",
+      "noNavigation": "No navigation items available."
+    },
+    "footer": {
+      "copyright": "© {year} Cheche Technologies",
+      "tagline": "Smart Dispatch System — Ethiopian Investment Holdings",
+      "backToWebsite": "Back to website",
+      "version": "Version {version}"
+    }
+  },
+  "adminDashboard": {
+    "eyebrow": "Overview",
+    "title": "Dashboard",
+    "welcome": "Welcome back, {name}",
+    "description": "Live snapshot of users, fleet, and locations across Smart Dispatch.",
+    "stats": {
+      "usersTitle": "Users",
+      "usersDescription": "{active} active accounts",
+      "vehiclesTitle": "Vehicles",
+      "vehiclesDescription": "{active} active in fleet",
+      "locationsTitle": "Locations",
+      "locationsDescription": "{active} active dispatch sites",
+      "regionsTitle": "Regions",
+      "regionsDescription": "Administrative regions configured"
+    },
+    "comingSoon": "Coming soon",
+    "comingSoonStats": {
+      "bookingsTitle": "Active bookings",
+      "bookingsDescription": "Pending and confirmed trip requests",
+      "tripsTitle": "Trips in progress",
+      "tripsDescription": "Live dispatches on the road",
+      "fleetOnlineTitle": "Fleet online",
+      "fleetOnlineDescription": "Vehicles currently available",
+      "revenueTitle": "Revenue today",
+      "revenueDescription": "Billing and payment summary"
+    },
+    "comingSoonCharts": {
+      "sectionTitle": "Analytics",
+      "sectionDescription": "Trends and operational insights across dispatch operations",
+      "bookingsTrendTitle": "Bookings trend",
+      "bookingsTrendDescription": "Daily booking volume over the last 30 days",
+      "tripsByRegionTitle": "Trips by region",
+      "tripsByRegionDescription": "Dispatch activity across administrative regions",
+      "fleetUtilizationTitle": "Fleet utilization",
+      "fleetUtilizationDescription": "Active vs idle vehicle share",
+      "revenueTrendTitle": "Revenue trend",
+      "revenueTrendDescription": "Billing totals over the last 30 days"
+    },
+    "fleet": {
+      "title": "Fleet overview",
+      "description": "Vehicle types and operational status",
+      "types": "Vehicle types",
+      "active": "Active vehicles",
+      "assigned": "Assigned to drivers",
+      "maintenance": "In maintenance"
+    },
+    "access": {
+      "title": "People & access",
+      "description": "Accounts and role configuration",
+      "roles": "Roles",
+      "activeUsers": "Active users",
+      "totalUsers": "Total users"
+    },
+    "quickLinks": {
+      "title": "Quick links",
+      "description": "Jump to frequently used admin modules",
+      "users": "Manage users",
+      "vehicles": "Fleet vehicles",
+      "locations": "Dispatch locations",
+      "regions": "Regions"
+    },
+    "system": {
+      "title": "Session status",
+      "description": "Your current admin session",
+      "api": "API",
+      "apiConnected": "Connected",
+      "auth": "Authentication",
+      "authActive": "Active",
+      "rbac": "Permissions",
+      "rbacEnabled": "Enforced"
+    }
+  },
   "adminRoles": {
     "eyebrow": "Access control",
     "title": "Roles",

@@ -13,6 +13,95 @@
       }
     }
   },
+  "adminShell": {
+    "sidebar": {
+      "eyebrow": "የቁጥጥር ማዕከል",
+      "subtitle": "የአስተዳዳሪ ኮንሶል",
+      "navigationLabel": "አሰሳ",
+      "footerTitle": "ስማርት ዲስፓች",
+      "footerBadge": "አስተዳዳሪ",
+      "footerDescription": "ለኢትዮጵያ ኢንቨስትመንት ሆልዲንግስ የታሰበ የከፍተኛ ጥራት የተሽከርካሪ አገልግሎት መድረክ።",
+      "noNavigation": "ምንም የአሰሳ ንጥሎች የሉም።"
+    },
+    "footer": {
+      "copyright": "© {year} ቸቸ ቴክኖሎጂስ",
+      "tagline": "ስማርት ዲስፓች ሲስተም — ኢትዮጵያ ኢንቨስትመንት ሆልዲንግስ",
+      "backToWebsite": "ወደ ድረ-ገጽ ተመለስ",
+      "version": "ስሪት {version}"
+    }
+  },
+  "adminDashboard": {
+    "eyebrow": "አጠቃላይ እይታ",
+    "title": "ዳሽቦርድ",
+    "welcome": "እንኳን ደህና መጡ፣ {name}",
+    "description": "በስማርት ዲስፓች ውስጥ የተጠቃሚዎች፣ መኪና ብዛት እና ቦታዎች ቀጥታ ማጠቃለያ።",
+    "stats": {
+      "usersTitle": "ተጠቃሚዎች",
+      "usersDescription": "{active} ንቁ መለያዎች",
+      "vehiclesTitle": "ተሽከርካሪዎች",
+      "vehiclesDescription": "{active} በመኪና ብዛት ንቁ",
+      "locationsTitle": "ቦታዎች",
+      "locationsDescription": "{active} ንቁ የዲስፓች ቦታዎች",
+      "regionsTitle": "ክልሎች",
+      "regionsDescription": "የተዋቀሩ አስተዳደራዊ ክልሎች"
+    },
+    "comingSoon": "በቅርቡ ይመጣል",
+    "comingSoonStats": {
+      "bookingsTitle": "ንቁ ቦታ ማስያዣዎች",
+      "bookingsDescription": "በመጠባበቅ ላይ እና የተረጋገጡ የጉዞ ጥያቄዎች",
+      "tripsTitle": "በመስራት ላይ ያሉ ጉዞዎች",
+      "tripsDescription": "በመንገድ ላይ ያሉ ቀጥታ ዲስፓችዎች",
+      "fleetOnlineTitle": "መስመር ላይ መኪና ብዛት",
+      "fleetOnlineDescription": "አሁን የሚገኙ ተሽከርካሪዎች",
+      "revenueTitle": "የዛሬ ገቢ",
+      "revenueDescription": "የክፍያ እና የክፍያ ማጠቃለያ"
+    },
+    "comingSoonCharts": {
+      "sectionTitle": "ትንታኔ",
+      "sectionDescription": "በዲስፓች ክወና ውስጥ አዝማሚያዎች እና የክወና ግንዛቤዎች",
+      "bookingsTrendTitle": "የቦታ ማስያዣ አዝማሚያ",
+      "bookingsTrendDescription": "ባለፉት 30 ቀናት ዕለታዊ የቦታ ማስያዣ መጠን",
+      "tripsByRegionTitle": "ጉዞዎች በክልል",
+      "tripsByRegionDescription": "በአስተዳደራዊ ክልሎች ውስጥ የዲስፓች እንቅስቃሴ",
+      "fleetUtilizationTitle": "የመኪና ብዛት አጠቃቀም",
+      "fleetUtilizationDescription": "ንቁ እና ባዶ ተሽከርካሪዎች ክፍፍል",
+      "revenueTrendTitle": "የገቢ አዝማሚያ",
+      "revenueTrendDescription": "ባለፉት 30 ቀናት የክፍያ ጠቅላላዎች"
+    },
+    "fleet": {
+      "title": "የመኪና ብዛት ማጠቃለያ",
+      "description": "የተሽከርካሪ አይነቶች እና የክወና ሁኔታ",
+      "types": "የተሽከርካሪ አይነቶች",
+      "active": "ንቁ ተሽከርካሪዎች",
+      "assigned": "ለሹፌሮች የተመደቡ",
+      "maintenance": "በጥገና ላይ"
+    },
+    "access": {
+      "title": "ሰዎች እና መዳረሻ",
+      "description": "መለያዎች እና የሚና ማዋቀር",
+      "roles": "ሚናዎች",
+      "activeUsers": "ንቁ ተጠቃሚዎች",
+      "totalUsers": "ጠቅላላ ተጠቃሚዎች"
+    },
+    "quickLinks": {
+      "title": "ፈጣን አገናኞች",
+      "description": "ብዙ ጊዜ የሚጠቀሙትን የአስተዳደር ሞጁሎች ይክፈቱ",
+      "users": "ተጠቃሚዎችን ያስተዳድሩ",
+      "vehicles": "የመኪና ብዛት ተሽከርካሪዎች",
+      "locations": "የዲስፓች ቦታዎች",
+      "regions": "ክልሎች"
+    },
+    "system": {
+      "title": "የክፍያ ሁኔታ",
+      "description": "የአሁኑ የአስተዳዳሪ ክፍያ",
+      "api": "API",
+      "apiConnected": "ተገናኝቷል",
+      "auth": "ማረጋገጫ",
+      "authActive": "ንቁ",
+      "rbac": "ፈቃዶች",
+      "rbacEnabled": "የተጣራ"
+    }
+  },
   "adminRoles": {
     "eyebrow": "የመዳረሻ ቁጥጥር",
     "title": "ሚናዎች",
