@@ -16,3 +16,4 @@ export type AdminFarePlansMessages = Translations["adminFarePlans"];
 export type AdminShellMessages = Translations["adminShell"];
 export type AdminDashboardMessages = Translations["adminDashboard"];
 export type AdminProfileMessages = Translations["adminProfile"];
+export type AdminDriverApplicationsMessages = Translations["adminDriverApplications"];

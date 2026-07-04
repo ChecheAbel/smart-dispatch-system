@@ -7,6 +7,7 @@ import type {
 } from "@smart-dispatch/types";
 import { Prisma } from "../generated/prisma";
 import { AuthError } from "../services/auth.service";
+import { DriverApplicationError } from "../services/driver-application.service";
 
 export function sendSuccess<T>(
   res: Response,
@@ -40,6 +41,10 @@ export function sendError(res: Response, error: string, status = 400) {
 
 export function handleRouteError(res: Response, error: unknown) {
   if (error instanceof AuthError) {
+    return sendError(res, error.message, error.status);
+  }
+
+  if (error instanceof DriverApplicationError) {
     return sendError(res, error.message, error.status);
   }
 

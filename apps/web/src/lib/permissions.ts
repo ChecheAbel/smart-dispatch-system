@@ -49,6 +49,10 @@ export const PERMISSIONS = {
     write: "fare_plans.write",
     delete: "fare_plans.delete",
   },
+  drivers: {
+    read: "drivers.read",
+    write: "drivers.write",
+  },
 } as const;
 
 export const ADMIN_PERMISSION_MODULES = Object.keys(PERMISSIONS) as Array<keyof typeof PERMISSIONS>;

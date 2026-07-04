@@ -1,5 +1,6 @@
 const ADMIN_MODULES = [
   "users",
+  "drivers",
   "roles",
   "menus",
   "notifications",
@@ -63,6 +64,10 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
 
   if (normalizedSlug === "fare-plans") {
     return ["fare_plans.read"];
+  }
+
+  if (normalizedSlug === "driver-applications") {
+    return ["drivers.read"];
   }
 
   if (isAdminModule(normalizedSlug)) {

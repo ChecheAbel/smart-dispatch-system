@@ -190,6 +190,84 @@
       }
     }
   },
+  "adminDriverApplications": {
+    "eyebrow": "ሰዎች",
+    "title": "የሹፌር ማመልከቻዎች",
+    "description": "በመጠባበቅ ላይ ያሉ የሹፌር ምዝገባዎችን ይመልከቱ፣ የፈቃድ መረጃ ያረጋግጡ እና ማመልከቻዎችን ያጽድቁ ወይም ይካዱ።",
+    "searchPlaceholder": "በስም፣ ኢሜይል፣ ሞባይል ወይም የፈቃድ ቁጥር ይፈልጉ...",
+    "itemLabel": "ማመልከቻ",
+    "pendingTitle": "በመጠባበቅ ላይ",
+    "pendingDescription": "የአስተዳዳሪ ፈቃድ በመጠባበቅ ላይ ያሉ ማመልከቻዎች",
+    "columns": {
+      "name": "አመልካች",
+      "email": "ኢሜይል",
+      "mobile": "ሞባይል",
+      "license": "የፈቃድ ቁጥር",
+      "submitted": "ተላልፏል",
+      "actions": "እርምጃዎች"
+    },
+    "empty": {
+      "title": "ምንም በመጠባበቅ ላይ ያለ ማመልከቻ የለም",
+      "description": "አዲስ የሹፌር ምዝገባዎች ለግምገማ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የሹፌር ማመልከቻዎችን ለመመልከት ፈቃድ ያስፈልጋል። ለሚናዎ drivers.read ፈቃድ እንዲሰጥዎ አስተዳዳሪዎን ይጠይቁ።",
+      "sessionHint": "ፈቃዶች በቅርቡ ከተቀየሩ፣ ክፍለ ጊዜዎን ለማደስ ይውጡ እና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ሂድ"
+    },
+    "actions": {
+      "review": "ግምገማ",
+      "approve": "አጽድቅ",
+      "reject": "አጥፋ",
+      "menuLabel": "ለ {name} እርምጃዎች"
+    },
+    "review": {
+      "title": "ማመልከቻ ግምገማ",
+      "description": "መዳረሻ ከመፍቀድዎ በፊት የአመልካች መረጃ እና የሹፌር ፈቃድ ያረጋግጡ።",
+      "applicantSection": "የአመልካች መረጃ",
+      "licenseSection": "የሹፌር ፈቃድ",
+      "licenseNumber": "የፈቃድ ቁጥር",
+      "licensePhoto": "የፈቃድ ፎቶ",
+      "noPhoto": "ምንም የፈቃድ ፎቶ አልተሰቀለም።",
+      "openPhoto": "ሙሉ ምስል ክፈት",
+      "submittedAt": "ተላልፏል",
+      "approve": "ማመልከቻ አጽድቅ",
+      "approving": "በመጽደቅ ላይ...",
+      "reject": "ማመልከቻ አጥፋ",
+      "rejecting": "በመሰረዝ ላይ...",
+      "cancel": "ዝጋ",
+      "rejectConfirmTitle": "ይህ ማመልከቻ ይካድ?",
+      "rejectConfirmDescription": "አመልካቹ መግቢያ ማድረግ አይችልም። ይህ እርምጃ ማመልከቻውን ከበጠባበቅ ዝርዝር ውጭ ያደርገዋል።",
+      "rejectConfirm": "ማመልከቻ አጥፋ",
+      "rejectCancel": "ተው"
+    },
+    "toast": {
+      "approveSuccess": {
+        "title": "ማመልከቻ ጸድቋል",
+        "description": "{name} አሁን እንደ ሹፌር መግቢያ ማድረግ ይችላል።"
+      },
+      "rejectSuccess": {
+        "title": "ማመልከቻ ተከልክሏል",
+        "description": "የ {name} ማመልከቻ ተከልክሏል።"
+      },
+      "approveFailed": {
+        "title": "ማመልከቻ መጽደቅ አልተሳካም",
+        "description": "እባክዎ እንደገና ይሞክሩ።"
+      },
+      "rejectFailed": {
+        "title": "ማመልከቻ መሰረዝ አልተሳካም",
+        "description": "እባክዎ እንደገና ይሞክሩ።"
+      },
+      "loadFailed": {
+        "title": "ማመልከቻ መጫን አልተሳካም",
+        "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+      }
+    }
+  },
   "adminRoles": {
     "eyebrow": "የመዳረሻ ቁጥጥር",
     "title": "ሚናዎች",

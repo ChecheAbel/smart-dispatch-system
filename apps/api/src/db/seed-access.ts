@@ -10,6 +10,8 @@ const DEFAULT_PERMISSIONS = [
   { slug: "users.read", module: "users", action: "read", description: "View users" },
   { slug: "users.write", module: "users", action: "write", description: "Create and update users" },
   { slug: "users.delete", module: "users", action: "delete", description: "Delete users" },
+  { slug: "drivers.read", module: "drivers", action: "read", description: "View driver applications" },
+  { slug: "drivers.write", module: "drivers", action: "write", description: "Review driver applications" },
   { slug: "roles.read", module: "roles", action: "read", description: "View roles" },
   { slug: "roles.write", module: "roles", action: "write", description: "Create and update roles" },
   { slug: "roles.delete", module: "roles", action: "delete", description: "Delete roles" },
@@ -79,6 +81,17 @@ const DEFAULT_MENUS = [
     translations: [
       { locale: "en", label: "Users" },
       { locale: "am", label: "ተጠቃሚዎች" },
+    ],
+  },
+  {
+    slug: "driver-applications",
+    path: "/admin/drivers/applications",
+    icon: "clipboard-check",
+    sortOrder: 15,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "Driver Applications" },
+      { locale: "am", label: "የሹፌር ማመልከቻዎች" },
     ],
   },
   {
@@ -257,6 +270,11 @@ const DEFAULT_ENDPOINTS: Array<{
 }> = [
   { slug: "users.list", method: "GET", path: "/api/users", description: "List users", permissionSlug: "users.read" },
   { slug: "users.create", method: "POST", path: "/api/users", description: "Create user", permissionSlug: "users.write" },
+  { slug: "driver_applications.list", method: "GET", path: "/api/driver-applications", description: "List driver applications", permissionSlug: "drivers.read" },
+  { slug: "driver_applications.count", method: "GET", path: "/api/driver-applications/count", description: "Count pending driver applications", permissionSlug: "drivers.read" },
+  { slug: "driver_applications.get", method: "GET", path: "/api/driver-applications/:id", description: "Get driver application", permissionSlug: "drivers.read" },
+  { slug: "driver_applications.approve", method: "POST", path: "/api/driver-applications/:id/approve", description: "Approve driver application", permissionSlug: "drivers.write" },
+  { slug: "driver_applications.reject", method: "POST", path: "/api/driver-applications/:id/reject", description: "Reject driver application", permissionSlug: "drivers.write" },
   { slug: "roles.list", method: "GET", path: "/api/roles", description: "List roles", permissionSlug: "roles.read" },
   { slug: "roles.create", method: "POST", path: "/api/roles", description: "Create role", permissionSlug: "roles.write" },
   { slug: "roles.update", method: "PATCH", path: "/api/roles/:id", description: "Update role", permissionSlug: "roles.write" },

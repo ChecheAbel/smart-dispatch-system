@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Bell,
   Circle,
+  ClipboardCheck,
   Key,
   Layers,
   LayoutDashboard,
@@ -25,6 +26,8 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   "layout-dashboard": LayoutDashboard,
   dashboard: LayoutDashboard,
   users: Users,
+  "clipboard-check": ClipboardCheck,
+  "driver-applications": ClipboardCheck,
   shield: Shield,
   "shield-check": ShieldCheck,
   roles: Shield,

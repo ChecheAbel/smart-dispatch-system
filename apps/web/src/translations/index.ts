@@ -16,6 +16,7 @@ import type {
   AdminShellMessages,
   AdminDashboardMessages,
   AdminProfileMessages,
+  AdminDriverApplicationsMessages,
   Translations,
 } from "./types";
 
@@ -39,6 +40,7 @@ export type {
   AdminShellMessages,
   AdminDashboardMessages,
   AdminProfileMessages,
+  AdminDriverApplicationsMessages,
   Translations,
 };
 export { formatMessage } from "./format";
@@ -107,4 +109,10 @@ export function getAdminDashboardMessages(locale: SupportedLocale): AdminDashboa
 
 export function getAdminProfileMessages(locale: SupportedLocale): AdminProfileMessages {
   return getTranslations(locale).adminProfile;
+}
+
+export function getAdminDriverApplicationsMessages(
+  locale: SupportedLocale,
+): AdminDriverApplicationsMessages {
+  return getTranslations(locale).adminDriverApplications;
 }

@@ -32,6 +32,19 @@ export interface DriverProfile {
   license_photo_url: string | null;
 }
 
+/** Pending driver registration awaiting admin review. */
+export interface DriverApplication {
+  id: string;
+  email: string;
+  first_name: string;
+  middle_name: string | null;
+  last_name: string;
+  mobile_number: string;
+  license_number: string;
+  license_photo_url: string | null;
+  submitted_at: string;
+}
+
 /** Public user returned by auth endpoints (no password). */
 export interface User {
   id: string;
