@@ -101,6 +101,7 @@ import { seedRegions } from "./seed-regions";
 import { seedLocations } from "./seed-locations";
 import { seedVehicleTypes } from "./seed-vehicle-types";
 import { seedVehicles } from "./seed-vehicles";
+import { seedFarePlans } from "./seed-fare-plans";
 
 export async function seedDatabase() {
   await seedRoles();
@@ -110,5 +111,6 @@ export async function seedDatabase() {
   await seedLocations();
   await seedVehicleTypes();
   await seedVehicles();
+  await seedFarePlans();
   await seedAdminUser();
 }

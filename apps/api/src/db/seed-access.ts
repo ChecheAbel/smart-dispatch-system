@@ -32,6 +32,9 @@ const DEFAULT_PERMISSIONS = [
   { slug: "locations.read", module: "locations", action: "read", description: "View locations" },
   { slug: "locations.write", module: "locations", action: "write", description: "Create and update locations" },
   { slug: "locations.delete", module: "locations", action: "delete", description: "Delete locations" },
+  { slug: "fare_plans.read", module: "fare_plans", action: "read", description: "View fare plans" },
+  { slug: "fare_plans.write", module: "fare_plans", action: "write", description: "Create and update fare plans" },
+  { slug: "fare_plans.delete", module: "fare_plans", action: "delete", description: "Delete fare plans" },
 ] as const;
 
 const REMOVED_MENU_SLUGS = ["permissions", "endpoints"] as const;
@@ -221,6 +224,28 @@ const DEFAULT_MENUS = [
       { locale: "am", label: "ቦታዎች" },
     ],
   },
+  {
+    slug: "billing",
+    path: null,
+    icon: "receipt",
+    sortOrder: 60,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "Billing" },
+      { locale: "am", label: "ክፍያ" },
+    ],
+  },
+  {
+    slug: "fare-plans",
+    path: "/admin/billing/fare-plans",
+    icon: "coins",
+    sortOrder: 10,
+    parentSlug: "billing",
+    translations: [
+      { locale: "en", label: "Fare Plans" },
+      { locale: "am", label: "የክፍያ ዕቅዶች" },
+    ],
+  },
 ] as const;
 
 const DEFAULT_ENDPOINTS: Array<{
@@ -270,6 +295,11 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "locations.create", method: "POST", path: "/api/locations", description: "Create location", permissionSlug: "locations.write" },
   { slug: "locations.update", method: "PATCH", path: "/api/locations/:id", description: "Update location", permissionSlug: "locations.write" },
   { slug: "locations.delete", method: "DELETE", path: "/api/locations/:id", description: "Delete location", permissionSlug: "locations.delete" },
+  { slug: "fare_plans.list", method: "GET", path: "/api/fare-plans", description: "List fare plans", permissionSlug: "fare_plans.read" },
+  { slug: "fare_plans.get", method: "GET", path: "/api/fare-plans/:id", description: "Get fare plan", permissionSlug: "fare_plans.read" },
+  { slug: "fare_plans.create", method: "POST", path: "/api/fare-plans", description: "Create fare plan", permissionSlug: "fare_plans.write" },
+  { slug: "fare_plans.update", method: "PATCH", path: "/api/fare-plans/:id", description: "Update fare plan", permissionSlug: "fare_plans.write" },
+  { slug: "fare_plans.delete", method: "DELETE", path: "/api/fare-plans/:id", description: "Delete fare plan", permissionSlug: "fare_plans.delete" },
 ];
 
 async function seedPermissions() {

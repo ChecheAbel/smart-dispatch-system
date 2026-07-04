@@ -10,6 +10,7 @@ import {
   MapPin,
   Menu,
   MessageSquare,
+  Receipt,
   Route,
   ScrollText,
   Settings,
@@ -17,6 +18,7 @@ import {
   ShieldCheck,
   Truck,
   Users,
+  Coins,
 } from "lucide-react";
 
 const MENU_ICON_MAP: Record<string, LucideIcon> = {
@@ -50,6 +52,10 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   "location-management": Map,
   "location-regions": Map,
   "location-sites": MapPin,
+  receipt: Receipt,
+  billing: Receipt,
+  coins: Coins,
+  "fare-plans": Coins,
 };
 
 export function getMenuIcon(icon?: string | null): LucideIcon {

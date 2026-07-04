@@ -12,6 +12,7 @@ import type {
   AdminVehiclesMessages,
   AdminRegionsMessages,
   AdminLocationsMessages,
+  AdminFarePlansMessages,
   AdminShellMessages,
   AdminDashboardMessages,
   Translations,
@@ -33,6 +34,7 @@ export type {
   AdminVehiclesMessages,
   AdminRegionsMessages,
   AdminLocationsMessages,
+  AdminFarePlansMessages,
   AdminShellMessages,
   AdminDashboardMessages,
   Translations,
@@ -87,6 +89,10 @@ export function getAdminRegionsMessages(locale: SupportedLocale): AdminRegionsMe
 
 export function getAdminLocationsMessages(locale: SupportedLocale): AdminLocationsMessages {
   return getTranslations(locale).adminLocations;
+}
+
+export function getAdminFarePlansMessages(locale: SupportedLocale): AdminFarePlansMessages {
+  return getTranslations(locale).adminFarePlans;
 }
 
 export function getAdminShellMessages(locale: SupportedLocale): AdminShellMessages {

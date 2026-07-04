@@ -16,6 +16,7 @@ import { registerLocationRoutes } from "./routes/location.routes";
 import { registerRegionRoutes } from "./routes/region.routes";
 import { registerVehicleRoutes } from "./routes/vehicle.routes";
 import { registerVehicleTypeRoutes } from "./routes/vehicle-type.routes";
+import { registerFarePlanRoutes } from "./routes/fare-plan.routes";
 import { sendSuccess } from "./utils/response";
 
 dotenv.config();
@@ -38,6 +39,7 @@ registerVehicleTypeRoutes(app);
 registerVehicleRoutes(app);
 registerRegionRoutes(app);
 registerLocationRoutes(app);
+registerFarePlanRoutes(app);
 
 app.get("/api/health", (_req, res) => {
   sendSuccess(res, { status: "ok" }, { message: "Smart Dispatch System API is running" });

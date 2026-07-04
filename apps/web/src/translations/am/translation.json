@@ -1225,6 +1225,168 @@
       }
     }
   },
+  "adminFarePlans": {
+    "eyebrow": "ክፍያ",
+    "title": "የክፍያ ዕቅዶች",
+    "description": "በተሽከርካሪ አይነት፣ ክልል እና የክፍያ ሞዴል የክፍያ ደንቦችን ያዋቅሩ።",
+    "searchPlaceholder": "በስም ፈልግ...",
+    "newFarePlan": "አዲስ የክፍያ ዕቅድ",
+    "itemLabel": "የክፍያ ዕቅድ",
+    "allRegions": "ሁሉም ክልሎች",
+    "allVehicleTypes": "ሁሉም የተሽከርካሪ አይነቶች",
+    "columns": {
+      "name": "ስም",
+      "pricingModel": "የክፍያ ሞዴል",
+      "scope": "ወሰን",
+      "baseFare": "መሰረታዊ ክፍያ",
+      "status": "ሁኔታ",
+      "priority": "ቅድሚያ",
+      "created": "ተፈጥሯል",
+      "actions": "እርምጃዎች"
+    },
+    "pricingModels": {
+      "flat": "ቋሚ ክፍያ",
+      "distance": "ርቀት",
+      "time": "ጊዜ",
+      "distance_time": "ርቀት + ጊዜ",
+      "hourly": "ሰዓታዊ"
+    },
+    "pricingModelHelp": {
+      "flat": "ርቀት ወይም ጊዜ ሳይታወቅ ለእያንዳንዱ ጉዞ ቋሚ ዋጋ።",
+      "distance": "መሰረታዊ ክፍያ እና በኪ.ሜ ክፍያ በመጠቀም በተጓዙት ርቀት መሰረት ይሰላል።",
+      "time": "መሰረታዊ ክፍያ እና በደቂቃ ክፍያ በመጠቀም በጉዞ ጊዜ መሰረት ይሰላል።",
+      "distance_time": "ለበይነመረብ ጥሪ-መኪና አይነት ክፍያ ርቀትን እና ጊዜን ያጣምራል።",
+      "hourly": "በሰዓት የሚሰላ ቻርተር ክፍያ ከዝቅተኛ የቦታ ማስያዣ ሰዓታት ጋር።"
+    },
+    "status": {
+      "active": "ንቁ",
+      "inactive": "እንቅስቃሴ የለውም"
+    },
+    "empty": {
+      "title": "ምንም የክፍያ ዕቅድ አልተገኘም",
+      "description": "የክፍያ ዕቅዶች ከተፈጠሩ በኋላ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የክፍያ ዕቅዶችን ለማየት ፈቃድ ያስፈልጋል።",
+      "sessionHint": "ፈቃዶች ቅርብ ጊዜ ከተቀየሩ፣ ክፍያዎን ለማደስ እንደገና ይውጡና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ሂድ"
+    },
+    "actions": {
+      "edit": "አርትዕ",
+      "delete": "ሰርዝ",
+      "menuLabel": "ለ {name} እርምጃዎች"
+    },
+    "stats": {
+      "title": "ጠቅላላ የክፍያ ዕቅዶች",
+      "description": "በመድረኩ ውስጥ የተዋቀሩ ሁሉም የክፍያ ደንቦች",
+      "activeTitle": "ንቁ ዕቅዶች",
+      "activeDescription": "ለክፍያ ስሌት የሚገኙ ዕቅዶች",
+      "distanceTimeTitle": "ርቀት + ጊዜ",
+      "distanceTimeDescription": "የርቀት እና ጊዜን የሚጠቀሙ ዕቅዶች"
+    },
+    "form": {
+      "createTitle": "አዲስ የክፍያ ዕቅድ",
+      "editTitle": "የክፍያ ዕቅድ አርትዕ",
+      "createDescription": "ቢያንስ የእንግሊዝኛ ስም እና የክፍያ ዝርዝሮች ያለው የክፍያ ዕቅድ ይፍጠሩ።",
+      "editDescription": "የክፍያ ዕቅድ ዝርዝሮችን፣ ወሰንን እና የክፍያ ደንቦችን ያዘምኑ።",
+      "name": "ስም",
+      "description": "መግለጫ",
+      "descriptionPlaceholder": "አማራጭ መግለጫ",
+      "active": "ንቁ",
+      "optional": "(አማራጭ)",
+      "cancel": "ተው",
+      "create": "የክፍያ ዕቅድ ፍጠር",
+      "creating": "በመፍጠር ላይ...",
+      "save": "ለውጦችን አስቀምጥ",
+      "saving": "በማስቀመጥ ላይ...",
+      "loading": "የክፍያ ዕቅድ በመጫን ላይ...",
+      "namePlaceholderEn": "Addis Sedan Standard",
+      "namePlaceholderAm": "አዲስ አበባ ሴዳን መደበኛ",
+      "sections": {
+        "identity": "የዕቅድ ማንነት",
+        "identityDescription": "ይህ የክፍያ ዕቅድ በአስተዳደር ዝርዝሮች እና ሪፖርቶች ውስጥ እንዴት እንደሚታይ።",
+        "scope": "ወሰን",
+        "scopeDescription": "ዕቅዱን ለተሽከርካሪ አይነት እና/ወይም ክልል ይገድቡ፣ ወይም ለሁሉም ባዶ ይተዉት።",
+        "pricing": "ክፍያ",
+        "pricingDescription": "ለክፍያ ስሌት የሚያገለግሉትን የክፍያ ሞዴል እና የክፍያ አካላትን ያዘጋጁ።",
+        "rules": "ደንቦች",
+        "rulesDescription": "ቅድሚያ፣ የመጠበቂያ ጊዜ ፈቃድ፣ የመጠበቂያ ክፍያዎች እና ተገኝነት።"
+      },
+      "vehicleType": "የተሽከርካሪ አይነት",
+      "vehicleTypePlaceholder": "የተሽከርካሪ አይነት ይምረጡ",
+      "region": "ክልል",
+      "regionPlaceholder": "ክልል ይምረጡ",
+      "pricingModel": "የክፍያ ሞዴል",
+      "pricingModelPlaceholder": "የክፍያ ሞዴል ይምረጡ",
+      "currency": "ምንዛሬ",
+      "currencyPlaceholder": "ምንዛሬ ይምረጡ",
+      "currencies": {
+        "ETB": "የኢትዮጵያ ብር (ETB)",
+        "USD": "የአሜሪካ ዶላር (USD)",
+        "EUR": "ዩሮ (EUR)",
+        "GBP": "የብሪታንያ ፓውንድ (GBP)"
+      },
+      "baseFare": "መሰረታዊ ክፍያ",
+      "flatFare": "ቋሚ ክፍያ",
+      "perHourRate": "በሰዓት ክፍያ",
+      "perHourRateHelp": "ዝቅተኛ ሰዓታት ከመተገበርያቸው በፊት የሚጠቀመው የሰዓት ቻርተር ክፍያ።",
+      "perKmRate": "በኪ.ሜ ክፍያ",
+      "perMinuteRate": "በደቂቃ ክፍያ",
+      "perMinuteRateHelp": "ተሽከርካሪው በአገልግሎት ላይ በሚሆንበት ጊዜ ለጉዞ ቆይታ ይተገበራል።",
+      "minimumFare": "ዝቅተኛ ክፍያ",
+      "minimumHours": "ዝቅተኛ ሰዓታት",
+      "minimumHoursHelp": "ዝቅተኛ የሚከፈሉ ሰዓታት። ጠቅላላ ዝቅተኛ ክፍያ በራስ-ሰር ይሰላል።",
+      "bookingFee": "የቦታ ማስያዣ ክፍያ",
+      "freeWaitingMinutes": "ነጻ የመጠበቂያ ጊዜ (ደቂቃ)",
+      "freeWaitingMinutesHelp": "በመነሻ ወይም በማቆሚያዎች ላይ ያለ እንቅስቃሴ ጊዜ ከተጨማሪ ክፍያ ያለ ንቁ ነው።",
+      "waitingFeePerMinute": "የመጠበቂያ ክፍያ (በደቂቃ)",
+      "waitingFeePerMinuteHelp": "ነጻ የመጠበቂያ ጊዜ ካለቀ በኋላ ለእያንዳንዱ የመጠበቂያ ደቂቃ የሚጣል ክፍያ።",
+      "priority": "ቅድሚያ",
+      "priorityHelp": "ከፍተኛ ቅድሚያ ያላቸው ዕቅዶች ብዙ ደንቦች ሲተገብሩ በመጀመሪያ ይመረጣሉ።",
+      "isActiveTitle": "ንቁ ዕቅድ",
+      "isActiveOn": "ይህ ዕቅድ ለክፍያ ስሌት ይገኛል።",
+      "isActiveOff": "ይህ ዕቅድ ከክፍያ ስሌት ተደብቋል።",
+      "errors": {
+        "enNameRequired": "የእንግሊዝኛ ስም ያስፈልጋል።",
+        "pricingModelRequired": "የክፍያ ሞዴል ያስፈልጋል።",
+        "baseFareRequired": "መሰረታዊ ክፍያ ያስፈልጋል።",
+        "baseFareInvalid": "ትክክለኛ መሰረታዊ ክፍያ ያስገቡ (0 ወይም ከዚያ በላይ)።",
+        "rateInvalid": "ትክክለኛ መጠን ያስገቡ (0 ወይም ከዚያ በላይ)።",
+        "hoursInvalid": "ትክክለኛ ዝቅተኛ ሰዓታት ያስገቡ (0 ወይም ከዚያ በላይ)።",
+        "priorityInvalid": "ትክክለኛ ቅድሚያ ያስገቡ (0 ወይም ከዚያ በላይ)።",
+        "waitingInvalid": "ትክክለኛ ነጻ የመጠበቂያ ደቂቃዎች ያስገቡ (0 ወይም ከዚያ በላይ)።",
+        "createFailed": "የክፍያ ዕቅድ መፍጠር አልተሳካም።",
+        "updateFailed": "የክፍያ ዕቅድ ማዘመን አልተሳካም።",
+        "loadFailed": "የክፍያ ዕቅድ መጫን አልተሳካም።"
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "የክፍያ ዕቅድ ተፈጥሯል",
+        "description": "{name} በተሳካ ሁኔታ ታክሏል።"
+      },
+      "updateSuccess": {
+        "title": "የክፍያ ዕቅድ ተዘምኗል",
+        "description": "{name} በተሳካ ሁኔታ ተቀምጧል።"
+      },
+      "deleteSuccess": {
+        "title": "የክፍያ ዕቅድ ተሰርዟል",
+        "description": "{name} ተወግዷል።"
+      },
+      "deleteFailed": {
+        "title": "መሰረዝ አልተሳካም",
+        "description": "የክፍያ ዕቅዱን መሰረዝ አልተቻለም።"
+      },
+      "loadFailed": {
+        "title": "መጫን አልተሳካም",
+        "description": "የክፍያ ዕቅዱን መጫን አልተቻለም።"
+      }
+    }
+  },
   "adminAuditLogs": {
     "eyebrow": "የመዳረሻ ቁጥጥር",
     "title": "የኦዲት መዝገቦች",

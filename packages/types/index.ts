@@ -220,6 +220,48 @@ export interface Location {
   translations?: LocationTranslation[];
 }
 
+export type PricingModel = "flat" | "distance" | "time" | "distance_time" | "hourly";
+
+export interface FarePlanTranslation {
+  locale: string;
+  name: string;
+  description: string | null;
+}
+
+export interface FarePlan {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  locale: string;
+  vehicle_type_id: string | null;
+  vehicle_type?: {
+    id: string;
+    slug: string;
+    name: string;
+  };
+  region_id: string | null;
+  region?: {
+    id: string;
+    slug: string;
+    name: string;
+  };
+  pricing_model: PricingModel;
+  currency: string;
+  base_fare: number;
+  per_km_rate: number | null;
+  per_minute_rate: number | null;
+  minimum_fare: number | null;
+  booking_fee: number | null;
+  free_waiting_minutes: number | null;
+  waiting_fee_per_minute: number | null;
+  priority: number;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  translations?: FarePlanTranslation[];
+}
+
 export interface Endpoint {
   id: string;
   slug: string;

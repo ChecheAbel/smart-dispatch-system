@@ -12,5 +12,6 @@ export type AdminVehicleTypesMessages = Translations["adminVehicleTypes"];
 export type AdminVehiclesMessages = Translations["adminVehicles"];
 export type AdminRegionsMessages = Translations["adminRegions"];
 export type AdminLocationsMessages = Translations["adminLocations"];
+export type AdminFarePlansMessages = Translations["adminFarePlans"];
 export type AdminShellMessages = Translations["adminShell"];
 export type AdminDashboardMessages = Translations["adminDashboard"];

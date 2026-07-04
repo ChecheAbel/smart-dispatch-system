@@ -1225,6 +1225,168 @@
       }
     }
   },
+  "adminFarePlans": {
+    "eyebrow": "Billing",
+    "title": "Fare Plans",
+    "description": "Configure pricing rules by vehicle type, region, and pricing model.",
+    "searchPlaceholder": "Search by name...",
+    "newFarePlan": "New fare plan",
+    "itemLabel": "fare plan",
+    "allRegions": "All regions",
+    "allVehicleTypes": "All vehicle types",
+    "columns": {
+      "name": "Name",
+      "pricingModel": "Pricing model",
+      "scope": "Scope",
+      "baseFare": "Base fare",
+      "status": "Status",
+      "priority": "Priority",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "pricingModels": {
+      "flat": "Flat rate",
+      "distance": "Distance",
+      "time": "Time",
+      "distance_time": "Distance + time",
+      "hourly": "Hourly"
+    },
+    "pricingModelHelp": {
+      "flat": "Fixed price per trip regardless of distance or duration.",
+      "distance": "Charge by distance traveled using a base fare plus per km rate.",
+      "time": "Charge by trip duration using a base fare plus per minute rate.",
+      "distance_time": "Combine distance and time for on-demand ride-hail style pricing.",
+      "hourly": "Charter pricing billed by the hour with a minimum booking duration."
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "empty": {
+      "title": "No fare plans found",
+      "description": "Fare plans will appear here once they are created.",
+      "searchDescription": "Try a different search term."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to fare plans is required to open this page.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "menuLabel": "Actions for {name}"
+    },
+    "stats": {
+      "title": "Total fare plans",
+      "description": "All pricing rules configured in the platform",
+      "activeTitle": "Active plans",
+      "activeDescription": "Plans currently available for fare calculation",
+      "distanceTimeTitle": "Distance + time",
+      "distanceTimeDescription": "Plans using combined distance and time pricing"
+    },
+    "form": {
+      "createTitle": "New fare plan",
+      "editTitle": "Edit fare plan",
+      "createDescription": "Create a fare plan with at least an English name and pricing details.",
+      "editDescription": "Update fare plan details, scope, and pricing rules.",
+      "name": "Name",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "active": "Active",
+      "optional": "(optional)",
+      "cancel": "Cancel",
+      "create": "Create fare plan",
+      "creating": "Creating...",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "loading": "Loading fare plan...",
+      "namePlaceholderEn": "Addis Sedan Standard",
+      "namePlaceholderAm": "አዲስ አበባ ሴዳን መደበኛ",
+      "sections": {
+        "identity": "Plan identity",
+        "identityDescription": "How this fare plan appears in admin lists and reports.",
+        "scope": "Scope",
+        "scopeDescription": "Limit the plan to a vehicle type and/or region, or leave blank for all.",
+        "pricing": "Pricing",
+        "pricingDescription": "Set the pricing model and rate components used for fare calculation.",
+        "rules": "Rules",
+        "rulesDescription": "Priority, waiting allowance, waiting fees, and availability."
+      },
+      "vehicleType": "Vehicle type",
+      "vehicleTypePlaceholder": "Select vehicle type",
+      "region": "Region",
+      "regionPlaceholder": "Select region",
+      "pricingModel": "Pricing model",
+      "pricingModelPlaceholder": "Select pricing model",
+      "currency": "Currency",
+      "currencyPlaceholder": "Select currency",
+      "currencies": {
+        "ETB": "Ethiopian Birr (ETB)",
+        "USD": "US Dollar (USD)",
+        "EUR": "Euro (EUR)",
+        "GBP": "British Pound (GBP)"
+      },
+      "baseFare": "Base fare",
+      "flatFare": "Flat fare",
+      "perHourRate": "Per hour rate",
+      "perHourRateHelp": "Hourly charter rate before minimum hours are applied.",
+      "perKmRate": "Per km rate",
+      "perMinuteRate": "Per minute rate",
+      "perMinuteRateHelp": "Applied to trip duration while the vehicle is in service.",
+      "minimumFare": "Minimum fare",
+      "minimumHours": "Minimum hours",
+      "minimumHoursHelp": "Minimum billable hours. Total minimum charge is calculated automatically.",
+      "bookingFee": "Booking fee",
+      "freeWaitingMinutes": "Free waiting (minutes)",
+      "freeWaitingMinutesHelp": "Idle time at pickup or stops that is included at no extra charge.",
+      "waitingFeePerMinute": "Waiting fee (per minute)",
+      "waitingFeePerMinuteHelp": "Charged for each minute of waiting after the free waiting period ends.",
+      "priority": "Priority",
+      "priorityHelp": "Higher priority plans are matched first when multiple rules apply.",
+      "isActiveTitle": "Active plan",
+      "isActiveOn": "This plan is available for fare calculation.",
+      "isActiveOff": "This plan is hidden from fare calculation.",
+      "errors": {
+        "enNameRequired": "English name is required.",
+        "pricingModelRequired": "Pricing model is required.",
+        "baseFareRequired": "Base fare is required.",
+        "baseFareInvalid": "Enter a valid base fare (0 or greater).",
+        "rateInvalid": "Enter a valid amount (0 or greater).",
+        "hoursInvalid": "Enter valid minimum hours (0 or greater).",
+        "priorityInvalid": "Enter a valid priority (0 or greater).",
+        "waitingInvalid": "Enter valid free waiting minutes (0 or greater).",
+        "createFailed": "Failed to create fare plan.",
+        "updateFailed": "Failed to update fare plan.",
+        "loadFailed": "Failed to load fare plan."
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "Fare plan created",
+        "description": "{name} was added successfully."
+      },
+      "updateSuccess": {
+        "title": "Fare plan updated",
+        "description": "{name} was saved successfully."
+      },
+      "deleteSuccess": {
+        "title": "Fare plan deleted",
+        "description": "{name} was removed."
+      },
+      "deleteFailed": {
+        "title": "Delete failed",
+        "description": "Could not delete the fare plan."
+      },
+      "loadFailed": {
+        "title": "Load failed",
+        "description": "Could not load the fare plan."
+      }
+    }
+  },
   "adminAuditLogs": {
     "eyebrow": "Access control",
     "title": "Audit logs",
