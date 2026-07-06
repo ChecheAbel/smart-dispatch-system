@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { MoreHorizontal, Pencil, Plus, Trash2, Users } from "lucide-react";
-import type { AccountActivation, AccountStatus, User } from "@smart-dispatch/types";
+import type { AccountActivation, AccountStatus, RequesterSegment, User } from "@smart-dispatch/types";
 import { useLocale, useAuth } from "@/components/shared/providers";
 import {
   DataTable,
@@ -110,6 +110,17 @@ function UserRowActions({
   );
 }
 
+function requesterSegmentBadgeClass(segment: RequesterSegment) {
+  switch (segment) {
+    case "business":
+      return "border-violet-200 bg-violet-50 text-violet-800";
+    case "government":
+      return "border-sky-200 bg-sky-50 text-sky-800";
+    default:
+      return "border-emerald-200 bg-emerald-50 text-emerald-800";
+  }
+}
+
 export function UsersPage() {
   const { locale } = useLocale();
   const { hasPermission } = useAuth();
@@ -161,6 +172,21 @@ export function UsersPage() {
         header: copy.columns.mobile,
         cellClassName: "text-slate-500",
         cell: (user) => user.mobile_number,
+      },
+      {
+        id: "requesterType",
+        header: copy.columns.requesterType,
+        cell: (user) =>
+          user.requester_profile ? (
+            <Badge
+              variant="outline"
+              className={cn("text-xs", requesterSegmentBadgeClass(user.requester_profile.segment))}
+            >
+              {copy.requesterSegment[user.requester_profile.segment]}
+            </Badge>
+          ) : (
+            "—"
+          ),
       },
       {
         id: "roles",

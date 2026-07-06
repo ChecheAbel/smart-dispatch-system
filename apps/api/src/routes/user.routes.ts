@@ -31,6 +31,7 @@ import {
   parseAccountActivation,
   parseAccountStatus,
 } from "../utils/validation";
+import { parseRequesterSegment } from "../utils/requester-profile";
 import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
 import { toPublicRole } from "../mappers/role.mapper";
 
@@ -49,6 +50,7 @@ router.get("/", requirePermission("users.read"), async (req: Request, res: Respo
       search: getString(req.query.search) || undefined,
       accountStatus: parseAccountStatus(req.query.account_status),
       accountActivation: parseAccountActivation(req.query.account_activation),
+      requesterSegment: parseRequesterSegment(req.query.requester_segment) ?? undefined,
     };
 
     const result = await paginate(

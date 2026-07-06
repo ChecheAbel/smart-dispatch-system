@@ -109,6 +109,12 @@ enum AccountActivation {
   activated
 }
 
+enum RequesterSegment {
+  individual
+  business
+  government
+}
+
 model User {
   id                String            @id @default(uuid()) @db.Uuid
   email             String            @unique @db.VarChar(255)
@@ -125,11 +131,33 @@ model User {
   tokens            Token[]
   auditLogs         AuditLog[]
   driverProfile     Driver?
+  requesterProfile  RequesterProfile?
   assignedVehicle   Vehicle?   @relation("VehicleAssignedDriver")
 
   @@index([email])
   @@index([mobileNumber])
   @@map("users")
+}
+
+model RequesterProfile {
+  id                   String           @id @default(uuid()) @db.Uuid
+  userId               String           @unique @map("user_id") @db.Uuid
+  segment              RequesterSegment
+  organizationName     String?          @map("organization_name") @db.VarChar(200)
+  jobTitle             String?          @map("job_title") @db.VarChar(100)
+  organizationAddress  String?          @map("organization_address") @db.VarChar(500)
+  taxId                String?          @map("tax_id") @db.VarChar(50)
+  registrationNumber   String?          @map("registration_number") @db.VarChar(50)
+  governmentEntityType String?          @map("government_entity_type") @db.VarChar(100)
+  officialReference    String?          @map("official_reference") @db.VarChar(100)
+  billingContactName   String?          @map("billing_contact_name") @db.VarChar(100)
+  billingContactEmail  String?          @map("billing_contact_email") @db.VarChar(255)
+  createdAt            DateTime         @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime         @updatedAt @map("updated_at") @db.Timestamptz
+  user                 User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([segment])
+  @@map("requester_profiles")
 }
 
 model Driver {

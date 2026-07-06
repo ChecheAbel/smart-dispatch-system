@@ -348,6 +348,7 @@
       "name": "Name",
       "email": "Email",
       "mobile": "Mobile",
+      "requesterType": "Account type",
       "roles": "Roles",
       "status": "Status",
       "activation": "Activation",
@@ -361,6 +362,11 @@
     "activation": {
       "pending": "Pending",
       "activated": "Activated"
+    },
+    "requesterSegment": {
+      "individual": "Individual",
+      "business": "Business",
+      "government": "Government"
     },
     "empty": {
       "title": "No users found",
@@ -425,6 +431,19 @@
       },
       "rolesSection": "Roles",
       "rolesSectionDescription": "Assign roles to control what modules and actions this user can access.",
+      "requesterSection": "Requester profile",
+      "requesterSectionDescription": "Information submitted during public registration for vehicle requests.",
+      "requesterFields": {
+        "organizationName": "Organization",
+        "jobTitle": "Job title",
+        "organizationAddress": "Organization address",
+        "taxId": "Tax ID / TIN",
+        "registrationNumber": "Registration number",
+        "governmentEntityType": "Entity type",
+        "officialReference": "Official reference",
+        "billingContactName": "Billing contact",
+        "billingContactEmail": "Billing email"
+      },
       "roleNoneOption": "No role assigned",
       "optional": "(optional)",
       "cancel": "Cancel",

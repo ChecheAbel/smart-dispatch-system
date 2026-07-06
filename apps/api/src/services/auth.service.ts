@@ -15,7 +15,11 @@ import { findDriverByLicenseNumber, findDriverByUserId } from "../models/driver.
 import { findPermissionsByUserId } from "../models/permission.model";
 import { toPublicPermission } from "../mappers/permission.mapper";
 import { toPublicDriverProfile } from "../mappers/driver.mapper";
+import { toPublicRequesterProfile } from "../mappers/requester-profile.mapper";
+import { findRequesterProfileByUserId } from "../models/requester-profile.model";
+import { createRequesterProfile } from "../models/requester-profile.model";
 import { prisma } from "../db/prisma";
+import type { RequesterProfileInput } from "../utils/requester-profile";
 import {
   isValidEmail,
   normalizeEthiopianMobileNumber,
@@ -46,9 +50,10 @@ function isAccountUsable(user: DbUser) {
 }
 
 async function toSafeUser(user: DbUser): Promise<User> {
-  const [roles, driverProfile] = await Promise.all([
+  const [roles, driverProfile, requesterProfile] = await Promise.all([
     findRolesByUserId(user.id),
     findDriverByUserId(user.id),
+    findRequesterProfileByUserId(user.id),
   ]);
 
   return {
@@ -59,6 +64,7 @@ async function toSafeUser(user: DbUser): Promise<User> {
     last_name: user.lastName,
     mobile_number: user.mobileNumber,
     driver: driverProfile ? toPublicDriverProfile(driverProfile) : null,
+    requester_profile: requesterProfile ? toPublicRequesterProfile(requesterProfile) : null,
     account_status: user.accountStatus,
     account_activation: user.accountActivation,
     roles: roles.map((role) => role.slug as RoleSlug),
@@ -297,6 +303,67 @@ export async function registerDriverApplication(input: {
   return {
     message:
       "Your application has been submitted. We will review your details and notify you once your account is activated.",
+  };
+}
+
+export async function registerUserApplication(input: {
+  email: string;
+  password: string;
+  firstName: string;
+  middleName?: string | null;
+  lastName: string;
+  mobileNumber: string;
+  requesterProfile: RequesterProfileInput;
+}) {
+  const email = input.email.trim().toLowerCase();
+  const firstName = input.firstName.trim();
+  const lastName = input.lastName.trim();
+  const mobileNumber = input.mobileNumber.trim();
+  const middleName = input.middleName?.trim() || null;
+
+  if (!isValidEmail(email)) {
+    throw new AuthError("A valid email address is required.", 400);
+  }
+
+  if (!input.password || input.password.length < 8) {
+    throw new AuthError("Password must be at least 8 characters.", 400);
+  }
+
+  if (!firstName || !lastName || !mobileNumber) {
+    throw new AuthError("First name, last name, and mobile number are required.", 400);
+  }
+
+  const existingEmail = await findUserByEmail(email);
+  if (existingEmail) {
+    throw new AuthError("An account with this email already exists.", 409);
+  }
+
+  const existingMobile = await findUserByMobileNumber(mobileNumber);
+  if (existingMobile) {
+    throw new AuthError("This mobile number is already registered.", 409);
+  }
+
+  const passwordHash = await bcrypt.hash(input.password, 12);
+  await prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({
+      data: {
+        email,
+        passwordHash,
+        firstName,
+        middleName,
+        lastName,
+        mobileNumber,
+        accountStatus: "active",
+        accountActivation: "pending",
+      },
+    });
+
+    await createRequesterProfile(user.id, input.requesterProfile, tx);
+  });
+
+  return {
+    message:
+      "Your account has been created. We will review your details and notify you once your account is activated.",
   };
 }
 

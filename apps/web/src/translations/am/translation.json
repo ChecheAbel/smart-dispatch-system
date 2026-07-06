@@ -348,6 +348,7 @@
       "name": "ስም",
       "email": "ኢሜይል",
       "mobile": "ስልክ",
+      "requesterType": "የመለያ አይነት",
       "roles": "ሚናዎች",
       "status": "ሁኔታ",
       "activation": "ማግበር",
@@ -361,6 +362,11 @@
     "activation": {
       "pending": "በመጠባበቅ ላይ",
       "activated": "ተገብቷል"
+    },
+    "requesterSegment": {
+      "individual": "ግለሰብ",
+      "business": "ንግድ",
+      "government": "መንግስት"
     },
     "empty": {
       "title": "ምንም ተጠቃሚ አልተገኘም",
@@ -425,6 +431,19 @@
       },
       "rolesSection": "ሚናዎች",
       "rolesSectionDescription": "ይህ ተጠቃሚ ምን ሞጁሎች እና እርምጃዎች መድረስ እንደሚችል ሚናዎችን ይመድቡ።",
+      "requesterSection": "የጠያቂ መገለጫ",
+      "requesterSectionDescription": "ለተሽከርካሪ ጥያቄዎች በህዝብ ምዝገባ ወቅት የቀረበ መረጃ።",
+      "requesterFields": {
+        "organizationName": "ድርጅት",
+        "jobTitle": "የስራ መደብ",
+        "organizationAddress": "የድርጅት አድራሻ",
+        "taxId": "የታክስ መለያ",
+        "registrationNumber": "የምዝገባ ቁጥር",
+        "governmentEntityType": "የመንግስት አካል አይነት",
+        "officialReference": "ይፋዊ ማጣቀሻ",
+        "billingContactName": "የክፍያ ተጠሪ",
+        "billingContactEmail": "የክፍያ ኢሜይል"
+      },
       "roleNoneOption": "ምንም ሚና አልተመደበም",
       "optional": "(አማራጭ)",
       "cancel": "ሰርዝ",

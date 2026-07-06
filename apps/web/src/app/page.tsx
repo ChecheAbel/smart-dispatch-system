@@ -3,7 +3,6 @@ import Hero        from "@/components/landing/Hero";
 import LiveView    from "@/components/landing/LiveView";
 import Features    from "@/components/landing/Features";
 import Enterprises from "@/components/landing/Enterprises";
-import DriverRegistration from "@/components/landing/DriverRegistration";
 import CTA         from "@/components/landing/CTA";
 import Contact     from "@/components/landing/Contact";
 import Footer      from "@/components/landing/Footer";
@@ -24,9 +23,6 @@ export default function Home() {
       </Reveal>
       <Reveal delay={80}>
         <Enterprises />
-      </Reveal>
-      <Reveal delay={80}>
-        <DriverRegistration />
       </Reveal>
       <Reveal delay={80}>
         <CTA />

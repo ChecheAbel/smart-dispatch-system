@@ -54,6 +54,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { UserRequesterProfileSection } from "./user-requester-profile-section";
 
 type UserFormSheetMode = "create" | "edit";
 
@@ -234,6 +235,7 @@ export function CreateUserSheet({
   const [allRoles, setAllRoles] = useState<Role[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const [rolesLoading, setRolesLoading] = useState(false);
+  const [loadedUser, setLoadedUser] = useState<User | null>(null);
 
   useEffect(() => {
     if (!open) {
@@ -245,6 +247,7 @@ export function CreateUserSheet({
       setAllRoles([]);
       setSelectedRoleId(null);
       setRolesLoading(false);
+      setLoadedUser(null);
       return;
     }
 
@@ -264,6 +267,7 @@ export function CreateUserSheet({
         if (!isEdit) {
           setForm(emptyForm);
           setSelectedRoleId(null);
+          setLoadedUser(null);
           return;
         }
 
@@ -281,6 +285,7 @@ export function CreateUserSheet({
 
         if (!cancelled) {
           setForm(mapUserToForm(user));
+          setLoadedUser(user);
           setSelectedRoleId(assignedRoles[0]?.id ?? null);
         }
       } catch (err) {
@@ -606,6 +611,10 @@ export function CreateUserSheet({
                 </div>
               </div>
             </section>
+
+            {isEdit && loadedUser?.requester_profile ? (
+              <UserRequesterProfileSection user={loadedUser} />
+            ) : null}
 
             <section className="space-y-4 rounded-lg border border-slate-200 bg-[#f8fafb]/60 p-5">
               <SectionHeader

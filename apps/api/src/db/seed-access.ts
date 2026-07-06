@@ -40,7 +40,7 @@ const DEFAULT_PERMISSIONS = [
   { slug: "fare_plans.delete", module: "fare_plans", action: "delete", description: "Delete fare plans" },
 ] as const;
 
-const REMOVED_MENU_SLUGS = ["permissions", "endpoints"] as const;
+const REMOVED_MENU_SLUGS = ["permissions", "endpoints", "registration-forms"] as const;
 
 const REMOVED_PERMISSION_SLUGS = [
   "permissions.read",
@@ -49,6 +49,9 @@ const REMOVED_PERMISSION_SLUGS = [
   "endpoints.read",
   "endpoints.write",
   "endpoints.delete",
+  "registration_forms.read",
+  "registration_forms.write",
+  "registration_forms.delete",
 ] as const;
 
 const REMOVED_ENDPOINT_SLUGS = [
@@ -59,6 +62,12 @@ const REMOVED_ENDPOINT_SLUGS = [
   "endpoints.create",
   "endpoints.update",
   "endpoints.delete",
+  "registration_forms.list",
+  "registration_forms.public",
+  "registration_forms.get",
+  "registration_forms.create",
+  "registration_forms.update",
+  "registration_forms.delete",
 ] as const;
 
 const DEFAULT_MENUS = [

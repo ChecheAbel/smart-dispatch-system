@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import BrandLogo from "@/components/landing/BrandLogo";
+import { cn } from "@/lib/utils";
 
 type AuthShellProps = {
   children: ReactNode;
@@ -7,6 +8,9 @@ type AuthShellProps = {
   desktopEyebrow: string;
   desktopTitle: ReactNode;
   desktopDescription: string;
+  desktopAside?: ReactNode;
+  contentClassName?: string;
+  contentAlign?: "center" | "start";
 };
 
 export default function AuthShell({
@@ -15,6 +19,9 @@ export default function AuthShell({
   desktopEyebrow,
   desktopTitle,
   desktopDescription,
+  desktopAside,
+  contentClassName = "max-w-md",
+  contentAlign = "center",
 }: AuthShellProps) {
   return (
     <div className="min-h-[100dvh] flex flex-col lg:flex-row">
@@ -35,6 +42,7 @@ export default function AuthShell({
             {desktopTitle}
           </h1>
           <p className="text-white/55 text-lg leading-relaxed">{desktopDescription}</p>
+          {desktopAside}
         </div>
 
         <p className="relative z-10 text-white/25 text-xs">
@@ -42,7 +50,7 @@ export default function AuthShell({
         </p>
       </div>
 
-      <div className="flex-1 flex flex-col min-h-[100dvh] bg-[#f8f7f4]">
+      <div className="flex-1 flex flex-col min-h-[100dvh] bg-[#f8f7f4] overflow-y-auto">
         <div className="lg:hidden relative overflow-hidden bg-[#1C3A34] px-4 sm:px-6 py-8 text-center">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(201,184,122,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(201,184,122,0.04)_1px,transparent_1px)] bg-[size:40px_40px] opacity-50" />
           <div className="relative z-10 flex flex-col items-center gap-4">
@@ -51,8 +59,13 @@ export default function AuthShell({
           </div>
         </div>
 
-        <div className="flex-1 flex items-center justify-center px-4 sm:px-6 py-10 sm:py-12">
-          <div className="w-full max-w-md">{children}</div>
+        <div
+          className={cn(
+            "flex-1 flex px-5 sm:px-8 lg:px-12 py-8 sm:py-10 lg:py-12",
+            contentAlign === "start" ? "items-start" : "items-center",
+          )}
+        >
+          <div className={cn("w-full", contentClassName)}>{children}</div>
         </div>
       </div>
     </div>

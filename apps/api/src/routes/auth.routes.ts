@@ -8,6 +8,7 @@ import {
   logout,
   refreshAccessToken,
   registerDriverApplication,
+  registerUserApplication,
   requestPasswordReset,
   resetPasswordWithToken,
   updateMyProfile,
@@ -27,8 +28,62 @@ import {
   buildDriverLicensePhotoUrl,
   driverLicensePhotoUpload,
 } from "../utils/driver-license-upload";
+import {
+  parseRequesterProfileInput,
+  validateRequesterProfileInput,
+} from "../utils/requester-profile";
 
 export function registerAuthRoutes(app: Express) {
+  app.post("/api/auth/register-user", async (req: Request, res: Response) => {
+    try {
+      const email = getString(req.body?.email);
+      const password = getString(req.body?.password);
+      const firstName = getString(req.body?.first_name);
+      const lastName = getString(req.body?.last_name);
+      const mobileInput = getString(req.body?.mobile_number);
+      const requesterProfile = validateRequesterProfileInput(parseRequesterProfileInput(req.body));
+
+      if (!isValidEmail(email)) {
+        return sendError(res, "A valid email address is required.", 400);
+      }
+
+      if (!password || password.length < 8) {
+        return sendError(res, "Password must be at least 8 characters.", 400);
+      }
+
+      if (!firstName || !lastName || !mobileInput) {
+        return sendError(
+          res,
+          "First name, last name, and mobile number are required.",
+          400,
+        );
+      }
+
+      const mobileNumber = normalizeEthiopianMobileNumber(mobileInput);
+      if (!mobileNumber || !isValidEthiopianMobileNumber(mobileInput)) {
+        return sendError(
+          res,
+          "Enter a valid 9-digit number starting with 9 (Ethio Telecom) or 7 (Safaricom).",
+          400,
+        );
+      }
+
+      const result = await registerUserApplication({
+        email,
+        password,
+        firstName,
+        middleName: getOptionalString(req.body?.middle_name),
+        lastName,
+        mobileNumber,
+        requesterProfile,
+      });
+
+      return sendSuccess(res, result, { status: 201, message: result.message });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  });
+
   app.post("/api/auth/register-driver", (req: Request, res: Response) => {
     driverLicensePhotoUpload.single("driver_license_photo")(req, res, async (uploadError) => {
       if (uploadError) {

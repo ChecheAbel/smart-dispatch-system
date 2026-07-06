@@ -1,4 +1,4 @@
-import type { AccountActivation, AccountStatus, Prisma } from "../generated/prisma";
+import type { AccountActivation, AccountStatus, Prisma, RequesterSegment } from "../generated/prisma";
 import { prisma } from "../db/prisma";
 
 export type CreateUserInput = {
@@ -27,6 +27,7 @@ export type ListUsersFilter = {
   accountStatus?: AccountStatus;
   accountActivation?: AccountActivation;
   roleSlug?: string;
+  requesterSegment?: RequesterSegment;
 };
 
 const userWithRelationsInclude = {
@@ -35,6 +36,7 @@ const userWithRelationsInclude = {
     orderBy: { role: { slug: "asc" as const } },
   },
   driverProfile: true,
+  requesterProfile: true,
 } satisfies Prisma.UserInclude;
 
 function normalizeEmail(email: string) {
@@ -62,7 +64,22 @@ function buildUserWhere(filter?: ListUsersFilter): Prisma.UserWhereInput {
       { middleName: { contains: search, mode: "insensitive" } },
       { lastName: { contains: search, mode: "insensitive" } },
       { mobileNumber: { contains: search, mode: "insensitive" } },
+      {
+        requesterProfile: {
+          is: {
+            organizationName: { contains: search, mode: "insensitive" },
+          },
+        },
+      },
     ];
+  }
+
+  if (filter.requesterSegment) {
+    where.requesterProfile = {
+      is: {
+        segment: filter.requesterSegment,
+      },
+    };
   }
 
   if (filter.roleSlug?.trim()) {

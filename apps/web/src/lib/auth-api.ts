@@ -96,6 +96,30 @@ export type RegisterDriverInput = {
   driver_license_photo: File;
 };
 
+export type RegisterUserInput = {
+  email: string;
+  password: string;
+  first_name: string;
+  middle_name?: string | null;
+  last_name: string;
+  mobile_number: string;
+  segment: "individual" | "business" | "government";
+  organization_name?: string | null;
+  job_title?: string | null;
+  organization_address?: string | null;
+  tax_id?: string | null;
+  registration_number?: string | null;
+  government_entity_type?: string | null;
+  official_reference?: string | null;
+  billing_contact_name?: string | null;
+  billing_contact_email?: string | null;
+};
+
+export async function registerUserApplication(input: RegisterUserInput) {
+  const { data } = await apiClient.post("/api/auth/register-user", input);
+  return unwrapApiResponse<{ message: string }>(data);
+}
+
 export async function registerDriverApplication(input: RegisterDriverInput) {
   const formData = new FormData();
   formData.append("email", input.email);

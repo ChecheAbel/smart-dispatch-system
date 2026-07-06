@@ -32,6 +32,23 @@ export interface DriverProfile {
   license_photo_url: string | null;
 }
 
+export type RequesterSegment = "individual" | "business" | "government";
+
+export interface RequesterProfile {
+  segment: RequesterSegment;
+  organization_name: string | null;
+  job_title: string | null;
+  organization_address: string | null;
+  tax_id: string | null;
+  registration_number: string | null;
+  government_entity_type: string | null;
+  official_reference: string | null;
+  billing_contact_name: string | null;
+  billing_contact_email: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 /** Public user returned by auth endpoints (no password). */
 export interface User {
   id: string;
@@ -41,6 +58,7 @@ export interface User {
   last_name: string;
   mobile_number: string;
   driver: DriverProfile | null;
+  requester_profile: RequesterProfile | null;
   account_status: AccountStatus;
   account_activation: AccountActivation;
   roles: RoleSlug[];
