@@ -4,8 +4,16 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useNavigation } from "@/components/shared/providers/navigation-context";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
-import { ADMIN_DASHBOARD_PATH } from "@/lib/auth-paths";
-import { getDefaultAllowedPath, isPathAllowed } from "@/lib/admin-navigation";
+import {
+  getCustomerDefaultAllowedPath,
+  isCustomerPathAllowed,
+} from "@/lib/customer-navigation";
+import {
+  getDefaultAllowedPath,
+  isPathAllowed,
+} from "@/lib/admin-navigation";
+import { ADMIN_DASHBOARD_PATH, USER_DASHBOARD_PATH } from "@/lib/auth-paths";
+import type { NavigationPortal } from "@/lib/portal-navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const ROUTE_ACCESS_DENIED_COPY = {
@@ -27,14 +35,28 @@ function RouteLoading() {
   );
 }
 
-export function RouteGuard({ children }: { children: React.ReactNode }) {
+export function RouteGuard({
+  children,
+  portal = "admin",
+}: {
+  children: React.ReactNode;
+  portal?: NavigationPortal;
+}) {
   const pathname = usePathname();
   const router = useRouter();
   const { menus, loading, error } = useNavigation();
   const [isRedirecting, setIsRedirecting] = useState(false);
 
-  const allowed = isPathAllowed(pathname, menus);
-  const fallbackPath = getDefaultAllowedPath(menus);
+  const allowed =
+    portal === "customer"
+      ? isCustomerPathAllowed(pathname, menus)
+      : isPathAllowed(pathname, menus);
+  const fallbackPath =
+    portal === "customer"
+      ? getCustomerDefaultAllowedPath(menus)
+      : getDefaultAllowedPath(menus);
+  const defaultDashboardPath =
+    portal === "customer" ? USER_DASHBOARD_PATH : ADMIN_DASHBOARD_PATH;
 
   useEffect(() => {
     if (loading) return;
@@ -61,7 +83,7 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
     return (
       <PageAccessDenied
         copy={{ ...ROUTE_ACCESS_DENIED_COPY, goToDashboard: "Go to dashboard" }}
-        fallbackPath={ADMIN_DASHBOARD_PATH}
+        fallbackPath={defaultDashboardPath}
       />
     );
   }
@@ -70,7 +92,7 @@ export function RouteGuard({ children }: { children: React.ReactNode }) {
     return (
       <PageAccessDenied
         copy={ROUTE_ACCESS_DENIED_COPY}
-        fallbackPath={fallbackPath ?? ADMIN_DASHBOARD_PATH}
+        fallbackPath={fallbackPath ?? defaultDashboardPath}
       />
     );
   }

@@ -2,15 +2,17 @@
 
 import Link from "next/link";
 import { useLocale } from "@/components/shared/providers";
+import { usePortalShell } from "@/components/shared/providers/portal-shell-context";
 import { adminTheme } from "@/lib/admin-theme";
 import { Separator } from "@/components/ui/separator";
-import { formatMessage, getAdminShellMessages } from "@/translations";
+import { formatMessage } from "@/translations";
 
 const APP_VERSION = "1.0.0";
 
 export function DashboardFooter() {
   const { locale } = useLocale();
-  const copy = getAdminShellMessages(locale);
+  const { getShellMessages, homePath } = usePortalShell();
+  const copy = getShellMessages(locale);
 
   return (
     <footer className="mt-auto border-t border-slate-200/80 bg-white">
@@ -24,7 +26,7 @@ export function DashboardFooter() {
 
         <div className="flex flex-wrap items-center gap-3">
           <Link
-            href="/"
+            href={homePath}
             className="font-medium transition-colors hover:text-[#C9B87A]"
             style={{ color: adminTheme.brand }}
           >

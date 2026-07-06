@@ -40,9 +40,11 @@ const DEFAULT_PERMISSIONS = [
   { slug: "fare_plans.read", module: "fare_plans", action: "read", description: "View fare plans" },
   { slug: "fare_plans.write", module: "fare_plans", action: "write", description: "Create and update fare plans" },
   { slug: "fare_plans.delete", module: "fare_plans", action: "delete", description: "Delete fare plans" },
+  { slug: "customer_dashboard.read", module: "customer_dashboard", action: "read", description: "View customer dashboard" },
+  { slug: "customer_profile.read", module: "customer_profile", action: "read", description: "View customer profile" },
 ] as const;
 
-const REMOVED_MENU_SLUGS = ["permissions", "endpoints", "registration-forms"] as const;
+const REMOVED_MENU_SLUGS = ["permissions", "endpoints", "registration-forms", "customer-portal"] as const;
 
 const REMOVED_PERMISSION_SLUGS = [
   "permissions.read",
@@ -282,6 +284,28 @@ const DEFAULT_MENUS = [
       { locale: "am", label: "የክፍያ ዕቅዶች" },
     ],
   },
+  {
+    slug: "customer-dashboard",
+    path: "/dashboard",
+    icon: "layout-dashboard",
+    sortOrder: 70,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "Dashboard" },
+      { locale: "am", label: "ዳሽቦርድ" },
+    ],
+  },
+  {
+    slug: "customer-profile",
+    path: "/dashboard/profile",
+    icon: "user-round",
+    sortOrder: 71,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "Profile" },
+      { locale: "am", label: "መገለጫ" },
+    ],
+  },
 ] as const;
 
 const DEFAULT_ENDPOINTS: Array<{
@@ -461,6 +485,25 @@ async function seedAdminRolePermissions(permissionIds: string[]) {
   console.log(`[Seed] Administrator role synced with ${permissionIds.length} permissions`);
 }
 
+async function seedUserRolePermissions() {
+  const userRole = await prisma.role.findUnique({ where: { slug: "user" } });
+  if (!userRole) return;
+
+  const permissions = await prisma.permission.findMany({
+    where: {
+      slug: { in: ["customer_dashboard.read", "customer_profile.read"] },
+    },
+    orderBy: { slug: "asc" },
+  });
+
+  await setRolePermissions(
+    userRole.id,
+    permissions.map((permission) => permission.id),
+  );
+
+  console.log(`[Seed] User role synced with ${permissions.length} customer portal permissions`);
+}
+
 /** Re-assigns every default platform permission to the admin role. */
 export async function restoreAdminRolePermissions() {
   const adminRole = await prisma.role.findUnique({ where: { slug: "admin" } });
@@ -491,4 +534,5 @@ export async function seedAccessControl() {
   await deleteRemovedEndpoints();
   await deleteRemovedPermissions();
   await seedAdminRolePermissions(permissionIds);
+  await seedUserRolePermissions();
 }

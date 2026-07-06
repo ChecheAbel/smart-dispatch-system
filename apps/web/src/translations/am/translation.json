@@ -37,7 +37,8 @@
       "navigationLabel": "አሰሳ",
       "footerTitle": "ስማርት ዲስፓች",
       "footerBadge": "ቤታ",
-      "footerDescription": "በቀላሉ የከፍተኛ ጥራት ተሽከርካሪዎችን ያስይዙ።"
+      "footerDescription": "በቀላሉ የከፍተኛ ጥራት ተሽከርካሪዎችን ያስይዙ።",
+      "noNavigation": "ምንም የአሰሳ ንጥሎች የሉም።"
     },
     "footer": {
       "copyright": "© {year} ቸቸ ቴክኖሎጂስ",
@@ -50,10 +51,12 @@
     },
     "header": {
       "eyebrow": "የደንበኛ መግቢያ",
+      "profile": "መገለጫ",
       "signOut": "ውጣ"
     },
     "pageTitles": {
       "dashboard": "ዳሽቦርድ",
+      "profile": "መገለጫ",
       "portal": "የደንበኛ መግቢያ"
     }
   },

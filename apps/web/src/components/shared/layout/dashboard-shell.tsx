@@ -10,16 +10,17 @@ import { RouteGuard } from "@/components/shared/layout/route-guard";
 import { AuthProvider } from "@/components/shared/providers/auth-context";
 import { LocaleProvider } from "@/components/shared/providers/locale-context";
 import { NavigationProvider } from "@/components/shared/providers/navigation-context";
-import { ADMIN_SIGN_IN_PATH } from "@/lib/auth-paths";
+import { PortalShellProvider } from "@/components/shared/providers/portal-shell-context";
 import { clearAuthSession } from "@/lib/auth-session";
-import { resumeAdminSession } from "@/lib/auth-api";
 import { adminTheme } from "@/lib/admin-theme";
+import type { NavigationPortal } from "@/lib/portal-navigation";
+import { PORTAL_SHELL_CONFIG } from "@/lib/portal-shell-config";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 
-function DashboardLoadingShell() {
+function ShellLoadingState() {
   return (
     <div className="admin-theme flex min-h-svh" style={{ backgroundColor: adminTheme.surface }}>
       <div
@@ -44,7 +45,13 @@ function DashboardLoadingShell() {
   );
 }
 
-export function DashboardShell({ children }: { children: React.ReactNode }) {
+export function DashboardShell({
+  portal = "admin",
+  children,
+}: {
+  portal?: NavigationPortal;
+  children: React.ReactNode;
+}) {
   const router = useRouter();
   const [session, setSession] = useState<AuthMeResponse | null>(null);
   const [ready, setReady] = useState(false);
@@ -56,14 +63,16 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
+    const { resumeSession, signInPath } = PORTAL_SHELL_CONFIG[portal];
 
     async function verifySession() {
-      const nextSession = await resumeAdminSession();
+      const nextSession = await resumeSession();
 
       if (cancelled) return;
 
       if (!nextSession) {
-        router.replace(ADMIN_SIGN_IN_PATH);
+        clearAuthSession();
+        router.replace(signInPath);
         return;
       }
 
@@ -76,15 +85,15 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [portal, router]);
 
   function signOut() {
     clearAuthSession();
-    router.replace(ADMIN_SIGN_IN_PATH);
+    router.replace(PORTAL_SHELL_CONFIG[portal].signInPath);
   }
 
   if (!ready || !session) {
-    return <DashboardLoadingShell />;
+    return <ShellLoadingState />;
   }
 
   return (
@@ -94,24 +103,26 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
       signOut={signOut}
     >
       <LocaleProvider>
-        <NavigationProvider>
-          <TooltipProvider>
-            <SidebarProvider
-              className="admin-theme bg-[#f8fafb]"
-              style={{ "--sidebar-width": adminTheme.sidebarWidth } as CSSProperties}
-            >
-              <DashboardSidebar />
-              <SidebarInset className="flex min-h-svh flex-col bg-[#f8fafb]">
-                <DashboardHeader />
-                <main className="flex-1 overflow-auto p-4 sm:p-6">
-                  <RouteGuard>{children}</RouteGuard>
-                </main>
-                <DashboardFooter />
-              </SidebarInset>
-            </SidebarProvider>
-            <Toaster />
-          </TooltipProvider>
-        </NavigationProvider>
+        <PortalShellProvider portal={portal}>
+          <NavigationProvider portal={portal}>
+            <TooltipProvider>
+              <SidebarProvider
+                className="admin-theme bg-[#f8fafb]"
+                style={{ "--sidebar-width": adminTheme.sidebarWidth } as CSSProperties}
+              >
+                <DashboardSidebar />
+                <SidebarInset className="flex min-h-svh flex-col bg-[#f8fafb]">
+                  <DashboardHeader />
+                  <main className="flex-1 overflow-auto p-4 sm:p-6">
+                    <RouteGuard portal={portal}>{children}</RouteGuard>
+                  </main>
+                  <DashboardFooter />
+                </SidebarInset>
+              </SidebarProvider>
+              <Toaster />
+            </TooltipProvider>
+          </NavigationProvider>
+        </PortalShellProvider>
       </LocaleProvider>
     </AuthProvider>
   );

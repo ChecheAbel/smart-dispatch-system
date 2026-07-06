@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { LogOut, UserRound } from "lucide-react";
 import { getUserInitials, useAuth } from "@/components/shared/providers/auth-context";
 import { LanguageSelector } from "@/components/shared/layout/language-selector";
-import { useNavigation } from "@/components/shared/providers/navigation-context";
-import { ADMIN_PROFILE_PATH } from "@/lib/auth-paths";
+import { useLocale, useNavigation } from "@/components/shared/providers";
+import { usePortalShell } from "@/components/shared/providers/portal-shell-context";
 import {
   adminEyebrowClass,
   adminHeaderActionsClass,
@@ -30,8 +30,10 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export function DashboardHeader() {
   const pathname = usePathname();
+  const { locale } = useLocale();
   const { user, signOut } = useAuth();
   const { getPageTitle } = useNavigation();
+  const { getHeaderEyebrow, getProfileLabel, getSignOutLabel, profilePath } = usePortalShell();
   const pageTitle = getPageTitle(pathname);
 
   return (
@@ -41,7 +43,7 @@ export function DashboardHeader() {
       <Separator orientation="vertical" className="hidden h-5 sm:block" />
 
       <div className="min-w-0 flex-1">
-        <p className={adminEyebrowClass}>Admin Console</p>
+        <p className={adminEyebrowClass}>{getHeaderEyebrow(locale)}</p>
         <h1 className={`truncate text-lg ${adminHeadingClass}`}>{pageTitle}</h1>
       </div>
 
@@ -77,16 +79,16 @@ export function DashboardHeader() {
                 </p>
                 <p className="truncate text-xs text-slate-500">{user.email}</p>
               </DropdownMenuLabel>
-              <DropdownMenuItem className="rounded-md" render={<Link href={ADMIN_PROFILE_PATH} />}>
+              <DropdownMenuItem className="rounded-md" render={<Link href={profilePath} />}>
                 <UserRound />
-                Profile
+                {getProfileLabel(locale)}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem variant="destructive" onClick={signOut} className="rounded-md">
                 <LogOut />
-                Sign out
+                {getSignOutLabel(locale)}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>

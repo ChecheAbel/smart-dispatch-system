@@ -7,6 +7,7 @@ import {
   Key,
   Layers,
   LayoutDashboard,
+  LayoutGrid,
   Mail,
   Map,
   MapPin,
@@ -20,11 +21,14 @@ import {
   ShieldCheck,
   Truck,
   Users,
+  UserRound,
   Coins,
 } from "lucide-react";
 
 const MENU_ICON_MAP: Record<string, LucideIcon> = {
   "layout-dashboard": LayoutDashboard,
+  "layout-grid": LayoutGrid,
+  "user-round": UserRound,
   dashboard: LayoutDashboard,
   users: Users,
   "clipboard-check": ClipboardCheck,

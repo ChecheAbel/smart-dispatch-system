@@ -7,7 +7,7 @@ import { ChevronRight } from "lucide-react";
 import type { Menu } from "@smart-dispatch/types";
 import { useNavigation } from "@/components/shared/providers/navigation-context";
 import { useLocale } from "@/components/shared/providers";
-import { isAdminNavActive } from "@/lib/admin-navigation";
+import { usePortalShell } from "@/components/shared/providers/portal-shell-context";
 import { adminNavButtonClass } from "@/lib/admin-theme";
 import { getMenuIcon } from "@/lib/menu-icons";
 import { cn } from "@/lib/utils";
@@ -25,16 +25,19 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { getAdminShellMessages } from "@/translations";
 
-function getActiveParentMenuId(items: Menu[], pathname: string) {
+function getActiveParentMenuId(
+  items: Menu[],
+  pathname: string,
+  isNavActive: (pathname: string, href: string) => boolean,
+) {
   for (const item of items) {
     if (!item.children?.length) {
       continue;
     }
 
     const childActive = item.children.some(
-      (child) => child.path && isAdminNavActive(pathname, child.path),
+      (child) => child.path && isNavActive(pathname, child.path),
     );
 
     if (childActive) {
@@ -50,14 +53,16 @@ function ParentMenuItem({
   pathname,
   open,
   onOpenChange,
+  isNavActive,
 }: {
   item: Menu;
   pathname: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isNavActive: (pathname: string, href: string) => boolean;
 }) {
   const childActive = Boolean(
-    item.children?.some((child) => child.path && isAdminNavActive(pathname, child.path)),
+    item.children?.some((child) => child.path && isNavActive(pathname, child.path)),
   );
   const Icon = getMenuIcon(item.icon);
 
@@ -94,7 +99,7 @@ function ParentMenuItem({
                 return (
                   <SidebarMenuSubItem key={child.id}>
                     <SidebarMenuSubButton
-                      isActive={isAdminNavActive(pathname, child.path)}
+                      isActive={isNavActive(pathname, child.path)}
                       size="md"
                       className={cn(adminNavButtonClass, "h-9 px-3")}
                       render={<Link href={child.path} />}
@@ -113,14 +118,22 @@ function ParentMenuItem({
   );
 }
 
-function SidebarMenuItems({ items, pathname }: { items: Menu[]; pathname: string }) {
+function SidebarMenuItems({
+  items,
+  pathname,
+  isNavActive,
+}: {
+  items: Menu[];
+  pathname: string;
+  isNavActive: (pathname: string, href: string) => boolean;
+}) {
   const [expandedParentId, setExpandedParentId] = useState<string | null>(() =>
-    getActiveParentMenuId(items, pathname),
+    getActiveParentMenuId(items, pathname, isNavActive),
   );
 
   useEffect(() => {
-    setExpandedParentId(getActiveParentMenuId(items, pathname));
-  }, [items, pathname]);
+    setExpandedParentId(getActiveParentMenuId(items, pathname, isNavActive));
+  }, [items, isNavActive, pathname]);
 
   return (
     <>
@@ -139,6 +152,7 @@ function SidebarMenuItems({ items, pathname }: { items: Menu[]; pathname: string
               onOpenChange={(nextOpen) => {
                 setExpandedParentId(nextOpen ? item.id : null);
               }}
+              isNavActive={isNavActive}
             />
           );
         }
@@ -148,7 +162,7 @@ function SidebarMenuItems({ items, pathname }: { items: Menu[]; pathname: string
         return (
           <SidebarMenuItem key={item.id}>
             <SidebarMenuButton
-              isActive={isAdminNavActive(pathname, href)}
+              isActive={isNavActive(pathname, href)}
               tooltip={item.label}
               size="lg"
               className={adminNavButtonClass}
@@ -168,7 +182,8 @@ function SidebarMenuItems({ items, pathname }: { items: Menu[]; pathname: string
 export function DashboardSidebarNav() {
   const pathname = usePathname();
   const { locale } = useLocale();
-  const copy = getAdminShellMessages(locale);
+  const { getShellMessages, isNavActive } = usePortalShell();
+  const copy = getShellMessages(locale);
   const { menus, loading, error } = useNavigation();
 
   if (loading) {
@@ -201,7 +216,7 @@ export function DashboardSidebarNav() {
 
   return (
     <SidebarMenu className="gap-1.5 px-2 py-2">
-      <SidebarMenuItems items={menus} pathname={pathname} />
+      <SidebarMenuItems items={menus} pathname={pathname} isNavActive={isNavActive} />
     </SidebarMenu>
   );
 }

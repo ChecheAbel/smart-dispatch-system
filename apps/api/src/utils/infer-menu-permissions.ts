@@ -75,6 +75,22 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
     return ["fare_plans.read"];
   }
 
+  if (normalizedSlug === "customer-dashboard") {
+    return ["customer_dashboard.read"];
+  }
+
+  if (normalizedSlug === "customer-profile") {
+    return ["customer_profile.read"];
+  }
+
+  if (normalizedPath === "/dashboard") {
+    return ["customer_dashboard.read"];
+  }
+
+  if (normalizedPath?.startsWith("/dashboard/profile")) {
+    return ["customer_profile.read"];
+  }
+
   if (isAdminModule(normalizedSlug)) {
     return [`${normalizedSlug}.read`];
   }
@@ -88,4 +104,4 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
 }
 
 export const MENU_PERMISSION_INFERENCE_ERROR =
-  "Could not determine sidebar access from path or slug. Use paths like /admin/users.";
+  "Could not determine sidebar access from path or slug. Use paths like /admin/users or /dashboard/profile.";

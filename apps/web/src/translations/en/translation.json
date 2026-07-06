@@ -37,7 +37,8 @@
       "navigationLabel": "Navigation",
       "footerTitle": "Smart Dispatch",
       "footerBadge": "Beta",
-      "footerDescription": "Book premium vehicles with ease."
+      "footerDescription": "Book premium vehicles with ease.",
+      "noNavigation": "No navigation items available."
     },
     "footer": {
       "copyright": "© {year} Cheche Technologies",
@@ -50,10 +51,12 @@
     },
     "header": {
       "eyebrow": "Customer Portal",
+      "profile": "Profile",
       "signOut": "Sign out"
     },
     "pageTitles": {
       "dashboard": "Dashboard",
+      "profile": "Profile",
       "portal": "Customer Portal"
     }
   },

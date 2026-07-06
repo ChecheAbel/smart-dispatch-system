@@ -4,6 +4,7 @@ import Link from "next/link";
 import BrandLogo from "@/components/landing/BrandLogo";
 import { DashboardSidebarNav } from "@/components/shared/layout/dashboard-sidebar-nav";
 import { useLocale } from "@/components/shared/providers";
+import { usePortalShell } from "@/components/shared/providers/portal-shell-context";
 import { adminBadgeGoldClass, adminEyebrowClass } from "@/lib/admin-theme";
 import {
   Sidebar,
@@ -16,17 +17,17 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { Badge } from "@/components/ui/badge";
-import { getAdminShellMessages } from "@/translations";
 
 export function DashboardSidebar() {
   const { locale } = useLocale();
-  const copy = getAdminShellMessages(locale);
+  const { getShellMessages, logoHref } = usePortalShell();
+  const copy = getShellMessages(locale);
 
   return (
     <Sidebar collapsible="icon" className="border-sidebar-border">
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <Link
-          href="/admin"
+          href={logoHref}
           className="flex items-center gap-3 rounded-lg px-1 py-1 transition-colors hover:bg-sidebar-accent"
         >
           <BrandLogo className="brightness-0 invert" />

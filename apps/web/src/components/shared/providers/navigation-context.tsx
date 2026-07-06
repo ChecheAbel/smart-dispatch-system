@@ -3,7 +3,14 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { Menu } from "@smart-dispatch/types";
 import { useLocale } from "@/components/shared/providers/locale-context";
-import { flattenMenus, getPageTitleFromMenus } from "@/lib/admin-navigation";
+import {
+  flattenMenus,
+  getPageTitleFromMenus,
+} from "@/lib/admin-navigation";
+import {
+  getCustomerPageTitleFromMenus,
+} from "@/lib/customer-navigation";
+import { filterMenusForPortal, type NavigationPortal } from "@/lib/portal-navigation";
 import { ADMIN_PROFILE_PATH } from "@/lib/auth-paths";
 import { fetchNavigationMenus } from "@/lib/menu-api";
 import { getAdminProfileMessages } from "@/translations";
@@ -19,7 +26,13 @@ type NavigationContextValue = {
 
 const NavigationContext = createContext<NavigationContextValue | null>(null);
 
-export function NavigationProvider({ children }: { children: React.ReactNode }) {
+export function NavigationProvider({
+  children,
+  portal = "admin",
+}: {
+  children: React.ReactNode;
+  portal?: NavigationPortal;
+}) {
   const { locale } = useLocale();
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,22 +84,28 @@ export function NavigationProvider({ children }: { children: React.ReactNode }) 
     };
   }, [locale]);
 
-  const flatMenus = useMemo(() => flattenMenus(menus), [menus]);
+  const portalMenus = useMemo(() => filterMenusForPortal(menus, portal), [menus, portal]);
+  const flatMenus = useMemo(() => flattenMenus(portalMenus), [portalMenus]);
 
   const getPageTitle = useCallback(
     (pathname: string) => {
-      if (pathname === ADMIN_PROFILE_PATH) {
+      if (portal === "admin" && pathname === ADMIN_PROFILE_PATH) {
         return getAdminProfileMessages(locale).title;
       }
-      return getPageTitleFromMenus(pathname, menus);
+
+      if (portal === "customer") {
+        return getCustomerPageTitleFromMenus(pathname, portalMenus);
+      }
+
+      return getPageTitleFromMenus(pathname, portalMenus);
     },
-    [locale, menus],
+    [locale, portal, portalMenus],
   );
 
   return (
     <NavigationContext.Provider
       value={{
-        menus,
+        menus: portalMenus,
         flatMenus,
         loading,
         error,

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { CustomerShell } from "@/components/shared/layout";
+import { DashboardShell } from "@/components/shared/layout";
 
 export const metadata: Metadata = {
   title: "Dashboard | Smart Dispatch",
@@ -7,5 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  return <CustomerShell>{children}</CustomerShell>;
+  return <DashboardShell portal="customer">{children}</DashboardShell>;
 }
