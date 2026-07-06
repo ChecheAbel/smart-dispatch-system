@@ -16,7 +16,9 @@ import type {
   AdminLocationsMessages,
   AdminFarePlansMessages,
   AdminShellMessages,
+  CustomerShellMessages,
   AdminDashboardMessages,
+  CustomerDashboardMessages,
   AdminProfileMessages,
   Translations,
 } from "./types";
@@ -41,7 +43,9 @@ export type {
   AdminLocationsMessages,
   AdminFarePlansMessages,
   AdminShellMessages,
+  CustomerShellMessages,
   AdminDashboardMessages,
+  CustomerDashboardMessages,
   AdminProfileMessages,
   Translations,
 };
@@ -117,8 +121,16 @@ export function getAdminShellMessages(locale: SupportedLocale): AdminShellMessag
   return getTranslations(locale).adminShell;
 }
 
+export function getCustomerShellMessages(locale: SupportedLocale): CustomerShellMessages {
+  return getTranslations(locale).customerShell;
+}
+
 export function getAdminDashboardMessages(locale: SupportedLocale): AdminDashboardMessages {
   return getTranslations(locale).adminDashboard;
+}
+
+export function getCustomerDashboardMessages(locale: SupportedLocale): CustomerDashboardMessages {
+  return getTranslations(locale).customerDashboard;
 }
 
 export function getAdminProfileMessages(locale: SupportedLocale): AdminProfileMessages {

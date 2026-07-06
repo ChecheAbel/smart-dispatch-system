@@ -30,6 +30,62 @@
       "version": "ስሪት {version}"
     }
   },
+  "customerShell": {
+    "sidebar": {
+      "eyebrow": "የደንበኛ መግቢያ",
+      "subtitle": "መጠይቆችን ያስይዙ እና ያስተዳድሩ",
+      "navigationLabel": "አሰሳ",
+      "footerTitle": "ስማርት ዲስፓች",
+      "footerBadge": "ቤታ",
+      "footerDescription": "በቀላሉ የከፍተኛ ጥራት ተሽከርካሪዎችን ያስይዙ።"
+    },
+    "footer": {
+      "copyright": "© {year} ቸቸ ቴክኖሎጂስ",
+      "tagline": "ስማርት ዲስፓች ሲስተም — ኢትዮጵያ ኢንቨስትመንት ሆልዲንግስ",
+      "backToWebsite": "ወደ ድረ-ገጽ ተመለስ",
+      "version": "ስሪት {version}"
+    },
+    "nav": {
+      "dashboard": "ዳሽቦርድ"
+    },
+    "header": {
+      "eyebrow": "የደንበኛ መግቢያ",
+      "signOut": "ውጣ"
+    },
+    "pageTitles": {
+      "dashboard": "ዳሽቦርድ",
+      "portal": "የደንበኛ መግቢያ"
+    }
+  },
+  "customerDashboard": {
+    "eyebrow": "አጠቃላይ እይታ",
+    "title": "ዳሽቦርድ",
+    "welcome": "እንኳን ደህና መጡ፣ {name}",
+    "description": "የቦታ ማስያዝዎን እና የተሽከርካሪ ጥያቄዎችዎን በአንድ ቦታ ያስተዳድሩ።",
+    "comingSoon": "በቅርቡ",
+    "stats": {
+      "bookingsTitle": "የእኔ ቦታ ማስያዞች",
+      "bookingsDescription": "የሚመጡ እና ያለፉ የጉዞ ጥያቄዎች",
+      "requestsTitle": "ንቁ ጥያቄዎች",
+      "requestsDescription": "በመጠባበቅ ላይ ያሉ የተሽከርካሪ ጥያቄዎች",
+      "tripsTitle": "በመንገድ ላይ ያሉ ጉዞዎች",
+      "tripsDescription": "አሁን በመንገድ ላይ ያሉ ቀጥተኛ ጉዞዎች",
+      "profileTitle": "መገለጫ",
+      "profileDescription": "የመለያ ቅንብሮች እና ምርጫዎች"
+    },
+    "comingSoonCharts": {
+      "sectionTitle": "የእንቅስቃሴ ግንዛቤ",
+      "sectionDescription": "ለየቦታ ማስያዝ ታሪክዎ የግራፍ እና አዝማሚያዎች እዚህ ይታያሉ።",
+      "bookingsTrendTitle": "የቦታ ማስያዝ አዝማሚያ",
+      "bookingsTrendDescription": "ባለፉት 30 ቀናት የቦታ ማስያዝ መጠንዎ",
+      "spendingTrendTitle": "የወጪ አዝማሚያ",
+      "spendingTrendDescription": "የጉዞ ወጪዎች እና የክፍያ ጠቅላላ በጊዜ ሂደት",
+      "tripTypesTitle": "የጉዞ አይነቶች",
+      "tripTypesDescription": "በጣም ብዙ የሚጠየቁ የተሽከርካሪ ክፍሎች ብድር",
+      "requestStatusTitle": "የጥያቄ ሁኔታ",
+      "requestStatusDescription": "በመጠባበቅ ላይ፣ የተረጋገጡ እና የተጠናቀቁ ጥያቄዎች"
+    }
+  },
   "adminDashboard": {
     "eyebrow": "አጠቃላይ እይታ",
     "title": "ዳሽቦርድ",

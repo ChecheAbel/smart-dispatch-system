@@ -30,6 +30,62 @@
       "version": "Version {version}"
     }
   },
+  "customerShell": {
+    "sidebar": {
+      "eyebrow": "Customer Portal",
+      "subtitle": "Book and manage requests",
+      "navigationLabel": "Navigation",
+      "footerTitle": "Smart Dispatch",
+      "footerBadge": "Beta",
+      "footerDescription": "Book premium vehicles with ease."
+    },
+    "footer": {
+      "copyright": "© {year} Cheche Technologies",
+      "tagline": "Smart Dispatch System — Ethiopian Investment Holdings",
+      "backToWebsite": "Back to website",
+      "version": "Version {version}"
+    },
+    "nav": {
+      "dashboard": "Dashboard"
+    },
+    "header": {
+      "eyebrow": "Customer Portal",
+      "signOut": "Sign out"
+    },
+    "pageTitles": {
+      "dashboard": "Dashboard",
+      "portal": "Customer Portal"
+    }
+  },
+  "customerDashboard": {
+    "eyebrow": "Overview",
+    "title": "Dashboard",
+    "welcome": "Welcome back, {name}",
+    "description": "Manage your bookings and vehicle requests in one place.",
+    "comingSoon": "Coming soon",
+    "stats": {
+      "bookingsTitle": "My bookings",
+      "bookingsDescription": "Upcoming and past trip requests",
+      "requestsTitle": "Active requests",
+      "requestsDescription": "Pending vehicle dispatch requests",
+      "tripsTitle": "Trips in progress",
+      "tripsDescription": "Live trips currently on the road",
+      "profileTitle": "Profile",
+      "profileDescription": "Account settings and preferences"
+    },
+    "comingSoonCharts": {
+      "sectionTitle": "Activity insights",
+      "sectionDescription": "Charts and trends for your booking history will appear here.",
+      "bookingsTrendTitle": "Booking trend",
+      "bookingsTrendDescription": "Your booking volume over the last 30 days",
+      "spendingTrendTitle": "Spending trend",
+      "spendingTrendDescription": "Trip costs and billing totals over time",
+      "tripTypesTitle": "Trip types",
+      "tripTypesDescription": "Breakdown of your most requested vehicle classes",
+      "requestStatusTitle": "Request status",
+      "requestStatusDescription": "Pending, confirmed, and completed requests"
+    }
+  },
   "adminDashboard": {
     "eyebrow": "Overview",
     "title": "Dashboard",

@@ -7,7 +7,7 @@ import { Eye, EyeOff, Loader2, Lock, Mail, XCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { AuthRequestError, login, resumeUserSession } from "@/lib/auth-api";
-import { USER_HOME_PATH, USER_REGISTER_PATH } from "@/lib/auth-paths";
+import { USER_DASHBOARD_PATH, USER_REGISTER_PATH } from "@/lib/auth-paths";
 import { clearAuthSession, saveAuthSession } from "@/lib/auth-session";
 import { showErrorToast } from "@/lib/toast";
 
@@ -47,7 +47,7 @@ export default function UserSignInForm() {
         if (cancelled) return;
 
         if (session) {
-          router.replace(USER_HOME_PATH);
+          router.replace(USER_DASHBOARD_PATH);
           return;
         }
 
@@ -84,7 +84,7 @@ export default function UserSignInForm() {
       }
 
       saveAuthSession(session, remember);
-      router.push(USER_HOME_PATH);
+      router.push(USER_DASHBOARD_PATH);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Sign in failed. Please try again.";
