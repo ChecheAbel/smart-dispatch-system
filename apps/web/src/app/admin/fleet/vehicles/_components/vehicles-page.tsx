@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { MoreHorizontal, Pencil, Plus, Trash2, Truck } from "lucide-react";
-import type { Vehicle, VehicleStatus, VehicleType } from "@smart-dispatch/types";
+import type { Vehicle, VehicleStatus, VehicleType, VehicleClass } from "@smart-dispatch/types";
 import { useLocale, useAuth } from "@/components/shared/providers";
 import {
   DataTable,
@@ -36,6 +36,7 @@ import {
 } from "@/translations";
 import { deleteVehicle, fetchVehicles } from "@/lib/vehicle-api";
 import { fetchVehicleTypes } from "@/lib/vehicle-type-api";
+import { fetchVehicleClasses } from "@/lib/vehicle-class-api";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import {
   adminBadgeGoldClass,
@@ -133,9 +134,11 @@ export function VehiclesPage() {
   const [deletingVehicle, setDeletingVehicle] = useState<Vehicle | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [typeFilter, setTypeFilter] = useState("all");
+  const [classFilter, setClassFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
   const [assignmentFilter, setAssignmentFilter] = useState("all");
   const [vehicleTypes, setVehicleTypes] = useState<VehicleType[]>([]);
+  const [vehicleClasses, setVehicleClasses] = useState<VehicleClass[]>([]);
 
   useEffect(() => {
     if (!canRead) {
@@ -144,20 +147,25 @@ export function VehiclesPage() {
 
     let cancelled = false;
 
-    async function loadVehicleTypes() {
+    async function loadFilterOptions() {
       try {
-        const result = await fetchVehicleTypes({ limit: 100, locale });
+        const [typesResult, classesResult] = await Promise.all([
+          fetchVehicleTypes({ limit: 100, locale }),
+          fetchVehicleClasses({ limit: 100, locale }),
+        ]);
         if (!cancelled) {
-          setVehicleTypes(result.data);
+          setVehicleTypes(typesResult.data);
+          setVehicleClasses(classesResult.data);
         }
       } catch {
         if (!cancelled) {
           setVehicleTypes([]);
+          setVehicleClasses([]);
         }
       }
     }
 
-    void loadVehicleTypes();
+    void loadFilterOptions();
 
     return () => {
       cancelled = true;
@@ -206,6 +214,12 @@ export function VehiclesPage() {
         cell: (vehicle) => vehicle.vehicle_type?.name ?? "—",
       },
       {
+        id: "class",
+        header: copy.columns.class,
+        cellClassName: "text-slate-600",
+        cell: (vehicle) => vehicle.vehicle_class?.name ?? "—",
+      },
+      {
         id: "driver",
         header: copy.columns.driver,
         cell: (vehicle) => (
@@ -252,11 +266,12 @@ export function VehiclesPage() {
         search: search || undefined,
         locale,
         vehicle_type_id: typeFilter === "all" ? undefined : typeFilter,
+        vehicle_class_id: classFilter === "all" ? undefined : classFilter,
         status: statusFilter === "all" ? undefined : (statusFilter as VehicleStatus),
         unassigned_only: assignmentFilter === "unassigned" ? true : undefined,
         assigned_only: assignmentFilter === "assigned" ? true : undefined,
       }),
-    [locale, typeFilter, statusFilter, assignmentFilter],
+    [locale, typeFilter, classFilter, statusFilter, assignmentFilter],
   );
 
   const renderRowActions = useCallback(
@@ -309,14 +324,14 @@ export function VehiclesPage() {
             </Button>
           ) : undefined
         }
-        minTableWidth="1040px"
+        minTableWidth="1160px"
         emptyIcon={Truck}
         emptyTitle={copy.empty.title}
         emptyDescription={copy.empty.description}
         emptySearchDescription={copy.empty.searchDescription}
-        refreshDeps={[locale, refreshKey, typeFilter, statusFilter, assignmentFilter]}
+        refreshDeps={[locale, refreshKey, typeFilter, classFilter, statusFilter, assignmentFilter]}
         filterBar={
-          <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-[repeat(3,minmax(0,1fr))]">
+          <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,1fr))]">
             <div className="min-w-0 space-y-2">
               <Label htmlFor="vehicle-type-filter" className={adminFilterLabelClass}>
                 {copy.filters.type}
@@ -347,6 +362,43 @@ export function VehiclesPage() {
                     {vehicleTypes.map((vehicleType) => (
                       <SelectItem key={vehicleType.id} value={vehicleType.id}>
                         {vehicleType.name}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="min-w-0 space-y-2">
+              <Label htmlFor="vehicle-class-filter" className={adminFilterLabelClass}>
+                {copy.filters.class}
+              </Label>
+              <Select
+                items={[
+                  { label: copy.filters.classAll, value: "all" },
+                  ...vehicleClasses.map((vehicleClass) => ({
+                    label: vehicleClass.name,
+                    value: vehicleClass.id,
+                  })),
+                ]}
+                value={classFilter}
+                onValueChange={(value) => {
+                  setClassFilter(value ?? "all");
+                  bumpRefresh();
+                }}
+              >
+                <SelectTrigger
+                  id="vehicle-class-filter"
+                  className="h-10 w-full rounded-lg border-slate-200 bg-white shadow-sm"
+                >
+                  <SelectValue placeholder={copy.filters.class} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectItem value="all">{copy.filters.classAll}</SelectItem>
+                    {vehicleClasses.map((vehicleClass) => (
+                      <SelectItem key={vehicleClass.id} value={vehicleClass.id}>
+                        {vehicleClass.name}
                       </SelectItem>
                     ))}
                   </SelectGroup>

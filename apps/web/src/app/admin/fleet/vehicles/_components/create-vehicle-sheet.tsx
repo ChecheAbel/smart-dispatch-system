@@ -5,6 +5,7 @@ import { Car, ClipboardList, CreditCard, UserRound } from "lucide-react";
 import type { Vehicle, VehicleStatus } from "@smart-dispatch/types";
 import { createVehicle, fetchVehicleById, fetchVehicleDriverOptions, updateVehicle } from "@/lib/vehicle-api";
 import { fetchActiveVehicleTypes } from "@/lib/vehicle-type-api";
+import { fetchActiveVehicleClasses } from "@/lib/vehicle-class-api";
 import {
   adminCardClass,
   adminHeadingClass,
@@ -61,6 +62,7 @@ type VehicleFormState = {
   plateCode: string;
   plateLicense: string;
   vehicleTypeId: string;
+  vehicleClassId: string;
   assignedDriverUserId: string;
   chassisNumber: string;
   make: string;
@@ -77,6 +79,7 @@ const emptyForm: VehicleFormState = {
   plateCode: "",
   plateLicense: "",
   vehicleTypeId: "",
+  vehicleClassId: "",
   assignedDriverUserId: "",
   chassisNumber: "",
   make: "",
@@ -94,6 +97,7 @@ function mapVehicleToForm(vehicle: Vehicle): VehicleFormState {
     plateCode: plate.code,
     plateLicense: plate.license,
     vehicleTypeId: vehicle.vehicle_type_id,
+    vehicleClassId: vehicle.vehicle_class_id,
     assignedDriverUserId: vehicle.assigned_driver_user_id ?? "",
     chassisNumber: vehicle.chassis_number ?? "",
     make: vehicle.make ?? "",
@@ -175,11 +179,19 @@ export function CreateVehicleSheet({
   const [vehicleTypeOptions, setVehicleTypeOptions] = useState<
     Array<{ label: string; value: string }>
   >([]);
+  const [vehicleClassOptions, setVehicleClassOptions] = useState<
+    Array<{ label: string; value: string }>
+  >([]);
   const [driverOptions, setDriverOptions] = useState<Array<{ label: string; value: string }>>([]);
 
   const vehicleTypeItems = useMemo(
     () => [{ label: formCopy.vehicleTypePlaceholder, value: "" }, ...vehicleTypeOptions],
     [formCopy.vehicleTypePlaceholder, vehicleTypeOptions],
+  );
+
+  const vehicleClassItems = useMemo(
+    () => [{ label: formCopy.vehicleClassPlaceholder, value: "" }, ...vehicleClassOptions],
+    [formCopy.vehicleClassPlaceholder, vehicleClassOptions],
   );
 
   const driverItems = useMemo(
@@ -263,8 +275,9 @@ export function CreateVehicleSheet({
       setOptionsLoading(true);
 
       try {
-        const [vehicleTypes, drivers] = await Promise.all([
+        const [vehicleTypes, vehicleClasses, drivers] = await Promise.all([
           fetchActiveVehicleTypes(locale),
+          fetchActiveVehicleClasses(locale),
           fetchVehicleDriverOptions(),
         ]);
         if (!cancelled) {
@@ -272,6 +285,12 @@ export function CreateVehicleSheet({
             vehicleTypes.map((vehicleType) => ({
               label: vehicleType.name,
               value: vehicleType.id,
+            })),
+          );
+          setVehicleClassOptions(
+            vehicleClasses.map((vehicleClass) => ({
+              label: vehicleClass.name,
+              value: vehicleClass.id,
             })),
           );
           setDriverOptions(
@@ -284,6 +303,7 @@ export function CreateVehicleSheet({
       } catch {
         if (!cancelled) {
           setVehicleTypeOptions([]);
+          setVehicleClassOptions([]);
           setDriverOptions([]);
         }
       } finally {
@@ -407,6 +427,12 @@ export function CreateVehicleSheet({
       nextErrors.vehicleTypeId = formCopy.errors.typeRequired;
     }
 
+    const vehicleClassId = form.vehicleClassId;
+
+    if (!vehicleClassId) {
+      nextErrors.vehicleClassId = formCopy.errors.classRequired;
+    }
+
     const chassisNumber = form.chassisNumber.trim().toUpperCase();
     if (!chassisNumber) {
       nextErrors.chassisNumber = formCopy.errors.chassisNumberRequired;
@@ -423,6 +449,7 @@ export function CreateVehicleSheet({
     const payload = {
       plate_number: plateNumber,
       vehicle_type_id: vehicleTypeId,
+      vehicle_class_id: vehicleClassId,
       assigned_driver_user_id: form.assignedDriverUserId || null,
       chassis_number: chassisNumber,
       make: form.make.trim() || null,
@@ -670,6 +697,42 @@ export function CreateVehicleSheet({
                 </div>
 
                 <div className="space-y-2">
+                  <Label
+                    htmlFor="vehicle-class-id"
+                    className={fieldErrors.vehicleClassId ? "text-red-700" : undefined}
+                  >
+                    {formCopy.vehicleClass}
+                  </Label>
+                  <Select
+                    items={vehicleClassItems}
+                    value={form.vehicleClassId || null}
+                    onValueChange={(value) => updateField("vehicleClassId", value ?? "")}
+                    disabled={optionsLoading}
+                  >
+                    <SelectTrigger
+                      id="vehicle-class-id"
+                      className={cn(
+                        selectTriggerClassName,
+                        fieldErrors.vehicleClassId && fieldErrorClassName,
+                      )}
+                      aria-invalid={Boolean(fieldErrors.vehicleClassId)}
+                    >
+                      <SelectValue placeholder={formCopy.vehicleClassPlaceholder} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {vehicleClassOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FieldHint error={fieldErrors.vehicleClassId} />
+                </div>
+
+                <div className="space-y-2 sm:col-span-2">
                   <Label htmlFor="vehicle-status">{formCopy.status}</Label>
                   <Select
                     items={statusItems}

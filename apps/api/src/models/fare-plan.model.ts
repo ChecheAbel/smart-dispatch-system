@@ -15,6 +15,7 @@ export type { FarePlanTranslationInput };
 export type CreateFarePlanInput = {
   translations: FarePlanTranslationInput[];
   vehicleTypeId?: string | null;
+  vehicleClassId?: string | null;
   regionId?: string | null;
   pricingModel: PricingModel;
   currency?: string;
@@ -32,6 +33,7 @@ export type CreateFarePlanInput = {
 export type UpdateFarePlanInput = {
   translations?: FarePlanTranslationInput[];
   vehicleTypeId?: string | null;
+  vehicleClassId?: string | null;
   regionId?: string | null;
   pricingModel?: PricingModel;
   currency?: string;
@@ -51,11 +53,19 @@ export type ListFarePlansFilter = {
   isActive?: boolean;
   pricingModel?: PricingModel;
   vehicleTypeId?: string;
+  vehicleClassId?: string;
   regionId?: string;
+};
+
+export type ResolveFarePlanInput = {
+  vehicleTypeId?: string | null;
+  vehicleClassId?: string | null;
+  regionId?: string | null;
 };
 
 const farePlanInclude = {
   vehicleType: true,
+  vehicleClass: true,
   region: true,
 } as const;
 
@@ -102,6 +112,7 @@ async function listFarePlansWithSearch(search: string, skip: number, take: numbe
       slug: string;
       translations: Prisma.JsonValue;
       vehicleTypeId: string | null;
+      vehicleClassId: string | null;
       regionId: string | null;
       pricingModel: PricingModel;
       currency: string;
@@ -123,6 +134,7 @@ async function listFarePlansWithSearch(search: string, skip: number, take: numbe
       slug,
       translations,
       vehicle_type_id AS "vehicleTypeId",
+      vehicle_class_id AS "vehicleClassId",
       region_id AS "regionId",
       pricing_model AS "pricingModel",
       currency,
@@ -189,6 +201,7 @@ export async function listFarePlans(
       ...(filter?.isActive === undefined ? {} : { isActive: filter.isActive }),
       ...(filter?.pricingModel ? { pricingModel: filter.pricingModel } : {}),
       ...(filter?.vehicleTypeId ? { vehicleTypeId: filter.vehicleTypeId } : {}),
+      ...(filter?.vehicleClassId ? { vehicleClassId: filter.vehicleClassId } : {}),
       ...(filter?.regionId ? { regionId: filter.regionId } : {}),
     },
     include: farePlanInclude,
@@ -210,6 +223,7 @@ export async function countFarePlans(filter?: ListFarePlansFilter) {
       ...(filter?.isActive === undefined ? {} : { isActive: filter.isActive }),
       ...(filter?.pricingModel ? { pricingModel: filter.pricingModel } : {}),
       ...(filter?.vehicleTypeId ? { vehicleTypeId: filter.vehicleTypeId } : {}),
+      ...(filter?.vehicleClassId ? { vehicleClassId: filter.vehicleClassId } : {}),
       ...(filter?.regionId ? { regionId: filter.regionId } : {}),
     },
   });
@@ -230,6 +244,7 @@ export async function createFarePlan(input: CreateFarePlanInput) {
       slug,
       translations: toJsonTranslations(translations),
       vehicleTypeId: input.vehicleTypeId ?? null,
+      vehicleClassId: input.vehicleClassId ?? null,
       regionId: input.regionId ?? null,
       pricingModel: input.pricingModel,
       currency: input.currency?.trim().toUpperCase() || "ETB",
@@ -266,6 +281,7 @@ export async function updateFarePlan(id: string, input: UpdateFarePlanInput) {
         ? toJsonTranslations(translationsUpdate)
         : undefined,
       vehicleTypeId: input.vehicleTypeId,
+      vehicleClassId: input.vehicleClassId,
       regionId: input.regionId,
       pricingModel: input.pricingModel,
       currency: input.currency?.trim().toUpperCase(),
@@ -291,4 +307,50 @@ export function hasDefaultLocaleTranslation(translations: FarePlanTranslationInp
   return translations.some(
     (translation) => normalizeLocale(translation.locale) === DEFAULT_LOCALE,
   );
+}
+
+function scopeMatches(planScopeId: string | null, requestedId?: string | null) {
+  if (!planScopeId) return true;
+  if (!requestedId) return false;
+  return planScopeId === requestedId;
+}
+
+function farePlanSpecificityScore(plan: {
+  regionId: string | null;
+  vehicleClassId: string | null;
+  vehicleTypeId: string | null;
+}) {
+  return (
+    (plan.regionId ? 1 : 0) +
+    (plan.vehicleClassId ? 1 : 0) +
+    (plan.vehicleTypeId ? 1 : 0)
+  );
+}
+
+export async function resolveFarePlan(input: ResolveFarePlanInput) {
+  const plans = await prisma.farePlan.findMany({
+    where: { isActive: true },
+    include: farePlanInclude,
+    orderBy: [{ priority: "desc" }, { slug: "asc" }],
+  });
+
+  const matches = plans
+    .filter(
+      (plan) =>
+        scopeMatches(plan.regionId, input.regionId) &&
+        scopeMatches(plan.vehicleClassId, input.vehicleClassId) &&
+        scopeMatches(plan.vehicleTypeId, input.vehicleTypeId),
+    )
+    .sort((left, right) => {
+      if (right.priority !== left.priority) {
+        return right.priority - left.priority;
+      }
+
+      return (
+        farePlanSpecificityScore(right) - farePlanSpecificityScore(left) ||
+        left.slug.localeCompare(right.slug)
+      );
+    });
+
+  return matches[0] ?? null;
 }

@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Award,
   Bell,
   Circle,
   ClipboardCheck,
@@ -27,7 +28,6 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   dashboard: LayoutDashboard,
   users: Users,
   "clipboard-check": ClipboardCheck,
-  "driver-applications": ClipboardCheck,
   shield: Shield,
   "shield-check": ShieldCheck,
   roles: Shield,
@@ -50,6 +50,8 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   "fleet-vehicles": Truck,
   layers: Layers,
   "vehicle-types": Layers,
+  award: Award,
+  "vehicle-classes": Award,
   map: Map,
   "map-pin": MapPin,
   "location-management": Map,

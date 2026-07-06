@@ -1,6 +1,7 @@
 import type { Prisma } from "../generated/prisma";
 import type { Vehicle } from "@smart-dispatch/types";
 import { toPublicVehicleType } from "./vehicle-type.mapper";
+import { toPublicVehicleClass } from "./vehicle-class.mapper";
 
 type DbDriver = {
   id: string;
@@ -16,6 +17,7 @@ type DbVehicle = {
   plateNumber: string;
   chassisNumber: string | null;
   vehicleTypeId: string;
+  vehicleClassId: string;
   assignedDriverUserId: string | null;
   make: string | null;
   model: string | null;
@@ -33,6 +35,14 @@ type DbVehicle = {
     updatedAt: Date;
     translations: Prisma.JsonValue;
   };
+  vehicleClass: {
+    id: string;
+    slug: string;
+    isActive: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+    translations: Prisma.JsonValue;
+  };
   assignedDriver: DbDriver | null;
 };
 
@@ -42,6 +52,7 @@ function formatDriverName(driver: DbDriver) {
 
 export function toPublicVehicle(vehicle: DbVehicle, options?: { locale?: string }): Vehicle {
   const vehicleType = toPublicVehicleType(vehicle.vehicleType, { locale: options?.locale });
+  const vehicleClass = toPublicVehicleClass(vehicle.vehicleClass, { locale: options?.locale });
 
   return {
     id: vehicle.id,
@@ -52,6 +63,12 @@ export function toPublicVehicle(vehicle: DbVehicle, options?: { locale?: string 
       id: vehicleType.id,
       slug: vehicleType.slug,
       name: vehicleType.name,
+    },
+    vehicle_class_id: vehicle.vehicleClassId,
+    vehicle_class: {
+      id: vehicleClass.id,
+      slug: vehicleClass.slug,
+      name: vehicleClass.name,
     },
     assigned_driver_user_id: vehicle.assignedDriverUserId,
     assigned_driver: vehicle.assignedDriver

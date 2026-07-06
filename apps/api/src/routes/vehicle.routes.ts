@@ -16,6 +16,7 @@ import {
   updateVehicle,
 } from "../models/vehicle.model";
 import { findVehicleTypeById } from "../models/vehicle-type.model";
+import { findVehicleClassById } from "../models/vehicle-class.model";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
 import { getOptionalString, getString, parseBoolean } from "../utils/validation";
@@ -59,6 +60,7 @@ router.get("/", requirePermission("vehicles.read"), async (req: Request, res: Re
     const filter = {
       search: getString(req.query.search) || undefined,
       vehicleTypeId: getString(req.query.vehicle_type_id) || undefined,
+      vehicleClassId: getString(req.query.vehicle_class_id) || undefined,
       status: parseVehicleStatus(req.query.status),
       assignedDriverUserId: getString(req.query.assigned_driver_user_id) || undefined,
       unassignedOnly: parseBoolean(req.query.unassigned_only),
@@ -116,6 +118,7 @@ router.post("/", requirePermission("vehicles.write"), async (req: Request, res: 
     const plateNumber = getString(req.body?.plate_number);
     const chassisNumber = getString(req.body?.chassis_number);
     const vehicleTypeId = getString(req.body?.vehicle_type_id);
+    const vehicleClassId = getString(req.body?.vehicle_class_id);
     const status = parseVehicleStatus(req.body?.status);
     const year = parseYear(req.body?.year);
     const assignedDriverUserId = parseAssignedDriverUserId(req.body?.assigned_driver_user_id);
@@ -132,15 +135,25 @@ router.post("/", requirePermission("vehicles.write"), async (req: Request, res: 
       return sendError(res, "Vehicle type is required.", 400);
     }
 
+    if (!vehicleClassId) {
+      return sendError(res, "Vehicle class is required.", 400);
+    }
+
     const vehicleType = await findVehicleTypeById(vehicleTypeId);
     if (!vehicleType) {
       return sendError(res, "Vehicle type not found.", 404);
+    }
+
+    const vehicleClass = await findVehicleClassById(vehicleClassId);
+    if (!vehicleClass) {
+      return sendError(res, "Vehicle class not found.", 404);
     }
 
     const vehicle = await createVehicle({
       plateNumber,
       chassisNumber,
       vehicleTypeId,
+      vehicleClassId,
       assignedDriverUserId,
       make: getOptionalString(req.body?.make),
       model: getOptionalString(req.body?.model),
@@ -172,10 +185,18 @@ router.patch("/:id", requirePermission("vehicles.write"), async (req: Request, r
     }
 
     const vehicleTypeId = getOptionalString(req.body?.vehicle_type_id);
+    const vehicleClassId = getOptionalString(req.body?.vehicle_class_id);
     if (vehicleTypeId) {
       const vehicleType = await findVehicleTypeById(vehicleTypeId);
       if (!vehicleType) {
         return sendError(res, "Vehicle type not found.", 404);
+      }
+    }
+
+    if (vehicleClassId) {
+      const vehicleClass = await findVehicleClassById(vehicleClassId);
+      if (!vehicleClass) {
+        return sendError(res, "Vehicle class not found.", 404);
       }
     }
 
@@ -189,6 +210,7 @@ router.patch("/:id", requirePermission("vehicles.write"), async (req: Request, r
       plateNumber: getOptionalString(req.body?.plate_number) ?? undefined,
       chassisNumber: getOptionalString(req.body?.chassis_number),
       vehicleTypeId: vehicleTypeId ?? undefined,
+      vehicleClassId: vehicleClassId ?? undefined,
       assignedDriverUserId,
       make: getOptionalString(req.body?.make),
       model: getOptionalString(req.body?.model),

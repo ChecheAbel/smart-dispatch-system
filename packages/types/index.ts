@@ -32,19 +32,6 @@ export interface DriverProfile {
   license_photo_url: string | null;
 }
 
-/** Pending driver registration awaiting admin review. */
-export interface DriverApplication {
-  id: string;
-  email: string;
-  first_name: string;
-  middle_name: string | null;
-  last_name: string;
-  mobile_number: string;
-  license_number: string;
-  license_photo_url: string | null;
-  submitted_at: string;
-}
-
 /** Public user returned by auth endpoints (no password). */
 export interface User {
   id: string;
@@ -164,6 +151,24 @@ export interface VehicleType {
   translations?: VehicleTypeTranslation[];
 }
 
+export interface VehicleClassTranslation {
+  locale: string;
+  name: string;
+  description: string | null;
+}
+
+export interface VehicleClass {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  locale: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  translations?: VehicleClassTranslation[];
+}
+
 export type VehicleStatus = "active" | "maintenance" | "retired";
 
 export interface Vehicle {
@@ -172,6 +177,12 @@ export interface Vehicle {
   chassis_number: string | null;
   vehicle_type_id: string;
   vehicle_type?: {
+    id: string;
+    slug: string;
+    name: string;
+  };
+  vehicle_class_id: string;
+  vehicle_class?: {
     id: string;
     slug: string;
     name: string;
@@ -256,7 +267,13 @@ export interface FarePlan {
   description: string | null;
   locale: string;
   vehicle_type_id: string | null;
+  vehicle_class_id: string | null;
   vehicle_type?: {
+    id: string;
+    slug: string;
+    name: string;
+  };
+  vehicle_class?: {
     id: string;
     slug: string;
     name: string;

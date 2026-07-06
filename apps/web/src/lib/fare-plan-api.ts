@@ -10,12 +10,14 @@ export type FetchFarePlansParams = {
   is_active?: boolean;
   pricing_model?: PricingModel;
   vehicle_type_id?: string;
+  vehicle_class_id?: string;
   region_id?: string;
 };
 
 export type CreateFarePlanInput = {
   translations: FarePlanTranslation[];
   vehicle_type_id?: string | null;
+  vehicle_class_id?: string | null;
   region_id?: string | null;
   pricing_model: PricingModel;
   currency?: string;
@@ -33,6 +35,7 @@ export type CreateFarePlanInput = {
 export type UpdateFarePlanInput = {
   translations?: FarePlanTranslation[];
   vehicle_type_id?: string | null;
+  vehicle_class_id?: string | null;
   region_id?: string | null;
   pricing_model?: PricingModel;
   currency?: string;
@@ -61,6 +64,18 @@ export async function fetchFarePlanCount(
 
 export async function fetchFarePlanById(id: string) {
   const { data } = await apiClient.get(`/api/fare-plans/${id}`);
+  return unwrapApiResponse<{ fare_plan: FarePlan }>(data).fare_plan;
+}
+
+export type ResolveFarePlanParams = {
+  vehicle_type_id?: string;
+  vehicle_class_id?: string;
+  region_id?: string;
+  locale?: string;
+};
+
+export async function resolveFarePlan(params: ResolveFarePlanParams) {
+  const { data } = await apiClient.get("/api/fare-plans/resolve", { params });
   return unwrapApiResponse<{ fare_plan: FarePlan }>(data).fare_plan;
 }
 

@@ -12,6 +12,7 @@ import {
   findFarePlanById,
   hasDefaultLocaleTranslation,
   listFarePlans,
+  resolveFarePlan,
   slugFromFarePlanTranslations,
   updateFarePlan,
 } from "../models/fare-plan.model";
@@ -80,6 +81,7 @@ router.get("/", requirePermission("fare_plans.read"), async (req: Request, res: 
       isActive: parseBoolean(req.query.is_active),
       pricingModel: parsePricingModel(req.query.pricing_model),
       vehicleTypeId: getString(req.query.vehicle_type_id) || undefined,
+      vehicleClassId: getString(req.query.vehicle_class_id) || undefined,
       regionId: getString(req.query.region_id) || undefined,
     };
 
@@ -94,6 +96,27 @@ router.get("/", requirePermission("fare_plans.read"), async (req: Request, res: 
       result.data.map((farePlan) => toPublicFarePlan(farePlan, { locale })),
       result.pagination,
     );
+  } catch (error) {
+    return handleRouteError(res, error);
+  }
+});
+
+router.get("/resolve", requirePermission("fare_plans.read"), async (req: Request, res: Response) => {
+  try {
+    const locale = getRequestLocale(req);
+    const farePlan = await resolveFarePlan({
+      vehicleTypeId: getString(req.query.vehicle_type_id) || null,
+      vehicleClassId: getString(req.query.vehicle_class_id) || null,
+      regionId: getString(req.query.region_id) || null,
+    });
+
+    if (!farePlan) {
+      return sendError(res, "No matching fare plan found.", 404);
+    }
+
+    return sendSuccess(res, {
+      fare_plan: toPublicFarePlan(farePlan, { locale }),
+    });
   } catch (error) {
     return handleRouteError(res, error);
   }
@@ -145,6 +168,7 @@ router.post("/", requirePermission("fare_plans.write"), async (req: Request, res
     const farePlan = await createFarePlan({
       translations,
       vehicleTypeId: parseOptionalId(req.body?.vehicle_type_id),
+      vehicleClassId: parseOptionalId(req.body?.vehicle_class_id),
       regionId: parseOptionalId(req.body?.region_id),
       pricingModel,
       currency: getString(req.body?.currency) || "ETB",
@@ -188,6 +212,7 @@ router.patch("/:id", requirePermission("fare_plans.write"), async (req: Request,
     const farePlan = await updateFarePlan(req.params.id, {
       translations: translations.length ? translations : undefined,
       vehicleTypeId: parseOptionalId(req.body?.vehicle_type_id),
+      vehicleClassId: parseOptionalId(req.body?.vehicle_class_id),
       regionId: parseOptionalId(req.body?.region_id),
       pricingModel,
       currency: getString(req.body?.currency) || undefined,

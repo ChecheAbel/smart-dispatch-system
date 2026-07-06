@@ -133,7 +133,7 @@ export function CoordinateMapPicker({
       markerRef.current = null;
       setMapReady(false);
     };
-  }, [defaultCenter.latitude, defaultCenter.longitude, defaultZoom, latitude, longitude]);
+  }, [defaultCenter.latitude, defaultCenter.longitude, defaultZoom]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -164,6 +164,14 @@ export function CoordinateMapPicker({
 
     if (skipExternalSyncRef.current) {
       skipExternalSyncRef.current = false;
+      if (hasCoordinates) {
+        const latLng = L.latLng(latitude!, longitude!);
+        if (markerRef.current) {
+          markerRef.current.setLatLng(latLng);
+        } else {
+          attachMarker(map, markerRef, latLng, onChangeRef.current, skipExternalSyncRef);
+        }
+      }
       return;
     }
 

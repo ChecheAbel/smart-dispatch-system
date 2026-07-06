@@ -226,6 +226,11 @@ export function CreateLocationSheet({
   );
   const hasCoordinatePreview = parsedLatitude !== undefined && parsedLongitude !== undefined;
 
+  const regionItems = useMemo(
+    () => regions.map((region) => ({ label: region.name, value: region.id })),
+    [regions],
+  );
+
   useEffect(() => {
     if (!open) {
       return;
@@ -538,7 +543,8 @@ export function CreateLocationSheet({
                   {formCopy.region}
                 </Label>
                 <Select
-                  value={form.regionId}
+                  items={regionItems}
+                  value={form.regionId || null}
                   onValueChange={(value) => updateField("regionId", value ?? "")}
                 >
                   <SelectTrigger

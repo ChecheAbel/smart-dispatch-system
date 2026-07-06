@@ -6,6 +6,7 @@ export type CreateVehicleInput = {
   plateNumber: string;
   chassisNumber?: string | null;
   vehicleTypeId: string;
+  vehicleClassId: string;
   assignedDriverUserId?: string | null;
   make?: string | null;
   model?: string | null;
@@ -18,6 +19,7 @@ export type UpdateVehicleInput = {
   plateNumber?: string;
   chassisNumber?: string | null;
   vehicleTypeId?: string;
+  vehicleClassId?: string;
   assignedDriverUserId?: string | null;
   make?: string | null;
   model?: string | null;
@@ -29,6 +31,7 @@ export type UpdateVehicleInput = {
 export type ListVehiclesFilter = {
   search?: string;
   vehicleTypeId?: string;
+  vehicleClassId?: string;
   status?: VehicleStatus;
   assignedDriverUserId?: string;
   unassignedOnly?: boolean;
@@ -37,6 +40,7 @@ export type ListVehiclesFilter = {
 
 const vehicleInclude = {
   vehicleType: true,
+  vehicleClass: true,
   assignedDriver: true,
 } as const;
 
@@ -88,6 +92,7 @@ function buildVehicleWhere(filter?: ListVehiclesFilter) {
 
   return {
     ...(filter?.vehicleTypeId ? { vehicleTypeId: filter.vehicleTypeId } : {}),
+    ...(filter?.vehicleClassId ? { vehicleClassId: filter.vehicleClassId } : {}),
     ...(filter?.status ? { status: filter.status } : {}),
     ...(filter?.assignedDriverUserId
       ? { assignedDriverUserId: filter.assignedDriverUserId }
@@ -151,6 +156,7 @@ export async function createVehicle(input: CreateVehicleInput) {
         ? normalizeChassisNumber(input.chassisNumber)
         : null,
       vehicleTypeId: input.vehicleTypeId,
+      vehicleClassId: input.vehicleClassId,
       assignedDriverUserId: input.assignedDriverUserId ?? null,
       make: input.make?.trim() || null,
       model: input.model?.trim() || null,
@@ -182,6 +188,7 @@ export async function updateVehicle(id: string, input: UpdateVehicleInput) {
             ? normalizeChassisNumber(input.chassisNumber)
             : null,
       vehicleTypeId: input.vehicleTypeId,
+      vehicleClassId: input.vehicleClassId,
       assignedDriverUserId: input.assignedDriverUserId,
       make: input.make,
       model: input.model,

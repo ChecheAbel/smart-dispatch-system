@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { Coins, Languages, MapPin, Receipt, Settings2 } from "lucide-react";
-import type { FarePlan, PricingModel, Region, VehicleType } from "@smart-dispatch/types";
+import type { FarePlan, PricingModel, Region, VehicleType, VehicleClass } from "@smart-dispatch/types";
 import {
   createFarePlan,
   fetchFarePlanById,
@@ -10,6 +10,7 @@ import {
 } from "@/lib/fare-plan-api";
 import { fetchActiveRegions } from "@/lib/region-api";
 import { fetchActiveVehicleTypes } from "@/lib/vehicle-type-api";
+import { fetchActiveVehicleClasses } from "@/lib/vehicle-class-api";
 import {
   adminCardClass,
   adminHeadingClass,
@@ -70,6 +71,7 @@ type FarePlanFormState = {
   amName: string;
   amDescription: string;
   vehicleTypeId: string;
+  vehicleClassId: string;
   regionId: string;
   pricingModel: PricingModel | "";
   currency: string;
@@ -93,6 +95,7 @@ const emptyForm: FarePlanFormState = {
   amName: "",
   amDescription: "",
   vehicleTypeId: "",
+  vehicleClassId: "",
   regionId: "",
   pricingModel: "distance_time",
   currency: "ETB",
@@ -131,6 +134,7 @@ function mapFarePlanToForm(farePlan: FarePlan): FarePlanFormState {
     amName: am?.name ?? "",
     amDescription: am?.description ?? "",
     vehicleTypeId: farePlan.vehicle_type_id ?? "",
+    vehicleClassId: farePlan.vehicle_class_id ?? "",
     regionId: farePlan.region_id ?? "",
     pricingModel: farePlan.pricing_model,
     currency: farePlan.currency,
@@ -275,6 +279,7 @@ export function CreateFarePlanSheet({
   const [submitting, setSubmitting] = useState(false);
   const [loading, setLoading] = useState(false);
   const [vehicleTypes, setVehicleTypes] = useState<VehicleType[]>([]);
+  const [vehicleClasses, setVehicleClasses] = useState<VehicleClass[]>([]);
   const [regions, setRegions] = useState<Region[]>([]);
 
   const isHourly = form.pricingModel === "hourly";
@@ -319,6 +324,17 @@ export function CreateFarePlanSheet({
     [copy.allVehicleTypes, vehicleTypes],
   );
 
+  const vehicleClassItems = useMemo(
+    () => [
+      { label: copy.allVehicleClasses, value: "all" },
+      ...vehicleClasses.map((vehicleClass) => ({
+        label: vehicleClass.name,
+        value: vehicleClass.id,
+      })),
+    ],
+    [copy.allVehicleClasses, vehicleClasses],
+  );
+
   const regionItems = useMemo(
     () => [
       { label: copy.allRegions, value: "all" },
@@ -357,13 +373,15 @@ export function CreateFarePlanSheet({
 
     async function loadOptions() {
       try {
-        const [nextVehicleTypes, nextRegions] = await Promise.all([
+        const [nextVehicleTypes, nextVehicleClasses, nextRegions] = await Promise.all([
           fetchActiveVehicleTypes(locale),
+          fetchActiveVehicleClasses(locale),
           fetchActiveRegions(locale),
         ]);
 
         if (!cancelled) {
           setVehicleTypes(nextVehicleTypes);
+          setVehicleClasses(nextVehicleClasses);
           setRegions(nextRegions);
         }
       } catch {
@@ -543,6 +561,7 @@ export function CreateFarePlanSheet({
     const payload = {
       translations,
       vehicle_type_id: form.vehicleTypeId || null,
+      vehicle_class_id: form.vehicleClassId || null,
       region_id: form.regionId || null,
       pricing_model: form.pricingModel as PricingModel,
       currency: form.currency.trim().toUpperCase() || "ETB",
@@ -673,7 +692,7 @@ export function CreateFarePlanSheet({
               title={formCopy.sections.scope}
               description={formCopy.sections.scopeDescription}
             >
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div className="space-y-2">
                   <Label>{formCopy.vehicleType}</Label>
                   <Select
@@ -700,6 +719,31 @@ export function CreateFarePlanSheet({
                 </div>
 
                 <div className="space-y-2">
+                  <Label>{formCopy.vehicleClass}</Label>
+                  <Select
+                    items={vehicleClassItems}
+                    value={form.vehicleClassId || "all"}
+                    onValueChange={(value) =>
+                      updateField("vehicleClassId", !value || value === "all" ? "" : value)
+                    }
+                  >
+                    <SelectTrigger className={selectTriggerClassName}>
+                      <SelectValue placeholder={formCopy.vehicleClassPlaceholder} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="all">{copy.allVehicleClasses}</SelectItem>
+                        {vehicleClasses.map((vehicleClass) => (
+                          <SelectItem key={vehicleClass.id} value={vehicleClass.id}>
+                            {vehicleClass.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2 sm:col-span-2 lg:col-span-1">
                   <Label>{formCopy.region}</Label>
                   <Select
                     items={regionItems}

@@ -7,6 +7,7 @@ const DEFAULT_FARE_PLANS = [
   {
     slug: "addis-sedan-standard",
     vehicleTypeSlug: "sedan",
+    vehicleClassSlug: "standard",
     regionSlug: "addis-ababa",
     pricingModel: PricingModel.distance_time,
     currency: "ETB",
@@ -33,7 +34,8 @@ const DEFAULT_FARE_PLANS = [
   },
   {
     slug: "addis-executive-flat",
-    vehicleTypeSlug: "executive",
+    vehicleTypeSlug: "suv",
+    vehicleClassSlug: "luxury",
     regionSlug: "addis-ababa",
     pricingModel: PricingModel.flat,
     currency: "ETB",
@@ -61,6 +63,7 @@ const DEFAULT_FARE_PLANS = [
   {
     slug: "oromia-minibus-distance",
     vehicleTypeSlug: "minibus",
+    vehicleClassSlug: "standard",
     regionSlug: "oromia",
     pricingModel: PricingModel.distance,
     currency: "ETB",
@@ -88,6 +91,7 @@ const DEFAULT_FARE_PLANS = [
   {
     slug: "national-van-hourly",
     vehicleTypeSlug: "van",
+    vehicleClassSlug: "standard",
     regionSlug: null,
     pricingModel: PricingModel.hourly,
     currency: "ETB",
@@ -119,6 +123,9 @@ export async function seedFarePlans() {
     const vehicleType = farePlan.vehicleTypeSlug
       ? await prisma.vehicleType.findUnique({ where: { slug: farePlan.vehicleTypeSlug } })
       : null;
+    const vehicleClass = farePlan.vehicleClassSlug
+      ? await prisma.vehicleClass.findUnique({ where: { slug: farePlan.vehicleClassSlug } })
+      : null;
     const region = farePlan.regionSlug
       ? await prisma.region.findUnique({ where: { slug: farePlan.regionSlug } })
       : null;
@@ -132,6 +139,7 @@ export async function seedFarePlans() {
       update: {
         translations,
         vehicleTypeId: vehicleType?.id ?? null,
+        vehicleClassId: vehicleClass?.id ?? null,
         regionId: region?.id ?? null,
         pricingModel: farePlan.pricingModel,
         currency: farePlan.currency,
@@ -149,6 +157,7 @@ export async function seedFarePlans() {
         slug: farePlan.slug,
         translations,
         vehicleTypeId: vehicleType?.id ?? null,
+        vehicleClassId: vehicleClass?.id ?? null,
         regionId: region?.id ?? null,
         pricingModel: farePlan.pricingModel,
         currency: farePlan.currency,

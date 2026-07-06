@@ -29,6 +29,11 @@ export const PERMISSIONS = {
     write: "vehicle_types.write",
     delete: "vehicle_types.delete",
   },
+  vehicle_classes: {
+    read: "vehicle_classes.read",
+    write: "vehicle_classes.write",
+    delete: "vehicle_classes.delete",
+  },
   vehicles: {
     read: "vehicles.read",
     write: "vehicles.write",
@@ -48,10 +53,6 @@ export const PERMISSIONS = {
     read: "fare_plans.read",
     write: "fare_plans.write",
     delete: "fare_plans.delete",
-  },
-  drivers: {
-    read: "drivers.read",
-    write: "drivers.write",
   },
 } as const;
 

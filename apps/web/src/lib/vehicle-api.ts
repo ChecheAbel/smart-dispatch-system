@@ -7,6 +7,7 @@ export type FetchVehiclesParams = {
   limit?: number;
   search?: string;
   vehicle_type_id?: string;
+  vehicle_class_id?: string;
   status?: VehicleStatus;
   unassigned_only?: boolean;
   assigned_only?: boolean;
@@ -17,6 +18,7 @@ export type CreateVehicleInput = {
   plate_number: string;
   chassis_number: string;
   vehicle_type_id: string;
+  vehicle_class_id: string;
   assigned_driver_user_id?: string | null;
   make?: string | null;
   model?: string | null;
@@ -35,7 +37,7 @@ export async function fetchVehicles(params: FetchVehiclesParams = {}) {
 export async function fetchVehicleCount(
   params: Pick<
     FetchVehiclesParams,
-    "status" | "assigned_only" | "unassigned_only" | "vehicle_type_id"
+    "status" | "assigned_only" | "unassigned_only" | "vehicle_type_id" | "vehicle_class_id"
   > = {},
 ) {
   const result = await fetchVehicles({ page: 1, limit: 1, ...params });

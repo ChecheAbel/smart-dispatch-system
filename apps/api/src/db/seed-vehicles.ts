@@ -5,11 +5,20 @@ type SeedVehicle = {
   plateNumber: string;
   chassisNumber: string;
   vehicleTypeSlug: string;
+  vehicleClassSlug?: string;
   make: string;
   model: string;
   year: number;
   status?: VehicleStatus;
   notes?: string;
+};
+
+const DEFAULT_CLASS_BY_TYPE: Record<string, string> = {
+  sedan: "economy",
+  suv: "premium",
+  minibus: "standard",
+  bus: "standard",
+  van: "standard",
 };
 
 const ETHIOPIAN_FLEET: SeedVehicle[] = [
@@ -53,6 +62,7 @@ const ETHIOPIAN_FLEET: SeedVehicle[] = [
     plateNumber: "AA-1-53421",
     chassisNumber: "MR0KA3CD5J0534215",
     vehicleTypeSlug: "suv",
+    vehicleClassSlug: "luxury",
     make: "Toyota",
     model: "Fortuner",
     year: 2022,
@@ -176,6 +186,21 @@ export async function seedVehicles() {
       continue;
     }
 
+    const classSlug =
+      vehicle.vehicleClassSlug ??
+      DEFAULT_CLASS_BY_TYPE[vehicle.vehicleTypeSlug] ??
+      "standard";
+    const vehicleClass = await prisma.vehicleClass.findUnique({
+      where: { slug: classSlug },
+    });
+
+    if (!vehicleClass) {
+      console.warn(
+        `[Seed] Vehicle class "${classSlug}" not found — skipping ${vehicle.plateNumber}`,
+      );
+      continue;
+    }
+
     const plateNumber = vehicle.plateNumber.trim().toUpperCase();
     const chassisNumber = vehicle.chassisNumber.trim().toUpperCase();
 
@@ -184,6 +209,7 @@ export async function seedVehicles() {
       update: {
         chassisNumber,
         vehicleTypeId: vehicleType.id,
+        vehicleClassId: vehicleClass.id,
         make: vehicle.make,
         model: vehicle.model,
         year: vehicle.year,
@@ -194,6 +220,7 @@ export async function seedVehicles() {
         plateNumber,
         chassisNumber,
         vehicleTypeId: vehicleType.id,
+        vehicleClassId: vehicleClass.id,
         make: vehicle.make,
         model: vehicle.model,
         year: vehicle.year,

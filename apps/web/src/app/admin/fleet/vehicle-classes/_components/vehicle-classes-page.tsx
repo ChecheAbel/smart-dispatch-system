@@ -1,8 +1,8 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { Coins, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
-import type { FarePlan, PricingModel } from "@smart-dispatch/types";
+import { Award, MoreHorizontal, Pencil, Plus, Trash2 } from "lucide-react";
+import type { VehicleClass } from "@smart-dispatch/types";
 import { useLocale, useAuth } from "@/components/shared/providers";
 import {
   DataTable,
@@ -22,10 +22,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   formatMessage,
-  getAdminFarePlansMessages,
-  type AdminFarePlansMessages,
+  getAdminVehicleClassesMessages,
+  type AdminVehicleClassesMessages,
 } from "@/translations";
-import { deleteFarePlan, fetchFarePlans } from "@/lib/fare-plan-api";
+import { deleteVehicleClass, fetchVehicleClasses } from "@/lib/vehicle-class-api";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import {
   adminBadgeGoldClass,
@@ -35,8 +35,8 @@ import {
 import { PERMISSIONS } from "@/lib/permissions";
 import { DeleteConfirmModal } from "@/components/shared/delete-confirm-modal";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
-import { CreateFarePlanSheet } from "./create-fare-plan-sheet";
-import { FarePlanStats } from "./fare-plan-stats";
+import { CreateVehicleClassSheet } from "./create-vehicle-class-sheet";
+import { VehicleClassStats } from "./vehicle-class-stats";
 
 function formatDate(value: string, locale: string) {
   return new Date(value).toLocaleDateString(locale, {
@@ -46,30 +46,18 @@ function formatDate(value: string, locale: string) {
   });
 }
 
-function formatMoney(amount: number, currency: string, locale: string) {
-  try {
-    return new Intl.NumberFormat(locale, {
-      style: "currency",
-      currency,
-      maximumFractionDigits: 2,
-    }).format(amount);
-  } catch {
-    return `${currency} ${amount.toFixed(2)}`;
-  }
-}
-
-function FarePlanRowActions({
-  farePlan,
+function VehicleClassRowActions({
+  vehicleClass,
   labels,
   onEdit,
   onDelete,
   canEdit,
   canDelete,
 }: {
-  farePlan: FarePlan;
-  labels: AdminFarePlansMessages["actions"];
-  onEdit: (farePlan: FarePlan) => void;
-  onDelete: (farePlan: FarePlan) => void;
+  vehicleClass: VehicleClass;
+  labels: AdminVehicleClassesMessages["actions"];
+  onEdit: (vehicleClass: VehicleClass) => void;
+  onDelete: (vehicleClass: VehicleClass) => void;
   canEdit: boolean;
   canDelete: boolean;
 }) {
@@ -82,7 +70,7 @@ function FarePlanRowActions({
             variant="ghost"
             size="icon-sm"
             className="text-slate-500 hover:bg-[#1C3A34]/6 hover:text-[#1C3A34]"
-            aria-label={formatMessage(labels.menuLabel, { name: farePlan.name })}
+            aria-label={formatMessage(labels.menuLabel, { name: vehicleClass.name })}
           />
         }
       >
@@ -91,14 +79,14 @@ function FarePlanRowActions({
       <DropdownMenuContent align="end" className="w-44">
         <DropdownMenuGroup>
           {canEdit ? (
-            <DropdownMenuItem onClick={() => onEdit(farePlan)}>
+            <DropdownMenuItem onClick={() => onEdit(vehicleClass)}>
               <Pencil />
               {labels.edit}
             </DropdownMenuItem>
           ) : null}
           {canEdit && canDelete ? <DropdownMenuSeparator /> : null}
           {canDelete ? (
-            <DropdownMenuItem variant="destructive" onClick={() => onDelete(farePlan)}>
+            <DropdownMenuItem variant="destructive" onClick={() => onDelete(vehicleClass)}>
               <Trash2 />
               {labels.delete}
             </DropdownMenuItem>
@@ -109,89 +97,51 @@ function FarePlanRowActions({
   );
 }
 
-export function FarePlansPage() {
+export function VehicleClassesPage() {
   const { locale } = useLocale();
   const { hasPermission } = useAuth();
-  const copy = getAdminFarePlansMessages(locale);
-  const canRead = hasPermission(PERMISSIONS.fare_plans.read);
-  const canWrite = hasPermission(PERMISSIONS.fare_plans.write);
-  const canDelete = hasPermission(PERMISSIONS.fare_plans.delete);
+  const copy = getAdminVehicleClassesMessages(locale);
+  const canRead = hasPermission(PERMISSIONS.vehicle_classes.read);
+  const canWrite = hasPermission(PERMISSIONS.vehicle_classes.write);
+  const canDelete = hasPermission(PERMISSIONS.vehicle_classes.delete);
   const showRowActions = canWrite || canDelete;
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetMode, setSheetMode] = useState<"create" | "edit">("create");
-  const [editingFarePlanId, setEditingFarePlanId] = useState<string | null>(null);
+  const [editingVehicleClassId, setEditingVehicleClassId] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deletingFarePlan, setDeletingFarePlan] = useState<FarePlan | null>(null);
+  const [deletingVehicleClass, setDeletingVehicleClass] = useState<VehicleClass | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
-
-  const pricingModelLabel = useCallback(
-    (model: PricingModel) => copy.pricingModels[model],
-    [copy.pricingModels],
-  );
 
   function openCreateSheet() {
     setSheetMode("create");
-    setEditingFarePlanId(null);
+    setEditingVehicleClassId(null);
     setSheetOpen(true);
   }
 
-  const openEditSheet = useCallback((farePlan: FarePlan) => {
+  const openEditSheet = useCallback((vehicleClass: VehicleClass) => {
     setSheetMode("edit");
-    setEditingFarePlanId(farePlan.id);
+    setEditingVehicleClassId(vehicleClass.id);
     setSheetOpen(true);
   }, []);
 
-  const openDeleteModal = useCallback((farePlan: FarePlan) => {
-    setDeletingFarePlan(farePlan);
+  const openDeleteModal = useCallback((vehicleClass: VehicleClass) => {
+    setDeletingVehicleClass(vehicleClass);
     setDeleteOpen(true);
   }, []);
 
-  const farePlanColumns = useMemo<DataTableColumn<FarePlan>[]>(
+  const vehicleClassColumns = useMemo<DataTableColumn<VehicleClass>[]>(
     () => [
       {
         id: "name",
         header: copy.columns.name,
         cellClassName: "text-slate-700",
-        cell: (farePlan) => farePlan.name,
-      },
-      {
-        id: "pricingModel",
-        header: copy.columns.pricingModel,
-        cell: (farePlan) => (
-          <Badge variant="outline">{pricingModelLabel(farePlan.pricing_model)}</Badge>
-        ),
-      },
-      {
-        id: "scope",
-        header: copy.columns.scope,
-        cellClassName: "text-slate-500",
-        cell: (farePlan) => (
-          <span className="text-sm">
-            {farePlan.vehicle_type?.name ?? copy.allVehicleTypes}
-            <span className="px-1 text-slate-300">·</span>
-            {farePlan.vehicle_class?.name ?? copy.allVehicleClasses}
-            <span className="px-1 text-slate-300">·</span>
-            {farePlan.region?.name ?? copy.allRegions}
-          </span>
-        ),
-      },
-      {
-        id: "baseFare",
-        header: copy.columns.baseFare,
-        cellClassName: "text-slate-700 tabular-nums",
-        cell: (farePlan) => formatMoney(farePlan.base_fare, farePlan.currency, locale),
-      },
-      {
-        id: "priority",
-        header: copy.columns.priority,
-        cellClassName: "text-slate-500 tabular-nums",
-        cell: (farePlan) => farePlan.priority,
+        cell: (vehicleClass) => vehicleClass.name,
       },
       {
         id: "status",
         header: copy.columns.status,
-        cell: (farePlan) =>
-          farePlan.is_active ? (
+        cell: (vehicleClass) =>
+          vehicleClass.is_active ? (
             <Badge className={adminBadgeSuccessClass}>{copy.status.active}</Badge>
           ) : (
             <Badge variant="outline">{copy.status.inactive}</Badge>
@@ -201,15 +151,15 @@ export function FarePlansPage() {
         id: "created",
         header: copy.columns.created,
         cellClassName: "text-slate-500",
-        cell: (farePlan) => formatDate(farePlan.created_at, locale),
+        cell: (vehicleClass) => formatDate(vehicleClass.created_at, locale),
       },
     ],
-    [copy, locale, pricingModelLabel],
+    [copy, locale],
   );
 
-  const loadFarePlans = useCallback(
+  const loadVehicleClasses = useCallback(
     ({ page, limit, search }: DataTableFetchParams) =>
-      fetchFarePlans({
+      fetchVehicleClasses({
         page,
         limit,
         search: search || undefined,
@@ -219,14 +169,14 @@ export function FarePlansPage() {
   );
 
   const renderRowActions = useCallback(
-    (farePlan: FarePlan, _context: DataTableRowContext<FarePlan>) => {
+    (vehicleClass: VehicleClass, _context: DataTableRowContext<VehicleClass>) => {
       if (!canWrite && !canDelete) {
         return null;
       }
 
       return (
-        <FarePlanRowActions
-          farePlan={farePlan}
+        <VehicleClassRowActions
+          vehicleClass={vehicleClass}
           labels={copy.actions}
           onEdit={openEditSheet}
           onDelete={openDeleteModal}
@@ -244,7 +194,7 @@ export function FarePlansPage() {
 
   return (
     <div className="space-y-6">
-      <FarePlanStats locale={locale} refreshKey={refreshKey} />
+      <VehicleClassStats locale={locale} refreshKey={refreshKey} />
 
       <DataTable
         key={locale}
@@ -254,9 +204,9 @@ export function FarePlansPage() {
         description={copy.description}
         searchPlaceholder={copy.searchPlaceholder}
         itemLabel={copy.itemLabel}
-        columns={farePlanColumns}
-        fetchData={loadFarePlans}
-        getRowKey={(farePlan) => farePlan.id}
+        columns={vehicleClassColumns}
+        fetchData={loadVehicleClasses}
+        getRowKey={(vehicleClass) => vehicleClass.id}
         showIndexColumn
         renderRowActions={showRowActions ? renderRowActions : undefined}
         actionsColumnHeader={copy.columns.actions}
@@ -264,12 +214,12 @@ export function FarePlansPage() {
           canWrite ? (
             <Button type="button" onClick={openCreateSheet} className={adminPrimaryButtonClass}>
               <Plus className="size-4" />
-              {copy.newFarePlan}
+              {copy.newClass}
             </Button>
           ) : undefined
         }
-        minTableWidth="980px"
-        emptyIcon={Coins}
+        minTableWidth="720px"
+        emptyIcon={Award}
         emptyTitle={copy.empty.title}
         emptyDescription={copy.empty.description}
         emptySearchDescription={copy.empty.searchDescription}
@@ -277,11 +227,11 @@ export function FarePlansPage() {
       />
 
       {canWrite ? (
-        <CreateFarePlanSheet
+        <CreateVehicleClassSheet
           open={sheetOpen}
           onOpenChange={setSheetOpen}
           mode={sheetMode}
-          farePlanId={editingFarePlanId}
+          vehicleClassId={editingVehicleClassId}
           onSuccess={() => setRefreshKey((current) => current + 1)}
         />
       ) : null}
@@ -290,18 +240,18 @@ export function FarePlansPage() {
         <DeleteConfirmModal
           open={deleteOpen}
           onOpenChange={setDeleteOpen}
-          itemName={deletingFarePlan?.name}
+          itemName={deletingVehicleClass?.name}
           onConfirm={async () => {
-            if (!deletingFarePlan) {
+            if (!deletingVehicleClass) {
               return;
             }
 
             try {
-              await deleteFarePlan(deletingFarePlan.id);
+              await deleteVehicleClass(deletingVehicleClass.id);
               showSuccessToast({
                 title: copy.toast.deleteSuccess.title,
                 description: formatMessage(copy.toast.deleteSuccess.description, {
-                  name: deletingFarePlan.name,
+                  name: deletingVehicleClass.name,
                 }),
               });
               setRefreshKey((current) => current + 1);

@@ -12,6 +12,7 @@ type DbFarePlan = {
   id: string;
   slug: string;
   vehicleTypeId: string | null;
+  vehicleClassId: string | null;
   regionId: string | null;
   pricingModel: PricingModel;
   currency: string;
@@ -28,6 +29,11 @@ type DbFarePlan = {
   updatedAt: Date;
   translations: Prisma.JsonValue;
   vehicleType?: {
+    id: string;
+    slug: string;
+    translations: Prisma.JsonValue;
+  } | null;
+  vehicleClass?: {
     id: string;
     slug: string;
     translations: Prisma.JsonValue;
@@ -87,6 +93,7 @@ export function toPublicFarePlan(
     locale,
     vehicle_type_id: farePlan.vehicleTypeId,
     region_id: farePlan.regionId,
+    vehicle_class_id: farePlan.vehicleClassId,
     pricing_model: farePlan.pricingModel,
     currency: farePlan.currency,
     base_fare: Number(farePlan.baseFare),
@@ -107,6 +114,14 @@ export function toPublicFarePlan(
       id: farePlan.vehicleType.id,
       slug: farePlan.vehicleType.slug,
       name: pickRelatedName(farePlan.vehicleType.translations, options?.locale),
+    };
+  }
+
+  if (farePlan.vehicleClass) {
+    result.vehicle_class = {
+      id: farePlan.vehicleClass.id,
+      slug: farePlan.vehicleClass.slug,
+      name: pickRelatedName(farePlan.vehicleClass.translations, options?.locale),
     };
   }
 

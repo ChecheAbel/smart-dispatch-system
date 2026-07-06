@@ -16,7 +16,7 @@ import { registerLocationRoutes } from "./routes/location.routes";
 import { registerRegionRoutes } from "./routes/region.routes";
 import { registerVehicleRoutes } from "./routes/vehicle.routes";
 import { registerVehicleTypeRoutes } from "./routes/vehicle-type.routes";
-import { registerDriverApplicationRoutes } from "./routes/driver-application.routes";
+import { registerVehicleClassRoutes } from "./routes/vehicle-class.routes";
 import { registerFarePlanRoutes } from "./routes/fare-plan.routes";
 import { ensureDriverLicenseUploadDir, getDriverLicenseUploadDir } from "./utils/driver-license-upload";
 import { sendSuccess } from "./utils/response";
@@ -40,10 +40,10 @@ registerMenuRoutes(app);
 registerNotificationRoutes(app);
 registerAuditLogRoutes(app);
 registerVehicleTypeRoutes(app);
+registerVehicleClassRoutes(app);
 registerVehicleRoutes(app);
 registerRegionRoutes(app);
 registerLocationRoutes(app);
-registerDriverApplicationRoutes(app);
 registerFarePlanRoutes(app);
 
 app.get("/api/health", (_req, res) => {

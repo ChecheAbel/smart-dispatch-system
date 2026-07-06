@@ -190,84 +190,6 @@
       }
     }
   },
-  "adminDriverApplications": {
-    "eyebrow": "People",
-    "title": "Driver Applications",
-    "description": "Review pending driver registrations, verify license details, and approve or reject applications.",
-    "searchPlaceholder": "Search by name, email, mobile, or license number...",
-    "itemLabel": "application",
-    "pendingTitle": "Pending review",
-    "pendingDescription": "Applications waiting for administrator approval",
-    "columns": {
-      "name": "Applicant",
-      "email": "Email",
-      "mobile": "Mobile",
-      "license": "License number",
-      "submitted": "Submitted",
-      "actions": "Actions"
-    },
-    "empty": {
-      "title": "No pending applications",
-      "description": "New driver registrations will appear here for review.",
-      "searchDescription": "Try a different search term."
-    },
-    "accessDenied": {
-      "eyebrow": "Access denied",
-      "title": "You do not have permission",
-      "description": "View access to driver applications is required to open this page. Ask an administrator to grant the drivers.read permission for your role.",
-      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
-      "permissionNote": "Access is controlled by your role permissions.",
-      "goToDashboard": "Go to dashboard"
-    },
-    "actions": {
-      "review": "Review",
-      "approve": "Approve",
-      "reject": "Reject",
-      "menuLabel": "Actions for {name}"
-    },
-    "review": {
-      "title": "Review application",
-      "description": "Verify the applicant details and driver license before approving access.",
-      "applicantSection": "Applicant details",
-      "licenseSection": "Driver license",
-      "licenseNumber": "License number",
-      "licensePhoto": "License photo",
-      "noPhoto": "No license photo uploaded.",
-      "openPhoto": "Open full image",
-      "submittedAt": "Submitted",
-      "approve": "Approve application",
-      "approving": "Approving...",
-      "reject": "Reject application",
-      "rejecting": "Rejecting...",
-      "cancel": "Close",
-      "rejectConfirmTitle": "Reject this application?",
-      "rejectConfirmDescription": "The applicant will not be able to sign in. This action removes the application from the pending queue.",
-      "rejectConfirm": "Reject application",
-      "rejectCancel": "Cancel"
-    },
-    "toast": {
-      "approveSuccess": {
-        "title": "Application approved",
-        "description": "{name} can now sign in as a driver."
-      },
-      "rejectSuccess": {
-        "title": "Application rejected",
-        "description": "{name}'s application has been rejected."
-      },
-      "approveFailed": {
-        "title": "Could not approve application",
-        "description": "Please try again."
-      },
-      "rejectFailed": {
-        "title": "Could not reject application",
-        "description": "Please try again."
-      },
-      "loadFailed": {
-        "title": "Could not load application",
-        "description": "Please try again or refresh the page."
-      }
-    }
-  },
   "adminRoles": {
     "eyebrow": "Access control",
     "title": "Roles",
@@ -1000,6 +922,98 @@
       }
     }
   },
+  "adminVehicleClasses": {
+    "eyebrow": "Vehicle management",
+    "title": "Vehicle classes",
+    "description": "Define service tiers such as economy, standard, or premium.",
+    "searchPlaceholder": "Search by name...",
+    "newClass": "New vehicle class",
+    "itemLabel": "vehicle class",
+    "columns": {
+      "name": "Name",
+      "slug": "Slug",
+      "status": "Status",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "empty": {
+      "title": "No vehicle classes found",
+      "description": "Vehicle classes will appear here once they are created.",
+      "searchDescription": "Try a different search term."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to vehicle classes is required to open this page.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "menuLabel": "Actions for {name}"
+    },
+    "stats": {
+      "title": "Total vehicle classes",
+      "description": "All service tiers in the fleet catalog",
+      "activeTitle": "Active classes",
+      "activeDescription": "Classes available for fleet operations",
+      "inactiveTitle": "Inactive classes",
+      "inactiveDescription": "Classes hidden from active use"
+    },
+    "form": {
+      "createTitle": "New vehicle class",
+      "editTitle": "Edit vehicle class",
+      "createDescription": "Create a vehicle class with at least an English name.",
+      "editDescription": "Update the vehicle class details and translations.",
+      "name": "Name",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "active": "Active",
+      "optional": "(optional)",
+      "cancel": "Cancel",
+      "create": "Create class",
+      "creating": "Creating...",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "loading": "Loading vehicle class...",
+      "namePlaceholderEn": "Premium",
+      "namePlaceholderAm": "ፕሪሚየም",
+      "errors": {
+        "enNameRequired": "English name is required.",
+        "createFailed": "Failed to create vehicle class.",
+        "updateFailed": "Failed to update vehicle class.",
+        "loadFailed": "Failed to load vehicle class."
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "Vehicle class created",
+        "description": "{name} was added successfully."
+      },
+      "updateSuccess": {
+        "title": "Vehicle class updated",
+        "description": "{name} was saved successfully."
+      },
+      "deleteSuccess": {
+        "title": "Vehicle class deleted",
+        "description": "{name} was removed."
+      },
+      "deleteFailed": {
+        "title": "Delete failed",
+        "description": "Could not delete the vehicle class."
+      },
+      "loadFailed": {
+        "title": "Load failed",
+        "description": "Could not load the vehicle class."
+      }
+    }
+  },
   "adminVehicles": {
     "eyebrow": "Vehicle management",
     "title": "Vehicles",
@@ -1010,6 +1024,8 @@
     "filters": {
       "type": "Vehicle type",
       "typeAll": "All types",
+      "class": "Vehicle class",
+      "classAll": "All classes",
       "status": "Status",
       "statusAll": "All statuses",
       "assignment": "Assignment",
@@ -1021,6 +1037,7 @@
       "plate": "Plate number",
       "chassis": "Chassis number",
       "type": "Type",
+      "class": "Class",
       "driver": "Assigned driver",
       "makeModel": "Make / model",
       "year": "Year",
@@ -1098,7 +1115,7 @@
         "plateDescription": "Ethiopian license plate format: region, category code, and serial number.",
         "platePreviewEmpty": "AA-1-31209",
         "classification": "Classification",
-        "classificationDescription": "Vehicle category and operational status.",
+        "classificationDescription": "Vehicle category, service class, and operational status.",
         "assignment": "Driver assignment",
         "assignmentDescription": "Optionally link an active driver to this vehicle.",
         "details": "Vehicle details",
@@ -1106,6 +1123,8 @@
       },
       "vehicleType": "Vehicle type",
       "vehicleTypePlaceholder": "Select type",
+      "vehicleClass": "Vehicle class",
+      "vehicleClassPlaceholder": "Select class",
       "assignedDriver": "Assigned driver",
       "assignedDriverPlaceholder": "Select driver",
       "noDriver": "No driver assigned",
@@ -1135,6 +1154,7 @@
         "plateLicenseRequired": "License number is required.",
         "plateInvalid": "Enter a valid plate in the format AA-1-31209.",
         "typeRequired": "Vehicle type is required.",
+        "classRequired": "Vehicle class is required.",
         "chassisNumberRequired": "Chassis number is required.",
         "createFailed": "Failed to create vehicle.",
         "updateFailed": "Failed to update vehicle.",
@@ -1399,12 +1419,13 @@
   "adminFarePlans": {
     "eyebrow": "Billing",
     "title": "Fare Plans",
-    "description": "Configure pricing rules by vehicle type, region, and pricing model.",
+    "description": "Configure pricing rules by vehicle type, class, region, and pricing model.",
     "searchPlaceholder": "Search by name...",
     "newFarePlan": "New fare plan",
     "itemLabel": "fare plan",
     "allRegions": "All regions",
     "allVehicleTypes": "All vehicle types",
+    "allVehicleClasses": "All vehicle classes",
     "columns": {
       "name": "Name",
       "pricingModel": "Pricing model",
@@ -1481,7 +1502,7 @@
         "identity": "Plan identity",
         "identityDescription": "How this fare plan appears in admin lists and reports.",
         "scope": "Scope",
-        "scopeDescription": "Limit the plan to a vehicle type and/or region, or leave blank for all.",
+        "scopeDescription": "Limit the plan to a vehicle type, class, and/or region, or leave blank for all.",
         "pricing": "Pricing",
         "pricingDescription": "Set the pricing model and rate components used for fare calculation.",
         "rules": "Rules",
@@ -1489,6 +1510,8 @@
       },
       "vehicleType": "Vehicle type",
       "vehicleTypePlaceholder": "Select vehicle type",
+      "vehicleClass": "Vehicle class",
+      "vehicleClassPlaceholder": "Select vehicle class",
       "region": "Region",
       "regionPlaceholder": "Select region",
       "pricingModel": "Pricing model",

@@ -1,11 +1,11 @@
 const ADMIN_MODULES = [
   "users",
-  "drivers",
   "roles",
   "menus",
   "notifications",
   "audit_logs",
   "vehicle_types",
+  "vehicle_classes",
   "vehicles",
   "regions",
   "locations",
@@ -35,11 +35,15 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
   }
 
   if (normalizedSlug === "fleet") {
-    return ["vehicle_types.read", "vehicles.read"];
+    return ["vehicle_types.read", "vehicle_classes.read", "vehicles.read"];
   }
 
   if (normalizedSlug === "vehicle-types") {
     return ["vehicle_types.read"];
+  }
+
+  if (normalizedSlug === "vehicle-classes") {
+    return ["vehicle_classes.read"];
   }
 
   if (normalizedSlug === "fleet-vehicles") {
@@ -64,10 +68,6 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
 
   if (normalizedSlug === "fare-plans") {
     return ["fare_plans.read"];
-  }
-
-  if (normalizedSlug === "driver-applications") {
-    return ["drivers.read"];
   }
 
   if (isAdminModule(normalizedSlug)) {

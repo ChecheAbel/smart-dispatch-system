@@ -9,6 +9,7 @@ import type {
   AdminRolesMessages,
   AdminUsersMessages,
   AdminVehicleTypesMessages,
+  AdminVehicleClassesMessages,
   AdminVehiclesMessages,
   AdminRegionsMessages,
   AdminLocationsMessages,
@@ -16,7 +17,6 @@ import type {
   AdminShellMessages,
   AdminDashboardMessages,
   AdminProfileMessages,
-  AdminDriverApplicationsMessages,
   Translations,
 } from "./types";
 
@@ -33,6 +33,7 @@ export type {
   AdminRolesMessages,
   AdminUsersMessages,
   AdminVehicleTypesMessages,
+  AdminVehicleClassesMessages,
   AdminVehiclesMessages,
   AdminRegionsMessages,
   AdminLocationsMessages,
@@ -40,7 +41,6 @@ export type {
   AdminShellMessages,
   AdminDashboardMessages,
   AdminProfileMessages,
-  AdminDriverApplicationsMessages,
   Translations,
 };
 export { formatMessage } from "./format";
@@ -83,6 +83,12 @@ export function getAdminVehicleTypesMessages(
   return getTranslations(locale).adminVehicleTypes;
 }
 
+export function getAdminVehicleClassesMessages(
+  locale: SupportedLocale,
+): AdminVehicleClassesMessages {
+  return getTranslations(locale).adminVehicleClasses;
+}
+
 export function getAdminVehiclesMessages(locale: SupportedLocale): AdminVehiclesMessages {
   return getTranslations(locale).adminVehicles;
 }
@@ -109,10 +115,4 @@ export function getAdminDashboardMessages(locale: SupportedLocale): AdminDashboa
 
 export function getAdminProfileMessages(locale: SupportedLocale): AdminProfileMessages {
   return getTranslations(locale).adminProfile;
-}
-
-export function getAdminDriverApplicationsMessages(
-  locale: SupportedLocale,
-): AdminDriverApplicationsMessages {
-  return getTranslations(locale).adminDriverApplications;
 }

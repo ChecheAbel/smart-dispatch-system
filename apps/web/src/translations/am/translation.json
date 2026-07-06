@@ -190,84 +190,6 @@
       }
     }
   },
-  "adminDriverApplications": {
-    "eyebrow": "ሰዎች",
-    "title": "የሹፌር ማመልከቻዎች",
-    "description": "በመጠባበቅ ላይ ያሉ የሹፌር ምዝገባዎችን ይመልከቱ፣ የፈቃድ መረጃ ያረጋግጡ እና ማመልከቻዎችን ያጽድቁ ወይም ይካዱ።",
-    "searchPlaceholder": "በስም፣ ኢሜይል፣ ሞባይል ወይም የፈቃድ ቁጥር ይፈልጉ...",
-    "itemLabel": "ማመልከቻ",
-    "pendingTitle": "በመጠባበቅ ላይ",
-    "pendingDescription": "የአስተዳዳሪ ፈቃድ በመጠባበቅ ላይ ያሉ ማመልከቻዎች",
-    "columns": {
-      "name": "አመልካች",
-      "email": "ኢሜይል",
-      "mobile": "ሞባይል",
-      "license": "የፈቃድ ቁጥር",
-      "submitted": "ተላልፏል",
-      "actions": "እርምጃዎች"
-    },
-    "empty": {
-      "title": "ምንም በመጠባበቅ ላይ ያለ ማመልከቻ የለም",
-      "description": "አዲስ የሹፌር ምዝገባዎች ለግምገማ እዚህ ይታያሉ።",
-      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
-    },
-    "accessDenied": {
-      "eyebrow": "መዳረሻ ተከልክሏል",
-      "title": "ፈቃድ የለዎትም",
-      "description": "ይህን ገጽ ለመክፈት የሹፌር ማመልከቻዎችን ለመመልከት ፈቃድ ያስፈልጋል። ለሚናዎ drivers.read ፈቃድ እንዲሰጥዎ አስተዳዳሪዎን ይጠይቁ።",
-      "sessionHint": "ፈቃዶች በቅርቡ ከተቀየሩ፣ ክፍለ ጊዜዎን ለማደስ ይውጡ እና እንደገና ይግቡ።",
-      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
-      "goToDashboard": "ወደ ዳሽቦርድ ሂድ"
-    },
-    "actions": {
-      "review": "ግምገማ",
-      "approve": "አጽድቅ",
-      "reject": "አጥፋ",
-      "menuLabel": "ለ {name} እርምጃዎች"
-    },
-    "review": {
-      "title": "ማመልከቻ ግምገማ",
-      "description": "መዳረሻ ከመፍቀድዎ በፊት የአመልካች መረጃ እና የሹፌር ፈቃድ ያረጋግጡ።",
-      "applicantSection": "የአመልካች መረጃ",
-      "licenseSection": "የሹፌር ፈቃድ",
-      "licenseNumber": "የፈቃድ ቁጥር",
-      "licensePhoto": "የፈቃድ ፎቶ",
-      "noPhoto": "ምንም የፈቃድ ፎቶ አልተሰቀለም።",
-      "openPhoto": "ሙሉ ምስል ክፈት",
-      "submittedAt": "ተላልፏል",
-      "approve": "ማመልከቻ አጽድቅ",
-      "approving": "በመጽደቅ ላይ...",
-      "reject": "ማመልከቻ አጥፋ",
-      "rejecting": "በመሰረዝ ላይ...",
-      "cancel": "ዝጋ",
-      "rejectConfirmTitle": "ይህ ማመልከቻ ይካድ?",
-      "rejectConfirmDescription": "አመልካቹ መግቢያ ማድረግ አይችልም። ይህ እርምጃ ማመልከቻውን ከበጠባበቅ ዝርዝር ውጭ ያደርገዋል።",
-      "rejectConfirm": "ማመልከቻ አጥፋ",
-      "rejectCancel": "ተው"
-    },
-    "toast": {
-      "approveSuccess": {
-        "title": "ማመልከቻ ጸድቋል",
-        "description": "{name} አሁን እንደ ሹፌር መግቢያ ማድረግ ይችላል።"
-      },
-      "rejectSuccess": {
-        "title": "ማመልከቻ ተከልክሏል",
-        "description": "የ {name} ማመልከቻ ተከልክሏል።"
-      },
-      "approveFailed": {
-        "title": "ማመልከቻ መጽደቅ አልተሳካም",
-        "description": "እባክዎ እንደገና ይሞክሩ።"
-      },
-      "rejectFailed": {
-        "title": "ማመልከቻ መሰረዝ አልተሳካም",
-        "description": "እባክዎ እንደገና ይሞክሩ።"
-      },
-      "loadFailed": {
-        "title": "ማመልከቻ መጫን አልተሳካም",
-        "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
-      }
-    }
-  },
   "adminRoles": {
     "eyebrow": "የመዳረሻ ቁጥጥር",
     "title": "ሚናዎች",
@@ -1000,6 +922,98 @@
       }
     }
   },
+  "adminVehicleClasses": {
+    "eyebrow": "የተሽከርካሪ አስተዳደር",
+    "title": "የተሽከርካሪ ክፍሎች",
+    "description": "ኢኮኖሚ፣ መደበኛ ወይም ፕሪሚየም ያሉ የአገልግሎት ደረጃዎችን ይግለጹ።",
+    "searchPlaceholder": "በስም ይፈልጉ...",
+    "newClass": "አዲስ የተሽከርካሪ ክፍል",
+    "itemLabel": "የተሽከርካሪ ክፍል",
+    "columns": {
+      "name": "ስም",
+      "slug": "መለያ",
+      "status": "ሁኔታ",
+      "created": "ተፈጥሯል",
+      "actions": "እርምጃዎች"
+    },
+    "status": {
+      "active": "ንቁ",
+      "inactive": "ንቁ ያልሆነ"
+    },
+    "empty": {
+      "title": "ምንም የተሽከርካሪ ክፍል አልተገኘም",
+      "description": "የተሽከርካሪ ክፍሎች ከተፈጠሩ በኋላ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የተሽከርካሪ ክፍሎችን ለመመልከት ፈቃድ ያስፈልጋል።",
+      "sessionHint": "ፈቃዶች በቅርቡ ከተቀየሩ፣ ክፍለ ጊዜዎን ለማደስ ይውጡ እና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ሂድ"
+    },
+    "actions": {
+      "edit": "አርትዕ",
+      "delete": "ሰርዝ",
+      "menuLabel": "ለ {name} እርምጃዎች"
+    },
+    "stats": {
+      "title": "ጠቅላላ የተሽከርካሪ ክፍሎች",
+      "description": "በመኪና ካታሎግ ውስጥ ያሉ ሁሉም የአገልግሎት ደረጃዎች",
+      "activeTitle": "ንቁ ክፍሎች",
+      "activeDescription": "ለመኪና አስተዳደር የሚገኙ ክፍሎች",
+      "inactiveTitle": "ንቁ ያልሆኑ ክፍሎች",
+      "inactiveDescription": "ከንቁ አገልግሎት የተደበቁ ክፍሎች"
+    },
+    "form": {
+      "createTitle": "አዲስ የተሽከርካሪ ክፍል",
+      "editTitle": "የተሽከርካሪ ክፍል አርትዕ",
+      "createDescription": "ቢያንስ የእንግሊዝኛ ስም ያለው የተሽከርካሪ ክፍል ይፍጠሩ።",
+      "editDescription": "የተሽከርካሪ ክፍል መረጃ እና ትርጉሞችን ያዘምኑ።",
+      "name": "ስም",
+      "description": "መግለጫ",
+      "descriptionPlaceholder": "አማራጭ መግለጫ",
+      "active": "ንቁ",
+      "optional": "(አማራጭ)",
+      "cancel": "ተው",
+      "create": "ክፍል ፍጠር",
+      "creating": "በመፍጠር ላይ...",
+      "save": "ለውጦችን አስቀምጥ",
+      "saving": "በማስቀመጥ ላይ...",
+      "loading": "የተሽከርካሪ ክፍል በመጫን ላይ...",
+      "namePlaceholderEn": "Premium",
+      "namePlaceholderAm": "ፕሪሚየም",
+      "errors": {
+        "enNameRequired": "የእንግሊዝኛ ስም ያስፈልጋል።",
+        "createFailed": "የተሽከርካሪ ክፍል መፍጠር አልተሳካም።",
+        "updateFailed": "የተሽከርካሪ ክፍል ማዘመን አልተሳካም።",
+        "loadFailed": "የተሽከርካሪ ክፍል መጫን አልተሳካም።"
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "የተሽከርካሪ ክፍል ተፈጥሯል",
+        "description": "{name} በተሳካ ሁኔታ ታክሏል።"
+      },
+      "updateSuccess": {
+        "title": "የተሽከርካሪ ክፍል ተዘምኗል",
+        "description": "{name} በተሳካ ሁኔታ ተስቀምጧል።"
+      },
+      "deleteSuccess": {
+        "title": "የተሽከርካሪ ክፍል ተሰርዟል",
+        "description": "{name} ተወግዷል።"
+      },
+      "deleteFailed": {
+        "title": "ማጥፋት አልተሳካም",
+        "description": "የተሽከርካሪ ክፍል ማጥፋት አልተቻለም።"
+      },
+      "loadFailed": {
+        "title": "መጫን አልተሳካም",
+        "description": "የተሽከርካሪ ክፍል መጫን አልተቻለም።"
+      }
+    }
+  },
   "adminVehicles": {
     "eyebrow": "የተሽከርካሪ አስተዳደር",
     "title": "ተሽከርካሪዎች",
@@ -1010,6 +1024,8 @@
     "filters": {
       "type": "የተሽከርካሪ አይነት",
       "typeAll": "ሁሉም አይነቶች",
+      "class": "የተሽከርካሪ ክፍል",
+      "classAll": "ሁሉም ክፍሎች",
       "status": "ሁኔታ",
       "statusAll": "ሁሉም ሁኔታዎች",
       "assignment": "መመደብ",
@@ -1021,6 +1037,7 @@
       "plate": "የሰሌዳ ቁጥር",
       "chassis": "የቻሲስ ቁጥር",
       "type": "አይነት",
+      "class": "ክፍል",
       "driver": "የተመደበ ሹፌር",
       "makeModel": "ማምረት / ሞዴል",
       "year": "ዓመት",
@@ -1098,7 +1115,7 @@
         "plateDescription": "የኢትዮጵያ የሰሌዳ ቅርጸት፡ ክልል፣ የምድብ ኮድ እና ተከታታይ ቁጥር።",
         "platePreviewEmpty": "AA-1-31209",
         "classification": "ምድብ",
-        "classificationDescription": "የተሽከርካሪ አይነት እና የክወና ሁኔታ።",
+        "classificationDescription": "የተሽከርካሪ አይነት፣ የአገልግሎት ክፍል እና የክወና ሁኔታ።",
         "assignment": "የሹፌር መመደብ",
         "assignmentDescription": "አማራጭ ሆኖ ንቁ ሹፌር ከዚህ ተሽከርካሪ ጋር ያገናኙ።",
         "details": "የተሽከርካሪ ዝርዝሮች",
@@ -1106,6 +1123,8 @@
       },
       "vehicleType": "የተሽከርካሪ አይነት",
       "vehicleTypePlaceholder": "አይነት ይምረጡ",
+      "vehicleClass": "የተሽከርካሪ ክፍል",
+      "vehicleClassPlaceholder": "ክፍል ይምረጡ",
       "assignedDriver": "የተመደበ ሹፌር",
       "assignedDriverPlaceholder": "ሹፌር ይምረጡ",
       "noDriver": "ሹፌር አልተመደበም",
@@ -1135,6 +1154,7 @@
         "plateLicenseRequired": "የፍቃድ ቁጥር ያስፈልጋል።",
         "plateInvalid": "በ AA-1-31209 ቅርጸት ትክክለኛ ሰሌዳ ያስገቡ።",
         "typeRequired": "የተሽከርካሪ አይነት ያስፈልጋል።",
+        "classRequired": "የተሽከርካሪ ክፍል ያስፈልጋል።",
         "chassisNumberRequired": "የቻሲስ ቁጥር ያስፈልጋል።",
         "createFailed": "ተሽከርካሪ መፍጠር አልተሳካም።",
         "updateFailed": "ተሽከርካሪ ማዘመን አልተሳካም።",
@@ -1399,12 +1419,13 @@
   "adminFarePlans": {
     "eyebrow": "ክፍያ",
     "title": "የክፍያ ዕቅዶች",
-    "description": "በተሽከርካሪ አይነት፣ ክልል እና የክፍያ ሞዴል የክፍያ ደንቦችን ያዋቅሩ።",
+    "description": "በተሽከርካሪ አይነት፣ ክፍል፣ ክልል እና የክፍያ ሞዴል የክፍያ ደንቦችን ያዋቅሩ።",
     "searchPlaceholder": "በስም ፈልግ...",
     "newFarePlan": "አዲስ የክፍያ ዕቅድ",
     "itemLabel": "የክፍያ ዕቅድ",
     "allRegions": "ሁሉም ክልሎች",
     "allVehicleTypes": "ሁሉም የተሽከርካሪ አይነቶች",
+    "allVehicleClasses": "ሁሉም የተሽከርካሪ ክፍሎች",
     "columns": {
       "name": "ስም",
       "pricingModel": "የክፍያ ሞዴል",
@@ -1481,7 +1502,7 @@
         "identity": "የዕቅድ ማንነት",
         "identityDescription": "ይህ የክፍያ ዕቅድ በአስተዳደር ዝርዝሮች እና ሪፖርቶች ውስጥ እንዴት እንደሚታይ።",
         "scope": "ወሰን",
-        "scopeDescription": "ዕቅዱን ለተሽከርካሪ አይነት እና/ወይም ክልል ይገድቡ፣ ወይም ለሁሉም ባዶ ይተዉት።",
+        "scopeDescription": "ዕቅዱን ለተሽከርካሪ አይነት፣ ክፍል እና/ወይም ክልል ይገድቡ፣ ወይም ለሁሉም ባዶ ይተዉት።",
         "pricing": "ክፍያ",
         "pricingDescription": "ለክፍያ ስሌት የሚያገለግሉትን የክፍያ ሞዴል እና የክፍያ አካላትን ያዘጋጁ።",
         "rules": "ደንቦች",
@@ -1489,6 +1510,8 @@
       },
       "vehicleType": "የተሽከርካሪ አይነት",
       "vehicleTypePlaceholder": "የተሽከርካሪ አይነት ይምረጡ",
+      "vehicleClass": "የተሽከርካሪ ክፍል",
+      "vehicleClassPlaceholder": "የተሽከርካሪ ክፍል ይምረጡ",
       "region": "ክልል",
       "regionPlaceholder": "ክልል ይምረጡ",
       "pricingModel": "የክፍያ ሞዴል",
