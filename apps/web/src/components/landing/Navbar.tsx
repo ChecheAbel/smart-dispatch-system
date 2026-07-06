@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import BrandLogo from "@/components/landing/BrandLogo";
+import { USER_SIGN_IN_PATH } from "@/lib/auth-paths";
 
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
@@ -107,12 +109,12 @@ export default function Navbar() {
 
           {/* Desktop actions */}
           <div className="hidden lg:flex items-center gap-2 shrink-0">
-            <a
-              href="/register"
+            <Link
+              href={USER_SIGN_IN_PATH}
               className="inline-flex items-center gap-2 bg-[#C9B87A] hover:bg-[#d9ca8e] text-[#1C3A34] font-bold text-[13px] px-5 py-2.5 rounded-full tracking-wide transition-all duration-200 hover:shadow-lg hover:shadow-[#C9B87A]/25 hover:-translate-y-px"
             >
               Book now
-            </a>
+            </Link>
           </div>
 
           {/* Mobile toggle */}
@@ -169,13 +171,13 @@ export default function Navbar() {
           </nav>
 
           <div className="px-4 pb-6 pt-2 border-t border-white/10 space-y-2">
-            <a
-              href="/register"
+            <Link
+              href={USER_SIGN_IN_PATH}
               onClick={closeMobileMenu}
               className="flex items-center justify-center w-full bg-[#C9B87A] text-[#1C3A34] font-bold text-sm py-3.5 rounded-xl hover:bg-[#d9ca8e] transition-colors"
             >
               Book now
-            </a>
+            </Link>
           </div>
         </div>
       </div>

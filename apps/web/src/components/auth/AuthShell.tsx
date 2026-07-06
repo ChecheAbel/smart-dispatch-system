@@ -9,6 +9,7 @@ type AuthShellProps = {
   desktopTitle: ReactNode;
   desktopDescription: string;
   desktopAside?: ReactNode;
+  leadingAction?: ReactNode;
   contentClassName?: string;
   contentAlign?: "center" | "start";
 };
@@ -20,6 +21,7 @@ export default function AuthShell({
   desktopTitle,
   desktopDescription,
   desktopAside,
+  leadingAction,
   contentClassName = "max-w-md",
   contentAlign = "center",
 }: AuthShellProps) {
@@ -59,9 +61,14 @@ export default function AuthShell({
           </div>
         </div>
 
+        {leadingAction ? (
+          <div className="px-5 sm:px-8 lg:px-12 pt-6 sm:pt-8 lg:pt-10">{leadingAction}</div>
+        ) : null}
+
         <div
           className={cn(
-            "flex-1 flex px-5 sm:px-8 lg:px-12 py-8 sm:py-10 lg:py-12",
+            "flex-1 flex px-5 sm:px-8 lg:px-12 pb-8 sm:pb-10 lg:pb-12",
+            leadingAction ? "pt-4 sm:pt-5 lg:pt-6" : "py-8 sm:py-10 lg:py-12",
             contentAlign === "start" ? "items-start" : "items-center justify-center",
           )}
         >

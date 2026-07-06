@@ -4,3 +4,6 @@ export const ADMIN_PROFILE_PATH = "/admin/profile";
 export const ADMIN_FORGOT_PASSWORD_PATH = "/U@RQ$f/forgot-password";
 export const ADMIN_RESET_PASSWORD_PATH = "/U@RQ$f/reset-password";
 export const DRIVER_APPLY_PATH = "/drivers/apply";
+export const USER_SIGN_IN_PATH = "/sign-in";
+export const USER_REGISTER_PATH = "/register";
+export const USER_HOME_PATH = "/";

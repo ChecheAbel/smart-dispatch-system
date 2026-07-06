@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import AdminSignInForm from "@/components/auth/AdminSignInForm";
+import { AdminSignInPage } from "./_components/admin-sign-in-page";
 
 export const metadata: Metadata = {
   title: "Administrator Sign In | Smart Dispatch",
   description: "Secure administrator sign in for the Smart Dispatch platform.",
 };
 
-export default function AdminSignInPage() {
-  return <AdminSignInForm />;
+export default function Page() {
+  return <AdminSignInPage />;
 }

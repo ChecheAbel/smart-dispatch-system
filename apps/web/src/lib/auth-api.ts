@@ -21,6 +21,19 @@ export class AuthRequestError extends Error {
   }
 }
 
+function getAccountBlockReason(error: unknown) {
+  if (error instanceof AuthRequestError) {
+    return error.accountBlockReason?.trim() || null;
+  }
+
+  if (error instanceof Error && "accountBlockReason" in error) {
+    const reason = (error as Error & { accountBlockReason?: string | null }).accountBlockReason;
+    return reason?.trim() || null;
+  }
+
+  return null;
+}
+
 export async function login(email: string, password: string) {
   try {
     const { data } = await apiClient.post("/api/auth/login", { email, password });
@@ -31,6 +44,14 @@ export async function login(email: string, password: string) {
       if (body?.success === false && typeof body.error === "string") {
         throw new AuthRequestError(body.error, body.account_block_reason);
       }
+    }
+
+    const message =
+      error instanceof Error ? error.message : "Sign in failed. Please try again.";
+    const accountBlockReason = getAccountBlockReason(error);
+
+    if (accountBlockReason) {
+      throw new AuthRequestError(message, accountBlockReason);
     }
 
     throw error instanceof Error ? error : new Error("Sign in failed. Please try again.");
@@ -78,6 +99,53 @@ export async function resumeAdminSession(): Promise<AuthMeResponse | null> {
     try {
       const tokenResponse = await refreshSession(refreshToken);
       if (!tokenResponse.user.roles.includes("admin")) {
+        clearAuthSession();
+        return null;
+      }
+
+      updateAuthSession(tokenResponse);
+      return {
+        user: tokenResponse.user,
+        permissions: tokenResponse.permissions ?? [],
+      };
+    } catch {
+      clearAuthSession();
+      return null;
+    }
+  }
+
+  clearAuthSession();
+  return null;
+}
+
+/** Validates stored credentials and returns the session for customer accounts. */
+export async function resumeUserSession(): Promise<AuthMeResponse | null> {
+  const accessToken = getAccessToken();
+  const refreshToken = getRefreshToken();
+
+  if (!accessToken && !refreshToken) {
+    return null;
+  }
+
+  if (accessToken) {
+    try {
+      const session = await getCurrentSession();
+      if (!session.user.roles.includes("user")) {
+        clearAuthSession();
+        return null;
+      }
+
+      updateStoredSession(session);
+      return session;
+    } catch {
+      // Access token expired or invalid — try refresh below.
+    }
+  }
+
+  if (refreshToken) {
+    try {
+      const tokenResponse = await refreshSession(refreshToken);
+      if (!tokenResponse.user.roles.includes("user")) {
         clearAuthSession();
         return null;
       }

@@ -1,4 +1,5 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
+import type { ApiErrorResponse } from "@smart-dispatch/types";
 import { ADMIN_SIGN_IN_PATH } from "./auth-paths";
 import { performTokenRefresh } from "./auth-token-refresh";
 import { clearAuthSession, getAccessToken } from "./auth-session";
@@ -41,10 +42,20 @@ function redirectToSignInIfNeeded() {
 
 function rejectWithApiError(error: unknown) {
   if (axios.isAxiosError(error)) {
+    const body = error.response?.data as Partial<ApiErrorResponse> | undefined;
     const message =
-      typeof error.response?.data?.error === "string"
-        ? error.response.data.error
+      typeof body?.error === "string"
+        ? body.error
         : "Something went wrong. Please try again.";
+
+    if (body?.account_block_reason) {
+      const rejectionError = new Error(message) as Error & {
+        accountBlockReason: string;
+      };
+      rejectionError.accountBlockReason = body.account_block_reason;
+      return Promise.reject(rejectionError);
+    }
+
     return Promise.reject(new Error(message));
   }
 
