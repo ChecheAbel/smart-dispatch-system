@@ -63,11 +63,6 @@ function vehicleStatusBadgeClass(status: VehicleStatus) {
   }
 }
 
-function formatMakeModel(vehicle: Vehicle) {
-  const parts = [vehicle.make, vehicle.model].filter(Boolean);
-  return parts.length > 0 ? parts.join(" / ") : "—";
-}
-
 function VehicleRowActions({
   vehicle,
   labels,
@@ -220,32 +215,6 @@ export function VehiclesPage() {
         cell: (vehicle) => vehicle.vehicle_class?.name ?? "—",
       },
       {
-        id: "driver",
-        header: copy.columns.driver,
-        cell: (vehicle) => (
-          <div className="min-w-0">
-            <p className="truncate text-slate-700">
-              {vehicle.assigned_driver?.name ?? copy.filters.unassigned}
-            </p>
-            {vehicle.assigned_driver?.email ? (
-              <p className="truncate text-xs text-slate-500">{vehicle.assigned_driver.email}</p>
-            ) : null}
-          </div>
-        ),
-      },
-      {
-        id: "makeModel",
-        header: copy.columns.makeModel,
-        cellClassName: "text-slate-500",
-        cell: (vehicle) => formatMakeModel(vehicle),
-      },
-      {
-        id: "year",
-        header: copy.columns.year,
-        cellClassName: "text-slate-500 tabular-nums",
-        cell: (vehicle) => vehicle.year ?? "—",
-      },
-      {
         id: "status",
         header: copy.columns.status,
         cell: (vehicle) => (
@@ -324,7 +293,7 @@ export function VehiclesPage() {
             </Button>
           ) : undefined
         }
-        minTableWidth="1160px"
+        minTableWidth="800px"
         emptyIcon={Truck}
         emptyTitle={copy.empty.title}
         emptyDescription={copy.empty.description}

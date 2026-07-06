@@ -2,6 +2,14 @@ import bcrypt from "bcrypt";
 import { prisma } from "../db/prisma";
 import { roleTranslationInputsToMap } from "../types/role-translations";
 import type { Prisma } from "../generated/prisma";
+import { seedAccessControl } from "./seed-access";
+import { seedNotifications } from "./seed-notifications";
+import { seedRegions } from "./seed-regions";
+import { seedLocations } from "./seed-locations";
+import { seedVehicleTypes } from "./seed-vehicle-types";
+import { seedVehicleClasses } from "./seed-vehicle-classes";
+import { seedVehicles } from "./seed-vehicles";
+import { seedFarePlans } from "./seed-fare-plans";
 
 const DEFAULT_ROLES = [
   {
@@ -26,6 +34,143 @@ const DEFAULT_ROLES = [
     ],
   },
 ] as const;
+
+export const SEED_TARGETS = [
+  "roles",
+  "access",
+  "notifications",
+  "regions",
+  "locations",
+  "vehicle-types",
+  "vehicle-classes",
+  "vehicles",
+  "fare-plans",
+  "admin",
+] as const;
+
+export type SeedTarget = (typeof SEED_TARGETS)[number];
+
+type SeedRunner = {
+  label: string;
+  run: () => Promise<void>;
+  deps: SeedTarget[];
+};
+
+const SEED_REGISTRY: Record<SeedTarget, SeedRunner> = {
+  roles: {
+    label: "roles",
+    run: seedRoles,
+    deps: [],
+  },
+  access: {
+    label: "access control (permissions, menus, endpoints)",
+    run: seedAccessControl,
+    deps: ["roles"],
+  },
+  notifications: {
+    label: "notifications",
+    run: seedNotifications,
+    deps: [],
+  },
+  regions: {
+    label: "regions",
+    run: seedRegions,
+    deps: [],
+  },
+  locations: {
+    label: "locations",
+    run: seedLocations,
+    deps: ["regions"],
+  },
+  "vehicle-types": {
+    label: "vehicle types",
+    run: seedVehicleTypes,
+    deps: [],
+  },
+  "vehicle-classes": {
+    label: "vehicle classes",
+    run: seedVehicleClasses,
+    deps: [],
+  },
+  vehicles: {
+    label: "vehicles",
+    run: seedVehicles,
+    deps: ["vehicle-types", "vehicle-classes"],
+  },
+  "fare-plans": {
+    label: "fare plans",
+    run: seedFarePlans,
+    deps: ["vehicle-types", "vehicle-classes", "regions"],
+  },
+  admin: {
+    label: "admin user",
+    run: seedAdminUser,
+    deps: ["roles", "access"],
+  },
+};
+
+const FULL_SEED_ORDER: SeedTarget[] = [
+  "roles",
+  "access",
+  "notifications",
+  "regions",
+  "locations",
+  "vehicle-types",
+  "vehicle-classes",
+  "vehicles",
+  "fare-plans",
+  "admin",
+];
+
+export function listSeedTargets(): SeedTarget[] {
+  return [...SEED_TARGETS];
+}
+
+export function printSeedHelp() {
+  console.log("Usage: pnpm db:seed [target...]");
+  console.log("");
+  console.log("Run all seeders when no targets are provided.");
+  console.log("Pass one or more targets to seed only those tables (dependencies run first).");
+  console.log("");
+  console.log("Available targets:");
+  for (const target of SEED_TARGETS) {
+    const entry = SEED_REGISTRY[target];
+    const deps =
+      entry.deps.length > 0 ? ` (depends on: ${entry.deps.join(", ")})` : "";
+    console.log(`  ${target.padEnd(16)} ${entry.label}${deps}`);
+  }
+}
+
+function normalizeSeedTarget(value: string): SeedTarget | null {
+  const normalized = value.trim().toLowerCase().replaceAll("_", "-");
+  return SEED_TARGETS.includes(normalized as SeedTarget)
+    ? (normalized as SeedTarget)
+    : null;
+}
+
+function resolveSeedOrder(targets: SeedTarget[]): SeedTarget[] {
+  const order: SeedTarget[] = [];
+  const visited = new Set<SeedTarget>();
+
+  function visit(target: SeedTarget) {
+    if (visited.has(target)) {
+      return;
+    }
+
+    for (const dep of SEED_REGISTRY[target].deps) {
+      visit(dep);
+    }
+
+    visited.add(target);
+    order.push(target);
+  }
+
+  for (const target of targets) {
+    visit(target);
+  }
+
+  return order;
+}
 
 async function seedRoles() {
   for (const role of DEFAULT_ROLES) {
@@ -95,24 +240,31 @@ async function seedAdminUser() {
   console.log(`[Seed] Administrator account created for ${email}`);
 }
 
-import { seedAccessControl } from "./seed-access";
-import { seedNotifications } from "./seed-notifications";
-import { seedRegions } from "./seed-regions";
-import { seedLocations } from "./seed-locations";
-import { seedVehicleTypes } from "./seed-vehicle-types";
-import { seedVehicleClasses } from "./seed-vehicle-classes";
-import { seedVehicles } from "./seed-vehicles";
-import { seedFarePlans } from "./seed-fare-plans";
+export async function seedDatabase(options?: { targets?: string[] }) {
+  const requestedTargets = options?.targets?.length
+    ? options.targets
+        .map(normalizeSeedTarget)
+        .filter((target): target is SeedTarget => target !== null)
+    : null;
 
-export async function seedDatabase() {
-  await seedRoles();
-  await seedAccessControl();
-  await seedNotifications();
-  await seedRegions();
-  await seedLocations();
-  await seedVehicleTypes();
-  await seedVehicleClasses();
-  await seedVehicles();
-  await seedFarePlans();
-  await seedAdminUser();
+  if (options?.targets?.length && requestedTargets?.length !== options.targets.length) {
+    const invalid = options.targets.filter(
+      (target) => normalizeSeedTarget(target) === null,
+    );
+    throw new Error(
+      `Unknown seed target(s): ${invalid.join(", ")}. Run with --help to list available targets.`,
+    );
+  }
+
+  const order = requestedTargets ? resolveSeedOrder(requestedTargets) : FULL_SEED_ORDER;
+
+  if (requestedTargets) {
+    console.log(`[Seed] Running: ${order.join(" -> ")}`);
+  }
+
+  for (const target of order) {
+    const entry = SEED_REGISTRY[target];
+    console.log(`[Seed] ${entry.label}...`);
+    await entry.run();
+  }
 }
