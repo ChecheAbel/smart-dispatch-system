@@ -53,7 +53,7 @@ export default function Footer() {
             <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-white mb-5">Company</h4>
             <ul className="space-y-3 text-[13px]">
               {[
-                { label: "Request a Demo", href: "#contact" },
+                { label: "Book now", href: "/register" },
                 { label: "Platform Overview", href: "#platform" },
                 { label: "About EIH", href: "https://eih.et/about-us/", external: true },
                 { label: "Contact EIH", href: "https://eih.et/contact-us/", external: true },

@@ -523,6 +523,120 @@
       }
     }
   },
+  "adminUserRegistrations": {
+    "eyebrow": "ምዝገባ",
+    "title": "የደንበኛ ምዝገባዎች",
+    "description": "በራስ-ሰር የተመዘገቡ ተጠቃሚዎችን ይገምግሙ፣ የጠየቁ ዝርዝሮችን ያረጋግጡ እና መዳረሻን ያጽድቁ ወይም ይከልክሉ።",
+    "searchPlaceholder": "በስም፣ ኢሜይል፣ ሞባይል ወይም ድርጅት ይፈልጉ...",
+    "itemLabel": "ማመልከቻ",
+    "tabs": {
+      "pending": "በመጠባበቅ ላይ",
+      "approved": "የጸደቀ",
+      "rejected": "የተከለከለ"
+    },
+    "filters": {
+      "status": "ሁኔታ",
+      "statusOptions": {
+        "all": "ሁሉም ማመልከቻዎች",
+        "pending": "በመጠባበቅ ላይ",
+        "approved": "የጸደቀ",
+        "rejected": "የተከለከለ"
+      }
+    },
+    "columns": {
+      "name": "አመልካች",
+      "email": "ኢሜይል",
+      "mobile": "ሞባይል",
+      "accountType": "የመለያ አይነት",
+      "submitted": "የቀረበበት",
+      "actions": "እርምጃዎች"
+    },
+    "requesterSegment": {
+      "individual": "ግለሰብ",
+      "business": "ንግድ",
+      "government": "መንግስት"
+    },
+    "empty": {
+      "title": "ምንም ማመልከቻ አልተገኘም",
+      "description": "አዲስ የደንበኛ ምዝገባዎች ለግምገማ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የደንበኛ ምዝገባዎችን የማየት ፈቃድ ያስፈልጋል። አስተዳዳሪዎ ሚናዎ ላይ user_registrations.read ፈቃድ እንዲሰጥዎት ይጠይቁ።",
+      "sessionHint": "ፈቃዶች ቅር ብለው ከተቀየሩ፣ ክፍያዎን ለማደስ ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
+    "actions": {
+      "review": "ግምገማ",
+      "menuLabel": "ለ {name} እርምጃዎች"
+    },
+    "stats": {
+      "title": "ጠቅላላ ማመልከቻዎች",
+      "description": "ሁሉም በራስ-ሰር የተመዘገቡ የደንበኛ ምዝገባዎች",
+      "pendingTitle": "በመጠባበቅ ላይ",
+      "pendingDescription": "የአስተዳዳሪ ፍቃድ በመጠባበቅ ላይ ያሉ ማመልከቻዎች",
+      "approvedTitle": "የጸደቀ",
+      "approvedDescription": "ለመግባት እና ተሽከርካሪ ለመጠየቅ የተፈቀደላቸው ደንበኞች",
+      "rejectedTitle": "የተከለከለ",
+      "rejectedDescription": "በአስተዳዳሪ የተከለከሉ ማመልከቻዎች"
+    },
+    "review": {
+      "title": "ማመልከቻ ግምገማ",
+      "description": "የመድረክ መዳረሻ ከመፍቀድዎ በፊት የቀረቡትን ዝርዝሮች ያረጋግጡ።",
+      "submittedAt": "በ {date} ቀርቧል",
+      "profileSection": "የአመልካች ዝርዝሮች",
+      "profileSectionDescription": "በምዝገባ ጊዜ የቀረቡ የግል መረጃዎች እና የመግቢያ መለያ።",
+      "approve": "ማመልከቻ ይጽድቁ",
+      "approving": "በመጽደቅ ላይ...",
+      "reject": "ማመልከቻ ይከልክሉ",
+      "rejecting": "በመከልከል ላይ...",
+      "close": "ዝጋ",
+      "rejectionReasonTitle": "የከልክል ምክንያት",
+      "rejectionReasonHint": "አመልካቹ መግባት ሲሞክሩ ይህ መልዕክት ሊታይ ይችላል።",
+      "fields": {
+        "firstName": "የመጀመሪያ ስም",
+        "middleName": "የአባት ስም",
+        "lastName": "የአያት ስም",
+        "email": "ኢሜይል",
+        "mobile": "ሞባይል ቁጥር"
+      }
+    },
+    "rejectModal": {
+      "title": "ማመልከቻ ይከለከል?",
+      "description": "የ {name} ማመልከቻ ለምን እንደተከለከለ ግልጽ ምክንያት ያስገቡ። አመልካቹ መግባት ሲሞክሩ ይህ መልዕክት ሊታይ ይችላል።",
+      "reasonLabel": "የከልክል ምክንያት",
+      "reasonPlaceholder": "ይህ ማመልከቻ ለምን እንደማይጸድቅ ያብራሩ...",
+      "reasonRequired": "የከልክል ምክንያት ያስፈልጋል።",
+      "reasonTooLong": "ምክንያቱ ከ 500 ቁምፊዎች በታች መሆን አለበት።",
+      "confirm": "ማመልከቻ ይከልክሉ",
+      "cancel": "ይቅር"
+    },
+    "toast": {
+      "approveSuccess": {
+        "title": "ማመልከቻ ጸድቋል",
+        "description": "{name} መለያቸው ንቁ ከሆነ መግባት ይችላሉ።"
+      },
+      "approveFailed": {
+        "title": "ማመልከቻ ማጽደቅ አልተቻለም",
+        "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
+      },
+      "rejectSuccess": {
+        "title": "ማመልከቻ ተከልክሏል",
+        "description": "የ {name} መለያ ተቦዝሯል።"
+      },
+      "rejectFailed": {
+        "title": "ማመልከቻ መከልከል አልተቻለም",
+        "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
+      },
+      "loadFailed": {
+        "title": "ማመልከቻ መጫን አልተቻለም",
+        "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+      }
+    }
+  },
   "adminMenus": {
     "eyebrow": "አሰሳ",
     "title": "ሜኑዎች",

@@ -33,6 +33,13 @@ const DEFAULT_ROLES = [
       { locale: "am", name: "አሽከርካሪ", description: "የአሽከርካሪ ሞባይል መዳረሻ" },
     ],
   },
+  {
+    slug: "user",
+    translations: [
+      { locale: "en", name: "User", description: "Customer self-service access" },
+      { locale: "am", name: "ተጠቃሚ", description: "የደንበኛ በራስ-ሰር መዳረሻ" },
+    ],
+  },
 ] as const;
 
 export const SEED_TARGETS = [

@@ -28,6 +28,7 @@ export type ListUsersFilter = {
   accountActivation?: AccountActivation;
   roleSlug?: string;
   requesterSegment?: RequesterSegment;
+  hasRequesterProfile?: boolean;
 };
 
 const userWithRelationsInclude = {
@@ -80,6 +81,10 @@ function buildUserWhere(filter?: ListUsersFilter): Prisma.UserWhereInput {
         segment: filter.requesterSegment,
       },
     };
+  } else if (filter.hasRequesterProfile === true) {
+    where.requesterProfile = { isNot: null };
+  } else if (filter.hasRequesterProfile === false) {
+    where.requesterProfile = { is: null };
   }
 
   if (filter.roleSlug?.trim()) {
@@ -161,7 +166,12 @@ export async function updateUser(userId: string, input: UpdateUserInput) {
   if (input.middleName !== undefined) data.middleName = input.middleName?.trim() || null;
   if (input.lastName !== undefined) data.lastName = input.lastName.trim();
   if (input.mobileNumber !== undefined) data.mobileNumber = input.mobileNumber.trim();
-  if (input.accountStatus !== undefined) data.accountStatus = input.accountStatus;
+  if (input.accountStatus !== undefined) {
+    data.accountStatus = input.accountStatus;
+    if (input.accountStatus === "active") {
+      data.accountBlockReason = null;
+    }
+  }
   if (input.accountActivation !== undefined) data.accountActivation = input.accountActivation;
 
   return prisma.user.update({
@@ -178,10 +188,22 @@ export async function updateUserPassword(userId: string, passwordHash: string) {
   });
 }
 
-export async function updateUserAccountStatus(userId: string, accountStatus: AccountStatus) {
+export async function updateUserAccountStatus(
+  userId: string,
+  accountStatus: AccountStatus,
+  accountBlockReason?: string | null,
+) {
+  const data: Prisma.UserUpdateInput = { accountStatus };
+
+  if (accountStatus === "deactivated") {
+    data.accountBlockReason = accountBlockReason?.trim() || null;
+  } else if (accountStatus === "active") {
+    data.accountBlockReason = null;
+  }
+
   return prisma.user.update({
     where: { id: userId },
-    data: { accountStatus },
+    data,
     include: userWithRelationsInclude,
   });
 }
@@ -192,7 +214,10 @@ export async function updateUserAccountActivation(
 ) {
   return prisma.user.update({
     where: { id: userId },
-    data: { accountActivation },
+    data: {
+      accountActivation,
+      ...(accountActivation === "activated" ? { accountBlockReason: null } : {}),
+    },
     include: userWithRelationsInclude,
   });
 }

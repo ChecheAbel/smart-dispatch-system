@@ -17,10 +17,10 @@ export default function CTA() {
         </p>
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md sm:max-w-none mx-auto">
           <a
-            href="#contact"
+            href="/register"
             className="w-full sm:w-auto bg-[#C9B87A] hover:bg-[#d9ca8e] text-[#1C3A34] font-bold text-[15px] px-9 py-3.5 sm:py-4 rounded-full tracking-wide transition-all duration-200 hover:shadow-2xl hover:shadow-[#C9B87A]/20 hover:-translate-y-0.5 text-center"
           >
-            Request a Demo
+            Book now
           </a>
           <a
             href="#features"

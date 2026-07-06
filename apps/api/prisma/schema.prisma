@@ -125,6 +125,7 @@ model User {
   mobileNumber      String            @unique @map("mobile_number") @db.VarChar(20)
   accountStatus     AccountStatus     @default(active) @map("account_status")
   accountActivation AccountActivation @default(pending) @map("account_activation")
+  accountBlockReason String?          @map("account_block_reason") @db.VarChar(500)
   createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz
   updatedAt         DateTime          @updatedAt @map("updated_at") @db.Timestamptz
   authRoles         AuthRole[]

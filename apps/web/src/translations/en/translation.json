@@ -523,6 +523,120 @@
       }
     }
   },
+  "adminUserRegistrations": {
+    "eyebrow": "Onboarding",
+    "title": "Customer registrations",
+    "description": "Review self-service sign-ups, verify requester details, and approve or reject access.",
+    "searchPlaceholder": "Search by name, email, mobile, or organization...",
+    "itemLabel": "application",
+    "tabs": {
+      "pending": "Pending review",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "filters": {
+      "status": "Status",
+      "statusOptions": {
+        "all": "All applications",
+        "pending": "Pending review",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      }
+    },
+    "columns": {
+      "name": "Applicant",
+      "email": "Email",
+      "mobile": "Mobile",
+      "accountType": "Account type",
+      "submitted": "Submitted",
+      "actions": "Actions"
+    },
+    "requesterSegment": {
+      "individual": "Individual",
+      "business": "Business",
+      "government": "Government"
+    },
+    "empty": {
+      "title": "No applications found",
+      "description": "New customer registrations will appear here for review.",
+      "searchDescription": "Try a different search term."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to customer registrations is required to open this page. Ask an administrator to grant the user_registrations.read permission for your role.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "actions": {
+      "review": "Review",
+      "menuLabel": "Actions for {name}"
+    },
+    "stats": {
+      "title": "Total applications",
+      "description": "All customer self-service registrations",
+      "pendingTitle": "Pending review",
+      "pendingDescription": "Applications waiting for administrator approval",
+      "approvedTitle": "Approved",
+      "approvedDescription": "Customers cleared to sign in and request vehicles",
+      "rejectedTitle": "Rejected",
+      "rejectedDescription": "Applications declined by an administrator"
+    },
+    "review": {
+      "title": "Review application",
+      "description": "Verify the submitted details before approving platform access.",
+      "submittedAt": "Submitted on {date}",
+      "profileSection": "Applicant details",
+      "profileSectionDescription": "Personal information and login identity submitted during registration.",
+      "approve": "Approve application",
+      "approving": "Approving...",
+      "reject": "Reject application",
+      "rejecting": "Rejecting...",
+      "close": "Close",
+      "rejectionReasonTitle": "Rejection reason",
+      "rejectionReasonHint": "This message can be shown to the applicant when they try to sign in.",
+      "fields": {
+        "firstName": "First name",
+        "middleName": "Middle name",
+        "lastName": "Last name",
+        "email": "Email address",
+        "mobile": "Mobile number"
+      }
+    },
+    "rejectModal": {
+      "title": "Reject application?",
+      "description": "Provide a clear reason for rejecting {name}'s application. The applicant may see this message when they try to sign in.",
+      "reasonLabel": "Reason for rejection",
+      "reasonPlaceholder": "Explain why this application cannot be approved...",
+      "reasonRequired": "A rejection reason is required.",
+      "reasonTooLong": "Reason must be 500 characters or fewer.",
+      "confirm": "Reject application",
+      "cancel": "Cancel"
+    },
+    "toast": {
+      "approveSuccess": {
+        "title": "Application approved",
+        "description": "{name} can now sign in once their account is active."
+      },
+      "approveFailed": {
+        "title": "Could not approve application",
+        "description": "Please try again in a moment."
+      },
+      "rejectSuccess": {
+        "title": "Application rejected",
+        "description": "{name}'s account has been deactivated."
+      },
+      "rejectFailed": {
+        "title": "Could not reject application",
+        "description": "Please try again in a moment."
+      },
+      "loadFailed": {
+        "title": "Could not load application",
+        "description": "Please try again or refresh the page."
+      }
+    }
+  },
   "adminMenus": {
     "eyebrow": "Navigation",
     "title": "Menus",

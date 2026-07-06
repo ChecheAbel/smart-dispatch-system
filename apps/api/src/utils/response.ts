@@ -41,7 +41,11 @@ export function sendError(res: Response, error: string, status = 400) {
 
 export function handleRouteError(res: Response, error: unknown) {
   if (error instanceof AuthError) {
-    return sendError(res, error.message, error.status);
+    const body: ApiErrorResponse = { success: false, error: error.message };
+    if (error.accountBlockReason) {
+      body.account_block_reason = error.accountBlockReason;
+    }
+    return res.status(error.status).json(body);
   }
 
   if (error instanceof RequesterProfileValidationError) {

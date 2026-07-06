@@ -12,6 +12,7 @@ type UserWithRelations = {
   mobileNumber: string;
   accountStatus: User["account_status"];
   accountActivation: User["account_activation"];
+  accountBlockReason?: string | null;
   authRoles?: { role: { slug: string } }[];
   driverProfile?: {
     licenseNumber: string;
@@ -34,6 +35,7 @@ export function toPublicUser(user: UserWithRelations): User {
       : null,
     account_status: user.accountStatus,
     account_activation: user.accountActivation,
+    account_block_reason: user.accountBlockReason ?? null,
     roles: (user.authRoles ?? []).map((authRole) => authRole.role.slug as RoleSlug),
   };
 }

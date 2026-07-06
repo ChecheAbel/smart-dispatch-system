@@ -1,4 +1,5 @@
-import type { AuthMeResponse, AuthTokenResponse } from "@smart-dispatch/types";
+import type { ApiErrorResponse, AuthMeResponse, AuthTokenResponse } from "@smart-dispatch/types";
+import axios from "axios";
 import { apiClient } from "./api-client";
 import { unwrapApiResponse } from "./api-response";
 import { performTokenRefresh } from "./auth-token-refresh";
@@ -10,9 +11,30 @@ import {
   updateStoredSession,
 } from "./auth-session";
 
+export class AuthRequestError extends Error {
+  accountBlockReason?: string | null;
+
+  constructor(message: string, accountBlockReason?: string | null) {
+    super(message);
+    this.name = "AuthRequestError";
+    this.accountBlockReason = accountBlockReason ?? null;
+  }
+}
+
 export async function login(email: string, password: string) {
-  const { data } = await apiClient.post("/api/auth/login", { email, password });
-  return unwrapApiResponse<AuthTokenResponse>(data);
+  try {
+    const { data } = await apiClient.post("/api/auth/login", { email, password });
+    return unwrapApiResponse<AuthTokenResponse>(data);
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const body = error.response?.data as Partial<ApiErrorResponse> | undefined;
+      if (body?.success === false && typeof body.error === "string") {
+        throw new AuthRequestError(body.error, body.account_block_reason);
+      }
+    }
+
+    throw error instanceof Error ? error : new Error("Sign in failed. Please try again.");
+  }
 }
 
 export async function getCurrentSession() {

@@ -9,7 +9,6 @@ const NAV_LINKS = [
   { label: "Features", href: "#features" },
   { label: "Console", href: "#live-view" },
   { label: "Platform", href: "#platform" },
-  { label: "Sign Up", href: "/register" },
   { label: "Contact", href: "#contact" },
 ] as const;
 
@@ -109,10 +108,10 @@ export default function Navbar() {
           {/* Desktop actions */}
           <div className="hidden lg:flex items-center gap-2 shrink-0">
             <a
-              href="#contact"
+              href="/register"
               className="inline-flex items-center gap-2 bg-[#C9B87A] hover:bg-[#d9ca8e] text-[#1C3A34] font-bold text-[13px] px-5 py-2.5 rounded-full tracking-wide transition-all duration-200 hover:shadow-lg hover:shadow-[#C9B87A]/25 hover:-translate-y-px"
             >
-              Request Demo
+              Book now
             </a>
           </div>
 
@@ -171,11 +170,11 @@ export default function Navbar() {
 
           <div className="px-4 pb-6 pt-2 border-t border-white/10 space-y-2">
             <a
-              href="#contact"
+              href="/register"
               onClick={closeMobileMenu}
               className="flex items-center justify-center w-full bg-[#C9B87A] text-[#1C3A34] font-bold text-sm py-3.5 rounded-xl hover:bg-[#d9ca8e] transition-colors"
             >
-              Request Demo
+              Book now
             </a>
           </div>
         </div>

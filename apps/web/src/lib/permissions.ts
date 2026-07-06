@@ -6,6 +6,10 @@ export const PERMISSIONS = {
     write: "users.write",
     delete: "users.delete",
   },
+  user_registrations: {
+    read: "user_registrations.read",
+    write: "user_registrations.write",
+  },
   roles: {
     read: "roles.read",
     write: "roles.write",

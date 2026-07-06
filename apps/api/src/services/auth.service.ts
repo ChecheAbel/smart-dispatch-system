@@ -67,6 +67,7 @@ async function toSafeUser(user: DbUser): Promise<User> {
     requester_profile: requesterProfile ? toPublicRequesterProfile(requesterProfile) : null,
     account_status: user.accountStatus,
     account_activation: user.accountActivation,
+    account_block_reason: user.accountBlockReason ?? null,
     roles: roles.map((role) => role.slug as RoleSlug),
   };
 }
@@ -122,13 +123,31 @@ export async function loginWithPassword(email: string, password: string) {
   }
 
   const user = await findUserByEmail(email);
-  if (!user || !isAccountUsable(user)) {
+  if (!user) {
     throw new AuthError("Invalid email or password.", 401);
   }
 
   const passwordMatches = await bcrypt.compare(password, user.passwordHash);
   if (!passwordMatches) {
     throw new AuthError("Invalid email or password.", 401);
+  }
+
+  if (!isAccountUsable(user)) {
+    if (user.accountStatus === "deactivated") {
+      throw new AuthError("Your account has been rejected.", 403, {
+        accountBlockReason: user.accountBlockReason,
+      });
+    }
+
+    if (user.accountActivation === "pending") {
+      throw new AuthError("Your account is pending administrator approval.", 403);
+    }
+
+    if (user.accountStatus === "suspended") {
+      throw new AuthError("Your account has been suspended.", 403);
+    }
+
+    throw new AuthError("Your account is not available.", 403);
   }
 
   return issueTokenPair(user);
@@ -343,6 +362,11 @@ export async function registerUserApplication(input: {
     throw new AuthError("This mobile number is already registered.", 409);
   }
 
+  const userRole = await findRoleBySlug("user");
+  if (!userRole) {
+    throw new AuthError("User registration is temporarily unavailable.", 503);
+  }
+
   const passwordHash = await bcrypt.hash(input.password, 12);
   await prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
@@ -355,6 +379,13 @@ export async function registerUserApplication(input: {
         mobileNumber,
         accountStatus: "active",
         accountActivation: "pending",
+      },
+    });
+
+    await tx.authRole.create({
+      data: {
+        userId: user.id,
+        roleId: userRole.id,
       },
     });
 
@@ -475,10 +506,16 @@ export async function changeMyPassword(
 
 export class AuthError extends Error {
   status: number;
+  accountBlockReason?: string | null;
 
-  constructor(message: string, status: number) {
+  constructor(
+    message: string,
+    status: number,
+    options?: { accountBlockReason?: string | null },
+  ) {
     super(message);
     this.name = "AuthError";
     this.status = status;
+    this.accountBlockReason = options?.accountBlockReason ?? null;
   }
 }

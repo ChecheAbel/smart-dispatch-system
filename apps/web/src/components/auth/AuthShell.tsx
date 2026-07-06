@@ -62,10 +62,18 @@ export default function AuthShell({
         <div
           className={cn(
             "flex-1 flex px-5 sm:px-8 lg:px-12 py-8 sm:py-10 lg:py-12",
-            contentAlign === "start" ? "items-start" : "items-center",
+            contentAlign === "start" ? "items-start" : "items-center justify-center",
           )}
         >
-          <div className={cn("w-full", contentClassName)}>{children}</div>
+          <div
+            className={cn(
+              "w-full",
+              contentClassName,
+              contentAlign === "center" && "mx-auto",
+            )}
+          >
+            {children}
+          </div>
         </div>
       </div>
     </div>

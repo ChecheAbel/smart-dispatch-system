@@ -30,6 +30,7 @@ import {
   isValidEmail,
   parseAccountActivation,
   parseAccountStatus,
+  parseBoolean,
 } from "../utils/validation";
 import { parseRequesterSegment } from "../utils/requester-profile";
 import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
@@ -51,6 +52,7 @@ router.get("/", requirePermission("users.read"), async (req: Request, res: Respo
       accountStatus: parseAccountStatus(req.query.account_status),
       accountActivation: parseAccountActivation(req.query.account_activation),
       requesterSegment: parseRequesterSegment(req.query.requester_segment) ?? undefined,
+      hasRequesterProfile: parseBoolean(req.query.has_requester_profile),
     };
 
     const result = await paginate(
@@ -148,7 +150,21 @@ router.patch("/:id/account-status", requirePermission("users.write"), async (req
       return sendError(res, "A valid account_status is required.", 400);
     }
 
-    const user = await updateUserAccountStatus(req.params.id, accountStatus);
+    const accountBlockReason = getOptionalString(req.body?.account_block_reason);
+    if (accountStatus === "deactivated") {
+      if (!accountBlockReason?.trim()) {
+        return sendError(res, "A reason is required when deactivating an account.", 400);
+      }
+      if (accountBlockReason.trim().length > 500) {
+        return sendError(res, "Reason must be 500 characters or fewer.", 400);
+      }
+    }
+
+    const user = await updateUserAccountStatus(
+      req.params.id,
+      accountStatus,
+      accountBlockReason,
+    );
     return sendSuccess(res, { user: toPublicUser(user) });
   } catch (error) {
     return handleRouteError(res, error);

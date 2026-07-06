@@ -1,4 +1,4 @@
-export type RoleSlug = "admin" | "dispatcher" | "driver";
+export type RoleSlug = "admin" | "dispatcher" | "driver" | "user";
 
 export const ADMIN_ROLE_SLUG: RoleSlug = "admin";
 
@@ -61,6 +61,7 @@ export interface User {
   requester_profile: RequesterProfile | null;
   account_status: AccountStatus;
   account_activation: AccountActivation;
+  account_block_reason: string | null;
   roles: RoleSlug[];
 }
 
@@ -368,6 +369,7 @@ export interface ApiPaginatedResponse<T> {
 export interface ApiErrorResponse {
   success: false;
   error: string;
+  account_block_reason?: string | null;
 }
 
 export type ApiResponse<T> =

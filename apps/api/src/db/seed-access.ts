@@ -10,6 +10,8 @@ const DEFAULT_PERMISSIONS = [
   { slug: "users.read", module: "users", action: "read", description: "View users" },
   { slug: "users.write", module: "users", action: "write", description: "Create and update users" },
   { slug: "users.delete", module: "users", action: "delete", description: "Delete users" },
+  { slug: "user_registrations.read", module: "user_registrations", action: "read", description: "View customer registration applications" },
+  { slug: "user_registrations.write", module: "user_registrations", action: "write", description: "Approve or reject customer registration applications" },
   { slug: "roles.read", module: "roles", action: "read", description: "View roles" },
   { slug: "roles.write", module: "roles", action: "write", description: "Create and update roles" },
   { slug: "roles.delete", module: "roles", action: "delete", description: "Delete roles" },
@@ -91,6 +93,17 @@ const DEFAULT_MENUS = [
     translations: [
       { locale: "en", label: "Users" },
       { locale: "am", label: "ተጠቃሚዎች" },
+    ],
+  },
+  {
+    slug: "user-registrations",
+    path: "/admin/user-registrations",
+    icon: "clipboard-check",
+    sortOrder: 11,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "Registrations" },
+      { locale: "am", label: "ምዝገባዎች" },
     ],
   },
   {

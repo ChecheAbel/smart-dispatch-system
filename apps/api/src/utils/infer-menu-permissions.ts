@@ -1,5 +1,6 @@
 const ADMIN_MODULES = [
   "users",
+  "user_registrations",
   "roles",
   "menus",
   "notifications",
@@ -32,6 +33,10 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
 
   if (normalizedSlug === "audit-logs") {
     return ["audit_logs.read"];
+  }
+
+  if (normalizedSlug === "user-registrations") {
+    return ["user_registrations.read"];
   }
 
   if (normalizedSlug === "fleet") {

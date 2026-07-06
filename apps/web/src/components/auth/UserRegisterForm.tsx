@@ -419,17 +419,19 @@ function RegistrationShell({
   children,
   description,
   aside,
+  contentAlign = "start",
 }: {
   children: ReactNode;
   description: string;
   aside?: ReactNode;
+  contentAlign?: "center" | "start";
 }) {
   return (
     <AuthShell
       mobileTitle="User Registration"
       desktopEyebrow="— User Onboarding —"
       contentClassName="max-w-xl xl:max-w-2xl"
-      contentAlign="start"
+      contentAlign={contentAlign}
       desktopTitle={
         <>
           Join{" "}
@@ -613,17 +615,39 @@ export default function UserRegisterForm() {
       <RegistrationShell
         description="Sign up for Smart Dispatch and access the platform once your account is approved."
         aside={<RegistrationAside success />}
+        contentAlign="center"
       >
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 sm:p-8 text-center">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
-            <CheckCircle2 className="h-7 w-7" />
+        <div className="w-full rounded-3xl border border-slate-200/80 bg-white p-8 text-center shadow-xl shadow-slate-200/50 sm:p-10 lg:p-12">
+          <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-[#1C3A34]/[0.05] ring-8 ring-[#1C3A34]/[0.04]">
+            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#1C3A34] text-white shadow-lg shadow-[#1C3A34]/25">
+              <CheckCircle2 className="h-9 w-9" strokeWidth={2.25} />
+            </div>
           </div>
-          <h2 className="text-2xl font-extrabold text-[#1C3A34] tracking-tight">Registration submitted</h2>
-          <p className="mt-3 text-sm leading-relaxed text-slate-500">{successMessage}</p>
+
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#C9B87A]">
+            Application received
+          </p>
+          <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-[#1C3A34] sm:text-4xl">
+            Registration submitted
+          </h2>
+          <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-slate-500 sm:text-[15px]">
+            {successMessage}
+          </p>
+
+          <div className="mx-auto mt-8 max-w-md rounded-2xl border border-slate-100 bg-slate-50/70 px-5 py-4 text-left lg:hidden">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9B87A]">What happens next</p>
+            <ol className="mt-3 space-y-2.5 text-sm leading-relaxed text-slate-600">
+              <li>An administrator reviews your application.</li>
+              <li>You receive confirmation once your account is approved.</li>
+              <li>Sign in and start requesting vehicles on the platform.</li>
+            </ol>
+          </div>
+
           <Link
             href="/"
-            className="mt-8 inline-flex w-full items-center justify-center rounded-xl bg-[#1C3A34] px-4 py-3.5 text-sm font-bold text-white transition-colors hover:bg-[#162e29]"
+            className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#1C3A34] px-5 py-4 text-[15px] font-bold text-white border-b-[3px] border-[#C9B87A] transition-all hover:bg-[#162e29] hover:shadow-lg hover:shadow-[#1C3A34]/15 sm:mt-10"
           >
+            <ArrowLeft className="h-4 w-4" />
             Back to home
           </Link>
         </div>

@@ -8,6 +8,7 @@ export type FetchUsersParams = {
   search?: string;
   account_status?: AccountStatus;
   account_activation?: AccountActivation;
+  has_requester_profile?: boolean;
 };
 
 export type CreateUserInput = {
@@ -56,9 +57,30 @@ export async function deleteUser(id: string) {
   return unwrapApiResponse<{ message: string }>(data);
 }
 
-export async function fetchUserCount(params: Pick<FetchUsersParams, "account_status"> = {}) {
+export async function fetchUserCount(
+  params: Pick<FetchUsersParams, "account_status" | "account_activation" | "has_requester_profile"> = {},
+) {
   const result = await fetchUsers({ page: 1, limit: 1, ...params });
   return result.pagination.total;
+}
+
+export async function updateUserAccountActivation(id: string, account_activation: AccountActivation) {
+  const { data } = await apiClient.patch(`/api/users/${id}/account-activation`, {
+    account_activation,
+  });
+  return unwrapApiResponse<{ user: User }>(data).user;
+}
+
+export async function updateUserAccountStatus(
+  id: string,
+  account_status: AccountStatus,
+  account_block_reason?: string | null,
+) {
+  const { data } = await apiClient.patch(`/api/users/${id}/account-status`, {
+    account_status,
+    ...(account_block_reason !== undefined ? { account_block_reason } : {}),
+  });
+  return unwrapApiResponse<{ user: User }>(data).user;
 }
 
 export async function fetchUserRoles(userId: string, locale?: string) {
