@@ -58,6 +58,10 @@ export const PERMISSIONS = {
     write: "fare_plans.write",
     delete: "fare_plans.delete",
   },
+  ride_requests: {
+    read: "ride_requests.read",
+    write: "ride_requests.write",
+  },
 } as const;
 
 export const ADMIN_PERMISSION_MODULES = Object.keys(PERMISSIONS) as Array<keyof typeof PERMISSIONS>;

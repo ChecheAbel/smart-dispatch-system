@@ -251,6 +251,8 @@
     "detailYes": "Yes",
     "detailNo": "No",
     "detailAsap": "As soon as possible",
+    "detailRejectionReason": "Rejection reason",
+    "detailRejectionReasonHint": "Provided by dispatch when this request was rejected.",
     "detailMapLoading": "Loading map...",
     "detailMapEmpty": "No map coordinates available for this request.",
     "detailMapRecenter": "Fit route",
@@ -773,6 +775,84 @@
         "title": "Could not delete user",
         "description": "Please try again in a moment."
       }
+    }
+  },
+  "adminRideRequests": {
+    "eyebrow": "Dispatch",
+    "title": "Ride requests",
+    "description": "Review customer ride requests, approve bookings, and manage the request queue.",
+    "searchPlaceholder": "Search by requester, address, or notes...",
+    "itemLabel": "request",
+    "filters": {
+      "status": "Status",
+      "statusAll": "All statuses"
+    },
+    "columns": {
+      "requester": "Requester",
+      "route": "Route",
+      "scheduled": "Scheduled",
+      "passengers": "Passengers",
+      "status": "Status",
+      "submitted": "Submitted",
+      "actions": "Actions"
+    },
+    "empty": {
+      "title": "No ride requests found",
+      "description": "Customer ride requests will appear here after submission.",
+      "searchDescription": "Try a different search term or clear the status filter."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to ride requests is required to open this page. Ask an administrator to grant the ride_requests.read permission for your role.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "actions": {
+      "review": "Review",
+      "menuLabel": "Actions for request"
+    },
+    "stats": {
+      "title": "Total requests",
+      "description": "All customer ride requests",
+      "pendingTitle": "Pending approval",
+      "pendingDescription": "Requests waiting for dispatcher review",
+      "confirmedTitle": "Confirmed",
+      "confirmedDescription": "Approved requests ready for dispatch",
+      "cancelledTitle": "Cancelled",
+      "cancelledDescription": "Rejected or cancelled requests"
+    },
+    "review": {
+      "title": "Review ride request",
+      "description": "Verify trip details and requester information before approving.",
+      "requesterSection": "Requester",
+      "requesterSectionDescription": "Customer who submitted this ride request.",
+      "email": "Email",
+      "mobile": "Mobile",
+      "approve": "Approve request",
+      "approving": "Approving...",
+      "reject": "Reject request",
+      "rejecting": "Rejecting...",
+      "rejectedDescription": "This request was rejected. Review the details and rejection reason below.",
+      "loadEmpty": "Ride request details could not be loaded."
+    },
+    "rejectModal": {
+      "title": "Reject ride request?",
+      "description": "The requester will see this reason on their request details.",
+      "reasonLabel": "Reason for rejection",
+      "reasonPlaceholder": "Explain why this ride request cannot be approved...",
+      "reasonRequired": "A rejection reason is required.",
+      "reasonTooLong": "Rejection reason must be 500 characters or fewer.",
+      "cancel": "Cancel",
+      "confirm": "Reject request"
+    },
+    "toast": {
+      "loadFailed": "Failed to load ride request.",
+      "approved": "Ride request approved.",
+      "rejected": "Ride request rejected.",
+      "approveFailed": "Failed to approve ride request.",
+      "rejectFailed": "Failed to reject ride request."
     }
   },
   "adminUserRegistrations": {

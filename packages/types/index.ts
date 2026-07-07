@@ -409,11 +409,27 @@ export interface RideRequest {
   passenger_count: number;
   notes: string | null;
   status: RideRequestStatus;
+  rejection_reason: string | null;
   created_at: string;
   updated_at: string;
   can_edit: boolean;
   can_cancel: boolean;
   cancel_deadline_at: string | null;
+}
+
+export interface RideRequestRequesterSummary {
+  id: string;
+  first_name: string;
+  middle_name: string | null;
+  last_name: string;
+  email: string;
+  mobile_number: string;
+}
+
+export interface AdminRideRequest extends RideRequest {
+  requester?: RideRequestRequesterSummary;
+  can_admin_confirm: boolean;
+  can_admin_reject: boolean;
 }
 
 export interface ApiSuccessResponse<T> {

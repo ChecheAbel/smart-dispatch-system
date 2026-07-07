@@ -40,6 +40,8 @@ const DEFAULT_PERMISSIONS = [
   { slug: "fare_plans.read", module: "fare_plans", action: "read", description: "View fare plans" },
   { slug: "fare_plans.write", module: "fare_plans", action: "write", description: "Create and update fare plans" },
   { slug: "fare_plans.delete", module: "fare_plans", action: "delete", description: "Delete fare plans" },
+  { slug: "ride_requests.read", module: "ride_requests", action: "read", description: "View customer ride requests" },
+  { slug: "ride_requests.write", module: "ride_requests", action: "write", description: "Approve or reject ride requests" },
   { slug: "customer_dashboard.read", module: "customer_dashboard", action: "read", description: "View customer dashboard" },
   { slug: "customer_profile.read", module: "customer_profile", action: "read", description: "View customer profile" },
   { slug: "customer_requests.read", module: "customer_requests", action: "read", description: "View and book ride requests" },
@@ -265,6 +267,28 @@ const DEFAULT_MENUS = [
     ],
   },
   {
+    slug: "dispatch",
+    path: null,
+    icon: "route",
+    sortOrder: 35,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "Dispatch" },
+      { locale: "am", label: "መላኪያ" },
+    ],
+  },
+  {
+    slug: "ride-requests",
+    path: "/admin/ride-requests",
+    icon: "clipboard-list",
+    sortOrder: 10,
+    parentSlug: "dispatch",
+    translations: [
+      { locale: "en", label: "Ride Requests" },
+      { locale: "am", label: "የጉዞ ጥያቄዎች" },
+    ],
+  },
+  {
     slug: "billing",
     path: null,
     icon: "receipt",
@@ -385,6 +409,9 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "ride_requests.create", method: "POST", path: "/api/ride-requests", description: "Create ride request", permissionSlug: "customer_requests.write" },
   { slug: "ride_requests.update", method: "PATCH", path: "/api/ride-requests/:id", description: "Update ride request", permissionSlug: "customer_requests.write" },
   { slug: "ride_requests.cancel", method: "POST", path: "/api/ride-requests/:id/cancel", description: "Cancel ride request", permissionSlug: "customer_requests.write" },
+  { slug: "admin_ride_requests.list", method: "GET", path: "/api/admin/ride-requests", description: "List all ride requests", permissionSlug: "ride_requests.read" },
+  { slug: "admin_ride_requests.get", method: "GET", path: "/api/admin/ride-requests/:id", description: "Get ride request for admin review", permissionSlug: "ride_requests.read" },
+  { slug: "admin_ride_requests.status", method: "POST", path: "/api/admin/ride-requests/:id/status", description: "Approve or reject ride request", permissionSlug: "ride_requests.write" },
 ];
 
 async function seedPermissions() {

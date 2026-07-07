@@ -251,6 +251,8 @@
     "detailYes": "አዎ",
     "detailNo": "አይ",
     "detailAsap": "በተቻለ ፍጥነት",
+    "detailRejectionReason": "የመከልከል ምክንያት",
+    "detailRejectionReasonHint": "ጥያቄው በተሰረዘበት ጊዜ በመላኪያ የቀረበ መልሳሽ።",
     "detailMapLoading": "ካርታ በመጫን ላይ…",
     "detailMapEmpty": "ለዚህ ጥያቄ የካርታ መጋጠሚያዎች የሉም።",
     "detailMapRecenter": "መስመር አስተካክል",
@@ -773,6 +775,84 @@
         "title": "ተጠቃሚ መሰረዝ አልተቻለም",
         "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
       }
+    }
+  },
+  "adminRideRequests": {
+    "eyebrow": "መላኪያ",
+    "title": "የጉዞ ጥያቄዎች",
+    "description": "የደንበኛ ጉዞ ጥያቄዎችን ይገምግሙ፣ ያረጋግጡ እና ወሬውን ያስተዳድሩ።",
+    "searchPlaceholder": "በጠያቂ፣ አድራሻ ወይም ማስታወሻ ይፈልጉ...",
+    "itemLabel": "ጥያቄ",
+    "filters": {
+      "status": "ሁኔታ",
+      "statusAll": "ሁሉም ሁኔታዎች"
+    },
+    "columns": {
+      "requester": "ጠያቂ",
+      "route": "መስመር",
+      "scheduled": "የታቀደ",
+      "passengers": "ተሳፋሪዎች",
+      "status": "ሁኔታ",
+      "submitted": "ተላከ",
+      "actions": "እርምጃዎች"
+    },
+    "empty": {
+      "title": "ጥያቄ አልተገኘም",
+      "description": "የደንበኛ ጉዞ ጥያቄዎች ከመላክ በኋላ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ ወይም የሁኔታ ማጣሪያውን ያጽዱ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የጉዞ ጥያቄዎችን የማየት ፈቃድ ያስፈልጋል። አስተዳዳሪዎ የሚናዎ ride_requests.read ፈቃድ እንዲሰጥዎት ይጠይቁ።",
+      "sessionHint": "ፈቃዶች ታርፈው ከተቀየሩ፣ ክፍለ ጊዜዎን ለማደስ ይውጡ እና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶች ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
+    "actions": {
+      "review": "ይገምግሙ",
+      "menuLabel": "ለጥያቄ እርምጃዎች"
+    },
+    "stats": {
+      "title": "ጠቅላላ ጥያቄዎች",
+      "description": "ሁሉም የደንበኛ ጉዞ ጥያቄዎች",
+      "pendingTitle": "ለማረጋገጥ በመጠባበቅ ላይ",
+      "pendingDescription": "የመላኪያ ግምገማ የሚጠብቁ ጥያቄዎች",
+      "confirmedTitle": "ተረጋግጧል",
+      "confirmedDescription": "ለመላክ የተዘጋጁ የተጸድቁ ጥያቄዎች",
+      "cancelledTitle": "ተሰርዟል",
+      "cancelledDescription": "የተሰረዙ ወይም የተቀባዩ ጥያቄዎች"
+    },
+    "review": {
+      "title": "የጉዞ ጥያቄ ይገምግሙ",
+      "description": "ከማረጋገጥ በፊት የጉዞ ዝርዝር እና የጠያቂ መረጃ ያረጋግጡ።",
+      "requesterSection": "ጠያቂ",
+      "requesterSectionDescription": "ይህን ጉዞ ጥያቄ ያስገባው ደንበኛ።",
+      "email": "ኢሜይል",
+      "mobile": "ሞባይል",
+      "approve": "ጥያቄ ያረጋግጡ",
+      "approving": "በማረጋገጥ ላይ…",
+      "reject": "ጥያቄ ይቀበሉ",
+      "rejecting": "በመሰረዝ ላይ…",
+      "rejectedDescription": "ይህ ጥያቄ ተሰርዟል። ዝርዝሮቹን እና የመከልከል ምክንያቱን ከታች ይመልከቱ።",
+      "loadEmpty": "የጉዞ ጥያቄ ዝርዝሮች ሊጫኑ አልተቻሉም።"
+    },
+    "rejectModal": {
+      "title": "የጉዞ ጥያቄ ይሰረዝ?",
+      "description": "ጠያቂው ይህን ምክንያት በጥያቄ ዝርዝሩ ላይ ያያል።",
+      "reasonLabel": "የመከልከል ምክንያት",
+      "reasonPlaceholder": "ይህ ጉዞ ጥያቄ ለምን እንዳይጸድቅ ያብራሩ...",
+      "reasonRequired": "የመከልከል ምክንያት ያስፈልጋል።",
+      "reasonTooLong": "የመከልከል ምክንያት ከ500 ቁምፊዎች በታች መሆን አለበት።",
+      "cancel": "ይቅር",
+      "confirm": "ጥያቄ ይሰርዙ"
+    },
+    "toast": {
+      "loadFailed": "ጥያቄ ማስገባት አልተሳካም።",
+      "approved": "ጉዞ ጥያቄ ተረጋግጧል።",
+      "rejected": "ጉዞ ጥያቄ ተሰርዟል።",
+      "approveFailed": "ጥያቄ ማረጋገጥ አልተሳካም።",
+      "rejectFailed": "ጥያቄ መሰረዝ አልተሳካም።"
     }
   },
   "adminUserRegistrations": {

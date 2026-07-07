@@ -448,6 +448,7 @@ model RideRequest {
   passengerCount   Int               @default(1) @map("passenger_count")
   notes            String?           @db.VarChar(1000)
   status           RideRequestStatus @default(pending)
+  rejectionReason  String?           @map("rejection_reason") @db.VarChar(500)
   createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime          @updatedAt @map("updated_at") @db.Timestamptz
   requester        User              @relation(fields: [requesterUserId], references: [id], onDelete: Cascade)

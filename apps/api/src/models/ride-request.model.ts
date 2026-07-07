@@ -32,12 +32,31 @@ export type ListRideRequestsForUserFilters = {
   search?: string;
 };
 
+export type ListRideRequestsAdminFilters = {
+  status?: RideRequestStatus;
+  search?: string;
+};
+
 const rideRequestInclude = {
   vehicleType: true,
   vehicleClass: true,
   region: true,
   pickupLocation: true,
   dropoffLocation: true,
+} as const;
+
+const rideRequestAdminInclude = {
+  ...rideRequestInclude,
+  requester: {
+    select: {
+      id: true,
+      firstName: true,
+      middleName: true,
+      lastName: true,
+      email: true,
+      mobileNumber: true,
+    },
+  },
 } as const;
 
 function toDecimal(value?: number | null) {
@@ -63,6 +82,32 @@ function buildRideRequestWhere(filters: ListRideRequestsForUserFilters): Prisma.
       { pickupAddress: { contains: search, mode: "insensitive" } },
       { dropoffAddress: { contains: search, mode: "insensitive" } },
       { notes: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
+  return where;
+}
+
+function buildRideRequestAdminWhere(
+  filters: ListRideRequestsAdminFilters,
+): Prisma.RideRequestWhereInput {
+  const where: Prisma.RideRequestWhereInput = {};
+
+  if (filters.status) {
+    where.status = filters.status;
+  }
+
+  const search = filters.search?.trim();
+  if (search) {
+    where.OR = [
+      { pickupAddress: { contains: search, mode: "insensitive" } },
+      { dropoffAddress: { contains: search, mode: "insensitive" } },
+      { notes: { contains: search, mode: "insensitive" } },
+      { requester: { firstName: { contains: search, mode: "insensitive" } } },
+      { requester: { middleName: { contains: search, mode: "insensitive" } } },
+      { requester: { lastName: { contains: search, mode: "insensitive" } } },
+      { requester: { email: { contains: search, mode: "insensitive" } } },
+      { requester: { mobileNumber: { contains: search, mode: "insensitive" } } },
     ];
   }
 
@@ -122,6 +167,58 @@ export async function findRideRequestForUser(id: string, requesterUserId: string
   return prisma.rideRequest.findFirst({
     where: { id, requesterUserId },
     include: rideRequestInclude,
+  });
+}
+
+export async function countRideRequestsAdmin(filters: ListRideRequestsAdminFilters) {
+  return prisma.rideRequest.count({
+    where: buildRideRequestAdminWhere(filters),
+  });
+}
+
+export async function listRideRequestsAdmin(
+  filters: ListRideRequestsAdminFilters,
+  skip: number,
+  take: number,
+) {
+  return prisma.rideRequest.findMany({
+    where: buildRideRequestAdminWhere(filters),
+    include: rideRequestAdminInclude,
+    orderBy: { createdAt: "desc" },
+    skip,
+    take,
+  });
+}
+
+export async function findRideRequestById(id: string) {
+  return prisma.rideRequest.findUnique({
+    where: { id },
+    include: rideRequestAdminInclude,
+  });
+}
+
+export async function updateRideRequestStatusAdmin(
+  id: string,
+  status: RideRequestStatus,
+  options?: { rejectionReason?: string | null },
+) {
+  const existing = await findRideRequestById(id);
+  if (!existing) {
+    return null;
+  }
+
+  return prisma.rideRequest.update({
+    where: { id },
+    data: {
+      status,
+      rejectionReason:
+        status === "cancelled"
+          ? options?.rejectionReason?.trim() || null
+          : status === "confirmed"
+            ? null
+            : undefined,
+    },
+    include: rideRequestAdminInclude,
   });
 }
 

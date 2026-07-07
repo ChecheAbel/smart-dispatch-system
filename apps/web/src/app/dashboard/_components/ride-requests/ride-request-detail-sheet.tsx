@@ -6,22 +6,26 @@ import {
   CalendarClock,
   Car,
   FileText,
+  Loader2,
   MapPin,
   Navigation,
   Route,
   Shield,
+  UserRound,
   Users,
 } from "lucide-react";
-import type { RideRequest } from "@smart-dispatch/types";
+import type { RideRequest, RideRequestRequesterSummary } from "@smart-dispatch/types";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
+  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { adminHeadingClass } from "@/lib/admin-theme";
+import { adminHeadingClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
 import { isValidCoordinatePair } from "@/lib/map/coordinates";
 import {
   formatMessage,
@@ -42,11 +46,40 @@ const LazyRideRequestRouteMap = dynamic(
   { ssr: false },
 );
 
+type RideRequestManageActions = {
+  canConfirm: boolean;
+  canReject: boolean;
+  confirmLabel: string;
+  rejectLabel: string;
+  confirmingLabel: string;
+  rejectingLabel: string;
+  onConfirm: () => void;
+  onReject: () => void;
+  submitting: "confirm" | "reject" | null;
+  rejectButtonClassName?: string;
+};
+
+type RideRequestRequesterLabels = {
+  section: string;
+  description: string;
+  email: string;
+  mobile: string;
+};
+
 type RideRequestDetailSheetProps = {
   request: RideRequest | null;
   open: boolean;
   locale: string;
   onOpenChange: (open: boolean) => void;
+  loading?: boolean;
+  title?: string;
+  description?: string;
+  emptyTitle?: string;
+  showCustomerPolicy?: boolean;
+  showCustomerActions?: boolean;
+  requester?: RideRequestRequesterSummary;
+  requesterLabels?: RideRequestRequesterLabels;
+  manageActions?: RideRequestManageActions;
 };
 
 function DetailSection({
@@ -152,47 +185,80 @@ function RouteStopDetail({
   );
 }
 
+function formatRequesterName(requester: RideRequestRequesterSummary) {
+  return [requester.first_name, requester.middle_name, requester.last_name].filter(Boolean).join(" ");
+}
+
 export function RideRequestDetailSheet({
   request,
   open,
   locale,
   onOpenChange,
+  loading = false,
+  title,
+  description,
+  emptyTitle,
+  showCustomerPolicy = true,
+  showCustomerActions = true,
+  requester,
+  requesterLabels,
+  manageActions,
 }: RideRequestDetailSheetProps) {
   const historyCopy = getCustomerRequestHistoryMessages(locale as "en" | "am");
   const requestCopy = getCustomerRequestsMessages(locale as "en" | "am");
 
-  if (!request) {
+  const sheetTitle = title ?? historyCopy.detailTitle;
+  const sheetDescription = description ?? historyCopy.detailDescription;
+  const sheetEmptyTitle = emptyTitle ?? historyCopy.emptyTitle;
+
+  if (!open) {
     return null;
   }
 
-  const policyMessage = request.can_edit
-    ? historyCopy.policyEdit
-    : request.can_cancel
-      ? request.cancel_deadline_at
-        ? formatMessage(historyCopy.policyCancelDeadline, {
-            time: formatSubmittedAt(request.cancel_deadline_at, locale),
-          })
-        : historyCopy.policyCancel
-      : historyCopy.policyLocked;
+  const policyMessage = request
+    ? request.can_edit
+      ? historyCopy.policyEdit
+      : request.can_cancel
+        ? request.cancel_deadline_at
+          ? formatMessage(historyCopy.policyCancelDeadline, {
+              time: formatSubmittedAt(request.cancel_deadline_at, locale),
+            })
+          : historyCopy.policyCancel
+        : historyCopy.policyLocked
+    : "";
 
-  const scheduledLabel = request.scheduled_at
-    ? formatScheduledAt(request.scheduled_at, locale)
-    : historyCopy.detailAsap;
+  const scheduledLabel = request
+    ? request.scheduled_at
+      ? formatScheduledAt(request.scheduled_at, locale)
+      : historyCopy.detailAsap
+    : "";
 
-  const shortRequestId = request.id.slice(0, 8).toUpperCase();
-  const hasNotes = Boolean(request.notes?.trim());
+  const shortRequestId = request ? request.id.slice(0, 8).toUpperCase() : "";
+  const hasNotes = Boolean(request?.notes?.trim());
+  const isSubmitting = Boolean(manageActions?.submitting);
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={(next) => !isSubmitting && onOpenChange(next)}>
       <SheetContent
         side="right"
         className="flex w-full flex-col gap-0 overflow-hidden p-0 data-[side=right]:sm:max-w-2xl data-[side=right]:lg:max-w-3xl"
       >
         <SheetHeader className="shrink-0 border-b border-slate-200/80 px-6 py-5">
-          <SheetTitle className={adminHeadingClass}>{historyCopy.detailTitle}</SheetTitle>
-          <SheetDescription>{historyCopy.detailDescription}</SheetDescription>
+          <SheetTitle className={adminHeadingClass}>{sheetTitle}</SheetTitle>
+          <SheetDescription>{sheetDescription}</SheetDescription>
         </SheetHeader>
 
+        {loading ? (
+          <div className="flex min-h-0 flex-1 items-center justify-center py-16 text-sm text-slate-500">
+            <Loader2 className="mr-2 size-4 animate-spin" />
+            {historyCopy.detailMapLoading}
+          </div>
+        ) : !request ? (
+          <div className="flex min-h-0 flex-1 items-center justify-center py-16 text-sm text-slate-500">
+            {sheetEmptyTitle}
+          </div>
+        ) : (
+          <>
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 py-6">
           <div className="rounded-xl border border-slate-200/80 bg-gradient-to-br from-[#f8fafb] to-white p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
@@ -238,9 +304,36 @@ export function RideRequestDetailSheet({
             </div>
           </div>
 
+          {requester && requesterLabels ? (
+            <DetailSection title={requesterLabels.section} icon={UserRound}>
+              <div className="rounded-xl border border-slate-200/80 bg-white p-3.5">
+                <p className="text-sm font-semibold text-[#1C3A34]">{formatRequesterName(requester)}</p>
+                <p className="mt-1 text-xs text-slate-500">{requesterLabels.description}</p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <DetailRow label={requesterLabels.email} value={requester.email} />
+                  <DetailRow label={requesterLabels.mobile} value={requester.mobile_number} />
+                </div>
+              </div>
+            </DetailSection>
+          ) : null}
+
+          {showCustomerPolicy ? (
           <p className="rounded-lg border border-slate-200/80 bg-[#f8fafb]/80 px-3 py-2.5 text-xs leading-relaxed text-slate-600">
             {policyMessage}
           </p>
+          ) : null}
+
+          {request.status === "cancelled" && request.rejection_reason ? (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-3.5 py-3">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-red-700">
+                {historyCopy.detailRejectionReason}
+              </p>
+              <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-red-900">
+                {request.rejection_reason}
+              </p>
+              <p className="mt-2 text-xs text-red-700/80">{historyCopy.detailRejectionReasonHint}</p>
+            </div>
+          ) : null}
 
           <DetailSection title={historyCopy.detailRouteSection} icon={Route}>
             <div className="space-y-2">
@@ -320,6 +413,7 @@ export function RideRequestDetailSheet({
             </DetailSection>
           ) : null}
 
+          {showCustomerActions ? (
           <DetailSection title={historyCopy.detailActionsSection} icon={Shield}>
             <div className="grid gap-3 rounded-xl border border-slate-200/80 bg-white p-3.5 sm:grid-cols-2">
               <DetailRow
@@ -339,6 +433,7 @@ export function RideRequestDetailSheet({
               ) : null}
             </div>
           </DetailSection>
+          ) : null}
 
           <div className="flex flex-wrap gap-2 border-t border-slate-200/80 pt-4">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-2.5 py-1 text-xs text-slate-600">
@@ -353,6 +448,41 @@ export function RideRequestDetailSheet({
             ) : null}
           </div>
         </div>
+
+        {manageActions && (manageActions.canConfirm || manageActions.canReject) ? (
+          <SheetFooter className="shrink-0 border-t border-slate-200/80 px-6 py-4 sm:flex-row sm:justify-end">
+            {manageActions.canReject ? (
+              <Button
+                type="button"
+                variant="outline"
+                className={
+                  manageActions.rejectButtonClassName ??
+                  "border-red-200 text-red-700 hover:bg-red-50 hover:text-red-700"
+                }
+                disabled={isSubmitting}
+                onClick={manageActions.onReject}
+              >
+                {manageActions.submitting === "reject"
+                  ? manageActions.rejectingLabel
+                  : manageActions.rejectLabel}
+              </Button>
+            ) : null}
+            {manageActions.canConfirm ? (
+              <Button
+                type="button"
+                className={adminPrimaryButtonClass}
+                disabled={isSubmitting}
+                onClick={manageActions.onConfirm}
+              >
+                {manageActions.submitting === "confirm"
+                  ? manageActions.confirmingLabel
+                  : manageActions.confirmLabel}
+              </Button>
+            ) : null}
+          </SheetFooter>
+        ) : null}
+          </>
+        )}
       </SheetContent>
     </Sheet>
   );

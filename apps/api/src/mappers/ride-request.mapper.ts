@@ -1,5 +1,5 @@
 import type { Prisma } from "../generated/prisma";
-import type { RideRequest } from "@smart-dispatch/types";
+import type { AdminRideRequest, RideRequest } from "@smart-dispatch/types";
 import { parseVehicleClassTranslationsMap } from "../types/vehicle-class-translations";
 import { parseVehicleTypeTranslationsMap } from "../types/vehicle-type-translations";
 import { DEFAULT_LOCALE, normalizeLocale } from "../utils/locale";
@@ -10,6 +10,10 @@ import {
   canEditRideRequest,
   getRideRequestCancelDeadline,
 } from "../services/ride-request-policy.service";
+import {
+  canAdminConfirmRideRequest,
+  canAdminRejectRideRequest,
+} from "../services/ride-request-admin-policy.service";
 
 type DbRideRequest = {
   id: string;
@@ -29,6 +33,7 @@ type DbRideRequest = {
   passengerCount: number;
   notes: string | null;
   status: RideRequest["status"];
+  rejectionReason: string | null;
   createdAt: Date;
   updatedAt: Date;
   vehicleType: {
@@ -64,6 +69,14 @@ type DbRideRequest = {
     id: string;
     translations: Prisma.JsonValue;
   } | null;
+  requester?: {
+    id: string;
+    firstName: string;
+    middleName: string | null;
+    lastName: string;
+    email: string;
+    mobileNumber: string;
+  };
 };
 
 function decimalToNumber(value: Prisma.Decimal | null) {
@@ -148,6 +161,7 @@ export function toPublicRideRequest(
     passenger_count: rideRequest.passengerCount,
     notes: rideRequest.notes,
     status: rideRequest.status,
+    rejection_reason: rideRequest.rejectionReason,
     created_at: rideRequest.createdAt.toISOString(),
     updated_at: rideRequest.updatedAt.toISOString(),
     can_edit: canEditRideRequest(rideRequest.status),
@@ -156,5 +170,28 @@ export function toPublicRideRequest(
       rideRequest.status === "pending"
         ? getRideRequestCancelDeadline(rideRequest.createdAt).toISOString()
         : null,
+  };
+}
+
+export function toAdminRideRequest(
+  rideRequest: DbRideRequest,
+  options?: { locale?: string },
+): AdminRideRequest {
+  const base = toPublicRideRequest(rideRequest, options);
+
+  return {
+    ...base,
+    requester: rideRequest.requester
+      ? {
+          id: rideRequest.requester.id,
+          first_name: rideRequest.requester.firstName,
+          middle_name: rideRequest.requester.middleName,
+          last_name: rideRequest.requester.lastName,
+          email: rideRequest.requester.email,
+          mobile_number: rideRequest.requester.mobileNumber,
+        }
+      : undefined,
+    can_admin_confirm: canAdminConfirmRideRequest(rideRequest.status),
+    can_admin_reject: canAdminRejectRideRequest(rideRequest.status),
   };
 }

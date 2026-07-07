@@ -19,6 +19,7 @@ import { registerVehicleTypeRoutes } from "./routes/vehicle-type.routes";
 import { registerVehicleClassRoutes } from "./routes/vehicle-class.routes";
 import { registerFarePlanRoutes } from "./routes/fare-plan.routes";
 import { registerRideRequestRoutes } from "./routes/ride-request.routes";
+import { registerAdminRideRequestRoutes } from "./routes/admin-ride-request.routes";
 import { ensureDriverLicenseUploadDir, getDriverLicenseUploadDir } from "./utils/driver-license-upload";
 import { sendSuccess } from "./utils/response";
 
@@ -47,6 +48,7 @@ registerRegionRoutes(app);
 registerLocationRoutes(app);
 registerFarePlanRoutes(app);
 registerRideRequestRoutes(app);
+registerAdminRideRequestRoutes(app);
 
 app.get("/api/health", (_req, res) => {
   sendSuccess(res, { status: "ok" }, { message: "Smart Dispatch System API is running" });

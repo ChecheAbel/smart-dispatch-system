@@ -11,6 +11,7 @@ const ADMIN_MODULES = [
   "regions",
   "locations",
   "fare_plans",
+  "ride_requests",
 ] as const;
 
 type AdminModule = (typeof ADMIN_MODULES)[number];
@@ -81,6 +82,14 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
 
   if (normalizedSlug === "fare-plans") {
     return ["fare_plans.read"];
+  }
+
+  if (normalizedSlug === "dispatch") {
+    return ["ride_requests.read"];
+  }
+
+  if (normalizedSlug === "ride-requests") {
+    return ["ride_requests.read"];
   }
 
   if (normalizedSlug === "customer-dashboard") {
