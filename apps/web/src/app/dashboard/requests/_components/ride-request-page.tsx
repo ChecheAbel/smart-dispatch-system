@@ -1,10 +1,12 @@
 "use client";
 
+import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { startOfDay } from "date-fns";
-import { CalendarClock, MapPin, Navigation, Route } from "lucide-react";
-import type { RideRequest, RideRequestLocationOption, RideRequestStatus, VehicleType } from "@smart-dispatch/types";
+import { CalendarClock, Car, MapPin, Route } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import type { RideRequest, RideRequestLocationOption } from "@smart-dispatch/types";
 import { useLocale, usePermission } from "@/components/shared/providers";
 import {
   AdminSelectField,
@@ -14,9 +16,21 @@ import {
 import { AdminDatePicker } from "@/components/shared/admin-date-picker";
 import {
   AdminTimePicker,
-  roundUpToMinuteInterval,
   type TimeValue,
 } from "@/components/shared/admin-time-picker";
+import { RecentRideRequestListItem } from "@/app/dashboard/_components/ride-requests/recent-request-list-item";
+import {
+  buildLocationAddress,
+  buildVehicleTypeLabel,
+  combineScheduledDateTime,
+  emptyRideRequestForm,
+  filterLocationsByRegion,
+  getMinTimeForDate,
+  isTimeBeforeMin,
+  type CoordinateState,
+  type RideRequestFieldErrors,
+  type RideRequestFormState,
+} from "@/app/dashboard/_components/ride-requests/ride-request-utils";
 import type { CoordinateMapPickerProps } from "@/components/shared/coordinate-map-picker/coordinate-map-picker";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,6 +40,7 @@ import {
   adminBadgeGoldClass,
   adminCardClass,
   adminHeadingClass,
+  adminIconBoxClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
 import {
@@ -38,6 +53,7 @@ import {
   fetchRideRequestFormOptions,
   type RideRequestVehicleTypeOption,
 } from "@/lib/ride-request-api";
+import { USER_MY_REQUESTS_PATH } from "@/lib/auth-paths";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { formatMessage, getCustomerRequestsMessages } from "@/translations";
 import { cn } from "@/lib/utils";
@@ -50,120 +66,276 @@ const LazyCoordinateMapPicker = dynamic<CoordinateMapPickerProps>(
   { ssr: false },
 );
 
-type RideRequestFormState = {
-  pickupAddress: string;
-  dropoffAddress: string;
-  vehicleTypeId: string;
-  vehicleClassId: string;
-  regionId: string;
-  passengerCount: string;
-  notes: string;
+type CustomerRequestsCopy = ReturnType<typeof getCustomerRequestsMessages>;
+
+type FormSectionProps = {
+  icon: LucideIcon;
+  title: string;
+  description?: string;
+  children: ReactNode;
+  className?: string;
 };
 
-type RideRequestFieldErrors = Partial<
-  Record<keyof RideRequestFormState | "pickupCoordinates" | "dropoffCoordinates" | "scheduledAt", string>
->;
+function FormSection({ icon: Icon, title, description, children, className }: FormSectionProps) {
+  return (
+    <section className={cn("space-y-4", className)}>
+      <div className="flex items-start gap-3">
+        <div className={adminIconBoxClass}>
+          <Icon className="size-4" />
+        </div>
+        <div className="min-w-0 flex-1 space-y-0.5">
+          <h3 className={cn("text-sm font-bold", adminHeadingClass)}>{title}</h3>
+          {description ? (
+            <p className="text-xs leading-relaxed text-slate-500">{description}</p>
+          ) : null}
+        </div>
+      </div>
+      <div className="pl-11">{children}</div>
+    </section>
+  );
+}
 
-type CoordinateState = {
-  latitude?: number;
-  longitude?: number;
+type LocationModeSwitchProps = {
+  savedLabel: string;
+  customLabel: string;
+  useCustom: boolean;
+  onSelectSaved: () => void;
+  onSelectCustom: () => void;
+  disabled?: boolean;
 };
 
-const emptyForm: RideRequestFormState = {
-  pickupAddress: "",
-  dropoffAddress: "",
-  vehicleTypeId: "",
-  vehicleClassId: "",
-  regionId: "",
-  passengerCount: "1",
-  notes: "",
+function LocationModeSwitch({
+  savedLabel,
+  customLabel,
+  useCustom,
+  onSelectSaved,
+  onSelectCustom,
+  disabled,
+}: LocationModeSwitchProps) {
+  return (
+    <div
+      className="inline-flex rounded-lg border border-slate-200 bg-slate-50/90 p-0.5"
+      role="group"
+      aria-label={savedLabel}
+    >
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={onSelectSaved}
+        className={cn(
+          "rounded-md px-3 py-1.5 text-xs font-semibold transition-all",
+          !useCustom
+            ? "bg-white text-[#1C3A34] shadow-sm"
+            : "text-slate-500 hover:text-slate-700",
+          disabled && "pointer-events-none opacity-50",
+        )}
+      >
+        {savedLabel}
+      </button>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={onSelectCustom}
+        className={cn(
+          "rounded-md px-3 py-1.5 text-xs font-semibold transition-all",
+          useCustom
+            ? "bg-white text-[#1C3A34] shadow-sm"
+            : "text-slate-500 hover:text-slate-700",
+          disabled && "pointer-events-none opacity-50",
+        )}
+      >
+        {customLabel}
+      </button>
+    </div>
+  );
+}
+
+type RouteStopProps = {
+  variant: "pickup" | "dropoff";
+  label: string;
+  isLast?: boolean;
+  children: ReactNode;
 };
 
-function statusBadgeClass(status: RideRequestStatus) {
-  switch (status) {
-    case "pending":
-      return "border-amber-200 bg-amber-50 text-amber-800";
-    case "confirmed":
-      return "border-sky-200 bg-sky-50 text-sky-800";
-    case "in_progress":
-      return "border-violet-200 bg-violet-50 text-violet-800";
-    case "completed":
-      return "border-emerald-200 bg-emerald-50 text-emerald-800";
-    case "cancelled":
-      return "border-slate-200 bg-slate-50 text-slate-600";
-    default:
-      return "";
-  }
+function RouteStop({ variant, label, isLast, children }: RouteStopProps) {
+  return (
+    <div className={cn("relative pl-8", !isLast && "pb-5")}>
+      {!isLast ? (
+        <span
+          className="absolute left-[11px] top-7 bottom-0 w-px bg-gradient-to-b from-[#1C3A34]/25 via-[#C9B87A]/40 to-[#C9B87A]/60"
+          aria-hidden
+        />
+      ) : null}
+      <span
+        className={cn(
+          "absolute left-0 top-1.5 flex size-[22px] items-center justify-center rounded-full border-2 bg-white shadow-sm",
+          variant === "pickup" ? "border-[#1C3A34]" : "border-[#C9B87A]",
+        )}
+        aria-hidden
+      >
+        <span
+          className={cn(
+            "size-2 rounded-full",
+            variant === "pickup" ? "bg-[#1C3A34]" : "bg-[#C9B87A]",
+          )}
+        />
+      </span>
+      <div className="space-y-3">
+        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">{label}</p>
+        <div className="rounded-xl border border-slate-200/80 bg-gradient-to-b from-white to-[#f8fafb]/60 p-4 shadow-sm">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
 }
 
-function formatScheduledAt(value: string | null, locale: string) {
-  if (!value) {
-    return "—";
-  }
+type LocationStopFieldsProps = {
+  copy: CustomerRequestsCopy;
+  kind: "pickup" | "dropoff";
+  showBackup: boolean;
+  hasSavedOptions: boolean;
+  locationItems: Array<{ label: string; value: string }>;
+  locationId: string;
+  onLocationChange: (value: string) => void;
+  onEnableCustom: () => void;
+  onEnableSaved: () => void;
+  address: string;
+  onAddressChange: (value: string) => void;
+  coordinates: CoordinateState;
+  onCoordinatesChange: (latitude: number, longitude: number) => void;
+  errors: RideRequestFieldErrors;
+  formDisabled: boolean;
+  loading: boolean;
+  mapDefaultCenter?: { latitude: number; longitude: number };
+};
 
-  return new Date(value).toLocaleString(locale, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-}
+function LocationStopFields({
+  copy,
+  kind,
+  showBackup,
+  hasSavedOptions,
+  locationItems,
+  locationId,
+  onLocationChange,
+  onEnableCustom,
+  onEnableSaved,
+  address,
+  onAddressChange,
+  coordinates,
+  onCoordinatesChange,
+  errors,
+  formDisabled,
+  loading,
+  mapDefaultCenter,
+}: LocationStopFieldsProps) {
+  const isPickup = kind === "pickup";
+  const savedError = isPickup ? errors.pickupSavedLocation : errors.dropoffSavedLocation;
+  const addressError = isPickup ? errors.pickupAddress : errors.dropoffAddress;
+  const coordinatesError = isPickup ? errors.pickupCoordinates : errors.dropoffCoordinates;
 
-function buildVehicleTypeLabel(vehicleType: VehicleType, copy: ReturnType<typeof getCustomerRequestsMessages>) {
-  if (vehicleType.passenger_capacity) {
-    return formatMessage(copy.vehicleTypeOption, {
-      name: vehicleType.name,
-      capacity: vehicleType.passenger_capacity,
-    });
-  }
+  const labels = isPickup
+    ? {
+        saved: copy.pickupSavedLocation,
+        savedPlaceholder: copy.pickupSavedLocationPlaceholder,
+        address: copy.pickupAddress,
+        addressPlaceholder: copy.pickupAddressPlaceholder,
+        map: copy.pickupLocation,
+        noSaved: copy.noPickupLocations,
+        id: "pickup",
+      }
+    : {
+        saved: copy.dropoffSavedLocation,
+        savedPlaceholder: copy.dropoffSavedLocationPlaceholder,
+        address: copy.dropoffAddress,
+        addressPlaceholder: copy.dropoffAddressPlaceholder,
+        map: copy.dropoffLocation,
+        noSaved: copy.noDropoffLocations,
+        id: "dropoff",
+      };
 
-  return formatMessage(copy.vehicleTypeOptionNoCapacity, { name: vehicleType.name });
-}
+  return (
+    <div className="space-y-4">
+      {hasSavedOptions ? (
+        <LocationModeSwitch
+          savedLabel={copy.locationModeSaved}
+          customLabel={copy.locationModeCustom}
+          useCustom={showBackup}
+          onSelectSaved={onEnableSaved}
+          onSelectCustom={onEnableCustom}
+          disabled={formDisabled}
+        />
+      ) : (
+        <p className="text-xs leading-relaxed text-slate-500">{labels.noSaved}</p>
+      )}
 
-function combineScheduledDateTime(date?: Date, time?: TimeValue): Date | null {
-  if (!date || !time) {
-    return null;
-  }
-
-  const combined = new Date(date);
-  combined.setHours(time.hour, time.minute, 0, 0);
-  return combined;
-}
-
-function getMinTimeForDate(date?: Date): TimeValue | undefined {
-  if (!date || startOfDay(date).getTime() !== startOfDay(new Date()).getTime()) {
-    return undefined;
-  }
-
-  return roundUpToMinuteInterval(new Date());
-}
-
-function isTimeBeforeMin(time: TimeValue, minTime: TimeValue) {
-  return time.hour < minTime.hour || (time.hour === minTime.hour && time.minute < minTime.minute);
-}
-
-function buildLocationAddress(location: RideRequestLocationOption) {
-  return location.address ? `${location.name}, ${location.address}` : location.name;
-}
-
-function filterLocationsByRegion(
-  locations: RideRequestLocationOption[],
-  regionId: string,
-) {
-  if (!regionId) {
-    return locations;
-  }
-
-  return locations.filter((location) => location.region_id === regionId);
+      {!showBackup ? (
+        <AdminSelectField
+          id={`${labels.id}-saved-location`}
+          label={labels.saved}
+          value={locationId || null}
+          onValueChange={onLocationChange}
+          items={locationItems}
+          placeholder={labels.savedPlaceholder}
+          disabled={formDisabled}
+          hint={copy.savedLocationHint}
+          error={savedError}
+        />
+      ) : (
+        <div className="space-y-4">
+          <p className="text-xs leading-relaxed text-slate-500">{copy.backupLocationHint}</p>
+          <AdminTextField
+            id={`${labels.id}-address`}
+            label={labels.address}
+            value={address}
+            onChange={(event) => onAddressChange(event.target.value)}
+            placeholder={labels.addressPlaceholder}
+            error={addressError}
+            disabled={formDisabled}
+            maxLength={500}
+          />
+          <div className="space-y-2">
+            <Label
+              className={cn(
+                "text-sm font-medium text-[#1C3A34]",
+                coordinatesError && "text-red-700",
+              )}
+            >
+              {labels.map}
+            </Label>
+            <LazyCoordinateMapPicker
+              latitude={coordinates.latitude}
+              longitude={coordinates.longitude}
+              onCoordinatesChange={onCoordinatesChange}
+              visible={!loading}
+              defaultCenter={mapDefaultCenter}
+              title={labels.map}
+              hint={copy.mapPickerHint}
+              loadingLabel={copy.mapLoading}
+              emptyLabel={copy.mapEmpty}
+              recenterLabel={copy.mapRecenter}
+            />
+            {coordinatesError ? (
+              <p className="text-xs text-red-600">{coordinatesError}</p>
+            ) : null}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function RideRequestPage() {
   const { locale } = useLocale();
   const copy = getCustomerRequestsMessages(locale);
   const canSubmitRequest = usePermission("customer_requests.write");
-  const [form, setForm] = useState<RideRequestFormState>(emptyForm);
+  const [form, setForm] = useState<RideRequestFormState>(emptyRideRequestForm);
   const [pickupCoordinates, setPickupCoordinates] = useState<CoordinateState>({});
   const [dropoffCoordinates, setDropoffCoordinates] = useState<CoordinateState>({});
   const [pickupLocationId, setPickupLocationId] = useState("");
   const [dropoffLocationId, setDropoffLocationId] = useState("");
+  const [useCustomPickup, setUseCustomPickup] = useState(false);
+  const [useCustomDropoff, setUseCustomDropoff] = useState(false);
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>();
   const [scheduledTime, setScheduledTime] = useState<TimeValue | undefined>();
   const [errors, setErrors] = useState<RideRequestFieldErrors>({});
@@ -227,6 +399,9 @@ export function RideRequestPage() {
       })),
     [filteredDropoffLocations],
   );
+
+  const showPickupBackup = pickupLocationItems.length === 0 || useCustomPickup;
+  const showDropoffBackup = dropoffLocationItems.length === 0 || useCustomDropoff;
 
   const scheduledMinTime = useMemo(() => getMinTimeForDate(scheduledDate), [scheduledDate]);
 
@@ -301,14 +476,6 @@ export function RideRequestPage() {
   ) {
     setForm((current) => ({ ...current, [key]: value }));
 
-    if (key === "pickupAddress") {
-      setPickupLocationId("");
-    }
-
-    if (key === "dropoffAddress") {
-      setDropoffLocationId("");
-    }
-
     if (key === "regionId") {
       setPickupLocationId((currentPickupId) => {
         if (!currentPickupId) return currentPickupId;
@@ -345,6 +512,7 @@ export function RideRequestPage() {
     }
 
     setPickupLocationId(locationId);
+    setUseCustomPickup(false);
     setForm((current) => ({
       ...current,
       pickupAddress: buildLocationAddress(location),
@@ -358,6 +526,7 @@ export function RideRequestPage() {
       const next = { ...current };
       delete next.pickupAddress;
       delete next.pickupCoordinates;
+      delete next.pickupSavedLocation;
       return next;
     });
   }
@@ -369,6 +538,7 @@ export function RideRequestPage() {
     }
 
     setDropoffLocationId(locationId);
+    setUseCustomDropoff(false);
     setForm((current) => ({
       ...current,
       dropoffAddress: buildLocationAddress(location),
@@ -382,6 +552,63 @@ export function RideRequestPage() {
       const next = { ...current };
       delete next.dropoffAddress;
       delete next.dropoffCoordinates;
+      delete next.dropoffSavedLocation;
+      return next;
+    });
+  }
+
+  function enableCustomPickup() {
+    setUseCustomPickup(true);
+    setPickupLocationId("");
+    setForm((current) => ({ ...current, pickupAddress: "" }));
+    setPickupCoordinates({});
+    setErrors((current) => {
+      const next = { ...current };
+      delete next.pickupSavedLocation;
+      delete next.pickupAddress;
+      delete next.pickupCoordinates;
+      return next;
+    });
+  }
+
+  function enableSavedPickup() {
+    setUseCustomPickup(false);
+    setPickupLocationId("");
+    setForm((current) => ({ ...current, pickupAddress: "" }));
+    setPickupCoordinates({});
+    setErrors((current) => {
+      const next = { ...current };
+      delete next.pickupSavedLocation;
+      delete next.pickupAddress;
+      delete next.pickupCoordinates;
+      return next;
+    });
+  }
+
+  function enableCustomDropoff() {
+    setUseCustomDropoff(true);
+    setDropoffLocationId("");
+    setForm((current) => ({ ...current, dropoffAddress: "" }));
+    setDropoffCoordinates({});
+    setErrors((current) => {
+      const next = { ...current };
+      delete next.dropoffSavedLocation;
+      delete next.dropoffAddress;
+      delete next.dropoffCoordinates;
+      return next;
+    });
+  }
+
+  function enableSavedDropoff() {
+    setUseCustomDropoff(false);
+    setDropoffLocationId("");
+    setForm((current) => ({ ...current, dropoffAddress: "" }));
+    setDropoffCoordinates({});
+    setErrors((current) => {
+      const next = { ...current };
+      delete next.dropoffSavedLocation;
+      delete next.dropoffAddress;
+      delete next.dropoffCoordinates;
       return next;
     });
   }
@@ -389,6 +616,8 @@ export function RideRequestPage() {
   function handlePickupLocationChange(value: string) {
     if (!value) {
       setPickupLocationId("");
+      setForm((current) => ({ ...current, pickupAddress: "" }));
+      setPickupCoordinates({});
       return;
     }
 
@@ -398,6 +627,8 @@ export function RideRequestPage() {
   function handleDropoffLocationChange(value: string) {
     if (!value) {
       setDropoffLocationId("");
+      setForm((current) => ({ ...current, dropoffAddress: "" }));
+      setDropoffCoordinates({});
       return;
     }
 
@@ -426,7 +657,6 @@ export function RideRequestPage() {
   }
 
   const updatePickupCoordinates = useCallback((latitude: number, longitude: number) => {
-    setPickupLocationId("");
     setPickupCoordinates({ latitude, longitude });
     setErrors((current) => {
       if (!current.pickupCoordinates) return current;
@@ -437,7 +667,6 @@ export function RideRequestPage() {
   }, []);
 
   const updateDropoffCoordinates = useCallback((latitude: number, longitude: number) => {
-    setDropoffLocationId("");
     setDropoffCoordinates({ latitude, longitude });
     setErrors((current) => {
       if (!current.dropoffCoordinates) return current;
@@ -448,11 +677,13 @@ export function RideRequestPage() {
   }, []);
 
   function resetFormState() {
-    setForm(emptyForm);
+    setForm(emptyRideRequestForm);
     setPickupCoordinates({});
     setDropoffCoordinates({});
     setPickupLocationId("");
     setDropoffLocationId("");
+    setUseCustomPickup(false);
+    setUseCustomDropoff(false);
     setScheduledDate(undefined);
     setScheduledTime(undefined);
     setErrors({});
@@ -489,20 +720,32 @@ export function RideRequestPage() {
     const passengerCount = Number(form.passengerCount);
     const nextErrors: RideRequestFieldErrors = {};
 
-    if (!pickupAddress) {
-      nextErrors.pickupAddress = copy.errors.pickupRequired;
+    if (!showPickupBackup) {
+      if (!pickupLocationId) {
+        nextErrors.pickupSavedLocation = copy.errors.pickupSavedRequired;
+      }
+    } else {
+      if (!pickupAddress) {
+        nextErrors.pickupAddress = copy.errors.pickupRequired;
+      }
+
+      if (!isValidCoordinatePair(pickupCoordinates.latitude, pickupCoordinates.longitude)) {
+        nextErrors.pickupCoordinates = copy.errors.pickupCoordinatesRequired;
+      }
     }
 
-    if (!dropoffAddress) {
-      nextErrors.dropoffAddress = copy.errors.dropoffRequired;
-    }
+    if (!showDropoffBackup) {
+      if (!dropoffLocationId) {
+        nextErrors.dropoffSavedLocation = copy.errors.dropoffSavedRequired;
+      }
+    } else {
+      if (!dropoffAddress) {
+        nextErrors.dropoffAddress = copy.errors.dropoffRequired;
+      }
 
-    if (!isValidCoordinatePair(pickupCoordinates.latitude, pickupCoordinates.longitude)) {
-      nextErrors.pickupCoordinates = copy.errors.pickupCoordinatesRequired;
-    }
-
-    if (!isValidCoordinatePair(dropoffCoordinates.latitude, dropoffCoordinates.longitude)) {
-      nextErrors.dropoffCoordinates = copy.errors.dropoffCoordinatesRequired;
+      if (!isValidCoordinatePair(dropoffCoordinates.latitude, dropoffCoordinates.longitude)) {
+        nextErrors.dropoffCoordinates = copy.errors.dropoffCoordinatesRequired;
+      }
     }
 
     if (!Number.isInteger(passengerCount) || passengerCount < 1 || passengerCount > 50) {
@@ -591,162 +834,114 @@ export function RideRequestPage() {
         <p className="max-w-3xl text-sm text-slate-500">{copy.description}</p>
       </div>
 
-      <Card className={adminCardClass}>
-        <CardHeader className="gap-2">
+      <Card className={cn(adminCardClass, "overflow-hidden")}>
+        <CardHeader className="gap-2 border-b border-slate-200/80 bg-gradient-to-r from-[#f8fafb] to-white">
           <CardTitle className="flex items-center gap-2">
             <Route className="size-4 text-[#1C3A34]" />
             {copy.formTitle}
           </CardTitle>
           <CardDescription>{copy.formDescription}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form className="space-y-5" onSubmit={(event) => void handleSubmit(event)}>
-            <div className="grid gap-5 md:grid-cols-2">
-              <AdminSelectField
-                id="pickup-saved-location"
-                label={copy.pickupSavedLocation}
-                value={pickupLocationId || null}
-                onValueChange={handlePickupLocationChange}
-                items={pickupLocationItems}
-                placeholder={copy.pickupSavedLocationPlaceholder}
-                optional
-                optionalLabel={copy.optional}
-                disabled={formDisabled || pickupLocationItems.length === 0}
-                hint={
-                  pickupLocationItems.length === 0 ? copy.noPickupLocations : copy.savedLocationHint
-                }
-                containerClassName="md:col-span-2"
-              />
-
-              <AdminTextField
-                id="pickup-address"
-                label={copy.pickupAddress}
-                value={form.pickupAddress}
-                onChange={(event) => updateField("pickupAddress", event.target.value)}
-                placeholder={copy.pickupAddressPlaceholder}
-                error={errors.pickupAddress}
-                disabled={formDisabled}
-                maxLength={500}
-                containerClassName="md:col-span-2"
-              />
-
-              <div className="space-y-2 md:col-span-2">
-                <Label
-                  className={cn(
-                    "text-sm font-medium text-[#1C3A34]",
-                    errors.pickupCoordinates && "text-red-700",
-                  )}
-                >
-                  {copy.pickupLocation}
-                </Label>
-                <LazyCoordinateMapPicker
-                  latitude={pickupCoordinates.latitude}
-                  longitude={pickupCoordinates.longitude}
-                  onCoordinatesChange={updatePickupCoordinates}
-                  visible={!loading}
-                  title={copy.pickupLocation}
-                  hint={copy.mapPickerHint}
-                  loadingLabel={copy.mapLoading}
-                  emptyLabel={copy.mapEmpty}
-                  recenterLabel={copy.mapRecenter}
+        <CardContent className="pt-6">
+          <form className="space-y-8" onSubmit={(event) => void handleSubmit(event)}>
+            <FormSection
+              icon={MapPin}
+              title={copy.sectionRoute}
+              description={copy.sectionRouteDescription}
+            >
+              <div className="space-y-5">
+                <AdminSelectField
+                  id="region"
+                  label={copy.region}
+                  value={form.regionId || null}
+                  onValueChange={(value) => updateField("regionId", value)}
+                  items={regions}
+                  placeholder={copy.regionPlaceholder}
+                  optional
+                  optionalLabel={copy.optional}
+                  disabled={formDisabled}
+                  hint={copy.regionFilterHint}
                 />
-                {errors.pickupCoordinates ? (
-                  <p className="text-xs text-red-600">{errors.pickupCoordinates}</p>
-                ) : null}
+
+                <div className="rounded-2xl border border-slate-200/80 bg-[#f8fafb]/40 p-4 sm:p-5">
+                  <RouteStop variant="pickup" label={copy.pickupAddress}>
+                    <LocationStopFields
+                      copy={copy}
+                      kind="pickup"
+                      showBackup={showPickupBackup}
+                      hasSavedOptions={pickupLocationItems.length > 0}
+                      locationItems={pickupLocationItems}
+                      locationId={pickupLocationId}
+                      onLocationChange={handlePickupLocationChange}
+                      onEnableCustom={enableCustomPickup}
+                      onEnableSaved={enableSavedPickup}
+                      address={form.pickupAddress}
+                      onAddressChange={(value) => updateField("pickupAddress", value)}
+                      coordinates={pickupCoordinates}
+                      onCoordinatesChange={updatePickupCoordinates}
+                      errors={errors}
+                      formDisabled={formDisabled}
+                      loading={loading}
+                    />
+                  </RouteStop>
+
+                  <RouteStop variant="dropoff" label={copy.dropoffAddress} isLast>
+                    <LocationStopFields
+                      copy={copy}
+                      kind="dropoff"
+                      showBackup={showDropoffBackup}
+                      hasSavedOptions={dropoffLocationItems.length > 0}
+                      locationItems={dropoffLocationItems}
+                      locationId={dropoffLocationId}
+                      onLocationChange={handleDropoffLocationChange}
+                      onEnableCustom={enableCustomDropoff}
+                      onEnableSaved={enableSavedDropoff}
+                      address={form.dropoffAddress}
+                      onAddressChange={(value) => updateField("dropoffAddress", value)}
+                      coordinates={dropoffCoordinates}
+                      onCoordinatesChange={updateDropoffCoordinates}
+                      errors={errors}
+                      formDisabled={formDisabled}
+                      loading={loading}
+                      mapDefaultCenter={dropoffMapCenter}
+                    />
+                  </RouteStop>
+                </div>
               </div>
+            </FormSection>
 
-              <AdminSelectField
-                id="dropoff-saved-location"
-                label={copy.dropoffSavedLocation}
-                value={dropoffLocationId || null}
-                onValueChange={handleDropoffLocationChange}
-                items={dropoffLocationItems}
-                placeholder={copy.dropoffSavedLocationPlaceholder}
-                optional
-                optionalLabel={copy.optional}
-                disabled={formDisabled || dropoffLocationItems.length === 0}
-                hint={
-                  dropoffLocationItems.length === 0
-                    ? copy.noDropoffLocations
-                    : copy.savedLocationHint
-                }
-                containerClassName="md:col-span-2"
-              />
+            <FormSection
+              icon={Car}
+              title={copy.sectionTripDetails}
+              description={copy.sectionTripDetailsDescription}
+            >
+              <div className="space-y-5 rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-5">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <AdminSelectField
+                    id="vehicle-type"
+                    label={copy.vehicleType}
+                    value={form.vehicleTypeId || null}
+                    onValueChange={updateVehicleTypeId}
+                    items={vehicleTypeItems}
+                    placeholder={copy.vehicleTypePlaceholder}
+                    optional
+                    optionalLabel={copy.optional}
+                    disabled={formDisabled}
+                  />
+                  <AdminSelectField
+                    id="vehicle-class"
+                    label={copy.vehicleClass}
+                    value={form.vehicleClassId || null}
+                    onValueChange={(value) => updateField("vehicleClassId", value)}
+                    items={vehicleClassItems}
+                    placeholder={copy.vehicleClassPlaceholder}
+                    optional
+                    optionalLabel={copy.optional}
+                    disabled={formDisabled || !form.vehicleTypeId}
+                    error={errors.vehicleClassId}
+                  />
+                </div>
 
-              <AdminTextField
-                id="dropoff-address"
-                label={copy.dropoffAddress}
-                value={form.dropoffAddress}
-                onChange={(event) => updateField("dropoffAddress", event.target.value)}
-                placeholder={copy.dropoffAddressPlaceholder}
-                error={errors.dropoffAddress}
-                disabled={formDisabled}
-                maxLength={500}
-                containerClassName="md:col-span-2"
-              />
-
-              <div className="space-y-2 md:col-span-2">
-                <Label
-                  className={cn(
-                    "text-sm font-medium text-[#1C3A34]",
-                    errors.dropoffCoordinates && "text-red-700",
-                  )}
-                >
-                  {copy.dropoffLocation}
-                </Label>
-                <LazyCoordinateMapPicker
-                  latitude={dropoffCoordinates.latitude}
-                  longitude={dropoffCoordinates.longitude}
-                  onCoordinatesChange={updateDropoffCoordinates}
-                  visible={!loading}
-                  defaultCenter={dropoffMapCenter}
-                  title={copy.dropoffLocation}
-                  hint={copy.mapPickerHint}
-                  loadingLabel={copy.mapLoading}
-                  emptyLabel={copy.mapEmpty}
-                  recenterLabel={copy.mapRecenter}
-                />
-                {errors.dropoffCoordinates ? (
-                  <p className="text-xs text-red-600">{errors.dropoffCoordinates}</p>
-                ) : null}
-              </div>
-
-              <AdminSelectField
-                id="vehicle-type"
-                label={copy.vehicleType}
-                value={form.vehicleTypeId || null}
-                onValueChange={updateVehicleTypeId}
-                items={vehicleTypeItems}
-                placeholder={copy.vehicleTypePlaceholder}
-                optional
-                optionalLabel={copy.optional}
-                disabled={formDisabled}
-              />
-              <AdminSelectField
-                id="vehicle-class"
-                label={copy.vehicleClass}
-                value={form.vehicleClassId || null}
-                onValueChange={(value) => updateField("vehicleClassId", value)}
-                items={vehicleClassItems}
-                placeholder={copy.vehicleClassPlaceholder}
-                optional
-                optionalLabel={copy.optional}
-                disabled={formDisabled || !form.vehicleTypeId}
-                error={errors.vehicleClassId}
-              />
-              <AdminSelectField
-                id="region"
-                label={copy.region}
-                value={form.regionId || null}
-                onValueChange={(value) => updateField("regionId", value)}
-                items={regions}
-                placeholder={copy.regionPlaceholder}
-                optional
-                optionalLabel={copy.optional}
-                disabled={formDisabled}
-                containerClassName="md:col-span-2"
-              />
-              <div className="space-y-3 md:col-span-2">
                 <div className="grid gap-4 md:grid-cols-3">
                   <AdminTextField
                     id="passenger-count"
@@ -777,10 +972,14 @@ export function RideRequestPage() {
                     clearLabel={copy.clearTime}
                     hourLabel={copy.hour}
                     minuteLabel={copy.minute}
+                    periodLabel={copy.period}
+                    amLabel={copy.am}
+                    pmLabel={copy.pm}
                     applyLabel={copy.applyTime}
                     value={scheduledTime}
                     minTime={scheduledMinTime}
                     locale={locale}
+                    hour12
                     disabled={formDisabled || !scheduledDate}
                     onChange={handleScheduledTimeChange}
                   />
@@ -791,6 +990,9 @@ export function RideRequestPage() {
                   <p className="text-xs leading-relaxed text-slate-500">{copy.scheduledAtHint}</p>
                 )}
               </div>
+            </FormSection>
+
+            <FormSection icon={CalendarClock} title={copy.sectionNotes} description={copy.sectionNotesDescription}>
               <AdminTextareaField
                 id="notes"
                 label={copy.notes}
@@ -801,18 +1003,21 @@ export function RideRequestPage() {
                 optionalLabel={copy.optional}
                 disabled={formDisabled}
                 maxLength={1000}
-                rows={4}
-                containerClassName="md:col-span-2"
+                rows={3}
               />
-            </div>
+            </FormSection>
 
-            <div className="flex flex-col items-end gap-2">
-              {!canSubmitRequest ? (
-                <p className="text-xs text-slate-500">{copy.submitDisabledNoPermission}</p>
-              ) : null}
+            <div className="-mx-6 -mb-6 flex flex-col gap-3 border-t border-slate-200/80 bg-[#f8fafb]/70 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0">
+                {!canSubmitRequest ? (
+                  <p className="text-xs text-slate-500">{copy.submitDisabledNoPermission}</p>
+                ) : (
+                  <p className="text-xs text-slate-500">{copy.submitHint}</p>
+                )}
+              </div>
               <Button
                 type="submit"
-                className={adminPrimaryButtonClass}
+                className={cn(adminPrimaryButtonClass, "w-full sm:w-auto")}
                 disabled={submitDisabled}
               >
                 {submitting ? copy.submitting : copy.submit}
@@ -822,58 +1027,46 @@ export function RideRequestPage() {
         </CardContent>
       </Card>
 
-      <Card className={adminCardClass}>
-        <CardHeader className="gap-2">
-          <CardTitle className="flex items-center gap-2">
-            <CalendarClock className="size-4 text-[#1C3A34]" />
-            {copy.recentTitle}
-          </CardTitle>
-          <CardDescription>{copy.recentDescription}</CardDescription>
+      <Card className={cn(adminCardClass, "overflow-hidden")}>
+        <CardHeader className="gap-2 border-b border-slate-200/80 bg-gradient-to-r from-[#f8fafb] to-white">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="space-y-2">
+              <CardTitle className="flex items-center gap-2">
+                <CalendarClock className="size-4 text-[#1C3A34]" />
+                {copy.recentTitle}
+              </CardTitle>
+              <CardDescription>{copy.recentDescription}</CardDescription>
+            </div>
+            {requests.length > 0 ? (
+              <Link
+                href={USER_MY_REQUESTS_PATH}
+                className="inline-flex h-8 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-[#1C3A34] hover:bg-[#f8fafb]"
+              >
+                {copy.viewAllRequests}
+              </Link>
+            ) : null}
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0">
           {loading ? (
-            <p className="text-sm text-slate-500">{copy.loading}</p>
+            <p className="px-6 py-8 text-sm text-slate-500">{copy.loading}</p>
           ) : requests.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-8 text-center">
+            <div className="mx-6 my-8 rounded-xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-10 text-center">
+              <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-full bg-[#1C3A34]/8">
+                <Route className="size-4 text-[#1C3A34]" />
+              </div>
               <p className="text-sm font-semibold text-slate-700">{copy.emptyTitle}</p>
               <p className="mt-1 text-sm text-slate-500">{copy.emptyDescription}</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="divide-y divide-slate-100">
               {requests.map((request) => (
-                <div
+                <RecentRideRequestListItem
                   key={request.id}
-                  className="rounded-xl border border-slate-200/80 bg-white px-4 py-4 shadow-sm"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div className="min-w-0 space-y-1">
-                      <div className="flex items-center gap-2 text-sm font-semibold text-[#1C3A34]">
-                        <MapPin className="size-4 shrink-0 text-[#C9B87A]" />
-                        <span className="truncate">{request.pickup_address}</span>
-                      </div>
-                      <p className="pl-6 text-sm text-slate-600">{request.dropoff_address}</p>
-                    </div>
-                    <Badge variant="outline" className={cn("text-xs", statusBadgeClass(request.status))}>
-                      {copy.status[request.status]}
-                    </Badge>
-                  </div>
-
-                  <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-                    <span>{formatScheduledAt(request.scheduled_at, locale)}</span>
-                    <span>
-                      {formatMessage(copy.passengersCount, { count: request.passenger_count })}
-                    </span>
-                    {request.vehicle_type ? <span>{request.vehicle_type.name}</span> : null}
-                    {request.vehicle_class ? <span>{request.vehicle_class.name}</span> : null}
-                    {request.region ? <span>{request.region.name}</span> : null}
-                    {isValidCoordinatePair(request.pickup_latitude ?? undefined, request.pickup_longitude ?? undefined) ? (
-                      <span className="inline-flex items-center gap-1">
-                        <Navigation className="size-3" />
-                        {request.pickup_latitude?.toFixed(5)}, {request.pickup_longitude?.toFixed(5)}
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
+                  request={request}
+                  copy={copy}
+                  locale={locale}
+                />
               ))}
             </div>
           )}

@@ -91,7 +91,7 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
     return ["customer_profile.read"];
   }
 
-  if (normalizedSlug === "customer-requests") {
+  if (normalizedSlug === "customer-requests" || normalizedSlug === "customer-request-history") {
     return ["customer_requests.read"];
   }
 
@@ -104,6 +104,10 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
   }
 
   if (normalizedPath?.startsWith("/dashboard/requests")) {
+    return ["customer_requests.read"];
+  }
+
+  if (normalizedPath?.startsWith("/dashboard/my-requests")) {
     return ["customer_requests.read"];
   }
 

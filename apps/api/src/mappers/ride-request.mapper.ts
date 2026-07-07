@@ -5,6 +5,11 @@ import { parseVehicleTypeTranslationsMap } from "../types/vehicle-type-translati
 import { DEFAULT_LOCALE, normalizeLocale } from "../utils/locale";
 import { toPublicRegion } from "./region.mapper";
 import { pickLocationName } from "./location.mapper";
+import {
+  canCancelRideRequest,
+  canEditRideRequest,
+  getRideRequestCancelDeadline,
+} from "../services/ride-request-policy.service";
 
 type DbRideRequest = {
   id: string;
@@ -145,5 +150,11 @@ export function toPublicRideRequest(
     status: rideRequest.status,
     created_at: rideRequest.createdAt.toISOString(),
     updated_at: rideRequest.updatedAt.toISOString(),
+    can_edit: canEditRideRequest(rideRequest.status),
+    can_cancel: canCancelRideRequest(rideRequest.status, rideRequest.createdAt),
+    cancel_deadline_at:
+      rideRequest.status === "pending"
+        ? getRideRequestCancelDeadline(rideRequest.createdAt).toISOString()
+        : null,
   };
 }

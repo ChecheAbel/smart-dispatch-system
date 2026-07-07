@@ -33,6 +33,10 @@ export type TimeValue = {
 const MINUTE_INTERVAL = 5;
 const MINUTE_OPTIONS = Array.from({ length: 60 / MINUTE_INTERVAL }, (_, index) => index * MINUTE_INTERVAL);
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, index) => index);
+const HOUR12_OPTIONS = Array.from({ length: 12 }, (_, index) => (index + 1) % 12 || 12);
+const PERIOD_OPTIONS = ["AM", "PM"] as const;
+
+type TimePeriod = (typeof PERIOD_OPTIONS)[number];
 
 type AdminTimePickerProps = {
   id: string;
@@ -43,16 +47,50 @@ type AdminTimePickerProps = {
   clearLabel?: string;
   hourLabel?: string;
   minuteLabel?: string;
+  periodLabel?: string;
+  amLabel?: string;
+  pmLabel?: string;
   applyLabel?: string;
   disabled?: boolean;
   locale?: string;
+  hour12?: boolean;
   onChange: (value: TimeValue | undefined) => void;
   className?: string;
 };
 
-function formatTimeDisplay(value: TimeValue, locale: string) {
+function formatTimeDisplay(value: TimeValue, locale: string, hour12 = false) {
   const date = new Date(2000, 0, 1, value.hour, value.minute);
-  return date.toLocaleTimeString(locale, { hour: "numeric", minute: "2-digit" });
+  return date.toLocaleTimeString(locale, {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12,
+  });
+}
+
+function to12HourParts(hour24: number): { hour12: number; period: TimePeriod } {
+  const period: TimePeriod = hour24 >= 12 ? "PM" : "AM";
+  const hour12 = hour24 % 12 || 12;
+  return { hour12, period };
+}
+
+function to24Hour(hour12: number, period: TimePeriod): number {
+  if (period === "AM") {
+    return hour12 === 12 ? 0 : hour12;
+  }
+
+  return hour12 === 12 ? 12 : hour12 + 12;
+}
+
+function buildTimeValue(hour: number, minute: number): TimeValue {
+  return { hour, minute };
+}
+
+function buildTimeValueFrom12Hour(
+  hour12: number,
+  minute: number,
+  period: TimePeriod,
+): TimeValue {
+  return buildTimeValue(to24Hour(hour12, period), minute);
 }
 
 function isTimeBefore(time: TimeValue, minTime: TimeValue) {
@@ -88,26 +126,58 @@ export function AdminTimePicker({
   clearLabel = "Clear",
   hourLabel = "Hour",
   minuteLabel = "Minute",
+  periodLabel = "Period",
+  amLabel = "AM",
+  pmLabel = "PM",
   applyLabel = "Apply",
   disabled = false,
   locale = "en",
+  hour12 = false,
   onChange,
   className,
 }: AdminTimePickerProps) {
   const [open, setOpen] = useState(false);
-  const [draftHour, setDraftHour] = useState<string>(value ? String(value.hour) : "");
+  const [draftHour, setDraftHour] = useState<string>(() => {
+    if (!value) return "";
+    if (!hour12) return String(value.hour);
+    return String(to12HourParts(value.hour).hour12);
+  });
   const [draftMinute, setDraftMinute] = useState<string>(
     value ? String(value.minute) : "",
   );
+  const [draftPeriod, setDraftPeriod] = useState<TimePeriod | "">(() => {
+    if (!value || !hour12) return "";
+    return to12HourParts(value.hour).period;
+  });
+
+  const periodLabels: Record<TimePeriod, string> = {
+    AM: amLabel,
+    PM: pmLabel,
+  };
 
   const displayValue = useMemo(
-    () => (value ? formatTimeDisplay(value, locale) : placeholder),
-    [locale, placeholder, value],
+    () => (value ? formatTimeDisplay(value, locale, hour12) : placeholder),
+    [hour12, locale, placeholder, value],
   );
 
   function syncDraft(nextValue?: TimeValue) {
-    setDraftHour(nextValue ? String(nextValue.hour) : "");
-    setDraftMinute(nextValue ? String(nextValue.minute) : "");
+    if (!nextValue) {
+      setDraftHour("");
+      setDraftMinute("");
+      setDraftPeriod("");
+      return;
+    }
+
+    if (hour12) {
+      const parts = to12HourParts(nextValue.hour);
+      setDraftHour(String(parts.hour12));
+      setDraftPeriod(parts.period);
+    } else {
+      setDraftHour(String(nextValue.hour));
+      setDraftPeriod("");
+    }
+
+    setDraftMinute(String(nextValue.minute));
   }
 
   function handleOpenChange(nextOpen: boolean) {
@@ -123,14 +193,13 @@ export function AdminTimePicker({
   }
 
   function applyDraft() {
-    if (!draftHour || !draftMinute) {
+    if (!draftHour || !draftMinute || (hour12 && !draftPeriod)) {
       return;
     }
 
-    const nextValue = {
-      hour: Number(draftHour),
-      minute: Number(draftMinute),
-    };
+    const nextValue = hour12
+      ? buildTimeValueFrom12Hour(Number(draftHour), Number(draftMinute), draftPeriod as TimePeriod)
+      : buildTimeValue(Number(draftHour), Number(draftMinute));
 
     if (minTime && isTimeBefore(nextValue, minTime)) {
       return;
@@ -146,11 +215,19 @@ export function AdminTimePicker({
     setOpen(false);
   }
 
+  const draftTimeValue = useMemo(() => {
+    if (!draftHour || !draftMinute || (hour12 && !draftPeriod)) {
+      return undefined;
+    }
+
+    return hour12
+      ? buildTimeValueFrom12Hour(Number(draftHour), Number(draftMinute), draftPeriod as TimePeriod)
+      : buildTimeValue(Number(draftHour), Number(draftMinute));
+  }, [draftHour, draftMinute, draftPeriod, hour12]);
+
   const canApply =
-    draftHour !== "" &&
-    draftMinute !== "" &&
-    !isMinuteDisabled(Number(draftMinute), Number(draftHour), minTime) &&
-    !isHourDisabled(Number(draftHour), minTime);
+    draftTimeValue !== undefined &&
+    (!minTime || !isTimeBefore(draftTimeValue, minTime));
 
   return (
     <div className={cn("min-w-0 space-y-2", className)}>
@@ -183,11 +260,11 @@ export function AdminTimePicker({
               {label}
             </p>
             <p className="mt-1 text-sm font-semibold text-[#1C3A34]">
-              {value ? formatTimeDisplay(value, locale) : placeholder}
+              {value ? formatTimeDisplay(value, locale, hour12) : placeholder}
             </p>
           </div>
 
-          <div className="grid gap-3 p-4 sm:grid-cols-2">
+          <div className={cn("grid gap-3 p-4", hour12 ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
             <div className="space-y-2">
               <Label className="text-xs font-medium text-slate-500">{hourLabel}</Label>
               <Select
@@ -200,13 +277,16 @@ export function AdminTimePicker({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {HOUR_OPTIONS.map((hour) => (
+                    {(hour12 ? HOUR12_OPTIONS : HOUR_OPTIONS).map((hour) => (
                       <SelectItem
                         key={hour}
                         value={String(hour)}
-                        disabled={isHourDisabled(hour, minTime)}
+                        disabled={
+                          !hour12 &&
+                          isHourDisabled(hour, minTime)
+                        }
                       >
-                        {String(hour).padStart(2, "0")}
+                        {hour12 ? String(hour) : String(hour).padStart(2, "0")}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -219,26 +299,63 @@ export function AdminTimePicker({
               <Select
                 value={draftMinute}
                 onValueChange={(value) => setDraftMinute(value ?? "")}
-                disabled={disabled || draftHour === ""}
+                disabled={disabled || draftHour === "" || (hour12 && !draftPeriod)}
               >
                 <SelectTrigger className={cn(adminInputClass, "w-full")}>
                   <SelectValue placeholder={minuteLabel} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
-                    {MINUTE_OPTIONS.map((minute) => (
-                      <SelectItem
-                        key={minute}
-                        value={String(minute)}
-                        disabled={isMinuteDisabled(minute, Number(draftHour), minTime)}
-                      >
-                        {String(minute).padStart(2, "0")}
-                      </SelectItem>
-                    ))}
+                    {MINUTE_OPTIONS.map((minute) => {
+                      const draftHour24 = hour12
+                        ? draftHour && draftPeriod
+                          ? to24Hour(Number(draftHour), draftPeriod as TimePeriod)
+                          : undefined
+                        : draftHour
+                          ? Number(draftHour)
+                          : undefined;
+
+                      return (
+                        <SelectItem
+                          key={minute}
+                          value={String(minute)}
+                          disabled={
+                            !hour12 &&
+                            isMinuteDisabled(minute, draftHour24, minTime)
+                          }
+                        >
+                          {String(minute).padStart(2, "0")}
+                        </SelectItem>
+                      );
+                    })}
                   </SelectGroup>
                 </SelectContent>
               </Select>
             </div>
+
+            {hour12 ? (
+              <div className="space-y-2">
+                <Label className="text-xs font-medium text-slate-500">{periodLabel}</Label>
+                <Select
+                  value={draftPeriod}
+                  onValueChange={(value) => setDraftPeriod((value as TimePeriod | null) ?? "")}
+                  disabled={disabled || draftHour === ""}
+                >
+                  <SelectTrigger className={cn(adminInputClass, "w-full")}>
+                    <SelectValue placeholder={periodLabel} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {PERIOD_OPTIONS.map((period) => (
+                        <SelectItem key={period} value={period}>
+                          {periodLabels[period]}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : null}
           </div>
 
           <div className="flex items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/80 px-3 py-2">

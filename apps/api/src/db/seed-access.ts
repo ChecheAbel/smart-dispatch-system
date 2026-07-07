@@ -308,6 +308,17 @@ const DEFAULT_MENUS = [
       { locale: "am", label: "ጉዞ ጠይቅ" },
     ],
   },
+  {
+    slug: "customer-request-history",
+    path: "/dashboard/my-requests",
+    icon: "scroll-text",
+    sortOrder: 73,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "My Requests" },
+      { locale: "am", label: "ጥያቄዎቼ" },
+    ],
+  },
 ] as const;
 
 const DEFAULT_ENDPOINTS: Array<{
@@ -370,7 +381,10 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "fare_plans.delete", method: "DELETE", path: "/api/fare-plans/:id", description: "Delete fare plan", permissionSlug: "fare_plans.delete" },
   { slug: "ride_requests.form_options", method: "GET", path: "/api/ride-requests/form-options", description: "Ride request form options", permissionSlug: "customer_requests.read" },
   { slug: "ride_requests.list", method: "GET", path: "/api/ride-requests", description: "List ride requests", permissionSlug: "customer_requests.read" },
+  { slug: "ride_requests.get", method: "GET", path: "/api/ride-requests/:id", description: "Get ride request", permissionSlug: "customer_requests.read" },
   { slug: "ride_requests.create", method: "POST", path: "/api/ride-requests", description: "Create ride request", permissionSlug: "customer_requests.write" },
+  { slug: "ride_requests.update", method: "PATCH", path: "/api/ride-requests/:id", description: "Update ride request", permissionSlug: "customer_requests.write" },
+  { slug: "ride_requests.cancel", method: "POST", path: "/api/ride-requests/:id/cancel", description: "Cancel ride request", permissionSlug: "customer_requests.write" },
 ];
 
 async function seedPermissions() {

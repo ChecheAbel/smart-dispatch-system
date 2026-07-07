@@ -21,6 +21,7 @@ import type {
   AdminDashboardMessages,
   CustomerDashboardMessages,
   CustomerRequestsMessages,
+  CustomerRequestHistoryMessages,
   AdminProfileMessages,
   Translations,
 } from "./types";
@@ -50,6 +51,7 @@ export type {
   AdminDashboardMessages,
   CustomerDashboardMessages,
   CustomerRequestsMessages,
+  CustomerRequestHistoryMessages,
   AdminProfileMessages,
   Translations,
 };
@@ -145,6 +147,12 @@ export function getCustomerDashboardMessages(locale: SupportedLocale): CustomerD
 
 export function getCustomerRequestsMessages(locale: SupportedLocale): CustomerRequestsMessages {
   return getTranslations(locale).customerRequests;
+}
+
+export function getCustomerRequestHistoryMessages(
+  locale: SupportedLocale,
+): CustomerRequestHistoryMessages {
+  return getTranslations(locale).customerRequestHistory;
 }
 
 export function getAdminProfileMessages(locale: SupportedLocale): AdminProfileMessages {

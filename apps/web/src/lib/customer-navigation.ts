@@ -11,7 +11,9 @@ export function isCustomerNavActive(pathname: string, href: string) {
 }
 
 export function getCustomerPageTitleFromMenus(pathname: string, menus: Menu[]) {
-  const flatMenus = flattenMenus(menus).filter((menu) => menu.path);
+  const flatMenus = flattenMenus(menus)
+    .filter((menu) => menu.path)
+    .sort((left, right) => right.path!.length - left.path!.length);
 
   const match = flatMenus.find((menu) => isCustomerNavActive(pathname, menu.path!));
 

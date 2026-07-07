@@ -411,6 +411,9 @@ export interface RideRequest {
   status: RideRequestStatus;
   created_at: string;
   updated_at: string;
+  can_edit: boolean;
+  can_cancel: boolean;
+  cancel_deadline_at: string | null;
 }
 
 export interface ApiSuccessResponse<T> {

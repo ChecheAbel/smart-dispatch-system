@@ -21,4 +21,5 @@ export type CustomerShellMessages = Translations["customerShell"];
 export type AdminDashboardMessages = Translations["adminDashboard"];
 export type CustomerDashboardMessages = Translations["customerDashboard"];
 export type CustomerRequestsMessages = Translations["customerRequests"];
+export type CustomerRequestHistoryMessages = Translations["customerRequestHistory"];
 export type AdminProfileMessages = Translations["adminProfile"];
