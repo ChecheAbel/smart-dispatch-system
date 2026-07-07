@@ -175,7 +175,7 @@ export function DataTable<T>({
   const pageRange = pagination ? getPageRange(pagination) : null;
 
   return (
-    <Card className={cn("border-slate-200/80 bg-white shadow-sm", className)}>
+    <Card className={cn("min-w-0 w-full max-w-full border-slate-200/80 bg-white shadow-sm", className)}>
       <CardHeader className="gap-4">
         {eyebrow}
 
@@ -210,7 +210,7 @@ export function DataTable<T>({
         ) : null}
       </CardHeader>
 
-      <CardContent className="space-y-4">
+      <CardContent className="min-w-0 space-y-4">
         {loading ? <TableSkeleton rows={pageSize > 5 ? 5 : pageSize} /> : null}
 
         {!loading && error ? (
@@ -234,7 +234,7 @@ export function DataTable<T>({
         ) : null}
 
         {!loading && !error && rows.length > 0 ? (
-          <div className="overflow-x-auto rounded-lg border border-slate-200">
+          <div className="w-full min-w-0 max-w-full overflow-x-auto rounded-lg border border-slate-200">
             <table className="w-full text-left text-sm" style={{ minWidth: minTableWidth }}>
               <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
                 <tr>

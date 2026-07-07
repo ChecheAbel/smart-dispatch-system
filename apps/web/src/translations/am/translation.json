@@ -791,13 +791,15 @@
     "itemLabel": "ጥያቄ",
     "filters": {
       "status": "ሁኔታ",
-      "statusAll": "ሁሉም ሁኔታዎች"
+      "statusAll": "ሁሉም ሁኔታዎች",
+      "upcoming": "የሚመጡ"
     },
     "columns": {
       "requester": "ጠያቂ",
       "route": "መስመር",
       "scheduled": "የታቀደ",
       "passengers": "ተሳፋሪዎች",
+      "assignment": "የተመደበ",
       "status": "ሁኔታ",
       "submitted": "ተላከ",
       "actions": "እርምጃዎች"
@@ -828,6 +830,10 @@
       "confirmedDescription": "ለመላክ የተዘጋጁ የተጸድቁ ጥያቄዎች",
       "upcomingTitle": "የሚመጡ ጥያቄዎች",
       "upcomingDescription": "የመውሰድ ጊዜው በወደፊት የታቀዱ ጥያቄዎች",
+      "inProgressTitle": "በሂደት ላይ",
+      "inProgressDescription": "አሁን በመንገድ ላይ ያሉ ጉዞዎች",
+      "completedTitle": "ተጠናቀዋል",
+      "completedDescription": "የተጠናቀቁ ጉዞዎች",
       "cancelledTitle": "ተሰርዟል",
       "cancelledDescription": "የተሰረዙ ወይም የተቀባዩ ጥያቄዎች"
     },

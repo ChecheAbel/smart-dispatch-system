@@ -111,9 +111,9 @@ export function DashboardShell({
                 style={{ "--sidebar-width": adminTheme.sidebarWidth } as CSSProperties}
               >
                 <DashboardSidebar />
-                <SidebarInset className="flex min-h-svh flex-col bg-[#f8fafb]">
+                <SidebarInset className="flex min-h-svh min-w-0 flex-col bg-[#f8fafb]">
                   <DashboardHeader />
-                  <main className="flex-1 overflow-auto p-4 sm:p-6">
+                  <main className="min-w-0 flex-1 overflow-auto p-4 sm:p-6">
                     <RouteGuard portal={portal}>{children}</RouteGuard>
                   </main>
                   <DashboardFooter />

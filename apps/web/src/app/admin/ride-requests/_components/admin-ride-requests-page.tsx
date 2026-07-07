@@ -42,10 +42,11 @@ import {
   getCustomerRequestsMessages,
 } from "@/translations";
 import { cn } from "@/lib/utils";
-import { AdminRideRequestStats } from "./admin-ride-request-stats";
+import { AdminRideRequestStats, type AdminRideRequestListFilter } from "./admin-ride-request-stats";
 import { AdminRideRequestReviewSheet } from "./admin-ride-request-review-sheet";
 
 const STATUS_FILTER_ALL = "all";
+const STATUS_FILTER_UPCOMING = "upcoming";
 
 const STATUS_FILTER_OPTIONS: RideRequestStatus[] = [
   "pending",
@@ -54,8 +55,6 @@ const STATUS_FILTER_OPTIONS: RideRequestStatus[] = [
   "completed",
   "cancelled",
 ];
-
-type StatusFilterValue = RideRequestStatus | typeof STATUS_FILTER_ALL;
 
 function formatRequesterName(requester?: RideRequestRequesterSummary) {
   if (!requester) {
@@ -69,6 +68,17 @@ function formatRoute(request: AdminRideRequest) {
   const pickup = request.pickup_location?.name ?? request.pickup_address;
   const dropoff = request.dropoff_location?.name ?? request.dropoff_address;
   return `${pickup} → ${dropoff}`;
+}
+
+function formatAssignment(request: AdminRideRequest) {
+  const plate = request.assigned_vehicle?.plate_number;
+  const driver = request.assigned_driver?.name;
+
+  if (plate && driver) {
+    return `${plate} · ${driver}`;
+  }
+
+  return plate ?? driver ?? "—";
 }
 
 function RideRequestRowActions({
@@ -114,7 +124,7 @@ export function AdminRideRequestsPage() {
   const requestCopy = getCustomerRequestsMessages(locale);
   const canRead = hasPermission(PERMISSIONS.ride_requests.read);
   const canWrite = hasPermission(PERMISSIONS.ride_requests.write);
-  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>(STATUS_FILTER_ALL);
+  const [statusFilter, setStatusFilter] = useState<AdminRideRequestListFilter>(STATUS_FILTER_ALL);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewRequestId, setReviewRequestId] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -162,7 +172,7 @@ export function AdminRideRequestsPage() {
       {
         id: "route",
         header: copy.columns.route,
-        cellClassName: "max-w-[18rem] truncate text-slate-600",
+        cellClassName: "max-w-[12rem] truncate text-slate-600",
         cell: (request) => formatRoute(request),
       },
       {
@@ -178,6 +188,12 @@ export function AdminRideRequestsPage() {
         cellClassName: "text-slate-500",
         cell: (request) =>
           formatMessage(requestCopy.passengersCount, { count: request.passenger_count }),
+      },
+      {
+        id: "assignment",
+        header: copy.columns.assignment,
+        cellClassName: "max-w-[11rem] truncate text-slate-600",
+        cell: (request) => formatAssignment(request),
       },
       {
         id: "status",
@@ -205,7 +221,9 @@ export function AdminRideRequestsPage() {
         page,
         limit,
         search: search || undefined,
-        status: statusFilter === STATUS_FILTER_ALL ? "" : statusFilter,
+        ...(statusFilter === STATUS_FILTER_UPCOMING
+          ? { upcoming: true }
+          : { status: statusFilter === STATUS_FILTER_ALL ? "" : statusFilter }),
       }),
     [locale, statusFilter],
   );
@@ -225,8 +243,9 @@ export function AdminRideRequestsPage() {
     return <PageAccessDenied copy={copy.accessDenied} />;
   }
 
-  const statusOptions: Array<{ value: StatusFilterValue; label: string }> = [
+  const statusOptions: Array<{ value: AdminRideRequestListFilter; label: string }> = [
     { value: STATUS_FILTER_ALL, label: copy.filters.statusAll },
+    { value: STATUS_FILTER_UPCOMING, label: copy.filters.upcoming },
     ...STATUS_FILTER_OPTIONS.map((status) => ({
       value: status,
       label: requestCopy.status[status],
@@ -234,8 +253,13 @@ export function AdminRideRequestsPage() {
   ];
 
   return (
-    <div className="space-y-6">
-      <AdminRideRequestStats locale={locale} refreshKey={refreshKey} />
+    <div className="min-w-0 max-w-full space-y-6">
+      <AdminRideRequestStats
+        locale={locale}
+        refreshKey={refreshKey}
+        activeFilter={statusFilter}
+        onFilterChange={setStatusFilter}
+      />
 
       <DataTable
         key={`${locale}-${statusFilter}`}
@@ -262,7 +286,7 @@ export function AdminRideRequestsPage() {
             items={statusOptions}
             value={statusFilter}
             onValueChange={(value) => {
-              setStatusFilter((value as StatusFilterValue | null) ?? STATUS_FILTER_ALL);
+              setStatusFilter((value as AdminRideRequestListFilter | null) ?? STATUS_FILTER_ALL);
             }}
           >
             <SelectTrigger

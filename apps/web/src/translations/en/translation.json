@@ -791,13 +791,15 @@
     "itemLabel": "request",
     "filters": {
       "status": "Status",
-      "statusAll": "All statuses"
+      "statusAll": "All statuses",
+      "upcoming": "Upcoming"
     },
     "columns": {
       "requester": "Requester",
       "route": "Route",
       "scheduled": "Scheduled",
       "passengers": "Passengers",
+      "assignment": "Assigned",
       "status": "Status",
       "submitted": "Submitted",
       "actions": "Actions"
@@ -828,6 +830,10 @@
       "confirmedDescription": "Approved requests ready for dispatch",
       "upcomingTitle": "Upcoming requests",
       "upcomingDescription": "Scheduled pickups still in the future",
+      "inProgressTitle": "In progress",
+      "inProgressDescription": "Trips currently underway",
+      "completedTitle": "Completed",
+      "completedDescription": "Finished trips",
       "cancelledTitle": "Cancelled",
       "cancelledDescription": "Rejected or cancelled requests"
     },
