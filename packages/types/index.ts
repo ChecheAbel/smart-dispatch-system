@@ -104,6 +104,26 @@ export interface AuditLog {
   created_at: string;
 }
 
+export type NotificationDeliveryStatus = "sent" | "skipped" | "failed";
+
+export interface NotificationDeliveryLog {
+  id: string;
+  status: NotificationDeliveryStatus;
+  module: NotificationModule;
+  event: string;
+  channel: NotificationChannel;
+  recipient: NotificationTemplateRecipient;
+  template_id: string | null;
+  entity_type: string | null;
+  entity_id: string | null;
+  recipient_contact: string | null;
+  subject: string | null;
+  body_preview: string | null;
+  error_message: string | null;
+  is_test: boolean;
+  created_at: string;
+}
+
 export type NotificationChannel = "email" | "sms";
 
 export interface NotificationConfiguration {

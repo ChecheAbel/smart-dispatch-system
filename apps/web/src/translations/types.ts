@@ -13,6 +13,7 @@ export type AdminNotificationsEmailMessages = Translations["adminNotificationsEm
 export type AdminNotificationsSmsMessages = Translations["adminNotificationsSms"];
 export type AdminNotificationsRideRequestsMessages = Translations["adminNotificationTemplates"];
 export type AdminNotificationTemplatesMessages = Translations["adminNotificationTemplates"];
+export type AdminNotificationDeliveryLogsMessages = Translations["adminNotificationDeliveryLogs"];
 export type AdminVehicleTypesMessages = Translations["adminVehicleTypes"];
 export type AdminVehicleClassesMessages = Translations["adminVehicleClasses"];
 export type AdminVehiclesMessages = Translations["adminVehicles"];

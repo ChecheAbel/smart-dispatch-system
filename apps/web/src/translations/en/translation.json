@@ -1449,6 +1449,8 @@
       "channelsSummaryLabel": "Channels on",
       "channelsSummaryAria": "{enabled} of {total} notification channels enabled",
       "notificationsLinkDescription": "Email & SMS provider settings",
+      "deliveryLogLinkTitle": "Delivery log",
+      "deliveryLogLinkDescription": "Sent, skipped, and failed deliveries",
       "readOnlyHint": "You have view-only access. Contact an administrator to edit templates."
     },
     "eventGroups": {
@@ -1552,6 +1554,96 @@
         "title": "Test notification failed",
         "description": "Verify channel credentials and the test recipient, then try again."
       }
+    }
+  },
+  "adminNotificationDeliveryLogs": {
+    "eyebrow": "System settings",
+    "title": "Notification delivery log",
+    "description": "Track sent, skipped, and failed email and SMS deliveries from message templates.",
+    "searchPlaceholder": "Search by recipient, event, error, or reference...",
+    "itemLabel": "delivery",
+    "filters": {
+      "status": "Status",
+      "statusAll": "All statuses",
+      "module": "Area",
+      "moduleAll": "All areas",
+      "channel": "Channel",
+      "channelAll": "All channels",
+      "kind": "Delivery type",
+      "kindAll": "Live and test",
+      "kindLive": "Live only",
+      "kindTest": "Test only",
+      "dateFrom": "From date",
+      "dateTo": "To date",
+      "pickDate": "Pick a date",
+      "clearDates": "Clear dates"
+    },
+    "columns": {
+      "time": "Time",
+      "status": "Status",
+      "event": "Event",
+      "channel": "Channel",
+      "recipient": "Audience",
+      "contact": "Recipient",
+      "summary": "Summary",
+      "actions": "Actions"
+    },
+    "statusLabels": {
+      "sent": "Sent",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    },
+    "moduleLabels": {
+      "ride_requests": "Ride requests",
+      "user_registrations": "User registrations"
+    },
+    "recipientLabels": {
+      "requester": "Customer",
+      "driver": "Driver",
+      "applicant": "Applicant"
+    },
+    "channelLabels": {
+      "email": "Email",
+      "sms": "SMS"
+    },
+    "kindLabels": {
+      "live": "Live",
+      "test": "Test"
+    },
+    "actions": {
+      "view": "View details",
+      "menuLabel": "Actions for delivery log"
+    },
+    "detail": {
+      "title": "Delivery details",
+      "description": "Full context for this notification attempt.",
+      "status": "Status",
+      "module": "Area",
+      "event": "Event",
+      "channel": "Channel",
+      "recipient": "Audience",
+      "contact": "Recipient contact",
+      "entityType": "Related record",
+      "entityId": "Record ID",
+      "subject": "Email subject",
+      "body": "Message preview",
+      "error": "Error",
+      "kind": "Delivery type",
+      "createdAt": "Logged at",
+      "close": "Close"
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to notification delivery logs is required to open this page. Ask an administrator to grant the notifications.read permission for your role.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "empty": {
+      "title": "No delivery logs yet",
+      "description": "Attempts to send notifications will appear here once templates are enabled and events occur.",
+      "searchDescription": "No delivery logs match your search or filters."
     }
   },
   "adminVehicleTypes": {

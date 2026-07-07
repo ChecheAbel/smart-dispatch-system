@@ -201,6 +201,17 @@ const DEFAULT_MENUS = [
     ],
   },
   {
+    slug: "notification-logs",
+    path: "/admin/notification-logs",
+    icon: "scroll-text",
+    sortOrder: 30,
+    parentSlug: "system-settings",
+    translations: [
+      { locale: "en", label: "Delivery Log" },
+      { locale: "am", label: "የማድረስ መዝገብ" },
+    ],
+  },
+  {
     slug: "fleet",
     path: null,
     icon: "truck",
@@ -383,6 +394,8 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "notifications.ride_requests.rules.list", method: "GET", path: "/api/notifications/templates", description: "List notification templates", permissionSlug: "notifications.read" },
   { slug: "notifications.ride_requests.rules.update", method: "PUT", path: "/api/notifications/templates", description: "Update notification templates", permissionSlug: "notifications.write" },
   { slug: "notifications.ride_requests.rules.test", method: "POST", path: "/api/notifications/templates/:id/test", description: "Send test notification template", permissionSlug: "notifications.write" },
+  { slug: "notifications.delivery_logs.list", method: "GET", path: "/api/notification-delivery-logs", description: "List notification delivery logs", permissionSlug: "notifications.read" },
+  { slug: "notifications.delivery_logs.get", method: "GET", path: "/api/notification-delivery-logs/:id", description: "Get notification delivery log", permissionSlug: "notifications.read" },
   { slug: "audit_logs.list", method: "GET", path: "/api/audit-logs", description: "List audit logs", permissionSlug: "audit_logs.read" },
   { slug: "audit_logs.get", method: "GET", path: "/api/audit-logs/:id", description: "Get audit log entry", permissionSlug: "audit_logs.read" },
   { slug: "vehicle_types.list", method: "GET", path: "/api/vehicle-types", description: "List vehicle types", permissionSlug: "vehicle_types.read" },

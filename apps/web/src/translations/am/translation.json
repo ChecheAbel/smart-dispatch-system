@@ -1449,6 +1449,8 @@
       "channelsSummaryLabel": "ነቅተው ያሉ መንገዶች",
       "channelsSummaryAria": "{enabled} ከ {total} የማሳወቂያ መንገዶች ነቅተዋል",
       "notificationsLinkDescription": "የኢሜይል እና ኤስኤምኤስ አቅራቢ ቅንብሮች",
+      "deliveryLogLinkTitle": "የማድረስ መዝገብ",
+      "deliveryLogLinkDescription": "የተላኩ፣ የተዘለሉ እና የከሰሉ ማድረሶች",
       "readOnlyHint": "ለመመልከት ብቻ ፈቃድ አለዎት። አብነቶችን ለመስተካከል አስተዳዳሪን ያነጋግሩ።"
     },
     "eventGroups": {
@@ -1552,6 +1554,96 @@
         "title": "የሙከራ ማሳወቂያ አልተሳካም",
         "description": "የመንገድ ምስክርነቶችን እና የሙከራ ተቀባዩን ያረጋግጡና እንደገና ይሞክሩ።"
       }
+    }
+  },
+  "adminNotificationDeliveryLogs": {
+    "eyebrow": "የስርዓት ቅንብሮች",
+    "title": "የማሳወቂያ ማድረስ መዝገብ",
+    "description": "ከመልዕክት አብነቶች የተላኩ፣ የተዘለሉ እና የከሰሉ ኢሜይል እና ኤስኤምኤስ ማድረሶችን ይከታተሉ።",
+    "searchPlaceholder": "በተቀባይ፣ ክስተት፣ ስህተት ወይም ማጣቀሻ ይፈልጉ...",
+    "itemLabel": "ማድረስ",
+    "filters": {
+      "status": "ሁኔታ",
+      "statusAll": "ሁሉም ሁኔታዎች",
+      "module": "አካባቢ",
+      "moduleAll": "ሁሉም አካባቢዎች",
+      "channel": "መንገድ",
+      "channelAll": "ሁሉም መንገዶች",
+      "kind": "የማድረስ አይነት",
+      "kindAll": "ቀጥተኛ እና ሙከራ",
+      "kindLive": "ቀጥተኛ ብቻ",
+      "kindTest": "ሙከራ ብቻ",
+      "dateFrom": "ከቀን",
+      "dateTo": "እስከ ቀን",
+      "pickDate": "ቀን ይምረጡ",
+      "clearDates": "ቀኖችን አጽዳ"
+    },
+    "columns": {
+      "time": "ሰዓት",
+      "status": "ሁኔታ",
+      "event": "ክስተት",
+      "channel": "መንገድ",
+      "recipient": "ታዳሚ",
+      "contact": "ተቀባይ",
+      "summary": "ማጠቃለያ",
+      "actions": "ድርጊቶች"
+    },
+    "statusLabels": {
+      "sent": "ተልኳል",
+      "skipped": "ተዘለለ",
+      "failed": "አልተሳካም"
+    },
+    "moduleLabels": {
+      "ride_requests": "የጉዞ ጥያቄዎች",
+      "user_registrations": "የተጠቃሚ ምዝገባዎች"
+    },
+    "recipientLabels": {
+      "requester": "ደንበኛ",
+      "driver": "አሽከርካሪ",
+      "applicant": "አመልካች"
+    },
+    "channelLabels": {
+      "email": "ኢሜይል",
+      "sms": "ኤስኤምኤስ"
+    },
+    "kindLabels": {
+      "live": "ቀጥተኛ",
+      "test": "ሙከራ"
+    },
+    "actions": {
+      "view": "ዝርዝር ይመልከቱ",
+      "menuLabel": "ለማድረስ መዝገብ ድርጊቶች"
+    },
+    "detail": {
+      "title": "የማድረስ ዝርዝር",
+      "description": "ለዚህ የማሳወቂያ ሙከሳ ሙሉ ዝርዝር።",
+      "status": "ሁኔታ",
+      "module": "አካባቢ",
+      "event": "ክስተት",
+      "channel": "መንገድ",
+      "recipient": "ታዳሚ",
+      "contact": "የተቀባይ አድራሻ",
+      "entityType": "ተዛማጅ መዝገብ",
+      "entityId": "የመዝገብ መለያ",
+      "subject": "የኢሜይል ርዕስ",
+      "body": "የመልዕክት ቅድመ እይታ",
+      "error": "ስህተት",
+      "kind": "የማድረስ አይነት",
+      "createdAt": "በተመዘገበበት",
+      "close": "ዝጋ"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የማሳወቂያ ማድረስ መዝገቦችን የማየት ፈቃድ ያስፈልጋል። አስተዳዳሪዎ ሚናዎ ላይ notifications.read ፈቃድ እንዲሰጥዎት ይጠይቁ።",
+      "sessionHint": "ፈቃዶች ቅርብ ጊዜ ከተቀየሩ፣ ክፍያዎን ለማደስ ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
+    "empty": {
+      "title": "ገና የማድረስ መዝገብ የለም",
+      "description": "አብነቶች ከነቁ እና ክስተቶች ከተከሰቱ በኋላ የማሳወቂያ ሙከራዎች እዚህ ይታያሉ።",
+      "searchDescription": "ከፍለጋዎ ወይም ማጣሪያዎ ጋር የሚዛመዱ የማድረስ መዝገቦች የሉም።"
     }
   },
   "adminVehicleTypes": {

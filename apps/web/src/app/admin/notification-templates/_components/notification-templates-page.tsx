@@ -18,6 +18,7 @@ import {
 } from "@/translations";
 import { cn } from "@/lib/utils";
 import {
+  NotificationDeliveryLogsLink,
   NotificationProvidersLink,
   NotificationTemplatesChannelsSummary,
 } from "./notification-templates-header-actions";
@@ -67,13 +68,14 @@ export function NotificationTemplatesPage() {
           </div>
         </div>
 
-        <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-stretch xl:w-auto xl:max-w-md xl:flex-col">
+        <div className="grid w-full gap-2 sm:grid-cols-2 xl:w-auto xl:max-w-xl">
           <NotificationTemplatesChannelsSummary
             enabled={stats.enabled}
             total={stats.total}
-            className="w-full sm:w-auto xl:w-full"
+            className="w-full sm:col-span-2"
           />
-          <NotificationProvidersLink className="w-full sm:w-auto xl:w-full" />
+          <NotificationProvidersLink className="w-full" />
+          <NotificationDeliveryLogsLink className="w-full" />
         </div>
       </div>
 

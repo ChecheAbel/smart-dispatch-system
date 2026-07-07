@@ -10,6 +10,7 @@ import {
   findNotificationTemplateById,
   listEnabledNotificationTemplates,
 } from "../models/notification-template.model";
+import { queueNotificationDeliveryLog } from "../models/notification-delivery-log.model";
 import {
   renderNotificationTemplate,
   validateNotificationTemplatePlaceholders,
@@ -131,6 +132,43 @@ function resolveUserRegistrationContact(
   return channel === "email" ? user.email?.trim() || null : user.mobileNumber?.trim() || null;
 }
 
+function moduleToEntityType(module: NotificationModule) {
+  return module === "ride_requests" ? "ride_request" : "user";
+}
+
+function logDeliveryAttempt(input: {
+  status: "sent" | "skipped" | "failed";
+  template: {
+    id: string;
+    module: string;
+    event: string;
+    channel: "email" | "sms";
+    recipient: NotificationTemplateRecipient;
+  };
+  entityId: string;
+  recipientContact?: string | null;
+  subject?: string | null;
+  bodyPreview?: string | null;
+  errorMessage?: string | null;
+  isTest?: boolean;
+}) {
+  queueNotificationDeliveryLog({
+    status: input.status,
+    module: input.template.module as NotificationModule,
+    event: input.template.event,
+    channel: input.template.channel,
+    recipient: input.template.recipient,
+    templateId: input.template.id,
+    entityType: input.isTest ? "test" : moduleToEntityType(input.template.module as NotificationModule),
+    entityId: input.isTest ? null : input.entityId,
+    recipientContact: input.recipientContact,
+    subject: input.subject,
+    bodyPreview: input.bodyPreview,
+    errorMessage: input.errorMessage,
+    isTest: input.isTest ?? false,
+  });
+}
+
 async function deliverTemplate(
   template: Awaited<ReturnType<typeof listEnabledNotificationTemplates>>[number],
   context: TemplateContext,
@@ -179,21 +217,52 @@ async function dispatchTemplates(
   }
 
   for (const template of templates) {
+    const renderedBody = renderNotificationTemplate(template.body, context);
+    const renderedSubject =
+      template.channel === "email"
+        ? renderNotificationTemplate(template.subject ?? "", context).trim()
+        : null;
+
     try {
       const contact = resolveContact(template);
       if (!contact) {
         console.warn(
           `[Notification] Skipped ${module}/${event}/${template.channel}/${template.recipient}: missing contact.`,
         );
+        logDeliveryAttempt({
+          status: "skipped",
+          template,
+          entityId,
+          subject: renderedSubject,
+          bodyPreview: renderedBody,
+          errorMessage: "Recipient contact is missing.",
+        });
         continue;
       }
 
       await deliverTemplate(template, context, contact);
+      logDeliveryAttempt({
+        status: "sent",
+        template,
+        entityId,
+        recipientContact: contact,
+        subject: renderedSubject,
+        bodyPreview: renderedBody,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown notification error.";
       console.error(
         `[Notification] Failed ${module}/${event}/${template.channel}/${template.recipient} for ${entityId}: ${message}`,
       );
+      logDeliveryAttempt({
+        status: "failed",
+        template,
+        entityId,
+        recipientContact: resolveContact(template),
+        subject: renderedSubject,
+        bodyPreview: renderedBody,
+        errorMessage: message,
+      });
     }
   }
 }
@@ -269,7 +338,38 @@ export async function sendNotificationTemplateTest(
       ? buildUserRegistrationSampleContext()
       : buildRideRequestSampleContext();
 
-  return deliverTemplate(template, context, contact);
+  const renderedBody = renderNotificationTemplate(template.body, context);
+  const renderedSubject =
+    template.channel === "email"
+      ? renderNotificationTemplate(template.subject ?? "", context).trim()
+      : null;
+
+  try {
+    await deliverTemplate(template, context, contact);
+    logDeliveryAttempt({
+      status: "sent",
+      template,
+      entityId: template.id,
+      recipientContact: contact,
+      subject: renderedSubject,
+      bodyPreview: renderedBody,
+      isTest: true,
+    });
+    return;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown notification error.";
+    logDeliveryAttempt({
+      status: "failed",
+      template,
+      entityId: template.id,
+      recipientContact: contact,
+      subject: renderedSubject,
+      bodyPreview: renderedBody,
+      errorMessage: message,
+      isTest: true,
+    });
+    throw error;
+  }
 }
 
 export function validateNotificationTemplateInput(input: {

@@ -238,12 +238,45 @@ model NotificationTemplate {
   recipient NotificationTemplateRecipient
   isEnabled Boolean                       @default(false) @map("is_enabled")
   subject   String?                       @db.VarChar(255)
-  body      String                        @db.VarChar(2000)
-  createdAt DateTime                      @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt DateTime                      @updatedAt @map("updated_at") @db.Timestamptz
+  body          String                        @db.VarChar(2000)
+  createdAt     DateTime                      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt     DateTime                      @updatedAt @map("updated_at") @db.Timestamptz
+  deliveryLogs  NotificationDeliveryLog[]
 
   @@unique([module, event, channel, recipient])
   @@map("notification_templates")
+}
+
+enum NotificationDeliveryStatus {
+  sent
+  skipped
+  failed
+
+  @@map("notification_delivery_status")
+}
+
+model NotificationDeliveryLog {
+  id               String                        @id @default(uuid()) @db.Uuid
+  status           NotificationDeliveryStatus
+  module           NotificationModule
+  event            String                        @db.VarChar(50)
+  channel          NotificationChannel
+  recipient        NotificationTemplateRecipient
+  templateId       String?                       @map("template_id") @db.Uuid
+  entityType       String?                       @map("entity_type") @db.VarChar(50)
+  entityId         String?                       @map("entity_id") @db.VarChar(255)
+  recipientContact String?                       @map("recipient_contact") @db.VarChar(255)
+  subject          String?                       @db.VarChar(255)
+  bodyPreview      String?                       @map("body_preview") @db.VarChar(500)
+  errorMessage     String?                       @map("error_message") @db.VarChar(500)
+  isTest           Boolean                       @default(false) @map("is_test")
+  createdAt        DateTime                      @default(now()) @map("created_at") @db.Timestamptz
+  template         NotificationTemplate?         @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt(sort: Desc)])
+  @@index([status])
+  @@index([module, event])
+  @@map("notification_delivery_logs")
 }
 
 model Token {
