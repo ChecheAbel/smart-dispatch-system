@@ -48,6 +48,8 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   "access-control": ShieldCheck,
   bell: Bell,
   notifications: Bell,
+  "messages-square": MessageSquare,
+  "notification-templates": MessageSquare,
   mail: Mail,
   "message-square": MessageSquare,
   truck: Truck,

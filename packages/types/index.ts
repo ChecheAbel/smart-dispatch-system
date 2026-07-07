@@ -121,6 +121,80 @@ export interface NotificationConfiguration {
   updated_at: string;
 }
 
+export type NotificationModule = "ride_requests" | "user_registrations";
+
+export type RideRequestNotificationEvent =
+  | "created"
+  | "confirmed"
+  | "rejected"
+  | "assigned"
+  | "started"
+  | "completed"
+  | "cancelled";
+
+export type UserRegistrationNotificationEvent = "submitted" | "approved" | "rejected";
+
+export type NotificationTemplateRecipient = "requester" | "driver" | "applicant";
+
+export interface NotificationTemplate {
+  id: string;
+  module: NotificationModule;
+  event: string;
+  channel: NotificationChannel;
+  recipient: NotificationTemplateRecipient;
+  is_enabled: boolean;
+  subject: string | null;
+  body: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export const RIDE_REQUEST_NOTIFICATION_PLACEHOLDERS = [
+  "requester_name",
+  "driver_name",
+  "pickup",
+  "dropoff",
+  "scheduled_at",
+  "passengers",
+  "vehicle_plate",
+  "rejection_reason",
+  "status",
+  "reference",
+] as const;
+
+export const USER_REGISTRATION_NOTIFICATION_PLACEHOLDERS = [
+  "applicant_name",
+  "applicant_email",
+  "applicant_mobile",
+  "segment",
+  "organization_name",
+  "rejection_reason",
+  "reference",
+] as const;
+
+export type RideRequestNotificationPlaceholder =
+  (typeof RIDE_REQUEST_NOTIFICATION_PLACEHOLDERS)[number];
+
+export type UserRegistrationNotificationPlaceholder =
+  (typeof USER_REGISTRATION_NOTIFICATION_PLACEHOLDERS)[number];
+
+export const NOTIFICATION_TEMPLATE_PLACEHOLDERS: Record<
+  NotificationModule,
+  readonly string[]
+> = {
+  ride_requests: RIDE_REQUEST_NOTIFICATION_PLACEHOLDERS,
+  user_registrations: USER_REGISTRATION_NOTIFICATION_PLACEHOLDERS,
+};
+
+/** @deprecated Use NotificationTemplate */
+export type RideRequestNotificationEventLegacy = RideRequestNotificationEvent;
+
+/** @deprecated Use NotificationTemplateRecipient */
+export type NotificationRecipient = "requester" | "driver";
+
+/** @deprecated Use NotificationTemplate */
+export type RideRequestNotificationRule = NotificationTemplate;
+
 export interface Permission {
   id: string;
   slug: string;

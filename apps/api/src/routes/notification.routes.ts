@@ -1,19 +1,31 @@
 import { Router, type Request, type Response } from "express";
-import type { NotificationChannel } from "@smart-dispatch/types";
+import type { NotificationChannel, NotificationModule } from "@smart-dispatch/types";
 import { auditMutations } from "../middleware/audit-mutation";
 import { authenticate } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
 import { requirePermission } from "../middleware/require-permission";
 import { toPublicNotificationConfiguration } from "../mappers/notification.mapper";
+import { toPublicNotificationTemplate } from "../mappers/notification-template.mapper";
 import {
   findNotificationConfigurationByChannel,
   upsertNotificationConfiguration,
 } from "../models/notification.model";
 import {
+  findNotificationTemplateById,
+  listNotificationTemplates,
+  updateNotificationTemplate,
+} from "../models/notification-template.model";
+import {
   sendAfroSmsTestMessage,
   SmsConfigurationError,
   SmsDeliveryError,
 } from "../services/sms.service";
+import {
+  sendNotificationTemplateTest,
+  validateNotificationTemplateInput,
+  EmailConfigurationError,
+  EmailDeliveryError,
+} from "../services/notification-dispatch.service";
 import { getOptionalString, parseBoolean } from "../utils/validation";
 import { handleRouteError, sendError, sendSuccess } from "../utils/response";
 
@@ -22,9 +34,18 @@ const router = Router();
 router.use(authenticate, authorize("admin"), auditMutations());
 
 const CHANNELS = new Set<NotificationChannel>(["email", "sms"]);
+const MODULES = new Set<NotificationModule>(["ride_requests", "user_registrations"]);
 
 function parseChannel(value: string): NotificationChannel | null {
   return CHANNELS.has(value as NotificationChannel) ? (value as NotificationChannel) : null;
+}
+
+function parseModule(value: unknown): NotificationModule | undefined {
+  if (typeof value !== "string" || !MODULES.has(value as NotificationModule)) {
+    return undefined;
+  }
+
+  return value as NotificationModule;
 }
 
 function parseSettings(value: unknown): Record<string, unknown> | undefined {
@@ -38,6 +59,118 @@ function parseSettings(value: unknown): Record<string, unknown> | undefined {
 
   return value as Record<string, unknown>;
 }
+
+router.get(
+  "/templates",
+  requirePermission("notifications.read"),
+  async (req: Request, res: Response) => {
+    try {
+      const module = parseModule(req.query.module);
+      const templates = await listNotificationTemplates(module);
+
+      return sendSuccess(res, {
+        templates: templates.map(toPublicNotificationTemplate),
+      });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.put(
+  "/templates",
+  requirePermission("notifications.write"),
+  async (req: Request, res: Response) => {
+    try {
+      const items = Array.isArray(req.body?.templates) ? req.body.templates : null;
+      if (!items) {
+        return sendError(res, "A templates array is required.", 400);
+      }
+
+      const updatedTemplates = [];
+
+      for (const item of items) {
+        const id = getOptionalString(item?.id);
+        if (!id) {
+          return sendError(res, "Each template must include an id.", 400);
+        }
+
+        const existing = await findNotificationTemplateById(id);
+        if (!existing) {
+          return sendError(res, "One or more notification templates were not found.", 404);
+        }
+
+        const nextEnabled =
+          item?.is_enabled !== undefined
+            ? (parseBoolean(item.is_enabled) ?? false)
+            : existing.isEnabled;
+        const nextSubject =
+          item?.subject !== undefined ? getOptionalString(item.subject) ?? null : existing.subject;
+        const nextBody =
+          item?.body !== undefined ? getOptionalString(item.body) ?? "" : existing.body;
+
+        const validationError = validateNotificationTemplateInput({
+          module: existing.module as NotificationModule,
+          channel: existing.channel,
+          isEnabled: nextEnabled,
+          subject: nextSubject,
+          body: nextBody,
+        });
+
+        if (validationError) {
+          return sendError(res, validationError, 400);
+        }
+
+        const updated = await updateNotificationTemplate(id, {
+          isEnabled: nextEnabled,
+          subject: nextSubject,
+          body: nextBody,
+        });
+
+        updatedTemplates.push(updated);
+      }
+
+      return sendSuccess(res, {
+        templates: updatedTemplates.map(toPublicNotificationTemplate),
+      });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.post(
+  "/templates/:id/test",
+  requirePermission("notifications.write"),
+  async (req: Request, res: Response) => {
+    try {
+      const template = await findNotificationTemplateById(req.params.id);
+      if (!template) {
+        return sendError(res, "Notification template not found.", 404);
+      }
+
+      const to = getOptionalString(req.body?.to);
+      const delivery = await sendNotificationTemplateTest(template.id, to ?? undefined);
+
+      return sendSuccess(res, { delivery }, { message: "Test notification sent successfully." });
+    } catch (error) {
+      if (
+        error instanceof SmsConfigurationError ||
+        error instanceof SmsDeliveryError ||
+        error instanceof EmailConfigurationError ||
+        error instanceof EmailDeliveryError
+      ) {
+        return sendError(res, error.message, 400);
+      }
+
+      if (error instanceof Error) {
+        return sendError(res, error.message, 400);
+      }
+
+      return handleRouteError(res, error);
+    }
+  },
+);
 
 router.post(
   "/:channel/test",

@@ -44,7 +44,7 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
     return ["users.read", "user_registrations.read"];
   }
 
-  if (normalizedSlug === "system-settings" || normalizedSlug === "notifications") {
+  if (normalizedSlug === "system-settings" || normalizedSlug === "notifications" || normalizedSlug === "notification-templates") {
     return ["notifications.read"];
   }
 

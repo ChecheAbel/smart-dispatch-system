@@ -1143,10 +1143,10 @@
   "adminNotifications": {
     "eyebrow": "System settings",
     "title": "Notifications",
-    "description": "Configure email and SMS delivery settings for platform notifications.",
+    "description": "Configure email and SMS provider credentials for outbound delivery.",
     "channels": {
-      "title": "Notification channel",
-      "description": "Choose which delivery method you want to configure.",
+      "title": "Delivery channel",
+      "description": "Choose which provider credentials you want to configure.",
       "email": {
         "title": "Email",
         "description": "SMTP, SendGrid, or Mailgun for outbound email."
@@ -1364,6 +1364,190 @@
       "testFailed": {
         "title": "Test SMS failed",
         "description": "Please verify your configuration and try again."
+      }
+    }
+  },
+  "adminNotificationTemplates": {
+    "eyebrow": "System settings",
+    "title": "Message templates",
+    "description": "Configure email and SMS messages for ride requests and user registration approval across the platform.",
+    "placeholders": {
+      "title": "Message placeholders",
+      "description": "Insert these tokens in email subjects and message bodies. They are replaced with real data when a notification is sent.",
+      "warning": "Only use the placeholders listed above. Unknown tokens such as {customer_name} will not be replaced and will appear literally in the message. The system will reject saves that include unsupported placeholders.",
+      "modules": {
+        "rideRequests": {
+          "title": "Ride requests & dispatch",
+          "description": "Available for all ride request notification templates."
+        },
+        "userRegistrations": {
+          "title": "User registrations",
+          "description": "Available for registration submitted, approved, and declined templates."
+        }
+      },
+      "items": {
+        "rideRequests": {
+          "requester_name": "Customer full name",
+          "driver_name": "Assigned driver full name",
+          "pickup": "Pickup address",
+          "dropoff": "Drop-off address",
+          "scheduled_at": "Scheduled date and time",
+          "passengers": "Number of passengers",
+          "vehicle_plate": "Assigned vehicle plate number",
+          "rejection_reason": "Reason when a request is declined",
+          "status": "Current request status",
+          "reference": "Short request reference code"
+        },
+        "userRegistrations": {
+          "applicant_name": "Applicant full name",
+          "applicant_email": "Applicant email address",
+          "applicant_mobile": "Applicant mobile number",
+          "segment": "Customer segment (e.g. business, government)",
+          "organization_name": "Organization or company name",
+          "rejection_reason": "Reason when registration is declined",
+          "reference": "Short application reference code"
+        }
+      }
+    },
+    "ruleDescription": "Enable this channel and edit the message sent when the event occurs.",
+    "enabledLabel": "Enabled",
+    "subjectLabel": "Email subject",
+    "subjectPlaceholder": "Subject line for this notification",
+    "bodyLabel": "Message",
+    "bodyPlaceholder": "Write the notification message...",
+    "testEmailLabel": "Test email",
+    "testEmailPlaceholder": "you@example.com",
+    "testPhoneLabel": "Test phone",
+    "testPhonePlaceholder": "+2519XXXXXXXX",
+    "testAction": "Send test",
+    "testing": "Sending...",
+    "test": {
+      "title": "Send test message",
+      "descriptionEmail": "Deliver this template to your inbox using sample placeholder data.",
+      "descriptionSms": "Deliver this template to a phone number using sample placeholder data.",
+      "previewTitle": "Message preview",
+      "previewNote": "Test messages replace placeholders with sample values such as Jane Doe and Bole International Airport.",
+      "emailHint": "Use an email address you can access to verify subject, body, and delivery.",
+      "phoneHint": "Include country code, for example +2519XXXXXXXX.",
+      "recipientRequired": "Enter a recipient before sending the test.",
+      "emailInvalid": "Enter a valid email address.",
+      "phoneInvalid": "Enter a valid phone number with country code.",
+      "providerNote": "Delivery uses your saved email or SMS provider under System Settings → Notifications."
+    },
+    "saveAction": "Save message templates",
+    "saving": "Saving...",
+    "shell": {
+      "modulePickerTitle": "Notification area",
+      "modulePickerDescription": "Choose which workflows these messages apply to.",
+      "eventPickerTitle": "Trigger event",
+      "eventPickerDescription": "Select when the message should be sent, then edit each channel on the right.",
+      "eventSearchPlaceholder": "Search events...",
+      "eventSearchEmpty": "No events match your search.",
+      "channelsEnabled": "{enabled}/{total} on",
+      "placeholdersToggle": "Placeholder reference",
+      "summaryEnabled": "{enabled} of {total} channels enabled",
+      "readOnlyHint": "You have view-only access. Contact an administrator to edit templates."
+    },
+    "eventGroups": {
+      "ride_requests": {
+        "booking": "Booking",
+        "review": "Review & approval",
+        "dispatch": "Dispatch & trip"
+      },
+      "user_registrations": {
+        "registration": "Account lifecycle"
+      }
+    },
+    "channels": {
+      "email": "Email",
+      "sms": "SMS"
+    },
+    "recipients": {
+      "requester": "Customer",
+      "driver": "Driver",
+      "applicant": "Applicant"
+    },
+    "modules": {
+      "rideRequests": {
+        "title": "Ride requests & dispatch",
+        "description": "Messages sent during booking, approval, assignment, and trip lifecycle."
+      },
+      "userRegistrations": {
+        "title": "User registrations",
+        "description": "Messages sent when a customer registers and their account is approved or declined."
+      }
+    },
+    "events": {
+      "ride_requests": {
+        "created": {
+          "title": "Request submitted",
+          "description": "Sent when a customer submits a new ride request."
+        },
+        "confirmed": {
+          "title": "Request approved",
+          "description": "Sent when an admin approves a ride request."
+        },
+        "rejected": {
+          "title": "Request declined",
+          "description": "Sent when an admin rejects a ride request."
+        },
+        "assigned": {
+          "title": "Vehicle assigned",
+          "description": "Sent when a vehicle and driver are assigned to a trip."
+        },
+        "started": {
+          "title": "Trip started",
+          "description": "Sent when the trip moves to in progress."
+        },
+        "completed": {
+          "title": "Trip completed",
+          "description": "Sent when the trip is marked complete."
+        },
+        "cancelled": {
+          "title": "Request cancelled",
+          "description": "Sent when a customer cancels a pending request."
+        }
+      },
+      "user_registrations": {
+        "submitted": {
+          "title": "Registration submitted",
+          "description": "Sent when a customer completes the sign-up form."
+        },
+        "approved": {
+          "title": "Registration approved",
+          "description": "Sent when an admin activates the customer account."
+        },
+        "rejected": {
+          "title": "Registration declined",
+          "description": "Sent when an admin rejects a pending registration."
+        }
+      }
+    },
+    "errors": {
+      "loadFailed": "Failed to load notification templates.",
+      "saveFailed": "Failed to save notification templates.",
+      "testFailed": "Failed to send test notification."
+    },
+    "toast": {
+      "loadFailed": {
+        "title": "Could not load message templates",
+        "description": "Please try again or refresh the page."
+      },
+      "saved": {
+        "title": "Message templates saved",
+        "description": "Your notification messages and channel settings have been updated."
+      },
+      "saveFailed": {
+        "title": "Could not save message templates",
+        "description": "Please check the form and try again."
+      },
+      "testSent": {
+        "title": "Test notification sent",
+        "description": "Check the recipient inbox or phone for the sample message."
+      },
+      "testFailed": {
+        "title": "Test notification failed",
+        "description": "Verify channel credentials and the test recipient, then try again."
       }
     }
   },

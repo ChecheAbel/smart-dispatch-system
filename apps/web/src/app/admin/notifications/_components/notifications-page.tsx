@@ -44,8 +44,14 @@ export function NotificationsPage() {
   );
 
   useEffect(() => {
-    setActiveTab(parseTab(searchParams.get("tab")));
-  }, [searchParams]);
+    const tab = searchParams.get("tab");
+    if (tab === "ride-requests") {
+      router.replace("/admin/notification-templates", { scroll: false });
+      return;
+    }
+
+    setActiveTab(parseTab(tab));
+  }, [router, searchParams]);
 
   function selectTab(tab: NotificationTab) {
     setActiveTab(tab);

@@ -199,6 +199,21 @@ enum NotificationChannel {
   @@map("notification_channel")
 }
 
+enum NotificationModule {
+  ride_requests
+  user_registrations
+
+  @@map("notification_module")
+}
+
+enum NotificationTemplateRecipient {
+  requester
+  driver
+  applicant
+
+  @@map("notification_template_recipient")
+}
+
 model NotificationConfiguration {
   id        String              @id @default(uuid()) @db.Uuid
   channel   NotificationChannel @unique
@@ -213,6 +228,22 @@ model NotificationConfiguration {
   updatedAt DateTime            @updatedAt @map("updated_at") @db.Timestamptz
 
   @@map("notification_configurations")
+}
+
+model NotificationTemplate {
+  id        String                        @id @default(uuid()) @db.Uuid
+  module    NotificationModule
+  event     String                        @db.VarChar(50)
+  channel   NotificationChannel
+  recipient NotificationTemplateRecipient
+  isEnabled Boolean                       @default(false) @map("is_enabled")
+  subject   String?                       @db.VarChar(255)
+  body      String                        @db.VarChar(2000)
+  createdAt DateTime                      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt DateTime                      @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@unique([module, event, channel, recipient])
+  @@map("notification_templates")
 }
 
 model Token {

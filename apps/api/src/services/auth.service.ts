@@ -368,6 +368,8 @@ export async function registerUserApplication(input: {
   }
 
   const passwordHash = await bcrypt.hash(input.password, 12);
+  let createdUserId = "";
+
   await prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
       data: {
@@ -382,6 +384,8 @@ export async function registerUserApplication(input: {
       },
     });
 
+    createdUserId = user.id;
+
     await tx.authRole.create({
       data: {
         userId: user.id,
@@ -395,6 +399,7 @@ export async function registerUserApplication(input: {
   return {
     message:
       "Your account has been created. We will review your details and notify you once your account is activated.",
+    userId: createdUserId,
   };
 }
 

@@ -14,6 +14,7 @@ import {
   updateMyProfile,
 } from "../services/auth.service";
 import { recordAuditLog } from "../services/audit-log.service";
+import { queueUserRegistrationNotifications } from "../services/notification-dispatch.service";
 import { handleRouteError, sendError, sendSuccess } from "../utils/response";
 import {
   getOptionalString,
@@ -77,6 +78,10 @@ export function registerAuthRoutes(app: Express) {
         mobileNumber,
         requesterProfile,
       });
+
+      if (result.userId) {
+        queueUserRegistrationNotifications("submitted", result.userId);
+      }
 
       return sendSuccess(res, result, { status: 201, message: result.message });
     } catch (error) {

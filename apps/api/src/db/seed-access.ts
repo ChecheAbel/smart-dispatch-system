@@ -190,6 +190,17 @@ const DEFAULT_MENUS = [
     ],
   },
   {
+    slug: "notification-templates",
+    path: "/admin/notification-templates",
+    icon: "messages-square",
+    sortOrder: 20,
+    parentSlug: "system-settings",
+    translations: [
+      { locale: "en", label: "Message Templates" },
+      { locale: "am", label: "የመልዕክት አብነቶች" },
+    ],
+  },
+  {
     slug: "fleet",
     path: null,
     icon: "truck",
@@ -369,6 +380,9 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "notifications.sms.get", method: "GET", path: "/api/notifications/sms", description: "Get SMS notification configuration", permissionSlug: "notifications.read" },
   { slug: "notifications.sms.update", method: "PATCH", path: "/api/notifications/sms", description: "Update SMS notification configuration", permissionSlug: "notifications.write" },
   { slug: "notifications.sms.test", method: "POST", path: "/api/notifications/sms/test", description: "Send test SMS", permissionSlug: "notifications.write" },
+  { slug: "notifications.ride_requests.rules.list", method: "GET", path: "/api/notifications/templates", description: "List notification templates", permissionSlug: "notifications.read" },
+  { slug: "notifications.ride_requests.rules.update", method: "PUT", path: "/api/notifications/templates", description: "Update notification templates", permissionSlug: "notifications.write" },
+  { slug: "notifications.ride_requests.rules.test", method: "POST", path: "/api/notifications/templates/:id/test", description: "Send test notification template", permissionSlug: "notifications.write" },
   { slug: "audit_logs.list", method: "GET", path: "/api/audit-logs", description: "List audit logs", permissionSlug: "audit_logs.read" },
   { slug: "audit_logs.get", method: "GET", path: "/api/audit-logs/:id", description: "Get audit log entry", permissionSlug: "audit_logs.read" },
   { slug: "vehicle_types.list", method: "GET", path: "/api/vehicle-types", description: "List vehicle types", permissionSlug: "vehicle_types.read" },

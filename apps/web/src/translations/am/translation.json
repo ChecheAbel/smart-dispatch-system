@@ -1143,10 +1143,10 @@
   "adminNotifications": {
     "eyebrow": "የስርዓት ቅንብሮች",
     "title": "ማሳወቂያዎች",
-    "description": "ለመድረክ ማሳወቂያዎች የኢሜይል እና የኤስኤምኤስ መላኪያ ቅንብሮችን ያዋቅሩ።",
+    "description": "ለወጪ መላኪያ የኢሜይል እና የኤስኤምኤስ አቅራቢ ምስክርነቶችን ያዋቅሩ።",
     "channels": {
-      "title": "የማሳወቂያ መንገድ",
-      "description": "ማዋቀር የሚፈልጉትን የመላኪያ ዘዴ ይምረጡ።",
+      "title": "የመላኪያ መንገድ",
+      "description": "ማዋቀር የሚፈልጉትን የአቅራቢ ምስክርነት ይምረጡ።",
       "email": {
         "title": "ኢሜይል",
         "description": "ለወጪ ኢሜይል SMTP፣ SendGrid ወይም Mailgun።"
@@ -1364,6 +1364,190 @@
       "testFailed": {
         "title": "የሙከራ ኤስኤምኤስ አልተሳካም",
         "description": "እባክዎ ቅንብርዎን ያረጋግጡና እንደገና ይሞክሩ።"
+      }
+    }
+  },
+  "adminNotificationTemplates": {
+    "eyebrow": "የስርዓት ቅንብሮች",
+    "title": "የመልዕክት አብነቶች",
+    "description": "ለጉዞ ጥያቄዎች እና የተጠቃሚ ምዝገባ ማረጋገጫ በመላው መድረክ ኢሜይል እና ኤስኤምኤስ መልዕክቶችን ያዋቅሩ።",
+    "placeholders": {
+      "title": "የመልዕክት ቦታ ማስተካከያዎች",
+      "description": "እነዚህን ቶከኖች በኢሜይል ርዕስ እና በመልዕክት ውስጥ ይጠቀሙ። ማሳወቂያ ሲላክ በእውነተኛ መረጃ ይተካሉ።",
+      "warning": "ከላይ የተዘረዘሩትን ቦታ ማስተካከያዎች ብቻ ይጠቀሙ። {customer_name} ያሉ ያልታወቁ ቶከኖች አይተኩሱም እና በመልዕክቱ ውስጥ እንደ ተጽዕኖ ይታያሉ። ያልተደገፉ ቦታ ማስተካከያዎች ካሉ ማስቀመጥ አይፈቀድም።",
+      "modules": {
+        "rideRequests": {
+          "title": "የጉዞ ጥያቄዎች እና መላኪያ",
+          "description": "ለሁሉም የጉዞ ጥያቄ ማሳወቂያ አብነቶች ይገኛሉ።"
+        },
+        "userRegistrations": {
+          "title": "የተጠቃሚ ምዝገባዎች",
+          "description": "ለምዝገባ ቀርቧል፣ ጸድቋል እና ተቀባይነት አላገኘም የሚሉ አብነቶች ይገኛሉ።"
+        }
+      },
+      "items": {
+        "rideRequests": {
+          "requester_name": "የደንበኛ ሙሉ ስም",
+          "driver_name": "የተመደበ አሽከርካሪ ሙሉ ስም",
+          "pickup": "የመውሰድ አድራሻ",
+          "dropoff": "የመውረድ አድራሻ",
+          "scheduled_at": "የታቀደ ቀን እና ሰዓት",
+          "passengers": "የተሳፋሪዎች ብዛት",
+          "vehicle_plate": "የተመደበ ተሽከርካሪ ታብራ",
+          "rejection_reason": "ጥያቄ ሲቀበል አልባይ ምክንያት",
+          "status": "የአሁኑ የጥያቄ ሁኔታ",
+          "reference": "አጭር የጥያቄ ማጣቀሻ ኮድ"
+        },
+        "userRegistrations": {
+          "applicant_name": "የአመልካች ሙሉ ስም",
+          "applicant_email": "የአመልካች ኢሜይል",
+          "applicant_mobile": "የአመልካች ሞባይል ቁጥር",
+          "segment": "የደንበኛ ክፍል (ለምሳሌ ንግድ፣ መንግስት)",
+          "organization_name": "የድርጅት ወይም የኩባንያ ስም",
+          "rejection_reason": "ምዝገባ ሲቀበል አልባይ ምክንያት",
+          "reference": "አጭር የምዝገባ ማጣቀሻ ኮድ"
+        }
+      }
+    },
+    "ruleDescription": "ይህን መንገድ ያንቁ እና ክስተቱ ሲከሰት የሚላከውን መልዕክት ያርትዑ።",
+    "enabledLabel": "ነቅቷል",
+    "subjectLabel": "የኢሜይል ርዕስ",
+    "subjectPlaceholder": "ለዚህ ማሳወቂያ የኢሜይል ርዕስ",
+    "bodyLabel": "መልዕክት",
+    "bodyPlaceholder": "የማሳወቂያ መልዕክቱን ይጻፉ...",
+    "testEmailLabel": "የሙከራ ኢሜይል",
+    "testEmailPlaceholder": "you@example.com",
+    "testPhoneLabel": "የሙከራ ስልክ",
+    "testPhonePlaceholder": "+2519XXXXXXXX",
+    "testAction": "ሙከራ ላክ",
+    "testing": "በመላክ ላይ…",
+    "test": {
+      "title": "የሙከራ መልዕክት ላክ",
+      "descriptionEmail": "ይህን አብነት ከናሙና ቦታ ማስተካከያዎች ጋር ወደ የእርስዎ ኢንቦክስ ይላካል።",
+      "descriptionSms": "ይህን አብነት ከናሙና ቦታ ማስተካከያዎች ጋር ወደ ስልክ ቁጥር ይላካል።",
+      "previewTitle": "የመልዕክት ቅድመ እይታ",
+      "previewNote": "የሙከራ መልዕክቶች ቦታ ማስተካከያዎችን በናሙና እሴቶች ይተካሉ (ለምሳሌ Jane Doe፣ ቦሌ አየር ማረፊያ)።",
+      "emailHint": "ርዕስ፣ ይዘት እና ማድረስ ለማረጋገጥ የሚያዩትን ኢሜይል ይጠቀሙ።",
+      "phoneHint": "የሀገር ኮድ ያካትቱ፣ ለምሳሌ +2519XXXXXXXX።",
+      "recipientRequired": "ሙከራ ከመላክዎ በፊት ተቀባይ ያስገቡ።",
+      "emailInvalid": "ትክክለኛ ኢሜይል ያስገቡ።",
+      "phoneInvalid": "ከሀገር ኮድ ጋር ትክክለኛ ስልክ ቁጥር ያስገቡ።",
+      "providerNote": "ማድረስ በስርዓት ቅንብሮች → ማሳወቂያዎች ውስጥ ከተቀመጡ የኢሜይል ወይም ኤስኤምኤስ አቅራቢዎች ይከናወናል።"
+    },
+    "saveAction": "የመልዕክት አብነቶችን አስቀምጥ",
+    "saving": "በማስቀመጥ ላይ…",
+    "shell": {
+      "modulePickerTitle": "የማሳወቂያ አካባቢ",
+      "modulePickerDescription": "እነዚህ መልዕክቶች ለየትኛው የስራ ሂደት እንደሚሰሩ ይምረጡ።",
+      "eventPickerTitle": "የማስነሳት ክስተት",
+      "eventPickerDescription": "መልዕክቱ መቼ እንደሚላክ ይምረጡ፣ ከዚያ በቀኝ በኩል ያለውን መንገድ ያርትዑ።",
+      "eventSearchPlaceholder": "ክስተቶችን ይፈልጉ...",
+      "eventSearchEmpty": "ከፍለጋዎ ጋር የሚዛመዱ ክስተቶች የሉም።",
+      "channelsEnabled": "{enabled}/{total} ነቅቷል",
+      "placeholdersToggle": "የቦታ ማስተካከያ ማጣቀሻ",
+      "summaryEnabled": "{enabled} ከ {total} መንገዶች ነቅተዋል",
+      "readOnlyHint": "ለመመልከት ብቻ ፈቃድ አለዎት። አብነቶችን ለመስተካከል አስተዳዳሪን ያነጋግሩ።"
+    },
+    "eventGroups": {
+      "ride_requests": {
+        "booking": "ቦታ ማስያዝ",
+        "review": "ግምገማ እና ማረጋገጫ",
+        "dispatch": "መላኪያ እና ጉዞ"
+      },
+      "user_registrations": {
+        "registration": "የመለያ ዑደት"
+      }
+    },
+    "channels": {
+      "email": "ኢሜይል",
+      "sms": "ኤስኤምኤስ"
+    },
+    "recipients": {
+      "requester": "ደንበኛ",
+      "driver": "አሽከርካሪ",
+      "applicant": "አመልካች"
+    },
+    "modules": {
+      "rideRequests": {
+        "title": "የጉዞ ጥያቄዎች እና መላኪያ",
+        "description": "በቦታ ማስያዝ፣ ማረጋገጥ፣ መመደብ እና የጉዞ ዑደት ወቅት የሚላኩ መልዕክቶች።"
+      },
+      "userRegistrations": {
+        "title": "የተጠቃሚ ምዝገባዎች",
+        "description": "ደንበኛ ሲመዘገብ እና መለያው ሲጸድቅ ወይም ሲሰረዝ የሚላኩ መልዕክቶች።"
+      }
+    },
+    "events": {
+      "ride_requests": {
+        "created": {
+          "title": "ጥያቄ ቀርቧል",
+          "description": "ደንበኛ አዲስ የጉዞ ጥያቄ ሲያስገባ ይላካል።"
+        },
+        "confirmed": {
+          "title": "ጥያቄ ጸድቋል",
+          "description": "አስተዳዳሪ የጉዞ ጥያቄ ሲያጸድቅ ይላካል።"
+        },
+        "rejected": {
+          "title": "ጥያቄ ተቀባይነት አላገኘም",
+          "description": "አስተዳዳሉ የጉዞ ጥያቄ ሲከልክል ይላካል።"
+        },
+        "assigned": {
+          "title": "ተሽከርካሪ ተመድቧል",
+          "description": "ለጉዞ ተሽከርካሪ እና አሽከርካሪ ሲመደቡ ይላካል።"
+        },
+        "started": {
+          "title": "ጉዞ ተጀምሯል",
+          "description": "ጉዞው ወደ በሂደት ላይ ሁኔታ ሲቀየር ይላካል።"
+        },
+        "completed": {
+          "title": "ጉዞ ተጠናቋል",
+          "description": "ጉዞው እንደተጠናቀቀ ሲሰነዝ ይላካል።"
+        },
+        "cancelled": {
+          "title": "ጥያቄ ተሰርዟል",
+          "description": "ደንበኛ በመጠባበቅ ላይ ያለን ጥያቄ ሲሰርዝ ይላካል።"
+        }
+      },
+      "user_registrations": {
+        "submitted": {
+          "title": "ምዝገባ ቀርቧል",
+          "description": "ደንበኛ የምዝገባ ቅጹን ሲጨርስ ይላካል።"
+        },
+        "approved": {
+          "title": "ምዝገባ ጸድቋል",
+          "description": "አስተዳዳሪ የደንበኛ መለያ ሲያግብር ይላካል።"
+        },
+        "rejected": {
+          "title": "ምዝገባ ተቀባይነት አላገኘም",
+          "description": "አስተዳዳሪ በመጠባበቅ ላይ ያለን ምዝገባ ሲሰርዝ ይላካል።"
+        }
+      }
+    },
+    "errors": {
+      "loadFailed": "የማሳወቂያ አብነቶችን መጫን አልተሳካም።",
+      "saveFailed": "የማሳወቂያ አብነቶችን ማስቀመጥ አልተሳካም።",
+      "testFailed": "የሙከራ ማሳወቂያ መላክ አልተሳካም።"
+    },
+    "toast": {
+      "loadFailed": {
+        "title": "የመልዕክት አብነቶችን መጫን አልተቻለም",
+        "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+      },
+      "saved": {
+        "title": "የመልዕክት አብነቶች ተቀምጠዋል",
+        "description": "የማሳወቂያ መልዕክቶችዎ እና የመንገድ ቅንብሮችዎ ተዘምነዋል።"
+      },
+      "saveFailed": {
+        "title": "የመልዕክት አብነቶችን ማስቀመጥ አልተቻለም",
+        "description": "እባክዎ ቅጹን ያረጋግጡና እንደገና ይሞክሩ።"
+      },
+      "testSent": {
+        "title": "የሙከራ ማሳወቂያ ተልኳል",
+        "description": "የናሙና መልዕክቱን በተቀባዩ ኢሜይል ወይም ስልክ ይመልከቱ።"
+      },
+      "testFailed": {
+        "title": "የሙከራ ማሳወቂያ አልተሳካም",
+        "description": "የመንገድ ምስክርነቶችን እና የሙከራ ተቀባዩን ያረጋግጡና እንደገና ይሞክሩ።"
       }
     }
   },

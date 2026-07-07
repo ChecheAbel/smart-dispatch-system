@@ -1,0 +1,75 @@
+import type {
+  NotificationModule,
+  NotificationTemplate,
+  NotificationTemplateRecipient,
+} from "@smart-dispatch/types";
+
+export const MODULE_EVENTS: Record<NotificationModule, string[]> = {
+  ride_requests: [
+    "created",
+    "confirmed",
+    "rejected",
+    "assigned",
+    "started",
+    "completed",
+    "cancelled",
+  ],
+  user_registrations: ["submitted", "approved", "rejected"],
+};
+
+export const EVENT_GROUPS: Record<
+  NotificationModule,
+  { id: string; events: string[] }[]
+> = {
+  ride_requests: [
+    { id: "booking", events: ["created", "cancelled"] },
+    { id: "review", events: ["confirmed", "rejected"] },
+    { id: "dispatch", events: ["assigned", "started", "completed"] },
+  ],
+  user_registrations: [{ id: "registration", events: ["submitted", "approved", "rejected"] }],
+};
+
+const DRIVER_EVENTS = new Set(["assigned", "started", "completed"]);
+
+export function shouldShowTemplate(
+  module: NotificationModule,
+  event: string,
+  recipient: NotificationTemplateRecipient,
+) {
+  if (module === "user_registrations") {
+    return recipient === "applicant";
+  }
+
+  if (recipient === "driver") {
+    return DRIVER_EVENTS.has(event);
+  }
+
+  return recipient === "requester";
+}
+
+export function getVisibleEventTemplates(
+  module: NotificationModule,
+  event: string,
+  templates: NotificationTemplate[],
+) {
+  return templates.filter(
+    (template) =>
+      template.module === module &&
+      template.event === event &&
+      shouldShowTemplate(module, event, template.recipient),
+  );
+}
+
+export function getEventChannelStats(
+  module: NotificationModule,
+  event: string,
+  templates: NotificationTemplate[],
+  formState: Record<string, { is_enabled: boolean }>,
+) {
+  const visible = getVisibleEventTemplates(module, event, templates);
+  const enabled = visible.filter(
+    (template) => formState[template.id]?.is_enabled ?? template.is_enabled,
+  ).length;
+
+  return { enabled, total: visible.length };
+}

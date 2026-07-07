@@ -24,6 +24,7 @@ import {
   type AdminRideRequestStatusAction,
 } from "../services/ride-request-admin-policy.service";
 import { validateRideRequestVehicleAssignment } from "../services/ride-request-dispatch.service";
+import { queueRideRequestNotifications } from "../services/notification-dispatch.service";
 import { parseRideRequestRejectionReason } from "../services/ride-request-rejection.service";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
@@ -213,6 +214,8 @@ router.post(
         req,
       });
 
+      queueRideRequestNotifications("assigned", updated.id);
+
       return sendSuccess(res, {
         ride_request: toAdminRideRequest(updated, { locale }),
       });
@@ -331,6 +334,16 @@ router.post(
         summary: getStatusActionSummary(action),
         req,
       });
+
+      if (action === "confirm") {
+        queueRideRequestNotifications("confirmed", updated.id);
+      } else if (action === "reject") {
+        queueRideRequestNotifications("rejected", updated.id);
+      } else if (action === "start") {
+        queueRideRequestNotifications("started", updated.id);
+      } else if (action === "complete") {
+        queueRideRequestNotifications("completed", updated.id);
+      }
 
       return sendSuccess(res, {
         ride_request: toAdminRideRequest(updated, { locale }),

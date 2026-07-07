@@ -20,6 +20,7 @@ import { listActiveRegions } from "../models/region.model";
 import { listActiveBookingLocations } from "../models/location.model";
 import { listActiveVehicleTypesWithAllowedClasses } from "../models/vehicle-type-class.model";
 import { recordAuditLog } from "../services/audit-log.service";
+import { queueRideRequestNotifications } from "../services/notification-dispatch.service";
 import { parseRideRequestPayload } from "../services/ride-request-payload.service";
 import { validateRideRequestReferences } from "../services/ride-request-reference.service";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
@@ -203,6 +204,8 @@ router.post(
         req,
       });
 
+      queueRideRequestNotifications("created", rideRequest.id);
+
       return sendSuccess(
         res,
         { ride_request: toPublicRideRequest(rideRequest, { locale }) },
@@ -317,6 +320,8 @@ router.post(
         summary: "Customer ride request cancelled",
         req,
       });
+
+      queueRideRequestNotifications("cancelled", result.id);
 
       return sendSuccess(res, {
         ride_request: toPublicRideRequest(result, { locale }),

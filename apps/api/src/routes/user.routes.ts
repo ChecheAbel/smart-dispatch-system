@@ -21,6 +21,7 @@ import {
   updateUserAccountActivation,
   updateUserAccountStatus,
 } from "../models/user.model";
+import { queueUserRegistrationNotifications } from "../services/notification-dispatch.service";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
 import {
@@ -160,11 +161,27 @@ router.patch("/:id/account-status", requirePermission("users.write"), async (req
       }
     }
 
+    const existing = await findUserByIdWithRoles(req.params.id);
+    if (!existing) {
+      return sendError(res, "User not found.", 404);
+    }
+
     const user = await updateUserAccountStatus(
       req.params.id,
       accountStatus,
       accountBlockReason,
     );
+
+    if (
+      existing.accountActivation === "pending" &&
+      existing.accountStatus === "active" &&
+      accountStatus === "deactivated"
+    ) {
+      queueUserRegistrationNotifications("rejected", user.id, {
+        rejectionReason: accountBlockReason,
+      });
+    }
+
     return sendSuccess(res, { user: toPublicUser(user) });
   } catch (error) {
     return handleRouteError(res, error);
@@ -178,7 +195,17 @@ router.patch("/:id/account-activation", requirePermission("users.write"), async 
       return sendError(res, "A valid account_activation is required.", 400);
     }
 
+    const existing = await findUserByIdWithRoles(req.params.id);
+    if (!existing) {
+      return sendError(res, "User not found.", 404);
+    }
+
     const user = await updateUserAccountActivation(req.params.id, accountActivation);
+
+    if (existing.accountActivation === "pending" && accountActivation === "activated") {
+      queueUserRegistrationNotifications("approved", user.id);
+    }
+
     return sendSuccess(res, { user: toPublicUser(user) });
   } catch (error) {
     return handleRouteError(res, error);
