@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle2, ClipboardList, Route, XCircle } from "lucide-react";
+import { CalendarClock, CheckCircle2, ClipboardList, Route, XCircle } from "lucide-react";
 import { StatCard } from "@/components/shared/stat-card";
 import { fetchAdminRideRequestCount } from "@/lib/admin-ride-request-api";
 import type { SupportedLocale } from "@/lib/locale";
@@ -16,6 +16,7 @@ type AdminRideRequestStatsState = {
   total: number;
   pending: number;
   confirmed: number;
+  upcoming: number;
   cancelled: number;
 };
 
@@ -23,6 +24,7 @@ const emptyStats: AdminRideRequestStatsState = {
   total: 0,
   pending: 0,
   confirmed: 0,
+  upcoming: 0,
   cancelled: 0,
 };
 
@@ -38,15 +40,16 @@ export function AdminRideRequestStats({ locale, refreshKey }: AdminRideRequestSt
       setLoading(true);
 
       try {
-        const [total, pending, confirmed, cancelledCount] = await Promise.all([
+        const [total, pending, confirmed, upcoming, cancelledCount] = await Promise.all([
           fetchAdminRideRequestCount({ locale }),
           fetchAdminRideRequestCount({ locale, status: "pending" }),
           fetchAdminRideRequestCount({ locale, status: "confirmed" }),
+          fetchAdminRideRequestCount({ locale, upcoming: true }),
           fetchAdminRideRequestCount({ locale, status: "cancelled" }),
         ]);
 
         if (!isStale) {
-          setStats({ total, pending, confirmed, cancelled: cancelledCount });
+          setStats({ total, pending, confirmed, upcoming, cancelled: cancelledCount });
         }
       } catch {
         if (!isStale) {
@@ -67,7 +70,7 @@ export function AdminRideRequestStats({ locale, refreshKey }: AdminRideRequestSt
   }, [locale, refreshKey]);
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
       <StatCard
         title={copy.stats.title}
         value={stats.total}
@@ -87,6 +90,13 @@ export function AdminRideRequestStats({ locale, refreshKey }: AdminRideRequestSt
         value={stats.confirmed}
         description={copy.stats.confirmedDescription}
         icon={CheckCircle2}
+        loading={loading}
+      />
+      <StatCard
+        title={copy.stats.upcomingTitle}
+        value={stats.upcoming}
+        description={copy.stats.upcomingDescription}
+        icon={CalendarClock}
         loading={loading}
       />
       <StatCard

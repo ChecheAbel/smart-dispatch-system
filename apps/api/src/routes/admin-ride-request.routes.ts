@@ -27,7 +27,7 @@ import { validateRideRequestVehicleAssignment } from "../services/ride-request-d
 import { parseRideRequestRejectionReason } from "../services/ride-request-rejection.service";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
-import { getOptionalString, getString } from "../utils/validation";
+import { getOptionalString, getString, parseBoolean } from "../utils/validation";
 import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
 
 const router = Router();
@@ -99,7 +99,8 @@ router.get(
       const pagination = parsePaginationQuery(req.query);
       const status = parseStatusFilter(req.query.status);
       const search = getOptionalString(req.query.search) ?? undefined;
-      const filters = { status, search };
+      const upcoming = parseBoolean(req.query.upcoming) === true;
+      const filters = { status, search, upcoming: upcoming || undefined };
 
       const result = await paginate(
         pagination,

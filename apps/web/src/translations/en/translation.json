@@ -826,6 +826,8 @@
       "pendingDescription": "Requests waiting for dispatcher review",
       "confirmedTitle": "Confirmed",
       "confirmedDescription": "Approved requests ready for dispatch",
+      "upcomingTitle": "Upcoming requests",
+      "upcomingDescription": "Scheduled pickups still in the future",
       "cancelledTitle": "Cancelled",
       "cancelledDescription": "Rejected or cancelled requests"
     },

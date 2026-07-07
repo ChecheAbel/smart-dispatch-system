@@ -826,6 +826,8 @@
       "pendingDescription": "የመላኪያ ግምገማ የሚጠብቁ ጥያቄዎች",
       "confirmedTitle": "ተረጋግጧል",
       "confirmedDescription": "ለመላክ የተዘጋጁ የተጸድቁ ጥያቄዎች",
+      "upcomingTitle": "የሚመጡ ጥያቄዎች",
+      "upcomingDescription": "የመውሰድ ጊዜው በወደፊት የታቀዱ ጥያቄዎች",
       "cancelledTitle": "ተሰርዟል",
       "cancelledDescription": "የተሰረዙ ወይም የተቀባዩ ጥያቄዎች"
     },

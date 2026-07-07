@@ -8,6 +8,7 @@ export type FetchAdminRideRequestsParams = {
   limit?: number;
   status?: RideRequestStatus | "";
   search?: string;
+  upcoming?: boolean;
 };
 
 export type AdminRideRequestStatusAction = "confirm" | "reject" | "start" | "complete";
@@ -20,13 +21,14 @@ export async function fetchAdminRideRequests(params: FetchAdminRideRequestsParam
       limit: params.limit,
       status: params.status || undefined,
       search: params.search || undefined,
+      upcoming: params.upcoming ? true : undefined,
     },
   });
   return unwrapPaginatedApiResponse<AdminRideRequest>(data);
 }
 
 export async function fetchAdminRideRequestCount(
-  params: Pick<FetchAdminRideRequestsParams, "locale" | "status"> = {},
+  params: Pick<FetchAdminRideRequestsParams, "locale" | "status" | "upcoming"> = {},
 ) {
   const result = await fetchAdminRideRequests({ ...params, page: 1, limit: 1 });
   return result.pagination.total;

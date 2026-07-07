@@ -36,6 +36,7 @@ export type ListRideRequestsForUserFilters = {
 export type ListRideRequestsAdminFilters = {
   status?: RideRequestStatus;
   search?: string;
+  upcoming?: boolean;
 };
 
 const rideRequestInclude = {
@@ -128,7 +129,10 @@ function buildRideRequestAdminWhere(
 ): Prisma.RideRequestWhereInput {
   const where: Prisma.RideRequestWhereInput = {};
 
-  if (filters.status) {
+  if (filters.upcoming) {
+    where.status = { in: ["pending", "confirmed"] };
+    where.scheduledAt = { gt: new Date() };
+  } else if (filters.status) {
     where.status = filters.status;
   }
 
