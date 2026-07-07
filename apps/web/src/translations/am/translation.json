@@ -1595,10 +1595,10 @@
       "region": "ክልል",
       "regionAll": "ሁሉም ክልሎች",
       "usage": "አገልግሎት",
-      "usageAll": "ሁሉም አገልግሎት አይነቶች",
-      "usagePickup": "መውሰድ ብቻ",
-      "usageDropoff": "መውረድ ብቻ",
-      "usageBoth": "መውሰድ እና መውረድ"
+      "usageAll": "ሁሉ",
+      "usagePickup": "መውሰድ",
+      "usageDropoff": "መውረድ",
+      "usageBoth": "ሁለቱም"
     },
     "usage": {
       "pickup": "መውሰድ",

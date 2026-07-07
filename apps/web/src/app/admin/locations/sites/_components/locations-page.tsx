@@ -30,6 +30,7 @@ import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import {
   adminBadgeGoldClass,
   adminBadgeSuccessClass,
+  adminFilterLabelClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
 import { PERMISSIONS } from "@/lib/permissions";
@@ -43,7 +44,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { CreateLocationSheet } from "./create-location-sheet";
 import { LocationStats } from "./location-stats";
@@ -132,6 +132,51 @@ function locationUsageBadgeClass(location: Location) {
   }
 
   return "border-slate-200 bg-slate-50 text-slate-600";
+}
+
+function UsageFilterSelect({
+  value,
+  onChange,
+  labels,
+}: {
+  value: UsageFilter;
+  onChange: (value: UsageFilter) => void;
+  labels: AdminLocationsMessages["filters"];
+}) {
+  const options: Array<{ value: UsageFilter; label: string }> = [
+    { value: "all", label: labels.usageAll },
+    { value: "pickup", label: labels.usagePickup },
+    { value: "dropoff", label: labels.usageDropoff },
+    { value: "both", label: labels.usageBoth },
+  ];
+
+  return (
+    <Select
+      items={options}
+      value={value}
+      onValueChange={(next) => onChange((next as UsageFilter | null) ?? "all")}
+    >
+      <SelectTrigger
+        id="location-usage-filter"
+        aria-label={labels.usage}
+        className="h-10 min-w-[9.5rem] rounded-lg border-slate-200 bg-white px-3 text-sm shadow-sm"
+      >
+        <span className={cn("mr-1.5 shrink-0 text-slate-500", adminFilterLabelClass)}>
+          {labels.usage}:
+        </span>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent align="end">
+        <SelectGroup>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
 }
 
 export function LocationsPage() {
@@ -267,37 +312,13 @@ export function LocationsPage() {
         showIndexColumn
         renderRowActions={showRowActions ? renderRowActions : undefined}
         actionsColumnHeader={copy.columns.actions}
-        filterBar={
-          <div className="grid gap-3 sm:max-w-xs">
-            <Label htmlFor="location-usage-filter" className="text-sm font-medium text-slate-600">
-              {copy.filters.usage}
-            </Label>
-            <Select
-              items={[
-                { label: copy.filters.usageAll, value: "all" },
-                { label: copy.filters.usagePickup, value: "pickup" },
-                { label: copy.filters.usageDropoff, value: "dropoff" },
-                { label: copy.filters.usageBoth, value: "both" },
-              ]}
-              value={usageFilter}
-              onValueChange={(value) => setUsageFilter((value as UsageFilter | null) ?? "all")}
-            >
-              <SelectTrigger id="location-usage-filter" className="w-full bg-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="all">{copy.filters.usageAll}</SelectItem>
-                  <SelectItem value="pickup">{copy.filters.usagePickup}</SelectItem>
-                  <SelectItem value="dropoff">{copy.filters.usageDropoff}</SelectItem>
-                  <SelectItem value="both">{copy.filters.usageBoth}</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-        }
         toolbarActions={
           <>
+            <UsageFilterSelect
+              value={usageFilter}
+              onChange={setUsageFilter}
+              labels={copy.filters}
+            />
             <Button
               type="button"
               variant="outline"
