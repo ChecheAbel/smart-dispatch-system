@@ -133,6 +133,16 @@ export function AdminRideRequestsPage() {
 
     if (result?.status === "confirmed") {
       setStatusFilter("confirmed");
+      return;
+    }
+
+    if (result?.status === "in_progress") {
+      setStatusFilter("in_progress");
+      return;
+    }
+
+    if (result?.status === "completed") {
+      setStatusFilter("completed");
     }
   }
 

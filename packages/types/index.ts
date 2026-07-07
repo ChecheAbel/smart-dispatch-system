@@ -410,6 +410,33 @@ export interface RideRequest {
   notes: string | null;
   status: RideRequestStatus;
   rejection_reason: string | null;
+  assigned_vehicle_id: string | null;
+  assigned_vehicle?: {
+    id: string;
+    plate_number: string;
+    make: string | null;
+    model: string | null;
+    vehicle_type?: {
+      id: string;
+      slug: string;
+      name: string;
+    } | null;
+    vehicle_class?: {
+      id: string;
+      slug: string;
+      name: string;
+    } | null;
+  } | null;
+  assigned_driver_user_id: string | null;
+  assigned_driver?: {
+    id: string;
+    name: string;
+    email: string;
+    mobile_number: string;
+  } | null;
+  assigned_at: string | null;
+  started_at: string | null;
+  completed_at: string | null;
   created_at: string;
   updated_at: string;
   can_edit: boolean;
@@ -430,6 +457,11 @@ export interface AdminRideRequest extends RideRequest {
   requester?: RideRequestRequesterSummary;
   can_admin_confirm: boolean;
   can_admin_reject: boolean;
+  can_admin_assign: boolean;
+  can_admin_unassign: boolean;
+  can_admin_start: boolean;
+  start_blocked_by_schedule: boolean;
+  can_admin_complete: boolean;
 }
 
 export interface ApiSuccessResponse<T> {

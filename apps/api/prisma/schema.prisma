@@ -135,6 +135,7 @@ model User {
   requesterProfile  RequesterProfile?
   assignedVehicle   Vehicle?   @relation("VehicleAssignedDriver")
   rideRequests      RideRequest[]
+  assignedDispatchRideRequests RideRequest[] @relation("RideRequestAssignedDriver")
 
   @@index([email])
   @@index([mobileNumber])
@@ -334,6 +335,7 @@ model Vehicle {
   vehicleType          VehicleType   @relation(fields: [vehicleTypeId], references: [id], onDelete: Restrict)
   vehicleClass         VehicleClass  @relation(fields: [vehicleClassId], references: [id], onDelete: Restrict)
   assignedDriver       User?         @relation("VehicleAssignedDriver", fields: [assignedDriverUserId], references: [id], onDelete: SetNull)
+  rideRequestAssignments RideRequest[] @relation("RideRequestAssignedVehicle")
 
   @@index([vehicleTypeId])
   @@index([vehicleClassId])
@@ -449,6 +451,11 @@ model RideRequest {
   notes            String?           @db.VarChar(1000)
   status           RideRequestStatus @default(pending)
   rejectionReason  String?           @map("rejection_reason") @db.VarChar(500)
+  assignedVehicleId    String?       @map("assigned_vehicle_id") @db.Uuid
+  assignedDriverUserId String?       @map("assigned_driver_user_id") @db.Uuid
+  assignedAt           DateTime?     @map("assigned_at") @db.Timestamptz
+  startedAt            DateTime?     @map("started_at") @db.Timestamptz
+  completedAt          DateTime?     @map("completed_at") @db.Timestamptz
   createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime          @updatedAt @map("updated_at") @db.Timestamptz
   requester        User              @relation(fields: [requesterUserId], references: [id], onDelete: Cascade)
@@ -457,10 +464,14 @@ model RideRequest {
   region           Region?           @relation(fields: [regionId], references: [id], onDelete: SetNull)
   pickupLocation   Location?         @relation("RideRequestPickupLocation", fields: [pickupLocationId], references: [id], onDelete: SetNull)
   dropoffLocation  Location?         @relation("RideRequestDropoffLocation", fields: [dropoffLocationId], references: [id], onDelete: SetNull)
+  assignedVehicle  Vehicle?          @relation("RideRequestAssignedVehicle", fields: [assignedVehicleId], references: [id], onDelete: SetNull)
+  assignedDriver   User?             @relation("RideRequestAssignedDriver", fields: [assignedDriverUserId], references: [id], onDelete: SetNull)
 
   @@index([requesterUserId])
   @@index([vehicleClassId])
   @@index([status])
+  @@index([assignedVehicleId])
+  @@index([assignedDriverUserId])
   @@index([pickupLocationId])
   @@index([dropoffLocationId])
   @@index([createdAt(sort: Desc)])

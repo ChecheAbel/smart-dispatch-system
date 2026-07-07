@@ -11,6 +11,7 @@ import {
   Navigation,
   Route,
   Shield,
+  Truck,
   UserRound,
   Users,
 } from "lucide-react";
@@ -49,13 +50,23 @@ const LazyRideRequestRouteMap = dynamic(
 type RideRequestManageActions = {
   canConfirm: boolean;
   canReject: boolean;
+  canStart?: boolean;
+  canComplete?: boolean;
   confirmLabel: string;
   rejectLabel: string;
   confirmingLabel: string;
   rejectingLabel: string;
+  startLabel?: string;
+  startingLabel?: string;
+  completeLabel?: string;
+  completingLabel?: string;
   onConfirm: () => void;
   onReject: () => void;
-  submitting: "confirm" | "reject" | null;
+  onStart?: () => void;
+  onComplete?: () => void;
+  submitting: "confirm" | "reject" | "start" | "complete" | null;
+  startDisabled?: boolean;
+  startDisabledTitle?: string;
   rejectButtonClassName?: string;
 };
 
@@ -80,6 +91,7 @@ type RideRequestDetailSheetProps = {
   requester?: RideRequestRequesterSummary;
   requesterLabels?: RideRequestRequesterLabels;
   manageActions?: RideRequestManageActions;
+  dispatchPanel?: ReactNode;
 };
 
 function DetailSection({
@@ -203,6 +215,7 @@ export function RideRequestDetailSheet({
   requester,
   requesterLabels,
   manageActions,
+  dispatchPanel,
 }: RideRequestDetailSheetProps) {
   const historyCopy = getCustomerRequestHistoryMessages(locale as "en" | "am");
   const requestCopy = getCustomerRequestsMessages(locale as "en" | "am");
@@ -335,6 +348,52 @@ export function RideRequestDetailSheet({
             </div>
           ) : null}
 
+          {!dispatchPanel && (request.assigned_vehicle || request.assigned_driver) ? (
+            <DetailSection title={historyCopy.detailAssignmentSection} icon={Truck}>
+              <div className="grid gap-3 rounded-xl border border-slate-200/80 bg-white p-3.5 sm:grid-cols-2">
+                <DetailRow
+                  label={historyCopy.detailAssignedVehicle}
+                  value={
+                    request.assigned_vehicle
+                      ? [
+                          request.assigned_vehicle.plate_number,
+                          [request.assigned_vehicle.make, request.assigned_vehicle.model]
+                            .filter(Boolean)
+                            .join(" "),
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")
+                      : "—"
+                  }
+                />
+                <DetailRow
+                  label={historyCopy.detailAssignedDriver}
+                  value={request.assigned_driver?.name ?? "—"}
+                />
+                {request.assigned_driver?.mobile_number ? (
+                  <DetailRow
+                    label={historyCopy.detailAssignedDriverMobile}
+                    value={request.assigned_driver.mobile_number}
+                  />
+                ) : null}
+                {request.started_at ? (
+                  <DetailRow
+                    label={historyCopy.detailTripStartedAt}
+                    value={formatSubmittedAt(request.started_at, locale)}
+                  />
+                ) : null}
+                {request.completed_at ? (
+                  <DetailRow
+                    label={historyCopy.detailTripCompletedAt}
+                    value={formatSubmittedAt(request.completed_at, locale)}
+                  />
+                ) : null}
+              </div>
+            </DetailSection>
+          ) : null}
+
+          {dispatchPanel}
+
           <DetailSection title={historyCopy.detailRouteSection} icon={Route}>
             <div className="space-y-2">
               <RouteStopDetail
@@ -449,7 +508,11 @@ export function RideRequestDetailSheet({
           </div>
         </div>
 
-        {manageActions && (manageActions.canConfirm || manageActions.canReject) ? (
+        {manageActions &&
+        (manageActions.canConfirm ||
+          manageActions.canReject ||
+          manageActions.canStart ||
+          manageActions.canComplete) ? (
           <SheetFooter className="shrink-0 border-t border-slate-200/80 px-6 py-4 sm:flex-row sm:justify-end">
             {manageActions.canReject ? (
               <Button
@@ -477,6 +540,31 @@ export function RideRequestDetailSheet({
                 {manageActions.submitting === "confirm"
                   ? manageActions.confirmingLabel
                   : manageActions.confirmLabel}
+              </Button>
+            ) : null}
+            {manageActions.canStart ? (
+              <Button
+                type="button"
+                className={adminPrimaryButtonClass}
+                disabled={isSubmitting || manageActions.startDisabled}
+                title={manageActions.startDisabled ? manageActions.startDisabledTitle : undefined}
+                onClick={manageActions.onStart}
+              >
+                {manageActions.submitting === "start"
+                  ? manageActions.startingLabel
+                  : manageActions.startLabel}
+              </Button>
+            ) : null}
+            {manageActions.canComplete ? (
+              <Button
+                type="button"
+                className={adminPrimaryButtonClass}
+                disabled={isSubmitting}
+                onClick={manageActions.onComplete}
+              >
+                {manageActions.submitting === "complete"
+                  ? manageActions.completingLabel
+                  : manageActions.completeLabel}
               </Button>
             ) : null}
           </SheetFooter>

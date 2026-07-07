@@ -4,12 +4,16 @@ import { useEffect, useState } from "react";
 import type { AdminRideRequest, RideRequestStatus } from "@smart-dispatch/types";
 import { RideRequestDetailSheet } from "@/app/dashboard/_components/ride-requests/ride-request-detail-sheet";
 import { RejectRegistrationModal } from "@/app/admin/user-registrations/_components/reject-registration-modal";
+import { AdminRideRequestDispatchPanel } from "./admin-ride-request-dispatch-panel";
+import { formatScheduledAt } from "@/app/dashboard/_components/ride-requests/ride-request-utils";
 import {
+  assignAdminRideRequest,
   fetchAdminRideRequest,
+  unassignAdminRideRequest,
   updateAdminRideRequestStatus,
 } from "@/lib/admin-ride-request-api";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import { getAdminRideRequestsMessages } from "@/translations";
+import { getAdminRideRequestsMessages, formatMessage } from "@/translations";
 import type { SupportedLocale } from "@/lib/locale";
 
 type AdminRideRequestReviewSheetProps = {
@@ -20,6 +24,8 @@ type AdminRideRequestReviewSheetProps = {
   canWrite: boolean;
   onSuccess: (result?: { status: RideRequestStatus }) => void;
 };
+
+type SubmittingAction = "confirm" | "reject" | "assign" | "unassign" | "start" | "complete" | null;
 
 export function AdminRideRequestReviewSheet({
   open,
@@ -33,7 +39,7 @@ export function AdminRideRequestReviewSheet({
   const [request, setRequest] = useState<AdminRideRequest | null>(null);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState(false);
-  const [submitting, setSubmitting] = useState<"confirm" | "reject" | null>(null);
+  const [submitting, setSubmitting] = useState<SubmittingAction>(null);
   const [rejectOpen, setRejectOpen] = useState(false);
 
   const isDetailLoading =
@@ -43,7 +49,15 @@ export function AdminRideRequestReviewSheet({
     (loading || !request || request.id !== requestId);
 
   const sheetDescription =
-    request?.status === "cancelled" ? copy.review.rejectedDescription : copy.review.description;
+    request?.status === "cancelled"
+      ? copy.review.rejectedDescription
+      : request?.status === "completed"
+        ? copy.review.completedDescription
+        : request?.status === "in_progress"
+          ? copy.review.inProgressDescription
+          : copy.review.description;
+
+  const isBusy = Boolean(submitting);
 
   useEffect(() => {
     if (!open || !requestId) {
@@ -135,6 +149,90 @@ export function AdminRideRequestReviewSheet({
     }
   }
 
+  async function handleAssign(vehicleId: string) {
+    if (!request) {
+      return;
+    }
+
+    setSubmitting("assign");
+
+    try {
+      const updated = await assignAdminRideRequest(request.id, vehicleId, { locale });
+      setRequest(updated);
+      showSuccessToast({ title: copy.toast.assigned });
+      onSuccess({ status: updated.status });
+    } catch (error) {
+      showErrorToast({
+        title: error instanceof Error ? error.message : copy.toast.assignFailed,
+      });
+    } finally {
+      setSubmitting(null);
+    }
+  }
+
+  async function handleUnassign() {
+    if (!request) {
+      return;
+    }
+
+    setSubmitting("unassign");
+
+    try {
+      const updated = await unassignAdminRideRequest(request.id, { locale });
+      setRequest(updated);
+      showSuccessToast({ title: copy.toast.unassigned });
+      onSuccess({ status: updated.status });
+    } catch (error) {
+      showErrorToast({
+        title: error instanceof Error ? error.message : copy.toast.unassignFailed,
+      });
+    } finally {
+      setSubmitting(null);
+    }
+  }
+
+  async function handleStart() {
+    if (!request) {
+      return;
+    }
+
+    setSubmitting("start");
+
+    try {
+      const updated = await updateAdminRideRequestStatus(request.id, "start", { locale });
+      setRequest(updated);
+      showSuccessToast({ title: copy.toast.started });
+      onSuccess({ status: updated.status });
+    } catch (error) {
+      showErrorToast({
+        title: error instanceof Error ? error.message : copy.toast.startFailed,
+      });
+    } finally {
+      setSubmitting(null);
+    }
+  }
+
+  async function handleComplete() {
+    if (!request) {
+      return;
+    }
+
+    setSubmitting("complete");
+
+    try {
+      const updated = await updateAdminRideRequestStatus(request.id, "complete", { locale });
+      setRequest(updated);
+      showSuccessToast({ title: copy.toast.completed });
+      onSuccess({ status: updated.status });
+    } catch (error) {
+      showErrorToast({
+        title: error instanceof Error ? error.message : copy.toast.completeFailed,
+      });
+    } finally {
+      setSubmitting(null);
+    }
+  }
+
   return (
     <>
       <RideRequestDetailSheet
@@ -154,19 +252,53 @@ export function AdminRideRequestReviewSheet({
           email: copy.review.email,
           mobile: copy.review.mobile,
         }}
-        onOpenChange={(next) => !submitting && onOpenChange(next)}
+        onOpenChange={(next) => !isBusy && onOpenChange(next)}
+        dispatchPanel={
+          request ? (
+            <AdminRideRequestDispatchPanel
+              request={request}
+              locale={locale}
+              canWrite={canWrite}
+              submitting={submitting === "assign" || submitting === "unassign" ? submitting : null}
+              onAssign={handleAssign}
+              onUnassign={handleUnassign}
+            />
+          ) : null
+        }
         manageActions={
           canWrite && request
             ? {
                 canConfirm: request.can_admin_confirm,
                 canReject: request.can_admin_reject,
+                canStart: request.can_admin_start || request.start_blocked_by_schedule,
+                canComplete: request.can_admin_complete,
                 confirmLabel: copy.review.approve,
                 rejectLabel: copy.review.reject,
                 confirmingLabel: copy.review.approving,
                 rejectingLabel: copy.review.rejecting,
+                startLabel: copy.review.startTrip,
+                startingLabel: copy.review.startingTrip,
+                completeLabel: copy.review.completeTrip,
+                completingLabel: copy.review.completingTrip,
+                startDisabled: request.start_blocked_by_schedule,
+                startDisabledTitle: request.start_blocked_by_schedule
+                  ? request.scheduled_at
+                    ? formatMessage(copy.review.startTripScheduleBlocked, {
+                        time: formatScheduledAt(request.scheduled_at, locale),
+                      })
+                    : copy.review.startTripScheduleBlocked
+                  : undefined,
                 onConfirm: () => void handleConfirm(),
                 onReject: () => setRejectOpen(true),
-                submitting,
+                onStart: () => void handleStart(),
+                onComplete: () => void handleComplete(),
+                submitting:
+                  submitting === "confirm" ||
+                  submitting === "reject" ||
+                  submitting === "start" ||
+                  submitting === "complete"
+                    ? submitting
+                    : null,
                 rejectButtonClassName:
                   "border-red-600 bg-red-600 text-white hover:border-red-700 hover:bg-red-700 hover:!text-white",
               }
@@ -176,7 +308,7 @@ export function AdminRideRequestReviewSheet({
 
       <RejectRegistrationModal
         open={rejectOpen}
-        onOpenChange={(next) => !submitting && setRejectOpen(next)}
+        onOpenChange={(next) => !isBusy && setRejectOpen(next)}
         title={copy.rejectModal.title}
         description={copy.rejectModal.description}
         reasonLabel={copy.rejectModal.reasonLabel}

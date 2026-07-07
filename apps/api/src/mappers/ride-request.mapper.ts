@@ -11,8 +11,13 @@ import {
   getRideRequestCancelDeadline,
 } from "../services/ride-request-policy.service";
 import {
+  canAdminAssignRideRequest,
+  canAdminCompleteRideRequest,
   canAdminConfirmRideRequest,
   canAdminRejectRideRequest,
+  canAdminStartRideRequest,
+  canAdminUnassignRideRequest,
+  isRideRequestStartBlockedBySchedule,
 } from "../services/ride-request-admin-policy.service";
 
 type DbRideRequest = {
@@ -34,6 +39,11 @@ type DbRideRequest = {
   notes: string | null;
   status: RideRequest["status"];
   rejectionReason: string | null;
+  assignedVehicleId: string | null;
+  assignedDriverUserId: string | null;
+  assignedAt: Date | null;
+  startedAt: Date | null;
+  completedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
   vehicleType: {
@@ -77,6 +87,30 @@ type DbRideRequest = {
     email: string;
     mobileNumber: string;
   };
+  assignedVehicle?: {
+    id: string;
+    plateNumber: string;
+    make: string | null;
+    model: string | null;
+    vehicleType: DbRideRequest["vehicleType"];
+    vehicleClass: DbRideRequest["vehicleClass"];
+    assignedDriver: {
+      id: string;
+      firstName: string;
+      middleName: string | null;
+      lastName: string;
+      email: string;
+      mobileNumber: string;
+    } | null;
+  } | null;
+  assignedDriver?: {
+    id: string;
+    firstName: string;
+    middleName: string | null;
+    lastName: string;
+    email: string;
+    mobileNumber: string;
+  } | null;
 };
 
 function decimalToNumber(value: Prisma.Decimal | null) {
@@ -92,6 +126,25 @@ function pickTranslatedName(
   const map = parser(translations);
   const normalizedLocale = normalizeLocale(locale) ?? DEFAULT_LOCALE;
   return map[normalizedLocale]?.name ?? map[DEFAULT_LOCALE]?.name ?? slug;
+}
+
+function formatPersonName(parts: {
+  firstName: string;
+  middleName: string | null;
+  lastName: string;
+}) {
+  return [parts.firstName, parts.middleName, parts.lastName].filter(Boolean).join(" ");
+}
+
+function mapAssignedDriver(
+  driver: NonNullable<DbRideRequest["assignedDriver"]>,
+) {
+  return {
+    id: driver.id,
+    name: formatPersonName(driver),
+    email: driver.email,
+    mobile_number: driver.mobileNumber,
+  };
 }
 
 export function toPublicRideRequest(
@@ -162,6 +215,46 @@ export function toPublicRideRequest(
     notes: rideRequest.notes,
     status: rideRequest.status,
     rejection_reason: rideRequest.rejectionReason,
+    assigned_vehicle_id: rideRequest.assignedVehicleId,
+    assigned_vehicle: rideRequest.assignedVehicle
+      ? {
+          id: rideRequest.assignedVehicle.id,
+          plate_number: rideRequest.assignedVehicle.plateNumber,
+          make: rideRequest.assignedVehicle.make,
+          model: rideRequest.assignedVehicle.model,
+          vehicle_type: rideRequest.assignedVehicle.vehicleType
+            ? {
+                id: rideRequest.assignedVehicle.vehicleType.id,
+                slug: rideRequest.assignedVehicle.vehicleType.slug,
+                name: pickTranslatedName(
+                  rideRequest.assignedVehicle.vehicleType.translations,
+                  rideRequest.assignedVehicle.vehicleType.slug,
+                  locale,
+                  parseVehicleTypeTranslationsMap,
+                ),
+              }
+            : null,
+          vehicle_class: rideRequest.assignedVehicle.vehicleClass
+            ? {
+                id: rideRequest.assignedVehicle.vehicleClass.id,
+                slug: rideRequest.assignedVehicle.vehicleClass.slug,
+                name: pickTranslatedName(
+                  rideRequest.assignedVehicle.vehicleClass.translations,
+                  rideRequest.assignedVehicle.vehicleClass.slug,
+                  locale,
+                  parseVehicleClassTranslationsMap,
+                ),
+              }
+            : null,
+        }
+      : null,
+    assigned_driver_user_id: rideRequest.assignedDriverUserId,
+    assigned_driver: rideRequest.assignedDriver
+      ? mapAssignedDriver(rideRequest.assignedDriver)
+      : null,
+    assigned_at: rideRequest.assignedAt?.toISOString() ?? null,
+    started_at: rideRequest.startedAt?.toISOString() ?? null,
+    completed_at: rideRequest.completedAt?.toISOString() ?? null,
     created_at: rideRequest.createdAt.toISOString(),
     updated_at: rideRequest.updatedAt.toISOString(),
     can_edit: canEditRideRequest(rideRequest.status),
@@ -178,6 +271,7 @@ export function toAdminRideRequest(
   options?: { locale?: string },
 ): AdminRideRequest {
   const base = toPublicRideRequest(rideRequest, options);
+  const hasAssignment = Boolean(rideRequest.assignedVehicleId);
 
   return {
     ...base,
@@ -193,5 +287,18 @@ export function toAdminRideRequest(
       : undefined,
     can_admin_confirm: canAdminConfirmRideRequest(rideRequest.status),
     can_admin_reject: canAdminRejectRideRequest(rideRequest.status),
+    can_admin_assign: canAdminAssignRideRequest(rideRequest.status),
+    can_admin_unassign: canAdminUnassignRideRequest(rideRequest.status, hasAssignment),
+    can_admin_start: canAdminStartRideRequest(
+      rideRequest.status,
+      hasAssignment,
+      rideRequest.scheduledAt,
+    ),
+    start_blocked_by_schedule: isRideRequestStartBlockedBySchedule(
+      rideRequest.status,
+      hasAssignment,
+      rideRequest.scheduledAt,
+    ),
+    can_admin_complete: canAdminCompleteRideRequest(rideRequest.status),
   };
 }

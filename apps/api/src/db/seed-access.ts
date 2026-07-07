@@ -270,7 +270,7 @@ const DEFAULT_MENUS = [
     slug: "dispatch",
     path: null,
     icon: "route",
-    sortOrder: 35,
+    sortOrder: 49,
     parentSlug: null,
     translations: [
       { locale: "en", label: "Dispatch" },
@@ -411,7 +411,10 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "ride_requests.cancel", method: "POST", path: "/api/ride-requests/:id/cancel", description: "Cancel ride request", permissionSlug: "customer_requests.write" },
   { slug: "admin_ride_requests.list", method: "GET", path: "/api/admin/ride-requests", description: "List all ride requests", permissionSlug: "ride_requests.read" },
   { slug: "admin_ride_requests.get", method: "GET", path: "/api/admin/ride-requests/:id", description: "Get ride request for admin review", permissionSlug: "ride_requests.read" },
-  { slug: "admin_ride_requests.status", method: "POST", path: "/api/admin/ride-requests/:id/status", description: "Approve or reject ride request", permissionSlug: "ride_requests.write" },
+  { slug: "admin_ride_requests.assignable_vehicles", method: "GET", path: "/api/admin/ride-requests/:id/assignable-vehicles", description: "List assignable vehicles for ride request", permissionSlug: "ride_requests.read" },
+  { slug: "admin_ride_requests.assign", method: "POST", path: "/api/admin/ride-requests/:id/assign", description: "Assign vehicle to ride request", permissionSlug: "ride_requests.write" },
+  { slug: "admin_ride_requests.unassign", method: "POST", path: "/api/admin/ride-requests/:id/unassign", description: "Unassign vehicle from ride request", permissionSlug: "ride_requests.write" },
+  { slug: "admin_ride_requests.status", method: "POST", path: "/api/admin/ride-requests/:id/status", description: "Update ride request dispatch status", permissionSlug: "ride_requests.write" },
 ];
 
 async function seedPermissions() {

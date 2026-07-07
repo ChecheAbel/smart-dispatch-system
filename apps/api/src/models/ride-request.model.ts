@@ -1,6 +1,7 @@
 import type { RideRequestStatus } from "@smart-dispatch/types";
 import { Prisma } from "../generated/prisma";
 import { prisma } from "../db/prisma";
+import { findVehicleById } from "./vehicle.model";
 import {
   canCancelRideRequest,
   canEditRideRequest,
@@ -43,11 +44,45 @@ const rideRequestInclude = {
   region: true,
   pickupLocation: true,
   dropoffLocation: true,
+  assignedVehicle: {
+    include: {
+      vehicleType: true,
+      vehicleClass: true,
+      assignedDriver: true,
+    },
+  },
+  assignedDriver: {
+    select: {
+      id: true,
+      firstName: true,
+      middleName: true,
+      lastName: true,
+      email: true,
+      mobileNumber: true,
+    },
+  },
 } as const;
 
 const rideRequestAdminInclude = {
   ...rideRequestInclude,
   requester: {
+    select: {
+      id: true,
+      firstName: true,
+      middleName: true,
+      lastName: true,
+      email: true,
+      mobileNumber: true,
+    },
+  },
+  assignedVehicle: {
+    include: {
+      vehicleType: true,
+      vehicleClass: true,
+      assignedDriver: true,
+    },
+  },
+  assignedDriver: {
     select: {
       id: true,
       firstName: true,
@@ -197,6 +232,83 @@ export async function findRideRequestById(id: string) {
   });
 }
 
+export async function findActiveRideRequestForVehicle(vehicleId: string, exceptRideRequestId?: string) {
+  return prisma.rideRequest.findFirst({
+    where: {
+      assignedVehicleId: vehicleId,
+      status: { in: ["confirmed", "in_progress"] },
+      ...(exceptRideRequestId ? { NOT: { id: exceptRideRequestId } } : {}),
+    },
+    select: { id: true },
+  });
+}
+
+export async function listAssignableVehiclesForRideRequest(
+  rideRequest: {
+    id: string;
+    vehicleTypeId: string | null;
+    vehicleClassId: string | null;
+    assignedVehicleId: string | null;
+  },
+  options?: { search?: string; take?: number },
+) {
+  const search = options?.search?.trim();
+
+  const vehicles = await prisma.vehicle.findMany({
+    where: {
+      status: "active",
+      assignedDriverUserId: { not: null },
+      ...(rideRequest.vehicleTypeId ? { vehicleTypeId: rideRequest.vehicleTypeId } : {}),
+      ...(rideRequest.vehicleClassId ? { vehicleClassId: rideRequest.vehicleClassId } : {}),
+      NOT: {
+        rideRequestAssignments: {
+          some: {
+            status: { in: ["confirmed", "in_progress"] },
+            NOT: { id: rideRequest.id },
+          },
+        },
+      },
+      ...(search
+        ? {
+            OR: [
+              { plateNumber: { contains: search, mode: "insensitive" } },
+              { make: { contains: search, mode: "insensitive" } },
+              { model: { contains: search, mode: "insensitive" } },
+              {
+                assignedDriver: {
+                  OR: [
+                    { firstName: { contains: search, mode: "insensitive" } },
+                    { lastName: { contains: search, mode: "insensitive" } },
+                    { email: { contains: search, mode: "insensitive" } },
+                  ],
+                },
+              },
+            ],
+          }
+        : {}),
+    },
+    include: {
+      vehicleType: true,
+      vehicleClass: true,
+      assignedDriver: true,
+    },
+    orderBy: { plateNumber: "asc" },
+    take: options?.take ?? 50,
+  });
+
+  if (
+    rideRequest.assignedVehicleId &&
+    !vehicles.some((vehicle) => vehicle.id === rideRequest.assignedVehicleId)
+  ) {
+    const assignedVehicle = await findVehicleById(rideRequest.assignedVehicleId);
+    if (assignedVehicle) {
+      return [assignedVehicle, ...vehicles];
+    }
+  }
+
+  return vehicles;
+}
+
 export async function updateRideRequestStatusAdmin(
   id: string,
   status: RideRequestStatus,
@@ -207,16 +319,54 @@ export async function updateRideRequestStatusAdmin(
     return null;
   }
 
+  const data: Prisma.RideRequestUpdateInput = { status };
+
+  if (status === "cancelled") {
+    data.rejectionReason = options?.rejectionReason?.trim() || null;
+    data.assignedVehicle = { disconnect: true };
+    data.assignedDriver = { disconnect: true };
+    data.assignedAt = null;
+    data.startedAt = null;
+    data.completedAt = null;
+  } else if (status === "confirmed") {
+    data.rejectionReason = null;
+  } else if (status === "in_progress") {
+    data.startedAt = new Date();
+  } else if (status === "completed") {
+    data.completedAt = new Date();
+  }
+
+  return prisma.rideRequest.update({
+    where: { id },
+    data,
+    include: rideRequestAdminInclude,
+  });
+}
+
+export async function assignRideRequestAdmin(id: string, vehicleId: string) {
+  const vehicle = await findVehicleById(vehicleId);
+  if (!vehicle?.assignedDriverUserId) {
+    return null;
+  }
+
   return prisma.rideRequest.update({
     where: { id },
     data: {
-      status,
-      rejectionReason:
-        status === "cancelled"
-          ? options?.rejectionReason?.trim() || null
-          : status === "confirmed"
-            ? null
-            : undefined,
+      assignedVehicleId: vehicleId,
+      assignedDriverUserId: vehicle.assignedDriverUserId,
+      assignedAt: new Date(),
+    },
+    include: rideRequestAdminInclude,
+  });
+}
+
+export async function unassignRideRequestAdmin(id: string) {
+  return prisma.rideRequest.update({
+    where: { id },
+    data: {
+      assignedVehicleId: null,
+      assignedDriverUserId: null,
+      assignedAt: null,
     },
     include: rideRequestAdminInclude,
   });
