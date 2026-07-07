@@ -1,8 +1,9 @@
 "use client";
 
-import { CalendarClock, Car, Navigation, Users } from "lucide-react";
+import { CalendarClock, Car, ChevronRight, Navigation, Users } from "lucide-react";
 import type { RideRequest } from "@smart-dispatch/types";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { isValidCoordinatePair } from "@/lib/map/coordinates";
 import { formatMessage, type CustomerRequestsMessages } from "@/translations";
 import { cn } from "@/lib/utils";
@@ -12,16 +13,40 @@ type RecentRideRequestListItemProps = {
   request: RideRequest;
   copy: CustomerRequestsMessages;
   locale: string;
+  onViewDetails?: (request: RideRequest) => void;
 };
 
-export function RecentRideRequestListItem({ request, copy, locale }: RecentRideRequestListItemProps) {
+export function RecentRideRequestListItem({
+  request,
+  copy,
+  locale,
+  onViewDetails,
+}: RecentRideRequestListItemProps) {
   const hasPickupCoordinates = isValidCoordinatePair(
     request.pickup_latitude ?? undefined,
     request.pickup_longitude ?? undefined,
   );
 
   return (
-    <article className="group px-4 py-4 transition-colors hover:bg-[#f8fafb]/80 sm:px-5">
+    <article
+      className={cn(
+        "group px-4 py-4 transition-colors sm:px-5",
+        onViewDetails && "cursor-pointer hover:bg-[#f8fafb]/80",
+      )}
+      onClick={onViewDetails ? () => onViewDetails(request) : undefined}
+      onKeyDown={
+        onViewDetails
+          ? (event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                onViewDetails(request);
+              }
+            }
+          : undefined
+      }
+      role={onViewDetails ? "button" : undefined}
+      tabIndex={onViewDetails ? 0 : undefined}
+    >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 flex-1 gap-3">
           <div className="flex flex-col items-center pt-1.5" aria-hidden>
@@ -81,6 +106,24 @@ export function RecentRideRequestListItem({ request, copy, locale }: RecentRideR
           </span>
         ) : null}
       </div>
+
+      {onViewDetails ? (
+        <div className="mt-3 flex justify-end pl-8">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="h-8 gap-1 text-xs font-medium text-[#1C3A34] hover:bg-[#1C3A34]/5"
+            onClick={(event) => {
+              event.stopPropagation();
+              onViewDetails(request);
+            }}
+          >
+            {copy.viewDetails}
+            <ChevronRight className="size-3.5" />
+          </Button>
+        </div>
+      ) : null}
     </article>
   );
 }

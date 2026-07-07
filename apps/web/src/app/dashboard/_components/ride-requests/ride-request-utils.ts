@@ -79,6 +79,14 @@ export function formatSubmittedAt(value: string, locale: string) {
   });
 }
 
+export function formatCoordinates(latitude?: number | null, longitude?: number | null) {
+  if (latitude == null || longitude == null) {
+    return null;
+  }
+
+  return `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`;
+}
+
 export function buildVehicleTypeLabel(
   vehicleType: VehicleType,
   copy: ReturnType<typeof getCustomerRequestsMessages>,

@@ -19,6 +19,7 @@ import {
   type TimeValue,
 } from "@/components/shared/admin-time-picker";
 import { RecentRideRequestListItem } from "@/app/dashboard/_components/ride-requests/recent-request-list-item";
+import { RideRequestDetailSheet } from "@/app/dashboard/_components/ride-requests/ride-request-detail-sheet";
 import {
   buildLocationAddress,
   buildVehicleTypeLabel,
@@ -346,6 +347,7 @@ export function RideRequestPage() {
   const [pickupLocations, setPickupLocations] = useState<RideRequestLocationOption[]>([]);
   const [dropoffLocations, setDropoffLocations] = useState<RideRequestLocationOption[]>([]);
   const [requests, setRequests] = useState<RideRequest[]>([]);
+  const [detailRequest, setDetailRequest] = useState<RideRequest | null>(null);
 
   const vehicleTypeItems = useMemo(
     () =>
@@ -1066,12 +1068,20 @@ export function RideRequestPage() {
                   request={request}
                   copy={copy}
                   locale={locale}
+                  onViewDetails={setDetailRequest}
                 />
               ))}
             </div>
           )}
         </CardContent>
       </Card>
+
+      <RideRequestDetailSheet
+        request={detailRequest}
+        open={Boolean(detailRequest)}
+        locale={locale}
+        onOpenChange={(open) => !open && setDetailRequest(null)}
+      />
     </div>
   );
 }

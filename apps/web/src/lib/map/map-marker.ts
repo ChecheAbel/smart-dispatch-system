@@ -4,7 +4,7 @@ export const MAP_MARKER_ICON_SIZE: L.PointExpression = [40, 52];
 export const MAP_MARKER_ICON_ANCHOR: L.PointExpression = [20, 50];
 export const MAP_MARKER_POPUP_ANCHOR: L.PointExpression = [0, -46];
 
-export type MapMarkerVariant = "active" | "inactive";
+export type MapMarkerVariant = "active" | "inactive" | "dropoff";
 
 let markerIdCounter = 0;
 
@@ -29,6 +29,14 @@ const MARKER_PALETTE = {
     inner: "#f8fafc",
     accent: "#e2e8f0",
     shadow: "rgba(100, 116, 139, 0.22)",
+  },
+  dropoff: {
+    fillTop: "#d9cb92",
+    fillBottom: "#C9B87A",
+    stroke: "#1C3A34",
+    inner: "#F8FAFB",
+    accent: "#1C3A34",
+    shadow: "rgba(201, 184, 122, 0.35)",
   },
 } as const;
 

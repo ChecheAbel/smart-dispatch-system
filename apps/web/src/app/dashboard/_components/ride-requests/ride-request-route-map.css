@@ -1,0 +1,114 @@
+.ride-request-route-map .leaflet-container {
+  font-family: inherit;
+  background: #e8eef0;
+}
+
+.ride-request-route-map__canvas .leaflet-container {
+  font-family: inherit;
+  background: #e8eef0;
+}
+
+.ride-request-route-map__canvas .leaflet-control-attribution {
+  margin: 0;
+  padding: 4px 8px;
+  border-radius: 8px 0 0 0;
+  background: rgba(255, 255, 255, 0.92);
+  color: #64748b;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.ride-request-route-map__canvas .leaflet-control-attribution a {
+  color: #1c3a34;
+}
+
+.ride-request-route-map__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.95);
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #334155;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  backdrop-filter: blur(4px);
+}
+
+.ride-request-route-map__chip .dispatch-map-pin--legend {
+  width: 18px;
+  height: 24px;
+}
+
+.ride-request-route-map__popup {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 10rem;
+}
+
+.ride-request-route-map__popup-type {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.ride-request-route-map__popup-type--pickup {
+  color: #1c3a34;
+}
+
+.ride-request-route-map__popup-type--dropoff {
+  color: #8f7d45;
+}
+
+.ride-request-route-map__popup-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1c3a34;
+  line-height: 1.35;
+}
+
+.ride-request-route-map .leaflet-popup-content {
+  margin: 10px 12px;
+}
+
+.ride-request-route-map__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: rgba(255, 255, 255, 0.96);
+  padding: 0.625rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+  backdrop-filter: blur(6px);
+}
+
+.ride-request-route-map__stat {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 8rem;
+  align-items: flex-start;
+  gap: 0.5rem;
+  border-radius: 0.625rem;
+  background: #f8fafb;
+  padding: 0.5rem 0.625rem;
+}
+
+.ride-request-route-map__stat-label {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.ride-request-route-map__stat-value {
+  margin-top: 0.125rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1c3a34;
+  line-height: 1.2;
+}
