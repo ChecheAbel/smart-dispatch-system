@@ -35,11 +35,11 @@ import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { getAdminNotificationTemplatesMessages } from "@/translations";
 import { cn } from "@/lib/utils";
 import {
-  formatTemplatesEnabledSummary,
   NotificationTemplatePlaceholdersGuide,
 } from "./notification-template-placeholders-guide";
 import { NotificationTemplateEventNav } from "./notification-template-event-nav";
 import { NotificationTemplateTestPanel } from "./notification-template-test-panel";
+import { NotificationTemplatesChannelsSummary } from "./notification-templates-header-actions";
 import {
   MODULE_EVENTS,
   shouldShowTemplate,
@@ -601,9 +601,11 @@ export function NotificationTemplatesSettings({
 
         <div className="sticky bottom-0 z-10 border-t border-slate-200/80 bg-white/95 px-5 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-slate-600">
-              {formatTemplatesEnabledSummary(locale, enabledCount, templates.length)}
-            </p>
+            <NotificationTemplatesChannelsSummary
+              enabled={enabledCount}
+              total={templates.length}
+              compact
+            />
 
             {canWrite ? (
               <Button

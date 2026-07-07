@@ -1446,6 +1446,9 @@
       "channelsEnabled": "{enabled}/{total} on",
       "placeholdersToggle": "Placeholder reference",
       "summaryEnabled": "{enabled} of {total} channels enabled",
+      "channelsSummaryLabel": "Channels on",
+      "channelsSummaryAria": "{enabled} of {total} notification channels enabled",
+      "notificationsLinkDescription": "Email & SMS provider settings",
       "readOnlyHint": "You have view-only access. Contact an administrator to edit templates."
     },
     "eventGroups": {

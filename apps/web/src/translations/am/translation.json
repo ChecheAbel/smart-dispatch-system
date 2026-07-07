@@ -1446,6 +1446,9 @@
       "channelsEnabled": "{enabled}/{total} ነቅቷል",
       "placeholdersToggle": "የቦታ ማስተካከያ ማጣቀሻ",
       "summaryEnabled": "{enabled} ከ {total} መንገዶች ነቅተዋል",
+      "channelsSummaryLabel": "ነቅተው ያሉ መንገዶች",
+      "channelsSummaryAria": "{enabled} ከ {total} የማሳወቂያ መንገዶች ነቅተዋል",
+      "notificationsLinkDescription": "የኢሜይል እና ኤስኤምኤስ አቅራቢ ቅንብሮች",
       "readOnlyHint": "ለመመልከት ብቻ ፈቃድ አለዎት። አብነቶችን ለመስተካከል አስተዳዳሪን ያነጋግሩ።"
     },
     "eventGroups": {

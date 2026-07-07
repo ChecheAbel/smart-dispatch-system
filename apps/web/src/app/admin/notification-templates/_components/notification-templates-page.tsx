@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { MessagesSquare, Settings2 } from "lucide-react";
+import { MessagesSquare } from "lucide-react";
 import { useAuth, useLocale } from "@/components/shared/providers";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { Badge } from "@/components/ui/badge";
@@ -18,7 +17,10 @@ import {
   getAdminNotificationsMessages,
 } from "@/translations";
 import { cn } from "@/lib/utils";
-import { formatTemplatesEnabledSummary } from "./notification-template-placeholders-guide";
+import {
+  NotificationProvidersLink,
+  NotificationTemplatesChannelsSummary,
+} from "./notification-templates-header-actions";
 import { NotificationTemplatesSettings } from "./notification-templates-settings";
 
 export function NotificationTemplatesPage() {
@@ -47,7 +49,7 @@ export function NotificationTemplatesPage() {
 
   return (
     <div className="min-w-0 space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
         <div className="min-w-0 space-y-3">
           <Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>
           <div className="flex items-start gap-3">
@@ -65,23 +67,13 @@ export function NotificationTemplatesPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-          {stats.total > 0 ? (
-            <Badge
-              variant="outline"
-              className="border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-50"
-            >
-              {formatTemplatesEnabledSummary(locale, stats.enabled, stats.total)}
-            </Badge>
-          ) : null}
-
-          <Link
-            href="/admin/notifications"
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-[#1C3A34] shadow-sm transition-colors hover:bg-[#f8fafb]"
-          >
-            <Settings2 className="size-4" />
-            {accessCopy.title}
-          </Link>
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-stretch xl:w-auto xl:max-w-md xl:flex-col">
+          <NotificationTemplatesChannelsSummary
+            enabled={stats.enabled}
+            total={stats.total}
+            className="w-full sm:w-auto xl:w-full"
+          />
+          <NotificationProvidersLink className="w-full sm:w-auto xl:w-full" />
         </div>
       </div>
 
