@@ -6,6 +6,8 @@ export type CreateRideRequestInput = {
   vehicleTypeId?: string | null;
   vehicleClassId?: string | null;
   regionId?: string | null;
+  pickupLocationId?: string | null;
+  dropoffLocationId?: string | null;
   pickupAddress: string;
   pickupLatitude?: number | null;
   pickupLongitude?: number | null;
@@ -21,6 +23,8 @@ const rideRequestInclude = {
   vehicleType: true,
   vehicleClass: true,
   region: true,
+  pickupLocation: true,
+  dropoffLocation: true,
 } as const;
 
 function toDecimal(value?: number | null) {
@@ -38,6 +42,8 @@ export async function createRideRequest(input: CreateRideRequestInput) {
       vehicleTypeId: input.vehicleTypeId ?? null,
       vehicleClassId: input.vehicleClassId ?? null,
       regionId: input.regionId ?? null,
+      pickupLocationId: input.pickupLocationId ?? null,
+      dropoffLocationId: input.dropoffLocationId ?? null,
       pickupAddress: input.pickupAddress,
       pickupLatitude: toDecimal(input.pickupLatitude),
       pickupLongitude: toDecimal(input.pickupLongitude),

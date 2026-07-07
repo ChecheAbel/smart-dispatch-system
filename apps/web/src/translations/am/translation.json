@@ -97,10 +97,17 @@
     "formDescription": "የጉዞ ዝርዝሮችዎን ከታች ይሙሉ። የተላኩ ጥያቄዎች በታች ባለው ዝርዝር ውስጥ ማየት ይችላሉ።",
     "pickupAddress": "የመውሰድ አድራሻ",
     "pickupAddressPlaceholder": "ለምሳሌ ቦሌ አየር ማረፊያ፣ መግቢያ 3",
+    "pickupSavedLocation": "የተቀመጠ የመውሰድ ቦታ",
+    "pickupSavedLocationPlaceholder": "የተቀመጠ የመውሰድ ነጥብ ይምረጡ",
     "pickupLocation": "የመውሰድ ነጥብ",
     "dropoffAddress": "የመውረድ አድራሻ",
     "dropoffAddressPlaceholder": "ለምሳሌ ቃዛንቺስ፣ ከመስቀል አደባባይ አቅራቢያ",
+    "dropoffSavedLocation": "የተቀመጠ የመውረድ ቦታ",
+    "dropoffSavedLocationPlaceholder": "የተቀመጠ የመውረድ ነጥብ ይምረጡ",
     "dropoffLocation": "የመውረድ ነጥብ",
+    "savedLocationHint": "የተቀመጠ ቦታ ይምረጡ ወይም ከታች ብጁ አድራሻ ያስገቡ።",
+    "noPickupLocations": "ለተመረጠው ክልል የተቀመጡ የመውሰድ ቦታዎች የሉም።",
+    "noDropoffLocations": "ለተመረጠው ክልል የተቀመጡ የመውረድ ቦታዎች የሉም።",
     "mapPickerHint": "ካርታውን ይጫኑ ወይም ፒኑን ይጎትቱ ትክክለኛውን ቦታ ለማስቀመጥ።",
     "mapLoading": "ካርታ በመጫን ላይ...",
     "mapEmpty": "በካርታው ላይ ነጥብ አልተመረጠም",
@@ -1586,13 +1593,25 @@
     "itemLabel": "ቦታ",
     "filters": {
       "region": "ክልል",
-      "regionAll": "ሁሉም ክልሎች"
+      "regionAll": "ሁሉም ክልሎች",
+      "usage": "አገልግሎት",
+      "usageAll": "ሁሉም አገልግሎት አይነቶች",
+      "usagePickup": "መውሰድ ብቻ",
+      "usageDropoff": "መውረድ ብቻ",
+      "usageBoth": "መውሰድ እና መውረድ"
+    },
+    "usage": {
+      "pickup": "መውሰድ",
+      "dropoff": "መውረድ",
+      "both": "መውሰድ እና መውረድ",
+      "none": "ምንም"
     },
     "columns": {
       "name": "ስም",
       "region": "ክልል",
       "coordinates": "የ GPS መጋጠሚያ",
       "address": "አድራሻ",
+      "usage": "አገልግሎት",
       "status": "ሁኔታ",
       "actions": "ድርጊቶች"
     },
@@ -1683,13 +1702,20 @@
         "isActiveTitle": "ንቁ ቦታ",
         "isActiveOn": "ይህ ቦታ ለመላኪያ ይገኛል።",
         "isActiveOff": "ይህ ቦታ ከመላኪያ ተደብቋል።",
-        "isActiveDescription": "እንቅስቃሴ የሌላቸው ቦታዎች በስርዓቱ ይቆያሉ፣ ነገር ግን ለአዲስ መላኪያ ሊመረጡ አይችሉም።"
+        "isActiveDescription": "እንቅስቃሴ የሌላቸው ቦታዎች በስርዓቱ ይቆያሉ፣ ነገር ግን ለአዲስ መላኪያ ሊመረጡ አይችሉም።",
+        "usageTitle": "የመላኪያ አገልግሎት",
+        "usageDescription": "ይህ ቦታ ለመውሰድ፣ ለመውረድ ወይም ለሁለቱም መመረጥ እንደሚችል ይቆጣጠሩ።",
+        "canPickupTitle": "ለመውሰድ ይገኛል",
+        "canPickupDescription": "ደንበኞች በሚያስይዙበት ጊዜ ይህን ቦታ እንደ የመውሰድ ነጥብ ሊመረጡ ይችላሉ።",
+        "canDropoffTitle": "ለመውረድ ይገኛል",
+        "canDropoffDescription": "ደንበኞች በሚያስይዙበት ጊዜ ይህን ቦታ እንደ የመውረድ ነጥብ ሊመረጡ ይችላሉ።"
       },
       "errors": {
         "regionRequired": "ክልል ያስፈልጋል።",
         "enNameRequired": "የእንግሊዝኛ ስም ያስፈልጋል።",
         "latitudeRequired": "ትክክለኛ ኬላት ያስፈልጋል (-90 እስከ 90)።",
         "longitudeRequired": "ትክክለኛ ሎንጂትዩድ ያስፈልጋል (-180 እስከ 180)።",
+        "usageRequired": "ለዚህ ቦታ የመውሰድ ወይም የመውረድ አገልግሎት ያንቁ።",
         "createFailed": "ቦታ መፍጠር አልተሳካም።",
         "updateFailed": "ቦታ ማዘመን አልተሳካም።",
         "loadFailed": "ቦታ መጫን አልተሳካም።"

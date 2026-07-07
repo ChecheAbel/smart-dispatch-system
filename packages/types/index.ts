@@ -266,10 +266,26 @@ export interface Location {
   latitude: number;
   longitude: number;
   address: string | null;
+  can_pickup: boolean;
+  can_dropoff: boolean;
   is_active: boolean;
   created_at: string;
   updated_at: string;
   translations?: LocationTranslation[];
+}
+
+export interface RideRequestLocationOption {
+  id: string;
+  region_id: string;
+  region: {
+    id: string;
+    slug: string;
+    name: string;
+  };
+  name: string;
+  latitude: number;
+  longitude: number;
+  address: string | null;
 }
 
 export type PricingModel = "flat" | "distance" | "time" | "distance_time" | "hourly";
@@ -373,9 +389,19 @@ export interface RideRequest {
     slug: string;
     name: string;
   } | null;
+  pickup_location_id: string | null;
+  pickup_location?: {
+    id: string;
+    name: string;
+  } | null;
   pickup_address: string;
   pickup_latitude: number | null;
   pickup_longitude: number | null;
+  dropoff_location_id: string | null;
+  dropoff_location?: {
+    id: string;
+    name: string;
+  } | null;
   dropoff_address: string;
   dropoff_latitude: number | null;
   dropoff_longitude: number | null;

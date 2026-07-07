@@ -1,4 +1,4 @@
-import type { Region, RideRequest, VehicleClass, VehicleType } from "@smart-dispatch/types";
+import type { Region, RideRequest, RideRequestLocationOption, VehicleClass, VehicleType } from "@smart-dispatch/types";
 import { apiClient } from "./api-client";
 import { unwrapApiResponse } from "./api-response";
 
@@ -9,11 +9,15 @@ export type RideRequestVehicleTypeOption = VehicleType & {
 export type RideRequestFormOptions = {
   vehicle_types: RideRequestVehicleTypeOption[];
   regions: Region[];
+  pickup_locations: RideRequestLocationOption[];
+  dropoff_locations: RideRequestLocationOption[];
 };
 
 export type CreateRideRequestInput = {
   pickup_address: string;
   dropoff_address: string;
+  pickup_location_id?: string | null;
+  dropoff_location_id?: string | null;
   pickup_latitude?: number | null;
   pickup_longitude?: number | null;
   dropoff_latitude?: number | null;
@@ -26,9 +30,9 @@ export type CreateRideRequestInput = {
   notes?: string | null;
 };
 
-export async function fetchRideRequestFormOptions(locale?: string) {
+export async function fetchRideRequestFormOptions(locale?: string, regionId?: string) {
   const { data } = await apiClient.get("/api/ride-requests/form-options", {
-    params: { locale },
+    params: { locale, region_id: regionId || undefined },
   });
   return unwrapApiResponse<RideRequestFormOptions>(data);
 }

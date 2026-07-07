@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { startOfDay } from "date-fns";
 import { CalendarClock, MapPin, Navigation, Route } from "lucide-react";
-import type { RideRequest, RideRequestStatus, VehicleType } from "@smart-dispatch/types";
+import type { RideRequest, RideRequestLocationOption, RideRequestStatus, VehicleType } from "@smart-dispatch/types";
 import { useLocale, usePermission } from "@/components/shared/providers";
 import {
   AdminSelectField,
@@ -140,6 +140,21 @@ function isTimeBeforeMin(time: TimeValue, minTime: TimeValue) {
   return time.hour < minTime.hour || (time.hour === minTime.hour && time.minute < minTime.minute);
 }
 
+function buildLocationAddress(location: RideRequestLocationOption) {
+  return location.address ? `${location.name}, ${location.address}` : location.name;
+}
+
+function filterLocationsByRegion(
+  locations: RideRequestLocationOption[],
+  regionId: string,
+) {
+  if (!regionId) {
+    return locations;
+  }
+
+  return locations.filter((location) => location.region_id === regionId);
+}
+
 export function RideRequestPage() {
   const { locale } = useLocale();
   const copy = getCustomerRequestsMessages(locale);
@@ -147,6 +162,8 @@ export function RideRequestPage() {
   const [form, setForm] = useState<RideRequestFormState>(emptyForm);
   const [pickupCoordinates, setPickupCoordinates] = useState<CoordinateState>({});
   const [dropoffCoordinates, setDropoffCoordinates] = useState<CoordinateState>({});
+  const [pickupLocationId, setPickupLocationId] = useState("");
+  const [dropoffLocationId, setDropoffLocationId] = useState("");
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>();
   const [scheduledTime, setScheduledTime] = useState<TimeValue | undefined>();
   const [errors, setErrors] = useState<RideRequestFieldErrors>({});
@@ -154,6 +171,8 @@ export function RideRequestPage() {
   const [loading, setLoading] = useState(true);
   const [vehicleTypes, setVehicleTypes] = useState<RideRequestVehicleTypeOption[]>([]);
   const [regions, setRegions] = useState<Array<{ label: string; value: string }>>([]);
+  const [pickupLocations, setPickupLocations] = useState<RideRequestLocationOption[]>([]);
+  const [dropoffLocations, setDropoffLocations] = useState<RideRequestLocationOption[]>([]);
   const [requests, setRequests] = useState<RideRequest[]>([]);
 
   const vehicleTypeItems = useMemo(
@@ -180,6 +199,34 @@ export function RideRequestPage() {
   );
 
   const passengerMax = selectedVehicleType?.passenger_capacity ?? 50;
+
+  const filteredPickupLocations = useMemo(
+    () => filterLocationsByRegion(pickupLocations, form.regionId),
+    [form.regionId, pickupLocations],
+  );
+
+  const filteredDropoffLocations = useMemo(
+    () => filterLocationsByRegion(dropoffLocations, form.regionId),
+    [form.regionId, dropoffLocations],
+  );
+
+  const pickupLocationItems = useMemo(
+    () =>
+      filteredPickupLocations.map((location) => ({
+        label: location.name,
+        value: location.id,
+      })),
+    [filteredPickupLocations],
+  );
+
+  const dropoffLocationItems = useMemo(
+    () =>
+      filteredDropoffLocations.map((location) => ({
+        label: location.name,
+        value: location.id,
+      })),
+    [filteredDropoffLocations],
+  );
 
   const scheduledMinTime = useMemo(() => getMinTimeForDate(scheduledDate), [scheduledDate]);
 
@@ -225,6 +272,8 @@ export function RideRequestPage() {
             value: region.id,
           })),
         );
+        setPickupLocations(options.pickup_locations);
+        setDropoffLocations(options.dropoff_locations);
         setRequests(rideRequests);
       } catch (error) {
         if (!cancelled) {
@@ -251,12 +300,108 @@ export function RideRequestPage() {
     value: RideRequestFormState[K],
   ) {
     setForm((current) => ({ ...current, [key]: value }));
+
+    if (key === "pickupAddress") {
+      setPickupLocationId("");
+    }
+
+    if (key === "dropoffAddress") {
+      setDropoffLocationId("");
+    }
+
+    if (key === "regionId") {
+      setPickupLocationId((currentPickupId) => {
+        if (!currentPickupId) return currentPickupId;
+        const stillValid = pickupLocations.some(
+          (location) =>
+            location.id === currentPickupId &&
+            (!value || location.region_id === value),
+        );
+        return stillValid ? currentPickupId : "";
+      });
+      setDropoffLocationId((currentDropoffId) => {
+        if (!currentDropoffId) return currentDropoffId;
+        const stillValid = dropoffLocations.some(
+          (location) =>
+            location.id === currentDropoffId &&
+            (!value || location.region_id === value),
+        );
+        return stillValid ? currentDropoffId : "";
+      });
+    }
+
     setErrors((current) => {
       if (!current[key]) return current;
       const next = { ...current };
       delete next[key];
       return next;
     });
+  }
+
+  function applyPickupLocation(locationId: string) {
+    const location = pickupLocations.find((entry) => entry.id === locationId);
+    if (!location) {
+      return;
+    }
+
+    setPickupLocationId(locationId);
+    setForm((current) => ({
+      ...current,
+      pickupAddress: buildLocationAddress(location),
+      regionId: current.regionId || location.region_id,
+    }));
+    setPickupCoordinates({
+      latitude: location.latitude,
+      longitude: location.longitude,
+    });
+    setErrors((current) => {
+      const next = { ...current };
+      delete next.pickupAddress;
+      delete next.pickupCoordinates;
+      return next;
+    });
+  }
+
+  function applyDropoffLocation(locationId: string) {
+    const location = dropoffLocations.find((entry) => entry.id === locationId);
+    if (!location) {
+      return;
+    }
+
+    setDropoffLocationId(locationId);
+    setForm((current) => ({
+      ...current,
+      dropoffAddress: buildLocationAddress(location),
+      regionId: current.regionId || location.region_id,
+    }));
+    setDropoffCoordinates({
+      latitude: location.latitude,
+      longitude: location.longitude,
+    });
+    setErrors((current) => {
+      const next = { ...current };
+      delete next.dropoffAddress;
+      delete next.dropoffCoordinates;
+      return next;
+    });
+  }
+
+  function handlePickupLocationChange(value: string) {
+    if (!value) {
+      setPickupLocationId("");
+      return;
+    }
+
+    applyPickupLocation(value);
+  }
+
+  function handleDropoffLocationChange(value: string) {
+    if (!value) {
+      setDropoffLocationId("");
+      return;
+    }
+
+    applyDropoffLocation(value);
   }
 
   function updateVehicleTypeId(value: string) {
@@ -281,6 +426,7 @@ export function RideRequestPage() {
   }
 
   const updatePickupCoordinates = useCallback((latitude: number, longitude: number) => {
+    setPickupLocationId("");
     setPickupCoordinates({ latitude, longitude });
     setErrors((current) => {
       if (!current.pickupCoordinates) return current;
@@ -291,6 +437,7 @@ export function RideRequestPage() {
   }, []);
 
   const updateDropoffCoordinates = useCallback((latitude: number, longitude: number) => {
+    setDropoffLocationId("");
     setDropoffCoordinates({ latitude, longitude });
     setErrors((current) => {
       if (!current.dropoffCoordinates) return current;
@@ -304,6 +451,8 @@ export function RideRequestPage() {
     setForm(emptyForm);
     setPickupCoordinates({});
     setDropoffCoordinates({});
+    setPickupLocationId("");
+    setDropoffLocationId("");
     setScheduledDate(undefined);
     setScheduledTime(undefined);
     setErrors({});
@@ -403,6 +552,8 @@ export function RideRequestPage() {
       const rideRequest = await createRideRequest({
         pickup_address: pickupAddress,
         dropoff_address: dropoffAddress,
+        pickup_location_id: pickupLocationId || null,
+        dropoff_location_id: dropoffLocationId || null,
         pickup_latitude: pickupCoordinates.latitude ?? null,
         pickup_longitude: pickupCoordinates.longitude ?? null,
         dropoff_latitude: dropoffCoordinates.latitude ?? null,
@@ -451,6 +602,22 @@ export function RideRequestPage() {
         <CardContent>
           <form className="space-y-5" onSubmit={(event) => void handleSubmit(event)}>
             <div className="grid gap-5 md:grid-cols-2">
+              <AdminSelectField
+                id="pickup-saved-location"
+                label={copy.pickupSavedLocation}
+                value={pickupLocationId || null}
+                onValueChange={handlePickupLocationChange}
+                items={pickupLocationItems}
+                placeholder={copy.pickupSavedLocationPlaceholder}
+                optional
+                optionalLabel={copy.optional}
+                disabled={formDisabled || pickupLocationItems.length === 0}
+                hint={
+                  pickupLocationItems.length === 0 ? copy.noPickupLocations : copy.savedLocationHint
+                }
+                containerClassName="md:col-span-2"
+              />
+
               <AdminTextField
                 id="pickup-address"
                 label={copy.pickupAddress}
@@ -487,6 +654,24 @@ export function RideRequestPage() {
                   <p className="text-xs text-red-600">{errors.pickupCoordinates}</p>
                 ) : null}
               </div>
+
+              <AdminSelectField
+                id="dropoff-saved-location"
+                label={copy.dropoffSavedLocation}
+                value={dropoffLocationId || null}
+                onValueChange={handleDropoffLocationChange}
+                items={dropoffLocationItems}
+                placeholder={copy.dropoffSavedLocationPlaceholder}
+                optional
+                optionalLabel={copy.optional}
+                disabled={formDisabled || dropoffLocationItems.length === 0}
+                hint={
+                  dropoffLocationItems.length === 0
+                    ? copy.noDropoffLocations
+                    : copy.savedLocationHint
+                }
+                containerClassName="md:col-span-2"
+              />
 
               <AdminTextField
                 id="dropoff-address"

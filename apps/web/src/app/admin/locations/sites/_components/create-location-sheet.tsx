@@ -76,6 +76,8 @@ type LocationFormState = {
   latitude: string;
   longitude: string;
   address: string;
+  canPickup: boolean;
+  canDropoff: boolean;
   isActive: boolean;
 };
 
@@ -90,6 +92,8 @@ const emptyForm: LocationFormState = {
   latitude: String(DEFAULT_MAP_CENTER.latitude),
   longitude: String(DEFAULT_MAP_CENTER.longitude),
   address: "",
+  canPickup: true,
+  canDropoff: true,
   isActive: true,
 };
 
@@ -106,6 +110,8 @@ function mapLocationToForm(location: Location): LocationFormState {
     latitude: String(location.latitude),
     longitude: String(location.longitude),
     address: location.address ?? "",
+    canPickup: location.can_pickup,
+    canDropoff: location.can_dropoff,
     isActive: location.is_active,
   };
 }
@@ -369,6 +375,10 @@ export function CreateLocationSheet({
       nextErrors.longitude = formCopy.errors.longitudeRequired;
     }
 
+    if (!form.canPickup && !form.canDropoff) {
+      nextErrors.canPickup = formCopy.errors.usageRequired;
+    }
+
     if (Object.keys(nextErrors).length > 0) {
       setFieldErrors(nextErrors);
       return;
@@ -400,6 +410,8 @@ export function CreateLocationSheet({
           latitude,
           longitude,
           address: form.address.trim() || null,
+          can_pickup: form.canPickup,
+          can_dropoff: form.canDropoff,
           is_active: form.isActive,
         });
         showSuccessToast({
@@ -415,6 +427,8 @@ export function CreateLocationSheet({
           latitude: latitude!,
           longitude: longitude!,
           address: form.address.trim() || null,
+          can_pickup: form.canPickup,
+          can_dropoff: form.canDropoff,
           is_active: form.isActive,
         });
         showSuccessToast({
@@ -670,6 +684,54 @@ export function CreateLocationSheet({
                 </p>
               </div>
             </FormSection>
+
+            <Card className={cn(adminCardClass, "gap-0 overflow-hidden py-0 shadow-none ring-0")}>
+              <div className="border-b border-slate-100 px-5 py-4">
+                <p className={cn("text-sm font-semibold", adminHeadingClass)}>
+                  {sectionCopy.usageTitle}
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                  {sectionCopy.usageDescription}
+                </p>
+              </div>
+              <div className="divide-y divide-slate-100">
+                <div className="flex items-center gap-4 px-5 py-4">
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <p className="text-sm font-medium text-[#1C3A34]">{sectionCopy.canPickupTitle}</p>
+                    <p className="text-xs leading-relaxed text-slate-500">
+                      {sectionCopy.canPickupDescription}
+                    </p>
+                  </div>
+                  <Switch
+                    id="location-can-pickup"
+                    checked={form.canPickup}
+                    onCheckedChange={(checked) => updateField("canPickup", checked)}
+                    disabled={submitting || loading}
+                    aria-label={sectionCopy.canPickupTitle}
+                  />
+                </div>
+                <div className="flex items-center gap-4 px-5 py-4">
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <p className="text-sm font-medium text-[#1C3A34]">{sectionCopy.canDropoffTitle}</p>
+                    <p className="text-xs leading-relaxed text-slate-500">
+                      {sectionCopy.canDropoffDescription}
+                    </p>
+                  </div>
+                  <Switch
+                    id="location-can-dropoff"
+                    checked={form.canDropoff}
+                    onCheckedChange={(checked) => updateField("canDropoff", checked)}
+                    disabled={submitting || loading}
+                    aria-label={sectionCopy.canDropoffTitle}
+                  />
+                </div>
+              </div>
+              {fieldErrors.canPickup ? (
+                <div className="border-t border-slate-100 px-5 py-3">
+                  <p className="text-xs text-red-600">{fieldErrors.canPickup}</p>
+                </div>
+              ) : null}
+            </Card>
 
             <Card className={cn(adminCardClass, "gap-0 overflow-hidden py-0 shadow-none ring-0")}>
               <div className="flex items-center gap-4 px-5 py-4">

@@ -35,6 +35,16 @@ import {
 import { PERMISSIONS } from "@/lib/permissions";
 import { DeleteConfirmModal } from "@/components/shared/delete-confirm-modal";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 import { CreateLocationSheet } from "./create-location-sheet";
 import { LocationStats } from "./location-stats";
 import { LocationsMapDialog } from "./locations-map-dialog";
@@ -90,6 +100,40 @@ function LocationRowActions({
   );
 }
 
+type UsageFilter = "all" | "pickup" | "dropoff" | "both";
+
+function locationUsageLabel(location: Location, copy: AdminLocationsMessages["usage"]) {
+  if (location.can_pickup && location.can_dropoff) {
+    return copy.both;
+  }
+
+  if (location.can_pickup) {
+    return copy.pickup;
+  }
+
+  if (location.can_dropoff) {
+    return copy.dropoff;
+  }
+
+  return copy.none;
+}
+
+function locationUsageBadgeClass(location: Location) {
+  if (location.can_pickup && location.can_dropoff) {
+    return "border-[#C9B87A]/30 bg-[#C9B87A]/10 text-[#8f7d45]";
+  }
+
+  if (location.can_pickup) {
+    return "border-sky-200 bg-sky-50 text-sky-800";
+  }
+
+  if (location.can_dropoff) {
+    return "border-violet-200 bg-violet-50 text-violet-800";
+  }
+
+  return "border-slate-200 bg-slate-50 text-slate-600";
+}
+
 export function LocationsPage() {
   const { locale } = useLocale();
   const { hasPermission } = useAuth();
@@ -104,6 +148,7 @@ export function LocationsPage() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletingLocation, setDeletingLocation] = useState<Location | null>(null);
   const [mapOpen, setMapOpen] = useState(false);
+  const [usageFilter, setUsageFilter] = useState<UsageFilter>("all");
   const [refreshKey, setRefreshKey] = useState(0);
 
   function openCreateSheet() {
@@ -144,6 +189,15 @@ export function LocationsPage() {
         cell: (location) => location.address ?? "—",
       },
       {
+        id: "usage",
+        header: copy.columns.usage,
+        cell: (location) => (
+          <Badge className={cn("text-xs", locationUsageBadgeClass(location))}>
+            {locationUsageLabel(location, copy.usage)}
+          </Badge>
+        ),
+      },
+      {
         id: "status",
         header: copy.columns.status,
         cell: (location) =>
@@ -164,8 +218,11 @@ export function LocationsPage() {
         limit,
         search: search || undefined,
         locale,
+        ...(usageFilter === "pickup" ? { can_pickup: true } : {}),
+        ...(usageFilter === "dropoff" ? { can_dropoff: true } : {}),
+        ...(usageFilter === "both" ? { can_pickup: true, can_dropoff: true } : {}),
       }),
-    [locale],
+    [locale, usageFilter],
   );
 
   const renderRowActions = useCallback(
@@ -197,7 +254,7 @@ export function LocationsPage() {
       <LocationStats locale={locale} refreshKey={refreshKey} />
 
       <DataTable
-        key={locale}
+        key={`${locale}-${usageFilter}`}
         eyebrow={<Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>}
         title={copy.title}
         titleClassName="text-2xl font-extrabold tracking-tight"
@@ -210,6 +267,35 @@ export function LocationsPage() {
         showIndexColumn
         renderRowActions={showRowActions ? renderRowActions : undefined}
         actionsColumnHeader={copy.columns.actions}
+        filterBar={
+          <div className="grid gap-3 sm:max-w-xs">
+            <Label htmlFor="location-usage-filter" className="text-sm font-medium text-slate-600">
+              {copy.filters.usage}
+            </Label>
+            <Select
+              items={[
+                { label: copy.filters.usageAll, value: "all" },
+                { label: copy.filters.usagePickup, value: "pickup" },
+                { label: copy.filters.usageDropoff, value: "dropoff" },
+                { label: copy.filters.usageBoth, value: "both" },
+              ]}
+              value={usageFilter}
+              onValueChange={(value) => setUsageFilter((value as UsageFilter | null) ?? "all")}
+            >
+              <SelectTrigger id="location-usage-filter" className="w-full bg-white">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="all">{copy.filters.usageAll}</SelectItem>
+                  <SelectItem value="pickup">{copy.filters.usagePickup}</SelectItem>
+                  <SelectItem value="dropoff">{copy.filters.usageDropoff}</SelectItem>
+                  <SelectItem value="both">{copy.filters.usageBoth}</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
+        }
         toolbarActions={
           <>
             <Button

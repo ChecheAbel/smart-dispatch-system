@@ -363,12 +363,18 @@ model Location {
   latitude     Decimal  @db.Decimal(10, 7)
   longitude    Decimal  @db.Decimal(10, 7)
   address      String?  @db.VarChar(255)
+  canPickup    Boolean  @default(true) @map("can_pickup")
+  canDropoff   Boolean  @default(true) @map("can_dropoff")
   isActive     Boolean  @default(true) @map("is_active")
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
   region       Region   @relation(fields: [regionId], references: [id], onDelete: Restrict)
+  pickupRideRequests  RideRequest[] @relation("RideRequestPickupLocation")
+  dropoffRideRequests RideRequest[] @relation("RideRequestDropoffLocation")
 
   @@index([regionId])
+  @@index([canPickup])
+  @@index([canDropoff])
   @@map("locations")
 }
 
@@ -430,6 +436,8 @@ model RideRequest {
   vehicleTypeId    String?           @map("vehicle_type_id") @db.Uuid
   vehicleClassId   String?           @map("vehicle_class_id") @db.Uuid
   regionId         String?           @map("region_id") @db.Uuid
+  pickupLocationId String?           @map("pickup_location_id") @db.Uuid
+  dropoffLocationId String?          @map("dropoff_location_id") @db.Uuid
   pickupAddress    String            @map("pickup_address") @db.VarChar(500)
   pickupLatitude   Decimal?          @map("pickup_latitude") @db.Decimal(10, 7)
   pickupLongitude  Decimal?          @map("pickup_longitude") @db.Decimal(10, 7)
@@ -446,10 +454,14 @@ model RideRequest {
   vehicleType      VehicleType?      @relation(fields: [vehicleTypeId], references: [id], onDelete: SetNull)
   vehicleClass     VehicleClass?     @relation(fields: [vehicleClassId], references: [id], onDelete: SetNull)
   region           Region?           @relation(fields: [regionId], references: [id], onDelete: SetNull)
+  pickupLocation   Location?         @relation("RideRequestPickupLocation", fields: [pickupLocationId], references: [id], onDelete: SetNull)
+  dropoffLocation  Location?         @relation("RideRequestDropoffLocation", fields: [dropoffLocationId], references: [id], onDelete: SetNull)
 
   @@index([requesterUserId])
   @@index([vehicleClassId])
   @@index([status])
+  @@index([pickupLocationId])
+  @@index([dropoffLocationId])
   @@index([createdAt(sort: Desc)])
   @@map("ride_requests")
 }

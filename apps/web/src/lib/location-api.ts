@@ -9,6 +9,8 @@ export type FetchLocationsParams = {
   region_id?: string;
   locale?: string;
   is_active?: boolean;
+  can_pickup?: boolean;
+  can_dropoff?: boolean;
 };
 
 export type CreateLocationInput = {
@@ -17,6 +19,8 @@ export type CreateLocationInput = {
   latitude: number;
   longitude: number;
   address?: string | null;
+  can_pickup?: boolean;
+  can_dropoff?: boolean;
   is_active?: boolean;
 };
 
@@ -26,6 +30,8 @@ export type UpdateLocationInput = {
   latitude?: number;
   longitude?: number;
   address?: string | null;
+  can_pickup?: boolean;
+  can_dropoff?: boolean;
   is_active?: boolean;
 };
 

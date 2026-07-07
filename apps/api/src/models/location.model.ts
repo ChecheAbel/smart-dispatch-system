@@ -17,6 +17,8 @@ export type CreateLocationInput = {
   latitude: number;
   longitude: number;
   address?: string | null;
+  canPickup?: boolean;
+  canDropoff?: boolean;
   isActive?: boolean;
 };
 
@@ -26,6 +28,8 @@ export type UpdateLocationInput = {
   latitude?: number;
   longitude?: number;
   address?: string | null;
+  canPickup?: boolean;
+  canDropoff?: boolean;
   isActive?: boolean;
 };
 
@@ -33,6 +37,8 @@ export type ListLocationsFilter = {
   search?: string;
   regionId?: string;
   isActive?: boolean;
+  canPickup?: boolean;
+  canDropoff?: boolean;
 };
 
 const locationInclude = {
@@ -67,6 +73,8 @@ function buildLocationWhere(filter?: ListLocationsFilter) {
   return {
     ...(filter?.regionId ? { regionId: filter.regionId } : {}),
     ...(filter?.isActive === undefined ? {} : { isActive: filter.isActive }),
+    ...(filter?.canPickup === undefined ? {} : { canPickup: filter.canPickup }),
+    ...(filter?.canDropoff === undefined ? {} : { canDropoff: filter.canDropoff }),
     ...(search
       ? {
           address: { contains: search, mode: "insensitive" as const },
@@ -111,6 +119,8 @@ export async function createLocation(input: CreateLocationInput) {
       latitude: toDecimal(input.latitude),
       longitude: toDecimal(input.longitude),
       address: input.address?.trim() || null,
+      canPickup: input.canPickup ?? true,
+      canDropoff: input.canDropoff ?? true,
       isActive: input.isActive ?? true,
     },
     include: locationInclude,
@@ -139,6 +149,8 @@ export async function updateLocation(id: string, input: UpdateLocationInput) {
       latitude: input.latitude === undefined ? undefined : toDecimal(input.latitude),
       longitude: input.longitude === undefined ? undefined : toDecimal(input.longitude),
       address: input.address,
+      canPickup: input.canPickup,
+      canDropoff: input.canDropoff,
       isActive: input.isActive,
     },
     include: locationInclude,
@@ -153,4 +165,34 @@ export function hasDefaultLocaleTranslation(translations: RegionTranslationInput
   return translations.some(
     (translation) => normalizeLocale(translation.locale) === DEFAULT_LOCALE,
   );
+}
+
+export async function listActiveBookingLocations(filter?: {
+  regionId?: string;
+  canPickup?: boolean;
+  canDropoff?: boolean;
+}) {
+  return prisma.location.findMany({
+    where: {
+      isActive: true,
+      ...(filter?.regionId ? { regionId: filter.regionId } : {}),
+      ...(filter?.canPickup ? { canPickup: true } : {}),
+      ...(filter?.canDropoff ? { canDropoff: true } : {}),
+    },
+    include: locationInclude,
+    orderBy: { createdAt: "asc" },
+  });
+}
+
+export async function findActiveLocationForBooking(
+  id: string,
+  usage: "pickup" | "dropoff",
+) {
+  return prisma.location.findFirst({
+    where: {
+      id,
+      isActive: true,
+      ...(usage === "pickup" ? { canPickup: true } : { canDropoff: true }),
+    },
+  });
 }

@@ -4,6 +4,7 @@ import { parseVehicleClassTranslationsMap } from "../types/vehicle-class-transla
 import { parseVehicleTypeTranslationsMap } from "../types/vehicle-type-translations";
 import { DEFAULT_LOCALE, normalizeLocale } from "../utils/locale";
 import { toPublicRegion } from "./region.mapper";
+import { pickLocationName } from "./location.mapper";
 
 type DbRideRequest = {
   id: string;
@@ -11,6 +12,8 @@ type DbRideRequest = {
   vehicleTypeId: string | null;
   vehicleClassId: string | null;
   regionId: string | null;
+  pickupLocationId: string | null;
+  dropoffLocationId: string | null;
   pickupAddress: string;
   pickupLatitude: Prisma.Decimal | null;
   pickupLongitude: Prisma.Decimal | null;
@@ -46,6 +49,14 @@ type DbRideRequest = {
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
+    translations: Prisma.JsonValue;
+  } | null;
+  pickupLocation: {
+    id: string;
+    translations: Prisma.JsonValue;
+  } | null;
+  dropoffLocation: {
+    id: string;
     translations: Prisma.JsonValue;
   } | null;
 };
@@ -108,9 +119,23 @@ export function toPublicRideRequest(
           name: toPublicRegion(rideRequest.region, { locale }).name,
         }
       : null,
+    pickup_location_id: rideRequest.pickupLocationId,
+    pickup_location: rideRequest.pickupLocation
+      ? {
+          id: rideRequest.pickupLocation.id,
+          name: pickLocationName(rideRequest.pickupLocation.translations, locale),
+        }
+      : null,
     pickup_address: rideRequest.pickupAddress,
     pickup_latitude: decimalToNumber(rideRequest.pickupLatitude),
     pickup_longitude: decimalToNumber(rideRequest.pickupLongitude),
+    dropoff_location_id: rideRequest.dropoffLocationId,
+    dropoff_location: rideRequest.dropoffLocation
+      ? {
+          id: rideRequest.dropoffLocation.id,
+          name: pickLocationName(rideRequest.dropoffLocation.translations, locale),
+        }
+      : null,
     dropoff_address: rideRequest.dropoffAddress,
     dropoff_latitude: decimalToNumber(rideRequest.dropoffLatitude),
     dropoff_longitude: decimalToNumber(rideRequest.dropoffLongitude),

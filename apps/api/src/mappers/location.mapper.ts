@@ -10,6 +10,8 @@ type DbLocation = {
   latitude: Prisma.Decimal;
   longitude: Prisma.Decimal;
   address: string | null;
+  canPickup: boolean;
+  canDropoff: boolean;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -24,7 +26,7 @@ type DbLocation = {
   };
 };
 
-function pickLocationName(translations: Prisma.JsonValue, locale?: string) {
+export function pickLocationName(translations: Prisma.JsonValue, locale?: string) {
   const map = parseRegionTranslationsMap(translations);
   const preferred = normalizeLocale(locale);
   return (
@@ -50,6 +52,8 @@ export function toPublicLocation(location: DbLocation, options?: { locale?: stri
     latitude: Number(location.latitude),
     longitude: Number(location.longitude),
     address: location.address,
+    can_pickup: location.canPickup,
+    can_dropoff: location.canDropoff,
     is_active: location.isActive,
     created_at: location.createdAt.toISOString(),
     updated_at: location.updatedAt.toISOString(),
@@ -72,4 +76,25 @@ export function toPublicLocationDetail(
   }
 
   return base;
+}
+
+export function toRideRequestLocationOption(
+  location: DbLocation,
+  options?: { locale?: string },
+) {
+  const region = toPublicRegion(location.region, { locale: options?.locale });
+
+  return {
+    id: location.id,
+    region_id: location.regionId,
+    region: {
+      id: region.id,
+      slug: region.slug,
+      name: region.name,
+    },
+    name: pickLocationName(location.translations, options?.locale),
+    latitude: Number(location.latitude),
+    longitude: Number(location.longitude),
+    address: location.address,
+  };
 }

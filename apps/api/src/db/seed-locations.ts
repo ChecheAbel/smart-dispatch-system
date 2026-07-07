@@ -121,6 +121,8 @@ async function upsertLocation(regionId: string, location: SeedLocation) {
         translations,
         latitude: location.latitude,
         longitude: location.longitude,
+        canPickup: true,
+        canDropoff: true,
         isActive: true,
       },
     });
@@ -134,6 +136,8 @@ async function upsertLocation(regionId: string, location: SeedLocation) {
       latitude: location.latitude,
       longitude: location.longitude,
       address: location.address,
+      canPickup: true,
+      canDropoff: true,
       isActive: true,
     },
   });

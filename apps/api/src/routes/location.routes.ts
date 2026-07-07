@@ -42,6 +42,8 @@ router.get("/", requirePermission("locations.read"), async (req: Request, res: R
       search: getString(req.query.search) || undefined,
       regionId: getString(req.query.region_id) || undefined,
       isActive: parseBoolean(req.query.is_active),
+      canPickup: parseBoolean(req.query.can_pickup),
+      canDropoff: parseBoolean(req.query.can_dropoff),
     };
 
     const result = await paginate(
@@ -83,6 +85,8 @@ router.post("/", requirePermission("locations.write"), async (req: Request, res:
     const latitude = parseLatitude(req.body?.latitude);
     const longitude = parseLongitude(req.body?.longitude);
     const address = getOptionalString(req.body?.address);
+    const canPickup = parseBoolean(req.body?.can_pickup);
+    const canDropoff = parseBoolean(req.body?.can_dropoff);
     const isActive = parseBoolean(req.body?.is_active);
 
     if (!regionId) {
@@ -105,6 +109,13 @@ router.post("/", requirePermission("locations.write"), async (req: Request, res:
       return sendError(res, "Valid longitude is required (-180 to 180).", 400);
     }
 
+    const resolvedCanPickup = canPickup ?? true;
+    const resolvedCanDropoff = canDropoff ?? true;
+
+    if (!resolvedCanPickup && !resolvedCanDropoff) {
+      return sendError(res, "At least one of pickup or drop-off usage must be enabled.", 400);
+    }
+
     const region = await findRegionById(regionId);
     if (!region) {
       return sendError(res, "Region not found.", 404);
@@ -116,6 +127,8 @@ router.post("/", requirePermission("locations.write"), async (req: Request, res:
       latitude,
       longitude,
       address: address ?? null,
+      canPickup: resolvedCanPickup,
+      canDropoff: resolvedCanDropoff,
       isActive: isActive ?? true,
     });
 
@@ -141,6 +154,8 @@ router.patch("/:id", requirePermission("locations.write"), async (req: Request, 
     const latitude = parseLatitude(req.body?.latitude);
     const longitude = parseLongitude(req.body?.longitude);
     const address = req.body?.address === null ? null : getOptionalString(req.body?.address);
+    const canPickup = parseBoolean(req.body?.can_pickup);
+    const canDropoff = parseBoolean(req.body?.can_dropoff);
     const isActive = parseBoolean(req.body?.is_active);
 
     if (req.body?.latitude !== undefined && latitude === undefined) {
@@ -158,12 +173,21 @@ router.patch("/:id", requirePermission("locations.write"), async (req: Request, 
       }
     }
 
+    const resolvedCanPickup = canPickup ?? existing.canPickup;
+    const resolvedCanDropoff = canDropoff ?? existing.canDropoff;
+
+    if (!resolvedCanPickup && !resolvedCanDropoff) {
+      return sendError(res, "At least one of pickup or drop-off usage must be enabled.", 400);
+    }
+
     const location = await updateLocation(req.params.id, {
       regionId: regionId ?? undefined,
       translations: translations.length ? translations : undefined,
       latitude,
       longitude,
       address,
+      canPickup: canPickup ?? undefined,
+      canDropoff: canDropoff ?? undefined,
       isActive,
     });
 

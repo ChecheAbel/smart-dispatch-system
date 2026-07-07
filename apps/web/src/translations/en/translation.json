@@ -97,10 +97,17 @@
     "formDescription": "Fill in your trip details below. You can track submitted requests in the list underneath.",
     "pickupAddress": "Pickup address",
     "pickupAddressPlaceholder": "e.g. Bole Airport, Gate 3",
+    "pickupSavedLocation": "Saved pickup location",
+    "pickupSavedLocationPlaceholder": "Choose a saved pickup point",
     "pickupLocation": "Pickup point",
     "dropoffAddress": "Drop-off address",
     "dropoffAddressPlaceholder": "e.g. Kazanchis, near Meskel Square",
+    "dropoffSavedLocation": "Saved drop-off location",
+    "dropoffSavedLocationPlaceholder": "Choose a saved drop-off point",
     "dropoffLocation": "Drop-off point",
+    "savedLocationHint": "Choose a saved location or enter a custom address below.",
+    "noPickupLocations": "No saved pickup locations are available for the selected region.",
+    "noDropoffLocations": "No saved drop-off locations are available for the selected region.",
     "mapPickerHint": "Click the map or drag the pin to set the exact location.",
     "mapLoading": "Loading map...",
     "mapEmpty": "No point selected on the map yet",
@@ -1586,13 +1593,25 @@
     "itemLabel": "location",
     "filters": {
       "region": "Region",
-      "regionAll": "All regions"
+      "regionAll": "All regions",
+      "usage": "Usage",
+      "usageAll": "All usage types",
+      "usagePickup": "Pickup only",
+      "usageDropoff": "Drop-off only",
+      "usageBoth": "Pickup & drop-off"
+    },
+    "usage": {
+      "pickup": "Pickup",
+      "dropoff": "Drop-off",
+      "both": "Pickup & drop-off",
+      "none": "None"
     },
     "columns": {
       "name": "Name",
       "region": "Region",
       "coordinates": "GPS coordinates",
       "address": "Address",
+      "usage": "Usage",
       "status": "Status",
       "actions": "Actions"
     },
@@ -1683,13 +1702,20 @@
         "isActiveTitle": "Active location",
         "isActiveOn": "This location is available for dispatch.",
         "isActiveOff": "This location is hidden from dispatch.",
-        "isActiveDescription": "Inactive locations remain in the system but cannot be selected for new dispatches."
+        "isActiveDescription": "Inactive locations remain in the system but cannot be selected for new dispatches.",
+        "usageTitle": "Dispatch usage",
+        "usageDescription": "Control whether this location can be selected for pickup, drop-off, or both.",
+        "canPickupTitle": "Available for pickup",
+        "canPickupDescription": "Customers can choose this location as a pickup point when booking.",
+        "canDropoffTitle": "Available for drop-off",
+        "canDropoffDescription": "Customers can choose this location as a drop-off point when booking."
       },
       "errors": {
         "regionRequired": "Region is required.",
         "enNameRequired": "English name is required.",
         "latitudeRequired": "Valid latitude is required (-90 to 90).",
         "longitudeRequired": "Valid longitude is required (-180 to 180).",
+        "usageRequired": "Enable pickup or drop-off usage for this location.",
         "createFailed": "Failed to create location.",
         "updateFailed": "Failed to update location.",
         "loadFailed": "Failed to load location."

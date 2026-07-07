@@ -4,6 +4,7 @@ import { authenticate, type AuthenticatedRequest } from "../middleware/authentic
 import { requirePermission } from "../middleware/require-permission";
 import { toPublicRideRequest } from "../mappers/ride-request.mapper";
 import { toPublicRegion } from "../mappers/region.mapper";
+import { toRideRequestLocationOption } from "../mappers/location.mapper";
 import { toPublicVehicleClass } from "../mappers/vehicle-class.mapper";
 import { toPublicVehicleType } from "../mappers/vehicle-type.mapper";
 import {
@@ -14,6 +15,7 @@ import {
   listRideRequestsForUser,
 } from "../models/ride-request.model";
 import { listActiveRegions } from "../models/region.model";
+import { listActiveBookingLocations, findActiveLocationForBooking } from "../models/location.model";
 import { isVehicleTypeClassAllowed, listActiveVehicleTypesWithAllowedClasses } from "../models/vehicle-type-class.model";
 import { recordAuditLog } from "../services/audit-log.service";
 import { parseLocale } from "../utils/locale";
@@ -71,9 +73,12 @@ router.get(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const locale = getRequestLocale(req);
-      const [vehicleTypes, regions] = await Promise.all([
+      const regionId = getOptionalString(req.query.region_id);
+      const [vehicleTypes, regions, pickupLocations, dropoffLocations] = await Promise.all([
         listActiveVehicleTypesWithAllowedClasses(),
         listActiveRegions(),
+        listActiveBookingLocations({ regionId: regionId ?? undefined, canPickup: true }),
+        listActiveBookingLocations({ regionId: regionId ?? undefined, canDropoff: true }),
       ]);
 
       return sendSuccess(res, {
@@ -84,6 +89,12 @@ router.get(
             .sort((left, right) => left.name.localeCompare(right.name)),
         })),
         regions: regions.map((region) => toPublicRegion(region, { locale })),
+        pickup_locations: pickupLocations.map((location) =>
+          toRideRequestLocationOption(location, { locale }),
+        ),
+        dropoff_locations: dropoffLocations.map((location) =>
+          toRideRequestLocationOption(location, { locale }),
+        ),
       });
     } catch (error) {
       return handleRouteError(res, error);
@@ -134,6 +145,8 @@ router.post(
       const vehicleTypeId = getOptionalString(req.body?.vehicle_type_id);
       const vehicleClassId = getOptionalString(req.body?.vehicle_class_id);
       const regionId = getOptionalString(req.body?.region_id);
+      const pickupLocationId = getOptionalString(req.body?.pickup_location_id);
+      const dropoffLocationId = getOptionalString(req.body?.dropoff_location_id);
       const notes = getOptionalString(req.body?.notes);
       const passengerCount = parsePassengerCount(req.body?.passenger_count) ?? 1;
       const pickupLatitude = parseCoordinate(req.body?.pickup_latitude);
@@ -192,11 +205,35 @@ router.post(
         }
       }
 
+      if (pickupLocationId) {
+        const pickupLocation = await findActiveLocationForBooking(pickupLocationId, "pickup");
+        if (!pickupLocation) {
+          return sendError(res, "Selected pickup location is not available.", 400);
+        }
+
+        if (regionId && pickupLocation.regionId !== regionId) {
+          return sendError(res, "Pickup location does not belong to the selected region.", 400);
+        }
+      }
+
+      if (dropoffLocationId) {
+        const dropoffLocation = await findActiveLocationForBooking(dropoffLocationId, "dropoff");
+        if (!dropoffLocation) {
+          return sendError(res, "Selected drop-off location is not available.", 400);
+        }
+
+        if (regionId && dropoffLocation.regionId !== regionId) {
+          return sendError(res, "Drop-off location does not belong to the selected region.", 400);
+        }
+      }
+
       const rideRequest = await createRideRequest({
         requesterUserId: userId,
         vehicleTypeId: vehicleTypeId ?? null,
         vehicleClassId: vehicleClassId ?? null,
         regionId: regionId ?? null,
+        pickupLocationId: pickupLocationId ?? null,
+        dropoffLocationId: dropoffLocationId ?? null,
         pickupAddress: pickupAddress.trim(),
         pickupLatitude,
         pickupLongitude,
