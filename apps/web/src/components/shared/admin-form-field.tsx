@@ -122,6 +122,57 @@ export function AdminTextField({
   );
 }
 
+type AdminTextareaFieldProps = Omit<ComponentProps<"textarea">, "id"> & {
+  id: string;
+  label: string;
+  hint?: string;
+  error?: string;
+  optional?: boolean;
+  optionalLabel?: string;
+  containerClassName?: string;
+};
+
+const textareaClassName =
+  "flex min-h-[88px] w-full resize-y rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
+
+export function AdminTextareaField({
+  id,
+  label,
+  hint,
+  error,
+  optional,
+  optionalLabel,
+  containerClassName,
+  className,
+  disabled,
+  ...props
+}: AdminTextareaFieldProps) {
+  return (
+    <AdminField
+      label={label}
+      htmlFor={id}
+      hint={hint}
+      error={error}
+      optional={optional}
+      optionalLabel={optionalLabel}
+      className={containerClassName}
+    >
+      <textarea
+        id={id}
+        disabled={disabled}
+        aria-invalid={Boolean(error)}
+        className={cn(
+          textareaClassName,
+          error && fieldErrorClassName,
+          disabled && "bg-slate-50 text-slate-500",
+          className,
+        )}
+        {...props}
+      />
+    </AdminField>
+  );
+}
+
 type AdminPasswordFieldProps = Omit<AdminTextFieldProps, "type"> & {
   savedHint?: string;
   showSaved?: boolean;

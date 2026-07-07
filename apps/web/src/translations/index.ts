@@ -4,6 +4,7 @@ import en from "./en/translation.json";
 import type {
   AdminAuditLogsMessages,
   AdminMenusMessages,
+  AdminNotificationsMessages,
   AdminNotificationsEmailMessages,
   AdminNotificationsSmsMessages,
   AdminRolesMessages,
@@ -19,6 +20,7 @@ import type {
   CustomerShellMessages,
   AdminDashboardMessages,
   CustomerDashboardMessages,
+  CustomerRequestsMessages,
   AdminProfileMessages,
   Translations,
 } from "./types";
@@ -31,6 +33,7 @@ const translations: Record<SupportedLocale, Translations> = {
 export type {
   AdminAuditLogsMessages,
   AdminMenusMessages,
+  AdminNotificationsMessages,
   AdminNotificationsEmailMessages,
   AdminNotificationsSmsMessages,
   AdminRolesMessages,
@@ -46,6 +49,7 @@ export type {
   CustomerShellMessages,
   AdminDashboardMessages,
   CustomerDashboardMessages,
+  CustomerRequestsMessages,
   AdminProfileMessages,
   Translations,
 };
@@ -75,6 +79,12 @@ export function getAdminUserRegistrationsMessages(
   locale: SupportedLocale,
 ): AdminUserRegistrationsMessages {
   return getTranslations(locale).adminUserRegistrations;
+}
+
+export function getAdminNotificationsMessages(
+  locale: SupportedLocale,
+): AdminNotificationsMessages {
+  return getTranslations(locale).adminNotifications;
 }
 
 export function getAdminNotificationsEmailMessages(
@@ -131,6 +141,10 @@ export function getAdminDashboardMessages(locale: SupportedLocale): AdminDashboa
 
 export function getCustomerDashboardMessages(locale: SupportedLocale): CustomerDashboardMessages {
   return getTranslations(locale).customerDashboard;
+}
+
+export function getCustomerRequestsMessages(locale: SupportedLocale): CustomerRequestsMessages {
+  return getTranslations(locale).customerRequests;
 }
 
 export function getAdminProfileMessages(locale: SupportedLocale): AdminProfileMessages {

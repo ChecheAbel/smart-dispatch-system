@@ -134,6 +134,7 @@ model User {
   driverProfile     Driver?
   requesterProfile  RequesterProfile?
   assignedVehicle   Vehicle?   @relation("VehicleAssignedDriver")
+  rideRequests      RideRequest[]
 
   @@index([email])
   @@index([mobileNumber])
@@ -275,30 +276,45 @@ enum VehicleStatus {
 }
 
 model VehicleType {
-  id                String    @id @default(uuid()) @db.Uuid
-  slug              String    @unique @db.VarChar(50)
-  translations      Json      @db.JsonB
-  passengerCapacity Int?      @map("passenger_capacity")
-  isActive          Boolean   @default(true) @map("is_active")
-  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  id                String             @id @default(uuid()) @db.Uuid
+  slug              String             @unique @db.VarChar(50)
+  translations      Json               @db.JsonB
+  passengerCapacity Int?               @map("passenger_capacity")
+  isActive          Boolean            @default(true) @map("is_active")
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime           @updatedAt @map("updated_at") @db.Timestamptz
   vehicles          Vehicle[]
   farePlans         FarePlan[]
+  rideRequests      RideRequest[]
+  vehicleClassLinks VehicleTypeClass[]
 
   @@map("vehicle_types")
 }
 
 model VehicleClass {
-  id           String     @id @default(uuid()) @db.Uuid
-  slug         String     @unique @db.VarChar(50)
-  translations Json       @db.JsonB
-  isActive     Boolean    @default(true) @map("is_active")
-  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz
-  vehicles     Vehicle[]
-  farePlans    FarePlan[]
+  id                String             @id @default(uuid()) @db.Uuid
+  slug              String             @unique @db.VarChar(50)
+  translations      Json               @db.JsonB
+  isActive          Boolean            @default(true) @map("is_active")
+  createdAt         DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt         DateTime           @updatedAt @map("updated_at") @db.Timestamptz
+  vehicles          Vehicle[]
+  farePlans         FarePlan[]
+  rideRequests      RideRequest[]
+  vehicleTypeLinks  VehicleTypeClass[]
 
   @@map("vehicle_classes")
+}
+
+model VehicleTypeClass {
+  vehicleTypeId  String       @map("vehicle_type_id") @db.Uuid
+  vehicleClassId String       @map("vehicle_class_id") @db.Uuid
+  vehicleType    VehicleType  @relation(fields: [vehicleTypeId], references: [id], onDelete: Cascade)
+  vehicleClass   VehicleClass @relation(fields: [vehicleClassId], references: [id], onDelete: Cascade)
+
+  @@id([vehicleTypeId, vehicleClassId])
+  @@index([vehicleClassId])
+  @@map("vehicle_type_classes")
 }
 
 model Vehicle {
@@ -335,6 +351,7 @@ model Region {
   updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz
   locations    Location[]
   farePlans    FarePlan[]
+  rideRequests RideRequest[]
 
   @@map("regions")
 }
@@ -395,4 +412,44 @@ model FarePlan {
   @@index([pricingModel])
   @@index([isActive])
   @@map("fare_plans")
+}
+
+enum RideRequestStatus {
+  pending
+  confirmed
+  in_progress
+  completed
+  cancelled
+
+  @@map("ride_request_status")
+}
+
+model RideRequest {
+  id               String            @id @default(uuid()) @db.Uuid
+  requesterUserId  String            @map("requester_user_id") @db.Uuid
+  vehicleTypeId    String?           @map("vehicle_type_id") @db.Uuid
+  vehicleClassId   String?           @map("vehicle_class_id") @db.Uuid
+  regionId         String?           @map("region_id") @db.Uuid
+  pickupAddress    String            @map("pickup_address") @db.VarChar(500)
+  pickupLatitude   Decimal?          @map("pickup_latitude") @db.Decimal(10, 7)
+  pickupLongitude  Decimal?          @map("pickup_longitude") @db.Decimal(10, 7)
+  dropoffAddress   String            @map("dropoff_address") @db.VarChar(500)
+  dropoffLatitude  Decimal?          @map("dropoff_latitude") @db.Decimal(10, 7)
+  dropoffLongitude Decimal?          @map("dropoff_longitude") @db.Decimal(10, 7)
+  scheduledAt      DateTime?         @map("scheduled_at") @db.Timestamptz
+  passengerCount   Int               @default(1) @map("passenger_count")
+  notes            String?           @db.VarChar(1000)
+  status           RideRequestStatus @default(pending)
+  createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime          @updatedAt @map("updated_at") @db.Timestamptz
+  requester        User              @relation(fields: [requesterUserId], references: [id], onDelete: Cascade)
+  vehicleType      VehicleType?      @relation(fields: [vehicleTypeId], references: [id], onDelete: SetNull)
+  vehicleClass     VehicleClass?     @relation(fields: [vehicleClassId], references: [id], onDelete: SetNull)
+  region           Region?           @relation(fields: [regionId], references: [id], onDelete: SetNull)
+
+  @@index([requesterUserId])
+  @@index([vehicleClassId])
+  @@index([status])
+  @@index([createdAt(sort: Desc)])
+  @@map("ride_requests")
 }

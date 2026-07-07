@@ -9,3 +9,4 @@ export const USER_REGISTER_PATH = "/register";
 export const USER_HOME_PATH = "/";
 export const USER_DASHBOARD_PATH = "/dashboard";
 export const USER_PROFILE_PATH = "/dashboard/profile";
+export const USER_REQUESTS_PATH = "/dashboard/requests";

@@ -89,6 +89,82 @@
       "requestStatusDescription": "Pending, confirmed, and completed requests"
     }
   },
+  "customerRequests": {
+    "eyebrow": "Book a ride",
+    "title": "Request Ride",
+    "description": "Tell us where to pick you up and where you are going. Our dispatch team will review and assign a vehicle.",
+    "formTitle": "New ride request",
+    "formDescription": "Fill in your trip details below. You can track submitted requests in the list underneath.",
+    "pickupAddress": "Pickup address",
+    "pickupAddressPlaceholder": "e.g. Bole Airport, Gate 3",
+    "pickupLocation": "Pickup point",
+    "dropoffAddress": "Drop-off address",
+    "dropoffAddressPlaceholder": "e.g. Kazanchis, near Meskel Square",
+    "dropoffLocation": "Drop-off point",
+    "mapPickerHint": "Click the map or drag the pin to set the exact location.",
+    "mapLoading": "Loading map...",
+    "mapEmpty": "No point selected on the map yet",
+    "mapRecenter": "Recenter",
+    "vehicleType": "Vehicle type",
+    "vehicleTypePlaceholder": "Select a vehicle type",
+    "vehicleClass": "Vehicle class",
+    "vehicleClassPlaceholder": "Select a vehicle class",
+    "vehicleTypeOption": "{name} (up to {capacity} passengers)",
+    "vehicleTypeOptionNoCapacity": "{name}",
+    "region": "Region",
+    "regionPlaceholder": "Select a region",
+    "passengerCount": "Passengers",
+    "passengersCount": "{count} passengers",
+    "scheduledAt": "Pickup date & time",
+    "scheduledDate": "Pickup date",
+    "scheduledTime": "Pickup time",
+    "pickDate": "Pick a date",
+    "pickTime": "Pick a time",
+    "clearDate": "Clear",
+    "clearTime": "Clear",
+    "today": "Today",
+    "hour": "Hour",
+    "minute": "Minute",
+    "applyTime": "Apply",
+    "scheduledAtHint": "Leave both empty if you need the ride as soon as possible.",
+    "notes": "Additional notes",
+    "notesPlaceholder": "Flight number, contact at gate, luggage details…",
+    "optional": "(optional)",
+    "loading": "Loading...",
+    "noVehicleTypes": "No vehicle types are available right now.",
+    "noVehicleClasses": "No classes are available for the selected vehicle type.",
+    "noRegions": "No regions are available right now.",
+    "submit": "Submit request",
+    "submitting": "Submitting...",
+    "submitDisabledNoPermission": "You do not have permission to submit ride requests.",
+    "recentTitle": "Your requests",
+    "recentDescription": "Recently submitted ride requests appear here while dispatch reviews them.",
+    "emptyTitle": "No requests yet",
+    "emptyDescription": "Submit your first ride request using the form above.",
+    "status": {
+      "pending": "Pending",
+      "confirmed": "Confirmed",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "errors": {
+      "pickupRequired": "Pickup address is required.",
+      "dropoffRequired": "Drop-off address is required.",
+      "pickupCoordinatesRequired": "Select the pickup point on the map.",
+      "dropoffCoordinatesRequired": "Select the drop-off point on the map.",
+      "passengerCountInvalid": "Enter a valid passenger count between 1 and 50.",
+      "passengerExceedsCapacity": "Passenger count exceeds the selected vehicle capacity ({capacity}).",
+      "vehicleClassRequiresType": "Select a vehicle type before choosing a vehicle class.",
+      "vehicleClassInvalid": "Selected vehicle class is not available for this vehicle type.",
+      "scheduledAtPast": "Pickup time must be in the future.",
+      "scheduledAtIncomplete": "Select both a pickup date and time, or leave both empty.",
+      "submitFailed": "Failed to submit ride request."
+    },
+    "toast": {
+      "submitted": "Ride request submitted successfully."
+    }
+  },
   "adminDashboard": {
     "eyebrow": "Overview",
     "title": "Dashboard",
@@ -103,6 +179,10 @@
       "locationsDescription": "{active} active dispatch sites",
       "regionsTitle": "Regions",
       "regionsDescription": "Administrative regions configured"
+    },
+    "registrations": {
+      "title": "Customer registrations",
+      "description": "Self-service sign-up applications awaiting or completed review"
     },
     "comingSoon": "Coming soon",
     "comingSoonStats": {
@@ -814,6 +894,31 @@
       }
     }
   },
+  "adminNotifications": {
+    "eyebrow": "System settings",
+    "title": "Notifications",
+    "description": "Configure email and SMS delivery settings for platform notifications.",
+    "channels": {
+      "title": "Notification channel",
+      "description": "Choose which delivery method you want to configure.",
+      "email": {
+        "title": "Email",
+        "description": "SMTP, SendGrid, or Mailgun for outbound email."
+      },
+      "sms": {
+        "title": "SMS",
+        "description": "AfroSMS messaging for outbound text delivery."
+      }
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to notifications is required to open this page. Ask an administrator to grant the notifications.read permission for your role.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    }
+  },
   "adminNotificationsEmail": {
     "eyebrow": "Notifications",
     "title": "Email configuration",
@@ -1073,6 +1178,9 @@
       "descriptionPlaceholder": "Optional description",
       "capacity": "Passenger capacity",
       "capacityPlaceholder": "e.g. 12",
+      "allowedClasses": "Allowed vehicle classes",
+      "allowedClassesDescription": "Choose which service classes customers and dispatch can use with this vehicle type.",
+      "allowedClassesEmpty": "No vehicle classes are available. Create classes under Fleet → Vehicle Classes first.",
       "active": "Active",
       "optional": "(optional)",
       "cancel": "Cancel",
@@ -1086,6 +1194,8 @@
       "errors": {
         "slugRequired": "Slug is required.",
         "enNameRequired": "English name is required.",
+        "allowedClassesInvalid": "One or more selected vehicle classes are not available.",
+        "allowedClassesInUse": "Cannot remove a class that is still used by vehicles, fare plans, or ride requests.",
         "createFailed": "Failed to create vehicle type.",
         "updateFailed": "Failed to update vehicle type.",
         "loadFailed": "Failed to load vehicle type."

@@ -44,6 +44,7 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   "scroll-text": ScrollText,
   "audit-logs": ScrollText,
   settings: Settings,
+  "system-settings": Settings,
   "access-control": ShieldCheck,
   bell: Bell,
   notifications: Bell,

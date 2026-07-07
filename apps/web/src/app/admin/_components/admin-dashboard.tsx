@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { CalendarCheck, Car, Map, MapPinned, Radio, Receipt, Truck, Users } from "lucide-react";
-import { useAuth, useLocale } from "@/components/shared/providers";
+import { useAuth, useLocale, usePermission } from "@/components/shared/providers";
 import { StatCard } from "@/components/shared/stat-card";
 import { ComingSoonChartCard } from "@/components/shared/coming-soon-chart-card";
+import { RegistrationStats } from "@/app/admin/user-registrations/_components/registration-stats";
 import { Badge } from "@/components/ui/badge";
 import { adminBadgeGoldClass, adminHeadingClass } from "@/lib/admin-theme";
+import { PERMISSIONS } from "@/lib/permissions";
 import { fetchLocationCount } from "@/lib/location-api";
 import { fetchRegionCount } from "@/lib/region-api";
 import { fetchUserCount } from "@/lib/user-api";
@@ -45,6 +47,7 @@ export function AdminDashboard() {
   const { user } = useAuth();
   const { locale } = useLocale();
   const copy = getAdminDashboardMessages(locale);
+  const canViewRegistrations = usePermission(PERMISSIONS.user_registrations.read);
   const [stats, setStats] = useState<DashboardStats>(emptyStats);
   const [loading, setLoading] = useState(true);
 
@@ -172,6 +175,16 @@ export function AdminDashboard() {
           comingSoon
         />
       </div>
+
+      {canViewRegistrations ? (
+        <div className="space-y-4">
+          <div className="space-y-1">
+            <h3 className={`text-lg font-bold ${adminHeadingClass}`}>{copy.registrations.title}</h3>
+            <p className="text-sm text-slate-500">{copy.registrations.description}</p>
+          </div>
+          <RegistrationStats locale={locale} refreshKey={0} />
+        </div>
+      ) : null}
 
       <div className="space-y-4">
         <div className="space-y-1">

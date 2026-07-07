@@ -26,26 +26,134 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 
-function getActiveParentMenuId(
+function collectMenuPaths(item: Menu): string[] {
+  const paths: string[] = [];
+
+  if (item.path) {
+    paths.push(item.path);
+  }
+
+  for (const child of item.children ?? []) {
+    paths.push(...collectMenuPaths(child));
+  }
+
+  return paths;
+}
+
+function isMenuBranchActive(
+  item: Menu,
+  pathname: string,
+  isNavActive: (pathname: string, href: string) => boolean,
+) {
+  return collectMenuPaths(item).some((path) => isNavActive(pathname, path));
+}
+
+function getActiveRootMenuId(
   items: Menu[],
   pathname: string,
   isNavActive: (pathname: string, href: string) => boolean,
 ) {
   for (const item of items) {
-    if (!item.children?.length) {
-      continue;
-    }
-
-    const childActive = item.children.some(
-      (child) => child.path && isNavActive(pathname, child.path),
-    );
-
-    if (childActive) {
+    if (isMenuBranchActive(item, pathname, isNavActive)) {
       return item.id;
     }
   }
 
   return null;
+}
+
+function NestedMenuGroup({
+  item,
+  pathname,
+  isNavActive,
+}: {
+  item: Menu;
+  pathname: string;
+  isNavActive: (pathname: string, href: string) => boolean;
+}) {
+  const [open, setOpen] = useState(() => isMenuBranchActive(item, pathname, isNavActive));
+  const branchActive = isMenuBranchActive(item, pathname, isNavActive);
+  const Icon = getMenuIcon(item.icon);
+
+  useEffect(() => {
+    if (isMenuBranchActive(item, pathname, isNavActive)) {
+      setOpen(true);
+    }
+  }, [item, isNavActive, pathname]);
+
+  return (
+    <SidebarMenuSubItem>
+      <Collapsible open={open} onOpenChange={setOpen} className="group/nested">
+        <CollapsibleTrigger
+          className={cn(
+            "flex h-9 w-full items-center gap-2 rounded-md px-3 text-sm font-medium text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+            branchActive && "bg-sidebar-accent text-sidebar-accent-foreground",
+          )}
+        >
+          <Icon className="size-4 shrink-0" />
+          <span className="truncate">{item.label}</span>
+          <ChevronRight
+            className={cn(
+              "ml-auto size-3.5 shrink-0 text-sidebar-foreground/60 transition-transform duration-200",
+              open && "rotate-90",
+            )}
+          />
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub className="ml-3.5 gap-1 border-l border-sidebar-border/70 py-1 pl-2">
+            <NavMenuChildren items={item.children ?? []} pathname={pathname} isNavActive={isNavActive} />
+          </SidebarMenuSub>
+        </CollapsibleContent>
+      </Collapsible>
+    </SidebarMenuSubItem>
+  );
+}
+
+function NavMenuChildren({
+  items,
+  pathname,
+  isNavActive,
+}: {
+  items: Menu[];
+  pathname: string;
+  isNavActive: (pathname: string, href: string) => boolean;
+}) {
+  return (
+    <>
+      {items.map((child) => {
+        if (child.children?.length) {
+          return (
+            <NestedMenuGroup
+              key={child.id}
+              item={child}
+              pathname={pathname}
+              isNavActive={isNavActive}
+            />
+          );
+        }
+
+        if (!child.path) {
+          return null;
+        }
+
+        const ChildIcon = getMenuIcon(child.icon);
+
+        return (
+          <SidebarMenuSubItem key={child.id}>
+            <SidebarMenuSubButton
+              isActive={isNavActive(pathname, child.path)}
+              size="md"
+              className={cn(adminNavButtonClass, "h-9 px-3")}
+              render={<Link href={child.path} />}
+            >
+              <ChildIcon />
+              <span>{child.label}</span>
+            </SidebarMenuSubButton>
+          </SidebarMenuSubItem>
+        );
+      })}
+    </>
+  );
 }
 
 function ParentMenuItem({
@@ -61,9 +169,7 @@ function ParentMenuItem({
   onOpenChange: (open: boolean) => void;
   isNavActive: (pathname: string, href: string) => boolean;
 }) {
-  const childActive = Boolean(
-    item.children?.some((child) => child.path && isNavActive(pathname, child.path)),
-  );
+  const branchActive = isMenuBranchActive(item, pathname, isNavActive);
   const Icon = getMenuIcon(item.icon);
 
   return (
@@ -72,7 +178,7 @@ function ParentMenuItem({
         <CollapsibleTrigger
           render={
             <SidebarMenuButton
-              isActive={childActive}
+              isActive={branchActive}
               tooltip={item.label}
               size="lg"
               className={adminNavButtonClass}
@@ -92,24 +198,7 @@ function ParentMenuItem({
         <CollapsibleContent className="overflow-hidden data-ending-style:animate-out data-starting-style:animate-in">
           {item.children && (
             <SidebarMenuSub className="gap-1.5 py-1">
-              {item.children.map((child) => {
-                if (!child.path) return null;
-                const ChildIcon = getMenuIcon(child.icon);
-
-                return (
-                  <SidebarMenuSubItem key={child.id}>
-                    <SidebarMenuSubButton
-                      isActive={isNavActive(pathname, child.path)}
-                      size="md"
-                      className={cn(adminNavButtonClass, "h-9 px-3")}
-                      render={<Link href={child.path} />}
-                    >
-                      <ChildIcon />
-                      <span>{child.label}</span>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                );
-              })}
+              <NavMenuChildren items={item.children} pathname={pathname} isNavActive={isNavActive} />
             </SidebarMenuSub>
           )}
         </CollapsibleContent>
@@ -128,11 +217,11 @@ function SidebarMenuItems({
   isNavActive: (pathname: string, href: string) => boolean;
 }) {
   const [expandedParentId, setExpandedParentId] = useState<string | null>(() =>
-    getActiveParentMenuId(items, pathname, isNavActive),
+    getActiveRootMenuId(items, pathname, isNavActive),
   );
 
   useEffect(() => {
-    setExpandedParentId(getActiveParentMenuId(items, pathname, isNavActive));
+    setExpandedParentId(getActiveRootMenuId(items, pathname, isNavActive));
   }, [items, isNavActive, pathname]);
 
   return (

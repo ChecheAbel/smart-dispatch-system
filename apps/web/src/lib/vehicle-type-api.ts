@@ -14,12 +14,14 @@ export type CreateVehicleTypeInput = {
   translations: VehicleTypeTranslation[];
   passenger_capacity?: number | null;
   is_active?: boolean;
+  allowed_class_ids?: string[];
 };
 
 export type UpdateVehicleTypeInput = {
   translations?: VehicleTypeTranslation[];
   passenger_capacity?: number | null;
   is_active?: boolean;
+  allowed_class_ids?: string[];
 };
 
 export async function fetchVehicleTypes(params: FetchVehicleTypesParams = {}) {

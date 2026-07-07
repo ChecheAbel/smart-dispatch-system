@@ -11,9 +11,10 @@ import {
   getCustomerPageTitleFromMenus,
 } from "@/lib/customer-navigation";
 import { filterMenusForPortal, type NavigationPortal } from "@/lib/portal-navigation";
-import { ADMIN_PROFILE_PATH } from "@/lib/auth-paths";
+import { ADMIN_PROFILE_PATH, USER_PROFILE_PATH } from "@/lib/auth-paths";
 import { fetchNavigationMenus } from "@/lib/menu-api";
 import { getAdminProfileMessages } from "@/translations";
+import { PORTAL_SHELL_CONFIG } from "@/lib/portal-shell-config";
 
 type NavigationContextValue = {
   menus: Menu[];
@@ -94,6 +95,10 @@ export function NavigationProvider({
       }
 
       if (portal === "customer") {
+        if (pathname === USER_PROFILE_PATH) {
+          return PORTAL_SHELL_CONFIG.customer.getProfileLabel(locale);
+        }
+
         return getCustomerPageTitleFromMenus(pathname, portalMenus);
       }
 

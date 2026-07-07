@@ -16,6 +16,7 @@ import {
   slugFromFarePlanTranslations,
   updateFarePlan,
 } from "../models/fare-plan.model";
+import { isVehicleTypeClassAllowed } from "../models/vehicle-type-class.model";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
 import {
@@ -59,6 +60,22 @@ function parseOptionalId(value: unknown) {
   if (value === null) return null;
   if (typeof value === "string" && value.trim()) return value.trim();
   return undefined;
+}
+
+async function validateVehicleTypeClassPair(
+  vehicleTypeId: string | null | undefined,
+  vehicleClassId: string | null | undefined,
+) {
+  if (!vehicleTypeId || !vehicleClassId) {
+    return null;
+  }
+
+  const allowed = await isVehicleTypeClassAllowed(vehicleTypeId, vehicleClassId);
+  if (!allowed) {
+    return "Selected vehicle class is not allowed for this vehicle type.";
+  }
+
+  return null;
 }
 
 function parsePriority(value: unknown) {
@@ -165,10 +182,17 @@ router.post("/", requirePermission("fare_plans.write"), async (req: Request, res
       return sendError(res, "Base fare is required.", 400);
     }
 
+    const vehicleTypeId = parseOptionalId(req.body?.vehicle_type_id);
+    const vehicleClassId = parseOptionalId(req.body?.vehicle_class_id);
+    const pairError = await validateVehicleTypeClassPair(vehicleTypeId, vehicleClassId);
+    if (pairError) {
+      return sendError(res, pairError, 400);
+    }
+
     const farePlan = await createFarePlan({
       translations,
-      vehicleTypeId: parseOptionalId(req.body?.vehicle_type_id),
-      vehicleClassId: parseOptionalId(req.body?.vehicle_class_id),
+      vehicleTypeId,
+      vehicleClassId,
       regionId: parseOptionalId(req.body?.region_id),
       pricingModel,
       currency: getString(req.body?.currency) || "ETB",
@@ -209,10 +233,20 @@ router.patch("/:id", requirePermission("fare_plans.write"), async (req: Request,
     const baseFare = parseMoney(req.body?.base_fare);
     const isActive = parseBoolean(req.body?.is_active);
 
+    const vehicleTypeId = parseOptionalId(req.body?.vehicle_type_id);
+    const vehicleClassId = parseOptionalId(req.body?.vehicle_class_id);
+    const pairError = await validateVehicleTypeClassPair(
+      vehicleTypeId ?? existing.vehicleTypeId,
+      vehicleClassId ?? existing.vehicleClassId,
+    );
+    if (pairError) {
+      return sendError(res, pairError, 400);
+    }
+
     const farePlan = await updateFarePlan(req.params.id, {
       translations: translations.length ? translations : undefined,
-      vehicleTypeId: parseOptionalId(req.body?.vehicle_type_id),
-      vehicleClassId: parseOptionalId(req.body?.vehicle_class_id),
+      vehicleTypeId,
+      vehicleClassId,
       regionId: parseOptionalId(req.body?.region_id),
       pricingModel,
       currency: getString(req.body?.currency) || undefined,

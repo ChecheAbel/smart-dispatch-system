@@ -42,9 +42,11 @@ const DEFAULT_PERMISSIONS = [
   { slug: "fare_plans.delete", module: "fare_plans", action: "delete", description: "Delete fare plans" },
   { slug: "customer_dashboard.read", module: "customer_dashboard", action: "read", description: "View customer dashboard" },
   { slug: "customer_profile.read", module: "customer_profile", action: "read", description: "View customer profile" },
+  { slug: "customer_requests.read", module: "customer_requests", action: "read", description: "View and book ride requests" },
+  { slug: "customer_requests.write", module: "customer_requests", action: "write", description: "Submit ride requests" },
 ] as const;
 
-const REMOVED_MENU_SLUGS = ["permissions", "endpoints", "registration-forms", "customer-portal"] as const;
+const REMOVED_MENU_SLUGS = ["permissions", "endpoints", "registration-forms", "customer-portal", "customer-profile", "user", "notifications-email", "notifications-sms"] as const;
 
 const REMOVED_PERMISSION_SLUGS = [
   "permissions.read",
@@ -87,11 +89,22 @@ const DEFAULT_MENUS = [
     ],
   },
   {
+    slug: "account-management",
+    path: null,
+    icon: "users",
+    sortOrder: 10,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "Account Management" },
+      { locale: "am", label: "የመለያ አስተዳደር" },
+    ],
+  },
+  {
     slug: "users",
     path: "/admin/users",
     icon: "users",
     sortOrder: 10,
-    parentSlug: null,
+    parentSlug: "account-management",
     translations: [
       { locale: "en", label: "Users" },
       { locale: "am", label: "ተጠቃሚዎች" },
@@ -101,8 +114,8 @@ const DEFAULT_MENUS = [
     slug: "user-registrations",
     path: "/admin/user-registrations",
     icon: "clipboard-check",
-    sortOrder: 11,
-    parentSlug: null,
+    sortOrder: 20,
+    parentSlug: "account-management",
     translations: [
       { locale: "en", label: "Registrations" },
       { locale: "am", label: "ምዝገባዎች" },
@@ -153,36 +166,25 @@ const DEFAULT_MENUS = [
     ],
   },
   {
-    slug: "notifications",
+    slug: "system-settings",
     path: null,
-    icon: "bell",
-    sortOrder: 30,
+    icon: "settings",
+    sortOrder: 60,
     parentSlug: null,
+    translations: [
+      { locale: "en", label: "System Settings" },
+      { locale: "am", label: "የስርዓት ቅንብሮች" },
+    ],
+  },
+  {
+    slug: "notifications",
+    path: "/admin/notifications",
+    icon: "bell",
+    sortOrder: 10,
+    parentSlug: "system-settings",
     translations: [
       { locale: "en", label: "Notifications" },
       { locale: "am", label: "ማሳወቂያዎች" },
-    ],
-  },
-  {
-    slug: "notifications-email",
-    path: "/admin/notifications/email",
-    icon: "mail",
-    sortOrder: 10,
-    parentSlug: "notifications",
-    translations: [
-      { locale: "en", label: "Email" },
-      { locale: "am", label: "ኢሜይል" },
-    ],
-  },
-  {
-    slug: "notifications-sms",
-    path: "/admin/notifications/sms",
-    icon: "message-square",
-    sortOrder: 20,
-    parentSlug: "notifications",
-    translations: [
-      { locale: "en", label: "SMS" },
-      { locale: "am", label: "ኤስኤምኤስ" },
     ],
   },
   {
@@ -233,7 +235,7 @@ const DEFAULT_MENUS = [
     slug: "location-management",
     path: null,
     icon: "map",
-    sortOrder: 50,
+    sortOrder: 30,
     parentSlug: null,
     translations: [
       { locale: "en", label: "Location Management" },
@@ -266,7 +268,7 @@ const DEFAULT_MENUS = [
     slug: "billing",
     path: null,
     icon: "receipt",
-    sortOrder: 60,
+    sortOrder: 50,
     parentSlug: null,
     translations: [
       { locale: "en", label: "Billing" },
@@ -296,14 +298,14 @@ const DEFAULT_MENUS = [
     ],
   },
   {
-    slug: "customer-profile",
-    path: "/dashboard/profile",
-    icon: "user-round",
-    sortOrder: 71,
+    slug: "customer-requests",
+    path: "/dashboard/requests",
+    icon: "route",
+    sortOrder: 72,
     parentSlug: null,
     translations: [
-      { locale: "en", label: "Profile" },
-      { locale: "am", label: "መገለጫ" },
+      { locale: "en", label: "Request Ride" },
+      { locale: "am", label: "ጉዞ ጠይቅ" },
     ],
   },
 ] as const;
@@ -366,6 +368,9 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "fare_plans.create", method: "POST", path: "/api/fare-plans", description: "Create fare plan", permissionSlug: "fare_plans.write" },
   { slug: "fare_plans.update", method: "PATCH", path: "/api/fare-plans/:id", description: "Update fare plan", permissionSlug: "fare_plans.write" },
   { slug: "fare_plans.delete", method: "DELETE", path: "/api/fare-plans/:id", description: "Delete fare plan", permissionSlug: "fare_plans.delete" },
+  { slug: "ride_requests.form_options", method: "GET", path: "/api/ride-requests/form-options", description: "Ride request form options", permissionSlug: "customer_requests.read" },
+  { slug: "ride_requests.list", method: "GET", path: "/api/ride-requests", description: "List ride requests", permissionSlug: "customer_requests.read" },
+  { slug: "ride_requests.create", method: "POST", path: "/api/ride-requests", description: "Create ride request", permissionSlug: "customer_requests.write" },
 ];
 
 async function seedPermissions() {
@@ -491,7 +496,7 @@ async function seedUserRolePermissions() {
 
   const permissions = await prisma.permission.findMany({
     where: {
-      slug: { in: ["customer_dashboard.read", "customer_profile.read"] },
+      slug: { in: ["customer_dashboard.read", "customer_requests.read", "customer_requests.write"] },
     },
     orderBy: { slug: "asc" },
   });

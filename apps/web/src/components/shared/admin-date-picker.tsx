@@ -28,6 +28,7 @@ type AdminDatePickerProps = {
   maxDate?: Date;
   clearLabel?: string;
   todayLabel?: string;
+  disabled?: boolean;
   onChange: (date: Date | undefined) => void;
   className?: string;
 };
@@ -41,10 +42,19 @@ export function AdminDatePicker({
   maxDate,
   clearLabel = "Clear",
   todayLabel = "Today",
+  disabled = false,
   onChange,
   className,
 }: AdminDatePickerProps) {
   const [open, setOpen] = useState(false);
+
+  function handleOpenChange(nextOpen: boolean) {
+    if (disabled) {
+      return;
+    }
+
+    setOpen(nextOpen);
+  }
 
   function handleSelect(date: Date | undefined) {
     onChange(date);
@@ -56,13 +66,14 @@ export function AdminDatePicker({
       <Label htmlFor={id} className={adminFilterLabelClass}>
         {label}
       </Label>
-      <Popover open={open} onOpenChange={setOpen}>
+      <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger
           render={
             <Button
               type="button"
               variant="outline"
               id={id}
+              disabled={disabled}
               data-empty={!value}
               data-state={open ? "open" : "closed"}
               className={cn(

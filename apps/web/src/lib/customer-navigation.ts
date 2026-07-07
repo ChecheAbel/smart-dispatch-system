@@ -1,5 +1,5 @@
 import type { Menu } from "@smart-dispatch/types";
-import { USER_DASHBOARD_PATH } from "@/lib/auth-paths";
+import { USER_DASHBOARD_PATH, USER_PROFILE_PATH } from "@/lib/auth-paths";
 import { flattenMenus } from "@/lib/admin-navigation";
 
 export function isCustomerNavActive(pathname: string, href: string) {
@@ -19,6 +19,10 @@ export function getCustomerPageTitleFromMenus(pathname: string, menus: Menu[]) {
 }
 
 export function isCustomerPathAllowed(pathname: string, menus: Menu[]) {
+  if (pathname === USER_PROFILE_PATH || pathname.startsWith(`${USER_PROFILE_PATH}/`)) {
+    return true;
+  }
+
   const flatMenus = flattenMenus(menus).filter((menu) => menu.path);
 
   return flatMenus.some((menu) => isCustomerNavActive(pathname, menu.path!));

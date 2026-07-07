@@ -89,6 +89,82 @@
       "requestStatusDescription": "በመጠባበቅ ላይ፣ የተረጋገጡ እና የተጠናቀቁ ጥያቄዎች"
     }
   },
+  "customerRequests": {
+    "eyebrow": "ጉዞ ያስይዙ",
+    "title": "ጉዞ ጠይቅ",
+    "description": "እንዴት እንደሚወሰዱ እና ወዴት እንደሚሄዱ ይንገሩን። የዲስፓች ቡድናችን ያስተውላል እና ተሽከርካሪ ይመድባል።",
+    "formTitle": "አዲስ የጉዞ ጥያቄ",
+    "formDescription": "የጉዞ ዝርዝሮችዎን ከታች ይሙሉ። የተላኩ ጥያቄዎች በታች ባለው ዝርዝር ውስጥ ማየት ይችላሉ።",
+    "pickupAddress": "የመውሰድ አድራሻ",
+    "pickupAddressPlaceholder": "ለምሳሌ ቦሌ አየር ማረፊያ፣ መግቢያ 3",
+    "pickupLocation": "የመውሰድ ነጥብ",
+    "dropoffAddress": "የመውረድ አድራሻ",
+    "dropoffAddressPlaceholder": "ለምሳሌ ቃዛንቺስ፣ ከመስቀል አደባባይ አቅራቢያ",
+    "dropoffLocation": "የመውረድ ነጥብ",
+    "mapPickerHint": "ካርታውን ይጫኑ ወይም ፒኑን ይጎትቱ ትክክለኛውን ቦታ ለማስቀመጥ።",
+    "mapLoading": "ካርታ በመጫን ላይ...",
+    "mapEmpty": "በካርታው ላይ ነጥብ አልተመረጠም",
+    "mapRecenter": "እንደገና ማዕከል",
+    "vehicleType": "የተሽከርካሪ አይነት",
+    "vehicleTypePlaceholder": "የተሽከርካሪ አይነት ይምረጡ",
+    "vehicleClass": "የተሽከርካሪ ክፍል",
+    "vehicleClassPlaceholder": "የተሽከርካሪ ክፍል ይምረጡ",
+    "vehicleTypeOption": "{name} (እስከ {capacity} ተሳፋሪዎች)",
+    "vehicleTypeOptionNoCapacity": "{name}",
+    "region": "ክልል",
+    "regionPlaceholder": "ክልል ይምረጡ",
+    "passengerCount": "ተሳፋሪዎች",
+    "passengersCount": "{count} ተሳፋሪዎች",
+    "scheduledAt": "የመውሰድ ቀን እና ሰዓት",
+    "scheduledDate": "የመውሰድ ቀን",
+    "scheduledTime": "የመውሰድ ሰዓት",
+    "pickDate": "ቀን ይምረጡ",
+    "pickTime": "ሰዓት ይምረጡ",
+    "clearDate": "አጽዳ",
+    "clearTime": "አጽዳ",
+    "today": "ዛሬ",
+    "hour": "ሰዓት",
+    "minute": "ደቂቃ",
+    "applyTime": "ተግብር",
+    "scheduledAtHint": "በተቻለ ፍጥነት ጉዞ ከፈለጉ ሁለቱንም ባዶ ይተውት።",
+    "notes": "ተጨማሪ ማስታወሻ",
+    "notesPlaceholder": "የበረራ ቁጥር፣ በመግቢያ የሚገኙ ሰው፣ የሻንጣ ዝርዝር…",
+    "optional": "(አማራጭ)",
+    "loading": "በመጫን ላይ...",
+    "noVehicleTypes": "በአሁኑ ጊዜ የተሽከርካሪ አይነቶች የሉም።",
+    "noVehicleClasses": "ለተመረጠው የተሽከርካሪ አይነት ክፍሎች የሉም።",
+    "noRegions": "በአሁኑ ጊዜ ክልሎች የሉም።",
+    "submit": "ጥያቄ አስገባ",
+    "submitting": "በመላክ ላይ...",
+    "submitDisabledNoPermission": "የጉዞ ጥያቄ ለመላክ ፍቃድ የለዎትም።",
+    "recentTitle": "የእርስዎ ጥያቄዎች",
+    "recentDescription": "በቅርብ የተላኩ የጉዞ ጥያቄዎች ዲስፓች እስኪመረምር ድረስ እዚህ ይታያሉ።",
+    "emptyTitle": "ገና ጥያቄ የለም",
+    "emptyDescription": "የመጀመሪያዎን የጉዞ ጥያቄ በላይኛው ቅጽ በመጠቀም ያስገቡ።",
+    "status": {
+      "pending": "በመጠባበቅ ላይ",
+      "confirmed": "ተረጋግጧል",
+      "in_progress": "በመስራት ላይ",
+      "completed": "ተጠናቋል",
+      "cancelled": "ተሰርዟል"
+    },
+    "errors": {
+      "pickupRequired": "የመውሰድ አድራሻ ያስፈልጋል።",
+      "dropoffRequired": "የመውረድ አድራሻ ያስፈልጋል።",
+      "pickupCoordinatesRequired": "በካርታው ላይ የመውሰድ ነጥብ ይምረጡ።",
+      "dropoffCoordinatesRequired": "በካርታው ላይ የመውረድ ነጥብ ይምረጡ።",
+      "passengerCountInvalid": "በ1 እና 50 መካከል ትክክለኛ የተሳፋሪ ብዛት ያስገቡ።",
+      "passengerExceedsCapacity": "የተሳፋሪ ብዛት ከተመረጠው የተሽከርካሪ አቅም ({capacity}) በላይ ነው።",
+      "vehicleClassRequiresType": "የተሽከርካሪ ክፍል ከመምረጥዎ በፊት የተሽከርካሪ አይነት ይምረጡ።",
+      "vehicleClassInvalid": "የተመረጠው የተሽከርካሪ ክፍል ለዚህ የተሽከርካሪ አይነት አይገኝም።",
+      "scheduledAtPast": "የመውሰድ ሰዓት በወደፊት መሆን አለበት።",
+      "scheduledAtIncomplete": "የመውሰድ ቀን እና ሰዓት ሁለቱንም ይምረጡ፣ ወይም ሁለቱንም ባዶ ይተውት።",
+      "submitFailed": "የጉዞ ጥያቄ ማስገባት አልተሳካም።"
+    },
+    "toast": {
+      "submitted": "የጉዞ ጥያቄ በተሳካ ሁኔታ ተልኳል።"
+    }
+  },
   "adminDashboard": {
     "eyebrow": "አጠቃላይ እይታ",
     "title": "ዳሽቦርድ",
@@ -103,6 +179,10 @@
       "locationsDescription": "{active} ንቁ የዲስፓች ቦታዎች",
       "regionsTitle": "ክልሎች",
       "regionsDescription": "የተዋቀሩ አስተዳደራዊ ክልሎች"
+    },
+    "registrations": {
+      "title": "የደንበኛ ምዝገባዎች",
+      "description": "በራስ-ሰር ምዝገባ ጥያቄዎች ለግምገማ በመጠባበቅ ላይ ወይም ከተጠናቀቁ በኋላ"
     },
     "comingSoon": "በቅርቡ ይመጣል",
     "comingSoonStats": {
@@ -814,6 +894,31 @@
       }
     }
   },
+  "adminNotifications": {
+    "eyebrow": "የስርዓት ቅንብሮች",
+    "title": "ማሳወቂያዎች",
+    "description": "ለመድረክ ማሳወቂያዎች የኢሜይል እና የኤስኤምኤስ መላኪያ ቅንብሮችን ያዋቅሩ።",
+    "channels": {
+      "title": "የማሳወቂያ መንገድ",
+      "description": "ማዋቀር የሚፈልጉትን የመላኪያ ዘዴ ይምረጡ።",
+      "email": {
+        "title": "ኢሜይል",
+        "description": "ለወጪ ኢሜይል SMTP፣ SendGrid ወይም Mailgun።"
+      },
+      "sms": {
+        "title": "ኤስኤምኤስ",
+        "description": "ለወጪ የጽሁፍ መልዕክት AfroSMS።"
+      }
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የማሳወቂያዎችን የእይታ መዳረሻ ያስፈልጋል። አስተዳዳሪው ሚናዎ ላይ notifications.read ፈቃድ እንዲሰጥዎት ይጠይቁ።",
+      "sessionHint": "ፈቃዶች ቀርፊው ከተቀየሩ በኋላ ክፍለ ጊዜዎን ለማደስ ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    }
+  },
   "adminNotificationsEmail": {
     "eyebrow": "ማሳወቂያዎች",
     "title": "የኢሜይል ቅንብር",
@@ -1073,6 +1178,9 @@
       "descriptionPlaceholder": "አማራጭ መግለጫ",
       "capacity": "የተሳተፍ አቅም",
       "capacityPlaceholder": "ለምሳሌ 12",
+      "allowedClasses": "የሚፈቀዱ የተሽከርካሪ ክፍሎች",
+      "allowedClassesDescription": "ደንበኞች እና ዲስፓች ከዚህ የተሽከርካሪ አይነት ጋር የሚጠቀሙባቸውን የአገልግሎት ክፍሎች ይምረጡ።",
+      "allowedClassesEmpty": "ምንም የተሽከርካሪ ክፍሎች የሉም። በመጀመሪያ በመኪና ብዛት → የተሽከርካሪ ክፍሎች ውስጥ ይፍጠሩ።",
       "active": "ንቁ",
       "optional": "(አማራጭ)",
       "cancel": "ሰርዝ",
@@ -1086,6 +1194,8 @@
       "errors": {
         "slugRequired": "ስላግ ያስፈልጋል።",
         "enNameRequired": "የእንግሊዝኛ ስም ያስፈልጋል።",
+        "allowedClassesInvalid": "ከተመረጡት የተሽከርካሪ ክፍሎች አንዱ ወይም ከዚያ በላይ አይገኙም።",
+        "allowedClassesInUse": "በተሽከርካሪዎች፣ በክፍያ ዕቅዶች ወይም በጉዞ ጥያቄዎች ላይ እስካለ ድረስ ክፍል ማስወገድ አይቻልም።",
         "createFailed": "የተሽከርካሪ አይነት መፍጠር አልተሳካም።",
         "updateFailed": "የተሽከርካሪ አይነት ማዘመን አልተሳካም።",
         "loadFailed": "የተሽከርካሪ አይነት መጫን አልተሳካም።"

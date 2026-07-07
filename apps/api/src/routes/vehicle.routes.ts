@@ -17,6 +17,7 @@ import {
 } from "../models/vehicle.model";
 import { findVehicleTypeById } from "../models/vehicle-type.model";
 import { findVehicleClassById } from "../models/vehicle-class.model";
+import { isVehicleTypeClassAllowed } from "../models/vehicle-type-class.model";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
 import { getOptionalString, getString, parseBoolean } from "../utils/validation";
@@ -149,6 +150,11 @@ router.post("/", requirePermission("vehicles.write"), async (req: Request, res: 
       return sendError(res, "Vehicle class not found.", 404);
     }
 
+    const typeClassAllowed = await isVehicleTypeClassAllowed(vehicleTypeId, vehicleClassId);
+    if (!typeClassAllowed) {
+      return sendError(res, "Selected vehicle class is not allowed for this vehicle type.", 400);
+    }
+
     const vehicle = await createVehicle({
       plateNumber,
       chassisNumber,
@@ -198,6 +204,16 @@ router.patch("/:id", requirePermission("vehicles.write"), async (req: Request, r
       if (!vehicleClass) {
         return sendError(res, "Vehicle class not found.", 404);
       }
+    }
+
+    const resolvedVehicleTypeId = vehicleTypeId ?? existing.vehicleTypeId;
+    const resolvedVehicleClassId = vehicleClassId ?? existing.vehicleClassId;
+    const typeClassAllowed = await isVehicleTypeClassAllowed(
+      resolvedVehicleTypeId,
+      resolvedVehicleClassId,
+    );
+    if (!typeClassAllowed) {
+      return sendError(res, "Selected vehicle class is not allowed for this vehicle type.", 400);
     }
 
     const assignedDriverUserId = parseAssignedDriverUserId(req.body?.assigned_driver_user_id);

@@ -39,6 +39,14 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
     return ["user_registrations.read"];
   }
 
+  if (normalizedSlug === "account-management") {
+    return ["users.read", "user_registrations.read"];
+  }
+
+  if (normalizedSlug === "system-settings" || normalizedSlug === "notifications") {
+    return ["notifications.read"];
+  }
+
   if (normalizedSlug === "fleet") {
     return ["vehicle_types.read", "vehicle_classes.read", "vehicles.read"];
   }
@@ -83,12 +91,20 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
     return ["customer_profile.read"];
   }
 
+  if (normalizedSlug === "customer-requests") {
+    return ["customer_requests.read"];
+  }
+
   if (normalizedPath === "/dashboard") {
     return ["customer_dashboard.read"];
   }
 
   if (normalizedPath?.startsWith("/dashboard/profile")) {
     return ["customer_profile.read"];
+  }
+
+  if (normalizedPath?.startsWith("/dashboard/requests")) {
+    return ["customer_requests.read"];
   }
 
   if (isAdminModule(normalizedSlug)) {

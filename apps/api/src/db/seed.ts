@@ -8,6 +8,7 @@ import { seedRegions } from "./seed-regions";
 import { seedLocations } from "./seed-locations";
 import { seedVehicleTypes } from "./seed-vehicle-types";
 import { seedVehicleClasses } from "./seed-vehicle-classes";
+import { seedVehicleTypeClasses } from "./seed-vehicle-type-classes";
 import { seedVehicles } from "./seed-vehicles";
 import { seedFarePlans } from "./seed-fare-plans";
 
@@ -50,6 +51,7 @@ export const SEED_TARGETS = [
   "locations",
   "vehicle-types",
   "vehicle-classes",
+  "vehicle-type-classes",
   "vehicles",
   "fare-plans",
   "admin",
@@ -99,15 +101,20 @@ const SEED_REGISTRY: Record<SeedTarget, SeedRunner> = {
     run: seedVehicleClasses,
     deps: [],
   },
+  "vehicle-type-classes": {
+    label: "vehicle type-class links",
+    run: seedVehicleTypeClasses,
+    deps: ["vehicle-types", "vehicle-classes"],
+  },
   vehicles: {
     label: "vehicles",
     run: seedVehicles,
-    deps: ["vehicle-types", "vehicle-classes"],
+    deps: ["vehicle-types", "vehicle-classes", "vehicle-type-classes"],
   },
   "fare-plans": {
     label: "fare plans",
     run: seedFarePlans,
-    deps: ["vehicle-types", "vehicle-classes", "regions"],
+    deps: ["vehicle-types", "vehicle-classes", "vehicle-type-classes", "regions"],
   },
   admin: {
     label: "admin user",
@@ -124,6 +131,7 @@ const FULL_SEED_ORDER: SeedTarget[] = [
   "locations",
   "vehicle-types",
   "vehicle-classes",
+  "vehicle-type-classes",
   "vehicles",
   "fare-plans",
   "admin",

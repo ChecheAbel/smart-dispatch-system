@@ -168,6 +168,7 @@ export interface VehicleType {
   created_at: string;
   updated_at: string;
   translations?: VehicleTypeTranslation[];
+  allowed_class_ids?: string[];
 }
 
 export interface VehicleClassTranslation {
@@ -342,6 +343,48 @@ export interface AuthTokenResponse {
 export interface AuthMeResponse {
   user: User;
   permissions: Permission[];
+}
+
+export type RideRequestStatus =
+  | "pending"
+  | "confirmed"
+  | "in_progress"
+  | "completed"
+  | "cancelled";
+
+export interface RideRequest {
+  id: string;
+  requester_user_id: string;
+  vehicle_type_id: string | null;
+  vehicle_type?: {
+    id: string;
+    slug: string;
+    name: string;
+  } | null;
+  vehicle_class_id: string | null;
+  vehicle_class?: {
+    id: string;
+    slug: string;
+    name: string;
+  } | null;
+  region_id: string | null;
+  region?: {
+    id: string;
+    slug: string;
+    name: string;
+  } | null;
+  pickup_address: string;
+  pickup_latitude: number | null;
+  pickup_longitude: number | null;
+  dropoff_address: string;
+  dropoff_latitude: number | null;
+  dropoff_longitude: number | null;
+  scheduled_at: string | null;
+  passenger_count: number;
+  notes: string | null;
+  status: RideRequestStatus;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ApiSuccessResponse<T> {

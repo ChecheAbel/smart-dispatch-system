@@ -1,18 +1,20 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import type { VehicleType } from "@smart-dispatch/types";
+import type { VehicleClass, VehicleType } from "@smart-dispatch/types";
 import {
   createVehicleType,
   fetchVehicleTypeById,
   updateVehicleType,
 } from "@/lib/vehicle-type-api";
+import { fetchActiveVehicleClasses } from "@/lib/vehicle-class-api";
 import { adminHeadingClass, adminInputClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
 import { LOCALE_OPTIONS } from "@/lib/locale";
 import { useLocale } from "@/components/shared/providers";
 import { formatMessage, getAdminVehicleTypesMessages } from "@/translations";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -89,6 +91,8 @@ export function CreateVehicleTypeSheet({
   const isEdit = mode === "edit";
 
   const [form, setForm] = useState<VehicleTypeFormState>(emptyForm);
+  const [allowedClassIds, setAllowedClassIds] = useState<string[]>([]);
+  const [vehicleClasses, setVehicleClasses] = useState<VehicleClass[]>([]);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -97,6 +101,8 @@ export function CreateVehicleTypeSheet({
   useEffect(() => {
     if (!open) {
       setForm(emptyForm);
+      setAllowedClassIds([]);
+      setVehicleClasses([]);
       setFieldErrors({});
       setError(null);
       setSubmitting(false);
@@ -104,17 +110,38 @@ export function CreateVehicleTypeSheet({
       return;
     }
 
+    let cancelled = false;
+
+    async function loadVehicleClasses() {
+      try {
+        const classes = await fetchActiveVehicleClasses(locale);
+        if (!cancelled) {
+          setVehicleClasses(classes);
+        }
+      } catch {
+        if (!cancelled) {
+          setVehicleClasses([]);
+        }
+      }
+    }
+
+    void loadVehicleClasses();
+
     if (!isEdit) {
       setForm(emptyForm);
-      return;
+      setAllowedClassIds([]);
+      return () => {
+        cancelled = true;
+      };
     }
 
     if (!vehicleTypeId) {
-      return;
+      return () => {
+        cancelled = true;
+      };
     }
 
     const editingId = vehicleTypeId;
-    let cancelled = false;
 
     async function loadVehicleType() {
       setLoading(true);
@@ -124,6 +151,7 @@ export function CreateVehicleTypeSheet({
         const vehicleType = await fetchVehicleTypeById(editingId);
         if (!cancelled) {
           setForm(mapVehicleTypeToForm(vehicleType));
+          setAllowedClassIds(vehicleType.allowed_class_ids ?? []);
         }
       } catch (err) {
         if (!cancelled) {
@@ -146,7 +174,14 @@ export function CreateVehicleTypeSheet({
     return () => {
       cancelled = true;
     };
-  }, [open, isEdit, vehicleTypeId, formCopy.errors.loadFailed, toastCopy.loadFailed.title]);
+  }, [
+    open,
+    isEdit,
+    vehicleTypeId,
+    locale,
+    formCopy.errors.loadFailed,
+    toastCopy.loadFailed.title,
+  ]);
 
   function updateField<K extends keyof VehicleTypeFormState>(
     key: K,
@@ -163,6 +198,29 @@ export function CreateVehicleTypeSheet({
       return next;
     });
     setError(null);
+  }
+
+  function toggleAllowedClass(classId: string, checked: boolean) {
+    setAllowedClassIds((current) => {
+      if (checked) {
+        return current.includes(classId) ? current : [...current, classId];
+      }
+
+      return current.filter((id) => id !== classId);
+    });
+    setError(null);
+  }
+
+  function mapAllowedClassError(message: string) {
+    if (message.includes("not available")) {
+      return formCopy.errors.allowedClassesInvalid;
+    }
+
+    if (message.includes("still used")) {
+      return formCopy.errors.allowedClassesInUse;
+    }
+
+    return message;
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -211,6 +269,7 @@ export function CreateVehicleTypeSheet({
           translations,
           passenger_capacity,
           is_active: form.isActive,
+          allowed_class_ids: allowedClassIds,
         });
         showSuccessToast({
           title: toastCopy.updateSuccess.title,
@@ -223,6 +282,7 @@ export function CreateVehicleTypeSheet({
           translations,
           passenger_capacity,
           is_active: form.isActive,
+          allowed_class_ids: allowedClassIds,
         });
         showSuccessToast({
           title: toastCopy.createSuccess.title,
@@ -236,7 +296,9 @@ export function CreateVehicleTypeSheet({
       onOpenChange(false);
     } catch (err) {
       const failedMessage = isEdit ? formCopy.errors.updateFailed : formCopy.errors.createFailed;
-      const message = err instanceof Error ? err.message : failedMessage;
+      const message = mapAllowedClassError(
+        err instanceof Error ? err.message : failedMessage,
+      );
       setError(message);
       showErrorToast({
         title: failedMessage,
@@ -253,7 +315,10 @@ export function CreateVehicleTypeSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full overflow-y-auto sm:max-w-md">
+      <SheetContent
+        side="right"
+        className="flex w-full flex-col overflow-y-auto data-[side=right]:sm:max-w-xl"
+      >
         <SheetHeader>
           <SheetTitle className={adminHeadingClass}>
             {isEdit ? formCopy.editTitle : formCopy.createTitle}
@@ -350,6 +415,54 @@ export function CreateVehicleTypeSheet({
                 placeholder={formCopy.capacityPlaceholder}
                 className={fieldClassName}
               />
+            </div>
+
+            <div className="space-y-3 rounded-lg border border-slate-200 bg-[#f8fafb]/60 p-4">
+              <div className="space-y-1">
+                <p className={`text-sm font-semibold ${adminHeadingClass}`}>
+                  {formCopy.allowedClasses}
+                </p>
+                <p className="text-xs leading-relaxed text-slate-500">
+                  {formCopy.allowedClassesDescription}
+                </p>
+              </div>
+
+              {vehicleClasses.length === 0 ? (
+                <p className="text-sm text-slate-500">{formCopy.allowedClassesEmpty}</p>
+              ) : (
+                <div className="space-y-2">
+                  {vehicleClasses.map((vehicleClass) => {
+                    const checkboxId = `vehicle-type-class-${vehicleClass.id}`;
+
+                    return (
+                      <div
+                        key={vehicleClass.id}
+                        className="flex items-start gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2.5"
+                      >
+                        <Checkbox
+                          id={checkboxId}
+                          checked={allowedClassIds.includes(vehicleClass.id)}
+                          onCheckedChange={(checked) =>
+                            toggleAllowedClass(vehicleClass.id, checked === true)
+                          }
+                          disabled={submitting || loading}
+                          className="mt-0.5 data-checked:border-[#1C3A34] data-checked:bg-[#1C3A34] data-checked:text-white"
+                        />
+                        <Label htmlFor={checkboxId} className="min-w-0 cursor-pointer space-y-0.5">
+                          <span className="block text-sm font-medium text-[#1C3A34]">
+                            {vehicleClass.name}
+                          </span>
+                          {vehicleClass.description ? (
+                            <span className="block text-xs leading-relaxed text-slate-500">
+                              {vehicleClass.description}
+                            </span>
+                          ) : null}
+                        </Label>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-[#f8fafb]/60 px-4 py-3">
