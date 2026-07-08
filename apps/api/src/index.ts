@@ -1,4 +1,5 @@
 import express from "express";
+import http from "http";
 import cors from "cors";
 import dotenv from "dotenv";
 import { apiReference } from "@scalar/express-api-reference";
@@ -21,12 +22,14 @@ import { registerVehicleClassRoutes } from "./routes/vehicle-class.routes";
 import { registerFarePlanRoutes } from "./routes/fare-plan.routes";
 import { registerRideRequestRoutes } from "./routes/ride-request.routes";
 import { registerAdminRideRequestRoutes } from "./routes/admin-ride-request.routes";
+import { registerDriverUpcomingTripsWebSocket } from "./websocket/driver-upcoming-trips.ws";
 import { ensureDriverLicenseUploadDir, getDriverLicenseUploadDir } from "./utils/driver-license-upload";
 import { sendSuccess } from "./utils/response";
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
 const port = process.env.PORT || 4000;
 
 app.use(cors());
@@ -51,6 +54,7 @@ registerLocationRoutes(app);
 registerFarePlanRoutes(app);
 registerRideRequestRoutes(app);
 registerAdminRideRequestRoutes(app);
+registerDriverUpcomingTripsWebSocket(server);
 
 app.get("/api/health", (_req, res) => {
   sendSuccess(res, { status: "ok" }, { message: "Smart Dispatch System API is running" });
@@ -68,7 +72,7 @@ app.use(
 
 async function start() {
   await migrate();
-  app.listen(port, () => {
+  server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
 }

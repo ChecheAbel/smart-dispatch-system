@@ -1,7 +1,17 @@
 import type { Prisma } from "../generated/prisma";
 import type { AdminRideRequest, RideRequest } from "@smart-dispatch/types";
-import { parseVehicleClassTranslationsMap } from "../types/vehicle-class-translations";
-import { parseVehicleTypeTranslationsMap } from "../types/vehicle-type-translations";
+import {
+  parseVehicleClassTranslationsMap,
+  vehicleClassTranslationsMapToArray,
+} from "../types/vehicle-class-translations";
+import {
+  parseVehicleTypeTranslationsMap,
+  vehicleTypeTranslationsMapToArray,
+} from "../types/vehicle-type-translations";
+import {
+  parseRegionTranslationsMap,
+  regionTranslationsMapToArray,
+} from "../types/region-translations";
 import { DEFAULT_LOCALE, normalizeLocale } from "../utils/locale";
 import { toPublicRegion } from "./region.mapper";
 import { pickLocationName } from "./location.mapper";
@@ -128,6 +138,24 @@ function pickTranslatedName(
   return map[normalizedLocale]?.name ?? map[DEFAULT_LOCALE]?.name ?? slug;
 }
 
+function mapNameTranslations(translations: Prisma.JsonValue) {
+  return regionTranslationsMapToArray(parseRegionTranslationsMap(translations)).map(
+    ({ locale, name, description }) => ({ locale, name, description }),
+  );
+}
+
+function mapVehicleTypeNameTranslations(translations: Prisma.JsonValue) {
+  return vehicleTypeTranslationsMapToArray(parseVehicleTypeTranslationsMap(translations)).map(
+    ({ locale, name, description }) => ({ locale, name, description }),
+  );
+}
+
+function mapVehicleClassNameTranslations(translations: Prisma.JsonValue) {
+  return vehicleClassTranslationsMapToArray(parseVehicleClassTranslationsMap(translations)).map(
+    ({ locale, name, description }) => ({ locale, name, description }),
+  );
+}
+
 function formatPersonName(parts: {
   firstName: string;
   middleName: string | null;
@@ -149,9 +177,10 @@ function mapAssignedDriver(
 
 export function toPublicRideRequest(
   rideRequest: DbRideRequest,
-  options?: { locale?: string },
+  options?: { locale?: string; includeAllTranslations?: boolean },
 ): RideRequest {
   const locale = options?.locale;
+  const includeAllTranslations = options?.includeAllTranslations === true;
 
   return {
     id: rideRequest.id,
@@ -167,6 +196,11 @@ export function toPublicRideRequest(
             locale,
             parseVehicleTypeTranslationsMap,
           ),
+          ...(includeAllTranslations
+            ? {
+                translations: mapVehicleTypeNameTranslations(rideRequest.vehicleType.translations),
+              }
+            : {}),
         }
       : null,
     vehicle_class_id: rideRequest.vehicleClassId,
@@ -180,6 +214,13 @@ export function toPublicRideRequest(
             locale,
             parseVehicleClassTranslationsMap,
           ),
+          ...(includeAllTranslations
+            ? {
+                translations: mapVehicleClassNameTranslations(
+                  rideRequest.vehicleClass.translations,
+                ),
+              }
+            : {}),
         }
       : null,
     region_id: rideRequest.regionId,
@@ -188,6 +229,9 @@ export function toPublicRideRequest(
           id: rideRequest.region.id,
           slug: rideRequest.region.slug,
           name: toPublicRegion(rideRequest.region, { locale }).name,
+          ...(includeAllTranslations
+            ? { translations: mapNameTranslations(rideRequest.region.translations) }
+            : {}),
         }
       : null,
     pickup_location_id: rideRequest.pickupLocationId,
@@ -195,6 +239,11 @@ export function toPublicRideRequest(
       ? {
           id: rideRequest.pickupLocation.id,
           name: pickLocationName(rideRequest.pickupLocation.translations, locale),
+          ...(includeAllTranslations
+            ? {
+                translations: mapNameTranslations(rideRequest.pickupLocation.translations),
+              }
+            : {}),
         }
       : null,
     pickup_address: rideRequest.pickupAddress,
@@ -205,6 +254,11 @@ export function toPublicRideRequest(
       ? {
           id: rideRequest.dropoffLocation.id,
           name: pickLocationName(rideRequest.dropoffLocation.translations, locale),
+          ...(includeAllTranslations
+            ? {
+                translations: mapNameTranslations(rideRequest.dropoffLocation.translations),
+              }
+            : {}),
         }
       : null,
     dropoff_address: rideRequest.dropoffAddress,
@@ -232,6 +286,13 @@ export function toPublicRideRequest(
                   locale,
                   parseVehicleTypeTranslationsMap,
                 ),
+                ...(includeAllTranslations
+                  ? {
+                      translations: mapVehicleTypeNameTranslations(
+                        rideRequest.assignedVehicle.vehicleType.translations,
+                      ),
+                    }
+                  : {}),
               }
             : null,
           vehicle_class: rideRequest.assignedVehicle.vehicleClass
@@ -244,6 +305,13 @@ export function toPublicRideRequest(
                   locale,
                   parseVehicleClassTranslationsMap,
                 ),
+                ...(includeAllTranslations
+                  ? {
+                      translations: mapVehicleClassNameTranslations(
+                        rideRequest.assignedVehicle.vehicleClass.translations,
+                      ),
+                    }
+                  : {}),
               }
             : null,
         }

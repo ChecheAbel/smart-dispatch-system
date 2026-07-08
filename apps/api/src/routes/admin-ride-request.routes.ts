@@ -25,6 +25,7 @@ import {
 } from "../services/ride-request-admin-policy.service";
 import { validateRideRequestVehicleAssignment } from "../services/ride-request-dispatch.service";
 import { queueRideRequestNotifications } from "../services/notification-dispatch.service";
+import { syncDriverUpcomingTripsAfterChange } from "../services/driver-upcoming-trips-sync.service";
 import { parseRideRequestRejectionReason } from "../services/ride-request-rejection.service";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
@@ -89,6 +90,16 @@ function getStatusActionSummary(action: AdminRideRequestStatusAction) {
     case "complete":
       return "Ride request trip completed by admin";
   }
+}
+
+function getRideRequestSnapshot(
+  rideRequest: NonNullable<Awaited<ReturnType<typeof findRideRequestById>>>,
+) {
+  return {
+    id: rideRequest.id,
+    assignedDriverUserId: rideRequest.assignedDriverUserId,
+    status: rideRequest.status,
+  };
 }
 
 router.get(
@@ -216,6 +227,11 @@ router.post(
 
       queueRideRequestNotifications("assigned", updated.id);
 
+      syncDriverUpcomingTripsAfterChange({
+        before: getRideRequestSnapshot(existing),
+        after: updated,
+      });
+
       return sendSuccess(res, {
         ride_request: toAdminRideRequest(updated, { locale }),
       });
@@ -262,6 +278,11 @@ router.post(
         entityLabel: `${updated.pickupAddress} → ${updated.dropoffAddress}`,
         summary: "Vehicle and driver unassigned from ride request",
         req,
+      });
+
+      syncDriverUpcomingTripsAfterChange({
+        before: getRideRequestSnapshot(existing),
+        after: updated,
       });
 
       return sendSuccess(res, {
@@ -344,6 +365,11 @@ router.post(
       } else if (action === "complete") {
         queueRideRequestNotifications("completed", updated.id);
       }
+
+      syncDriverUpcomingTripsAfterChange({
+        before: getRideRequestSnapshot(existing),
+        after: updated,
+      });
 
       return sendSuccess(res, {
         ride_request: toAdminRideRequest(updated, { locale }),

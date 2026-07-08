@@ -39,6 +39,20 @@ export type ListRideRequestsAdminFilters = {
   upcoming?: boolean;
 };
 
+export type ListRideRequestsForDriverFilters = {
+  driverUserId: string;
+  status?: RideRequestStatus;
+  /**
+   * When true, returns only upcoming trips for the driver
+   * (confirmed or in_progress, scheduled in the future when scheduled_at is set).
+   */
+  upcoming?: boolean;
+  /**
+   * When true, returns only completed or cancelled trips for the driver.
+   */
+  history?: boolean;
+};
+
 const rideRequestInclude = {
   vehicleType: true,
   vehicleClass: true,
@@ -153,6 +167,28 @@ function buildRideRequestAdminWhere(
   return where;
 }
 
+function buildRideRequestDriverWhere(
+  filters: ListRideRequestsForDriverFilters,
+): Prisma.RideRequestWhereInput {
+  const where: Prisma.RideRequestWhereInput = {
+    assignedDriverUserId: filters.driverUserId,
+  };
+
+  if (filters.upcoming) {
+    where.status = { in: ["confirmed", "in_progress"] };
+  } else if (filters.history) {
+    if (filters.status) {
+      where.status = filters.status;
+    } else {
+      where.status = { in: ["completed", "cancelled"] };
+    }
+  } else if (filters.status) {
+    where.status = filters.status;
+  }
+
+  return where;
+}
+
 function buildRideRequestData(input: UpdateRideRequestInput) {
   return {
     vehicleTypeId: input.vehicleTypeId ?? null,
@@ -206,6 +242,28 @@ export async function findRideRequestForUser(id: string, requesterUserId: string
   return prisma.rideRequest.findFirst({
     where: { id, requesterUserId },
     include: rideRequestInclude,
+  });
+}
+
+export async function countRideRequestsForDriver(filters: ListRideRequestsForDriverFilters) {
+  return prisma.rideRequest.count({
+    where: buildRideRequestDriverWhere(filters),
+  });
+}
+
+export async function listRideRequestsForDriver(
+  filters: ListRideRequestsForDriverFilters,
+  skip: number,
+  take: number,
+) {
+  const upcoming = filters.upcoming === true;
+
+  return prisma.rideRequest.findMany({
+    where: buildRideRequestDriverWhere(filters),
+    include: rideRequestInclude,
+    orderBy: upcoming ? { scheduledAt: "asc" } : { createdAt: "desc" },
+    skip,
+    take,
   });
 }
 

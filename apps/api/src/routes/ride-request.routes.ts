@@ -11,11 +11,15 @@ import { toPublicVehicleType } from "../mappers/vehicle-type.mapper";
 import {
   cancelRideRequestForUser,
   countRideRequestsForUser,
+  countRideRequestsForDriver,
   createRideRequest,
   findRideRequestForUser,
+  listRideRequestsForDriver,
   listRideRequestsForUser,
   updateRideRequestForUser,
 } from "../models/ride-request.model";
+import { listVehicles } from "../models/vehicle.model";
+import { toPublicVehicle } from "../mappers/vehicle.mapper";
 import { listActiveRegions } from "../models/region.model";
 import { listActiveBookingLocations } from "../models/location.model";
 import { listActiveVehicleTypesWithAllowedClasses } from "../models/vehicle-type-class.model";
@@ -55,6 +59,13 @@ function parseStatusFilter(value: unknown) {
 
 function mapRideRequestList(
   rideRequests: Awaited<ReturnType<typeof listRideRequestsForUser>>,
+  locale?: string,
+) {
+  return rideRequests.map((rideRequest) => toPublicRideRequest(rideRequest, { locale }));
+}
+
+function mapRideRequestListForDriver(
+  rideRequests: Awaited<ReturnType<typeof listRideRequestsForDriver>>,
   locale?: string,
 ) {
   return rideRequests.map((rideRequest) => toPublicRideRequest(rideRequest, { locale }));
@@ -119,6 +130,110 @@ router.get(
       );
 
       return sendPaginatedSuccess(res, mapRideRequestList(result.data, locale), result.pagination);
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.get(
+  "/driver/vehicle",
+  requirePermission("customer_requests.read"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const locale = getRequestLocale(req);
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      const vehicles = await listVehicles(
+        { assignedDriverUserId: userId },
+        { skip: 0, take: 1 },
+      );
+
+      if (!vehicles.length) {
+        return sendSuccess(res, { vehicle: null });
+      }
+
+      return sendSuccess(res, {
+        vehicle: toPublicVehicle(vehicles[0], { locale }),
+      });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.get(
+  "/driver/upcoming",
+  requirePermission("customer_requests.read"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const locale = getRequestLocale(req);
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      const pagination = parsePaginationQuery(req.query);
+      const filters = { driverUserId: userId, upcoming: true as const };
+
+      const result = await paginate(
+        pagination,
+        () => countRideRequestsForDriver(filters),
+        (skip, take) => listRideRequestsForDriver(filters, skip, take),
+      );
+
+      return sendPaginatedSuccess(
+        res,
+        mapRideRequestListForDriver(result.data, locale),
+        result.pagination,
+      );
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.get(
+  "/driver/history",
+  requirePermission("customer_requests.read"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const locale = getRequestLocale(req);
+      const userId = req.user?.id;
+
+      if (!userId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      const pagination = parsePaginationQuery(req.query);
+      const status = parseStatusFilter(req.query.status);
+
+      if (status && status !== "completed" && status !== "cancelled") {
+        return sendError(
+          res,
+          "History trips can only be filtered by completed or cancelled status.",
+          400,
+        );
+      }
+
+      const filters = { driverUserId: userId, history: true as const, status };
+
+      const result = await paginate(
+        pagination,
+        () => countRideRequestsForDriver(filters),
+        (skip, take) => listRideRequestsForDriver(filters, skip, take),
+      );
+
+      return sendPaginatedSuccess(
+        res,
+        mapRideRequestListForDriver(result.data, locale),
+        result.pagination,
+      );
     } catch (error) {
       return handleRouteError(res, error);
     }

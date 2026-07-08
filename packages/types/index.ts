@@ -462,6 +462,12 @@ export type RideRequestStatus =
   | "completed"
   | "cancelled";
 
+export interface RideRequestLocalizedName {
+  locale: string;
+  name: string;
+  description?: string | null;
+}
+
 export interface RideRequest {
   id: string;
   requester_user_id: string;
@@ -470,23 +476,27 @@ export interface RideRequest {
     id: string;
     slug: string;
     name: string;
+    translations?: RideRequestLocalizedName[];
   } | null;
   vehicle_class_id: string | null;
   vehicle_class?: {
     id: string;
     slug: string;
     name: string;
+    translations?: RideRequestLocalizedName[];
   } | null;
   region_id: string | null;
   region?: {
     id: string;
     slug: string;
     name: string;
+    translations?: RideRequestLocalizedName[];
   } | null;
   pickup_location_id: string | null;
   pickup_location?: {
     id: string;
     name: string;
+    translations?: RideRequestLocalizedName[];
   } | null;
   pickup_address: string;
   pickup_latitude: number | null;
@@ -495,6 +505,7 @@ export interface RideRequest {
   dropoff_location?: {
     id: string;
     name: string;
+    translations?: RideRequestLocalizedName[];
   } | null;
   dropoff_address: string;
   dropoff_latitude: number | null;
@@ -514,11 +525,13 @@ export interface RideRequest {
       id: string;
       slug: string;
       name: string;
+      translations?: RideRequestLocalizedName[];
     } | null;
     vehicle_class?: {
       id: string;
       slug: string;
       name: string;
+      translations?: RideRequestLocalizedName[];
     } | null;
   } | null;
   assigned_driver_user_id: string | null;

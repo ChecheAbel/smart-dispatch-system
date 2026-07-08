@@ -1,3 +1,10 @@
+import {
+  extensionParameters,
+  extensionPaths,
+  extensionSchemas,
+  extensionTags,
+} from "./openapi-extensions";
+
 export const openApiSpec = {
   openapi: "3.1.0",
   info: {
@@ -15,6 +22,7 @@ export const openApiSpec = {
     { name: "Permissions", description: "Permission management (admin only)" },
     { name: "Menus", description: "Navigation menu management" },
     { name: "Endpoints", description: "API endpoint registry (admin only)" },
+    ...extensionTags,
   ],
   components: {
     securitySchemes: {
@@ -118,6 +126,10 @@ export const openApiSpec = {
           token_type: { type: "string", enum: ["Bearer"] },
           expires_in: { type: "integer", example: 900 },
           user: { $ref: "#/components/schemas/User" },
+          permissions: {
+            type: "array",
+            items: { $ref: "#/components/schemas/Permission" },
+          },
         },
       },
       Permission: {
@@ -187,6 +199,7 @@ export const openApiSpec = {
           message: { type: "string" },
         },
       },
+      ...extensionSchemas,
     },
     parameters: {
       Page: {
@@ -219,6 +232,7 @@ export const openApiSpec = {
         required: true,
         schema: { type: "string", format: "uuid" },
       },
+      ...extensionParameters,
     },
     responses: {
       BadRequest: {
@@ -429,7 +443,7 @@ export const openApiSpec = {
       get: {
         tags: ["Auth"],
         summary: "Current user",
-        description: "Returns the authenticated user profile.",
+        description: "Returns the authenticated user profile and effective permission slugs for the session.",
         security: [{ bearerAuth: [] }],
         responses: {
           "200": {
@@ -444,6 +458,10 @@ export const openApiSpec = {
                       type: "object",
                       properties: {
                         user: { $ref: "#/components/schemas/User" },
+                        permissions: {
+                          type: "array",
+                          items: { $ref: "#/components/schemas/Permission" },
+                        },
                       },
                     },
                   },
@@ -2388,5 +2406,6 @@ export const openApiSpec = {
         },
       },
     },
+    ...extensionPaths,
   },
 } as const;
