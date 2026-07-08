@@ -28,7 +28,7 @@ router.get("/", requirePermission("menus.read"), async (req: Request, res: Respo
     const result = await paginate(
       pagination,
       () => countPermissions(filter),
-      (skip, take) => listPermissions(filter, { skip, take }),
+      (skip, take) => listPermissions(filter, { skip, take, includeEndpoints: true }),
     );
 
     return sendPaginatedSuccess(

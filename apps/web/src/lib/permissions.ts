@@ -63,6 +63,11 @@ export const PERMISSIONS = {
     read: "ride_requests.read",
     write: "ride_requests.write",
   },
+  driver: {
+    vehicle: "driver.vehicle",
+    upcoming: "driver.upcoming",
+    history: "driver.history",
+  },
 } as const;
 
 export const ADMIN_PERMISSION_MODULES = Object.keys(PERMISSIONS) as Array<keyof typeof PERMISSIONS>;

@@ -1,6 +1,14 @@
 import type { Permission } from "@smart-dispatch/types";
 
-const ACTION_ORDER = ["read", "write", "delete"] as const;
+const ACTION_ORDER = [
+  "read",
+  "write",
+  "assign_driver",
+  "vehicle",
+  "upcoming",
+  "history",
+  "delete",
+] as const;
 
 export type PermissionGroup = {
   module: string;

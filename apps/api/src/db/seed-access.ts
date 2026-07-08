@@ -41,8 +41,11 @@ const DEFAULT_PERMISSIONS = [
   { slug: "fare_plans.read", module: "fare_plans", action: "read", description: "View fare plans" },
   { slug: "fare_plans.write", module: "fare_plans", action: "write", description: "Create and update fare plans" },
   { slug: "fare_plans.delete", module: "fare_plans", action: "delete", description: "Delete fare plans" },
-  { slug: "ride_requests.read", module: "ride_requests", action: "read", description: "View customer ride requests" },
-  { slug: "ride_requests.write", module: "ride_requests", action: "write", description: "Approve or reject ride requests" },
+  { slug: "ride_requests.read", module: "ride_requests", action: "read", description: "View customer ride requests in admin dispatch" },
+  { slug: "ride_requests.write", module: "ride_requests", action: "write", description: "Approve, assign, start, complete, or reject ride requests" },
+  { slug: "driver.vehicle", module: "driver", action: "vehicle", description: "Driver can get their assigned vehicle (GET /api/ride-requests/driver/vehicle)" },
+  { slug: "driver.upcoming", module: "driver", action: "upcoming", description: "Driver can list upcoming trips and connect to the upcoming-trips WebSocket (GET/WS /api/ride-requests/driver/upcoming)" },
+  { slug: "driver.history", module: "driver", action: "history", description: "Driver can list past trips (GET /api/ride-requests/driver/history)" },
   { slug: "customer_dashboard.read", module: "customer_dashboard", action: "read", description: "View customer dashboard" },
   { slug: "customer_profile.read", module: "customer_profile", action: "read", description: "View customer profile" },
   { slug: "customer_requests.read", module: "customer_requests", action: "read", description: "View and book ride requests" },
@@ -437,6 +440,10 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "ride_requests.create", method: "POST", path: "/api/ride-requests", description: "Create ride request", permissionSlug: "customer_requests.write" },
   { slug: "ride_requests.update", method: "PATCH", path: "/api/ride-requests/:id", description: "Update ride request", permissionSlug: "customer_requests.write" },
   { slug: "ride_requests.cancel", method: "POST", path: "/api/ride-requests/:id/cancel", description: "Cancel ride request", permissionSlug: "customer_requests.write" },
+  { slug: "ride_requests.driver_vehicle", method: "GET", path: "/api/ride-requests/driver/vehicle", description: "Get vehicle assigned to driver", permissionSlug: "driver.vehicle" },
+  { slug: "ride_requests.driver_upcoming", method: "GET", path: "/api/ride-requests/driver/upcoming", description: "List upcoming trips for driver", permissionSlug: "driver.upcoming" },
+  { slug: "ride_requests.driver_upcoming_ws", method: "GET", path: "WS /api/ride-requests/driver/upcoming", description: "Live upcoming trips WebSocket for driver", permissionSlug: "driver.upcoming" },
+  { slug: "ride_requests.driver_history", method: "GET", path: "/api/ride-requests/driver/history", description: "List trip history for driver", permissionSlug: "driver.history" },
   { slug: "admin_ride_requests.list", method: "GET", path: "/api/admin/ride-requests", description: "List all ride requests", permissionSlug: "ride_requests.read" },
   { slug: "admin_ride_requests.get", method: "GET", path: "/api/admin/ride-requests/:id", description: "Get ride request for admin review", permissionSlug: "ride_requests.read" },
   { slug: "admin_ride_requests.assignable_vehicles", method: "GET", path: "/api/admin/ride-requests/:id/assignable-vehicles", description: "List assignable vehicles for ride request", permissionSlug: "ride_requests.read" },
@@ -581,6 +588,25 @@ async function seedUserRolePermissions() {
   console.log(`[Seed] User role synced with ${permissions.length} customer portal permissions`);
 }
 
+async function seedDriverRolePermissions() {
+  const driverRole = await prisma.role.findUnique({ where: { slug: "driver" } });
+  if (!driverRole) return;
+
+  const permissions = await prisma.permission.findMany({
+    where: {
+      slug: { in: ["driver.vehicle", "driver.upcoming", "driver.history"] },
+    },
+    orderBy: { slug: "asc" },
+  });
+
+  await setRolePermissions(
+    driverRole.id,
+    permissions.map((permission) => permission.id),
+  );
+
+  console.log(`[Seed] Driver role synced with ${permissions.length} driver API permissions`);
+}
+
 /** Re-assigns every default platform permission to the admin role. */
 export async function restoreAdminRolePermissions() {
   const adminRole = await prisma.role.findUnique({ where: { slug: "admin" } });
@@ -612,4 +638,5 @@ export async function seedAccessControl() {
   await deleteRemovedPermissions();
   await seedAdminRolePermissions(permissionIds);
   await seedUserRolePermissions();
+  await seedDriverRolePermissions();
 }

@@ -80,7 +80,7 @@ router.get("/:id/permissions", requirePermission("roles.read"), async (req: Requ
       return sendError(res, "Role not found.", 404);
     }
 
-    const permissions = await findPermissionsByRoleId(req.params.id);
+    const permissions = await findPermissionsByRoleId(req.params.id, { includeEndpoints: true });
     return sendSuccess(res, {
       permissions: permissions.map((permission) => toPublicPermission(permission)),
     });

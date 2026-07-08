@@ -1,7 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Bell, LayoutList, Menu, ScrollText, Shield, Users } from "lucide-react";
+import {
+  Bell,
+  CarFront,
+  CheckCheck,
+  LayoutList,
+  Menu,
+  ScrollText,
+  Shield,
+  Users,
+  X,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { Permission, Role } from "@smart-dispatch/types";
 import { fetchPermissions } from "@/lib/permission-api";
@@ -13,6 +23,7 @@ import {
 } from "@/lib/permissions";
 import {
   adminBadgeGoldClass,
+  adminButtonClass,
   adminCardClass,
   adminHeadingClass,
   adminIconBoxClass,
@@ -57,6 +68,7 @@ const MODULE_ICONS: Record<string, LucideIcon> = {
   menus: Menu,
   notifications: Bell,
   audit_logs: ScrollText,
+  driver: CarFront,
 };
 
 function humanizePermissionToken(value: string) {
@@ -94,6 +106,9 @@ type ModulePermissionCardProps = {
   moduleLabels: Record<string, string>;
   actionLabels: Record<string, string>;
   moduleSelectedLabel: string;
+  endpointsHeading: string;
+  noEndpointsLabel: string;
+  slugLabel: string;
   disabled: boolean;
   onTogglePermission: (permissionId: string, checked: boolean) => void;
   onToggleModule: (permissions: Permission[], checked: boolean) => void;
@@ -106,6 +121,9 @@ function ModulePermissionCard({
   moduleLabels,
   actionLabels,
   moduleSelectedLabel,
+  endpointsHeading,
+  noEndpointsLabel,
+  slugLabel,
   disabled,
   onTogglePermission,
   onToggleModule,
@@ -147,27 +165,63 @@ function ModulePermissionCard({
       <div className="divide-y divide-slate-100">
         {permissions.map((permission) => {
           const checked = selectedIds.has(permission.id);
+          const endpoints = permission.endpoints ?? [];
 
           return (
             <div
               key={permission.id}
               className={cn(
-                "flex items-center gap-3 px-4 py-3 transition-colors",
+                "flex items-start gap-3 px-4 py-3.5 transition-colors",
                 checked && "bg-[#1C3A34]/[0.03]",
               )}
             >
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium break-words text-[#1C3A34]">
-                  {getActionLabel(permission.action, actionLabels)}
-                </p>
-                {permission.description ? (
-                  <p className="mt-0.5 text-xs leading-relaxed break-words text-slate-500">
-                    {permission.description}
+              <div className="min-w-0 flex-1 space-y-2">
+                <div>
+                  <p className="text-sm font-medium break-words text-[#1C3A34]">
+                    {getActionLabel(permission.action, actionLabels)}
                   </p>
-                ) : null}
+                  {permission.description ? (
+                    <p className="mt-0.5 text-xs leading-relaxed break-words text-slate-500">
+                      {permission.description}
+                    </p>
+                  ) : null}
+                  <p className="mt-1 text-[11px] text-slate-400">
+                    {slugLabel}: <span className="font-mono text-slate-500">{permission.slug}</span>
+                  </p>
+                </div>
+
+                <div className="rounded-md border border-slate-100 bg-slate-50/80 px-2.5 py-2">
+                  <p className="mb-1.5 text-[10px] font-semibold tracking-wide text-slate-500 uppercase">
+                    {endpointsHeading}
+                  </p>
+                  {endpoints.length ? (
+                    <ul className="space-y-1.5">
+                      {endpoints.map((endpoint) => (
+                        <li
+                          key={`${endpoint.method}:${endpoint.path}`}
+                          className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5"
+                        >
+                          <span className="rounded bg-white px-1.5 py-0.5 font-mono text-[10px] font-semibold text-[#1C3A34] ring-1 ring-slate-200">
+                            {endpoint.method}
+                          </span>
+                          <span className="font-mono text-[11px] break-all text-slate-700">
+                            {endpoint.path}
+                          </span>
+                          {endpoint.description ? (
+                            <span className="basis-full text-[11px] text-slate-500">
+                              {endpoint.description}
+                            </span>
+                          ) : null}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-[11px] text-slate-400">{noEndpointsLabel}</p>
+                  )}
+                </div>
               </div>
               <Switch
-                className="shrink-0"
+                className="mt-0.5 shrink-0"
                 checked={checked}
                 onCheckedChange={(value) => onTogglePermission(permission.id, value)}
                 disabled={disabled}
@@ -347,7 +401,7 @@ export function RolePermissionsSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-2xl lg:max-w-3xl"
+        className="flex w-full flex-col gap-0 overflow-y-auto p-0 data-[side=right]:w-[min(100%,40rem)] data-[side=right]:sm:max-w-xl data-[side=right]:md:max-w-2xl"
       >
         <SheetHeader className="border-b border-slate-100 px-6 py-5">
           <SheetTitle className={adminHeadingClass}>
@@ -388,32 +442,36 @@ export function RolePermissionsSheet({
               </div>
             ) : null}
 
-            <div className="flex items-center gap-2">
-              {!readOnly ? (
-                <>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={selectAll}
-                    disabled={submitting || selectedCount === totalCount}
-                    className="border-slate-200"
-                  >
-                    {permissionsCopy.selectAll}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={clearAll}
-                    disabled={submitting || selectedCount === 0}
-                    className="border-slate-200"
-                  >
-                    {permissionsCopy.clearAll}
-                  </Button>
-                </>
-              ) : null}
-            </div>
+            {!readOnly ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={selectAll}
+                  disabled={submitting || selectedCount === totalCount}
+                  className={cn(
+                    adminButtonClass,
+                    "border-[#1C3A34]/20 bg-[#1C3A34]/[0.04] text-[#1C3A34] hover:border-[#1C3A34]/35 hover:bg-[#1C3A34]/10",
+                  )}
+                >
+                  <CheckCheck className="size-4" />
+                  {permissionsCopy.selectAll}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={clearAll}
+                  disabled={submitting || selectedCount === 0}
+                  className={cn(
+                    adminButtonClass,
+                    "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800",
+                  )}
+                >
+                  <X className="size-4" />
+                  {permissionsCopy.clearAll}
+                </Button>
+              </div>
+            ) : null}
 
             {!readOnly ? <Separator className="bg-slate-100" /> : null}
 
@@ -427,6 +485,9 @@ export function RolePermissionsSheet({
                   moduleLabels={permissionsCopy.modules}
                   actionLabels={permissionsCopy.actions}
                   moduleSelectedLabel={permissionsCopy.moduleSelected}
+                  endpointsHeading={permissionsCopy.endpointsHeading}
+                  noEndpointsLabel={permissionsCopy.noEndpoints}
+                  slugLabel={permissionsCopy.slugLabel}
                   disabled={submitting || readOnly}
                   onTogglePermission={togglePermission}
                   onToggleModule={toggleModule}

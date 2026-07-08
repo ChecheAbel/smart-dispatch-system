@@ -138,7 +138,7 @@ router.get(
 
 router.get(
   "/driver/vehicle",
-  requirePermission("customer_requests.read"),
+  requirePermission("driver.vehicle"),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const locale = getRequestLocale(req);
@@ -168,7 +168,7 @@ router.get(
 
 router.get(
   "/driver/upcoming",
-  requirePermission("customer_requests.read"),
+  requirePermission("driver.upcoming"),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const locale = getRequestLocale(req);
@@ -200,7 +200,7 @@ router.get(
 
 router.get(
   "/driver/history",
-  requirePermission("customer_requests.read"),
+  requirePermission("driver.history"),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const locale = getRequestLocale(req);

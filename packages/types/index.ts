@@ -215,6 +215,12 @@ export type NotificationRecipient = "requester" | "driver";
 /** @deprecated Use NotificationTemplate */
 export type RideRequestNotificationRule = NotificationTemplate;
 
+export interface PermissionEndpoint {
+  method: string;
+  path: string;
+  description: string | null;
+}
+
 export interface Permission {
   id: string;
   slug: string;
@@ -222,6 +228,7 @@ export interface Permission {
   action: string;
   description: string | null;
   created_at: string;
+  endpoints?: PermissionEndpoint[];
 }
 
 export interface MenuTranslation {

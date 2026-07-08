@@ -23,6 +23,7 @@ import { registerFarePlanRoutes } from "./routes/fare-plan.routes";
 import { registerRideRequestRoutes } from "./routes/ride-request.routes";
 import { registerAdminRideRequestRoutes } from "./routes/admin-ride-request.routes";
 import { registerDriverUpcomingTripsWebSocket } from "./websocket/driver-upcoming-trips.ws";
+import { requestLogger } from "./middleware/request-logger";
 import { ensureDriverLicenseUploadDir, getDriverLicenseUploadDir } from "./utils/driver-license-upload";
 import { sendSuccess } from "./utils/response";
 
@@ -33,6 +34,7 @@ const server = http.createServer(app);
 const port = process.env.PORT || 4000;
 
 app.use(cors());
+app.use(requestLogger);
 app.use(express.json());
 ensureDriverLicenseUploadDir();
 app.use("/uploads/driver-licenses", express.static(getDriverLicenseUploadDir()));

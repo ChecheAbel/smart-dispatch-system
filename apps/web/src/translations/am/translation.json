@@ -521,8 +521,8 @@
       "title": "የሚና ፈቃዶች",
       "readOnlyTitle": "የአስተዳዳሪ ፈቃዶች",
       "readOnlyDescription": "የአስተዳዳሪ ሚና በስርዓቱ ይተዳደራል። ፈቃዶቹን እዚህ ማየት ይቻላል ነገር ግን ከአስተዳዳሪ ኮንሶል መቀየር አይችሉም።",
-      "description": "{name} ሊደርስባቸው የሚችሉትን ሞጁሎች እና ድርጊቶች ይምረጡ።",
-      "descriptionFallback": "ይህ ሚና ሊደርስባቸው የሚችሉትን ሞጁሎች እና ድርጊቶች ይምረጡ።",
+      "description": "{name} ሊደርስባቸው የሚችሉትን ሞጁሎች፣ ድርጊቶች እና API መድረሻዎች ይምረጡ።",
+      "descriptionFallback": "ይህ ሚና ሊደርስባቸው የሚችሉትን ሞጁሎች፣ ድርጊቶች እና API መድረሻዎች ይምረጡ።",
       "loading": "ፈቃዶች በመጫን ላይ...",
       "save": "ፈቃዶችን አስቀምጥ",
       "saving": "በመቀመጥ ላይ...",
@@ -532,10 +532,16 @@
       "selectAll": "ሁሉንም ምረጥ",
       "clearAll": "ሁሉንም አጽዳ",
       "moduleSelected": "{selected}/{total}",
+      "endpointsHeading": "የ API መድረሻ",
+      "noEndpoints": "ከዚህ ፈቃድ ጋር የተገናኘ API መድረሻ የለም።",
+      "slugLabel": "ፈቃድ",
       "actions": {
         "read": "እይታ",
         "write": "ፍጠር እና አርትዕ",
         "assign_driver": "ሹፌሮችን መመደብ",
+        "vehicle": "የተመደበ ተሽከርካሪ",
+        "upcoming": "መጪ ጉዞዎች",
+        "history": "የጉዞ ታሪክ",
         "delete": "ሰርዝ"
       },
       "modules": {
@@ -551,7 +557,8 @@
         "regions": "ክልሎች",
         "locations": "ቦታዎች",
         "fare_plans": "የክፍያ ዕቅዶች",
-        "ride_requests": "የጉዞ ጥያቄዎች"
+        "ride_requests": "የጉዞ ጥያቄዎች (አስተዳዳሪ)",
+        "driver": "የሹፌር መተግበሪያ"
       },
       "errors": {
         "loadFailed": "ፈቃዶችን መጫን አልተሳካም።"

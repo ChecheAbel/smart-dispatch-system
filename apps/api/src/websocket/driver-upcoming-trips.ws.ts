@@ -105,7 +105,7 @@ async function handleConnection(ws: WebSocket, request: IncomingMessage) {
     }
 
     const user = await getUserFromAccessToken(token);
-    const allowed = await userHasPermission(user.id, "customer_requests.read");
+    const allowed = await userHasPermission(user.id, "driver.upcoming");
 
     if (!allowed) {
       ws.close(4403, "Forbidden.");
@@ -177,6 +177,7 @@ export function registerDriverUpcomingTripsWebSocket(server: Server) {
     }
 
     wss.handleUpgrade(request, socket, head, (ws) => {
+      console.log(`→ WS ${DRIVER_UPCOMING_TRIPS_WS_PATH}`);
       void handleConnection(ws, request);
     });
   });

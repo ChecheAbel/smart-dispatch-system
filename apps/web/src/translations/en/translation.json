@@ -521,8 +521,8 @@
       "title": "Role permissions",
       "readOnlyTitle": "Administrator permissions",
       "readOnlyDescription": "The Administrator role is system-managed. Its permissions can be viewed here but cannot be changed from the admin console.",
-      "description": "Choose which modules and actions {name} can access.",
-      "descriptionFallback": "Choose which modules and actions this role can access.",
+      "description": "Choose which modules, actions, and API endpoints {name} can access.",
+      "descriptionFallback": "Choose which modules, actions, and API endpoints this role can access.",
       "loading": "Loading permissions...",
       "save": "Save permissions",
       "saving": "Saving...",
@@ -532,10 +532,16 @@
       "selectAll": "Select all",
       "clearAll": "Clear all",
       "moduleSelected": "{selected}/{total}",
+      "endpointsHeading": "API access",
+      "noEndpoints": "No API endpoints linked to this permission.",
+      "slugLabel": "Permission",
       "actions": {
         "read": "View",
         "write": "Create & edit",
         "assign_driver": "Assign drivers",
+        "vehicle": "Assigned vehicle",
+        "upcoming": "Upcoming trips",
+        "history": "Trip history",
         "delete": "Delete"
       },
       "modules": {
@@ -551,7 +557,8 @@
         "regions": "Regions",
         "locations": "Locations",
         "fare_plans": "Fare plans",
-        "ride_requests": "Ride requests"
+        "ride_requests": "Ride requests (admin)",
+        "driver": "Driver app"
       },
       "errors": {
         "loadFailed": "Failed to load permissions."

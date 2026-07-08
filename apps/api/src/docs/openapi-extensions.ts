@@ -1324,7 +1324,7 @@ export const extensionPaths = {
         "**WebSocket (real-time):** upgrade this same path for live upcoming-trip updates.\n\n" +
         "- URL: `ws://{host}/api/ride-requests/driver/upcoming`\n" +
         "- Auth: `Authorization: Bearer {access_token}` header on the WebSocket handshake\n" +
-        "- Permission: `customer_requests.read`\n" +
+        "- Permission: `driver.upcoming`\n" +
         "- Localized fields include a `translations` array with all languages (`en`, `am`, ...).\n\n" +
         "Server messages:\n" +
         "- `snapshot`: full upcoming trip list sent on connect\n" +

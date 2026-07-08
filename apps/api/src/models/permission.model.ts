@@ -33,12 +33,13 @@ export async function findPermissionBySlug(slug: string) {
 
 export async function listPermissions(
   filter?: ListPermissionsFilter,
-  options?: { skip?: number; take?: number },
+  options?: { skip?: number; take?: number; includeEndpoints?: boolean },
 ) {
   const skip = options?.skip ?? 0;
   const take = options?.take ?? 20;
   const search = filter?.search?.trim();
   const module = filter?.module?.trim();
+  const includeEndpoints = options?.includeEndpoints === true;
 
   return prisma.permission.findMany({
     where: {
@@ -56,6 +57,19 @@ export async function listPermissions(
           : {},
       ],
     },
+    include: includeEndpoints
+      ? {
+          endpoints: {
+            where: { isActive: true },
+            select: {
+              method: true,
+              path: true,
+              description: true,
+            },
+            orderBy: [{ path: "asc" }, { method: "asc" }],
+          },
+        }
+      : undefined,
     skip,
     take,
     orderBy: [{ module: "asc" }, { action: "asc" }],
@@ -112,10 +126,28 @@ export async function deletePermission(permissionId: string) {
   return prisma.permission.delete({ where: { id: permissionId } });
 }
 
-export async function findPermissionsByRoleId(roleId: string) {
+export async function findPermissionsByRoleId(roleId: string, options?: { includeEndpoints?: boolean }) {
+  const includeEndpoints = options?.includeEndpoints === true;
+
   const rolePermissions = await prisma.rolePermission.findMany({
     where: { roleId },
-    include: { permission: true },
+    include: {
+      permission: includeEndpoints
+        ? {
+            include: {
+              endpoints: {
+                where: { isActive: true },
+                select: {
+                  method: true,
+                  path: true,
+                  description: true,
+                },
+                orderBy: [{ path: "asc" }, { method: "asc" }],
+              },
+            },
+          }
+        : true,
+    },
     orderBy: { permission: { slug: "asc" } },
   });
 
