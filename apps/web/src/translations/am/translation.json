@@ -1871,6 +1871,12 @@
       "status": "ሁኔታ",
       "actions": "ድርጊቶች"
     },
+    "columnEmpty": {
+      "chassis": "የቻሲስ ቁጥር አልተመዘገበም",
+      "type": "የተሽከርካሪ አይነት አልተዘጋጀም",
+      "class": "የተሽከርካሪ ክፍል አልተዘጋጀም",
+      "driver": "ሹፌር አልተመደበም"
+    },
     "status": {
       "active": "ንቁ",
       "maintenance": "ጥገና",
@@ -1892,7 +1898,27 @@
     "actions": {
       "edit": "አርትዕ",
       "delete": "ሰርዝ",
+      "assignDriver": "ሹፌር መመደብ",
       "menuLabel": "ለ {name} ድርጊቶች"
+    },
+    "assignDriverSheet": {
+      "title": "ነባሪ ሹፌር መመደብ",
+      "description": "በተለምዶ ይህን ተሽከርካሪ የሚነዳውን ሹፌር ያዘጋጁ። የጉዞ መላኪያ በጉዞ ሲመደብ ይህን ግንኙነት ይጠቀማል።",
+      "vehicleLabel": "ተሽከርካሪ",
+      "hint": "በጉዞ መላኪያ ላይ ለመምረጥ የሚችሉት ከሹፌር ጋር የተገናኙ ተሽከርካሪዎች ብቻ ናቸው። አንድ ሹፌር በአንድ ጊዜ ከአንድ ተሽከርካሪ ጋር ብቻ ሊገናኝ ይችላል።",
+      "save": "መመደብ አስቀምጥ",
+      "saving": "በማስቀመጥ ላይ…",
+      "success": {
+        "title": "የሹፌር መመደብ ተቀምጧል",
+        "description": "ለ {plate} ነባሪ ሹፌር ተዘምኗል።"
+      },
+      "errors": {
+        "saveFailed": "የሹፌር መመደብ ማስቀመጥ አልተሳካም"
+      }
+    },
+    "driverStatus": {
+      "assigned": "ለመላኪያ ዝግጁ",
+      "unassigned": "ከመላኪያ በፊት ይመድቡ"
     },
     "stats": {
       "title": "ጠቅላላ ተሽከርካሪዎች",
@@ -1943,8 +1969,8 @@
         "platePreviewEmpty": "AA-1-31209",
         "classification": "ምድብ",
         "classificationDescription": "የተሽከርካሪ አይነት፣ የአገልግሎት ክፍል እና የክወና ሁኔታ።",
-        "assignment": "የሹፌር መመደብ",
-        "assignmentDescription": "አማራጭ ሆኖ ንቁ ሹፌር ከዚህ ተሽከርካሪ ጋር ያገናኙ።",
+        "assignment": "ነባሪ ሹፌር",
+        "assignmentDescription": "በምዝገብ ጊዜ አማራጭ ነው። በጉዞ መላኪያ ላይ ከመጠቀም በፊት ያስፈልጋል።",
         "details": "የተሽከርካሪ ዝርዝሮች",
         "detailsDescription": "መለያ፣ የአምራች መረጃ እና አማራጭ የመኪና ብዛት ማስታወሻዎች።"
       },

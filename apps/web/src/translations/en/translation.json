@@ -1871,6 +1871,12 @@
       "status": "Status",
       "actions": "Actions"
     },
+    "columnEmpty": {
+      "chassis": "Chassis number not recorded",
+      "type": "Vehicle type not set",
+      "class": "Vehicle class not set",
+      "driver": "No driver assigned"
+    },
     "status": {
       "active": "Active",
       "maintenance": "Maintenance",
@@ -1892,7 +1898,27 @@
     "actions": {
       "edit": "Edit",
       "delete": "Delete",
+      "assignDriver": "Assign driver",
       "menuLabel": "Actions for {name}"
+    },
+    "assignDriverSheet": {
+      "title": "Assign default driver",
+      "description": "Set the driver who normally operates this vehicle. Ride dispatch uses this pairing when assigning trips.",
+      "vehicleLabel": "Vehicle",
+      "hint": "Only vehicles with an assigned driver can be selected during ride dispatch. A driver can only be linked to one vehicle at a time.",
+      "save": "Save assignment",
+      "saving": "Saving...",
+      "success": {
+        "title": "Driver assignment saved",
+        "description": "Default driver updated for {plate}."
+      },
+      "errors": {
+        "saveFailed": "Failed to save driver assignment"
+      }
+    },
+    "driverStatus": {
+      "assigned": "Ready for dispatch",
+      "unassigned": "Assign before dispatch"
     },
     "stats": {
       "title": "Total vehicles",
@@ -1943,8 +1969,8 @@
         "platePreviewEmpty": "AA-1-31209",
         "classification": "Classification",
         "classificationDescription": "Vehicle category, service class, and operational status.",
-        "assignment": "Driver assignment",
-        "assignmentDescription": "Optionally link an active driver to this vehicle.",
+        "assignment": "Default driver",
+        "assignmentDescription": "Optional during registration. Required before this vehicle can be used in ride dispatch.",
         "details": "Vehicle details",
         "detailsDescription": "Identification, manufacturer information, and optional fleet notes."
       },

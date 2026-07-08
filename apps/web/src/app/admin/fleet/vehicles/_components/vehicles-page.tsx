@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { MoreHorizontal, Pencil, Plus, Trash2, Truck } from "lucide-react";
+import { MoreHorizontal, Pencil, Plus, Trash2, Truck, UserRound } from "lucide-react";
 import type { Vehicle, VehicleStatus, VehicleType, VehicleClass } from "@smart-dispatch/types";
 import { useLocale, useAuth } from "@/components/shared/providers";
 import {
@@ -48,6 +48,7 @@ import { cn } from "@/lib/utils";
 import { DeleteConfirmModal } from "@/components/shared/delete-confirm-modal";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { CreateVehicleSheet } from "./create-vehicle-sheet";
+import { AssignVehicleDriverSheet } from "./assign-vehicle-driver-sheet";
 import { VehicleStats } from "./vehicle-stats";
 
 const VEHICLE_STATUSES: VehicleStatus[] = ["active", "maintenance", "retired"];
@@ -67,6 +68,7 @@ function VehicleRowActions({
   vehicle,
   labels,
   onEdit,
+  onAssignDriver,
   onDelete,
   canEdit,
   canDelete,
@@ -74,6 +76,7 @@ function VehicleRowActions({
   vehicle: Vehicle;
   labels: AdminVehiclesMessages["actions"];
   onEdit: (vehicle: Vehicle) => void;
+  onAssignDriver: (vehicle: Vehicle) => void;
   onDelete: (vehicle: Vehicle) => void;
   canEdit: boolean;
   canDelete: boolean;
@@ -93,12 +96,18 @@ function VehicleRowActions({
       >
         <MoreHorizontal className="size-4" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
+      <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuGroup>
           {canEdit ? (
             <DropdownMenuItem onClick={() => onEdit(vehicle)}>
               <Pencil />
               {labels.edit}
+            </DropdownMenuItem>
+          ) : null}
+          {canEdit ? (
+            <DropdownMenuItem onClick={() => onAssignDriver(vehicle)}>
+              <UserRound />
+              {labels.assignDriver}
             </DropdownMenuItem>
           ) : null}
           {canEdit && canDelete ? <DropdownMenuSeparator /> : null}
@@ -127,6 +136,8 @@ export function VehiclesPage() {
   const [editingVehicleId, setEditingVehicleId] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deletingVehicle, setDeletingVehicle] = useState<Vehicle | null>(null);
+  const [assignDriverOpen, setAssignDriverOpen] = useState(false);
+  const [assigningVehicle, setAssigningVehicle] = useState<Vehicle | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
   const [typeFilter, setTypeFilter] = useState("all");
   const [classFilter, setClassFilter] = useState("all");
@@ -188,8 +199,20 @@ export function VehiclesPage() {
     setDeleteOpen(true);
   }, []);
 
+  const openAssignDriverSheet = useCallback((vehicle: Vehicle) => {
+    setAssigningVehicle(vehicle);
+    setAssignDriverOpen(true);
+  }, []);
+
   const vehicleColumns = useMemo<DataTableColumn<Vehicle>[]>(
-    () => [
+    () => {
+      const empty = copy.columnEmpty;
+
+      function emptyCellLabel(text: string) {
+        return <span className="text-sm text-slate-400 italic">{text}</span>;
+      }
+
+      return [
       {
         id: "plate",
         header: copy.columns.plate,
@@ -200,19 +223,70 @@ export function VehiclesPage() {
         id: "chassis",
         header: copy.columns.chassis,
         cellClassName: "font-mono text-xs text-slate-600 tracking-wide",
-        cell: (vehicle) => vehicle.chassis_number ?? "—",
+        cell: (vehicle) =>
+          vehicle.chassis_number
+            ? vehicle.chassis_number
+            : emptyCellLabel(empty.chassis),
       },
       {
         id: "type",
         header: copy.columns.type,
         cellClassName: "text-slate-600",
-        cell: (vehicle) => vehicle.vehicle_type?.name ?? "—",
+        cell: (vehicle) =>
+          vehicle.vehicle_type?.name
+            ? vehicle.vehicle_type.name
+            : emptyCellLabel(empty.type),
       },
       {
         id: "class",
         header: copy.columns.class,
         cellClassName: "text-slate-600",
-        cell: (vehicle) => vehicle.vehicle_class?.name ?? "—",
+        cell: (vehicle) =>
+          vehicle.vehicle_class?.name
+            ? vehicle.vehicle_class.name
+            : emptyCellLabel(empty.class),
+      },
+      {
+        id: "driver",
+        header: copy.columns.driver,
+        cellClassName: "align-top",
+        cell: (vehicle) => {
+          const hasDriver = Boolean(vehicle.assigned_driver);
+          const driver = vehicle.assigned_driver;
+
+          return (
+            <div className="flex w-full min-w-[9.5rem] max-w-[11rem] flex-col items-start gap-1.5 py-0.5">
+              {hasDriver && driver ? (
+                <>
+                  <div className="min-w-0 w-full">
+                    <p className="truncate text-sm font-medium leading-snug text-slate-800">
+                      {driver.name}
+                    </p>
+                    {driver.email ? (
+                      <p className="truncate text-xs leading-snug text-slate-500">{driver.email}</p>
+                    ) : null}
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className="shrink-0 whitespace-nowrap border-emerald-200 bg-emerald-50 text-[10px] font-medium text-emerald-800"
+                  >
+                    {copy.driverStatus.assigned}
+                  </Badge>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm leading-snug text-slate-500">{empty.driver}</p>
+                  <Badge
+                    variant="outline"
+                    className="shrink-0 whitespace-nowrap border-amber-200 bg-amber-50 text-[10px] font-medium text-amber-800"
+                  >
+                    {copy.driverStatus.unassigned}
+                  </Badge>
+                </>
+              )}
+            </div>
+          );
+        },
       },
       {
         id: "status",
@@ -223,7 +297,8 @@ export function VehiclesPage() {
           </Badge>
         ),
       },
-    ],
+    ];
+    },
     [copy],
   );
 
@@ -254,13 +329,14 @@ export function VehiclesPage() {
           vehicle={vehicle}
           labels={copy.actions}
           onEdit={openEditSheet}
+          onAssignDriver={openAssignDriverSheet}
           onDelete={openDeleteModal}
           canEdit={canWrite}
           canDelete={canDelete}
         />
       );
     },
-    [copy.actions, openEditSheet, openDeleteModal, canWrite, canDelete],
+    [copy.actions, openEditSheet, openAssignDriverSheet, openDeleteModal, canWrite, canDelete],
   );
 
   if (!canRead) {
@@ -293,7 +369,7 @@ export function VehiclesPage() {
             </Button>
           ) : undefined
         }
-        minTableWidth="800px"
+        minTableWidth="960px"
         emptyIcon={Truck}
         emptyTitle={copy.empty.title}
         emptyDescription={copy.empty.description}
@@ -448,13 +524,21 @@ export function VehiclesPage() {
       />
 
       {canWrite ? (
-        <CreateVehicleSheet
-          open={sheetOpen}
-          onOpenChange={setSheetOpen}
-          mode={sheetMode}
-          vehicleId={editingVehicleId}
-          onSuccess={() => setRefreshKey((current) => current + 1)}
-        />
+        <>
+          <CreateVehicleSheet
+            open={sheetOpen}
+            onOpenChange={setSheetOpen}
+            mode={sheetMode}
+            vehicleId={editingVehicleId}
+            onSuccess={() => setRefreshKey((current) => current + 1)}
+          />
+          <AssignVehicleDriverSheet
+            open={assignDriverOpen}
+            onOpenChange={setAssignDriverOpen}
+            vehicle={assigningVehicle}
+            onSuccess={() => setRefreshKey((current) => current + 1)}
+          />
+        </>
       ) : null}
 
       {canDelete ? (
