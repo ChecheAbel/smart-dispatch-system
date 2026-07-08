@@ -71,6 +71,7 @@ function VehicleRowActions({
   onAssignDriver,
   onDelete,
   canEdit,
+  canAssignDriver,
   canDelete,
 }: {
   vehicle: Vehicle;
@@ -79,6 +80,7 @@ function VehicleRowActions({
   onAssignDriver: (vehicle: Vehicle) => void;
   onDelete: (vehicle: Vehicle) => void;
   canEdit: boolean;
+  canAssignDriver: boolean;
   canDelete: boolean;
 }) {
   return (
@@ -104,13 +106,13 @@ function VehicleRowActions({
               {labels.edit}
             </DropdownMenuItem>
           ) : null}
-          {canEdit ? (
+          {canAssignDriver ? (
             <DropdownMenuItem onClick={() => onAssignDriver(vehicle)}>
               <UserRound />
               {labels.assignDriver}
             </DropdownMenuItem>
           ) : null}
-          {canEdit && canDelete ? <DropdownMenuSeparator /> : null}
+          {(canEdit || canAssignDriver) && canDelete ? <DropdownMenuSeparator /> : null}
           {canDelete ? (
             <DropdownMenuItem variant="destructive" onClick={() => onDelete(vehicle)}>
               <Trash2 />
@@ -129,8 +131,9 @@ export function VehiclesPage() {
   const copy = getAdminVehiclesMessages(locale);
   const canRead = hasPermission(PERMISSIONS.vehicles.read);
   const canWrite = hasPermission(PERMISSIONS.vehicles.write);
+  const canAssignDriver = hasPermission(PERMISSIONS.vehicles.assign_driver);
   const canDelete = hasPermission(PERMISSIONS.vehicles.delete);
-  const showRowActions = canWrite || canDelete;
+  const showRowActions = canWrite || canAssignDriver || canDelete;
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetMode, setSheetMode] = useState<"create" | "edit">("create");
   const [editingVehicleId, setEditingVehicleId] = useState<string | null>(null);
@@ -320,7 +323,7 @@ export function VehiclesPage() {
 
   const renderRowActions = useCallback(
     (vehicle: Vehicle, _context: DataTableRowContext<Vehicle>) => {
-      if (!canWrite && !canDelete) {
+      if (!canWrite && !canAssignDriver && !canDelete) {
         return null;
       }
 
@@ -332,11 +335,12 @@ export function VehiclesPage() {
           onAssignDriver={openAssignDriverSheet}
           onDelete={openDeleteModal}
           canEdit={canWrite}
+          canAssignDriver={canAssignDriver}
           canDelete={canDelete}
         />
       );
     },
-    [copy.actions, openEditSheet, openAssignDriverSheet, openDeleteModal, canWrite, canDelete],
+    [copy.actions, openEditSheet, openAssignDriverSheet, openDeleteModal, canWrite, canAssignDriver, canDelete],
   );
 
   if (!canRead) {
@@ -524,21 +528,22 @@ export function VehiclesPage() {
       />
 
       {canWrite ? (
-        <>
-          <CreateVehicleSheet
-            open={sheetOpen}
-            onOpenChange={setSheetOpen}
-            mode={sheetMode}
-            vehicleId={editingVehicleId}
-            onSuccess={() => setRefreshKey((current) => current + 1)}
-          />
-          <AssignVehicleDriverSheet
-            open={assignDriverOpen}
-            onOpenChange={setAssignDriverOpen}
-            vehicle={assigningVehicle}
-            onSuccess={() => setRefreshKey((current) => current + 1)}
-          />
-        </>
+        <CreateVehicleSheet
+          open={sheetOpen}
+          onOpenChange={setSheetOpen}
+          mode={sheetMode}
+          vehicleId={editingVehicleId}
+          onSuccess={() => setRefreshKey((current) => current + 1)}
+        />
+      ) : null}
+
+      {canAssignDriver ? (
+        <AssignVehicleDriverSheet
+          open={assignDriverOpen}
+          onOpenChange={setAssignDriverOpen}
+          vehicle={assigningVehicle}
+          onSuccess={() => setRefreshKey((current) => current + 1)}
+        />
       ) : null}
 
       {canDelete ? (

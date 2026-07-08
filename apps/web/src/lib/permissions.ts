@@ -41,6 +41,7 @@ export const PERMISSIONS = {
   vehicles: {
     read: "vehicles.read",
     write: "vehicles.write",
+    assign_driver: "vehicles.assign_driver",
     delete: "vehicles.delete",
   },
   regions: {

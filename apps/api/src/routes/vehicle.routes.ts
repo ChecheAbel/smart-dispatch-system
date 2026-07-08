@@ -1,9 +1,10 @@
 import { Router, type Request, type Response } from "express";
 import { auditMutations } from "../middleware/audit-mutation";
-import { authenticate } from "../middleware/authenticate";
+import { authenticate, type AuthenticatedRequest } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
 import { requirePermission } from "../middleware/require-permission";
 import { toPublicDriverOption, toPublicVehicle } from "../mappers/vehicle.mapper";
+import { userHasPermission } from "../models/permission.model";
 import { listDrivers } from "../models/user.model";
 import {
   countVehicles,
@@ -54,6 +55,21 @@ function mapDriverAssignmentError(error: unknown) {
   }
 }
 
+async function assertCanAssignVehicleDriver(req: AuthenticatedRequest, res: Response) {
+  if (!req.user) {
+    sendError(res, "Unauthorized.", 401);
+    return false;
+  }
+
+  const allowed = await userHasPermission(req.user.id, "vehicles.assign_driver");
+  if (!allowed) {
+    sendError(res, "Forbidden.", 403);
+    return false;
+  }
+
+  return true;
+}
+
 router.get("/", requirePermission("vehicles.read"), async (req: Request, res: Response) => {
   try {
     const locale = getRequestLocale(req);
@@ -84,7 +100,7 @@ router.get("/", requirePermission("vehicles.read"), async (req: Request, res: Re
   }
 });
 
-router.get("/driver-options", requirePermission("vehicles.read"), async (req: Request, res: Response) => {
+router.get("/driver-options", requirePermission("vehicles.assign_driver"), async (req: Request, res: Response) => {
   try {
     const search = getString(req.query.search) || undefined;
     const drivers = await listDrivers({ search });
@@ -113,7 +129,7 @@ router.get("/:id", requirePermission("vehicles.read"), async (req: Request, res:
   }
 });
 
-router.post("/", requirePermission("vehicles.write"), async (req: Request, res: Response) => {
+router.post("/", requirePermission("vehicles.write"), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const locale = getRequestLocale(req);
     const plateNumber = getString(req.body?.plate_number);
@@ -123,6 +139,13 @@ router.post("/", requirePermission("vehicles.write"), async (req: Request, res: 
     const status = parseVehicleStatus(req.body?.status);
     const year = parseYear(req.body?.year);
     const assignedDriverUserId = parseAssignedDriverUserId(req.body?.assigned_driver_user_id);
+
+    if (assignedDriverUserId) {
+      const canAssign = await assertCanAssignVehicleDriver(req, res);
+      if (!canAssign) {
+        return;
+      }
+    }
 
     if (!plateNumber) {
       return sendError(res, "Plate number is required.", 400);
@@ -182,12 +205,25 @@ router.post("/", requirePermission("vehicles.write"), async (req: Request, res: 
   }
 });
 
-router.patch("/:id", requirePermission("vehicles.write"), async (req: Request, res: Response) => {
+router.patch("/:id", requirePermission("vehicles.write"), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const locale = getRequestLocale(req);
     const existing = await findVehicleById(req.params.id);
     if (!existing) {
       return sendError(res, "Vehicle not found.", 404);
+    }
+
+    if (req.body?.assigned_driver_user_id !== undefined) {
+      const assignedDriverUserId = parseAssignedDriverUserId(req.body.assigned_driver_user_id);
+      const nextDriverId = assignedDriverUserId ?? null;
+      const currentDriverId = existing.assignedDriverUserId ?? null;
+
+      if (nextDriverId !== currentDriverId) {
+        const canAssign = await assertCanAssignVehicleDriver(req, res);
+        if (!canAssign) {
+          return;
+        }
+      }
     }
 
     const vehicleTypeId = getOptionalString(req.body?.vehicle_type_id);

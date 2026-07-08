@@ -13,9 +13,10 @@ import {
   adminInputClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
-import { useLocale } from "@/components/shared/providers";
+import { useLocale, useAuth } from "@/components/shared/providers";
 import { formatMessage, getAdminVehiclesMessages } from "@/translations";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
+import { PERMISSIONS } from "@/lib/permissions";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -164,6 +165,8 @@ export function CreateVehicleSheet({
   onSuccess,
 }: CreateVehicleSheetProps) {
   const { locale } = useLocale();
+  const { hasPermission } = useAuth();
+  const canAssignDriver = hasPermission(PERMISSIONS.vehicles.assign_driver);
   const copy = getAdminVehiclesMessages(locale);
   const formCopy = copy.form;
   const sectionCopy = formCopy.sections;
@@ -278,7 +281,7 @@ export function CreateVehicleSheet({
         const [vehicleTypes, vehicleClasses, drivers] = await Promise.all([
           fetchActiveVehicleTypes(locale),
           fetchActiveVehicleClasses(locale),
-          fetchVehicleDriverOptions(),
+          canAssignDriver ? fetchVehicleDriverOptions() : Promise.resolve([]),
         ]);
         if (!cancelled) {
           setVehicleTypeOptions(
@@ -360,7 +363,7 @@ export function CreateVehicleSheet({
     return () => {
       cancelled = true;
     };
-  }, [open, isEdit, vehicleId, locale, formCopy.errors.loadFailed, toastCopy.loadFailed.title]);
+  }, [open, isEdit, vehicleId, locale, canAssignDriver, formCopy.errors.loadFailed, toastCopy.loadFailed.title]);
 
   function updateField<K extends keyof VehicleFormState>(key: K, value: VehicleFormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -450,7 +453,9 @@ export function CreateVehicleSheet({
       plate_number: plateNumber,
       vehicle_type_id: vehicleTypeId,
       vehicle_class_id: vehicleClassId,
-      assigned_driver_user_id: form.assignedDriverUserId || null,
+      ...(canAssignDriver
+        ? { assigned_driver_user_id: form.assignedDriverUserId || null }
+        : {}),
       chassis_number: chassisNumber,
       make: form.make.trim() || null,
       model: form.model.trim() || null,
@@ -758,35 +763,37 @@ export function CreateVehicleSheet({
               </div>
             </FormSection>
 
-            <FormSection
-              icon={UserRound}
-              title={sectionCopy.assignment}
-              description={sectionCopy.assignmentDescription}
-            >
-              <div className="space-y-2">
-                <Label htmlFor="vehicle-driver-id">{formCopy.assignedDriver}</Label>
-                <Select
-                  items={driverItems}
-                  value={form.assignedDriverUserId || null}
-                  onValueChange={(value) => updateField("assignedDriverUserId", value ?? "")}
-                  disabled={optionsLoading}
-                >
-                  <SelectTrigger id="vehicle-driver-id" className={selectTriggerClassName}>
-                    <SelectValue placeholder={formCopy.assignedDriverPlaceholder} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      <SelectItem value="">{formCopy.noDriver}</SelectItem>
-                      {driverOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              </div>
-            </FormSection>
+            {canAssignDriver ? (
+              <FormSection
+                icon={UserRound}
+                title={sectionCopy.assignment}
+                description={sectionCopy.assignmentDescription}
+              >
+                <div className="space-y-2">
+                  <Label htmlFor="vehicle-driver-id">{formCopy.assignedDriver}</Label>
+                  <Select
+                    items={driverItems}
+                    value={form.assignedDriverUserId || null}
+                    onValueChange={(value) => updateField("assignedDriverUserId", value ?? "")}
+                    disabled={optionsLoading}
+                  >
+                    <SelectTrigger id="vehicle-driver-id" className={selectTriggerClassName}>
+                      <SelectValue placeholder={formCopy.assignedDriverPlaceholder} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value="">{formCopy.noDriver}</SelectItem>
+                        {driverOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </FormSection>
+            ) : null}
 
             <FormSection
               icon={ClipboardList}

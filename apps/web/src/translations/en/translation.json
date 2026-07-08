@@ -535,18 +535,23 @@
       "actions": {
         "read": "View",
         "write": "Create & edit",
+        "assign_driver": "Assign drivers",
         "delete": "Delete"
       },
       "modules": {
         "users": "Users",
+        "user_registrations": "User registrations",
         "roles": "Roles",
         "menus": "Menus",
         "notifications": "Notifications",
         "audit_logs": "Audit logs",
         "vehicle_types": "Vehicle types",
+        "vehicle_classes": "Vehicle classes",
         "vehicles": "Vehicles",
         "regions": "Regions",
-        "locations": "Locations"
+        "locations": "Locations",
+        "fare_plans": "Fare plans",
+        "ride_requests": "Ride requests"
       },
       "errors": {
         "loadFailed": "Failed to load permissions."

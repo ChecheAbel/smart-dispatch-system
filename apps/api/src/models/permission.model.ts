@@ -122,6 +122,11 @@ export async function findPermissionsByRoleId(roleId: string) {
   return rolePermissions.map((entry) => entry.permission);
 }
 
+export async function userHasPermission(userId: string, permissionSlug: string) {
+  const permissions = await findPermissionsByUserId(userId);
+  return permissions.some((permission) => permission.slug === permissionSlug);
+}
+
 export async function findPermissionsByUserId(userId: string) {
   const authRoles = await prisma.authRole.findMany({
     where: { userId },

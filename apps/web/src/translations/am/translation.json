@@ -535,18 +535,23 @@
       "actions": {
         "read": "እይታ",
         "write": "ፍጠር እና አርትዕ",
+        "assign_driver": "ሹፌሮችን መመደብ",
         "delete": "ሰርዝ"
       },
       "modules": {
         "users": "ተጠቃሚዎች",
+        "user_registrations": "የተጠቃሚ ምዝገባዎች",
         "roles": "ሚናዎች",
         "menus": "ሜኑዎች",
         "notifications": "ማሳወቂያዎች",
         "audit_logs": "የኦዲት መዝገቦች",
         "vehicle_types": "የተሽከርካሪ አይነቶች",
+        "vehicle_classes": "የተሽከርካሪ ክፍሎች",
         "vehicles": "ተሽከርካሪዎች",
         "regions": "ክልሎች",
-        "locations": "ቦታዎች"
+        "locations": "ቦታዎች",
+        "fare_plans": "የክፍያ ዕቅዶች",
+        "ride_requests": "የጉዞ ጥያቄዎች"
       },
       "errors": {
         "loadFailed": "ፈቃዶችን መጫን አልተሳካም።"

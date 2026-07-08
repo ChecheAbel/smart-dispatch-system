@@ -59,12 +59,20 @@ const MODULE_ICONS: Record<string, LucideIcon> = {
   audit_logs: ScrollText,
 };
 
+function humanizePermissionToken(value: string) {
+  return value
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 function getModuleLabel(module: string, labels: Record<string, string>) {
-  return labels[module] ?? module.charAt(0).toUpperCase() + module.slice(1);
+  return labels[module] ?? humanizePermissionToken(module);
 }
 
 function getActionLabel(action: string, labels: Record<string, string>) {
-  return labels[action] ?? action;
+  return labels[action] ?? humanizePermissionToken(action);
 }
 
 function PermissionsSkeleton() {
