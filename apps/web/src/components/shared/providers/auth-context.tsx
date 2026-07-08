@@ -50,6 +50,23 @@ export function AuthProvider({
     updateStoredSession(session);
   }, []);
 
+  useEffect(() => {
+    void refreshSession().catch(() => {
+      // Keep the shell-provided session when refresh fails (e.g. expired token).
+    });
+  }, [refreshSession]);
+
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        void refreshSession().catch(() => {});
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [refreshSession]);
+
   return (
     <AuthContext.Provider
       value={{ user, permissions, hasPermission, updateUser, refreshSession, signOut }}
