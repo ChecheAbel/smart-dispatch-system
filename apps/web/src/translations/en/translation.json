@@ -2231,7 +2231,36 @@
         "markCompleted": "Mark completed",
         "openCount": "{count} open",
         "optionalDetails": "Workshop & schedule",
-        "optionalDetailsHint": "Optional — fill in if you already know the provider, cost, or next service date."
+        "optionalDetailsHint": "Optional — fill in if you already know the provider, cost, or next service date.",
+        "requestedBy": "Requested by {name}",
+        "requestedByLabel": "Requested by",
+        "requestedByUnknown": "System",
+        "loggedOnLabel": "Logged on",
+        "viewDetails": "View details",
+        "noDescription": "No notes provided for this maintenance log.",
+        "tableColumns": {
+          "workType": "Work type",
+          "title": "Title",
+          "status": "Status",
+          "requestedBy": "Requested by",
+          "loggedOn": "Logged on",
+          "actions": "Actions"
+        },
+        "detailSheet": {
+          "title": "Maintenance details",
+          "description": "Full record including who requested the work and workshop details.",
+          "overview": "Overview",
+          "request": "Request",
+          "schedule": "Schedule & mileage",
+          "workshop": "Workshop & cost",
+          "completedAt": "Completed",
+          "nextDueKm": "Next due (km)",
+          "lastUpdated": "Last updated",
+          "notSet": "Not set",
+          "close": "Close",
+          "kmValue": "{count} km",
+          "costValue": "{amount}"
+        }
       },
       "maintenanceTypes": {
         "scheduled": "Scheduled",

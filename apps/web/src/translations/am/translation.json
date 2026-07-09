@@ -2231,7 +2231,36 @@
         "markCompleted": "እንደ ተጠናቀቀ ምልክት አድርግ",
         "openCount": "{count} ክፍት",
         "optionalDetails": "ወርክሾፕ እና መርሐግብር",
-        "optionalDetailsHint": "አማራጭ — አቅራቢውን፣ ወጪን ወይም የቀጣይ አገልግሎት ቀን ካወቁ ይሙሉ።"
+        "optionalDetailsHint": "አማራጭ — አቅራቢውን፣ ወጪን ወይም የቀጣይ አገልግሎት ቀን ካወቁ ይሙሉ።",
+        "requestedBy": "በ {name} ተጠይቋል",
+        "requestedByLabel": "የጠየቀው",
+        "requestedByUnknown": "ስርዓት",
+        "loggedOnLabel": "የተመዘገበበት",
+        "viewDetails": "ዝርዝር ይመልከቱ",
+        "noDescription": "ለዚህ ጥገና መዝገብ ማስታወሻ አልተሰጠም።",
+        "tableColumns": {
+          "workType": "የስራ አይነት",
+          "title": "ርዕስ",
+          "status": "ሁኔታ",
+          "requestedBy": "የጠየቀው",
+          "loggedOn": "የተመዘገበበት",
+          "actions": "እርምጃዎች"
+        },
+        "detailSheet": {
+          "title": "የጥገና ዝርዝር",
+          "description": "ሙሉ መዝገብ፣ ጥገናውን የጠየቀው ሰው እና የወርክሾፕ ዝርዝሮችን ያካትታል።",
+          "overview": "አጠቃላይ",
+          "request": "ጥያቄ",
+          "schedule": "መርሐግብር እና ኪሎሜትር",
+          "workshop": "ወርክሾፕ እና ወጪ",
+          "completedAt": "ተጠናቋል",
+          "nextDueKm": "ቀጣይ ቀን (ኪ.ሜ)",
+          "lastUpdated": "የተዘመነበት",
+          "notSet": "አልተሞላም",
+          "close": "ዝጋ",
+          "kmValue": "{count} ኪ.ሜ",
+          "costValue": "{amount}"
+        }
       },
       "maintenanceTypes": {
         "scheduled": "ታቅዶ",

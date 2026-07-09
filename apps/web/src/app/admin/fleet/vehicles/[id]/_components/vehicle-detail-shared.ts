@@ -104,6 +104,29 @@ export function maintenanceStatusClass(status: VehicleMaintenanceStatus) {
   }
 }
 
+export function formatMaintenanceDate(value: string | null, locale?: string) {
+  if (!value) return null;
+  const date = new Date(value.includes("T") ? value : `${value}T00:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleDateString(locale, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+export function formatMaintenanceDateTime(value: string, locale?: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString(locale, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export function historyIcon(eventType: VehicleHistoryEvent["event_type"]) {
   switch (eventType) {
     case "maintenance_opened":
