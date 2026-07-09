@@ -19,16 +19,47 @@ type VehicleDetailOverviewTabProps = {
   vehicle: Vehicle;
   copy: ReturnType<typeof getAdminVehiclesMessages>;
   locale: string;
+  canWrite: boolean;
   onNavigateToCompliance: () => void;
+  onEditInsurance: () => void;
+  onEditInspection: () => void;
 };
 
 export function VehicleDetailOverviewTab({
   vehicle,
   copy,
   locale,
+  canWrite,
   onNavigateToCompliance,
+  onEditInsurance,
+  onEditInspection,
 }: VehicleDetailOverviewTabProps) {
   const detail = copy.detail;
+
+  const complianceItems = [
+    {
+      key: "insurance" as const,
+      title: detail.overview.insurance,
+      tone: getExpiryTone(vehicle.insurance_expires_at),
+      icon: ShieldCheck,
+      expiresAt: vehicle.insurance_expires_at,
+      subtitle: vehicle.insurance_provider,
+      reference: vehicle.insurance_policy_number,
+      onClick: canWrite ? onEditInsurance : onNavigateToCompliance,
+      actionLabel: canWrite ? detail.overview.updateInsurance : detail.overview.viewDetails,
+    },
+    {
+      key: "inspection" as const,
+      title: detail.overview.inspection,
+      tone: getExpiryTone(vehicle.inspection_expires_at),
+      icon: ClipboardList,
+      expiresAt: vehicle.inspection_expires_at,
+      subtitle: vehicle.inspection_center,
+      reference: vehicle.inspection_certificate_number,
+      onClick: canWrite ? onEditInspection : onNavigateToCompliance,
+      actionLabel: canWrite ? detail.overview.updateInspection : detail.overview.viewDetails,
+    },
+  ] as const;
 
   return (
     <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-5">
@@ -82,28 +113,7 @@ export function VehicleDetailOverviewTab({
         </div>
 
         <div className="space-y-2.5">
-          {(
-            [
-              {
-                key: "insurance" as const,
-                title: detail.overview.insurance,
-                tone: getExpiryTone(vehicle.insurance_expires_at),
-                icon: ShieldCheck,
-                expiresAt: vehicle.insurance_expires_at,
-                subtitle: vehicle.insurance_provider,
-                reference: vehicle.insurance_policy_number,
-              },
-              {
-                key: "inspection" as const,
-                title: detail.overview.inspection,
-                tone: getExpiryTone(vehicle.inspection_expires_at),
-                icon: ClipboardList,
-                expiresAt: vehicle.inspection_expires_at,
-                subtitle: vehicle.inspection_center,
-                reference: vehicle.inspection_certificate_number,
-              },
-            ] as const
-          ).map((item) => {
+          {complianceItems.map((item) => {
             const Icon = item.icon;
             const formattedExpiry = formatComplianceDate(item.expiresAt, locale);
             const countdown = formatExpiryCountdown(item.expiresAt, detail.overview);
@@ -111,7 +121,7 @@ export function VehicleDetailOverviewTab({
               <button
                 key={item.key}
                 type="button"
-                onClick={onNavigateToCompliance}
+                onClick={item.onClick}
                 className="group flex w-full items-start justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-3.5 py-3.5 text-left transition hover:border-slate-200 hover:bg-white sm:px-4"
               >
                 <div className="flex min-w-0 items-start gap-3">
@@ -142,7 +152,7 @@ export function VehicleDetailOverviewTab({
                     {detail.overview.expiryStatus[item.tone]}
                   </Badge>
                   <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-500 transition group-hover:text-[#1C3A34]">
-                    {detail.overview.editPolicy}
+                    {item.actionLabel}
                     <ChevronRight className="size-3.5 transition group-hover:translate-x-0.5" />
                   </span>
                 </div>

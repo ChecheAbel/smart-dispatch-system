@@ -1950,6 +1950,129 @@
       }
     }
   },
+  "adminCompliance": {
+    "eyebrow": "ተገዢነት",
+    "overview": {
+      "title": "የተገዢነት አጠቃላይ እይታ",
+      "description": "በመራጭ ውስጥ የኢንሹራንስ እና የምርመራ ሁኔታን ይከታተሉ።",
+      "insuranceSection": "ኢንሹራንስ",
+      "insuranceDescription": "የሶስተኛ ወገን ኢንሹራንስ ሽፋን እና የማደስ ቀኖች።",
+      "inspectionSection": "ምርመራ",
+      "inspectionDescription": "የቴክኒክ ምርመራ የምስክር ወረቀቶች እና የማብቂያ ቀን መከታተያ።",
+      "viewAll": "ሁሉንም ይመልከቱ",
+      "viewIssues": "ችግሮችን ይመልከቱ",
+      "attentionMessage": "{count} ተሽከርካሪዎች የተገዢነት ትኩረት ይፈልጋሉ።",
+      "reportSummary": "የመራጭ ሽፋን",
+      "compliantSummary": "{total} ተሽከርካሪዎች ውስጥ {valid} ትክክለኛ",
+      "needsAction": "{count} እርምጃ ይፈልጋሉ",
+      "allCompliant": "ለዚህ ምድብ ሁሉም ተሽከርካሪዎች ትክክለኛ ናቸው።",
+      "validRate": "የትክክለኝነት መጠን",
+      "statusBreakdown": "የሁኔታ ይበልጥ",
+      "browseByStatus": "በሁኔታ ይፈልጉ"
+    },
+    "insurance": {
+      "title": "ኢንሹራንስ",
+      "description": "በመራጭ ውስጥ የኢንሹራንስ ሁኔታ። ከዚህ ዝርዝር ቀጥታ መዝገቦችን ያዘምኑ።",
+      "searchPlaceholder": "በሰሌዳ፣ አቅራቢ ወይም በፖሊሲ ቁጥር ይፈልጉ..."
+    },
+    "inspection": {
+      "title": "ምርመራ",
+      "description": "በመራጭ ውስጥ የምርመራ ሁኔታ። ከዚህ ዝርዝር ቀጥታ መዝገቦችን ያዘምኑ።",
+      "searchPlaceholder": "በሰሌዳ፣ በምርመራ ማዕከል ወይም በየምስክር ወረቀት ቁጥር ይፈልጉ..."
+    },
+    "itemLabel": "ተሽከርካሪ",
+    "columns": {
+      "plate": "ሰሌዳ",
+      "provider": "አቅራቢ",
+      "policyNumber": "የፖሊሲ ቁጥር",
+      "issuedAt": "የተሰጠበት ቀን",
+      "center": "የምርመራ ማዕከል",
+      "certificateNumber": "የምስክር ወረቀት ቁጥር",
+      "performedAt": "የተመረመረበት ቀን",
+      "expiresAt": "የሚያበቃበት ቀን",
+      "status": "ሁኔታ",
+      "actions": "ተግባሮች"
+    },
+    "status": {
+      "expired": "ጊዜው አልፏል",
+      "due_soon": "በቅርቡ ያበቃል",
+      "ok": "ትክክለኛ",
+      "not_set": "አልተዘጋጀም",
+      "all": "ሁሉም ሁኔታዎች"
+    },
+    "filters": {
+      "status": "የተገዢነት ሁኔታ"
+    },
+    "empty": {
+      "title": "ምንም ተሽከርካሪ አልተገኘም",
+      "description": "ተሽከርካሪዎች ከተመዘገቡ በኋላ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ ፍለጋ ወይም ማጣሪያ ይሞክሩ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፍቃድ የለዎትም",
+      "description": "የተገዢነት ገጾችን ለመክፈት የተሽከርካሪዎችን የማየት ፍቃድ ያስፈልጋል።",
+      "sessionHint": "ፍቃዶች ቅርብ ጊዜ ከተቀየሩ፣ ክፍያዎን ለማደስ ይውጡ እና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፍቃዶች ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
+    "actions": {
+      "view": "ተሽከርካሪ ይመልከቱ",
+      "editInsurance": "ኢንሹራንስ ያዘምኑ",
+      "editInspection": "ምርመራ ያዘምኑ",
+      "menuLabel": "ለ {name} ተግባሮች"
+    },
+    "sheet": {
+      "insurance": {
+        "title": "ኢንሹራንስ ያዘምኑ",
+        "description": "ለዚህ ተሽከርካሪ የኢንሹራንስ አቅራቢ፣ የፖሊሲ ዝርዝሮች እና የማብቂያ ቀኖችን ያርትዑ።",
+        "vehicleLabel": "ተሽከርካሪ",
+        "save": "ኢንሹራንስ አስቀምጥ",
+        "saving": "በማስቀመጥ ላይ...",
+        "cancel": "ሰርዝ",
+        "success": {
+          "title": "ኢንሹራንስ ተዘምኗል",
+          "description": "የ {plate} ኢንሹራንስ ዝርዝሮች ተቀምጠዋል።"
+        },
+        "errors": {
+          "saveFailed": "ኢንሹራንስ ማስቀመጥ አልተሳካም"
+        }
+      },
+      "inspection": {
+        "title": "ምርመራ ያዘምኑ",
+        "description": "ለዚህ ተሽከርካሪ የምርመራ ማዕከል፣ የምስክር ወረቀት ዝርዝሮች እና የማብቂያ ቀኖችን ያርትዑ።",
+        "vehicleLabel": "ተሽከርካሪ",
+        "save": "ምርመራ አስቀምጥ",
+        "saving": "በማስቀመጥ ላይ...",
+        "cancel": "ሰርዝ",
+        "success": {
+          "title": "ምርመራ ተዘምኗል",
+          "description": "የ {plate} የምርመራ ዝርዝሮች ተቀምጠዋል።"
+        },
+        "errors": {
+          "saveFailed": "ምርመራ ማስቀመጥ አልተሳካም"
+        }
+      }
+    },
+    "stats": {
+      "fleetVehicles": "የመራጭ ተሽከርካሪዎች",
+      "fleetVehiclesDescription": "በመራጭ ውስጥ የተመዘገቡ ተሽከርካሪዎች",
+      "insuranceNotSet": "ኢንሹራንስ አልተዘጋጀም",
+      "insuranceNotSetDescription": "የኢንሹራንስ የማብቂያ ቀን የሌላቸው ተሽከርካሪዎች",
+      "inspectionNotSet": "ምርመራ አልተዘጋጀም",
+      "inspectionNotSetDescription": "የምርመራ የማብቂያ ቀን የሌላቸው ተሽከርካሪዎች",
+      "needsAttention": "ትኩረት ይፈልጋል",
+      "needsAttentionDescription": "መዝገብ የሌላቸው ወይም የሚያበቃ ወይም ጊዜው ያለፈባቸው ተሽከርካሪዎች",
+      "expired": "ጊዜው አልፏል",
+      "expiredDescription": "የማብቂያ ቀን አልፏል — እርምጃ ያስፈልጋል",
+      "dueSoon": "በ 30 ቀናት ውስጥ ያበቃል",
+      "dueSoonDescription": "ማደስ በቅርቡ ያስፈልጋል",
+      "ok": "ትክክለኛ",
+      "okDescription": "ከማብቂያው በላይ 30 ቀናት ቀርቷል",
+      "notSet": "አልተዘጋጀም",
+      "notSetDescription": "የማብቂያ ቀን አልተመዘገበም"
+    }
+  },
   "adminVehicles": {
     "eyebrow": "የተሽከርካሪ አስተዳደር",
     "title": "ተሽከርካሪዎች",
@@ -2028,8 +2151,11 @@
         "vehicleInfo": "የተሽከርካሪ መረጃ",
         "compliance": "የተገዢነት ሁኔታ",
         "complianceHint": "የኢንሹራንስ እና የምርመራ የማብቂያ ቀን በአንድ ተመልከት።",
-        "manageCompliance": "ኢንሹራንስ እና ምርመራ አዘምን",
-        "manageComplianceHint": "የአቅራቢ ዝርዝሮች፣ የሰርተፊኬት ቁጥሮች እና የማደሻ ቀኖችን ያክሉ።",
+        "manageCompliance": "ሁሉንም የተገዢነት ዝርዝሮች ይመልከቱ",
+        "manageComplianceHint": "ለዚህ ተሽከርካሪ ሙሉ የኢንሹራንስ እና የምርመራ መዝገቦችን ይመልከቱ።",
+        "updateInsurance": "ኢንሹራንስ ያዘምኑ",
+        "updateInspection": "ምርመራ ያዘምኑ",
+        "viewDetails": "ዝርዝሮችን ይመልከቱ",
         "expiresToday": "ዛሬ ያበቃል",
         "expiresInDays": "በ {count} ቀናት ውስጥ ያበቃል",
         "expiredDaysAgo": "ከ {count} ቀናት በፊት አልቋል",
@@ -2071,7 +2197,8 @@
       },
       "compliance": {
         "title": "ኢንሹራንስ እና ምርመራ",
-        "description": "ተሽከርካሪው ለመንገድ ዝግጁ መሆኑን ለማረጋገጥ የፖሊሲ መዝገቦችን ወቅታዊ ያድርጉ።",
+        "description": "የዚህ ተሽከርካሪ የተገዢነት መዝገቦችን ይመልከቱ። ዝርዝሮችን ለማዘመን ከታች ያሉትን ቁልፎች ይጠቀሙ።",
+        "fleetOverviewLink": "የመራጭ ተገዢነት አጠቃላይ እይታ",
         "policyDetails": "የፖሊሲ ዝርዝሮች",
         "dates": "ቀኖች",
         "additionalNotes": "ተጨማሪ ማስታወሻዎች"

@@ -15,8 +15,11 @@ import {
   createVehicle,
   deleteVehicle,
   findVehicleById,
+  getVehicleComplianceSummary,
   listVehicles,
   parseAssignedDriverUserId,
+  parseVehicleComplianceStatus,
+  parseVehicleComplianceType,
   parseVehicleStatus,
   updateVehicle,
 } from "../models/vehicle.model";
@@ -139,6 +142,8 @@ router.get("/", requirePermission("vehicles.read"), async (req: Request, res: Re
       assignedDriverUserId: getString(req.query.assigned_driver_user_id) || undefined,
       unassignedOnly: parseBoolean(req.query.unassigned_only),
       assignedOnly: parseBoolean(req.query.assigned_only),
+      complianceType: parseVehicleComplianceType(req.query.compliance_type),
+      complianceStatus: parseVehicleComplianceStatus(req.query.compliance_status),
     };
 
     const result = await paginate(
@@ -165,6 +170,15 @@ router.get("/driver-options", requirePermission("vehicles.assign_driver"), async
     return sendSuccess(res, {
       drivers: drivers.map((driver) => toPublicDriverOption(driver)),
     });
+  } catch (error) {
+    return handleRouteError(res, error);
+  }
+});
+
+router.get("/compliance/summary", requirePermission("vehicles.read"), async (_req: Request, res: Response) => {
+  try {
+    const summary = await getVehicleComplianceSummary();
+    return sendSuccess(res, { summary });
   } catch (error) {
     return handleRouteError(res, error);
   }

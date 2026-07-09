@@ -1,5 +1,6 @@
 import type {
   Vehicle,
+  VehicleComplianceSummary,
   VehicleDriverOption,
   VehicleHistoryEvent,
   VehicleMaintenanceLog,
@@ -18,6 +19,8 @@ export type FetchVehiclesParams = {
   status?: VehicleStatus;
   unassigned_only?: boolean;
   assigned_only?: boolean;
+  compliance_type?: "insurance" | "inspection";
+  compliance_status?: "expired" | "due_soon" | "ok" | "not_set";
   locale?: string;
 };
 
@@ -118,6 +121,11 @@ export async function updateVehicleMaintenance(
 ) {
   const { data } = await apiClient.patch(`/api/vehicles/${id}/maintenance/${maintenanceId}`, input);
   return unwrapApiResponse<{ maintenance_log: VehicleMaintenanceLog }>(data).maintenance_log;
+}
+
+export async function fetchVehicleComplianceSummary() {
+  const { data } = await apiClient.get("/api/vehicles/compliance/summary");
+  return unwrapApiResponse<{ summary: VehicleComplianceSummary }>(data).summary;
 }
 
 export async function createVehicle(input: CreateVehicleInput) {

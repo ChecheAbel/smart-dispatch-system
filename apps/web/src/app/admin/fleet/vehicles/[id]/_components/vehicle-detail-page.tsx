@@ -29,27 +29,25 @@ import {
   fetchVehicleById,
   fetchVehicleHistory,
   fetchVehicleMaintenance,
-  updateVehicle,
   updateVehicleMaintenance,
 } from "@/lib/vehicle-api";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import { formatMessage, getAdminVehiclesMessages } from "@/translations";
+import { formatMessage, getAdminComplianceMessages, getAdminVehiclesMessages } from "@/translations";
 import { cn } from "@/lib/utils";
+import { UpdateComplianceSheet } from "@/app/admin/compliance/_components/update-compliance-sheet";
 import { VehicleDetailComplianceTab } from "./vehicle-detail-compliance-tab";
 import { VehicleDetailHistoryTab } from "./vehicle-detail-history-tab";
 import { VehicleDetailMaintenanceTab } from "./vehicle-detail-maintenance-tab";
 import { VehicleDetailOverviewTab } from "./vehicle-detail-overview-tab";
 import {
-  type ComplianceForm,
   type DetailTab,
-  complianceFormToPayload,
-  emptyComplianceForm,
   expiryToneClass,
   getExpiryTone,
   parseTab,
   vehicleStatusBadgeClass,
-  vehicleToComplianceForm,
 } from "./vehicle-detail-shared";
+
+type ComplianceSheetType = "insurance" | "inspection";
 
 type VehicleDetailPageProps = {
   vehicleId: string;
@@ -61,6 +59,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
   const { locale } = useLocale();
   const { hasPermission } = useAuth();
   const copy = getAdminVehiclesMessages(locale);
+  const complianceCopy = getAdminComplianceMessages(locale);
   const detail = copy.detail;
   const canRead = hasPermission(PERMISSIONS.vehicles.read);
   const canWrite = hasPermission(PERMISSIONS.vehicles.write);
@@ -74,12 +73,11 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
   const [workTypesLoading, setWorkTypesLoading] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [maintenanceLoading, setMaintenanceLoading] = useState(false);
-  const [savingCompliance, setSavingCompliance] = useState(false);
   const [creatingMaintenance, setCreatingMaintenance] = useState(false);
   const [showMaintenanceForm, setShowMaintenanceForm] = useState(false);
+  const [complianceSheetOpen, setComplianceSheetOpen] = useState(false);
+  const [complianceSheetType, setComplianceSheetType] = useState<ComplianceSheetType>("insurance");
   const [isPending, startTransition] = useTransition();
-
-  const [complianceForm, setComplianceForm] = useState<ComplianceForm>(emptyComplianceForm);
 
   const [maintenanceForm, setMaintenanceForm] = useState({
     work_type_id: "",
@@ -97,7 +95,6 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
     try {
       const next = await fetchVehicleById(vehicleId, locale);
       setVehicle(next);
-      setComplianceForm(vehicleToComplianceForm(next));
     } catch (error) {
       showErrorToast({
         title: detail.toast.loadFailed.title,
@@ -197,23 +194,14 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
     });
   }
 
-  async function handleSaveCompliance() {
-    if (!vehicle || !canWrite) return;
-    setSavingCompliance(true);
-    try {
-      const updated = await updateVehicle(vehicle.id, complianceFormToPayload(complianceForm));
-      setVehicle(updated);
-      setComplianceForm(vehicleToComplianceForm(updated));
-      showSuccessToast(detail.toast.expirySaved);
-      if (tab === "history" || tab === "compliance") void loadHistory();
-    } catch (error) {
-      showErrorToast({
-        title: detail.toast.expiryFailed.title,
-        description: error instanceof Error ? error.message : detail.toast.expiryFailed.description,
-      });
-    } finally {
-      setSavingCompliance(false);
-    }
+  function openComplianceSheet(type: ComplianceSheetType) {
+    setComplianceSheetType(type);
+    setComplianceSheetOpen(true);
+  }
+
+  async function handleComplianceSaved() {
+    await loadVehicle();
+    if (tab === "history") void loadHistory();
   }
 
   async function handleCreateMaintenance() {
@@ -484,7 +472,10 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
           vehicle={vehicle}
           copy={copy}
           locale={locale}
+          canWrite={canWrite}
           onNavigateToCompliance={() => changeTab("compliance")}
+          onEditInsurance={() => openComplianceSheet("insurance")}
+          onEditInspection={() => openComplianceSheet("inspection")}
         />
       ) : null}
 
@@ -492,11 +483,11 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
         <VehicleDetailComplianceTab
           vehicle={vehicle}
           detail={detail}
-          complianceForm={complianceForm}
-          setComplianceForm={setComplianceForm}
+          complianceCopy={complianceCopy}
+          locale={locale}
           canWrite={canWrite}
-          savingCompliance={savingCompliance}
-          onSave={() => void handleSaveCompliance()}
+          onEditInsurance={() => openComplianceSheet("insurance")}
+          onEditInspection={() => openComplianceSheet("inspection")}
         />
       ) : null}
 
@@ -526,6 +517,14 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
           historyLoading={historyLoading}
         />
       ) : null}
+
+      <UpdateComplianceSheet
+        open={complianceSheetOpen}
+        onOpenChange={setComplianceSheetOpen}
+        type={complianceSheetType}
+        vehicle={vehicle}
+        onSuccess={() => void handleComplianceSaved()}
+      />
     </div>
   );
 }

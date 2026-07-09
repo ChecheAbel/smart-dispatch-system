@@ -1,21 +1,23 @@
 import type { Menu } from "@smart-dispatch/types";
 import { USER_DASHBOARD_PATH, USER_PROFILE_PATH } from "@/lib/auth-paths";
 import { flattenMenus } from "@/lib/admin-navigation";
+import { menuPathMatches, resolveActiveMenuPath } from "@/lib/menu-navigation";
 
-export function isCustomerNavActive(pathname: string, href: string) {
-  if (href === USER_DASHBOARD_PATH) {
-    return pathname === USER_DASHBOARD_PATH;
+const CUSTOMER_EXACT_MATCH_ROOTS = [USER_DASHBOARD_PATH];
+
+export function isCustomerNavActive(pathname: string, href: string, allPaths?: string[]) {
+  if (allPaths?.length) {
+    return resolveActiveMenuPath(pathname, allPaths, CUSTOMER_EXACT_MATCH_ROOTS) === href;
   }
 
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return menuPathMatches(pathname, href, CUSTOMER_EXACT_MATCH_ROOTS);
 }
 
 export function getCustomerPageTitleFromMenus(pathname: string, menus: Menu[]) {
-  const flatMenus = flattenMenus(menus)
-    .filter((menu) => menu.path)
-    .sort((left, right) => right.path!.length - left.path!.length);
-
-  const match = flatMenus.find((menu) => isCustomerNavActive(pathname, menu.path!));
+  const flatMenus = flattenMenus(menus).filter((menu) => menu.path);
+  const paths = flatMenus.map((menu) => menu.path!);
+  const activePath = resolveActiveMenuPath(pathname, paths, CUSTOMER_EXACT_MATCH_ROOTS);
+  const match = flatMenus.find((menu) => menu.path === activePath);
 
   return match?.label ?? "Dashboard";
 }
@@ -27,7 +29,9 @@ export function isCustomerPathAllowed(pathname: string, menus: Menu[]) {
 
   const flatMenus = flattenMenus(menus).filter((menu) => menu.path);
 
-  return flatMenus.some((menu) => isCustomerNavActive(pathname, menu.path!));
+  return flatMenus.some((menu) =>
+    menuPathMatches(pathname, menu.path!, CUSTOMER_EXACT_MATCH_ROOTS),
+  );
 }
 
 export function getCustomerDefaultAllowedPath(menus: Menu[]) {
@@ -41,3 +45,5 @@ export function getCustomerDefaultAllowedPath(menus: Menu[]) {
 
   return paths[0] ?? null;
 }
+
+export { CUSTOMER_EXACT_MATCH_ROOTS };

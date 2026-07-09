@@ -69,6 +69,18 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
     return ["vehicles.read"];
   }
 
+  if (normalizedSlug === "compliance") {
+    return ["vehicles.read"];
+  }
+
+  if (
+    normalizedSlug === "compliance-overview" ||
+    normalizedSlug === "compliance-insurance" ||
+    normalizedSlug === "compliance-inspection"
+  ) {
+    return ["vehicles.read"];
+  }
+
   if (normalizedSlug === "location-management") {
     return ["regions.read", "locations.read"];
   }

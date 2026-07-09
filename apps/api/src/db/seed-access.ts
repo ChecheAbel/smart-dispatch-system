@@ -275,6 +275,50 @@ const DEFAULT_MENUS = [
     ],
   },
   {
+    slug: "compliance",
+    path: null,
+    icon: "shield-check",
+    sortOrder: 45,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "Compliance" },
+      { locale: "am", label: "ተገዢነት" },
+    ],
+  },
+  {
+    slug: "compliance-overview",
+    path: "/admin/compliance",
+    icon: "layout-dashboard",
+    sortOrder: 10,
+    parentSlug: "compliance",
+    translations: [
+      { locale: "en", label: "Overview" },
+      { locale: "am", label: "አጠቃላይ እይታ" },
+    ],
+  },
+  {
+    slug: "compliance-insurance",
+    path: "/admin/compliance/insurance",
+    icon: "shield-check",
+    sortOrder: 20,
+    parentSlug: "compliance",
+    translations: [
+      { locale: "en", label: "Insurance" },
+      { locale: "am", label: "ኢንሹራንስ" },
+    ],
+  },
+  {
+    slug: "compliance-inspection",
+    path: "/admin/compliance/inspection",
+    icon: "clipboard-list",
+    sortOrder: 30,
+    parentSlug: "compliance",
+    translations: [
+      { locale: "en", label: "Inspection" },
+      { locale: "am", label: "ምርመራ" },
+    ],
+  },
+  {
     slug: "location-management",
     path: null,
     icon: "map",
@@ -428,6 +472,7 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "vehicle_classes.update", method: "PATCH", path: "/api/vehicle-classes/:id", description: "Update vehicle class", permissionSlug: "vehicle_classes.write" },
   { slug: "vehicle_classes.delete", method: "DELETE", path: "/api/vehicle-classes/:id", description: "Delete vehicle class", permissionSlug: "vehicle_classes.delete" },
   { slug: "vehicles.list", method: "GET", path: "/api/vehicles", description: "List vehicles", permissionSlug: "vehicles.read" },
+  { slug: "vehicles.compliance_summary", method: "GET", path: "/api/vehicles/compliance/summary", description: "Fleet compliance summary counts", permissionSlug: "vehicles.read" },
   { slug: "vehicles.driver_options", method: "GET", path: "/api/vehicles/driver-options", description: "List assignable drivers", permissionSlug: "vehicles.assign_driver" },
   { slug: "vehicles.get", method: "GET", path: "/api/vehicles/:id", description: "Get vehicle", permissionSlug: "vehicles.read" },
   { slug: "vehicles.history", method: "GET", path: "/api/vehicles/:id/history", description: "List vehicle history events", permissionSlug: "vehicles.read" },

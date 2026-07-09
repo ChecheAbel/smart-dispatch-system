@@ -1950,6 +1950,129 @@
       }
     }
   },
+  "adminCompliance": {
+    "eyebrow": "Compliance",
+    "overview": {
+      "title": "Compliance overview",
+      "description": "Monitor insurance and roadworthiness inspection status across the fleet.",
+      "insuranceSection": "Insurance",
+      "insuranceDescription": "Third-party insurance coverage and renewal dates.",
+      "inspectionSection": "Inspection",
+      "inspectionDescription": "Technical inspection certificates and expiry tracking.",
+      "viewAll": "View all",
+      "viewIssues": "View issues",
+      "attentionMessage": "{count} vehicles need compliance attention.",
+      "reportSummary": "Fleet coverage",
+      "compliantSummary": "{valid} of {total} vehicles valid",
+      "needsAction": "{count} need action",
+      "allCompliant": "All vehicles are valid for this category.",
+      "validRate": "Valid rate",
+      "statusBreakdown": "Status breakdown",
+      "browseByStatus": "Browse by status"
+    },
+    "insurance": {
+      "title": "Insurance",
+      "description": "Fleet-wide insurance policy status. Update records directly from this list.",
+      "searchPlaceholder": "Search by plate, provider, or policy number..."
+    },
+    "inspection": {
+      "title": "Inspection",
+      "description": "Fleet-wide roadworthiness inspection status. Update records directly from this list.",
+      "searchPlaceholder": "Search by plate, center, or certificate number..."
+    },
+    "itemLabel": "vehicle",
+    "columns": {
+      "plate": "Plate",
+      "provider": "Provider",
+      "policyNumber": "Policy number",
+      "issuedAt": "Issued on",
+      "center": "Inspection center",
+      "certificateNumber": "Certificate number",
+      "performedAt": "Inspected on",
+      "expiresAt": "Expires on",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "status": {
+      "expired": "Expired",
+      "due_soon": "Due soon",
+      "ok": "Valid",
+      "not_set": "Not set",
+      "all": "All statuses"
+    },
+    "filters": {
+      "status": "Compliance status"
+    },
+    "empty": {
+      "title": "No vehicles found",
+      "description": "Vehicles will appear here once they are registered.",
+      "searchDescription": "Try a different search term or filter."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to vehicles is required to open compliance pages.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "actions": {
+      "view": "View vehicle",
+      "editInsurance": "Update insurance",
+      "editInspection": "Update inspection",
+      "menuLabel": "Actions for {name}"
+    },
+    "sheet": {
+      "insurance": {
+        "title": "Update insurance",
+        "description": "Edit insurance provider, policy details, and expiry dates for this vehicle.",
+        "vehicleLabel": "Vehicle",
+        "save": "Save insurance",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "success": {
+          "title": "Insurance updated",
+          "description": "Insurance details for {plate} were saved."
+        },
+        "errors": {
+          "saveFailed": "Could not save insurance"
+        }
+      },
+      "inspection": {
+        "title": "Update inspection",
+        "description": "Edit inspection center, certificate details, and expiry dates for this vehicle.",
+        "vehicleLabel": "Vehicle",
+        "save": "Save inspection",
+        "saving": "Saving...",
+        "cancel": "Cancel",
+        "success": {
+          "title": "Inspection updated",
+          "description": "Inspection details for {plate} were saved."
+        },
+        "errors": {
+          "saveFailed": "Could not save inspection"
+        }
+      }
+    },
+    "stats": {
+      "fleetVehicles": "Fleet vehicles",
+      "fleetVehiclesDescription": "Registered vehicles in the fleet",
+      "insuranceNotSet": "Insurance not set",
+      "insuranceNotSetDescription": "Vehicles without an insurance expiry date",
+      "inspectionNotSet": "Inspection not set",
+      "inspectionNotSetDescription": "Vehicles without an inspection expiry date",
+      "needsAttention": "Need attention",
+      "needsAttentionDescription": "Vehicles missing records or with upcoming or expired dates",
+      "expired": "Expired",
+      "expiredDescription": "Past expiry date — action required",
+      "dueSoon": "Due within 30 days",
+      "dueSoonDescription": "Renewal coming up soon",
+      "ok": "Valid",
+      "okDescription": "More than 30 days until expiry",
+      "notSet": "Not set",
+      "notSetDescription": "No expiry date recorded"
+    }
+  },
   "adminVehicles": {
     "eyebrow": "Vehicle management",
     "title": "Vehicles",
@@ -2028,8 +2151,11 @@
         "vehicleInfo": "Vehicle information",
         "compliance": "Compliance status",
         "complianceHint": "Insurance and inspection expiry at a glance.",
-        "manageCompliance": "Update insurance & inspection",
-        "manageComplianceHint": "Add provider details, certificate numbers, and renewal dates.",
+        "manageCompliance": "View all compliance details",
+        "manageComplianceHint": "See full insurance and inspection records for this vehicle.",
+        "updateInsurance": "Update insurance",
+        "updateInspection": "Update inspection",
+        "viewDetails": "View details",
         "expiresToday": "Expires today",
         "expiresInDays": "Expires in {count} days",
         "expiredDaysAgo": "Expired {count} days ago",
@@ -2071,7 +2197,8 @@
       },
       "compliance": {
         "title": "Insurance & inspection",
-        "description": "Keep policy records current so dispatch can confirm this vehicle is road-ready.",
+        "description": "Review this vehicle's compliance records. Use the buttons below to update details.",
+        "fleetOverviewLink": "Fleet compliance overview",
         "policyDetails": "Policy details",
         "dates": "Dates",
         "additionalNotes": "Additional notes"

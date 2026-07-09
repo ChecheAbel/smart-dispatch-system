@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
@@ -8,7 +8,10 @@ import type { Menu } from "@smart-dispatch/types";
 import { useNavigation } from "@/components/shared/providers/navigation-context";
 import { useLocale } from "@/components/shared/providers";
 import { usePortalShell } from "@/components/shared/providers/portal-shell-context";
+import { ADMIN_EXACT_MATCH_ROOTS, flattenMenus } from "@/lib/admin-navigation";
 import { adminNavButtonClass } from "@/lib/admin-theme";
+import { CUSTOMER_EXACT_MATCH_ROOTS } from "@/lib/customer-navigation";
+import { resolveActiveMenuPath } from "@/lib/menu-navigation";
 import { getMenuIcon } from "@/lib/menu-icons";
 import { cn } from "@/lib/utils";
 import {
@@ -40,21 +43,17 @@ function collectMenuPaths(item: Menu): string[] {
   return paths;
 }
 
-function isMenuBranchActive(
-  item: Menu,
-  pathname: string,
-  isNavActive: (pathname: string, href: string) => boolean,
-) {
-  return collectMenuPaths(item).some((path) => isNavActive(pathname, path));
+function isMenuBranchActive(item: Menu, activeMenuPath: string | null) {
+  if (!activeMenuPath) {
+    return false;
+  }
+
+  return collectMenuPaths(item).includes(activeMenuPath);
 }
 
-function getActiveRootMenuId(
-  items: Menu[],
-  pathname: string,
-  isNavActive: (pathname: string, href: string) => boolean,
-) {
+function getActiveRootMenuId(items: Menu[], activeMenuPath: string | null) {
   for (const item of items) {
-    if (isMenuBranchActive(item, pathname, isNavActive)) {
+    if (isMenuBranchActive(item, activeMenuPath)) {
       return item.id;
     }
   }
@@ -64,22 +63,20 @@ function getActiveRootMenuId(
 
 function NestedMenuGroup({
   item,
-  pathname,
-  isNavActive,
+  activeMenuPath,
 }: {
   item: Menu;
-  pathname: string;
-  isNavActive: (pathname: string, href: string) => boolean;
+  activeMenuPath: string | null;
 }) {
-  const [open, setOpen] = useState(() => isMenuBranchActive(item, pathname, isNavActive));
-  const branchActive = isMenuBranchActive(item, pathname, isNavActive);
+  const [open, setOpen] = useState(() => isMenuBranchActive(item, activeMenuPath));
+  const branchActive = isMenuBranchActive(item, activeMenuPath);
   const Icon = getMenuIcon(item.icon);
 
   useEffect(() => {
-    if (isMenuBranchActive(item, pathname, isNavActive)) {
+    if (isMenuBranchActive(item, activeMenuPath)) {
       setOpen(true);
     }
-  }, [item, isNavActive, pathname]);
+  }, [activeMenuPath, item]);
 
   return (
     <SidebarMenuSubItem>
@@ -101,7 +98,7 @@ function NestedMenuGroup({
         </CollapsibleTrigger>
         <CollapsibleContent>
           <SidebarMenuSub className="ml-3.5 gap-1 border-l border-sidebar-border/70 py-1 pl-2">
-            <NavMenuChildren items={item.children ?? []} pathname={pathname} isNavActive={isNavActive} />
+            <NavMenuChildren items={item.children ?? []} activeMenuPath={activeMenuPath} />
           </SidebarMenuSub>
         </CollapsibleContent>
       </Collapsible>
@@ -111,25 +108,16 @@ function NestedMenuGroup({
 
 function NavMenuChildren({
   items,
-  pathname,
-  isNavActive,
+  activeMenuPath,
 }: {
   items: Menu[];
-  pathname: string;
-  isNavActive: (pathname: string, href: string) => boolean;
+  activeMenuPath: string | null;
 }) {
   return (
     <>
       {items.map((child) => {
         if (child.children?.length) {
-          return (
-            <NestedMenuGroup
-              key={child.id}
-              item={child}
-              pathname={pathname}
-              isNavActive={isNavActive}
-            />
-          );
+          return <NestedMenuGroup key={child.id} item={child} activeMenuPath={activeMenuPath} />;
         }
 
         if (!child.path) {
@@ -141,7 +129,7 @@ function NavMenuChildren({
         return (
           <SidebarMenuSubItem key={child.id}>
             <SidebarMenuSubButton
-              isActive={isNavActive(pathname, child.path)}
+              isActive={child.path === activeMenuPath}
               size="md"
               className={cn(adminNavButtonClass, "h-9 px-3")}
               render={<Link href={child.path} />}
@@ -158,18 +146,16 @@ function NavMenuChildren({
 
 function ParentMenuItem({
   item,
-  pathname,
+  activeMenuPath,
   open,
   onOpenChange,
-  isNavActive,
 }: {
   item: Menu;
-  pathname: string;
+  activeMenuPath: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  isNavActive: (pathname: string, href: string) => boolean;
 }) {
-  const branchActive = isMenuBranchActive(item, pathname, isNavActive);
+  const branchActive = isMenuBranchActive(item, activeMenuPath);
   const Icon = getMenuIcon(item.icon);
 
   return (
@@ -198,7 +184,7 @@ function ParentMenuItem({
         <CollapsibleContent className="overflow-hidden data-ending-style:animate-out data-starting-style:animate-in">
           {item.children && (
             <SidebarMenuSub className="gap-1.5 py-1">
-              <NavMenuChildren items={item.children} pathname={pathname} isNavActive={isNavActive} />
+              <NavMenuChildren items={item.children} activeMenuPath={activeMenuPath} />
             </SidebarMenuSub>
           )}
         </CollapsibleContent>
@@ -209,20 +195,18 @@ function ParentMenuItem({
 
 function SidebarMenuItems({
   items,
-  pathname,
-  isNavActive,
+  activeMenuPath,
 }: {
   items: Menu[];
-  pathname: string;
-  isNavActive: (pathname: string, href: string) => boolean;
+  activeMenuPath: string | null;
 }) {
   const [expandedParentId, setExpandedParentId] = useState<string | null>(() =>
-    getActiveRootMenuId(items, pathname, isNavActive),
+    getActiveRootMenuId(items, activeMenuPath),
   );
 
   useEffect(() => {
-    setExpandedParentId(getActiveRootMenuId(items, pathname, isNavActive));
-  }, [items, isNavActive, pathname]);
+    setExpandedParentId(getActiveRootMenuId(items, activeMenuPath));
+  }, [activeMenuPath, items]);
 
   return (
     <>
@@ -236,12 +220,11 @@ function SidebarMenuItems({
             <ParentMenuItem
               key={item.id}
               item={item}
-              pathname={pathname}
+              activeMenuPath={activeMenuPath}
               open={expandedParentId === item.id}
               onOpenChange={(nextOpen) => {
                 setExpandedParentId(nextOpen ? item.id : null);
               }}
-              isNavActive={isNavActive}
             />
           );
         }
@@ -251,7 +234,7 @@ function SidebarMenuItems({
         return (
           <SidebarMenuItem key={item.id}>
             <SidebarMenuButton
-              isActive={isNavActive(pathname, href)}
+              isActive={href === activeMenuPath}
               tooltip={item.label}
               size="lg"
               className={adminNavButtonClass}
@@ -271,9 +254,21 @@ function SidebarMenuItems({
 export function DashboardSidebarNav() {
   const pathname = usePathname();
   const { locale } = useLocale();
-  const { getShellMessages, isNavActive } = usePortalShell();
+  const { getShellMessages, portal } = usePortalShell();
   const copy = getShellMessages(locale);
   const { menus, loading, error } = useNavigation();
+  const exactMatchRoots = portal === "admin" ? ADMIN_EXACT_MATCH_ROOTS : CUSTOMER_EXACT_MATCH_ROOTS;
+  const menuPaths = useMemo(
+    () =>
+      flattenMenus(menus)
+        .map((menu) => menu.path)
+        .filter((path): path is string => Boolean(path)),
+    [menus],
+  );
+  const activeMenuPath = useMemo(
+    () => resolveActiveMenuPath(pathname, menuPaths, exactMatchRoots),
+    [exactMatchRoots, menuPaths, pathname],
+  );
 
   if (loading) {
     return (
@@ -305,7 +300,7 @@ export function DashboardSidebarNav() {
 
   return (
     <SidebarMenu className="gap-1.5 px-2 py-2">
-      <SidebarMenuItems items={menus} pathname={pathname} isNavActive={isNavActive} />
+      <SidebarMenuItems items={menus} activeMenuPath={activeMenuPath} />
     </SidebarMenu>
   );
 }

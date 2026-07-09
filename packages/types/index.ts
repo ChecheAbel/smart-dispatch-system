@@ -333,6 +333,15 @@ export type VehicleHistoryEventType =
   | "maintenance_cancelled"
   | "expiry_updated";
 
+export type VehicleComplianceStatus = "expired" | "due_soon" | "ok" | "not_set";
+
+export type VehicleComplianceType = "insurance" | "inspection";
+
+export type VehicleComplianceSummary = {
+  total_vehicles: number;
+  vehicles_needing_attention: number;
+} & Record<VehicleComplianceType, Record<VehicleComplianceStatus, number>>;
+
 export interface Vehicle {
   id: string;
   plate_number: string;

@@ -61,7 +61,23 @@ export type ListVehiclesFilter = {
   assignedDriverUserId?: string;
   unassignedOnly?: boolean;
   assignedOnly?: boolean;
+  complianceType?: VehicleComplianceType;
+  complianceStatus?: VehicleComplianceStatus;
 };
+
+export type VehicleComplianceType = "insurance" | "inspection";
+
+export type VehicleComplianceStatus = "expired" | "due_soon" | "ok" | "not_set";
+
+export type VehicleComplianceSummary = {
+  total_vehicles: number;
+  vehicles_needing_attention: number;
+} & Record<
+  VehicleComplianceType,
+  Record<VehicleComplianceStatus, number>
+>;
+
+const COMPLIANCE_DUE_SOON_DAYS = 30;
 
 const vehicleInclude = {
   vehicleType: true,
@@ -112,6 +128,55 @@ export async function findVehicleById(id: string) {
   });
 }
 
+function startOfTodayUtc() {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+}
+
+function complianceExpiryField(type: VehicleComplianceType) {
+  return type === "insurance" ? "insuranceExpiresAt" : "inspectionExpiresAt";
+}
+
+function classifyExpiryComplianceStatus(
+  expiresAt: Date | null,
+  today: Date,
+  dueSoonEnd: Date,
+): VehicleComplianceStatus {
+  if (!expiresAt) {
+    return "not_set";
+  }
+
+  const time = expiresAt.getTime();
+  if (time < today.getTime()) {
+    return "expired";
+  }
+  if (time <= dueSoonEnd.getTime()) {
+    return "due_soon";
+  }
+  return "ok";
+}
+
+function buildComplianceExpiryWhere(
+  type: VehicleComplianceType,
+  status: VehicleComplianceStatus,
+) {
+  const field = complianceExpiryField(type);
+  const today = startOfTodayUtc();
+  const dueSoonEnd = new Date(today);
+  dueSoonEnd.setUTCDate(dueSoonEnd.getUTCDate() + COMPLIANCE_DUE_SOON_DAYS);
+
+  switch (status) {
+    case "not_set":
+      return { [field]: null };
+    case "expired":
+      return { [field]: { lt: today } };
+    case "due_soon":
+      return { [field]: { gte: today, lte: dueSoonEnd } };
+    case "ok":
+      return { [field]: { gt: dueSoonEnd } };
+  }
+}
+
 function buildVehicleWhere(filter?: ListVehiclesFilter) {
   const search = filter?.search?.trim();
 
@@ -124,6 +189,9 @@ function buildVehicleWhere(filter?: ListVehiclesFilter) {
       : {}),
     ...(filter?.unassignedOnly ? { assignedDriverUserId: null } : {}),
     ...(filter?.assignedOnly ? { assignedDriverUserId: { not: null } } : {}),
+    ...(filter?.complianceType && filter?.complianceStatus
+      ? buildComplianceExpiryWhere(filter.complianceType, filter.complianceStatus)
+      : {}),
     ...(search
       ? {
           OR: [
@@ -166,6 +234,65 @@ export async function countVehicles(filter?: ListVehiclesFilter) {
   return prisma.vehicle.count({
     where: buildVehicleWhere(filter),
   });
+}
+
+export async function getVehicleComplianceSummary(): Promise<VehicleComplianceSummary> {
+  const today = startOfTodayUtc();
+  const dueSoonEnd = new Date(today);
+  dueSoonEnd.setUTCDate(dueSoonEnd.getUTCDate() + COMPLIANCE_DUE_SOON_DAYS);
+
+  const vehicles = await prisma.vehicle.findMany({
+    select: {
+      insuranceExpiresAt: true,
+      inspectionExpiresAt: true,
+    },
+  });
+
+  const summary: VehicleComplianceSummary = {
+    total_vehicles: vehicles.length,
+    vehicles_needing_attention: 0,
+    insurance: { expired: 0, due_soon: 0, ok: 0, not_set: 0 },
+    inspection: { expired: 0, due_soon: 0, ok: 0, not_set: 0 },
+  };
+
+  for (const vehicle of vehicles) {
+    const insuranceStatus = classifyExpiryComplianceStatus(
+      vehicle.insuranceExpiresAt,
+      today,
+      dueSoonEnd,
+    );
+    const inspectionStatus = classifyExpiryComplianceStatus(
+      vehicle.inspectionExpiresAt,
+      today,
+      dueSoonEnd,
+    );
+
+    summary.insurance[insuranceStatus] += 1;
+    summary.inspection[inspectionStatus] += 1;
+
+    if (insuranceStatus !== "ok" || inspectionStatus !== "ok") {
+      summary.vehicles_needing_attention += 1;
+    }
+  }
+
+  return summary;
+}
+
+export function parseVehicleComplianceType(value: unknown): VehicleComplianceType | undefined {
+  if (value === "insurance" || value === "inspection") return value;
+  return undefined;
+}
+
+export function parseVehicleComplianceStatus(value: unknown): VehicleComplianceStatus | undefined {
+  if (
+    value === "expired" ||
+    value === "due_soon" ||
+    value === "ok" ||
+    value === "not_set"
+  ) {
+    return value;
+  }
+  return undefined;
 }
 
 function dateKey(value: Date | null | undefined) {

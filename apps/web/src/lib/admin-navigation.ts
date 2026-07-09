@@ -1,12 +1,15 @@
 import type { Menu } from "@smart-dispatch/types";
 import { ADMIN_PROFILE_PATH } from "./auth-paths";
+import { menuPathMatches, resolveActiveMenuPath } from "./menu-navigation";
 
-export function isAdminNavActive(pathname: string, href: string) {
-  if (href === "/admin") {
-    return pathname === "/admin";
+const ADMIN_EXACT_MATCH_ROOTS = ["/admin"];
+
+export function isAdminNavActive(pathname: string, href: string, allPaths?: string[]) {
+  if (allPaths?.length) {
+    return resolveActiveMenuPath(pathname, allPaths, ADMIN_EXACT_MATCH_ROOTS) === href;
   }
 
-  return pathname === href || pathname.startsWith(`${href}/`);
+  return menuPathMatches(pathname, href, ADMIN_EXACT_MATCH_ROOTS);
 }
 
 export function flattenMenus(menus: Menu[]): Menu[] {
@@ -109,10 +112,9 @@ export function flattenMenuTree(menus: Menu[], depth = 0): MenuTreeRow[] {
 
 export function getPageTitleFromMenus(pathname: string, menus: Menu[]) {
   const flatMenus = flattenMenus(menus).filter((menu) => menu.path);
-
-  const match = flatMenus.find((menu) =>
-    menu.path === "/admin" ? pathname === "/admin" : pathname.startsWith(menu.path!),
-  );
+  const paths = flatMenus.map((menu) => menu.path!);
+  const activePath = resolveActiveMenuPath(pathname, paths, ADMIN_EXACT_MATCH_ROOTS);
+  const match = flatMenus.find((menu) => menu.path === activePath);
 
   return match?.label ?? "Dashboard";
 }
@@ -124,7 +126,7 @@ export function isPathAllowed(pathname: string, menus: Menu[]) {
 
   const flatMenus = flattenMenus(menus).filter((menu) => menu.path);
 
-  return flatMenus.some((menu) => isAdminNavActive(pathname, menu.path!));
+  return flatMenus.some((menu) => menuPathMatches(pathname, menu.path!, ADMIN_EXACT_MATCH_ROOTS));
 }
 
 export function getDefaultAllowedPath(menus: Menu[]) {
@@ -138,3 +140,5 @@ export function getDefaultAllowedPath(menus: Menu[]) {
 
   return paths[0] ?? null;
 }
+
+export { ADMIN_EXACT_MATCH_ROOTS };
