@@ -8,6 +8,7 @@ export const extensionTags = [
   { name: "Notification Delivery Logs", description: "History of sent, skipped, and failed notification deliveries (admin only)" },
   { name: "Audit Logs", description: "Platform audit trail (admin only)" },
   { name: "Vehicles", description: "Fleet vehicle registry and default driver assignment (admin only)" },
+  { name: "Maintenance Work Types", description: "Configurable maintenance work categories used by vehicle maintenance logs (admin only)" },
   { name: "Admin Ride Requests", description: "Ride request review, dispatch, status management, and driver trip views." },
 ] as const;
 
@@ -183,6 +184,58 @@ export const extensionSchemas = {
       name: { type: "string" },
     },
   },
+  MaintenanceWorkTypeSummary: {
+    type: "object",
+    description: "Localized summary of a maintenance work type embedded on maintenance logs.",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      slug: { type: "string", example: "repair" },
+      name: { type: "string", example: "Repair" },
+    },
+  },
+  MaintenanceWorkTypeTranslation: {
+    type: "object",
+    required: ["locale", "name"],
+    properties: {
+      locale: { type: "string", example: "en" },
+      name: { type: "string", example: "Repair" },
+      description: { type: "string", nullable: true },
+    },
+  },
+  MaintenanceWorkType: {
+    type: "object",
+    description:
+      "Maintenance work category. `name` and `description` follow the request locale; detail responses may include a `translations` array.",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      slug: { type: "string", example: "repair" },
+      name: { type: "string" },
+      description: { type: "string", nullable: true },
+      locale: { type: "string", example: "en" },
+      is_active: { type: "boolean" },
+      sort_order: { type: "integer" },
+      created_at: { type: "string", format: "date-time" },
+      updated_at: { type: "string", format: "date-time" },
+      translations: {
+        type: "array",
+        items: { $ref: "#/components/schemas/MaintenanceWorkTypeTranslation" },
+      },
+    },
+  },
+  MaintenanceWorkTypeInput: {
+    type: "object",
+    required: ["translations"],
+    properties: {
+      translations: {
+        type: "array",
+        minItems: 1,
+        items: { $ref: "#/components/schemas/MaintenanceWorkTypeTranslation" },
+        description: "At least one translation is required, including English (`en`). Slug is generated from the English name.",
+      },
+      is_active: { type: "boolean", default: true },
+      sort_order: { type: "integer", default: 0 },
+    },
+  },
   Vehicle: {
     type: "object",
     description:
@@ -235,9 +288,13 @@ export const extensionSchemas = {
     properties: {
       id: { type: "string", format: "uuid" },
       vehicle_id: { type: "string", format: "uuid" },
+      work_type_id: { type: "string", format: "uuid" },
+      work_type: { $ref: "#/components/schemas/MaintenanceWorkTypeSummary" },
       type: {
         type: "string",
-        enum: ["scheduled", "repair", "inspection", "tire", "oil", "accident", "other"],
+        deprecated: true,
+        description: "Slug alias of `work_type` for backward compatibility.",
+        example: "repair",
       },
       status: {
         type: "string",
@@ -265,54 +322,126 @@ export const extensionSchemas = {
       updated_at: { type: "string", format: "date-time" },
     },
   },
-  DriverVehicleMaintenanceInput: {
+  VehicleMaintenanceWorkTypeInput: {
     type: "object",
-    required: ["type"],
+    description:
+      "Identify the maintenance work type using one of `work_type_id`, `work_type_slug`, or legacy `type` (slug alias). The referenced work type must be active.",
     properties: {
+      work_type_id: {
+        type: "string",
+        format: "uuid",
+        description: "Preferred. UUID of an active maintenance work type.",
+      },
+      work_type_slug: {
+        type: "string",
+        example: "repair",
+        description: "Slug of an active maintenance work type.",
+      },
       type: {
         type: "string",
-        enum: ["scheduled", "repair", "inspection", "tire", "oil", "accident", "other"],
+        deprecated: true,
+        example: "repair",
+        description: "Legacy alias for `work_type_slug`.",
       },
-      status: {
-        type: "string",
-        enum: ["open", "in_progress", "completed", "cancelled"],
-        default: "open",
-      },
-      title: {
-        type: "string",
-        description: "Optional. When omitted, the title is derived from `type`.",
-      },
-      description: { type: "string", nullable: true },
-      vendor: { type: "string", nullable: true },
-      cost_amount: { type: "number", nullable: true },
-      odometer_km: { type: "number", nullable: true },
-      started_at: { type: "string", format: "date", nullable: true },
-      completed_at: { type: "string", format: "date", nullable: true },
-      next_due_at: { type: "string", format: "date", nullable: true },
-      next_due_km: { type: "number", nullable: true },
     },
   },
+  VehicleMaintenanceInput: {
+    allOf: [
+      { $ref: "#/components/schemas/VehicleMaintenanceWorkTypeInput" },
+      {
+        type: "object",
+        required: ["title"],
+        properties: {
+          status: {
+            type: "string",
+            enum: ["open", "in_progress", "completed", "cancelled"],
+            default: "open",
+          },
+          title: { type: "string" },
+          description: { type: "string", nullable: true },
+          vendor: { type: "string", nullable: true },
+          cost_amount: { type: "number", nullable: true },
+          odometer_km: { type: "number", nullable: true },
+          started_at: { type: "string", format: "date", nullable: true },
+          completed_at: { type: "string", format: "date", nullable: true },
+          next_due_at: { type: "string", format: "date", nullable: true },
+          next_due_km: { type: "number", nullable: true },
+        },
+      },
+    ],
+  },
+  VehicleMaintenanceUpdateInput: {
+    allOf: [
+      { $ref: "#/components/schemas/VehicleMaintenanceWorkTypeInput" },
+      {
+        type: "object",
+        properties: {
+          status: {
+            type: "string",
+            enum: ["open", "in_progress", "completed", "cancelled"],
+          },
+          title: { type: "string" },
+          description: { type: "string", nullable: true },
+          vendor: { type: "string", nullable: true },
+          cost_amount: { type: "number", nullable: true },
+          odometer_km: { type: "number", nullable: true },
+          started_at: { type: "string", format: "date", nullable: true },
+          completed_at: { type: "string", format: "date", nullable: true },
+          next_due_at: { type: "string", format: "date", nullable: true },
+          next_due_km: { type: "number", nullable: true },
+        },
+      },
+    ],
+  },
+  DriverVehicleMaintenanceInput: {
+    allOf: [
+      { $ref: "#/components/schemas/VehicleMaintenanceWorkTypeInput" },
+      {
+        type: "object",
+        properties: {
+          status: {
+            type: "string",
+            enum: ["open", "in_progress", "completed", "cancelled"],
+            default: "open",
+          },
+          title: {
+            type: "string",
+            description: "Optional. When omitted, the title is derived from the selected work type name.",
+          },
+          description: { type: "string", nullable: true },
+          vendor: { type: "string", nullable: true },
+          cost_amount: { type: "number", nullable: true },
+          odometer_km: { type: "number", nullable: true },
+          started_at: { type: "string", format: "date", nullable: true },
+          completed_at: { type: "string", format: "date", nullable: true },
+          next_due_at: { type: "string", format: "date", nullable: true },
+          next_due_km: { type: "number", nullable: true },
+        },
+      },
+    ],
+  },
   DriverVehicleMaintenanceUpdateInput: {
-    type: "object",
-    properties: {
-      type: {
-        type: "string",
-        enum: ["scheduled", "repair", "inspection", "tire", "oil", "accident", "other"],
+    allOf: [
+      { $ref: "#/components/schemas/VehicleMaintenanceWorkTypeInput" },
+      {
+        type: "object",
+        properties: {
+          status: {
+            type: "string",
+            enum: ["open", "in_progress", "completed", "cancelled"],
+          },
+          title: { type: "string" },
+          description: { type: "string", nullable: true },
+          vendor: { type: "string", nullable: true },
+          cost_amount: { type: "number", nullable: true },
+          odometer_km: { type: "number", nullable: true },
+          started_at: { type: "string", format: "date", nullable: true },
+          completed_at: { type: "string", format: "date", nullable: true },
+          next_due_at: { type: "string", format: "date", nullable: true },
+          next_due_km: { type: "number", nullable: true },
+        },
       },
-      status: {
-        type: "string",
-        enum: ["open", "in_progress", "completed", "cancelled"],
-      },
-      title: { type: "string" },
-      description: { type: "string", nullable: true },
-      vendor: { type: "string", nullable: true },
-      cost_amount: { type: "number", nullable: true },
-      odometer_km: { type: "number", nullable: true },
-      started_at: { type: "string", format: "date", nullable: true },
-      completed_at: { type: "string", format: "date", nullable: true },
-      next_due_at: { type: "string", format: "date", nullable: true },
-      next_due_km: { type: "number", nullable: true },
-    },
+    ],
   },
   AdminRideRequest: {
     type: "object",
@@ -1109,6 +1238,372 @@ export const extensionPaths = {
       },
     },
   },
+  "/api/vehicles/{id}/maintenance": {
+    get: {
+      tags: ["Vehicles"],
+      summary: "List vehicle maintenance logs",
+      description:
+        "Returns paginated maintenance logs for a vehicle. Each log includes the resolved `work_type` summary.\n\n" +
+        "- Permission: `vehicles.read`",
+      security,
+      parameters: [
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        { $ref: "#/components/parameters/Page" },
+        { $ref: "#/components/parameters/Limit" },
+        { $ref: "#/components/parameters/Locale" },
+        {
+          name: "status",
+          in: "query",
+          required: false,
+          schema: {
+            type: "string",
+            enum: ["open", "in_progress", "completed", "cancelled"],
+          },
+        },
+      ],
+      responses: {
+        "200": {
+          description: "Paginated maintenance logs",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/VehicleMaintenanceLog" },
+                  },
+                  pagination: { $ref: "#/components/schemas/PaginationMeta" },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+    post: {
+      tags: ["Vehicles"],
+      summary: "Create vehicle maintenance log",
+      description:
+        "Creates a maintenance log on a vehicle.\n\n" +
+        "- Permission: `vehicles.write`\n" +
+        "- Requires a valid active work type via `work_type_id`, `work_type_slug`, or legacy `type`.\n" +
+        "- Opening maintenance on an active vehicle can move that vehicle to `maintenance` status.",
+      security,
+      parameters: [
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        { $ref: "#/components/parameters/Locale" },
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/VehicleMaintenanceInput" },
+          },
+        },
+      },
+      responses: {
+        "201": {
+          description: "Maintenance log created",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      maintenance_log: { $ref: "#/components/schemas/VehicleMaintenanceLog" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+  },
+  "/api/vehicles/{id}/maintenance/{maintenanceId}": {
+    patch: {
+      tags: ["Vehicles"],
+      summary: "Update vehicle maintenance log",
+      description:
+        "Updates a maintenance log on a vehicle. Work type can be changed by sending `work_type_id`, `work_type_slug`, or legacy `type`.\n\n" +
+        "- Permission: `vehicles.write`",
+      security,
+      parameters: [
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "maintenanceId",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
+        { $ref: "#/components/parameters/Locale" },
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/VehicleMaintenanceUpdateInput" },
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: "Maintenance log updated",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      maintenance_log: { $ref: "#/components/schemas/VehicleMaintenanceLog" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+  },
+  "/api/maintenance-work-types/active": {
+    get: {
+      tags: ["Maintenance Work Types"],
+      summary: "List active maintenance work types",
+      description:
+        "Returns active work types for maintenance forms. Used by admin vehicle maintenance UI and driver maintenance requests.\n\n" +
+        "- Permission: `maintenance_work_types.read`, `vehicles.read`, or `driver.maintenance`",
+      security,
+      parameters: [{ $ref: "#/components/parameters/Locale" }],
+      responses: {
+        "200": {
+          description: "Active work types",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      maintenance_work_types: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/MaintenanceWorkType" },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+  },
+  "/api/maintenance-work-types": {
+    get: {
+      tags: ["Maintenance Work Types"],
+      summary: "List maintenance work types",
+      description: "Paginated list of maintenance work types. Requires `maintenance_work_types.read`.",
+      security,
+      parameters: [
+        { $ref: "#/components/parameters/Page" },
+        { $ref: "#/components/parameters/Limit" },
+        { $ref: "#/components/parameters/Locale" },
+        { name: "search", in: "query", schema: { type: "string" } },
+        { name: "is_active", in: "query", schema: { type: "boolean" } },
+      ],
+      responses: {
+        "200": {
+          description: "Paginated work types",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/MaintenanceWorkType" },
+                  },
+                  pagination: { $ref: "#/components/schemas/PaginationMeta" },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+    post: {
+      tags: ["Maintenance Work Types"],
+      summary: "Create maintenance work type",
+      description: "Requires `maintenance_work_types.write`. English (`en`) translation is required to generate the slug.",
+      security,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/MaintenanceWorkTypeInput" },
+          },
+        },
+      },
+      responses: {
+        "201": {
+          description: "Work type created",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      maintenance_work_type: { $ref: "#/components/schemas/MaintenanceWorkType" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+  },
+  "/api/maintenance-work-types/{id}": {
+    get: {
+      tags: ["Maintenance Work Types"],
+      summary: "Get maintenance work type",
+      security,
+      parameters: [
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        { $ref: "#/components/parameters/Locale" },
+      ],
+      responses: {
+        "200": {
+          description: "Work type details",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      maintenance_work_type: { $ref: "#/components/schemas/MaintenanceWorkType" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+    patch: {
+      tags: ["Maintenance Work Types"],
+      summary: "Update maintenance work type",
+      description: "Requires `maintenance_work_types.write`.",
+      security,
+      parameters: [
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+      ],
+      requestBody: {
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/MaintenanceWorkTypeInput" },
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: "Work type updated",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      maintenance_work_type: { $ref: "#/components/schemas/MaintenanceWorkType" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+    delete: {
+      tags: ["Maintenance Work Types"],
+      summary: "Delete maintenance work type",
+      description:
+        "Requires `maintenance_work_types.delete`. Returns 409 if the work type is referenced by maintenance logs.",
+      security,
+      parameters: [
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+      ],
+      responses: {
+        "200": {
+          description: "Work type deleted",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: { $ref: "#/components/schemas/MessageResponse" },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+        "409": { $ref: "#/components/responses/Conflict" },
+      },
+    },
+  },
   "/api/admin/ride-requests": {
     get: {
       tags: ["Admin Ride Requests"],
@@ -1484,13 +1979,14 @@ export const extensionPaths = {
       tags: ["Vehicles"],
       summary: "List maintenance logs for driver's assigned vehicle",
       description:
-        "Lists maintenance logs for the vehicle assigned to the authenticated driver.\n\n" +
+        "Lists maintenance logs for the vehicle assigned to the authenticated driver. Each log includes the resolved `work_type` summary.\n\n" +
         "- Permission: `driver.maintenance`\n" +
         "- Returns 404 if the driver has no assigned vehicle.",
       security,
       parameters: [
         { $ref: "#/components/parameters/Page" },
         { $ref: "#/components/parameters/Limit" },
+        { $ref: "#/components/parameters/Locale" },
         {
           name: "status",
           in: "query",
@@ -1531,7 +2027,8 @@ export const extensionPaths = {
       description:
         "Creates a maintenance log on the vehicle assigned to the authenticated driver.\n\n" +
         "- Permission: `driver.maintenance`\n" +
-        "- If `title` is omitted, it is derived from `type`.\n" +
+        "- Requires a valid active work type via `work_type_id`, `work_type_slug`, or legacy `type`.\n" +
+        "- If `title` is omitted, it is derived from the selected work type name.\n" +
         "- Opening an active vehicle can move that vehicle to `maintenance` status.",
       security,
       requestBody: {
@@ -1574,7 +2071,7 @@ export const extensionPaths = {
       tags: ["Vehicles"],
       summary: "Update maintenance log on driver's assigned vehicle",
       description:
-        "Updates a maintenance log that belongs to the vehicle assigned to the authenticated driver.\n\n" +
+        "Updates a maintenance log that belongs to the vehicle assigned to the authenticated driver. Work type can be changed by sending `work_type_id`, `work_type_slug`, or legacy `type`.\n\n" +
         "- Permission: `driver.maintenance`",
       security,
       parameters: [
