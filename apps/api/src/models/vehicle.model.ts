@@ -1,6 +1,7 @@
-import { VehicleStatus } from "../generated/prisma";
+import { VehicleHistoryEventType, VehicleStatus } from "../generated/prisma";
 import { prisma } from "../db/prisma";
 import { findUserByIdWithRoles } from "./user.model";
+import { createVehicleHistoryEvent } from "./vehicle-ops.model";
 
 export type CreateVehicleInput = {
   plateNumber: string;
@@ -13,6 +14,10 @@ export type CreateVehicleInput = {
   year?: number | null;
   status?: VehicleStatus;
   notes?: string | null;
+  insuranceExpiresAt?: Date | null;
+  inspectionExpiresAt?: Date | null;
+  registrationExpiresAt?: Date | null;
+  actorUserId?: string | null;
 };
 
 export type UpdateVehicleInput = {
@@ -26,6 +31,10 @@ export type UpdateVehicleInput = {
   year?: number | null;
   status?: VehicleStatus;
   notes?: string | null;
+  insuranceExpiresAt?: Date | null;
+  inspectionExpiresAt?: Date | null;
+  registrationExpiresAt?: Date | null;
+  actorUserId?: string | null;
 };
 
 export type ListVehiclesFilter = {
@@ -143,13 +152,17 @@ export async function countVehicles(filter?: ListVehiclesFilter) {
   });
 }
 
+function dateKey(value: Date | null | undefined) {
+  return value ? value.toISOString().slice(0, 10) : null;
+}
+
 export async function createVehicle(input: CreateVehicleInput) {
   if (input.assignedDriverUserId) {
     await assertAssignableDriver(input.assignedDriverUserId);
     await clearDriverFromOtherVehicles(input.assignedDriverUserId);
   }
 
-  return prisma.vehicle.create({
+  const vehicle = await prisma.vehicle.create({
     data: {
       plateNumber: normalizePlateNumber(input.plateNumber),
       chassisNumber: input.chassisNumber?.trim()
@@ -163,18 +176,46 @@ export async function createVehicle(input: CreateVehicleInput) {
       year: input.year ?? null,
       status: input.status ?? VehicleStatus.active,
       notes: input.notes?.trim() || null,
+      insuranceExpiresAt: input.insuranceExpiresAt ?? null,
+      inspectionExpiresAt: input.inspectionExpiresAt ?? null,
+      registrationExpiresAt: input.registrationExpiresAt ?? null,
     },
     include: vehicleInclude,
   });
+
+  await createVehicleHistoryEvent({
+    vehicleId: vehicle.id,
+    eventType: VehicleHistoryEventType.created,
+    summary: `Vehicle ${vehicle.plateNumber} created`,
+    actorUserId: input.actorUserId,
+    metadata: { status: vehicle.status },
+  });
+
+  if (vehicle.assignedDriverUserId) {
+    await createVehicleHistoryEvent({
+      vehicleId: vehicle.id,
+      eventType: VehicleHistoryEventType.driver_assigned,
+      summary: "Default driver assigned",
+      actorUserId: input.actorUserId,
+      metadata: { driver_user_id: vehicle.assignedDriverUserId },
+    });
+  }
+
+  return vehicle;
 }
 
 export async function updateVehicle(id: string, input: UpdateVehicleInput) {
+  const existing = await findVehicleById(id);
+  if (!existing) {
+    throw new Error("VEHICLE_NOT_FOUND");
+  }
+
   if (input.assignedDriverUserId) {
     await assertAssignableDriver(input.assignedDriverUserId);
     await clearDriverFromOtherVehicles(input.assignedDriverUserId, id);
   }
 
-  return prisma.vehicle.update({
+  const vehicle = await prisma.vehicle.update({
     where: { id },
     data: {
       plateNumber:
@@ -195,9 +236,72 @@ export async function updateVehicle(id: string, input: UpdateVehicleInput) {
       year: input.year,
       status: input.status,
       notes: input.notes,
+      insuranceExpiresAt: input.insuranceExpiresAt,
+      inspectionExpiresAt: input.inspectionExpiresAt,
+      registrationExpiresAt: input.registrationExpiresAt,
     },
     include: vehicleInclude,
   });
+
+  if (input.status !== undefined && input.status !== existing.status) {
+    await createVehicleHistoryEvent({
+      vehicleId: vehicle.id,
+      eventType: VehicleHistoryEventType.status_changed,
+      summary: `Status changed from ${existing.status} to ${vehicle.status}`,
+      actorUserId: input.actorUserId,
+      metadata: { from: existing.status, to: vehicle.status },
+    });
+  }
+
+  if (
+    input.assignedDriverUserId !== undefined &&
+    input.assignedDriverUserId !== existing.assignedDriverUserId
+  ) {
+    if (input.assignedDriverUserId) {
+      await createVehicleHistoryEvent({
+        vehicleId: vehicle.id,
+        eventType: VehicleHistoryEventType.driver_assigned,
+        summary: "Default driver assigned",
+        actorUserId: input.actorUserId,
+        metadata: {
+          previous_driver_user_id: existing.assignedDriverUserId,
+          driver_user_id: input.assignedDriverUserId,
+        },
+      });
+    } else {
+      await createVehicleHistoryEvent({
+        vehicleId: vehicle.id,
+        eventType: VehicleHistoryEventType.driver_unassigned,
+        summary: "Default driver unassigned",
+        actorUserId: input.actorUserId,
+        metadata: { previous_driver_user_id: existing.assignedDriverUserId },
+      });
+    }
+  }
+
+  const expiryChanged =
+    (input.insuranceExpiresAt !== undefined &&
+      dateKey(input.insuranceExpiresAt) !== dateKey(existing.insuranceExpiresAt)) ||
+    (input.inspectionExpiresAt !== undefined &&
+      dateKey(input.inspectionExpiresAt) !== dateKey(existing.inspectionExpiresAt)) ||
+    (input.registrationExpiresAt !== undefined &&
+      dateKey(input.registrationExpiresAt) !== dateKey(existing.registrationExpiresAt));
+
+  if (expiryChanged) {
+    await createVehicleHistoryEvent({
+      vehicleId: vehicle.id,
+      eventType: VehicleHistoryEventType.expiry_updated,
+      summary: "Compliance expiry dates updated",
+      actorUserId: input.actorUserId,
+      metadata: {
+        insurance_expires_at: dateKey(vehicle.insuranceExpiresAt),
+        inspection_expires_at: dateKey(vehicle.inspectionExpiresAt),
+        registration_expires_at: dateKey(vehicle.registrationExpiresAt),
+      },
+    });
+  }
+
+  return vehicle;
 }
 
 export async function deleteVehicle(id: string) {

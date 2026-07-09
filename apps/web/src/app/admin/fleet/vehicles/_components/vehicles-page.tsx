@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { MoreHorizontal, Pencil, Plus, Trash2, Truck, UserRound } from "lucide-react";
+import { MoreHorizontal, Eye, Pencil, Plus, Trash2, Truck, UserRound } from "lucide-react";
 import type { Vehicle, VehicleStatus, VehicleType, VehicleClass } from "@smart-dispatch/types";
 import { useLocale, useAuth } from "@/components/shared/providers";
+import { useRouter } from "next/navigation";
 import {
   DataTable,
   type DataTableColumn,
@@ -67,6 +68,7 @@ function vehicleStatusBadgeClass(status: VehicleStatus) {
 function VehicleRowActions({
   vehicle,
   labels,
+  onView,
   onEdit,
   onAssignDriver,
   onDelete,
@@ -76,6 +78,7 @@ function VehicleRowActions({
 }: {
   vehicle: Vehicle;
   labels: AdminVehiclesMessages["actions"];
+  onView: (vehicle: Vehicle) => void;
   onEdit: (vehicle: Vehicle) => void;
   onAssignDriver: (vehicle: Vehicle) => void;
   onDelete: (vehicle: Vehicle) => void;
@@ -100,6 +103,10 @@ function VehicleRowActions({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuGroup>
+          <DropdownMenuItem onClick={() => onView(vehicle)}>
+            <Eye />
+            {labels.view}
+          </DropdownMenuItem>
           {canEdit ? (
             <DropdownMenuItem onClick={() => onEdit(vehicle)}>
               <Pencil />
@@ -126,6 +133,7 @@ function VehicleRowActions({
 }
 
 export function VehiclesPage() {
+  const router = useRouter();
   const { locale } = useLocale();
   const { hasPermission } = useAuth();
   const copy = getAdminVehiclesMessages(locale);
@@ -133,7 +141,7 @@ export function VehiclesPage() {
   const canWrite = hasPermission(PERMISSIONS.vehicles.write);
   const canAssignDriver = hasPermission(PERMISSIONS.vehicles.assign_driver);
   const canDelete = hasPermission(PERMISSIONS.vehicles.delete);
-  const showRowActions = canWrite || canAssignDriver || canDelete;
+  const showRowActions = true;
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetMode, setSheetMode] = useState<"create" | "edit">("create");
   const [editingVehicleId, setEditingVehicleId] = useState<string | null>(null);
@@ -197,6 +205,13 @@ export function VehiclesPage() {
     setSheetOpen(true);
   }, []);
 
+  const openVehicleDetail = useCallback(
+    (vehicle: Vehicle) => {
+      router.push(`/admin/fleet/vehicles/${vehicle.id}`);
+    },
+    [router],
+  );
+
   const openDeleteModal = useCallback((vehicle: Vehicle) => {
     setDeletingVehicle(vehicle);
     setDeleteOpen(true);
@@ -220,7 +235,15 @@ export function VehiclesPage() {
         id: "plate",
         header: copy.columns.plate,
         cellClassName: "text-slate-700",
-        cell: (vehicle) => vehicle.plate_number,
+        cell: (vehicle) => (
+          <button
+            type="button"
+            onClick={() => openVehicleDetail(vehicle)}
+            className="text-left font-medium text-[#1C3A34] hover:underline"
+          >
+            {vehicle.plate_number}
+          </button>
+        ),
       },
       {
         id: "chassis",
@@ -302,7 +325,7 @@ export function VehiclesPage() {
       },
     ];
     },
-    [copy],
+    [copy, openVehicleDetail],
   );
 
   const loadVehicles = useCallback(
@@ -323,14 +346,11 @@ export function VehiclesPage() {
 
   const renderRowActions = useCallback(
     (vehicle: Vehicle, _context: DataTableRowContext<Vehicle>) => {
-      if (!canWrite && !canAssignDriver && !canDelete) {
-        return null;
-      }
-
       return (
         <VehicleRowActions
           vehicle={vehicle}
           labels={copy.actions}
+          onView={openVehicleDetail}
           onEdit={openEditSheet}
           onAssignDriver={openAssignDriverSheet}
           onDelete={openDeleteModal}
@@ -340,7 +360,16 @@ export function VehiclesPage() {
         />
       );
     },
-    [copy.actions, openEditSheet, openAssignDriverSheet, openDeleteModal, canWrite, canAssignDriver, canDelete],
+    [
+      copy.actions,
+      openVehicleDetail,
+      openEditSheet,
+      openAssignDriverSheet,
+      openDeleteModal,
+      canWrite,
+      canAssignDriver,
+      canDelete,
+    ],
   );
 
   if (!canRead) {

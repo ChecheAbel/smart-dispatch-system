@@ -24,6 +24,9 @@ type DbVehicle = {
   year: number | null;
   status: "active" | "maintenance" | "retired";
   notes: string | null;
+  insuranceExpiresAt: Date | null;
+  inspectionExpiresAt: Date | null;
+  registrationExpiresAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
   vehicleType: {
@@ -44,13 +47,24 @@ type DbVehicle = {
     translations: Prisma.JsonValue;
   };
   assignedDriver: DbDriver | null;
+  _count?: {
+    maintenanceLogs?: number;
+  };
 };
 
 function formatDriverName(driver: DbDriver) {
   return [driver.firstName, driver.middleName, driver.lastName].filter(Boolean).join(" ");
 }
 
-export function toPublicVehicle(vehicle: DbVehicle, options?: { locale?: string }): Vehicle {
+function dateToIsoDate(value: Date | null) {
+  if (!value) return null;
+  return value.toISOString().slice(0, 10);
+}
+
+export function toPublicVehicle(
+  vehicle: DbVehicle,
+  options?: { locale?: string; openMaintenanceCount?: number },
+): Vehicle {
   const vehicleType = toPublicVehicleType(vehicle.vehicleType, { locale: options?.locale });
   const vehicleClass = toPublicVehicleClass(vehicle.vehicleClass, { locale: options?.locale });
 
@@ -84,6 +98,11 @@ export function toPublicVehicle(vehicle: DbVehicle, options?: { locale?: string 
     year: vehicle.year,
     status: vehicle.status,
     notes: vehicle.notes,
+    insurance_expires_at: dateToIsoDate(vehicle.insuranceExpiresAt),
+    inspection_expires_at: dateToIsoDate(vehicle.inspectionExpiresAt),
+    registration_expires_at: dateToIsoDate(vehicle.registrationExpiresAt),
+    open_maintenance_count:
+      options?.openMaintenanceCount ?? vehicle._count?.maintenanceLogs ?? undefined,
     created_at: vehicle.createdAt.toISOString(),
     updated_at: vehicle.updatedAt.toISOString(),
   };

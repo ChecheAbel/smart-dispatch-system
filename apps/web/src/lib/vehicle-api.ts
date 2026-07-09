@@ -1,4 +1,12 @@
-import type { Vehicle, VehicleDriverOption, VehicleStatus } from "@smart-dispatch/types";
+import type {
+  Vehicle,
+  VehicleDriverOption,
+  VehicleHistoryEvent,
+  VehicleMaintenanceLog,
+  VehicleMaintenanceStatus,
+  VehicleMaintenanceType,
+  VehicleStatus,
+} from "@smart-dispatch/types";
 import { apiClient } from "./api-client";
 import { unwrapApiResponse, unwrapPaginatedApiResponse } from "./api-response";
 
@@ -25,9 +33,28 @@ export type CreateVehicleInput = {
   year?: number | null;
   status?: VehicleStatus;
   notes?: string | null;
+  insurance_expires_at?: string | null;
+  inspection_expires_at?: string | null;
+  registration_expires_at?: string | null;
 };
 
 export type UpdateVehicleInput = Partial<CreateVehicleInput>;
+
+export type CreateVehicleMaintenanceInput = {
+  type: VehicleMaintenanceType;
+  status?: VehicleMaintenanceStatus;
+  title: string;
+  description?: string | null;
+  vendor?: string | null;
+  cost_amount?: number | null;
+  odometer_km?: number | null;
+  started_at?: string | null;
+  completed_at?: string | null;
+  next_due_at?: string | null;
+  next_due_km?: number | null;
+};
+
+export type UpdateVehicleMaintenanceInput = Partial<CreateVehicleMaintenanceInput>;
 
 export async function fetchVehicles(params: FetchVehiclesParams = {}) {
   const { data } = await apiClient.get("/api/vehicles", { params });
@@ -54,6 +81,36 @@ export async function fetchVehicleDriverOptions(search?: string) {
 export async function fetchVehicleById(id: string, locale?: string) {
   const { data } = await apiClient.get(`/api/vehicles/${id}`, { params: { locale } });
   return unwrapApiResponse<{ vehicle: Vehicle }>(data).vehicle;
+}
+
+export async function fetchVehicleHistory(
+  id: string,
+  params: { page?: number; limit?: number } = {},
+) {
+  const { data } = await apiClient.get(`/api/vehicles/${id}/history`, { params });
+  return unwrapPaginatedApiResponse<VehicleHistoryEvent>(data);
+}
+
+export async function fetchVehicleMaintenance(
+  id: string,
+  params: { page?: number; limit?: number; status?: VehicleMaintenanceStatus } = {},
+) {
+  const { data } = await apiClient.get(`/api/vehicles/${id}/maintenance`, { params });
+  return unwrapPaginatedApiResponse<VehicleMaintenanceLog>(data);
+}
+
+export async function createVehicleMaintenance(id: string, input: CreateVehicleMaintenanceInput) {
+  const { data } = await apiClient.post(`/api/vehicles/${id}/maintenance`, input);
+  return unwrapApiResponse<{ maintenance_log: VehicleMaintenanceLog }>(data).maintenance_log;
+}
+
+export async function updateVehicleMaintenance(
+  id: string,
+  maintenanceId: string,
+  input: UpdateVehicleMaintenanceInput,
+) {
+  const { data } = await apiClient.patch(`/api/vehicles/${id}/maintenance/${maintenanceId}`, input);
+  return unwrapApiResponse<{ maintenance_log: VehicleMaintenanceLog }>(data).maintenance_log;
 }
 
 export async function createVehicle(input: CreateVehicleInput) {

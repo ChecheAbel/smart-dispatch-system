@@ -292,6 +292,28 @@ export interface VehicleClass {
 
 export type VehicleStatus = "active" | "maintenance" | "retired";
 
+export type VehicleMaintenanceType =
+  | "scheduled"
+  | "repair"
+  | "inspection"
+  | "tire"
+  | "oil"
+  | "accident"
+  | "other";
+
+export type VehicleMaintenanceStatus = "open" | "in_progress" | "completed" | "cancelled";
+
+export type VehicleHistoryEventType =
+  | "created"
+  | "status_changed"
+  | "driver_assigned"
+  | "driver_unassigned"
+  | "maintenance_opened"
+  | "maintenance_updated"
+  | "maintenance_completed"
+  | "maintenance_cancelled"
+  | "expiry_updated";
+
 export interface Vehicle {
   id: string;
   plate_number: string;
@@ -320,8 +342,49 @@ export interface Vehicle {
   year: number | null;
   status: VehicleStatus;
   notes: string | null;
+  insurance_expires_at: string | null;
+  inspection_expires_at: string | null;
+  registration_expires_at: string | null;
+  open_maintenance_count?: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface VehicleMaintenanceLog {
+  id: string;
+  vehicle_id: string;
+  type: VehicleMaintenanceType;
+  status: VehicleMaintenanceStatus;
+  title: string;
+  description: string | null;
+  vendor: string | null;
+  cost_amount: number | null;
+  odometer_km: number | null;
+  started_at: string | null;
+  completed_at: string | null;
+  next_due_at: string | null;
+  next_due_km: number | null;
+  created_by_user_id: string | null;
+  created_by: {
+    id: string;
+    name: string;
+  } | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VehicleHistoryEvent {
+  id: string;
+  vehicle_id: string;
+  event_type: VehicleHistoryEventType;
+  summary: string;
+  metadata: Record<string, unknown>;
+  actor_user_id: string | null;
+  actor: {
+    id: string;
+    name: string;
+  } | null;
+  created_at: string;
 }
 
 export interface VehicleDriverOption {

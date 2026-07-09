@@ -230,6 +230,90 @@ export const extensionSchemas = {
       notes: { type: "string", nullable: true },
     },
   },
+  VehicleMaintenanceLog: {
+    type: "object",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      vehicle_id: { type: "string", format: "uuid" },
+      type: {
+        type: "string",
+        enum: ["scheduled", "repair", "inspection", "tire", "oil", "accident", "other"],
+      },
+      status: {
+        type: "string",
+        enum: ["open", "in_progress", "completed", "cancelled"],
+      },
+      title: { type: "string" },
+      description: { type: "string", nullable: true },
+      vendor: { type: "string", nullable: true },
+      cost_amount: { type: "number", nullable: true },
+      odometer_km: { type: "number", nullable: true },
+      started_at: { type: "string", format: "date", nullable: true },
+      completed_at: { type: "string", format: "date", nullable: true },
+      next_due_at: { type: "string", format: "date", nullable: true },
+      next_due_km: { type: "number", nullable: true },
+      created_by_user_id: { type: "string", format: "uuid", nullable: true },
+      created_by: {
+        type: "object",
+        nullable: true,
+        properties: {
+          id: { type: "string", format: "uuid" },
+          name: { type: "string" },
+        },
+      },
+      created_at: { type: "string", format: "date-time" },
+      updated_at: { type: "string", format: "date-time" },
+    },
+  },
+  DriverVehicleMaintenanceInput: {
+    type: "object",
+    required: ["type"],
+    properties: {
+      type: {
+        type: "string",
+        enum: ["scheduled", "repair", "inspection", "tire", "oil", "accident", "other"],
+      },
+      status: {
+        type: "string",
+        enum: ["open", "in_progress", "completed", "cancelled"],
+        default: "open",
+      },
+      title: {
+        type: "string",
+        description: "Optional. When omitted, the title is derived from `type`.",
+      },
+      description: { type: "string", nullable: true },
+      vendor: { type: "string", nullable: true },
+      cost_amount: { type: "number", nullable: true },
+      odometer_km: { type: "number", nullable: true },
+      started_at: { type: "string", format: "date", nullable: true },
+      completed_at: { type: "string", format: "date", nullable: true },
+      next_due_at: { type: "string", format: "date", nullable: true },
+      next_due_km: { type: "number", nullable: true },
+    },
+  },
+  DriverVehicleMaintenanceUpdateInput: {
+    type: "object",
+    properties: {
+      type: {
+        type: "string",
+        enum: ["scheduled", "repair", "inspection", "tire", "oil", "accident", "other"],
+      },
+      status: {
+        type: "string",
+        enum: ["open", "in_progress", "completed", "cancelled"],
+      },
+      title: { type: "string" },
+      description: { type: "string", nullable: true },
+      vendor: { type: "string", nullable: true },
+      cost_amount: { type: "number", nullable: true },
+      odometer_km: { type: "number", nullable: true },
+      started_at: { type: "string", format: "date", nullable: true },
+      completed_at: { type: "string", format: "date", nullable: true },
+      next_due_at: { type: "string", format: "date", nullable: true },
+      next_due_km: { type: "number", nullable: true },
+    },
+  },
   AdminRideRequest: {
     type: "object",
     description: "Ride request as seen by admin dispatch. Driver is inherited from the assigned vehicle.",
@@ -1391,6 +1475,147 @@ export const extensionPaths = {
           },
         },
         "401": unauthorized,
+      },
+    },
+  },
+  "/api/ride-requests/driver/maintenance": {
+    get: {
+      tags: ["Vehicles"],
+      summary: "List maintenance logs for driver's assigned vehicle",
+      description:
+        "Lists maintenance logs for the vehicle assigned to the authenticated driver.\n\n" +
+        "- Permission: `driver.maintenance`\n" +
+        "- Returns 404 if the driver has no assigned vehicle.",
+      security,
+      parameters: [
+        { $ref: "#/components/parameters/Page" },
+        { $ref: "#/components/parameters/Limit" },
+        {
+          name: "status",
+          in: "query",
+          required: false,
+          schema: {
+            type: "string",
+            enum: ["open", "in_progress", "completed", "cancelled"],
+          },
+        },
+      ],
+      responses: {
+        "200": {
+          description: "Paginated maintenance logs",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/VehicleMaintenanceLog" },
+                  },
+                  pagination: { $ref: "#/components/schemas/PaginationMeta" },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+    post: {
+      tags: ["Vehicles"],
+      summary: "Request maintenance for driver's assigned vehicle",
+      description:
+        "Creates a maintenance log on the vehicle assigned to the authenticated driver.\n\n" +
+        "- Permission: `driver.maintenance`\n" +
+        "- If `title` is omitted, it is derived from `type`.\n" +
+        "- Opening an active vehicle can move that vehicle to `maintenance` status.",
+      security,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/DriverVehicleMaintenanceInput" },
+          },
+        },
+      },
+      responses: {
+        "201": {
+          description: "Maintenance log created",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      maintenance_log: { $ref: "#/components/schemas/VehicleMaintenanceLog" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+  },
+  "/api/ride-requests/driver/maintenance/{maintenanceId}": {
+    patch: {
+      tags: ["Vehicles"],
+      summary: "Update maintenance log on driver's assigned vehicle",
+      description:
+        "Updates a maintenance log that belongs to the vehicle assigned to the authenticated driver.\n\n" +
+        "- Permission: `driver.maintenance`",
+      security,
+      parameters: [
+        {
+          name: "maintenanceId",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/DriverVehicleMaintenanceUpdateInput" },
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: "Maintenance log updated",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      maintenance_log: { $ref: "#/components/schemas/VehicleMaintenanceLog" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
       },
     },
   },

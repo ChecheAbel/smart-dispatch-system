@@ -1911,7 +1911,141 @@
       "edit": "አርትዕ",
       "delete": "ሰርዝ",
       "assignDriver": "ሹፌር መመደብ",
+      "view": "ዝርዝር ይመልከቱ",
       "menuLabel": "ለ {name} ድርጊቶች"
+    },
+    "detail": {
+      "eyebrow": "የተሽከርካሪ መገለጫ",
+      "backToList": "ወደ ተሽከርካሪዎች ተመለስ",
+      "notFound": "ይህ ተሽከርካሪ አልተገኘም።",
+      "untitledVehicle": "የተሽከርካሪ ዝርዝር",
+      "openMaintenance": "{count} ክፍት ጥገና",
+      "loading": "በመጫን ላይ...",
+      "tabs": {
+        "overview": "አጠቃላይ እይታ",
+        "maintenance": "ጥገና",
+        "history": "ታሪክ"
+      },
+      "overview": {
+        "vehicleInfo": "የተሽከርካሪ መረጃ",
+        "compliance": "የተገዢነት ማብቂያ",
+        "complianceHint": "ተሽከርካሪው ለመላኪያ ዝግጁ መሆኑን ለማረጋገጥ እነዚህን ቀኖች ወቅታዊ ያድርጉ።",
+        "insurance": "ኢንሹራንስ",
+        "inspection": "ምርመራ",
+        "registration": "ምዝገባ",
+        "expiresOn": "የማብቂያ ቀን",
+        "saveExpiry": "ቀኖችን አስቀምጥ",
+        "saving": "በማስቀመጥ ላይ...",
+        "noNotes": "ምንም ማስታወሻ የለም",
+        "unassigned": "አሽከርካሪ አልተመደበም",
+        "expiryStatus": {
+          "ok": "ተቀባይነት ያለው",
+          "dueSoon": "በቅርብ ያበቃል",
+          "expired": "አልቋል",
+          "notSet": "አልተቀመጠም"
+        },
+        "quickFacts": "ፈጣን መረጃ"
+      },
+      "maintenance": {
+        "createTitle": "ጥገና መመዝገብ",
+        "createSubtitle": "በ {plate} ላይ ምን ስራ እየተሰራ ነው?",
+        "listTitle": "የጥገና መዝገቦች",
+        "empty": "እስካሁን የጥገና መዝገብ የለም።",
+        "emptyTitle": "ገና መዝገብ የለም",
+        "emptyHint": "ጥገና፣ ምርመራ እና የታቀዱ ስራዎችን ይመዝግቡ ሁኔታና ታሪክ ትክክል እንዲሆኑ።",
+        "openForm": "ጥገና መዝግብ",
+        "closeForm": "ሰርዝ",
+        "type": "የስራ አይነት",
+        "status": "ሁኔታ",
+        "title": "ርዕስ",
+        "titlePlaceholder": "ለምሳሌ የዘይት ለውጥ",
+        "description": "ማስታወሻ",
+        "descriptionPlaceholder": "ምልክቶች፣ የተለወጡ ክፍሎች ወይም የወርክሾፕ መመሪያ…",
+        "vendor": "አቅራቢ / ወርክሾፕ",
+        "vendorPlaceholder": "የሱቅ ወይም የመካኒክ ስም",
+        "cost": "ወጪ",
+        "costPlaceholder": "ለምሳሌ 2500",
+        "odometer": "ኪሎሜትር",
+        "odometerPlaceholder": "ለምሳሌ 45200",
+        "startedAt": "የተጀመረበት",
+        "nextDueAt": "ቀጣይ ቀን",
+        "create": "መዝገብ አስቀምጥ",
+        "saving": "በማስቀመጥ ላይ...",
+        "markCompleted": "እንደ ተጠናቀቀ ምልክት አድርግ",
+        "openCount": "{count} ክፍት",
+        "optionalDetails": "ወርክሾፕ እና መርሐግብር",
+        "optionalDetailsHint": "አማራጭ — አቅራቢውን፣ ወጪን ወይም የቀጣይ አገልግሎት ቀን ካወቁ ይሙሉ።"
+      },
+      "maintenanceTypes": {
+        "scheduled": "ታቅዶ",
+        "repair": "ጥገና",
+        "inspection": "ምርመራ",
+        "tire": "ጎማ",
+        "oil": "ዘይት",
+        "accident": "አደጋ",
+        "other": "ሌላ"
+      },
+      "maintenanceStatuses": {
+        "open": "ክፍት",
+        "in_progress": "በሂደት ላይ",
+        "completed": "ተጠናቋል",
+        "cancelled": "ተሰርዟል"
+      },
+      "form": {
+        "titleRequired": "የጥገና ርዕስ ያስፈልጋል።"
+      },
+      "history": {
+        "title": "የተሽከርካሪ ታሪክ",
+        "empty": "እስካሁን የታሪክ ክስተት የለም።",
+        "emptyTitle": "ታሪክ ባዶ ነው",
+        "emptyHint": "ምደባ፣ የሁኔታ ለውጥ፣ ጥገና እና የማብቂያ ቀን ዝመናዎች እዚህ ይታያሉ።",
+        "by": "በ {name}"
+      },
+      "historyEventTypes": {
+        "created": "ተሽከርካሪ ተፈጥሯል",
+        "status_changed": "ሁኔታ ተቀይሯል",
+        "driver_assigned": "ሹፌር ተመድቧል",
+        "driver_unassigned": "ሹፌር ተነስቷል",
+        "maintenance_opened": "ጥገና ተከፍቷል",
+        "maintenance_updated": "ጥገና ተዘምኗል",
+        "maintenance_completed": "ጥገና ተጠናቋል",
+        "maintenance_cancelled": "ጥገና ተሰርዟል",
+        "expiry_updated": "የማብቂያ ቀኖች ተዘምነዋል"
+      },
+      "toast": {
+        "loadFailed": {
+          "title": "ተሽከርካሪን መጫን አልተቻለም",
+          "description": "እባክዎ እንደገና ይሞክሩ ወይም ወደ ዝርዝሩ ይመለሱ።"
+        },
+        "loadHistoryFailed": {
+          "title": "ታሪክን መጫን አልተቻለም",
+          "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
+        },
+        "loadMaintenanceFailed": {
+          "title": "የጥገና መዝገቦችን መጫን አልተቻለም",
+          "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
+        },
+        "expirySaved": {
+          "title": "የማብቂያ ቀኖች ተቀምጠዋል",
+          "description": "የኢንሹራንስ፣ ምርመራ እና ምዝገባ ቀኖች ተዘምነዋል።"
+        },
+        "expiryFailed": {
+          "title": "የማብቂያ ቀኖችን ማስቀመጥ አልተቻለም",
+          "description": "እባክዎ ቀኖቹን ያረጋግጡና እንደገና ይሞክሩ።"
+        },
+        "maintenanceCreated": {
+          "title": "ጥገና ተመዝግቧል",
+          "description": "የጥገና መዝገቡ ወደ ተሽከርካሪው ተጨምሯል።"
+        },
+        "maintenanceUpdated": {
+          "title": "ጥገና ተዘምኗል",
+          "description": "የጥገና መዝገቡ ተዘምኗል።"
+        },
+        "maintenanceFailed": {
+          "title": "ጥገናን ማስቀመጥ አልተቻለም",
+          "description": "እባክዎ ቅጹን ያረጋግጡና እንደገና ይሞክሩ።"
+        }
+      }
     },
     "assignDriverSheet": {
       "title": "ነባሪ ሹፌር መመደብ",

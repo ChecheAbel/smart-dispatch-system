@@ -136,6 +136,8 @@ model User {
   assignedVehicle   Vehicle?   @relation("VehicleAssignedDriver")
   rideRequests      RideRequest[]
   assignedDispatchRideRequests RideRequest[] @relation("RideRequestAssignedDriver")
+  vehicleMaintenanceLogs VehicleMaintenanceLog[] @relation("VehicleMaintenanceCreatedBy")
+  vehicleHistoryEvents   VehicleHistoryEvent[] @relation("VehicleHistoryActor")
 
   @@index([email])
   @@index([mobileNumber])
@@ -383,29 +385,114 @@ model VehicleTypeClass {
 }
 
 model Vehicle {
-  id                   String        @id @default(uuid()) @db.Uuid
-  plateNumber          String        @unique @map("plate_number") @db.VarChar(30)
-  chassisNumber        String?       @unique @map("chassis_number") @db.VarChar(50)
-  vehicleTypeId        String        @map("vehicle_type_id") @db.Uuid
-  vehicleClassId       String        @map("vehicle_class_id") @db.Uuid
-  assignedDriverUserId String?       @unique @map("assigned_driver_user_id") @db.Uuid
-  make                 String?       @db.VarChar(100)
-  model                String?       @db.VarChar(100)
-  year                 Int?
-  status               VehicleStatus @default(active)
-  notes                String?       @db.Text
-  createdAt            DateTime      @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt            DateTime      @updatedAt @map("updated_at") @db.Timestamptz
-  vehicleType          VehicleType   @relation(fields: [vehicleTypeId], references: [id], onDelete: Restrict)
-  vehicleClass         VehicleClass  @relation(fields: [vehicleClassId], references: [id], onDelete: Restrict)
-  assignedDriver       User?         @relation("VehicleAssignedDriver", fields: [assignedDriverUserId], references: [id], onDelete: SetNull)
-  rideRequestAssignments RideRequest[] @relation("RideRequestAssignedVehicle")
+  id                       String        @id @default(uuid()) @db.Uuid
+  plateNumber              String        @unique @map("plate_number") @db.VarChar(30)
+  chassisNumber            String?       @unique @map("chassis_number") @db.VarChar(50)
+  vehicleTypeId            String        @map("vehicle_type_id") @db.Uuid
+  vehicleClassId           String        @map("vehicle_class_id") @db.Uuid
+  assignedDriverUserId     String?       @unique @map("assigned_driver_user_id") @db.Uuid
+  make                     String?       @db.VarChar(100)
+  model                    String?       @db.VarChar(100)
+  year                     Int?
+  status                   VehicleStatus @default(active)
+  notes                    String?       @db.Text
+  insuranceExpiresAt       DateTime?     @map("insurance_expires_at") @db.Date
+  inspectionExpiresAt      DateTime?     @map("inspection_expires_at") @db.Date
+  registrationExpiresAt    DateTime?     @map("registration_expires_at") @db.Date
+  createdAt                DateTime      @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt                DateTime      @updatedAt @map("updated_at") @db.Timestamptz
+  vehicleType              VehicleType   @relation(fields: [vehicleTypeId], references: [id], onDelete: Restrict)
+  vehicleClass             VehicleClass  @relation(fields: [vehicleClassId], references: [id], onDelete: Restrict)
+  assignedDriver           User?         @relation("VehicleAssignedDriver", fields: [assignedDriverUserId], references: [id], onDelete: SetNull)
+  rideRequestAssignments   RideRequest[] @relation("RideRequestAssignedVehicle")
+  maintenanceLogs          VehicleMaintenanceLog[]
+  historyEvents            VehicleHistoryEvent[]
 
   @@index([vehicleTypeId])
   @@index([vehicleClassId])
   @@index([status])
   @@index([assignedDriverUserId])
+  @@index([insuranceExpiresAt])
+  @@index([inspectionExpiresAt])
+  @@index([registrationExpiresAt])
   @@map("vehicles")
+}
+
+enum VehicleMaintenanceType {
+  scheduled
+  repair
+  inspection
+  tire
+  oil
+  accident
+  other
+
+  @@map("vehicle_maintenance_type")
+}
+
+enum VehicleMaintenanceStatus {
+  open
+  in_progress
+  completed
+  cancelled
+
+  @@map("vehicle_maintenance_status")
+}
+
+model VehicleMaintenanceLog {
+  id           String                    @id @default(uuid()) @db.Uuid
+  vehicleId    String                    @map("vehicle_id") @db.Uuid
+  type         VehicleMaintenanceType
+  status       VehicleMaintenanceStatus  @default(open)
+  title        String                    @db.VarChar(200)
+  description  String?                   @db.Text
+  vendor       String?                   @db.VarChar(200)
+  costAmount   Decimal?                  @map("cost_amount") @db.Decimal(12, 2)
+  odometerKm   Int?                      @map("odometer_km")
+  startedAt    DateTime?                 @map("started_at") @db.Date
+  completedAt  DateTime?                 @map("completed_at") @db.Date
+  nextDueAt    DateTime?                 @map("next_due_at") @db.Date
+  nextDueKm    Int?                      @map("next_due_km")
+  createdById  String?                   @map("created_by_id") @db.Uuid
+  createdAt    DateTime                  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime                  @updatedAt @map("updated_at") @db.Timestamptz
+  vehicle      Vehicle                   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  createdBy    User?                     @relation("VehicleMaintenanceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([vehicleId, createdAt])
+  @@index([status])
+  @@index([type])
+  @@map("vehicle_maintenance_logs")
+}
+
+enum VehicleHistoryEventType {
+  created
+  status_changed
+  driver_assigned
+  driver_unassigned
+  maintenance_opened
+  maintenance_updated
+  maintenance_completed
+  maintenance_cancelled
+  expiry_updated
+
+  @@map("vehicle_history_event_type")
+}
+
+model VehicleHistoryEvent {
+  id          String                  @id @default(uuid()) @db.Uuid
+  vehicleId   String                  @map("vehicle_id") @db.Uuid
+  eventType   VehicleHistoryEventType @map("event_type")
+  summary     String                  @db.VarChar(500)
+  metadata    Json                    @default("{}") @db.JsonB
+  actorUserId String?                 @map("actor_user_id") @db.Uuid
+  createdAt   DateTime                @default(now()) @map("created_at") @db.Timestamptz
+  vehicle     Vehicle                 @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  actor       User?                   @relation("VehicleHistoryActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+
+  @@index([vehicleId, createdAt])
+  @@index([eventType])
+  @@map("vehicle_history_events")
 }
 
 model Region {

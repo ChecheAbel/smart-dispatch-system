@@ -1911,7 +1911,141 @@
       "edit": "Edit",
       "delete": "Delete",
       "assignDriver": "Assign driver",
+      "view": "View details",
       "menuLabel": "Actions for {name}"
+    },
+    "detail": {
+      "eyebrow": "Vehicle profile",
+      "backToList": "Back to vehicles",
+      "notFound": "This vehicle could not be found.",
+      "untitledVehicle": "Vehicle details",
+      "openMaintenance": "{count} open maintenance",
+      "loading": "Loading...",
+      "tabs": {
+        "overview": "Overview",
+        "maintenance": "Maintenance",
+        "history": "History"
+      },
+      "overview": {
+        "vehicleInfo": "Vehicle information",
+        "compliance": "Compliance expiry",
+        "complianceHint": "Keep these dates current so dispatch can trust this vehicle is road-ready.",
+        "insurance": "Insurance",
+        "inspection": "Inspection",
+        "registration": "Registration",
+        "expiresOn": "Expires on",
+        "saveExpiry": "Save dates",
+        "saving": "Saving...",
+        "noNotes": "No notes recorded",
+        "unassigned": "No driver assigned",
+        "expiryStatus": {
+          "ok": "Valid",
+          "dueSoon": "Due soon",
+          "expired": "Expired",
+          "notSet": "Not set"
+        },
+        "quickFacts": "Quick facts"
+      },
+      "maintenance": {
+        "createTitle": "Log maintenance",
+        "createSubtitle": "What work is being done on {plate}?",
+        "listTitle": "Maintenance logs",
+        "empty": "No maintenance logs yet.",
+        "emptyTitle": "Nothing logged yet",
+        "emptyHint": "Record repairs, inspections, and scheduled work so status and history stay accurate.",
+        "openForm": "Log maintenance",
+        "closeForm": "Cancel",
+        "type": "Work type",
+        "status": "Status",
+        "title": "Title",
+        "titlePlaceholder": "e.g. Oil change and filter replacement",
+        "description": "Notes",
+        "descriptionPlaceholder": "Symptoms, parts replaced, or workshop instructions…",
+        "vendor": "Vendor / workshop",
+        "vendorPlaceholder": "Shop or mechanic name",
+        "cost": "Cost",
+        "costPlaceholder": "e.g. 2500",
+        "odometer": "Odometer (km)",
+        "odometerPlaceholder": "e.g. 45200",
+        "startedAt": "Started",
+        "nextDueAt": "Next due",
+        "create": "Save log",
+        "saving": "Saving...",
+        "markCompleted": "Mark completed",
+        "openCount": "{count} open",
+        "optionalDetails": "Workshop & schedule",
+        "optionalDetailsHint": "Optional — fill in if you already know the provider, cost, or next service date."
+      },
+      "maintenanceTypes": {
+        "scheduled": "Scheduled",
+        "repair": "Repair",
+        "inspection": "Inspection",
+        "tire": "Tire",
+        "oil": "Oil",
+        "accident": "Accident",
+        "other": "Other"
+      },
+      "maintenanceStatuses": {
+        "open": "Open",
+        "in_progress": "In progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "form": {
+        "titleRequired": "Maintenance title is required."
+      },
+      "history": {
+        "title": "Vehicle history",
+        "empty": "No history events yet.",
+        "emptyTitle": "History is empty",
+        "emptyHint": "Assignments, status changes, maintenance, and expiry updates will show up here.",
+        "by": "by {name}"
+      },
+      "historyEventTypes": {
+        "created": "Vehicle created",
+        "status_changed": "Status changed",
+        "driver_assigned": "Driver assigned",
+        "driver_unassigned": "Driver unassigned",
+        "maintenance_opened": "Maintenance opened",
+        "maintenance_updated": "Maintenance updated",
+        "maintenance_completed": "Maintenance completed",
+        "maintenance_cancelled": "Maintenance cancelled",
+        "expiry_updated": "Expiry dates updated"
+      },
+      "toast": {
+        "loadFailed": {
+          "title": "Could not load vehicle",
+          "description": "Please try again or go back to the vehicle list."
+        },
+        "loadHistoryFailed": {
+          "title": "Could not load history",
+          "description": "Please try again in a moment."
+        },
+        "loadMaintenanceFailed": {
+          "title": "Could not load maintenance logs",
+          "description": "Please try again in a moment."
+        },
+        "expirySaved": {
+          "title": "Expiry dates saved",
+          "description": "Insurance, inspection, and registration dates were updated."
+        },
+        "expiryFailed": {
+          "title": "Could not save expiry dates",
+          "description": "Please check the dates and try again."
+        },
+        "maintenanceCreated": {
+          "title": "Maintenance logged",
+          "description": "The maintenance record was added to this vehicle."
+        },
+        "maintenanceUpdated": {
+          "title": "Maintenance updated",
+          "description": "The maintenance record was updated."
+        },
+        "maintenanceFailed": {
+          "title": "Could not save maintenance",
+          "description": "Please check the form and try again."
+        }
+      }
     },
     "assignDriverSheet": {
       "title": "Assign default driver",
