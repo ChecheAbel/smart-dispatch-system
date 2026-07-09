@@ -75,6 +75,7 @@ function registerNamespace(io: Server) {
   namespace.use(async (socket, next) => {
     try {
       const token = getAccessToken(socket);
+      console.log("token", token);
       if (!token) {
         next(new Error("Missing or invalid authorization."));
         return;

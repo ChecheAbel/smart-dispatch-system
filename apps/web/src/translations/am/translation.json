@@ -2020,13 +2020,21 @@
       "loading": "በመጫን ላይ...",
       "tabs": {
         "overview": "አጠቃላይ እይታ",
+        "compliance": "ተገዢነት",
         "maintenance": "ጥገና",
         "history": "ታሪክ"
       },
       "overview": {
         "vehicleInfo": "የተሽከርካሪ መረጃ",
-        "compliance": "ህጋዊ እና የደህንነት ሰነዶች",
-        "complianceHint": "ለዚህ ተሽከርካሪ የኢንሹራንስ እና የመንገድ ብቃት ምርመራ ዝርዝሮችን ይከታተሉ።",
+        "compliance": "የተገዢነት ሁኔታ",
+        "complianceHint": "የኢንሹራንስ እና የምርመራ የማብቂያ ቀን በአንድ ተመልከት።",
+        "manageCompliance": "ኢንሹራንስ እና ምርመራ አዘምን",
+        "manageComplianceHint": "የአቅራቢ ዝርዝሮች፣ የሰርተፊኬት ቁጥሮች እና የማደሻ ቀኖችን ያክሉ።",
+        "expiresToday": "ዛሬ ያበቃል",
+        "expiresInDays": "በ {count} ቀናት ውስጥ ያበቃል",
+        "expiredDaysAgo": "ከ {count} ቀናት በፊት አልቋል",
+        "noExpiryDate": "የማብቂያ ቀን አልተቀመጠም",
+        "editPolicy": "ዝርዝሮችን አርትዕ",
         "insurance": "የኢንሹራንስ ፖሊሲ",
         "insuranceHint": "ለዚህ ተሽከርካሪ የሶስተኛ ወገን ኢንሹራንስ ሽፋን።",
         "inspection": "የመንገድ ብቃት ምርመራ",
@@ -2060,6 +2068,13 @@
           "notSet": "አልተቀመጠም"
         },
         "quickFacts": "ፈጣን መረጃ"
+      },
+      "compliance": {
+        "title": "ኢንሹራንስ እና ምርመራ",
+        "description": "ተሽከርካሪው ለመንገድ ዝግጁ መሆኑን ለማረጋገጥ የፖሊሲ መዝገቦችን ወቅታዊ ያድርጉ።",
+        "policyDetails": "የፖሊሲ ዝርዝሮች",
+        "dates": "ቀኖች",
+        "additionalNotes": "ተጨማሪ ማስታወሻዎች"
       },
       "maintenance": {
         "createTitle": "ጥገና መመዝገብ",

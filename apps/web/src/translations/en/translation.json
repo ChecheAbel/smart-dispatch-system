@@ -2020,13 +2020,21 @@
       "loading": "Loading...",
       "tabs": {
         "overview": "Overview",
+        "compliance": "Compliance",
         "maintenance": "Maintenance",
         "history": "History"
       },
       "overview": {
         "vehicleInfo": "Vehicle information",
-        "compliance": "Legal & safety documents",
-        "complianceHint": "Track insurance and roadworthiness inspection details for this vehicle.",
+        "compliance": "Compliance status",
+        "complianceHint": "Insurance and inspection expiry at a glance.",
+        "manageCompliance": "Update insurance & inspection",
+        "manageComplianceHint": "Add provider details, certificate numbers, and renewal dates.",
+        "expiresToday": "Expires today",
+        "expiresInDays": "Expires in {count} days",
+        "expiredDaysAgo": "Expired {count} days ago",
+        "noExpiryDate": "No expiry date set",
+        "editPolicy": "Edit details",
         "insurance": "Insurance policy",
         "insuranceHint": "Third-party insurance coverage for this vehicle.",
         "inspection": "Roadworthiness inspection",
@@ -2060,6 +2068,13 @@
           "notSet": "Not set"
         },
         "quickFacts": "Quick facts"
+      },
+      "compliance": {
+        "title": "Insurance & inspection",
+        "description": "Keep policy records current so dispatch can confirm this vehicle is road-ready.",
+        "policyDetails": "Policy details",
+        "dates": "Dates",
+        "additionalNotes": "Additional notes"
       },
       "maintenance": {
         "createTitle": "Log maintenance",
