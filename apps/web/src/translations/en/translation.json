@@ -1761,6 +1761,103 @@
       }
     }
   },
+  "adminMaintenanceWorkTypes": {
+    "eyebrow": "Vehicle management",
+    "title": "Maintenance work types",
+    "description": "Define the work categories drivers and admins can log during vehicle maintenance.",
+    "searchPlaceholder": "Search by name...",
+    "newType": "New work type",
+    "itemLabel": "work type",
+    "columns": {
+      "name": "Name",
+      "slug": "Slug",
+      "sortOrder": "Order",
+      "status": "Status",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "empty": {
+      "title": "No work types found",
+      "description": "Work types will appear here once they are created.",
+      "searchDescription": "Try a different search term."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to maintenance work types is required to open this page.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "menuLabel": "Actions for {name}"
+    },
+    "stats": {
+      "title": "Total work types",
+      "description": "All maintenance categories available for logging",
+      "activeTitle": "Active types",
+      "activeDescription": "Shown when logging maintenance",
+      "inactiveTitle": "Inactive types",
+      "inactiveDescription": "Hidden from new maintenance logs"
+    },
+    "form": {
+      "createTitle": "New work type",
+      "editTitle": "Edit work type",
+      "createDescription": "Create a maintenance work type with at least an English name.",
+      "editDescription": "Update the work type details and translations.",
+      "name": "Name",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "sortOrder": "Display order",
+      "sortOrderPlaceholder": "e.g. 10",
+      "sortOrderHint": "Lower numbers appear first in maintenance forms.",
+      "active": "Active",
+      "optional": "(optional)",
+      "cancel": "Cancel",
+      "create": "Create type",
+      "creating": "Creating...",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "loading": "Loading work type...",
+      "namePlaceholderEn": "Repair",
+      "namePlaceholderAm": "ጥገና",
+      "errors": {
+        "enNameRequired": "English name is required.",
+        "sortOrderInvalid": "Display order must be a number.",
+        "createFailed": "Failed to create work type.",
+        "updateFailed": "Failed to update work type.",
+        "loadFailed": "Failed to load work type."
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "Work type created",
+        "description": "{name} was added successfully."
+      },
+      "updateSuccess": {
+        "title": "Work type updated",
+        "description": "{name} was saved successfully."
+      },
+      "deleteSuccess": {
+        "title": "Work type deleted",
+        "description": "{name} was removed."
+      },
+      "deleteFailed": {
+        "title": "Delete failed",
+        "description": "Could not delete the work type. It may still be used by maintenance logs."
+      },
+      "loadFailed": {
+        "title": "Load failed",
+        "description": "Could not load the work type."
+      }
+    }
+  },
   "adminVehicleClasses": {
     "eyebrow": "Vehicle management",
     "title": "Vehicle classes",
@@ -1928,12 +2025,16 @@
       },
       "overview": {
         "vehicleInfo": "Vehicle information",
-        "compliance": "Compliance expiry",
-        "complianceHint": "Keep these dates current so dispatch can trust this vehicle is road-ready.",
-        "insurance": "Insurance",
-        "inspection": "Inspection",
-        "registration": "Registration",
+        "compliance": "Legal & safety documents",
+        "complianceHint": "Track when insurance and roadworthiness inspection certificates expire.",
+        "insurance": "Insurance policy",
+        "insuranceHint": "When the vehicle insurance policy expires.",
+        "inspection": "Roadworthiness inspection",
+        "inspectionHint": "When the technical or safety inspection certificate expires (e.g. annual roadworthiness test).",
         "expiresOn": "Expires on",
+        "pickDate": "Pick a date",
+        "clearDate": "Clear",
+        "today": "Today",
         "saveExpiry": "Save dates",
         "saving": "Saving...",
         "noNotes": "No notes recorded",
@@ -2027,7 +2128,7 @@
         },
         "expirySaved": {
           "title": "Expiry dates saved",
-          "description": "Insurance, inspection, and registration dates were updated."
+          "description": "Insurance and inspection expiry dates were updated."
         },
         "expiryFailed": {
           "title": "Could not save expiry dates",

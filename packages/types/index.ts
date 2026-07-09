@@ -292,16 +292,35 @@ export interface VehicleClass {
 
 export type VehicleStatus = "active" | "maintenance" | "retired";
 
-export type VehicleMaintenanceType =
-  | "scheduled"
-  | "repair"
-  | "inspection"
-  | "tire"
-  | "oil"
-  | "accident"
-  | "other";
+/** Slug alias for a maintenance work type (dynamic lookup). */
+export type VehicleMaintenanceType = string;
 
 export type VehicleMaintenanceStatus = "open" | "in_progress" | "completed" | "cancelled";
+
+export interface MaintenanceWorkTypeTranslation {
+  locale: string;
+  name: string;
+  description: string | null;
+}
+
+export interface MaintenanceWorkType {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  locale: string;
+  is_active: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+  translations?: MaintenanceWorkTypeTranslation[];
+}
+
+export interface MaintenanceWorkTypeSummary {
+  id: string;
+  slug: string;
+  name: string;
+}
 
 export type VehicleHistoryEventType =
   | "created"
@@ -353,7 +372,10 @@ export interface Vehicle {
 export interface VehicleMaintenanceLog {
   id: string;
   vehicle_id: string;
-  type: VehicleMaintenanceType;
+  work_type_id: string;
+  work_type: MaintenanceWorkTypeSummary;
+  /** Slug alias of `work_type` for backward compatibility. */
+  type: string;
   status: VehicleMaintenanceStatus;
   title: string;
   description: string | null;

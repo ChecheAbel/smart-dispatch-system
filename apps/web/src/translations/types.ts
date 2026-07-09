@@ -15,6 +15,7 @@ export type AdminNotificationsRideRequestsMessages = Translations["adminNotifica
 export type AdminNotificationTemplatesMessages = Translations["adminNotificationTemplates"];
 export type AdminNotificationDeliveryLogsMessages = Translations["adminNotificationDeliveryLogs"];
 export type AdminVehicleTypesMessages = Translations["adminVehicleTypes"];
+export type AdminMaintenanceWorkTypesMessages = Translations["adminMaintenanceWorkTypes"];
 export type AdminVehicleClassesMessages = Translations["adminVehicleClasses"];
 export type AdminVehiclesMessages = Translations["adminVehicles"];
 export type AdminRegionsMessages = Translations["adminRegions"];

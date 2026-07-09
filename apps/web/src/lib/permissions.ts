@@ -44,6 +44,11 @@ export const PERMISSIONS = {
     assign_driver: "vehicles.assign_driver",
     delete: "vehicles.delete",
   },
+  maintenance_work_types: {
+    read: "maintenance_work_types.read",
+    write: "maintenance_work_types.write",
+    delete: "maintenance_work_types.delete",
+  },
   regions: {
     read: "regions.read",
     write: "regions.write",

@@ -15,6 +15,7 @@ import type {
   AdminUserRegistrationsMessages,
   AdminRideRequestsMessages,
   AdminVehicleTypesMessages,
+  AdminMaintenanceWorkTypesMessages,
   AdminVehicleClassesMessages,
   AdminVehiclesMessages,
   AdminRegionsMessages,
@@ -49,6 +50,7 @@ export type {
   AdminUserRegistrationsMessages,
   AdminRideRequestsMessages,
   AdminVehicleTypesMessages,
+  AdminMaintenanceWorkTypesMessages,
   AdminVehicleClassesMessages,
   AdminVehiclesMessages,
   AdminRegionsMessages,
@@ -137,6 +139,12 @@ export function getAdminVehicleTypesMessages(
   locale: SupportedLocale,
 ): AdminVehicleTypesMessages {
   return getTranslations(locale).adminVehicleTypes;
+}
+
+export function getAdminMaintenanceWorkTypesMessages(
+  locale: SupportedLocale,
+): AdminMaintenanceWorkTypesMessages {
+  return getTranslations(locale).adminMaintenanceWorkTypes;
 }
 
 export function getAdminVehicleClassesMessages(

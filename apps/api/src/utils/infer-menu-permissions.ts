@@ -6,6 +6,7 @@ const ADMIN_MODULES = [
   "notifications",
   "audit_logs",
   "vehicle_types",
+  "maintenance_work_types",
   "vehicle_classes",
   "vehicles",
   "regions",
@@ -49,7 +50,7 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
   }
 
   if (normalizedSlug === "fleet") {
-    return ["vehicle_types.read", "vehicle_classes.read", "vehicles.read"];
+    return ["vehicle_types.read", "vehicle_classes.read", "maintenance_work_types.read", "vehicles.read"];
   }
 
   if (normalizedSlug === "vehicle-types") {
@@ -58,6 +59,10 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
 
   if (normalizedSlug === "vehicle-classes") {
     return ["vehicle_classes.read"];
+  }
+
+  if (normalizedSlug === "maintenance-work-types") {
+    return ["maintenance_work_types.read"];
   }
 
   if (normalizedSlug === "fleet-vehicles") {

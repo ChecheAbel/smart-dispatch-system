@@ -21,6 +21,7 @@ import {
 import { listVehicles, updateVehicle } from "../models/vehicle.model";
 import { toPublicVehicle } from "../mappers/vehicle.mapper";
 import { toPublicVehicleMaintenanceLog } from "../mappers/vehicle-ops.mapper";
+import { toPublicMaintenanceWorkType } from "../mappers/maintenance-work-type.mapper";
 import {
   countOpenVehicleMaintenance,
   countVehicleMaintenanceLogs,
@@ -30,9 +31,12 @@ import {
   isOpenMaintenanceStatus,
   listVehicleMaintenanceLogs,
   parseVehicleMaintenanceStatus,
-  parseVehicleMaintenanceType,
   updateVehicleMaintenanceLog,
 } from "../models/vehicle-ops.model";
+import {
+  findMaintenanceWorkTypeById,
+  resolveMaintenanceWorkTypeId,
+} from "../models/maintenance-work-type.model";
 import { VehicleHistoryEventType, VehicleStatus } from "../generated/prisma";
 import { listActiveRegions } from "../models/region.model";
 import { listActiveBookingLocations } from "../models/location.model";
@@ -82,13 +86,6 @@ function parseOptionalNumber(value: unknown) {
     return Number.isFinite(parsed) ? parsed : undefined;
   }
   return undefined;
-}
-
-function titleFromMaintenanceType(type: string) {
-  return type
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
 }
 
 async function findAssignedVehicleForDriver(userId: string) {
@@ -314,7 +311,9 @@ router.get(
 
       return sendPaginatedSuccess(
         res,
-        result.data.map((log) => toPublicVehicleMaintenanceLog(log)),
+        result.data.map((log) =>
+          toPublicVehicleMaintenanceLog(log, { locale: getRequestLocale(req) }),
+        ),
         result.pagination,
       );
     } catch (error) {
@@ -338,12 +337,22 @@ router.post(
         return sendError(res, "No vehicle is assigned to this driver.", 404);
       }
 
-      const type = parseVehicleMaintenanceType(req.body?.type);
+      const locale = getRequestLocale(req);
+      const workTypeId = await resolveMaintenanceWorkTypeId({
+        workTypeId: req.body?.work_type_id,
+        workTypeSlug: req.body?.work_type_slug,
+        type: req.body?.type,
+      });
       const status = parseVehicleMaintenanceStatus(req.body?.status);
-      const title = getOptionalString(req.body?.title) || (type ? titleFromMaintenanceType(type) : null);
+      let title = getOptionalString(req.body?.title);
 
-      if (!type) {
-        return sendError(res, "A valid maintenance type is required.", 400);
+      if (!workTypeId) {
+        return sendError(res, "A valid maintenance work type is required.", 400);
+      }
+
+      if (!title) {
+        const workType = await findMaintenanceWorkTypeById(workTypeId);
+        title = workType ? toPublicMaintenanceWorkType(workType, { locale }).name : null;
       }
 
       if (!title) {
@@ -352,7 +361,7 @@ router.post(
 
       const log = await createVehicleMaintenanceLog({
         vehicleId: vehicle.id,
-        type,
+        workTypeId,
         status,
         title,
         description: getOptionalString(req.body?.description),
@@ -371,7 +380,13 @@ router.post(
         eventType: VehicleHistoryEventType.maintenance_opened,
         summary: `Maintenance opened: ${log.title}`,
         actorUserId: userId,
-        metadata: { maintenance_id: log.id, type: log.type, status: log.status, source: "driver" },
+        metadata: {
+          maintenance_id: log.id,
+          work_type_id: log.workTypeId,
+          work_type_slug: log.workType.slug,
+          status: log.status,
+          source: "driver",
+        },
       });
 
       if (isOpenMaintenanceStatus(log.status) && vehicle.status === VehicleStatus.active) {
@@ -383,7 +398,9 @@ router.post(
 
       return sendSuccess(
         res,
-        { maintenance_log: toPublicVehicleMaintenanceLog(log) },
+        {
+          maintenance_log: toPublicVehicleMaintenanceLog(log, { locale }),
+        },
         { status: 201 },
       );
     } catch (error) {
@@ -412,12 +429,27 @@ router.patch(
         return sendError(res, "Maintenance log not found.", 404);
       }
 
-      const type = parseVehicleMaintenanceType(req.body?.type);
+      const locale = getRequestLocale(req);
+      const workTypeId =
+        req.body?.work_type_id !== undefined ||
+        req.body?.work_type_slug !== undefined ||
+        req.body?.type !== undefined
+          ? await resolveMaintenanceWorkTypeId({
+              workTypeId: req.body?.work_type_id,
+              workTypeSlug: req.body?.work_type_slug,
+              type: req.body?.type,
+            })
+          : undefined;
       const status = parseVehicleMaintenanceStatus(req.body?.status);
       const title = getOptionalString(req.body?.title);
 
-      if (req.body?.type !== undefined && !type) {
-        return sendError(res, "A valid maintenance type is required.", 400);
+      if (
+        (req.body?.work_type_id !== undefined ||
+          req.body?.work_type_slug !== undefined ||
+          req.body?.type !== undefined) &&
+        !workTypeId
+      ) {
+        return sendError(res, "A valid maintenance work type is required.", 400);
       }
 
       if (req.body?.status !== undefined && !status) {
@@ -429,7 +461,7 @@ router.patch(
       }
 
       const log = await updateVehicleMaintenanceLog(existingLog.id, {
-        type,
+        workTypeId: workTypeId ?? undefined,
         status,
         title: title ?? undefined,
         description: getOptionalString(req.body?.description),
@@ -463,7 +495,13 @@ router.patch(
               ? `Maintenance cancelled: ${log.title}`
               : `Maintenance updated: ${log.title}`,
         actorUserId: userId,
-        metadata: { maintenance_id: log.id, type: log.type, status: log.status, source: "driver" },
+        metadata: {
+          maintenance_id: log.id,
+          work_type_id: log.workTypeId,
+          work_type_slug: log.workType.slug,
+          status: log.status,
+          source: "driver",
+        },
       });
 
       const openCount = await countOpenVehicleMaintenance(vehicle.id);
@@ -480,7 +518,7 @@ router.patch(
       }
 
       return sendSuccess(res, {
-        maintenance_log: toPublicVehicleMaintenanceLog(log),
+        maintenance_log: toPublicVehicleMaintenanceLog(log, { locale }),
       });
     } catch (error) {
       return handleRouteError(res, error);

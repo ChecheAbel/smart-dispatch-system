@@ -1,8 +1,8 @@
 import type { Prisma } from "../generated/prisma";
-import type {
-  VehicleHistoryEvent,
-  VehicleMaintenanceLog,
-} from "@smart-dispatch/types";
+import type { VehicleHistoryEvent, VehicleMaintenanceLog } from "@smart-dispatch/types";
+import {
+  toPublicMaintenanceWorkTypeSummary,
+} from "./maintenance-work-type.mapper";
 
 type DbPerson = {
   id: string;
@@ -24,10 +24,10 @@ function decimalToNumber(value: Prisma.Decimal | null) {
   return value === null ? null : Number(value);
 }
 
-export function toPublicVehicleMaintenanceLog(log: {
+type DbMaintenanceLog = {
   id: string;
   vehicleId: string;
-  type: VehicleMaintenanceLog["type"];
+  workTypeId: string;
   status: VehicleMaintenanceLog["status"];
   title: string;
   description: string | null;
@@ -42,11 +42,29 @@ export function toPublicVehicleMaintenanceLog(log: {
   createdAt: Date;
   updatedAt: Date;
   createdBy: DbPerson | null;
-}): VehicleMaintenanceLog {
+  workType: {
+    id: string;
+    slug: string;
+    isActive: boolean;
+    sortOrder: number;
+    createdAt: Date;
+    updatedAt: Date;
+    translations: Prisma.JsonValue;
+  };
+};
+
+export function toPublicVehicleMaintenanceLog(
+  log: DbMaintenanceLog,
+  options?: { locale?: string },
+): VehicleMaintenanceLog {
+  const workType = toPublicMaintenanceWorkTypeSummary(log.workType, options);
+
   return {
     id: log.id,
     vehicle_id: log.vehicleId,
-    type: log.type,
+    work_type_id: log.workTypeId,
+    work_type: workType,
+    type: workType.slug,
     status: log.status,
     title: log.title,
     description: log.description,

@@ -1761,6 +1761,103 @@
       }
     }
   },
+  "adminMaintenanceWorkTypes": {
+    "eyebrow": "የተሽከርካሪ አስተዳደር",
+    "title": "የጥገና የስራ አይነቶች",
+    "description": "አሽከርካሪዎችና አስተዳዳሪዎች በጥገና ላይ የሚመዘግቡትን የስራ ምድቦች ይግለጹ።",
+    "searchPlaceholder": "በስም ይፈልጉ...",
+    "newType": "አዲስ የስራ አይነት",
+    "itemLabel": "የስራ አይነት",
+    "columns": {
+      "name": "ስም",
+      "slug": "ስላግ",
+      "sortOrder": "ቅደም ተከተል",
+      "status": "ሁኔታ",
+      "created": "ተፈጥሯል",
+      "actions": "ድርጊቶች"
+    },
+    "status": {
+      "active": "ንቁ",
+      "inactive": "እንቅስቃሴ የለውም"
+    },
+    "empty": {
+      "title": "ምንም የስራ አይነት አልተገኘም",
+      "description": "የስራ አይነቶች ከተፈጠሩ በኋላ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የጥገና የስራ አይነቶችን የማየት ፈቃድ ያስፈልጋል።",
+      "sessionHint": "ፈቃዶች ቅርብ ጊዜ ከተቀየሩ፣ ክፍያዎን ለማደስ ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
+    "actions": {
+      "edit": "አርትዕ",
+      "delete": "ሰርዝ",
+      "menuLabel": "ለ {name} ድርጊቶች"
+    },
+    "stats": {
+      "title": "ጠቅላላ የስራ አይነቶች",
+      "description": "ለጥገና መመዝገብ የሚገኙ ሁሉም ምድቦች",
+      "activeTitle": "ንቁ አይነቶች",
+      "activeDescription": "በጥገና መመዝገብ ላይ ይታያሉ",
+      "inactiveTitle": "እንቅስቃሴ የሌላቸው አይነቶች",
+      "inactiveDescription": "ከአዲስ ጥገና መዝገቦች ተደብቀዋል"
+    },
+    "form": {
+      "createTitle": "አዲስ የስራ አይነት",
+      "editTitle": "የስራ አይነት አርትዕ",
+      "createDescription": "ቢያንስ የእንግሊዝኛ ስም ያለው የጥገና የስራ አይነት ይፍጠሩ።",
+      "editDescription": "የስራ አይነቱን ዝርዝሮችና ትርጉሞች ያዘምኑ።",
+      "name": "ስም",
+      "description": "መግለጫ",
+      "descriptionPlaceholder": "አማራጭ መግለጫ",
+      "sortOrder": "የማሳያ ቅደም ተከተል",
+      "sortOrderPlaceholder": "ለምሳሌ 10",
+      "sortOrderHint": "ዝቅተኛ ቁጥሮች በጥገና ቅጾች በመጀመሪያ ይታያሉ።",
+      "active": "ንቁ",
+      "optional": "(አማራጭ)",
+      "cancel": "ሰርዝ",
+      "create": "አይነት ፍጠር",
+      "creating": "በመፍጠር ላይ...",
+      "save": "ለውጦችን አስቀምጥ",
+      "saving": "በማስቀመጥ ላይ...",
+      "loading": "የስራ አይነት በመጫን ላይ...",
+      "namePlaceholderEn": "Repair",
+      "namePlaceholderAm": "ጥገና",
+      "errors": {
+        "enNameRequired": "የእንግሊዝኛ ስም ያስፈልጋል።",
+        "sortOrderInvalid": "የማሳያ ቅደም ተከተል ቁጥር መሆን አለበት።",
+        "createFailed": "የስራ አይነት መፍጠር አልተሳካም።",
+        "updateFailed": "የስራ አይነት ማዘመን አልተሳካም።",
+        "loadFailed": "የስራ አይነት መጫን አልተሳካም።"
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "የስራ አይነት ተፈጥሯል",
+        "description": "{name} በተሳካ ሁኔታ ታክሏል።"
+      },
+      "updateSuccess": {
+        "title": "የስራ አይነት ተዘምኗል",
+        "description": "{name} በተሳካ ሁኔታ ተቀምጧል።"
+      },
+      "deleteSuccess": {
+        "title": "የስራ አይነት ተሰርዟል",
+        "description": "{name} ተወግዷል።"
+      },
+      "deleteFailed": {
+        "title": "ማጥፋት አልተሳካም",
+        "description": "የስራ አይነቱን ማጥፋት አልተቻለም። በጥገና መዝገቦች ላይ ሊያገለግል ይችላል።"
+      },
+      "loadFailed": {
+        "title": "መጫን አልተሳካም",
+        "description": "የስራ አይነቱን መጫን አልተቻለም።"
+      }
+    }
+  },
   "adminVehicleClasses": {
     "eyebrow": "የተሽከርካሪ አስተዳደር",
     "title": "የተሽከርካሪ ክፍሎች",
@@ -1928,12 +2025,16 @@
       },
       "overview": {
         "vehicleInfo": "የተሽከርካሪ መረጃ",
-        "compliance": "የተገዢነት ማብቂያ",
-        "complianceHint": "ተሽከርካሪው ለመላኪያ ዝግጁ መሆኑን ለማረጋገጥ እነዚህን ቀኖች ወቅታዊ ያድርጉ።",
-        "insurance": "ኢንሹራንስ",
-        "inspection": "ምርመራ",
-        "registration": "ምዝገባ",
+        "compliance": "ህጋዊ እና የደህንነት ሰነዶች",
+        "complianceHint": "የኢንሹራንስ እና የመንገድ ብቃት ምርመራ ሰነዶች የማብቂያ ቀኖችን ይከታተሉ።",
+        "insurance": "የኢንሹራንስ ፖሊሲ",
+        "insuranceHint": "የተሽከርካሪው የኢንሹራንስ ፖሊሲ የሚያበቃበት ቀን።",
+        "inspection": "የመንገድ ብቃት ምርመራ",
+        "inspectionHint": "የቴክኒክ ወይም የደህንነት ምርመራ ሰነድ የሚያበቃበት ቀን (ለምሳሌ ዓመታዊ የመንገድ ብቃት ምርመራ)።",
         "expiresOn": "የማብቂያ ቀን",
+        "pickDate": "ቀን ይምረጡ",
+        "clearDate": "አጽዳ",
+        "today": "ዛሬ",
         "saveExpiry": "ቀኖችን አስቀምጥ",
         "saving": "በማስቀመጥ ላይ...",
         "noNotes": "ምንም ማስታወሻ የለም",
@@ -2027,7 +2128,7 @@
         },
         "expirySaved": {
           "title": "የማብቂያ ቀኖች ተቀምጠዋል",
-          "description": "የኢንሹራንስ፣ ምርመራ እና ምዝገባ ቀኖች ተዘምነዋል።"
+          "description": "የኢንሹራንስ እና የምርመራ የማብቂያ ቀኖች ተዘምነዋል።"
         },
         "expiryFailed": {
           "title": "የማብቂያ ቀኖችን ማስቀመጥ አልተቻለም",

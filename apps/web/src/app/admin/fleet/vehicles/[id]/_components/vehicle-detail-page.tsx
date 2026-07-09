@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { format } from "date-fns";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -22,13 +23,14 @@ import {
   Wrench,
 } from "lucide-react";
 import type {
+  MaintenanceWorkType,
   Vehicle,
   VehicleHistoryEvent,
   VehicleMaintenanceLog,
   VehicleMaintenanceStatus,
-  VehicleMaintenanceType,
 } from "@smart-dispatch/types";
 import { useAuth, useLocale } from "@/components/shared/providers";
+import { AdminDatePicker } from "@/components/shared/admin-date-picker";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,6 +45,7 @@ import {
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
 import { PERMISSIONS } from "@/lib/permissions";
+import { fetchActiveMaintenanceWorkTypes } from "@/lib/maintenance-work-type-api";
 import {
   createVehicleMaintenance,
   fetchVehicleById,
@@ -68,16 +71,6 @@ const textareaClassName = cn(
   "min-h-[128px] h-auto w-full resize-y rounded-xl border-slate-200 bg-white px-3.5 py-3 text-sm leading-relaxed text-slate-800 shadow-sm placeholder:text-slate-400 focus-visible:border-[#1C3A34] focus-visible:ring-2 focus-visible:ring-[#1C3A34]/15",
 );
 
-const MAINTENANCE_TYPES: VehicleMaintenanceType[] = [
-  "scheduled",
-  "repair",
-  "inspection",
-  "tire",
-  "oil",
-  "accident",
-  "other",
-];
-
 const MAINTENANCE_STATUSES: VehicleMaintenanceStatus[] = [
   "open",
   "in_progress",
@@ -85,8 +78,18 @@ const MAINTENANCE_STATUSES: VehicleMaintenanceStatus[] = [
   "cancelled",
 ];
 
-function maintenanceTypeIcon(type: VehicleMaintenanceType) {
-  switch (type) {
+function parseDateInputValue(value: string): Date | undefined {
+  if (!value) return undefined;
+  const parsed = new Date(`${value}T00:00:00`);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+}
+
+function formatDateInputValue(date: Date | undefined): string {
+  return date ? format(date, "yyyy-MM-dd") : "";
+}
+
+function maintenanceTypeIcon(slug: string) {
+  switch (slug) {
     case "scheduled":
       return CalendarClock;
     case "repair":
@@ -99,7 +102,7 @@ function maintenanceTypeIcon(type: VehicleMaintenanceType) {
       return Droplets;
     case "accident":
       return AlertTriangle;
-    case "other":
+    default:
       return ClipboardList;
   }
 }
@@ -196,6 +199,8 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
   const [tab, setTab] = useState<DetailTab>(parseTab(searchParams.get("tab")));
   const [history, setHistory] = useState<VehicleHistoryEvent[]>([]);
   const [maintenance, setMaintenance] = useState<VehicleMaintenanceLog[]>([]);
+  const [workTypes, setWorkTypes] = useState<MaintenanceWorkType[]>([]);
+  const [workTypesLoading, setWorkTypesLoading] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [maintenanceLoading, setMaintenanceLoading] = useState(false);
   const [savingExpiry, setSavingExpiry] = useState(false);
@@ -205,10 +210,9 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
 
   const [insuranceExpiresAt, setInsuranceExpiresAt] = useState("");
   const [inspectionExpiresAt, setInspectionExpiresAt] = useState("");
-  const [registrationExpiresAt, setRegistrationExpiresAt] = useState("");
 
   const [maintenanceForm, setMaintenanceForm] = useState({
-    type: "scheduled" as VehicleMaintenanceType,
+    work_type_id: "",
     status: "open" as VehicleMaintenanceStatus,
     description: "",
     vendor: "",
@@ -225,7 +229,6 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
       setVehicle(next);
       setInsuranceExpiresAt(next.insurance_expires_at ?? "");
       setInspectionExpiresAt(next.inspection_expires_at ?? "");
-      setRegistrationExpiresAt(next.registration_expires_at ?? "");
     } catch (error) {
       showErrorToast({
         title: detail.toast.loadFailed.title,
@@ -277,6 +280,22 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
     vehicleId,
   ]);
 
+  const loadWorkTypes = useCallback(async () => {
+    setWorkTypesLoading(true);
+    try {
+      const types = await fetchActiveMaintenanceWorkTypes(locale);
+      setWorkTypes(types);
+      setMaintenanceForm((current) => ({
+        ...current,
+        work_type_id: current.work_type_id || types[0]?.id || "",
+      }));
+    } catch {
+      setWorkTypes([]);
+    } finally {
+      setWorkTypesLoading(false);
+    }
+  }, [locale]);
+
   useEffect(() => {
     if (!canRead) return;
     void loadVehicle();
@@ -289,8 +308,11 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
   useEffect(() => {
     if (!canRead || !vehicle) return;
     if (tab === "history") void loadHistory();
-    if (tab === "maintenance") void loadMaintenance();
-  }, [canRead, loadHistory, loadMaintenance, tab, vehicle]);
+    if (tab === "maintenance") {
+      void loadMaintenance();
+      void loadWorkTypes();
+    }
+  }, [canRead, loadHistory, loadMaintenance, loadWorkTypes, tab, vehicle]);
 
   function changeTab(next: DetailTab) {
     setTab(next);
@@ -313,7 +335,6 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
       const updated = await updateVehicle(vehicle.id, {
         insurance_expires_at: insuranceExpiresAt || null,
         inspection_expires_at: inspectionExpiresAt || null,
-        registration_expires_at: registrationExpiresAt || null,
       });
       setVehicle(updated);
       showSuccessToast(detail.toast.expirySaved);
@@ -331,14 +352,21 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
   async function handleCreateMaintenance() {
     if (!vehicle || !canWrite) return;
 
-    const title = detail.maintenanceTypes[maintenanceForm.type];
+    const selectedWorkType = workTypes.find((type) => type.id === maintenanceForm.work_type_id);
+    if (!selectedWorkType) {
+      showErrorToast({
+        title: detail.toast.maintenanceFailed.title,
+        description: detail.form.titleRequired,
+      });
+      return;
+    }
 
     setCreatingMaintenance(true);
     try {
       await createVehicleMaintenance(vehicle.id, {
-        type: maintenanceForm.type,
+        work_type_id: selectedWorkType.id,
         status: maintenanceForm.status,
-        title,
+        title: selectedWorkType.name,
         description: maintenanceForm.description.trim() || null,
         vendor: maintenanceForm.vendor.trim() || null,
         cost_amount: maintenanceForm.cost_amount ? Number(maintenanceForm.cost_amount) : null,
@@ -347,7 +375,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
         next_due_at: maintenanceForm.next_due_at || null,
       });
       setMaintenanceForm({
-        type: "scheduled",
+        work_type_id: workTypes[0]?.id || "",
         status: "open",
         description: "",
         vendor: "",
@@ -407,21 +435,21 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
           setter: setInspectionExpiresAt,
           saved: vehicle?.inspection_expires_at,
         },
-        {
-          key: "registration" as const,
-          value: registrationExpiresAt,
-          setter: setRegistrationExpiresAt,
-          saved: vehicle?.registration_expires_at,
-        },
       ] as const,
     [
       inspectionExpiresAt,
       insuranceExpiresAt,
-      registrationExpiresAt,
       vehicle?.inspection_expires_at,
       vehicle?.insurance_expires_at,
-      vehicle?.registration_expires_at,
     ],
+  );
+
+  const complianceFieldHints = useMemo(
+    () => ({
+      insurance: detail.overview.insuranceHint,
+      inspection: detail.overview.inspectionHint,
+    }),
+    [detail.overview.insuranceHint, detail.overview.inspectionHint],
   );
 
   const worstExpiryTone = useMemo(() => {
@@ -447,7 +475,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
 
   if (loading) {
     return (
-      <div className="space-y-6 p-6">
+      <div className="space-y-5 sm:space-y-6">
         <div className="h-9 w-40 animate-pulse rounded-lg bg-slate-100" />
         <div className="h-28 animate-pulse rounded-2xl bg-slate-100" />
         <div className="h-12 animate-pulse rounded-xl bg-slate-100" />
@@ -461,7 +489,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
 
   if (!vehicle) {
     return (
-      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 p-6 text-center">
+      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 px-2 py-8 text-center sm:px-0">
         <div className={adminIconBoxClass}>
           <Truck className="size-5" />
         </div>
@@ -485,15 +513,15 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
     detail.untitledVehicle;
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-6">
+    <div className="mx-auto w-full min-w-0 max-w-6xl space-y-5 sm:space-y-6">
       <Button
         render={<Link href="/admin/fleet/vehicles" />}
         nativeButton={false}
         variant="ghost"
-        className="-ml-2 h-9 px-2 text-slate-600 hover:bg-[#1C3A34]/6 hover:text-[#1C3A34]"
+        className="-ml-1 h-9 max-w-full px-2 text-sm text-slate-600 hover:bg-[#1C3A34]/6 hover:text-[#1C3A34] sm:-ml-2 sm:text-base"
       >
-        <ArrowLeft className="size-4" />
-        {detail.backToList}
+        <ArrowLeft className="size-4 shrink-0" />
+        <span className="truncate">{detail.backToList}</span>
       </Button>
 
       <section
@@ -502,18 +530,18 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
           "overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white via-white to-[#1C3A34]/[0.04]",
         )}
       >
-        <div className="flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-start lg:justify-between">
-          <div className="flex items-start gap-4">
-            <div className="rounded-2xl bg-[#1C3A34] p-3 text-white shadow-sm">
-              <Truck className="size-6" />
+        <div className="flex flex-col gap-4 p-4 sm:gap-5 sm:p-5 lg:flex-row lg:items-start lg:justify-between lg:p-6">
+          <div className="flex min-w-0 items-start gap-3 sm:gap-4">
+            <div className="shrink-0 rounded-2xl bg-[#1C3A34] p-2.5 text-white shadow-sm sm:p-3">
+              <Truck className="size-5 sm:size-6" />
             </div>
-            <div className="min-w-0 space-y-2">
+            <div className="min-w-0 flex-1 space-y-2">
               <p className={adminEyebrowClass}>{detail.eyebrow}</p>
-              <h1 className={cn("truncate text-3xl tracking-tight", adminHeadingClass)}>
+              <h1 className={cn("text-2xl tracking-tight break-words sm:text-3xl", adminHeadingClass)}>
                 {vehicle.plate_number}
               </h1>
               <p className="text-sm text-slate-500">{subtitle}</p>
-              <div className="flex flex-wrap items-center gap-2 pt-1">
+              <div className="flex flex-wrap items-center gap-1.5 pt-1 sm:gap-2">
                 <Badge variant="outline" className={vehicleStatusBadgeClass(vehicle.status)}>
                   {copy.status[vehicle.status]}
                 </Badge>
@@ -535,8 +563,8 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
             </div>
           </div>
 
-          <div className="grid w-full gap-3 sm:grid-cols-3 lg:w-auto lg:min-w-[22rem]">
-            <div className="rounded-xl border border-slate-100 bg-white/80 px-3.5 py-3">
+          <div className="grid w-full grid-cols-1 gap-2.5 min-[420px]:grid-cols-2 sm:grid-cols-3 sm:gap-3 lg:w-auto lg:min-w-[22rem]">
+            <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2.5 sm:px-3.5 sm:py-3">
               <p className="text-[11px] font-medium tracking-wide text-slate-400 uppercase">
                 {copy.columns.type}
               </p>
@@ -544,7 +572,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
                 {vehicle.vehicle_type?.name || "—"}
               </p>
             </div>
-            <div className="rounded-xl border border-slate-100 bg-white/80 px-3.5 py-3">
+            <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2.5 sm:px-3.5 sm:py-3">
               <p className="text-[11px] font-medium tracking-wide text-slate-400 uppercase">
                 {copy.columns.class}
               </p>
@@ -552,7 +580,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
                 {vehicle.vehicle_class?.name || "—"}
               </p>
             </div>
-            <div className="rounded-xl border border-slate-100 bg-white/80 px-3.5 py-3">
+            <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2.5 min-[420px]:col-span-2 sm:col-span-1 sm:px-3.5 sm:py-3">
               <p className="text-[11px] font-medium tracking-wide text-slate-400 uppercase">
                 {copy.columns.driver}
               </p>
@@ -566,9 +594,9 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
 
       <nav
         aria-label={detail.eyebrow}
-        className="border-b border-slate-200"
+        className="-mx-4 border-b border-slate-200 px-4 sm:mx-0 sm:px-0"
       >
-        <div className="-mb-px flex gap-1 overflow-x-auto">
+        <div className="no-scrollbar -mb-px flex gap-0.5 overflow-x-auto sm:gap-1">
           {tabs.map((item) => {
             const Icon = item.icon;
             const active = tab === item.id;
@@ -583,7 +611,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
                 onClick={() => changeTab(item.id)}
                 disabled={isPending}
                 className={cn(
-                  "group relative inline-flex shrink-0 items-center gap-2.5 border-b-2 px-4 py-3 text-sm font-medium transition-colors",
+                  "group relative inline-flex shrink-0 snap-start items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors sm:gap-2.5 sm:px-4 sm:py-3",
                   active
                     ? "border-[#1C3A34] text-[#1C3A34]"
                     : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800",
@@ -591,7 +619,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
               >
                 <span
                   className={cn(
-                    "flex size-8 items-center justify-center rounded-lg transition-colors",
+                    "flex size-7 items-center justify-center rounded-lg transition-colors sm:size-8",
                     active
                       ? "bg-[#1C3A34] text-white shadow-sm"
                       : "bg-slate-100 text-slate-500 group-hover:bg-slate-200/80 group-hover:text-slate-700",
@@ -619,8 +647,8 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
       </nav>
 
       {tab === "overview" ? (
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)]">
-          <section className={cn(adminCardClass, "space-y-5 rounded-2xl p-5 sm:p-6")}>
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-5">
+          <section className={cn(adminCardClass, "space-y-4 rounded-2xl p-4 sm:space-y-5 sm:p-5 lg:p-6")}>
             <div className="flex items-center gap-3">
               <div className={adminIconBoxClass}>
                 <ClipboardList className="size-4" />
@@ -633,7 +661,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
               </div>
             </div>
 
-            <dl className="grid gap-3 sm:grid-cols-2">
+            <dl className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
               {(
                 [
                   [copy.columns.chassis, vehicle.chassis_number || "—"],
@@ -663,7 +691,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
             </div>
           </section>
 
-          <section className={cn(adminCardClass, "space-y-5 rounded-2xl p-5 sm:p-6")}>
+          <section className={cn(adminCardClass, "space-y-4 rounded-2xl p-4 sm:space-y-5 sm:p-5 lg:p-6")}>
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className={adminIconBoxClass}>
@@ -686,37 +714,42 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
                     key={item.key}
                     className="rounded-xl border border-slate-100 bg-slate-50/40 p-3.5 transition hover:border-slate-200"
                   >
-                    <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2">
-                      <Label htmlFor={`${item.key}-expires`} className="text-sm font-semibold">
-                        {detail.overview[item.key]}
-                      </Label>
+                    <div className="mb-2.5 flex flex-wrap items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <Label htmlFor={`${item.key}-expires`} className="text-sm font-semibold">
+                          {detail.overview[item.key]}
+                        </Label>
+                        <p className="text-xs leading-relaxed text-slate-500">
+                          {complianceFieldHints[item.key]}
+                        </p>
+                      </div>
                       <Badge variant="outline" className={expiryToneClass(tone)}>
                         {detail.overview.expiryStatus[tone]}
                       </Badge>
                     </div>
-                    <div className="space-y-1.5">
-                      <p className="text-xs text-slate-500">{detail.overview.expiresOn}</p>
-                      <Input
-                        id={`${item.key}-expires`}
-                        type="date"
-                        value={item.value}
-                        onChange={(event) => item.setter(event.target.value)}
-                        disabled={!canWrite || savingExpiry}
-                        className="bg-white"
-                      />
-                    </div>
+                    <AdminDatePicker
+                      id={`${item.key}-expires`}
+                      className="min-w-0"
+                      label={detail.overview.expiresOn}
+                      placeholder={detail.overview.pickDate}
+                      clearLabel={detail.overview.clearDate}
+                      todayLabel={detail.overview.today}
+                      value={parseDateInputValue(item.value)}
+                      disabled={!canWrite || savingExpiry}
+                      onChange={(date) => item.setter(formatDateInputValue(date))}
+                    />
                   </div>
                 );
               })}
             </div>
 
             {canWrite ? (
-              <div className="flex justify-end border-t border-slate-100 pt-4">
+              <div className="flex flex-col gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
                 <Button
                   type="button"
                   onClick={() => void handleSaveExpiry()}
                   disabled={savingExpiry}
-                  className={adminPrimaryButtonClass}
+                  className={cn(adminPrimaryButtonClass, "w-full sm:w-auto")}
                 >
                   {savingExpiry ? detail.overview.saving : detail.overview.saveExpiry}
                 </Button>
@@ -727,10 +760,10 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
       ) : null}
 
       {tab === "maintenance" ? (
-        <div className="space-y-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <h2 className={cn("text-lg", adminHeadingClass)}>{detail.maintenance.listTitle}</h2>
+        <div className="space-y-4 sm:space-y-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0">
+              <h2 className={cn("text-base sm:text-lg", adminHeadingClass)}>{detail.maintenance.listTitle}</h2>
               {vehicle.open_maintenance_count ? (
                 <p className="mt-0.5 text-sm text-amber-700">
                   {formatMessage(detail.maintenance.openCount, {
@@ -743,7 +776,10 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
               <Button
                 type="button"
                 variant={showMaintenanceForm ? "outline" : "default"}
-                className={showMaintenanceForm ? undefined : adminPrimaryButtonClass}
+                className={cn(
+                  "w-full shrink-0 sm:w-auto",
+                  showMaintenanceForm ? undefined : adminPrimaryButtonClass,
+                )}
                 onClick={() => setShowMaintenanceForm((open) => !open)}
               >
                 {showMaintenanceForm ? (
@@ -765,7 +801,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
                 "overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm",
               )}
             >
-              <div className="flex items-start gap-3 border-b border-slate-100 bg-gradient-to-r from-[#1C3A34]/[0.04] to-transparent px-5 py-4 sm:px-6">
+              <div className="flex items-start gap-3 border-b border-slate-100 bg-gradient-to-r from-[#1C3A34]/[0.04] to-transparent px-4 py-3.5 sm:px-5 sm:py-4 lg:px-6">
                 <div className="rounded-xl bg-[#1C3A34] p-2.5 text-white shadow-sm">
                   <Wrench className="size-4" />
                 </div>
@@ -782,7 +818,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
               </div>
 
               <form
-                className="space-y-6 p-5 sm:p-6"
+                className="space-y-5 p-4 sm:space-y-6 sm:p-5 lg:p-6"
                 onSubmit={(event) => {
                   event.preventDefault();
                   void handleCreateMaintenance();
@@ -794,31 +830,42 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
                       {detail.maintenance.type}
                     </Label>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
-                    {MAINTENANCE_TYPES.map((type) => {
-                      const Icon = maintenanceTypeIcon(type);
-                      const selected = maintenanceForm.type === type;
-                      return (
-                        <button
-                          key={type}
-                          type="button"
-                          onClick={() =>
-                            setMaintenanceForm((current) => ({ ...current, type }))
-                          }
-                          className={cn(
-                            "flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-center transition",
-                            selected
-                              ? "border-[#1C3A34] bg-[#1C3A34] text-white shadow-sm"
-                              : "border-slate-200 bg-white text-slate-600 hover:border-[#1C3A34]/30 hover:bg-[#1C3A34]/[0.03]",
-                          )}
-                        >
-                          <Icon className="size-4 shrink-0" />
-                          <span className="text-[11px] font-medium leading-tight">
-                            {detail.maintenanceTypes[type]}
-                          </span>
-                        </button>
-                      );
-                    })}
+                  <div className="grid grid-cols-2 gap-2 min-[480px]:grid-cols-3 sm:grid-cols-4 lg:grid-cols-7">
+                    {workTypesLoading ? (
+                      <p className="col-span-full text-sm text-slate-500">{detail.loading}</p>
+                    ) : workTypes.length === 0 ? (
+                      <p className="col-span-full text-sm text-slate-500">
+                        {detail.maintenance.emptyHint}
+                      </p>
+                    ) : (
+                      workTypes.map((workType) => {
+                        const Icon = maintenanceTypeIcon(workType.slug);
+                        const selected = maintenanceForm.work_type_id === workType.id;
+                        return (
+                          <button
+                            key={workType.id}
+                            type="button"
+                            onClick={() =>
+                              setMaintenanceForm((current) => ({
+                                ...current,
+                                work_type_id: workType.id,
+                              }))
+                            }
+                            className={cn(
+                              "flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-center transition",
+                              selected
+                                ? "border-[#1C3A34] bg-[#1C3A34] text-white shadow-sm"
+                                : "border-slate-200 bg-white text-slate-600 hover:border-[#1C3A34]/30 hover:bg-[#1C3A34]/[0.03]",
+                            )}
+                          >
+                            <Icon className="size-4 shrink-0" />
+                            <span className="text-[11px] font-medium leading-tight">
+                              {workType.name}
+                            </span>
+                          </button>
+                        );
+                      })
+                    )}
                   </div>
                 </div>
 
@@ -870,8 +917,8 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
                 </div>
 
                 <details className="group overflow-hidden rounded-xl border border-slate-200 bg-white open:shadow-sm">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 marker:content-none [&::-webkit-details-marker]:hidden">
-                    <span className="flex items-center gap-3">
+                  <summary className="flex cursor-pointer list-none flex-col items-start gap-2 px-3.5 py-3 marker:content-none sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-4 sm:py-3.5 [&::-webkit-details-marker]:hidden">
+                    <span className="flex min-w-0 items-start gap-2.5 sm:items-center sm:gap-3">
                       <span className={adminIconBoxClass}>
                         <Store className="size-3.5" />
                       </span>
@@ -887,7 +934,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
                     <ChevronDown className="size-4 shrink-0 text-slate-400 transition group-open:rotate-180" />
                   </summary>
 
-                  <div className="space-y-4 border-t border-slate-100 px-4 py-4">
+                  <div className="space-y-4 border-t border-slate-100 px-3.5 py-3.5 sm:px-4 sm:py-4">
                     <div className="space-y-1.5">
                       <Label
                         htmlFor="maintenance-vendor"
@@ -958,56 +1005,45 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
                           className={cn(adminInputClass, "bg-white")}
                         />
                       </div>
-                      <div className="space-y-1.5">
-                        <Label
-                          htmlFor="maintenance-started"
-                          className="inline-flex items-center gap-1.5 text-sm font-medium"
-                        >
-                          <CalendarClock className="size-3.5 text-slate-400" />
-                          {detail.maintenance.startedAt}
-                        </Label>
-                        <Input
-                          id="maintenance-started"
-                          type="date"
-                          value={maintenanceForm.started_at}
-                          onChange={(event) =>
-                            setMaintenanceForm((current) => ({
-                              ...current,
-                              started_at: event.target.value,
-                            }))
-                          }
-                          className={cn(adminInputClass, "bg-white")}
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label
-                          htmlFor="maintenance-next-due"
-                          className="inline-flex items-center gap-1.5 text-sm font-medium"
-                        >
-                          <CalendarClock className="size-3.5 text-slate-400" />
-                          {detail.maintenance.nextDueAt}
-                        </Label>
-                        <Input
-                          id="maintenance-next-due"
-                          type="date"
-                          value={maintenanceForm.next_due_at}
-                          onChange={(event) =>
-                            setMaintenanceForm((current) => ({
-                              ...current,
-                              next_due_at: event.target.value,
-                            }))
-                          }
-                          className={cn(adminInputClass, "bg-white")}
-                        />
-                      </div>
+                      <AdminDatePicker
+                        id="maintenance-started"
+                        className="min-w-0"
+                        label={detail.maintenance.startedAt}
+                        placeholder={detail.overview.pickDate}
+                        clearLabel={detail.overview.clearDate}
+                        todayLabel={detail.overview.today}
+                        value={parseDateInputValue(maintenanceForm.started_at)}
+                        onChange={(date) =>
+                          setMaintenanceForm((current) => ({
+                            ...current,
+                            started_at: formatDateInputValue(date),
+                          }))
+                        }
+                      />
+                      <AdminDatePicker
+                        id="maintenance-next-due"
+                        className="min-w-0"
+                        label={detail.maintenance.nextDueAt}
+                        placeholder={detail.overview.pickDate}
+                        clearLabel={detail.overview.clearDate}
+                        todayLabel={detail.overview.today}
+                        value={parseDateInputValue(maintenanceForm.next_due_at)}
+                        onChange={(date) =>
+                          setMaintenanceForm((current) => ({
+                            ...current,
+                            next_due_at: formatDateInputValue(date),
+                          }))
+                        }
+                      />
                     </div>
                   </div>
                 </details>
 
-                <div className="flex flex-wrap items-center justify-end gap-2 border-t border-slate-100 pt-4">
+                <div className="flex flex-col-reverse gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
                   <Button
                     type="button"
                     variant="outline"
+                    className="w-full sm:w-auto"
                     onClick={() => setShowMaintenanceForm(false)}
                   >
                     {detail.maintenance.closeForm}
@@ -1015,7 +1051,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
                   <Button
                     type="submit"
                     disabled={creatingMaintenance}
-                    className={adminPrimaryButtonClass}
+                    className={cn(adminPrimaryButtonClass, "w-full sm:w-auto")}
                   >
                     <Plus className="size-4" />
                     {creatingMaintenance ? detail.maintenance.saving : detail.maintenance.create}
@@ -1025,7 +1061,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
             </section>
           ) : null}
 
-          <section className={cn(adminCardClass, "rounded-2xl p-5 sm:p-6")}>
+          <section className={cn(adminCardClass, "rounded-2xl p-4 sm:p-5 lg:p-6")}>
             {maintenanceLoading ? (
               <div className="space-y-3">
                 {[0, 1, 2].map((key) => (
@@ -1049,10 +1085,10 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
                 {maintenance.map((log) => (
                   <li
                     key={log.id}
-                    className="rounded-xl border border-slate-100 bg-slate-50/30 p-4 transition hover:border-slate-200 hover:bg-white"
+                    className="rounded-xl border border-slate-100 bg-slate-50/30 p-3.5 transition hover:border-slate-200 hover:bg-white sm:p-4"
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="min-w-0 space-y-2">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0 flex-1 space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
                           <Badge variant="outline" className={maintenanceStatusClass(log.status)}>
                             {detail.maintenanceStatuses[log.status]}
@@ -1061,7 +1097,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
                             variant="outline"
                             className="border-slate-200 bg-white text-slate-600"
                           >
-                            {detail.maintenanceTypes[log.type]}
+                            {log.work_type.name}
                           </Badge>
                         </div>
                         <p className="text-base font-semibold text-slate-800">{log.title}</p>
@@ -1076,7 +1112,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
                           type="button"
                           size="sm"
                           variant="outline"
-                          className="shrink-0 border-emerald-200 text-emerald-800 hover:bg-emerald-50"
+                          className="w-full shrink-0 border-emerald-200 text-emerald-800 hover:bg-emerald-50 sm:w-auto"
                           onClick={() => void handleCompleteMaintenance(log)}
                         >
                           <CheckCircle2 className="size-3.5" />
@@ -1120,9 +1156,9 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
       ) : null}
 
       {tab === "history" ? (
-        <section className={cn(adminCardClass, "rounded-2xl p-5 sm:p-6")}>
-          <div className="mb-5">
-            <h2 className={cn("text-lg", adminHeadingClass)}>{detail.history.title}</h2>
+        <section className={cn(adminCardClass, "rounded-2xl p-4 sm:p-5 lg:p-6")}>
+          <div className="mb-4 sm:mb-5">
+            <h2 className={cn("text-base sm:text-lg", adminHeadingClass)}>{detail.history.title}</h2>
             <p className="mt-0.5 text-sm text-slate-500">{detail.history.emptyHint}</p>
           </div>
 
@@ -1146,18 +1182,18 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
               </div>
             </div>
           ) : (
-            <ol className="relative space-y-0 border-l border-slate-200 ml-4">
+            <ol className="relative ml-3 space-y-0 border-l border-slate-200 sm:ml-4">
               {history.map((event) => {
                 const Icon = historyIcon(event.event_type);
                 return (
-                  <li key={event.id} className="relative pb-6 pl-6 last:pb-0">
-                    <span className="absolute -left-[1.15rem] top-0 flex size-9 items-center justify-center rounded-full border border-slate-200 bg-white text-[#1C3A34] shadow-sm">
+                  <li key={event.id} className="relative pb-5 pl-5 last:pb-0 sm:pb-6 sm:pl-6">
+                    <span className="absolute -left-[1.05rem] top-0 flex size-8 items-center justify-center rounded-full border border-slate-200 bg-white text-[#1C3A34] shadow-sm sm:-left-[1.15rem] sm:size-9">
                       <Icon className="size-3.5" />
                     </span>
-                    <div className="rounded-xl border border-slate-100 bg-slate-50/40 px-4 py-3 transition hover:bg-white">
-                      <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div className="rounded-xl border border-slate-100 bg-slate-50/40 px-3.5 py-3 transition hover:bg-white sm:px-4">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-2">
                         <p className="text-sm font-semibold text-slate-800">{event.summary}</p>
-                        <time className="shrink-0 text-xs text-slate-400">
+                        <time className="text-xs text-slate-400 sm:shrink-0">
                           {new Date(event.created_at).toLocaleString()}
                         </time>
                       </div>

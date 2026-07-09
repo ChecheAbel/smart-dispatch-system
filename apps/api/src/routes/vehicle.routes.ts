@@ -31,9 +31,9 @@ import {
   listVehicleHistoryEvents,
   listVehicleMaintenanceLogs,
   parseVehicleMaintenanceStatus,
-  parseVehicleMaintenanceType,
   updateVehicleMaintenanceLog,
 } from "../models/vehicle-ops.model";
+import { resolveMaintenanceWorkTypeId } from "../models/maintenance-work-type.model";
 import { VehicleHistoryEventType, VehicleStatus } from "../generated/prisma";
 import { findVehicleTypeById } from "../models/vehicle-type.model";
 import { findVehicleClassById } from "../models/vehicle-class.model";
@@ -217,7 +217,9 @@ router.get(
 
       return sendPaginatedSuccess(
         res,
-        result.data.map((log) => toPublicVehicleMaintenanceLog(log)),
+        result.data.map((log) =>
+          toPublicVehicleMaintenanceLog(log, { locale: getRequestLocale(req) }),
+        ),
         result.pagination,
       );
     } catch (error) {
@@ -236,12 +238,16 @@ router.post(
         return sendError(res, "Vehicle not found.", 404);
       }
 
-      const type = parseVehicleMaintenanceType(req.body?.type);
+      const workTypeId = await resolveMaintenanceWorkTypeId({
+        workTypeId: req.body?.work_type_id,
+        workTypeSlug: req.body?.work_type_slug,
+        type: req.body?.type,
+      });
       const status = parseVehicleMaintenanceStatus(req.body?.status);
       const title = getString(req.body?.title);
 
-      if (!type) {
-        return sendError(res, "A valid maintenance type is required.", 400);
+      if (!workTypeId) {
+        return sendError(res, "A valid maintenance work type is required.", 400);
       }
 
       if (!title) {
@@ -250,7 +256,7 @@ router.post(
 
       const log = await createVehicleMaintenanceLog({
         vehicleId: vehicle.id,
-        type,
+        workTypeId,
         status,
         title,
         description: getOptionalString(req.body?.description),
@@ -269,7 +275,12 @@ router.post(
         eventType: VehicleHistoryEventType.maintenance_opened,
         summary: `Maintenance opened: ${log.title}`,
         actorUserId: req.user?.id,
-        metadata: { maintenance_id: log.id, type: log.type, status: log.status },
+        metadata: {
+          maintenance_id: log.id,
+          work_type_id: log.workTypeId,
+          work_type_slug: log.workType.slug,
+          status: log.status,
+        },
       });
 
       if (isOpenMaintenanceStatus(log.status) && vehicle.status === VehicleStatus.active) {
@@ -281,7 +292,11 @@ router.post(
 
       return sendSuccess(
         res,
-        { maintenance_log: toPublicVehicleMaintenanceLog(log) },
+        {
+          maintenance_log: toPublicVehicleMaintenanceLog(log, {
+            locale: getRequestLocale(req),
+          }),
+        },
         { status: 201 },
       );
     } catch (error) {
@@ -305,12 +320,26 @@ router.patch(
         return sendError(res, "Maintenance log not found.", 404);
       }
 
-      const type = parseVehicleMaintenanceType(req.body?.type);
+      const workTypeId =
+        req.body?.work_type_id !== undefined ||
+        req.body?.work_type_slug !== undefined ||
+        req.body?.type !== undefined
+          ? await resolveMaintenanceWorkTypeId({
+              workTypeId: req.body?.work_type_id,
+              workTypeSlug: req.body?.work_type_slug,
+              type: req.body?.type,
+            })
+          : undefined;
       const status = parseVehicleMaintenanceStatus(req.body?.status);
       const title = getOptionalString(req.body?.title);
 
-      if (req.body?.type !== undefined && !type) {
-        return sendError(res, "A valid maintenance type is required.", 400);
+      if (
+        (req.body?.work_type_id !== undefined ||
+          req.body?.work_type_slug !== undefined ||
+          req.body?.type !== undefined) &&
+        !workTypeId
+      ) {
+        return sendError(res, "A valid maintenance work type is required.", 400);
       }
 
       if (req.body?.status !== undefined && !status) {
@@ -322,7 +351,7 @@ router.patch(
       }
 
       const log = await updateVehicleMaintenanceLog(existingLog.id, {
-        type,
+        workTypeId: workTypeId ?? undefined,
         status,
         title: title ?? undefined,
         description: getOptionalString(req.body?.description),
@@ -356,7 +385,12 @@ router.patch(
               ? `Maintenance cancelled: ${log.title}`
               : `Maintenance updated: ${log.title}`,
         actorUserId: req.user?.id,
-        metadata: { maintenance_id: log.id, type: log.type, status: log.status },
+        metadata: {
+          maintenance_id: log.id,
+          work_type_id: log.workTypeId,
+          work_type_slug: log.workType.slug,
+          status: log.status,
+        },
       });
 
       const openCount = await countOpenVehicleMaintenance(vehicle.id);
@@ -373,7 +407,9 @@ router.patch(
       }
 
       return sendSuccess(res, {
-        maintenance_log: toPublicVehicleMaintenanceLog(log),
+        maintenance_log: toPublicVehicleMaintenanceLog(log, {
+          locale: getRequestLocale(req),
+        }),
       });
     } catch (error) {
       return handleRouteError(res, error);

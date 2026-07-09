@@ -4,7 +4,6 @@ import type {
   VehicleHistoryEvent,
   VehicleMaintenanceLog,
   VehicleMaintenanceStatus,
-  VehicleMaintenanceType,
   VehicleStatus,
 } from "@smart-dispatch/types";
 import { apiClient } from "./api-client";
@@ -41,7 +40,7 @@ export type CreateVehicleInput = {
 export type UpdateVehicleInput = Partial<CreateVehicleInput>;
 
 export type CreateVehicleMaintenanceInput = {
-  type: VehicleMaintenanceType;
+  work_type_id: string;
   status?: VehicleMaintenanceStatus;
   title: string;
   description?: string | null;

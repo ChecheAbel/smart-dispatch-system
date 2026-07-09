@@ -1,14 +1,10 @@
 import type { Prisma } from "../generated/prisma";
-import {
-  VehicleHistoryEventType,
-  VehicleMaintenanceStatus,
-  VehicleMaintenanceType,
-} from "../generated/prisma";
+import { VehicleHistoryEventType, VehicleMaintenanceStatus } from "../generated/prisma";
 import { prisma } from "../db/prisma";
 
 export type CreateVehicleMaintenanceInput = {
   vehicleId: string;
-  type: VehicleMaintenanceType;
+  workTypeId: string;
   status?: VehicleMaintenanceStatus;
   title: string;
   description?: string | null;
@@ -23,7 +19,7 @@ export type CreateVehicleMaintenanceInput = {
 };
 
 export type UpdateVehicleMaintenanceInput = {
-  type?: VehicleMaintenanceType;
+  workTypeId?: string;
   status?: VehicleMaintenanceStatus;
   title?: string;
   description?: string | null;
@@ -45,6 +41,7 @@ export type CreateVehicleHistoryEventInput = {
 };
 
 const maintenanceInclude = {
+  workType: true,
   createdBy: {
     select: {
       id: true,
@@ -144,7 +141,7 @@ export async function createVehicleMaintenanceLog(input: CreateVehicleMaintenanc
   return prisma.vehicleMaintenanceLog.create({
     data: {
       vehicleId: input.vehicleId,
-      type: input.type,
+      workTypeId: input.workTypeId,
       status: input.status ?? VehicleMaintenanceStatus.open,
       title: input.title.trim(),
       description: input.description?.trim() || null,
@@ -165,7 +162,7 @@ export async function updateVehicleMaintenanceLog(id: string, input: UpdateVehic
   return prisma.vehicleMaintenanceLog.update({
     where: { id },
     data: {
-      type: input.type,
+      workTypeId: input.workTypeId,
       status: input.status,
       title: input.title === undefined ? undefined : input.title.trim(),
       description: input.description === undefined ? undefined : input.description?.trim() || null,
@@ -179,14 +176,6 @@ export async function updateVehicleMaintenanceLog(id: string, input: UpdateVehic
     },
     include: maintenanceInclude,
   });
-}
-
-export function parseVehicleMaintenanceType(value: unknown): VehicleMaintenanceType | undefined {
-  if (typeof value !== "string") return undefined;
-  const normalized = value.trim().toLowerCase();
-  return Object.values(VehicleMaintenanceType).includes(normalized as VehicleMaintenanceType)
-    ? (normalized as VehicleMaintenanceType)
-    : undefined;
 }
 
 export function parseVehicleMaintenanceStatus(value: unknown): VehicleMaintenanceStatus | undefined {

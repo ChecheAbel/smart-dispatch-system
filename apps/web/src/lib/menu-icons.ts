@@ -22,6 +22,7 @@ import {
   Truck,
   Users,
   UserRound,
+  Wrench,
   Coins,
 } from "lucide-react";
 
@@ -59,6 +60,8 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   "vehicle-types": Layers,
   award: Award,
   "vehicle-classes": Award,
+  wrench: Wrench,
+  "maintenance-work-types": Wrench,
   map: Map,
   "map-pin": MapPin,
   "location-management": Map,

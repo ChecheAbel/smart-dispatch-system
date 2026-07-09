@@ -418,18 +418,6 @@ model Vehicle {
   @@map("vehicles")
 }
 
-enum VehicleMaintenanceType {
-  scheduled
-  repair
-  inspection
-  tire
-  oil
-  accident
-  other
-
-  @@map("vehicle_maintenance_type")
-}
-
 enum VehicleMaintenanceStatus {
   open
   in_progress
@@ -439,10 +427,23 @@ enum VehicleMaintenanceStatus {
   @@map("vehicle_maintenance_status")
 }
 
+model MaintenanceWorkType {
+  id           String                  @id @default(uuid()) @db.Uuid
+  slug         String                  @unique @db.VarChar(50)
+  translations Json                    @db.JsonB
+  isActive     Boolean                 @default(true) @map("is_active")
+  sortOrder    Int                     @default(0) @map("sort_order")
+  createdAt    DateTime                @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt    DateTime                @updatedAt @map("updated_at") @db.Timestamptz
+  maintenanceLogs VehicleMaintenanceLog[]
+
+  @@map("maintenance_work_types")
+}
+
 model VehicleMaintenanceLog {
   id           String                    @id @default(uuid()) @db.Uuid
   vehicleId    String                    @map("vehicle_id") @db.Uuid
-  type         VehicleMaintenanceType
+  workTypeId   String                    @map("work_type_id") @db.Uuid
   status       VehicleMaintenanceStatus  @default(open)
   title        String                    @db.VarChar(200)
   description  String?                   @db.Text
@@ -457,11 +458,12 @@ model VehicleMaintenanceLog {
   createdAt    DateTime                  @default(now()) @map("created_at") @db.Timestamptz
   updatedAt    DateTime                  @updatedAt @map("updated_at") @db.Timestamptz
   vehicle      Vehicle                   @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  workType     MaintenanceWorkType       @relation(fields: [workTypeId], references: [id], onDelete: Restrict)
   createdBy    User?                     @relation("VehicleMaintenanceCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([vehicleId, createdAt])
   @@index([status])
-  @@index([type])
+  @@index([workTypeId])
   @@map("vehicle_maintenance_logs")
 }
 
