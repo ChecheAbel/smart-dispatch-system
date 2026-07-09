@@ -16,7 +16,7 @@ import {
   adminIconBoxClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
-import { PERMISSIONS } from "@/lib/permissions";
+import { canReadCompliance } from "@/lib/permissions";
 import { fetchVehicleComplianceSummary } from "@/lib/vehicle-api";
 import { complianceStatusToExpiryTone, expiryToneClass } from "@/lib/vehicle-compliance";
 import { formatMessage, getAdminComplianceMessages } from "@/translations";
@@ -223,7 +223,7 @@ export function ComplianceOverviewPage() {
   const { locale } = useLocale();
   const { hasPermission } = useAuth();
   const copy = getAdminComplianceMessages(locale);
-  const canRead = hasPermission(PERMISSIONS.vehicles.read);
+  const canRead = canReadCompliance(hasPermission);
   const [summary, setSummary] = useState<VehicleComplianceSummary | null>(null);
   const [loading, setLoading] = useState(true);
 

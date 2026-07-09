@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ClipboardList, MoreHorizontal, Pencil, ShieldCheck } from "lucide-react";
+import { ClipboardList, Eye, MoreHorizontal, Pencil, ShieldCheck } from "lucide-react";
 import type { Vehicle, VehicleComplianceStatus } from "@smart-dispatch/types";
 import { useAuth, useLocale } from "@/components/shared/providers";
 import {
@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { adminBadgeGoldClass } from "@/lib/admin-theme";
-import { PERMISSIONS } from "@/lib/permissions";
+import { canReadCompliance, canWriteCompliance } from "@/lib/permissions";
 import { fetchVehicles } from "@/lib/vehicle-api";
 import {
   expiryToneClass,
@@ -85,7 +85,10 @@ function ComplianceRowActions({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
         <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => onView(vehicle)}>{labels.view}</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => onView(vehicle)}>
+            <Eye />
+            {labels.view}
+          </DropdownMenuItem>
           {canWrite ? (
             <DropdownMenuItem onClick={() => onEdit(vehicle)}>
               <Pencil />
@@ -105,8 +108,8 @@ export function ComplianceListPage({ type }: ComplianceListPageProps) {
   const { hasPermission } = useAuth();
   const copy = getAdminComplianceMessages(locale);
   const pageCopy = type === "insurance" ? copy.insurance : copy.inspection;
-  const canRead = hasPermission(PERMISSIONS.vehicles.read);
-  const canWrite = hasPermission(PERMISSIONS.vehicles.write);
+  const canRead = canReadCompliance(hasPermission);
+  const canWrite = canWriteCompliance(hasPermission);
 
   const initialStatus = searchParams.get("status");
   const [statusFilter, setStatusFilter] = useState<string>(

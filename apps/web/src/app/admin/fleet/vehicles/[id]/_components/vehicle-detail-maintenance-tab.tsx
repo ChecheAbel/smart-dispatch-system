@@ -1,52 +1,16 @@
-import type { Dispatch, SetStateAction } from "react";
-import {
-  CheckCircle2,
-  ChevronDown,
-  CircleDollarSign,
-  Gauge,
-  Plus,
-  Store,
-  Wrench,
-} from "lucide-react";
-import type {
-  MaintenanceWorkType,
-  Vehicle,
-  VehicleMaintenanceLog,
-  VehicleMaintenanceStatus,
-} from "@smart-dispatch/types";
-import { AdminDatePicker } from "@/components/shared/admin-date-picker";
+import { CheckCircle2, Plus, Wrench } from "lucide-react";
+import type { Vehicle, VehicleMaintenanceLog } from "@smart-dispatch/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   adminCardClass,
   adminHeadingClass,
   adminIconBoxClass,
-  adminInputClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
 import { formatMessage, getAdminVehiclesMessages } from "@/translations";
 import { cn } from "@/lib/utils";
-import {
-  formatDateInputValue,
-  MAINTENANCE_STATUSES,
-  maintenanceStatusClass,
-  maintenanceTypeIcon,
-  parseDateInputValue,
-  textareaClassName,
-} from "./vehicle-detail-shared";
-
-export type MaintenanceFormState = {
-  work_type_id: string;
-  status: VehicleMaintenanceStatus;
-  description: string;
-  vendor: string;
-  cost_amount: string;
-  odometer_km: string;
-  started_at: string;
-  next_due_at: string;
-};
+import { maintenanceStatusClass } from "./vehicle-detail-shared";
 
 type VehicleDetailMaintenanceTabProps = {
   vehicle: Vehicle;
@@ -54,14 +18,7 @@ type VehicleDetailMaintenanceTabProps = {
   canWrite: boolean;
   maintenance: VehicleMaintenanceLog[];
   maintenanceLoading: boolean;
-  workTypes: MaintenanceWorkType[];
-  workTypesLoading: boolean;
-  maintenanceForm: MaintenanceFormState;
-  setMaintenanceForm: Dispatch<SetStateAction<MaintenanceFormState>>;
-  showMaintenanceForm: boolean;
-  setShowMaintenanceForm: Dispatch<SetStateAction<boolean>>;
-  creatingMaintenance: boolean;
-  onCreateMaintenance: () => void;
+  onOpenCreateSheet: () => void;
   onCompleteMaintenance: (log: VehicleMaintenanceLog) => void;
 };
 
@@ -71,14 +28,7 @@ export function VehicleDetailMaintenanceTab({
   canWrite,
   maintenance,
   maintenanceLoading,
-  workTypes,
-  workTypesLoading,
-  maintenanceForm,
-  setMaintenanceForm,
-  showMaintenanceForm,
-  setShowMaintenanceForm,
-  creatingMaintenance,
-  onCreateMaintenance,
+  onOpenCreateSheet,
   onCompleteMaintenance,
 }: VehicleDetailMaintenanceTabProps) {
   return (
@@ -97,279 +47,14 @@ export function VehicleDetailMaintenanceTab({
         {canWrite ? (
           <Button
             type="button"
-            variant={showMaintenanceForm ? "outline" : "default"}
-            className={cn(
-              "w-full shrink-0 sm:w-auto",
-              showMaintenanceForm ? undefined : adminPrimaryButtonClass,
-            )}
-            onClick={() => setShowMaintenanceForm((open) => !open)}
+            className={cn("w-full shrink-0 sm:w-auto", adminPrimaryButtonClass)}
+            onClick={onOpenCreateSheet}
           >
-            {showMaintenanceForm ? (
-              detail.maintenance.closeForm
-            ) : (
-              <>
-                <Plus className="size-4" />
-                {detail.maintenance.openForm}
-              </>
-            )}
+            <Plus className="size-4" />
+            {detail.maintenance.openForm}
           </Button>
         ) : null}
       </div>
-
-      {canWrite && showMaintenanceForm ? (
-        <section
-          className={cn(
-            adminCardClass,
-            "overflow-hidden rounded-2xl border border-slate-200/80 shadow-sm",
-          )}
-        >
-          <div className="flex items-start gap-3 border-b border-slate-100 bg-gradient-to-r from-[#1C3A34]/[0.04] to-transparent px-4 py-3.5 sm:px-5 sm:py-4 lg:px-6">
-            <div className="rounded-xl bg-[#1C3A34] p-2.5 text-white shadow-sm">
-              <Wrench className="size-4" />
-            </div>
-            <div className="min-w-0">
-              <h3 className={cn("text-base", adminHeadingClass)}>{detail.maintenance.createTitle}</h3>
-              <p className="mt-0.5 text-sm text-slate-500">
-                {formatMessage(detail.maintenance.createSubtitle, {
-                  plate: vehicle.plate_number,
-                })}
-              </p>
-            </div>
-          </div>
-
-          <form
-            className="space-y-5 p-4 sm:space-y-6 sm:p-5 lg:p-6"
-            onSubmit={(event) => {
-              event.preventDefault();
-              onCreateMaintenance();
-            }}
-          >
-            <div className="space-y-3">
-              <div className="flex items-baseline justify-between gap-2">
-                <Label className="text-sm font-semibold text-slate-800">{detail.maintenance.type}</Label>
-              </div>
-              <div className="grid grid-cols-2 gap-2 min-[480px]:grid-cols-3 sm:grid-cols-4 lg:grid-cols-7">
-                {workTypesLoading ? (
-                  <p className="col-span-full text-sm text-slate-500">{detail.loading}</p>
-                ) : workTypes.length === 0 ? (
-                  <p className="col-span-full text-sm text-slate-500">{detail.maintenance.emptyHint}</p>
-                ) : (
-                  workTypes.map((workType) => {
-                    const Icon = maintenanceTypeIcon(workType.slug);
-                    const selected = maintenanceForm.work_type_id === workType.id;
-                    return (
-                      <button
-                        key={workType.id}
-                        type="button"
-                        onClick={() =>
-                          setMaintenanceForm((current) => ({
-                            ...current,
-                            work_type_id: workType.id,
-                          }))
-                        }
-                        className={cn(
-                          "flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-center transition",
-                          selected
-                            ? "border-[#1C3A34] bg-[#1C3A34] text-white shadow-sm"
-                            : "border-slate-200 bg-white text-slate-600 hover:border-[#1C3A34]/30 hover:bg-[#1C3A34]/[0.03]",
-                        )}
-                      >
-                        <Icon className="size-4 shrink-0" />
-                        <span className="text-[11px] font-medium leading-tight">{workType.name}</span>
-                      </button>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <Label className="text-sm font-semibold text-slate-800">{detail.maintenance.status}</Label>
-              <div className="flex flex-wrap gap-2">
-                {MAINTENANCE_STATUSES.map((status) => {
-                  const selected = maintenanceForm.status === status;
-                  return (
-                    <button
-                      key={status}
-                      type="button"
-                      onClick={() => setMaintenanceForm((current) => ({ ...current, status }))}
-                      className={cn(
-                        "inline-flex items-center rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
-                        selected
-                          ? cn(maintenanceStatusClass(status), "ring-1 ring-current/20")
-                          : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-700",
-                      )}
-                    >
-                      {detail.maintenanceStatuses[status]}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="space-y-1.5 rounded-xl border border-slate-100 bg-slate-50/40 p-4">
-              <Label htmlFor="maintenance-description" className="text-sm font-semibold">
-                {detail.maintenance.description}
-              </Label>
-              <textarea
-                id="maintenance-description"
-                value={maintenanceForm.description}
-                onChange={(event) =>
-                  setMaintenanceForm((current) => ({
-                    ...current,
-                    description: event.target.value,
-                  }))
-                }
-                rows={5}
-                placeholder={detail.maintenance.descriptionPlaceholder}
-                className={textareaClassName}
-              />
-            </div>
-
-            <details className="group overflow-hidden rounded-xl border border-slate-200 bg-white open:shadow-sm">
-              <summary className="flex cursor-pointer list-none flex-col items-start gap-2 px-3.5 py-3 marker:content-none sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-4 sm:py-3.5 [&::-webkit-details-marker]:hidden">
-                <span className="flex min-w-0 items-start gap-2.5 sm:items-center sm:gap-3">
-                  <span className={adminIconBoxClass}>
-                    <Store className="size-3.5" />
-                  </span>
-                  <span>
-                    <span className="block text-sm font-semibold text-slate-800">
-                      {detail.maintenance.optionalDetails}
-                    </span>
-                    <span className="mt-0.5 block text-xs text-slate-500">
-                      {detail.maintenance.optionalDetailsHint}
-                    </span>
-                  </span>
-                </span>
-                <ChevronDown className="size-4 shrink-0 text-slate-400 transition group-open:rotate-180" />
-              </summary>
-
-              <div className="space-y-4 border-t border-slate-100 px-3.5 py-3.5 sm:px-4 sm:py-4">
-                <div className="space-y-1.5">
-                  <Label
-                    htmlFor="maintenance-vendor"
-                    className="inline-flex items-center gap-1.5 text-sm font-medium"
-                  >
-                    <Store className="size-3.5 text-slate-400" />
-                    {detail.maintenance.vendor}
-                  </Label>
-                  <Input
-                    id="maintenance-vendor"
-                    value={maintenanceForm.vendor}
-                    onChange={(event) =>
-                      setMaintenanceForm((current) => ({
-                        ...current,
-                        vendor: event.target.value,
-                      }))
-                    }
-                    placeholder={detail.maintenance.vendorPlaceholder}
-                    className={cn(adminInputClass, "bg-white")}
-                  />
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-1.5">
-                    <Label
-                      htmlFor="maintenance-cost"
-                      className="inline-flex items-center gap-1.5 text-sm font-medium"
-                    >
-                      <CircleDollarSign className="size-3.5 text-slate-400" />
-                      {detail.maintenance.cost}
-                    </Label>
-                    <Input
-                      id="maintenance-cost"
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      value={maintenanceForm.cost_amount}
-                      onChange={(event) =>
-                        setMaintenanceForm((current) => ({
-                          ...current,
-                          cost_amount: event.target.value,
-                        }))
-                      }
-                      placeholder={detail.maintenance.costPlaceholder}
-                      className={cn(adminInputClass, "bg-white")}
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <Label
-                      htmlFor="maintenance-odometer"
-                      className="inline-flex items-center gap-1.5 text-sm font-medium"
-                    >
-                      <Gauge className="size-3.5 text-slate-400" />
-                      {detail.maintenance.odometer}
-                    </Label>
-                    <Input
-                      id="maintenance-odometer"
-                      type="number"
-                      min={0}
-                      value={maintenanceForm.odometer_km}
-                      onChange={(event) =>
-                        setMaintenanceForm((current) => ({
-                          ...current,
-                          odometer_km: event.target.value,
-                        }))
-                      }
-                      placeholder={detail.maintenance.odometerPlaceholder}
-                      className={cn(adminInputClass, "bg-white")}
-                    />
-                  </div>
-                  <AdminDatePicker
-                    id="maintenance-started"
-                    className="min-w-0"
-                    label={detail.maintenance.startedAt}
-                    placeholder={detail.overview.pickDate}
-                    clearLabel={detail.overview.clearDate}
-                    todayLabel={detail.overview.today}
-                    value={parseDateInputValue(maintenanceForm.started_at)}
-                    onChange={(date) =>
-                      setMaintenanceForm((current) => ({
-                        ...current,
-                        started_at: formatDateInputValue(date),
-                      }))
-                    }
-                  />
-                  <AdminDatePicker
-                    id="maintenance-next-due"
-                    className="min-w-0"
-                    label={detail.maintenance.nextDueAt}
-                    placeholder={detail.overview.pickDate}
-                    clearLabel={detail.overview.clearDate}
-                    todayLabel={detail.overview.today}
-                    value={parseDateInputValue(maintenanceForm.next_due_at)}
-                    onChange={(date) =>
-                      setMaintenanceForm((current) => ({
-                        ...current,
-                        next_due_at: formatDateInputValue(date),
-                      }))
-                    }
-                  />
-                </div>
-              </div>
-            </details>
-
-            <div className="flex flex-col-reverse gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full sm:w-auto"
-                onClick={() => setShowMaintenanceForm(false)}
-              >
-                {detail.maintenance.closeForm}
-              </Button>
-              <Button
-                type="submit"
-                disabled={creatingMaintenance}
-                className={cn(adminPrimaryButtonClass, "w-full sm:w-auto")}
-              >
-                <Plus className="size-4" />
-                {creatingMaintenance ? detail.maintenance.saving : detail.maintenance.create}
-              </Button>
-            </div>
-          </form>
-        </section>
-      ) : null}
 
       <section className={cn(adminCardClass, "rounded-2xl p-4 sm:p-5 lg:p-6")}>
         {maintenanceLoading ? (
@@ -387,6 +72,17 @@ export function VehicleDetailMaintenanceTab({
               <p className={cn("text-base", adminHeadingClass)}>{detail.maintenance.emptyTitle}</p>
               <p className="max-w-sm text-sm text-slate-500">{detail.maintenance.emptyHint}</p>
             </div>
+            {canWrite ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="mt-1 border-[#1C3A34]/20 text-[#1C3A34] hover:bg-[#1C3A34]/5"
+                onClick={onOpenCreateSheet}
+              >
+                <Plus className="size-4" />
+                {detail.maintenance.openForm}
+              </Button>
+            ) : null}
           </div>
         ) : (
           <ul className="space-y-3">

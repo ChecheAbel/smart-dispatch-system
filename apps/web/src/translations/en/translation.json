@@ -2011,7 +2011,7 @@
     "accessDenied": {
       "eyebrow": "Access denied",
       "title": "You do not have permission",
-      "description": "View access to vehicles is required to open compliance pages.",
+      "description": "View access to compliance or vehicles is required to open compliance pages.",
       "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
       "permissionNote": "Access is controlled by your role permissions.",
       "goToDashboard": "Go to dashboard"

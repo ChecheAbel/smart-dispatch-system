@@ -44,6 +44,10 @@ export const PERMISSIONS = {
     assign_driver: "vehicles.assign_driver",
     delete: "vehicles.delete",
   },
+  compliance: {
+    read: "compliance.read",
+    write: "compliance.write",
+  },
   maintenance_work_types: {
     read: "maintenance_work_types.read",
     write: "maintenance_work_types.write",
@@ -92,4 +96,35 @@ export function createPermissionChecker(permissions: Permission[]) {
   return function hasPermission(slug: string) {
     return granted.has(slug);
   };
+}
+
+export function hasAnyPermission(
+  hasPermission: (slug: string) => boolean,
+  ...slugs: string[]
+) {
+  return slugs.some((slug) => hasPermission(slug));
+}
+
+export function canReadCompliance(hasPermission: (slug: string) => boolean) {
+  return hasAnyPermission(
+    hasPermission,
+    PERMISSIONS.compliance.read,
+    PERMISSIONS.vehicles.read,
+  );
+}
+
+export function canWriteCompliance(hasPermission: (slug: string) => boolean) {
+  return hasAnyPermission(
+    hasPermission,
+    PERMISSIONS.compliance.write,
+    PERMISSIONS.vehicles.write,
+  );
+}
+
+export function canReadVehicle(hasPermission: (slug: string) => boolean) {
+  return hasAnyPermission(
+    hasPermission,
+    PERMISSIONS.vehicles.read,
+    PERMISSIONS.compliance.read,
+  );
 }

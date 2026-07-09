@@ -70,7 +70,7 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
   }
 
   if (normalizedSlug === "compliance") {
-    return ["vehicles.read"];
+    return ["compliance.read", "vehicles.read"];
   }
 
   if (
@@ -78,7 +78,7 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
     normalizedSlug === "compliance-insurance" ||
     normalizedSlug === "compliance-inspection"
   ) {
-    return ["vehicles.read"];
+    return ["compliance.read", "vehicles.read"];
   }
 
   if (normalizedSlug === "location-management") {

@@ -5,11 +5,9 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, CalendarClock, ClipboardList, History, ShieldCheck, Truck, Wrench } from "lucide-react";
 import type {
-  MaintenanceWorkType,
   Vehicle,
   VehicleHistoryEvent,
   VehicleMaintenanceLog,
-  VehicleMaintenanceStatus,
 } from "@smart-dispatch/types";
 import { useAuth, useLocale } from "@/components/shared/providers";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
@@ -22,10 +20,12 @@ import {
   adminIconBoxClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
-import { PERMISSIONS } from "@/lib/permissions";
-import { fetchActiveMaintenanceWorkTypes } from "@/lib/maintenance-work-type-api";
 import {
-  createVehicleMaintenance,
+  canReadVehicle,
+  canWriteCompliance as userCanWriteCompliance,
+  PERMISSIONS,
+} from "@/lib/permissions";
+import {
   fetchVehicleById,
   fetchVehicleHistory,
   fetchVehicleMaintenance,
@@ -35,6 +35,7 @@ import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { formatMessage, getAdminComplianceMessages, getAdminVehiclesMessages } from "@/translations";
 import { cn } from "@/lib/utils";
 import { UpdateComplianceSheet } from "@/app/admin/compliance/_components/update-compliance-sheet";
+import { CreateMaintenanceSheet } from "./create-maintenance-sheet";
 import { VehicleDetailComplianceTab } from "./vehicle-detail-compliance-tab";
 import { VehicleDetailHistoryTab } from "./vehicle-detail-history-tab";
 import { VehicleDetailMaintenanceTab } from "./vehicle-detail-maintenance-tab";
@@ -61,34 +62,22 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
   const copy = getAdminVehiclesMessages(locale);
   const complianceCopy = getAdminComplianceMessages(locale);
   const detail = copy.detail;
-  const canRead = hasPermission(PERMISSIONS.vehicles.read);
-  const canWrite = hasPermission(PERMISSIONS.vehicles.write);
+  const canRead = canReadVehicle(hasPermission);
+  const canWriteFleet = hasPermission(PERMISSIONS.vehicles.write);
+  const canWriteCompliance = userCanWriteCompliance(hasPermission);
+  const canViewFleetOps = hasPermission(PERMISSIONS.vehicles.read);
 
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<DetailTab>(parseTab(searchParams.get("tab")));
   const [history, setHistory] = useState<VehicleHistoryEvent[]>([]);
   const [maintenance, setMaintenance] = useState<VehicleMaintenanceLog[]>([]);
-  const [workTypes, setWorkTypes] = useState<MaintenanceWorkType[]>([]);
-  const [workTypesLoading, setWorkTypesLoading] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [maintenanceLoading, setMaintenanceLoading] = useState(false);
-  const [creatingMaintenance, setCreatingMaintenance] = useState(false);
-  const [showMaintenanceForm, setShowMaintenanceForm] = useState(false);
+  const [maintenanceSheetOpen, setMaintenanceSheetOpen] = useState(false);
   const [complianceSheetOpen, setComplianceSheetOpen] = useState(false);
   const [complianceSheetType, setComplianceSheetType] = useState<ComplianceSheetType>("insurance");
   const [isPending, startTransition] = useTransition();
-
-  const [maintenanceForm, setMaintenanceForm] = useState({
-    work_type_id: "",
-    status: "open" as VehicleMaintenanceStatus,
-    description: "",
-    vendor: "",
-    cost_amount: "",
-    odometer_km: "",
-    started_at: "",
-    next_due_at: "",
-  });
 
   const loadVehicle = useCallback(async () => {
     setLoading(true);
@@ -146,21 +135,11 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
     vehicleId,
   ]);
 
-  const loadWorkTypes = useCallback(async () => {
-    setWorkTypesLoading(true);
-    try {
-      const types = await fetchActiveMaintenanceWorkTypes(locale);
-      setWorkTypes(types);
-      setMaintenanceForm((current) => ({
-        ...current,
-        work_type_id: current.work_type_id || types[0]?.id || "",
-      }));
-    } catch {
-      setWorkTypes([]);
-    } finally {
-      setWorkTypesLoading(false);
+  useEffect(() => {
+    if (!canViewFleetOps && (tab === "maintenance" || tab === "history")) {
+      setTab("compliance");
     }
-  }, [locale]);
+  }, [canViewFleetOps, tab]);
 
   useEffect(() => {
     if (!canRead) return;
@@ -174,11 +153,8 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
   useEffect(() => {
     if (!canRead || !vehicle) return;
     if (tab === "history") void loadHistory();
-    if (tab === "maintenance") {
-      void loadMaintenance();
-      void loadWorkTypes();
-    }
-  }, [canRead, loadHistory, loadMaintenance, loadWorkTypes, tab, vehicle]);
+    if (tab === "maintenance") void loadMaintenance();
+  }, [canRead, loadHistory, loadMaintenance, tab, vehicle]);
 
   function changeTab(next: DetailTab) {
     setTab(next);
@@ -204,57 +180,16 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
     if (tab === "history") void loadHistory();
   }
 
-  async function handleCreateMaintenance() {
-    if (!vehicle || !canWrite) return;
-
-    const selectedWorkType = workTypes.find((type) => type.id === maintenanceForm.work_type_id);
-    if (!selectedWorkType) {
-      showErrorToast({
-        title: detail.toast.maintenanceFailed.title,
-        description: detail.form.titleRequired,
-      });
-      return;
-    }
-
-    setCreatingMaintenance(true);
-    try {
-      await createVehicleMaintenance(vehicle.id, {
-        work_type_id: selectedWorkType.id,
-        status: maintenanceForm.status,
-        title: selectedWorkType.name,
-        description: maintenanceForm.description.trim() || null,
-        vendor: maintenanceForm.vendor.trim() || null,
-        cost_amount: maintenanceForm.cost_amount ? Number(maintenanceForm.cost_amount) : null,
-        odometer_km: maintenanceForm.odometer_km ? Number(maintenanceForm.odometer_km) : null,
-        started_at: maintenanceForm.started_at || null,
-        next_due_at: maintenanceForm.next_due_at || null,
-      });
-      setMaintenanceForm({
-        work_type_id: workTypes[0]?.id || "",
-        status: "open",
-        description: "",
-        vendor: "",
-        cost_amount: "",
-        odometer_km: "",
-        started_at: "",
-        next_due_at: "",
-      });
-      setShowMaintenanceForm(false);
-      showSuccessToast(detail.toast.maintenanceCreated);
-      await Promise.all([loadVehicle(), loadMaintenance()]);
-    } catch (error) {
-      showErrorToast({
-        title: detail.toast.maintenanceFailed.title,
-        description:
-          error instanceof Error ? error.message : detail.toast.maintenanceFailed.description,
-      });
-    } finally {
-      setCreatingMaintenance(false);
-    }
+  async function handleMaintenanceSaved() {
+    await Promise.all([
+      loadVehicle(),
+      loadMaintenance(),
+      tab === "history" ? loadHistory() : Promise.resolve(),
+    ]);
   }
 
   async function handleCompleteMaintenance(log: VehicleMaintenanceLog) {
-    if (!vehicle || !canWrite) return;
+    if (!vehicle || !canWriteFleet) return;
     try {
       await updateVehicleMaintenance(vehicle.id, log.id, {
         status: "completed",
@@ -287,13 +222,24 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
   }, [vehicle?.insurance_expires_at, vehicle?.inspection_expires_at]);
 
   const tabs = useMemo(
-    () => [
-      { id: "overview" as const, label: detail.tabs.overview, icon: ClipboardList },
-      { id: "compliance" as const, label: detail.tabs.compliance, icon: ShieldCheck },
-      { id: "maintenance" as const, label: detail.tabs.maintenance, icon: Wrench },
-      { id: "history" as const, label: detail.tabs.history, icon: History },
+    () =>
+      [
+        { id: "overview" as const, label: detail.tabs.overview, icon: ClipboardList },
+        { id: "compliance" as const, label: detail.tabs.compliance, icon: ShieldCheck },
+        canViewFleetOps
+          ? { id: "maintenance" as const, label: detail.tabs.maintenance, icon: Wrench }
+          : null,
+        canViewFleetOps
+          ? { id: "history" as const, label: detail.tabs.history, icon: History }
+          : null,
+      ].filter((item): item is NonNullable<typeof item> => item !== null),
+    [
+      canViewFleetOps,
+      detail.tabs.compliance,
+      detail.tabs.history,
+      detail.tabs.maintenance,
+      detail.tabs.overview,
     ],
-    [detail.tabs.compliance, detail.tabs.history, detail.tabs.maintenance, detail.tabs.overview],
   );
 
   if (!canRead) {
@@ -472,7 +418,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
           vehicle={vehicle}
           copy={copy}
           locale={locale}
-          canWrite={canWrite}
+          canWrite={canWriteCompliance}
           onNavigateToCompliance={() => changeTab("compliance")}
           onEditInsurance={() => openComplianceSheet("insurance")}
           onEditInspection={() => openComplianceSheet("inspection")}
@@ -485,7 +431,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
           detail={detail}
           complianceCopy={complianceCopy}
           locale={locale}
-          canWrite={canWrite}
+          canWrite={canWriteCompliance}
           onEditInsurance={() => openComplianceSheet("insurance")}
           onEditInspection={() => openComplianceSheet("inspection")}
         />
@@ -495,17 +441,10 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
         <VehicleDetailMaintenanceTab
           vehicle={vehicle}
           detail={detail}
-          canWrite={canWrite}
+          canWrite={canWriteFleet}
           maintenance={maintenance}
           maintenanceLoading={maintenanceLoading}
-          workTypes={workTypes}
-          workTypesLoading={workTypesLoading}
-          maintenanceForm={maintenanceForm}
-          setMaintenanceForm={setMaintenanceForm}
-          showMaintenanceForm={showMaintenanceForm}
-          setShowMaintenanceForm={setShowMaintenanceForm}
-          creatingMaintenance={creatingMaintenance}
-          onCreateMaintenance={() => void handleCreateMaintenance()}
+          onOpenCreateSheet={() => setMaintenanceSheetOpen(true)}
           onCompleteMaintenance={(log) => void handleCompleteMaintenance(log)}
         />
       ) : null}
@@ -524,6 +463,13 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
         type={complianceSheetType}
         vehicle={vehicle}
         onSuccess={() => void handleComplianceSaved()}
+      />
+
+      <CreateMaintenanceSheet
+        open={maintenanceSheetOpen}
+        onOpenChange={setMaintenanceSheetOpen}
+        vehicle={vehicle}
+        onSuccess={() => void handleMaintenanceSaved()}
       />
     </div>
   );

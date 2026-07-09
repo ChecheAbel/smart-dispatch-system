@@ -100,6 +100,41 @@ function parseComplianceBody(body: Record<string, unknown>) {
   };
 }
 
+const COMPLIANCE_ONLY_PATCH_KEYS = new Set([
+  "insurance_provider",
+  "insurance_policy_number",
+  "insurance_issued_at",
+  "insurance_expires_at",
+  "insurance_notes",
+  "inspection_center",
+  "inspection_certificate_number",
+  "inspection_performed_at",
+  "inspection_expires_at",
+  "inspection_notes",
+  "registration_expires_at",
+]);
+
+async function assertCanPatchVehicle(req: AuthenticatedRequest, res: Response) {
+  if (!req.user) {
+    sendError(res, "Unauthorized.", 401);
+    return false;
+  }
+
+  const hasVehicleWrite = await userHasPermission(req.user.id, "vehicles.write");
+  if (hasVehicleWrite) {
+    return true;
+  }
+
+  const body = req.body ?? {};
+  const disallowedKeys = Object.keys(body).filter((key) => !COMPLIANCE_ONLY_PATCH_KEYS.has(key));
+  if (disallowedKeys.length > 0) {
+    sendError(res, "You can only update insurance and inspection fields.", 403);
+    return false;
+  }
+
+  return true;
+}
+
 function mapDriverAssignmentError(error: unknown) {
   if (!(error instanceof Error)) return null;
 
@@ -130,7 +165,7 @@ async function assertCanAssignVehicleDriver(req: AuthenticatedRequest, res: Resp
   return true;
 }
 
-router.get("/", requirePermission("vehicles.read"), async (req: Request, res: Response) => {
+router.get("/", requirePermission("vehicles.read", "compliance.read"), async (req: Request, res: Response) => {
   try {
     const locale = getRequestLocale(req);
     const pagination = parsePaginationQuery(req.query);
@@ -175,7 +210,7 @@ router.get("/driver-options", requirePermission("vehicles.assign_driver"), async
   }
 });
 
-router.get("/compliance/summary", requirePermission("vehicles.read"), async (_req: Request, res: Response) => {
+router.get("/compliance/summary", requirePermission("compliance.read", "vehicles.read"), async (_req: Request, res: Response) => {
   try {
     const summary = await getVehicleComplianceSummary();
     return sendSuccess(res, { summary });
@@ -184,7 +219,7 @@ router.get("/compliance/summary", requirePermission("vehicles.read"), async (_re
   }
 });
 
-router.get("/:id", requirePermission("vehicles.read"), async (req: Request, res: Response) => {
+router.get("/:id", requirePermission("vehicles.read", "compliance.read"), async (req: Request, res: Response) => {
   try {
     const locale = getRequestLocale(req);
     const vehicle = await findVehicleById(req.params.id);
@@ -525,12 +560,16 @@ router.post("/", requirePermission("vehicles.write"), async (req: AuthenticatedR
   }
 });
 
-router.patch("/:id", requirePermission("vehicles.write"), async (req: AuthenticatedRequest, res: Response) => {
+router.patch("/:id", requirePermission("vehicles.write", "compliance.write"), async (req: AuthenticatedRequest, res: Response) => {
   try {
     const locale = getRequestLocale(req);
     const existing = await findVehicleById(req.params.id);
     if (!existing) {
       return sendError(res, "Vehicle not found.", 404);
+    }
+
+    if (!(await assertCanPatchVehicle(req, res))) {
+      return;
     }
 
     if (req.body?.assigned_driver_user_id !== undefined) {
