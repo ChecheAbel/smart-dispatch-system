@@ -40,16 +40,23 @@ let driverUpcomingNamespace: Namespace<
   { userId: string }
 > | null = null;
 
+function normalizeBearerToken(value: string) {
+  const trimmed = value.trim();
+  if (trimmed.startsWith("Bearer ")) {
+    return trimmed.slice("Bearer ".length).trim();
+  }
+  return trimmed;
+}
+
 function getAccessToken(socket: Socket) {
   const authToken = socket.handshake.auth?.token;
   if (typeof authToken === "string" && authToken.trim()) {
-    return authToken.trim();
+    return normalizeBearerToken(authToken) || null;
   }
 
   const header = socket.handshake.headers.authorization;
-  if (typeof header === "string" && header.startsWith("Bearer ")) {
-    const token = header.slice("Bearer ".length).trim();
-    return token || null;
+  if (typeof header === "string" && header.trim()) {
+    return normalizeBearerToken(header) || null;
   }
 
   return null;
@@ -75,7 +82,6 @@ function registerNamespace(io: Server) {
   namespace.use(async (socket, next) => {
     try {
       const token = getAccessToken(socket);
-      console.log("token", token);
       if (!token) {
         next(new Error("Missing or invalid authorization."));
         return;
@@ -90,8 +96,8 @@ function registerNamespace(io: Server) {
 
       socket.data.userId = user.id;
       next();
-    } catch {
-      next(new Error("Unauthorized."));
+    } catch (error) {
+      next(new Error(error instanceof Error ? error.message : "Unauthorized."));
     }
   });
 

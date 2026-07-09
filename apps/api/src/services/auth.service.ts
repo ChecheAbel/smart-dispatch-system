@@ -403,9 +403,17 @@ export async function registerUserApplication(input: {
   };
 }
 
+function normalizeAccessToken(accessToken: string) {
+  const trimmed = accessToken.trim();
+  if (trimmed.startsWith("Bearer ")) {
+    return trimmed.slice("Bearer ".length).trim();
+  }
+  return trimmed;
+}
+
 export async function getUserFromAccessToken(accessToken: string) {
   try {
-    const payload = jwt.verify(accessToken, getJwtSecret()) as jwt.JwtPayload;
+    const payload = jwt.verify(normalizeAccessToken(accessToken), getJwtSecret()) as jwt.JwtPayload;
     if (!payload.sub || typeof payload.sub !== "string") {
       throw new AuthError("Invalid access token.", 401);
     }
