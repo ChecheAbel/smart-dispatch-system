@@ -23,7 +23,7 @@ import { registerMaintenanceWorkTypeRoutes } from "./routes/maintenance-work-typ
 import { registerFarePlanRoutes } from "./routes/fare-plan.routes";
 import { registerRideRequestRoutes } from "./routes/ride-request.routes";
 import { registerAdminRideRequestRoutes } from "./routes/admin-ride-request.routes";
-import { registerDriverUpcomingTripsWebSocket } from "./websocket/driver-upcoming-trips.ws";
+import { registerDriverUpcomingTripsSocket } from "./websocket/driver-upcoming-trips.socket";
 import { requestLogger } from "./middleware/request-logger";
 import { ensureDriverLicenseUploadDir, getDriverLicenseUploadDir } from "./utils/driver-license-upload";
 import { sendSuccess } from "./utils/response";
@@ -58,7 +58,7 @@ registerLocationRoutes(app);
 registerFarePlanRoutes(app);
 registerRideRequestRoutes(app);
 registerAdminRideRequestRoutes(app);
-registerDriverUpcomingTripsWebSocket(server);
+registerDriverUpcomingTripsSocket(server);
 
 app.get("/api/health", (_req, res) => {
   sendSuccess(res, { status: "ok" }, { message: "Smart Dispatch System API is running" });

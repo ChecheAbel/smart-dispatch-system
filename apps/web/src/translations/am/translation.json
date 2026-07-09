@@ -2026,16 +2026,30 @@
       "overview": {
         "vehicleInfo": "የተሽከርካሪ መረጃ",
         "compliance": "ህጋዊ እና የደህንነት ሰነዶች",
-        "complianceHint": "የኢንሹራንስ እና የመንገድ ብቃት ምርመራ ሰነዶች የማብቂያ ቀኖችን ይከታተሉ።",
+        "complianceHint": "ለዚህ ተሽከርካሪ የኢንሹራንስ እና የመንገድ ብቃት ምርመራ ዝርዝሮችን ይከታተሉ።",
         "insurance": "የኢንሹራንስ ፖሊሲ",
-        "insuranceHint": "የተሽከርካሪው የኢንሹራንስ ፖሊሲ የሚያበቃበት ቀን።",
+        "insuranceHint": "ለዚህ ተሽከርካሪ የሶስተኛ ወገን ኢንሹራንስ ሽፋን።",
         "inspection": "የመንገድ ብቃት ምርመራ",
-        "inspectionHint": "የቴክኒክ ወይም የደህንነት ምርመራ ሰነድ የሚያበቃበት ቀን (ለምሳሌ ዓመታዊ የመንገድ ብቃት ምርመራ)።",
+        "inspectionHint": "የቴክኒክ ወይም የደህንነት ምርመራ ሰነድ ዝርዝሮች።",
+        "insuranceProvider": "ኢንሹራንስ አቅራቢ",
+        "insuranceProviderPlaceholder": "ለምሳሌ ኒያላ ኢንሹራንስ",
+        "insurancePolicyNumber": "የፖሊሲ ቁጥር",
+        "insurancePolicyNumberPlaceholder": "ለምሳሌ POL-2026-001",
+        "insuranceIssuedAt": "የተሰጠበት ቀን",
+        "insuranceNotes": "የኢንሹራንስ ማስታወሻዎች",
+        "insuranceNotesPlaceholder": "የሽፋን ዝርዝሮች ወይም ማስታወሻዎች…",
+        "inspectionCenter": "የምርመራ ማዕከል",
+        "inspectionCenterPlaceholder": "ለምሳሌ አዲስ አበባ የተሽከርካሪ ምርመራ ማዕከል",
+        "inspectionCertificateNumber": "የሰርተፊኬት ቁጥር",
+        "inspectionCertificateNumberPlaceholder": "ለምሳሌ INS-45821",
+        "inspectionPerformedAt": "የተመረመረበት ቀን",
+        "inspectionNotes": "የምርመራ ማስታወሻዎች",
+        "inspectionNotesPlaceholder": "ውጤቶች፣ ሁኔታዎች ወይም ተከታይ እርምጃዎች…",
         "expiresOn": "የማብቂያ ቀን",
         "pickDate": "ቀን ይምረጡ",
         "clearDate": "አጽዳ",
         "today": "ዛሬ",
-        "saveExpiry": "ቀኖችን አስቀምጥ",
+        "saveCompliance": "ተገዢነት አስቀምጥ",
         "saving": "በማስቀመጥ ላይ...",
         "noNotes": "ምንም ማስታወሻ የለም",
         "unassigned": "አሽከርካሪ አልተመደበም",
@@ -2127,12 +2141,12 @@
           "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
         },
         "expirySaved": {
-          "title": "የማብቂያ ቀኖች ተቀምጠዋል",
-          "description": "የኢንሹራንስ እና የምርመራ የማብቂያ ቀኖች ተዘምነዋል።"
+          "title": "ተገዢነት ተቀምጧል",
+          "description": "የኢንሹራንስ እና የምርመራ ዝርዝሮች ተዘምነዋል።"
         },
         "expiryFailed": {
-          "title": "የማብቂያ ቀኖችን ማስቀመጥ አልተቻለም",
-          "description": "እባክዎ ቀኖቹን ያረጋግጡና እንደገና ይሞክሩ።"
+          "title": "ተገዢነትን ማስቀመጥ አልተቻለም",
+          "description": "እባክዎ ዝርዝሮቹን ያረጋግጡና እንደገና ይሞክሩ።"
         },
         "maintenanceCreated": {
           "title": "ጥገና ተመዝግቧል",

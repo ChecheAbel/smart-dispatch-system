@@ -1405,20 +1405,21 @@ export const extensionPaths = {
       summary: "Driver upcoming trips",
       description:
         "Lists rides where the authenticated user is the assigned driver. Only trips with upcoming driver statuses are returned. `pending` is never included because that status is admin review only.\n\n" +
-        "**WebSocket (real-time):** upgrade this same path for live upcoming-trip updates.\n\n" +
-        "- URL: `ws://{host}/api/ride-requests/driver/upcoming`\n" +
-        "- Auth: `Authorization: Bearer {access_token}` header on the WebSocket handshake\n" +
+        "**Socket.IO (real-time):** connect to namespace `/api/ride-requests/driver/upcoming` for live upcoming-trip updates.\n\n" +
+        "- URL: `http://{host}` with namespace `/api/ride-requests/driver/upcoming`\n" +
+        "- Auth: `auth: { token: \"{access_token}\" }` on connect, or `Authorization: Bearer {access_token}` header\n" +
         "- Permission: `driver.upcoming`\n" +
         "- Localized fields include a `translations` array with all languages (`en`, `am`, ...).\n\n" +
-        "Server messages:\n" +
+        "Server events:\n" +
         "- `snapshot`: full upcoming trip list sent on connect\n" +
         "- `trip_added`: trip entered the driver's upcoming list\n" +
         "- `trip_updated`: assigned upcoming trip changed\n" +
         "- `trip_removed`: trip left the upcoming list\n" +
-        "- `pong`: heartbeat response\n\n" +
-        "Client messages:\n" +
-        "- `{ \"type\": \"ping\" }`\n" +
-        "- `{ \"type\": \"refresh\" }` reload snapshot",
+        "- `pong`: heartbeat response\n" +
+        "- `error`: connection or message error\n\n" +
+        "Client events:\n" +
+        "- `ping`\n" +
+        "- `refresh` reload snapshot",
       security,
       parameters: [
         { $ref: "#/components/parameters/Page" },

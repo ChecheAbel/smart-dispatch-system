@@ -81,6 +81,22 @@ function parseOptionalNumber(value: unknown) {
   return undefined;
 }
 
+function parseComplianceBody(body: Record<string, unknown>) {
+  return {
+    insuranceProvider: getOptionalString(body.insurance_provider),
+    insurancePolicyNumber: getOptionalString(body.insurance_policy_number),
+    insuranceIssuedAt: parseOptionalDate(body.insurance_issued_at),
+    insuranceExpiresAt: parseOptionalDate(body.insurance_expires_at),
+    insuranceNotes: getOptionalString(body.insurance_notes),
+    inspectionCenter: getOptionalString(body.inspection_center),
+    inspectionCertificateNumber: getOptionalString(body.inspection_certificate_number),
+    inspectionPerformedAt: parseOptionalDate(body.inspection_performed_at),
+    inspectionExpiresAt: parseOptionalDate(body.inspection_expires_at),
+    inspectionNotes: getOptionalString(body.inspection_notes),
+    registrationExpiresAt: parseOptionalDate(body.registration_expires_at),
+  };
+}
+
 function mapDriverAssignmentError(error: unknown) {
   if (!(error instanceof Error)) return null;
 
@@ -477,9 +493,7 @@ router.post("/", requirePermission("vehicles.write"), async (req: AuthenticatedR
       year: year ?? null,
       status,
       notes: getOptionalString(req.body?.notes),
-      insuranceExpiresAt: parseOptionalDate(req.body?.insurance_expires_at) ?? null,
-      inspectionExpiresAt: parseOptionalDate(req.body?.inspection_expires_at) ?? null,
-      registrationExpiresAt: parseOptionalDate(req.body?.registration_expires_at) ?? null,
+      ...parseComplianceBody(req.body ?? {}),
       actorUserId: req.user?.id,
     });
 
@@ -561,9 +575,7 @@ router.patch("/:id", requirePermission("vehicles.write"), async (req: Authentica
       year: parseYear(req.body?.year),
       status: parseVehicleStatus(req.body?.status),
       notes: getOptionalString(req.body?.notes),
-      insuranceExpiresAt: parseOptionalDate(req.body?.insurance_expires_at),
-      inspectionExpiresAt: parseOptionalDate(req.body?.inspection_expires_at),
-      registrationExpiresAt: parseOptionalDate(req.body?.registration_expires_at),
+      ...parseComplianceBody(req.body ?? {}),
       actorUserId: req.user?.id,
     });
 

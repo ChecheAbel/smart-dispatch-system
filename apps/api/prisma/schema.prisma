@@ -396,8 +396,16 @@ model Vehicle {
   year                     Int?
   status                   VehicleStatus @default(active)
   notes                    String?       @db.Text
+  insuranceProvider        String?       @map("insurance_provider") @db.VarChar(150)
+  insurancePolicyNumber    String?       @map("insurance_policy_number") @db.VarChar(80)
+  insuranceIssuedAt        DateTime?     @map("insurance_issued_at") @db.Date
   insuranceExpiresAt       DateTime?     @map("insurance_expires_at") @db.Date
+  insuranceNotes           String?       @map("insurance_notes") @db.Text
+  inspectionCenter         String?       @map("inspection_center") @db.VarChar(150)
+  inspectionCertificateNumber String?    @map("inspection_certificate_number") @db.VarChar(80)
+  inspectionPerformedAt    DateTime?     @map("inspection_performed_at") @db.Date
   inspectionExpiresAt      DateTime?     @map("inspection_expires_at") @db.Date
+  inspectionNotes          String?       @map("inspection_notes") @db.Text
   registrationExpiresAt    DateTime?     @map("registration_expires_at") @db.Date
   createdAt                DateTime      @default(now()) @map("created_at") @db.Timestamptz
   updatedAt                DateTime      @updatedAt @map("updated_at") @db.Timestamptz

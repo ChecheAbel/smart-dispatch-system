@@ -24,8 +24,16 @@ type DbVehicle = {
   year: number | null;
   status: "active" | "maintenance" | "retired";
   notes: string | null;
+  insuranceProvider: string | null;
+  insurancePolicyNumber: string | null;
+  insuranceIssuedAt: Date | null;
   insuranceExpiresAt: Date | null;
+  insuranceNotes: string | null;
+  inspectionCenter: string | null;
+  inspectionCertificateNumber: string | null;
+  inspectionPerformedAt: Date | null;
   inspectionExpiresAt: Date | null;
+  inspectionNotes: string | null;
   registrationExpiresAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
@@ -98,8 +106,16 @@ export function toPublicVehicle(
     year: vehicle.year,
     status: vehicle.status,
     notes: vehicle.notes,
+    insurance_provider: vehicle.insuranceProvider,
+    insurance_policy_number: vehicle.insurancePolicyNumber,
+    insurance_issued_at: dateToIsoDate(vehicle.insuranceIssuedAt),
     insurance_expires_at: dateToIsoDate(vehicle.insuranceExpiresAt),
+    insurance_notes: vehicle.insuranceNotes,
+    inspection_center: vehicle.inspectionCenter,
+    inspection_certificate_number: vehicle.inspectionCertificateNumber,
+    inspection_performed_at: dateToIsoDate(vehicle.inspectionPerformedAt),
     inspection_expires_at: dateToIsoDate(vehicle.inspectionExpiresAt),
+    inspection_notes: vehicle.inspectionNotes,
     registration_expires_at: dateToIsoDate(vehicle.registrationExpiresAt),
     open_maintenance_count:
       options?.openMaintenanceCount ?? vehicle._count?.maintenanceLogs ?? undefined,

@@ -361,8 +361,16 @@ export interface Vehicle {
   year: number | null;
   status: VehicleStatus;
   notes: string | null;
+  insurance_provider: string | null;
+  insurance_policy_number: string | null;
+  insurance_issued_at: string | null;
   insurance_expires_at: string | null;
+  insurance_notes: string | null;
+  inspection_center: string | null;
+  inspection_certificate_number: string | null;
+  inspection_performed_at: string | null;
   inspection_expires_at: string | null;
+  inspection_notes: string | null;
   registration_expires_at: string | null;
   open_maintenance_count?: number;
   created_at: string;

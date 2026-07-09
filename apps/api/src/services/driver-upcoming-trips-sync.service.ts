@@ -1,6 +1,6 @@
 import type { RideRequestStatus } from "@smart-dispatch/types";
 import { toPublicRideRequest } from "../mappers/ride-request.mapper";
-import { broadcastDriverUpcomingTripEvent } from "../websocket/driver-upcoming-trips.ws";
+import { broadcastDriverUpcomingTripEvent } from "../websocket/driver-upcoming-trips.socket";
 
 const UPCOMING_STATUSES = new Set<RideRequestStatus>(["confirmed", "in_progress"]);
 

@@ -2026,16 +2026,30 @@
       "overview": {
         "vehicleInfo": "Vehicle information",
         "compliance": "Legal & safety documents",
-        "complianceHint": "Track when insurance and roadworthiness inspection certificates expire.",
+        "complianceHint": "Track insurance and roadworthiness inspection details for this vehicle.",
         "insurance": "Insurance policy",
-        "insuranceHint": "When the vehicle insurance policy expires.",
+        "insuranceHint": "Third-party insurance coverage for this vehicle.",
         "inspection": "Roadworthiness inspection",
-        "inspectionHint": "When the technical or safety inspection certificate expires (e.g. annual roadworthiness test).",
+        "inspectionHint": "Technical or safety inspection certificate details.",
+        "insuranceProvider": "Insurer / provider",
+        "insuranceProviderPlaceholder": "e.g. Nyala Insurance",
+        "insurancePolicyNumber": "Policy number",
+        "insurancePolicyNumberPlaceholder": "e.g. POL-2026-001",
+        "insuranceIssuedAt": "Issued on",
+        "insuranceNotes": "Insurance notes",
+        "insuranceNotesPlaceholder": "Coverage details or reminders…",
+        "inspectionCenter": "Inspection center",
+        "inspectionCenterPlaceholder": "e.g. Addis Ababa vehicle inspection station",
+        "inspectionCertificateNumber": "Certificate number",
+        "inspectionCertificateNumberPlaceholder": "e.g. INS-45821",
+        "inspectionPerformedAt": "Inspected on",
+        "inspectionNotes": "Inspection notes",
+        "inspectionNotesPlaceholder": "Findings, conditions, or follow-up items…",
         "expiresOn": "Expires on",
         "pickDate": "Pick a date",
         "clearDate": "Clear",
         "today": "Today",
-        "saveExpiry": "Save dates",
+        "saveCompliance": "Save compliance",
         "saving": "Saving...",
         "noNotes": "No notes recorded",
         "unassigned": "No driver assigned",
@@ -2127,12 +2141,12 @@
           "description": "Please try again in a moment."
         },
         "expirySaved": {
-          "title": "Expiry dates saved",
-          "description": "Insurance and inspection expiry dates were updated."
+          "title": "Compliance saved",
+          "description": "Insurance and inspection details were updated."
         },
         "expiryFailed": {
-          "title": "Could not save expiry dates",
-          "description": "Please check the dates and try again."
+          "title": "Could not save compliance",
+          "description": "Please check the details and try again."
         },
         "maintenanceCreated": {
           "title": "Maintenance logged",

@@ -64,6 +64,62 @@ type VehicleDetailPageProps = {
 
 type DetailTab = "overview" | "maintenance" | "history";
 
+type ComplianceForm = {
+  insurance_provider: string;
+  insurance_policy_number: string;
+  insurance_issued_at: string;
+  insurance_expires_at: string;
+  insurance_notes: string;
+  inspection_center: string;
+  inspection_certificate_number: string;
+  inspection_performed_at: string;
+  inspection_expires_at: string;
+  inspection_notes: string;
+};
+
+const emptyComplianceForm: ComplianceForm = {
+  insurance_provider: "",
+  insurance_policy_number: "",
+  insurance_issued_at: "",
+  insurance_expires_at: "",
+  insurance_notes: "",
+  inspection_center: "",
+  inspection_certificate_number: "",
+  inspection_performed_at: "",
+  inspection_expires_at: "",
+  inspection_notes: "",
+};
+
+function vehicleToComplianceForm(vehicle: Vehicle): ComplianceForm {
+  return {
+    insurance_provider: vehicle.insurance_provider ?? "",
+    insurance_policy_number: vehicle.insurance_policy_number ?? "",
+    insurance_issued_at: vehicle.insurance_issued_at ?? "",
+    insurance_expires_at: vehicle.insurance_expires_at ?? "",
+    insurance_notes: vehicle.insurance_notes ?? "",
+    inspection_center: vehicle.inspection_center ?? "",
+    inspection_certificate_number: vehicle.inspection_certificate_number ?? "",
+    inspection_performed_at: vehicle.inspection_performed_at ?? "",
+    inspection_expires_at: vehicle.inspection_expires_at ?? "",
+    inspection_notes: vehicle.inspection_notes ?? "",
+  };
+}
+
+function complianceFormToPayload(form: ComplianceForm) {
+  return {
+    insurance_provider: form.insurance_provider.trim() || null,
+    insurance_policy_number: form.insurance_policy_number.trim() || null,
+    insurance_issued_at: form.insurance_issued_at || null,
+    insurance_expires_at: form.insurance_expires_at || null,
+    insurance_notes: form.insurance_notes.trim() || null,
+    inspection_center: form.inspection_center.trim() || null,
+    inspection_certificate_number: form.inspection_certificate_number.trim() || null,
+    inspection_performed_at: form.inspection_performed_at || null,
+    inspection_expires_at: form.inspection_expires_at || null,
+    inspection_notes: form.inspection_notes.trim() || null,
+  };
+}
+
 type ExpiryTone = "ok" | "dueSoon" | "expired" | "notSet";
 
 const textareaClassName = cn(
@@ -203,13 +259,12 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
   const [workTypesLoading, setWorkTypesLoading] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [maintenanceLoading, setMaintenanceLoading] = useState(false);
-  const [savingExpiry, setSavingExpiry] = useState(false);
+  const [savingCompliance, setSavingCompliance] = useState(false);
   const [creatingMaintenance, setCreatingMaintenance] = useState(false);
   const [showMaintenanceForm, setShowMaintenanceForm] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const [insuranceExpiresAt, setInsuranceExpiresAt] = useState("");
-  const [inspectionExpiresAt, setInspectionExpiresAt] = useState("");
+  const [complianceForm, setComplianceForm] = useState<ComplianceForm>(emptyComplianceForm);
 
   const [maintenanceForm, setMaintenanceForm] = useState({
     work_type_id: "",
@@ -227,8 +282,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
     try {
       const next = await fetchVehicleById(vehicleId, locale);
       setVehicle(next);
-      setInsuranceExpiresAt(next.insurance_expires_at ?? "");
-      setInspectionExpiresAt(next.inspection_expires_at ?? "");
+      setComplianceForm(vehicleToComplianceForm(next));
     } catch (error) {
       showErrorToast({
         title: detail.toast.loadFailed.title,
@@ -328,15 +382,13 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
     });
   }
 
-  async function handleSaveExpiry() {
+  async function handleSaveCompliance() {
     if (!vehicle || !canWrite) return;
-    setSavingExpiry(true);
+    setSavingCompliance(true);
     try {
-      const updated = await updateVehicle(vehicle.id, {
-        insurance_expires_at: insuranceExpiresAt || null,
-        inspection_expires_at: inspectionExpiresAt || null,
-      });
+      const updated = await updateVehicle(vehicle.id, complianceFormToPayload(complianceForm));
       setVehicle(updated);
+      setComplianceForm(vehicleToComplianceForm(updated));
       showSuccessToast(detail.toast.expirySaved);
       if (tab === "history") void loadHistory();
     } catch (error) {
@@ -345,7 +397,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
         description: error instanceof Error ? error.message : detail.toast.expiryFailed.description,
       });
     } finally {
-      setSavingExpiry(false);
+      setSavingCompliance(false);
     }
   }
 
@@ -420,45 +472,16 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
     }
   }
 
-  const expiryItems = useMemo(
-    () =>
-      [
-        {
-          key: "insurance" as const,
-          value: insuranceExpiresAt,
-          setter: setInsuranceExpiresAt,
-          saved: vehicle?.insurance_expires_at,
-        },
-        {
-          key: "inspection" as const,
-          value: inspectionExpiresAt,
-          setter: setInspectionExpiresAt,
-          saved: vehicle?.inspection_expires_at,
-        },
-      ] as const,
-    [
-      inspectionExpiresAt,
-      insuranceExpiresAt,
-      vehicle?.inspection_expires_at,
-      vehicle?.insurance_expires_at,
-    ],
-  );
-
-  const complianceFieldHints = useMemo(
-    () => ({
-      insurance: detail.overview.insuranceHint,
-      inspection: detail.overview.inspectionHint,
-    }),
-    [detail.overview.insuranceHint, detail.overview.inspectionHint],
-  );
-
   const worstExpiryTone = useMemo(() => {
-    const tones = expiryItems.map((item) => getExpiryTone(item.saved));
+    const tones = [
+      getExpiryTone(vehicle?.insurance_expires_at),
+      getExpiryTone(vehicle?.inspection_expires_at),
+    ];
     if (tones.includes("expired")) return "expired";
     if (tones.includes("dueSoon")) return "dueSoon";
     if (tones.includes("notSet")) return "notSet";
     return "ok";
-  }, [expiryItems]);
+  }, [vehicle?.insurance_expires_at, vehicle?.inspection_expires_at]);
 
   const tabs = useMemo(
     () => [
@@ -706,38 +729,230 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
               </div>
             </div>
 
-            <div className="space-y-3">
-              {expiryItems.map((item) => {
-                const tone = getExpiryTone(item.saved);
+            <div className="space-y-4">
+              {(
+                [
+                  {
+                    key: "insurance" as const,
+                    title: detail.overview.insurance,
+                    hint: detail.overview.insuranceHint,
+                    tone: getExpiryTone(vehicle.insurance_expires_at),
+                    icon: ShieldCheck,
+                  },
+                  {
+                    key: "inspection" as const,
+                    title: detail.overview.inspection,
+                    hint: detail.overview.inspectionHint,
+                    tone: getExpiryTone(vehicle.inspection_expires_at),
+                    icon: ClipboardList,
+                  },
+                ] as const
+              ).map((section) => {
+                const Icon = section.icon;
                 return (
                   <div
-                    key={item.key}
-                    className="rounded-xl border border-slate-100 bg-slate-50/40 p-3.5 transition hover:border-slate-200"
+                    key={section.key}
+                    className="rounded-xl border border-slate-100 bg-slate-50/40 p-3.5 transition hover:border-slate-200 sm:p-4"
                   >
-                    <div className="mb-2.5 flex flex-wrap items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <Label htmlFor={`${item.key}-expires`} className="text-sm font-semibold">
-                          {detail.overview[item.key]}
-                        </Label>
-                        <p className="text-xs leading-relaxed text-slate-500">
-                          {complianceFieldHints[item.key]}
-                        </p>
+                    <div className="mb-4 flex flex-wrap items-start justify-between gap-2">
+                      <div className="flex min-w-0 items-start gap-3">
+                        <div className={adminIconBoxClass}>
+                          <Icon className="size-4" />
+                        </div>
+                        <div className="min-w-0 space-y-1">
+                          <p className="text-sm font-semibold text-slate-800">{section.title}</p>
+                          <p className="text-xs leading-relaxed text-slate-500">{section.hint}</p>
+                        </div>
                       </div>
-                      <Badge variant="outline" className={expiryToneClass(tone)}>
-                        {detail.overview.expiryStatus[tone]}
+                      <Badge variant="outline" className={expiryToneClass(section.tone)}>
+                        {detail.overview.expiryStatus[section.tone]}
                       </Badge>
                     </div>
-                    <AdminDatePicker
-                      id={`${item.key}-expires`}
-                      className="min-w-0"
-                      label={detail.overview.expiresOn}
-                      placeholder={detail.overview.pickDate}
-                      clearLabel={detail.overview.clearDate}
-                      todayLabel={detail.overview.today}
-                      value={parseDateInputValue(item.value)}
-                      disabled={!canWrite || savingExpiry}
-                      onChange={(date) => item.setter(formatDateInputValue(date))}
-                    />
+
+                    {section.key === "insurance" ? (
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-1.5 sm:col-span-2">
+                          <Label htmlFor="insurance-provider" className="text-sm font-medium">
+                            {detail.overview.insuranceProvider}
+                          </Label>
+                          <Input
+                            id="insurance-provider"
+                            value={complianceForm.insurance_provider}
+                            onChange={(event) =>
+                              setComplianceForm((current) => ({
+                                ...current,
+                                insurance_provider: event.target.value,
+                              }))
+                            }
+                            placeholder={detail.overview.insuranceProviderPlaceholder}
+                            disabled={!canWrite || savingCompliance}
+                            className={cn(adminInputClass, "bg-white")}
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label htmlFor="insurance-policy-number" className="text-sm font-medium">
+                            {detail.overview.insurancePolicyNumber}
+                          </Label>
+                          <Input
+                            id="insurance-policy-number"
+                            value={complianceForm.insurance_policy_number}
+                            onChange={(event) =>
+                              setComplianceForm((current) => ({
+                                ...current,
+                                insurance_policy_number: event.target.value,
+                              }))
+                            }
+                            placeholder={detail.overview.insurancePolicyNumberPlaceholder}
+                            disabled={!canWrite || savingCompliance}
+                            className={cn(adminInputClass, "bg-white")}
+                          />
+                        </div>
+                        <AdminDatePicker
+                          id="insurance-issued-at"
+                          className="min-w-0"
+                          label={detail.overview.insuranceIssuedAt}
+                          placeholder={detail.overview.pickDate}
+                          clearLabel={detail.overview.clearDate}
+                          todayLabel={detail.overview.today}
+                          value={parseDateInputValue(complianceForm.insurance_issued_at)}
+                          disabled={!canWrite || savingCompliance}
+                          onChange={(date) =>
+                            setComplianceForm((current) => ({
+                              ...current,
+                              insurance_issued_at: formatDateInputValue(date),
+                            }))
+                          }
+                        />
+                        <AdminDatePicker
+                          id="insurance-expires-at"
+                          className="min-w-0 sm:col-span-2"
+                          label={detail.overview.expiresOn}
+                          placeholder={detail.overview.pickDate}
+                          clearLabel={detail.overview.clearDate}
+                          todayLabel={detail.overview.today}
+                          value={parseDateInputValue(complianceForm.insurance_expires_at)}
+                          disabled={!canWrite || savingCompliance}
+                          onChange={(date) =>
+                            setComplianceForm((current) => ({
+                              ...current,
+                              insurance_expires_at: formatDateInputValue(date),
+                            }))
+                          }
+                        />
+                        <div className="space-y-1.5 sm:col-span-2">
+                          <Label htmlFor="insurance-notes" className="text-sm font-medium">
+                            {detail.overview.insuranceNotes}
+                          </Label>
+                          <textarea
+                            id="insurance-notes"
+                            value={complianceForm.insurance_notes}
+                            onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
+                              setComplianceForm((current) => ({
+                                ...current,
+                                insurance_notes: event.target.value,
+                              }))
+                            }
+                            rows={3}
+                            placeholder={detail.overview.insuranceNotesPlaceholder}
+                            disabled={!canWrite || savingCompliance}
+                            className={textareaClassName}
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-1.5 sm:col-span-2">
+                          <Label htmlFor="inspection-center" className="text-sm font-medium">
+                            {detail.overview.inspectionCenter}
+                          </Label>
+                          <Input
+                            id="inspection-center"
+                            value={complianceForm.inspection_center}
+                            onChange={(event) =>
+                              setComplianceForm((current) => ({
+                                ...current,
+                                inspection_center: event.target.value,
+                              }))
+                            }
+                            placeholder={detail.overview.inspectionCenterPlaceholder}
+                            disabled={!canWrite || savingCompliance}
+                            className={cn(adminInputClass, "bg-white")}
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label
+                            htmlFor="inspection-certificate-number"
+                            className="text-sm font-medium"
+                          >
+                            {detail.overview.inspectionCertificateNumber}
+                          </Label>
+                          <Input
+                            id="inspection-certificate-number"
+                            value={complianceForm.inspection_certificate_number}
+                            onChange={(event) =>
+                              setComplianceForm((current) => ({
+                                ...current,
+                                inspection_certificate_number: event.target.value,
+                              }))
+                            }
+                            placeholder={detail.overview.inspectionCertificateNumberPlaceholder}
+                            disabled={!canWrite || savingCompliance}
+                            className={cn(adminInputClass, "bg-white")}
+                          />
+                        </div>
+                        <AdminDatePicker
+                          id="inspection-performed-at"
+                          className="min-w-0"
+                          label={detail.overview.inspectionPerformedAt}
+                          placeholder={detail.overview.pickDate}
+                          clearLabel={detail.overview.clearDate}
+                          todayLabel={detail.overview.today}
+                          value={parseDateInputValue(complianceForm.inspection_performed_at)}
+                          disabled={!canWrite || savingCompliance}
+                          onChange={(date) =>
+                            setComplianceForm((current) => ({
+                              ...current,
+                              inspection_performed_at: formatDateInputValue(date),
+                            }))
+                          }
+                        />
+                        <AdminDatePicker
+                          id="inspection-expires-at"
+                          className="min-w-0 sm:col-span-2"
+                          label={detail.overview.expiresOn}
+                          placeholder={detail.overview.pickDate}
+                          clearLabel={detail.overview.clearDate}
+                          todayLabel={detail.overview.today}
+                          value={parseDateInputValue(complianceForm.inspection_expires_at)}
+                          disabled={!canWrite || savingCompliance}
+                          onChange={(date) =>
+                            setComplianceForm((current) => ({
+                              ...current,
+                              inspection_expires_at: formatDateInputValue(date),
+                            }))
+                          }
+                        />
+                        <div className="space-y-1.5 sm:col-span-2">
+                          <Label htmlFor="inspection-notes" className="text-sm font-medium">
+                            {detail.overview.inspectionNotes}
+                          </Label>
+                          <textarea
+                            id="inspection-notes"
+                            value={complianceForm.inspection_notes}
+                            onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) =>
+                              setComplianceForm((current) => ({
+                                ...current,
+                                inspection_notes: event.target.value,
+                              }))
+                            }
+                            rows={3}
+                            placeholder={detail.overview.inspectionNotesPlaceholder}
+                            disabled={!canWrite || savingCompliance}
+                            className={textareaClassName}
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
@@ -747,11 +962,11 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
               <div className="flex flex-col gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
                 <Button
                   type="button"
-                  onClick={() => void handleSaveExpiry()}
-                  disabled={savingExpiry}
+                  onClick={() => void handleSaveCompliance()}
+                  disabled={savingCompliance}
                   className={cn(adminPrimaryButtonClass, "w-full sm:w-auto")}
                 >
-                  {savingExpiry ? detail.overview.saving : detail.overview.saveExpiry}
+                  {savingCompliance ? detail.overview.saving : detail.overview.saveCompliance}
                 </Button>
               </div>
             ) : null}

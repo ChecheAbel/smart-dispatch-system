@@ -14,8 +14,16 @@ export type CreateVehicleInput = {
   year?: number | null;
   status?: VehicleStatus;
   notes?: string | null;
+  insuranceProvider?: string | null;
+  insurancePolicyNumber?: string | null;
+  insuranceIssuedAt?: Date | null;
   insuranceExpiresAt?: Date | null;
+  insuranceNotes?: string | null;
+  inspectionCenter?: string | null;
+  inspectionCertificateNumber?: string | null;
+  inspectionPerformedAt?: Date | null;
   inspectionExpiresAt?: Date | null;
+  inspectionNotes?: string | null;
   registrationExpiresAt?: Date | null;
   actorUserId?: string | null;
 };
@@ -31,8 +39,16 @@ export type UpdateVehicleInput = {
   year?: number | null;
   status?: VehicleStatus;
   notes?: string | null;
+  insuranceProvider?: string | null;
+  insurancePolicyNumber?: string | null;
+  insuranceIssuedAt?: Date | null;
   insuranceExpiresAt?: Date | null;
+  insuranceNotes?: string | null;
+  inspectionCenter?: string | null;
+  inspectionCertificateNumber?: string | null;
+  inspectionPerformedAt?: Date | null;
   inspectionExpiresAt?: Date | null;
+  inspectionNotes?: string | null;
   registrationExpiresAt?: Date | null;
   actorUserId?: string | null;
 };
@@ -156,6 +172,90 @@ function dateKey(value: Date | null | undefined) {
   return value ? value.toISOString().slice(0, 10) : null;
 }
 
+function textKey(value: string | null | undefined) {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
+function buildComplianceData(input: {
+  insuranceProvider?: string | null;
+  insurancePolicyNumber?: string | null;
+  insuranceIssuedAt?: Date | null;
+  insuranceExpiresAt?: Date | null;
+  insuranceNotes?: string | null;
+  inspectionCenter?: string | null;
+  inspectionCertificateNumber?: string | null;
+  inspectionPerformedAt?: Date | null;
+  inspectionExpiresAt?: Date | null;
+  inspectionNotes?: string | null;
+  registrationExpiresAt?: Date | null;
+}) {
+  return {
+    ...(input.insuranceProvider !== undefined
+      ? { insuranceProvider: textKey(input.insuranceProvider) }
+      : {}),
+    ...(input.insurancePolicyNumber !== undefined
+      ? { insurancePolicyNumber: textKey(input.insurancePolicyNumber) }
+      : {}),
+    ...(input.insuranceIssuedAt !== undefined ? { insuranceIssuedAt: input.insuranceIssuedAt } : {}),
+    ...(input.insuranceExpiresAt !== undefined ? { insuranceExpiresAt: input.insuranceExpiresAt } : {}),
+    ...(input.insuranceNotes !== undefined ? { insuranceNotes: textKey(input.insuranceNotes) } : {}),
+    ...(input.inspectionCenter !== undefined
+      ? { inspectionCenter: textKey(input.inspectionCenter) }
+      : {}),
+    ...(input.inspectionCertificateNumber !== undefined
+      ? { inspectionCertificateNumber: textKey(input.inspectionCertificateNumber) }
+      : {}),
+    ...(input.inspectionPerformedAt !== undefined
+      ? { inspectionPerformedAt: input.inspectionPerformedAt }
+      : {}),
+    ...(input.inspectionExpiresAt !== undefined
+      ? { inspectionExpiresAt: input.inspectionExpiresAt }
+      : {}),
+    ...(input.inspectionNotes !== undefined
+      ? { inspectionNotes: textKey(input.inspectionNotes) }
+      : {}),
+    ...(input.registrationExpiresAt !== undefined
+      ? { registrationExpiresAt: input.registrationExpiresAt }
+      : {}),
+  };
+}
+
+function complianceSnapshot(vehicle: {
+  insuranceProvider: string | null;
+  insurancePolicyNumber: string | null;
+  insuranceIssuedAt: Date | null;
+  insuranceExpiresAt: Date | null;
+  insuranceNotes: string | null;
+  inspectionCenter: string | null;
+  inspectionCertificateNumber: string | null;
+  inspectionPerformedAt: Date | null;
+  inspectionExpiresAt: Date | null;
+  inspectionNotes: string | null;
+  registrationExpiresAt: Date | null;
+}) {
+  return {
+    insurance_provider: textKey(vehicle.insuranceProvider),
+    insurance_policy_number: textKey(vehicle.insurancePolicyNumber),
+    insurance_issued_at: dateKey(vehicle.insuranceIssuedAt),
+    insurance_expires_at: dateKey(vehicle.insuranceExpiresAt),
+    insurance_notes: textKey(vehicle.insuranceNotes),
+    inspection_center: textKey(vehicle.inspectionCenter),
+    inspection_certificate_number: textKey(vehicle.inspectionCertificateNumber),
+    inspection_performed_at: dateKey(vehicle.inspectionPerformedAt),
+    inspection_expires_at: dateKey(vehicle.inspectionExpiresAt),
+    inspection_notes: textKey(vehicle.inspectionNotes),
+    registration_expires_at: dateKey(vehicle.registrationExpiresAt),
+  };
+}
+
+function complianceChanged(
+  existing: Parameters<typeof complianceSnapshot>[0],
+  next: Parameters<typeof complianceSnapshot>[0],
+) {
+  return JSON.stringify(complianceSnapshot(existing)) !== JSON.stringify(complianceSnapshot(next));
+}
+
 export async function createVehicle(input: CreateVehicleInput) {
   if (input.assignedDriverUserId) {
     await assertAssignableDriver(input.assignedDriverUserId);
@@ -176,9 +276,19 @@ export async function createVehicle(input: CreateVehicleInput) {
       year: input.year ?? null,
       status: input.status ?? VehicleStatus.active,
       notes: input.notes?.trim() || null,
-      insuranceExpiresAt: input.insuranceExpiresAt ?? null,
-      inspectionExpiresAt: input.inspectionExpiresAt ?? null,
-      registrationExpiresAt: input.registrationExpiresAt ?? null,
+      ...buildComplianceData({
+        insuranceProvider: input.insuranceProvider ?? null,
+        insurancePolicyNumber: input.insurancePolicyNumber ?? null,
+        insuranceIssuedAt: input.insuranceIssuedAt ?? null,
+        insuranceExpiresAt: input.insuranceExpiresAt ?? null,
+        insuranceNotes: input.insuranceNotes ?? null,
+        inspectionCenter: input.inspectionCenter ?? null,
+        inspectionCertificateNumber: input.inspectionCertificateNumber ?? null,
+        inspectionPerformedAt: input.inspectionPerformedAt ?? null,
+        inspectionExpiresAt: input.inspectionExpiresAt ?? null,
+        inspectionNotes: input.inspectionNotes ?? null,
+        registrationExpiresAt: input.registrationExpiresAt ?? null,
+      }),
     },
     include: vehicleInclude,
   });
@@ -236,9 +346,7 @@ export async function updateVehicle(id: string, input: UpdateVehicleInput) {
       year: input.year,
       status: input.status,
       notes: input.notes,
-      insuranceExpiresAt: input.insuranceExpiresAt,
-      inspectionExpiresAt: input.inspectionExpiresAt,
-      registrationExpiresAt: input.registrationExpiresAt,
+      ...buildComplianceData(input),
     },
     include: vehicleInclude,
   });
@@ -279,25 +387,13 @@ export async function updateVehicle(id: string, input: UpdateVehicleInput) {
     }
   }
 
-  const expiryChanged =
-    (input.insuranceExpiresAt !== undefined &&
-      dateKey(input.insuranceExpiresAt) !== dateKey(existing.insuranceExpiresAt)) ||
-    (input.inspectionExpiresAt !== undefined &&
-      dateKey(input.inspectionExpiresAt) !== dateKey(existing.inspectionExpiresAt)) ||
-    (input.registrationExpiresAt !== undefined &&
-      dateKey(input.registrationExpiresAt) !== dateKey(existing.registrationExpiresAt));
-
-  if (expiryChanged) {
+  if (complianceChanged(existing, vehicle)) {
     await createVehicleHistoryEvent({
       vehicleId: vehicle.id,
       eventType: VehicleHistoryEventType.expiry_updated,
-      summary: "Compliance expiry dates updated",
+      summary: "Compliance details updated",
       actorUserId: input.actorUserId,
-      metadata: {
-        insurance_expires_at: dateKey(vehicle.insuranceExpiresAt),
-        inspection_expires_at: dateKey(vehicle.inspectionExpiresAt),
-        registration_expires_at: dateKey(vehicle.registrationExpiresAt),
-      },
+      metadata: complianceSnapshot(vehicle),
     });
   }
 
