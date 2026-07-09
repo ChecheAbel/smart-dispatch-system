@@ -1,13 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { Bell, ChevronRight, ScrollText } from "lucide-react";
 import { useLocale } from "@/components/shared/providers";
-import { adminHeadingClass } from "@/lib/admin-theme";
-import {
-  getAdminNotificationTemplatesMessages,
-  getAdminNotificationsMessages,
-} from "@/translations";
+import { getAdminNotificationTemplatesMessages } from "@/translations";
 import { cn } from "@/lib/utils";
 
 type NotificationTemplatesChannelsSummaryProps = {
@@ -100,70 +94,5 @@ export function NotificationTemplatesChannelsSummary({
         </p>
       </div>
     </div>
-  );
-}
-
-export function NotificationDeliveryLogsLink({ className }: { className?: string }) {
-  const { locale } = useLocale();
-  const copy = getAdminNotificationTemplatesMessages(locale);
-
-  return (
-    <Link
-      href="/admin/notification-logs"
-      className={cn(
-        "group inline-flex items-center gap-3 rounded-xl border border-slate-200/80 bg-white px-3.5 py-2.5 text-left shadow-sm transition-all",
-        "hover:border-[#C9B87A]/50 hover:bg-[#f8fafb] hover:shadow-md",
-        "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1C3A34]/15",
-        className,
-      )}
-    >
-      <div className="rounded-lg bg-[#1C3A34]/8 p-2 text-[#1C3A34] transition-colors group-hover:bg-[#1C3A34]/12">
-        <ScrollText className="size-4" />
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <p className={cn("text-sm font-bold leading-tight", adminHeadingClass)}>
-          {copy.shell.deliveryLogLinkTitle}
-        </p>
-        <p className="mt-0.5 text-xs leading-snug text-slate-500">
-          {copy.shell.deliveryLogLinkDescription}
-        </p>
-      </div>
-
-      <ChevronRight className="size-4 shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-[#1C3A34]" />
-    </Link>
-  );
-}
-
-export function NotificationProvidersLink({ className }: { className?: string }) {
-  const { locale } = useLocale();
-  const templatesCopy = getAdminNotificationTemplatesMessages(locale);
-  const notificationsCopy = getAdminNotificationsMessages(locale);
-
-  return (
-    <Link
-      href="/admin/notifications"
-      className={cn(
-        "group inline-flex items-center gap-3 rounded-xl border border-[#1C3A34]/15 bg-[#1C3A34]/[0.03] px-3.5 py-2.5 text-left shadow-sm transition-all",
-        "hover:border-[#1C3A34]/25 hover:bg-[#1C3A34]/[0.06] hover:shadow-md",
-        "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1C3A34]/15",
-        className,
-      )}
-    >
-      <div className="rounded-lg bg-[#1C3A34] p-2 text-white shadow-sm transition-transform group-hover:scale-105">
-        <Bell className="size-4" />
-      </div>
-
-      <div className="min-w-0 flex-1">
-        <p className={cn("text-sm font-bold leading-tight", adminHeadingClass)}>
-          {notificationsCopy.title}
-        </p>
-        <p className="mt-0.5 text-xs leading-snug text-slate-500">
-          {templatesCopy.shell.notificationsLinkDescription}
-        </p>
-      </div>
-
-      <ChevronRight className="size-4 shrink-0 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-[#1C3A34]" />
-    </Link>
   );
 }

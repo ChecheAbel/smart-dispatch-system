@@ -17,11 +17,7 @@ import {
   getAdminNotificationsMessages,
 } from "@/translations";
 import { cn } from "@/lib/utils";
-import {
-  NotificationDeliveryLogsLink,
-  NotificationProvidersLink,
-  NotificationTemplatesChannelsSummary,
-} from "./notification-templates-header-actions";
+import { NotificationTemplatesChannelsSummary } from "./notification-templates-header-actions";
 import { NotificationTemplatesSettings } from "./notification-templates-settings";
 
 export function NotificationTemplatesPage() {
@@ -68,15 +64,11 @@ export function NotificationTemplatesPage() {
           </div>
         </div>
 
-        <div className="grid w-full gap-2 sm:grid-cols-2 xl:w-auto xl:max-w-xl">
-          <NotificationTemplatesChannelsSummary
-            enabled={stats.enabled}
-            total={stats.total}
-            className="w-full sm:col-span-2"
-          />
-          <NotificationProvidersLink className="w-full" />
-          <NotificationDeliveryLogsLink className="w-full" />
-        </div>
+        <NotificationTemplatesChannelsSummary
+          enabled={stats.enabled}
+          total={stats.total}
+          className="w-full xl:w-auto"
+        />
       </div>
 
       <NotificationTemplatesSettings canWrite={canWrite} onStatsChange={setStats} />

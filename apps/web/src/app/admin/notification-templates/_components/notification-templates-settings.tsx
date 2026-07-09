@@ -39,7 +39,6 @@ import {
 } from "./notification-template-placeholders-guide";
 import { NotificationTemplateEventNav } from "./notification-template-event-nav";
 import { NotificationTemplateTestPanel } from "./notification-template-test-panel";
-import { NotificationTemplatesChannelsSummary } from "./notification-templates-header-actions";
 import {
   MODULE_EVENTS,
   shouldShowTemplate,
@@ -599,15 +598,9 @@ export function NotificationTemplatesSettings({
           </div>
         </div>
 
-        <div className="sticky bottom-0 z-10 border-t border-slate-200/80 bg-white/95 px-5 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <NotificationTemplatesChannelsSummary
-              enabled={enabledCount}
-              total={templates.length}
-              compact
-            />
-
-            {canWrite ? (
+        {canWrite ? (
+          <div className="sticky bottom-0 z-10 border-t border-slate-200/80 bg-white/95 px-5 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+            <div className="flex justify-end">
               <Button
                 type="button"
                 onClick={() => void handleSave()}
@@ -617,9 +610,9 @@ export function NotificationTemplatesSettings({
                 <Save className="size-4" />
                 {saving ? copy.saving : copy.saveAction}
               </Button>
-            ) : null}
+            </div>
           </div>
-        </div>
+        ) : null}
       </section>
     </div>
   );
