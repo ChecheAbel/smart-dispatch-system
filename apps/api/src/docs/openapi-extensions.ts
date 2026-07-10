@@ -85,14 +85,14 @@ export const extensionSchemas = {
       "Message template for a module event and channel. Body and subject may include placeholders such as `{{requester_name}}` or `{{applicant_name}}` depending on module.",
     properties: {
       id: { type: "string", format: "uuid" },
-      module: { type: "string", enum: ["ride_requests", "user_registrations"] },
+      module: { type: "string", enum: ["ride_requests", "user_registrations", "insurance", "inspection"] },
       event: {
         type: "string",
         description: "Module-specific event slug (e.g. `created`, `approved`, `assigned`)",
         example: "created",
       },
       channel: { type: "string", enum: ["email", "sms"] },
-      recipient: { type: "string", enum: ["requester", "driver", "applicant"] },
+      recipient: { type: "string", enum: ["requester", "driver", "applicant", "fleet_manager"] },
       is_enabled: { type: "boolean" },
       subject: { type: "string", nullable: true, description: "Email subject (null for SMS)" },
       body: { type: "string" },
@@ -105,10 +105,10 @@ export const extensionSchemas = {
     properties: {
       id: { type: "string", format: "uuid" },
       status: { type: "string", enum: ["sent", "skipped", "failed"] },
-      module: { type: "string", enum: ["ride_requests", "user_registrations"] },
+      module: { type: "string", enum: ["ride_requests", "user_registrations", "insurance", "inspection"] },
       event: { type: "string" },
       channel: { type: "string", enum: ["email", "sms"] },
-      recipient: { type: "string", enum: ["requester", "driver", "applicant"] },
+      recipient: { type: "string", enum: ["requester", "driver", "applicant", "fleet_manager"] },
       template_id: { type: "string", format: "uuid", nullable: true },
       entity_type: { type: "string", nullable: true, example: "ride_request" },
       entity_id: { type: "string", format: "uuid", nullable: true },
@@ -530,13 +530,13 @@ export const extensionPaths = {
       tags: ["Notifications"],
       summary: "List notification templates",
       description:
-        "Returns all message templates, optionally filtered by module (`ride_requests` or `user_registrations`). Templates are grouped by module, event, channel, and recipient in the admin UI.",
+        "Returns all message templates, optionally filtered by module (`ride_requests`, `user_registrations`, `insurance`, or `inspection`). Templates are grouped by module, event, channel, and recipient in the admin UI.",
       security,
       parameters: [
         {
           name: "module",
           in: "query",
-          schema: { type: "string", enum: ["ride_requests", "user_registrations"] },
+          schema: { type: "string", enum: ["ride_requests", "user_registrations", "insurance", "inspection"] },
           description: "Filter templates for a single module",
         },
       ],
@@ -862,7 +862,7 @@ export const extensionPaths = {
         {
           name: "module",
           in: "query",
-          schema: { type: "string", enum: ["ride_requests", "user_registrations"] },
+          schema: { type: "string", enum: ["ride_requests", "user_registrations", "insurance", "inspection"] },
         },
         {
           name: "channel",

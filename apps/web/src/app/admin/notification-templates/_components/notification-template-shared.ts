@@ -15,6 +15,8 @@ export const MODULE_EVENTS: Record<NotificationModule, string[]> = {
     "cancelled",
   ],
   user_registrations: ["submitted", "approved", "rejected"],
+  insurance: ["due_soon", "expired"],
+  inspection: ["due_soon", "expired"],
 };
 
 export const EVENT_GROUPS: Record<
@@ -27,6 +29,8 @@ export const EVENT_GROUPS: Record<
     { id: "dispatch", events: ["assigned", "started", "completed"] },
   ],
   user_registrations: [{ id: "registration", events: ["submitted", "approved", "rejected"] }],
+  insurance: [{ id: "compliance", events: ["due_soon", "expired"] }],
+  inspection: [{ id: "compliance", events: ["due_soon", "expired"] }],
 };
 
 const DRIVER_EVENTS = new Set(["assigned", "started", "completed"]);
@@ -38,6 +42,10 @@ export function shouldShowTemplate(
 ) {
   if (module === "user_registrations") {
     return recipient === "applicant";
+  }
+
+  if (module === "insurance" || module === "inspection") {
+    return recipient === "fleet_manager";
   }
 
   if (recipient === "driver") {
@@ -72,4 +80,21 @@ export function getEventChannelStats(
   ).length;
 
   return { enabled, total: visible.length };
+}
+
+export function getModuleChannelStats(
+  module: NotificationModule,
+  templates: NotificationTemplate[],
+  formState: Record<string, { is_enabled: boolean }>,
+) {
+  let enabled = 0;
+  let total = 0;
+
+  for (const event of MODULE_EVENTS[module]) {
+    const stats = getEventChannelStats(module, event, templates, formState);
+    enabled += stats.enabled;
+    total += stats.total;
+  }
+
+  return { enabled, total };
 }

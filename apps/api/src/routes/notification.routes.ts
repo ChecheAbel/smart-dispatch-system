@@ -34,7 +34,12 @@ const router = Router();
 router.use(authenticate, authorize("admin"), auditMutations());
 
 const CHANNELS = new Set<NotificationChannel>(["email", "sms"]);
-const MODULES = new Set<NotificationModule>(["ride_requests", "user_registrations"]);
+const MODULES = new Set<NotificationModule>([
+  "ride_requests",
+  "user_registrations",
+  "insurance",
+  "inspection",
+]);
 
 function parseChannel(value: string): NotificationChannel | null {
   return CHANNELS.has(value as NotificationChannel) ? (value as NotificationChannel) : null;

@@ -2,14 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  CarFront,
-  Check,
-  Mail,
-  MessageSquare,
-  Save,
-  UserRoundCheck,
-} from "lucide-react";
+import { ChevronRight, Mail, MessageSquare, Save } from "lucide-react";
 import type {
   NotificationChannel,
   NotificationModule,
@@ -38,13 +31,17 @@ import {
   NotificationTemplatePlaceholdersGuide,
 } from "./notification-template-placeholders-guide";
 import { NotificationTemplateEventNav } from "./notification-template-event-nav";
+import { NotificationTemplateModuleNav } from "./notification-template-module-nav";
 import { NotificationTemplateTestPanel } from "./notification-template-test-panel";
+import {
+  getModuleDefinition,
+  NOTIFICATION_MODULE_ORDER,
+  parseNotificationModule,
+} from "./notification-template-modules";
 import {
   MODULE_EVENTS,
   shouldShowTemplate,
 } from "./notification-template-shared";
-
-const MODULE_ORDER: NotificationModule[] = ["ride_requests", "user_registrations"];
 
 type TemplateFormState = {
   is_enabled: boolean;
@@ -54,26 +51,36 @@ type TemplateFormState = {
 
 type NotificationTemplatesSettingsProps = {
   canWrite: boolean;
-  onStatsChange?: (stats: { enabled: number; total: number }) => void;
 };
 
-const RECIPIENT_ORDER: NotificationTemplateRecipient[] = ["requester", "applicant", "driver"];
+const RECIPIENT_ORDER: NotificationTemplateRecipient[] = [
+  "requester",
+  "applicant",
+  "driver",
+  "fleet_manager",
+];
 
 function RulesSkeleton() {
   return (
-    <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Skeleton className="h-28 rounded-xl" />
-        <Skeleton className="h-28 rounded-xl" />
+    <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white">
+      <div className="space-y-4 border-b border-slate-200/80 p-4">
+        <Skeleton className="h-4 w-24" />
+        <Skeleton className="h-10 w-full max-w-sm rounded-lg" />
       </div>
-      <Skeleton className="h-11 w-full rounded-xl" />
-      <Skeleton className="h-[28rem] w-full rounded-xl" />
+      <div className="grid min-h-[32rem] lg:grid-cols-[minmax(15rem,17.5rem)_minmax(0,1fr)]">
+        <div className="hidden space-y-3 border-r border-slate-200/80 p-3 lg:block">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-12 w-full rounded-lg" />
+          <Skeleton className="h-12 w-full rounded-lg" />
+        </div>
+        <div className="space-y-4 p-5">
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-24 w-full rounded-xl" />
+          <Skeleton className="h-64 w-full rounded-xl" />
+        </div>
+      </div>
     </div>
   );
-}
-
-function parseModule(value: string | null): NotificationModule {
-  return value === "user_registrations" ? "user_registrations" : "ride_requests";
 }
 
 function parseEvent(module: NotificationModule, value: string | null): string {
@@ -93,6 +100,10 @@ function getRecipientLabel(
     return copy.recipients.driver;
   }
 
+  if (recipient === "fleet_manager") {
+    return copy.recipients.fleet_manager;
+  }
+
   return copy.recipients.applicant;
 }
 
@@ -105,7 +116,6 @@ function getChannelLabel(
 
 export function NotificationTemplatesSettings({
   canWrite,
-  onStatsChange,
 }: NotificationTemplatesSettingsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -123,8 +133,9 @@ export function NotificationTemplatesSettings({
     Record<string, NotificationChannel>
   >({});
 
-  const activeModule = parseModule(searchParams.get("module"));
+  const activeModule = parseNotificationModule(searchParams.get("module"));
   const activeEvent = parseEvent(activeModule, searchParams.get("event"));
+  const activeModuleCopy = copy.modules[getModuleDefinition(activeModule).copyKey];
 
   useEffect(() => {
     let cancelled = false;
@@ -175,23 +186,10 @@ export function NotificationTemplatesSettings({
     };
   }, [copy.errors.loadFailed, copy.toast.loadFailed.title]);
 
-  const enabledCount = useMemo(
-    () =>
-      templates.reduce((count, template) => {
-        const form = formState[template.id];
-        return count + (form?.is_enabled ?? template.is_enabled ? 1 : 0);
-      }, 0),
-    [formState, templates],
-  );
-
-  useEffect(() => {
-    onStatsChange?.({ enabled: enabledCount, total: templates.length });
-  }, [enabledCount, onStatsChange, templates.length]);
-
   const templatesByModule = useMemo(() => {
     const grouped = new Map<NotificationModule, Map<string, NotificationTemplate[]>>();
 
-    for (const module of MODULE_ORDER) {
+    for (const module of NOTIFICATION_MODULE_ORDER) {
       const eventMap = new Map<string, NotificationTemplate[]>();
       for (const event of MODULE_EVENTS[module]) {
         eventMap.set(event, []);
@@ -242,11 +240,7 @@ export function NotificationTemplatesSettings({
   }, [activeEventTemplates]);
 
   const activeEventCopy =
-    activeModule === "ride_requests"
-      ? copy.events.ride_requests[activeEvent as keyof typeof copy.events.ride_requests]
-      : copy.events.user_registrations[
-          activeEvent as keyof typeof copy.events.user_registrations
-        ];
+    copy.events[activeModule][activeEvent as keyof (typeof copy.events)[typeof activeModule]];
 
   function updateRoute(module: NotificationModule, event: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -371,90 +365,37 @@ export function NotificationTemplatesSettings({
     );
   }
 
-  const moduleOptions = [
-    {
-      id: "ride_requests" as const,
-      title: copy.modules.rideRequests.title,
-      description: copy.modules.rideRequests.description,
-      icon: CarFront,
-    },
-    {
-      id: "user_registrations" as const,
-      title: copy.modules.userRegistrations.title,
-      description: copy.modules.userRegistrations.description,
-      icon: UserRoundCheck,
-    },
-  ];
-
   return (
-    <div className="min-w-0 space-y-6">
-      <section className="space-y-3">
-        <div className="space-y-1">
-          <h2 className={cn("text-sm font-bold", adminHeadingClass)}>
-            {copy.shell.modulePickerTitle}
-          </h2>
-          <p className="text-sm text-slate-500">{copy.shell.modulePickerDescription}</p>
-        </div>
+    <section className={cn("overflow-hidden rounded-xl border", adminCardClass)}>
+      <div className="border-b border-slate-200/80 bg-[#f8fafb]/80 px-4 py-4 sm:px-5">
+        <NotificationTemplateModuleNav
+          activeModule={activeModule}
+          templates={templates}
+          formState={formState}
+          onSelectModule={selectModule}
+        />
+      </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          {moduleOptions.map((option) => {
-            const Icon = option.icon;
-            const isActive = activeModule === option.id;
+      <div className="lg:grid lg:min-h-[32rem] lg:grid-cols-[minmax(15rem,17.5rem)_minmax(0,1fr)]">
+        <NotificationTemplateEventNav
+          module={activeModule}
+          activeEvent={activeEvent}
+          templates={templates}
+          formState={formState}
+          onSelectEvent={selectEvent}
+          className="lg:border-r lg:border-slate-200/80"
+        />
 
-            return (
-              <button
-                key={option.id}
-                type="button"
-                onClick={() => selectModule(option.id)}
-                aria-pressed={isActive}
-                className={cn(
-                  "group relative flex w-full items-start gap-4 rounded-xl border p-4 text-left transition-all",
-                  "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1C3A34]/15",
-                  isActive
-                    ? "border-[#1C3A34]/25 bg-[#1C3A34]/[0.04] shadow-sm ring-1 ring-[#1C3A34]/10"
-                    : cn(adminCardClass, "hover:border-[#C9B87A]/40 hover:bg-[#f8fafb]"),
-                )}
-              >
-                <div
-                  className={cn(
-                    "rounded-xl p-3 transition-colors",
-                    isActive
-                      ? "bg-[#1C3A34] text-white"
-                      : "bg-[#1C3A34]/8 text-[#1C3A34] group-hover:bg-[#1C3A34]/12",
-                  )}
-                >
-                  <Icon className="size-5" />
-                </div>
-
-                <div className="min-w-0 flex-1 space-y-1 pr-6">
-                  <p className={cn("text-sm font-bold", adminHeadingClass)}>{option.title}</p>
-                  <p className="text-sm leading-relaxed text-slate-500">{option.description}</p>
-                </div>
-
-                {isActive ? (
-                  <span className="absolute top-4 right-4 flex size-5 items-center justify-center rounded-full bg-[#1C3A34] text-white">
-                    <Check className="size-3" aria-hidden />
-                  </span>
-                ) : null}
-              </button>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className={cn("overflow-hidden rounded-xl border", adminCardClass)}>
-        <div className="lg:grid lg:min-h-[32rem] lg:grid-cols-[minmax(15rem,17.5rem)_minmax(0,1fr)]">
-          <NotificationTemplateEventNav
-            module={activeModule}
-            activeEvent={activeEvent}
-            templates={templates}
-            formState={formState}
-            onSelectEvent={selectEvent}
-            className="lg:border-r lg:border-slate-200/80"
-          />
-
-          <div className="min-w-0 flex flex-col">
+        <div className="min-w-0 flex flex-col">
             <div className="border-b border-slate-200/80 bg-white px-5 py-4">
+              <nav
+                aria-label={copy.shell.contextPathLabel}
+                className="mb-2 flex flex-wrap items-center gap-1.5 text-xs font-medium text-slate-500"
+              >
+                <span className="text-slate-700">{activeModuleCopy.title}</span>
+                <ChevronRight className="size-3.5 shrink-0 text-slate-400" aria-hidden />
+                <span className="text-slate-700">{activeEventCopy.title}</span>
+              </nav>
               <h3 className={cn("text-base font-bold", adminHeadingClass)}>
                 {activeEventCopy.title}
               </h3>
@@ -595,25 +536,24 @@ export function NotificationTemplatesSettings({
                 </div>
               )}
             </div>
-          </div>
-        </div>
 
-        {canWrite ? (
-          <div className="sticky bottom-0 z-10 border-t border-slate-200/80 bg-white/95 px-5 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80">
-            <div className="flex justify-end">
-              <Button
-                type="button"
-                onClick={() => void handleSave()}
-                disabled={saving}
-                className={cn(adminPrimaryButtonClass, "w-full sm:w-auto")}
-              >
-                <Save className="size-4" />
-                {saving ? copy.saving : copy.saveAction}
-              </Button>
-            </div>
-          </div>
-        ) : null}
-      </section>
-    </div>
+            {canWrite ? (
+              <div className="sticky bottom-0 z-10 mt-auto border-t border-slate-200/80 bg-white/95 px-5 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+                <div className="flex justify-end">
+                  <Button
+                    type="button"
+                    onClick={() => void handleSave()}
+                    disabled={saving}
+                    className={cn(adminPrimaryButtonClass, "w-full sm:w-auto")}
+                  >
+                    <Save className="size-4" />
+                    {saving ? copy.saving : copy.saveAction}
+                  </Button>
+                </div>
+              </div>
+            ) : null}
+        </div>
+      </div>
+    </section>
   );
 }

@@ -36,9 +36,8 @@ function getEventCopy(
   event: string,
   copy: ReturnType<typeof getAdminNotificationTemplatesMessages>,
 ) {
-  return module === "ride_requests"
-    ? copy.events.ride_requests[event as keyof typeof copy.events.ride_requests]
-    : copy.events.user_registrations[event as keyof typeof copy.events.user_registrations];
+  const events = copy.events[module];
+  return events[event as keyof typeof events];
 }
 
 function getGroupLabel(

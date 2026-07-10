@@ -92,12 +92,11 @@ function getEventTitle(
   log: NotificationDeliveryLog,
   templatesCopy: ReturnType<typeof getAdminNotificationTemplatesMessages>,
 ) {
-  if (log.module === "ride_requests") {
-    const events = templatesCopy.events.ride_requests;
-    return events[log.event as keyof typeof events]?.title ?? log.event;
+  const events = templatesCopy.events[log.module];
+  if (!events) {
+    return log.event;
   }
 
-  const events = templatesCopy.events.user_registrations;
   return events[log.event as keyof typeof events]?.title ?? log.event;
 }
 
@@ -353,6 +352,8 @@ export function NotificationDeliveryLogsPage() {
                       <SelectItem value="user_registrations">
                         {copy.moduleLabels.user_registrations}
                       </SelectItem>
+                      <SelectItem value="insurance">{copy.moduleLabels.insurance}</SelectItem>
+                      <SelectItem value="inspection">{copy.moduleLabels.inspection}</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>

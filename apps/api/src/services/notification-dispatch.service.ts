@@ -74,6 +74,50 @@ function buildUserRegistrationSampleContext(): TemplateContext {
   };
 }
 
+function buildInsuranceSampleContext(): TemplateContext {
+  return {
+    vehicle_plate: "AA-1-53421",
+    vehicle_type: "Sedan",
+    vehicle_class: "Standard",
+    assigned_driver_name: "Driver Smith",
+    insurance_provider: "Nyala Insurance",
+    insurance_policy_number: "POL-2026-001",
+    insurance_expires_at: "15 Aug 2026",
+    days_until_expiry: "14",
+    days_overdue: "7",
+    reference: "A1B2C3D4",
+  };
+}
+
+function buildInspectionSampleContext(): TemplateContext {
+  return {
+    vehicle_plate: "AA-1-53421",
+    vehicle_type: "Sedan",
+    vehicle_class: "Standard",
+    assigned_driver_name: "Driver Smith",
+    inspection_center: "Addis Ababa Vehicle Inspection",
+    inspection_certificate_number: "INS-45821",
+    inspection_performed_at: "15 Jan 2026",
+    inspection_expires_at: "15 Jan 2027",
+    days_until_expiry: "14",
+    days_overdue: "7",
+    reference: "A1B2C3D4",
+  };
+}
+
+function buildSampleContextForModule(module: NotificationModule): TemplateContext {
+  switch (module) {
+    case "user_registrations":
+      return buildUserRegistrationSampleContext();
+    case "insurance":
+      return buildInsuranceSampleContext();
+    case "inspection":
+      return buildInspectionSampleContext();
+    default:
+      return buildRideRequestSampleContext();
+  }
+}
+
 function buildRideRequestContext(
   rideRequest: NonNullable<Awaited<ReturnType<typeof findRideRequestById>>>,
 ): TemplateContext {
@@ -133,7 +177,15 @@ function resolveUserRegistrationContact(
 }
 
 function moduleToEntityType(module: NotificationModule) {
-  return module === "ride_requests" ? "ride_request" : "user";
+  switch (module) {
+    case "ride_requests":
+      return "ride_request";
+    case "user_registrations":
+      return "user";
+    case "insurance":
+    case "inspection":
+      return "vehicle";
+  }
 }
 
 function logDeliveryAttempt(input: {
@@ -207,10 +259,7 @@ async function dispatchTemplates(
     template: Awaited<ReturnType<typeof listEnabledNotificationTemplates>>[number],
   ) => string | null,
 ) {
-  const templates = await listEnabledNotificationTemplates(
-    module,
-    event as RideRequestNotificationEvent | UserRegistrationNotificationEvent,
-  );
+  const templates = await listEnabledNotificationTemplates(module, event);
 
   if (templates.length === 0) {
     return;
@@ -333,10 +382,7 @@ export async function sendNotificationTemplateTest(
     );
   }
 
-  const context =
-    template.module === "user_registrations"
-      ? buildUserRegistrationSampleContext()
-      : buildRideRequestSampleContext();
+  const context = buildSampleContextForModule(template.module as NotificationModule);
 
   const renderedBody = renderNotificationTemplate(template.body, context);
   const renderedSubject =

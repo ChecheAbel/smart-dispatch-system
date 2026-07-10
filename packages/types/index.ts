@@ -141,7 +141,11 @@ export interface NotificationConfiguration {
   updated_at: string;
 }
 
-export type NotificationModule = "ride_requests" | "user_registrations";
+export type NotificationModule =
+  | "ride_requests"
+  | "user_registrations"
+  | "insurance"
+  | "inspection";
 
 export type RideRequestNotificationEvent =
   | "created"
@@ -154,7 +158,13 @@ export type RideRequestNotificationEvent =
 
 export type UserRegistrationNotificationEvent = "submitted" | "approved" | "rejected";
 
-export type NotificationTemplateRecipient = "requester" | "driver" | "applicant";
+export type ComplianceNotificationEvent = "due_soon" | "expired";
+
+export type NotificationTemplateRecipient =
+  | "requester"
+  | "driver"
+  | "applicant"
+  | "fleet_manager";
 
 export interface NotificationTemplate {
   id: string;
@@ -192,11 +202,44 @@ export const USER_REGISTRATION_NOTIFICATION_PLACEHOLDERS = [
   "reference",
 ] as const;
 
+export const INSURANCE_NOTIFICATION_PLACEHOLDERS = [
+  "vehicle_plate",
+  "vehicle_type",
+  "vehicle_class",
+  "assigned_driver_name",
+  "insurance_provider",
+  "insurance_policy_number",
+  "insurance_expires_at",
+  "days_until_expiry",
+  "days_overdue",
+  "reference",
+] as const;
+
+export const INSPECTION_NOTIFICATION_PLACEHOLDERS = [
+  "vehicle_plate",
+  "vehicle_type",
+  "vehicle_class",
+  "assigned_driver_name",
+  "inspection_center",
+  "inspection_certificate_number",
+  "inspection_performed_at",
+  "inspection_expires_at",
+  "days_until_expiry",
+  "days_overdue",
+  "reference",
+] as const;
+
 export type RideRequestNotificationPlaceholder =
   (typeof RIDE_REQUEST_NOTIFICATION_PLACEHOLDERS)[number];
 
 export type UserRegistrationNotificationPlaceholder =
   (typeof USER_REGISTRATION_NOTIFICATION_PLACEHOLDERS)[number];
+
+export type InsuranceNotificationPlaceholder =
+  (typeof INSURANCE_NOTIFICATION_PLACEHOLDERS)[number];
+
+export type InspectionNotificationPlaceholder =
+  (typeof INSPECTION_NOTIFICATION_PLACEHOLDERS)[number];
 
 export const NOTIFICATION_TEMPLATE_PLACEHOLDERS: Record<
   NotificationModule,
@@ -204,6 +247,8 @@ export const NOTIFICATION_TEMPLATE_PLACEHOLDERS: Record<
 > = {
   ride_requests: RIDE_REQUEST_NOTIFICATION_PLACEHOLDERS,
   user_registrations: USER_REGISTRATION_NOTIFICATION_PLACEHOLDERS,
+  insurance: INSURANCE_NOTIFICATION_PLACEHOLDERS,
+  inspection: INSPECTION_NOTIFICATION_PLACEHOLDERS,
 };
 
 /** @deprecated Use NotificationTemplate */

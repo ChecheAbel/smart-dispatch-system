@@ -12,11 +12,10 @@ import { adminHeadingClass } from "@/lib/admin-theme";
 import { getAdminNotificationTemplatesMessages } from "@/translations";
 import { formatMessage } from "@/translations";
 import { cn } from "@/lib/utils";
-
-const MODULE_PLACEHOLDER_COPY_KEY = {
-  ride_requests: "rideRequests",
-  user_registrations: "userRegistrations",
-} as const;
+import {
+  getModuleDefinition,
+  NOTIFICATION_MODULE_ORDER,
+} from "./notification-template-modules";
 
 type NotificationTemplatePlaceholdersGuideProps = {
   module?: NotificationModule;
@@ -32,7 +31,7 @@ export function NotificationTemplatePlaceholdersGuide({
   const { locale } = useLocale();
   const copy = getAdminNotificationTemplatesMessages(locale);
   const [open, setOpen] = useState(defaultOpen);
-  const modules = module ? [module] : (["ride_requests", "user_registrations"] as const);
+  const modules = module ? [module] : NOTIFICATION_MODULE_ORDER;
 
   return (
     <Collapsible
@@ -68,7 +67,7 @@ export function NotificationTemplatePlaceholdersGuide({
 
       <CollapsibleContent className="space-y-5 border-t border-slate-200/80 px-4 py-4">
         {modules.map((moduleKey) => {
-          const copyKey = MODULE_PLACEHOLDER_COPY_KEY[moduleKey];
+          const copyKey = getModuleDefinition(moduleKey).copyKey;
           const placeholderCopy = copy.placeholders.items[copyKey];
 
           return (

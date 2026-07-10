@@ -22,7 +22,12 @@ const router = Router();
 router.use(authenticate, authorize("admin"));
 
 const STATUSES = new Set<NotificationDeliveryStatus>(["sent", "skipped", "failed"]);
-const MODULES = new Set<NotificationModule>(["ride_requests", "user_registrations"]);
+const MODULES = new Set<NotificationModule>([
+  "ride_requests",
+  "user_registrations",
+  "insurance",
+  "inspection",
+]);
 const CHANNELS = new Set<NotificationChannel>(["email", "sms"]);
 
 function parseStatus(value: unknown): NotificationDeliveryStatus | undefined {

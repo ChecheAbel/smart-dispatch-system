@@ -204,6 +204,8 @@ enum NotificationChannel {
 enum NotificationModule {
   ride_requests
   user_registrations
+  insurance
+  inspection
 
   @@map("notification_module")
 }
@@ -212,6 +214,7 @@ enum NotificationTemplateRecipient {
   requester
   driver
   applicant
+  fleet_manager
 
   @@map("notification_template_recipient")
 }

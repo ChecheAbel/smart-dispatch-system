@@ -1382,7 +1382,7 @@
   "adminNotificationTemplates": {
     "eyebrow": "የስርዓት ቅንብሮች",
     "title": "የመልዕክት አብነቶች",
-    "description": "ለጉዞ ጥያቄዎች እና የተጠቃሚ ምዝገባ ማረጋገጫ በመላው መድረክ ኢሜይል እና ኤስኤምኤስ መልዕክቶችን ያዋቅሩ።",
+    "description": "ለጉዞ ጥያቄዎች፣ ምዝገባዎች፣ ተገዢነት እና የወደፊት የማሳወቂያ አካባቢዎች ኢሜይል እና ኤስኤምኤስ አብነቶችን ያዋቅሩ።",
     "placeholders": {
       "title": "የመልዕክት ቦታ ማስተካከያዎች",
       "description": "እነዚህን ቶከኖች በኢሜይል ርዕስ እና በመልዕክት ውስጥ ይጠቀሙ። ማሳወቂያ ሲላክ በእውነተኛ መረጃ ይተካሉ።",
@@ -1395,6 +1395,14 @@
         "userRegistrations": {
           "title": "የተጠቃሚ ምዝገባዎች",
           "description": "ለምዝገባ ቀርቧል፣ ጸድቋል እና ተቀባይነት አላገኘም የሚሉ አብነቶች ይገኛሉ።"
+        },
+        "insurance": {
+          "title": "የኢንሹራንስ ተገዢነት",
+          "description": "ለኢንሹራንስ መቀጠል ያለበት እና ጊዜው ያለፈበት ማስጠንቀቂያ አብነቶች ይገኛሉ።"
+        },
+        "inspection": {
+          "title": "የፍተሻ ተገዢነት",
+          "description": "ለፍተሻ መቀጠል ያለበት እና ጊዜው ያለፈበት ማስጠንቀቂያ አብነቶች ይገኛሉ።"
         }
       },
       "items": {
@@ -1418,6 +1426,31 @@
           "organization_name": "የድርጅት ወይም የኩባንያ ስም",
           "rejection_reason": "ምዝገባ ሲቀበል አልባይ ምክንያት",
           "reference": "አጭር የምዝገባ ማጣቀሻ ኮድ"
+        },
+        "insurance": {
+          "vehicle_plate": "የተሽከርካሪ ታብራ",
+          "vehicle_type": "የተሽከርካሪ አይነት",
+          "vehicle_class": "የተሽከርካሪ ክፍል",
+          "assigned_driver_name": "የተመደበ አሽከርካሪ ሙሉ ስም",
+          "insurance_provider": "የኢንሹራንስ አቅራቢ",
+          "insurance_policy_number": "የኢንሹራንስ ፖሊሲ ቁጥር",
+          "insurance_expires_at": "የኢንሹራንስ መጨረሻ ቀን",
+          "days_until_expiry": "እስከ መጨረሻው የቀሩ ቀናት",
+          "days_overdue": "ከመጨረሻው በኋላ የቀሩ ቀናት",
+          "reference": "አጭር የተሽከርካሪ ማጣቀሻ ኮድ"
+        },
+        "inspection": {
+          "vehicle_plate": "የተሽከርካሪ ታብራ",
+          "vehicle_type": "የተሽከርካሪ አይነት",
+          "vehicle_class": "የተሽከርካሪ ክፍል",
+          "assigned_driver_name": "የተመደበ አሽከርካሪ ሙሉ ስም",
+          "inspection_center": "የፍተሻ ማዕከል",
+          "inspection_certificate_number": "የፍተሻ የምስክር ወረቀት ቁጥር",
+          "inspection_performed_at": "ፍተሻ የተከናወነበት ቀን",
+          "inspection_expires_at": "የፍተሻ መጨረሻ ቀን",
+          "days_until_expiry": "እስከ መጨረሻው የቀሩ ቀናት",
+          "days_overdue": "ከመጨረሻው በኋላ የቀሩ ቀናት",
+          "reference": "አጭር የተሽከርካሪ ማጣቀሻ ኮድ"
         }
       }
     },
@@ -1450,7 +1483,11 @@
     "saving": "በማስቀመጥ ላይ…",
     "shell": {
       "modulePickerTitle": "የማሳወቂያ አካባቢ",
-      "modulePickerDescription": "እነዚህ መልዕክቶች ለየትኛው የስራ ሂደት እንደሚሰሩ ይምረጡ።",
+      "modulePickerDescription": "የመልዕክት አብነቶችን ለማርትዕ በየስራ ሂደቶች መካከል ይቀይሩ።",
+      "moduleSearchPlaceholder": "አካባቢዎችን ይፈልጉ...",
+      "moduleSearchEmpty": "ከፍለጋዎ ጋር የሚዛመዱ አካባቢዎች የሉም።",
+      "moduleEventCount": "{count} ክስተቶች",
+      "contextPathLabel": "የአሁኑ አብነት አቀማመጥ",
       "eventPickerTitle": "የማስነሳት ክስተት",
       "eventPickerDescription": "መልዕክቱ መቼ እንደሚላክ ይምረጡ፣ ከዚያ በቀኝ በኩል ያለውን መንገድ ያርትዑ።",
       "eventSearchPlaceholder": "ክስተቶችን ይፈልጉ...",
@@ -1465,6 +1502,11 @@
       "deliveryLogLinkDescription": "የተላኩ፣ የተዘለሉ እና የከሰሉ ማድረሶች",
       "readOnlyHint": "ለመመልከት ብቻ ፈቃድ አለዎት። አብነቶችን ለመስተካከል አስተዳዳሪን ያነጋግሩ።"
     },
+    "moduleCategories": {
+      "operations": "ክዋኔ",
+      "accounts": "መለያዎች",
+      "compliance": "ተገዢነት"
+    },
     "eventGroups": {
       "ride_requests": {
         "booking": "ቦታ ማስያዝ",
@@ -1473,6 +1515,12 @@
       },
       "user_registrations": {
         "registration": "የመለያ ዑደት"
+      },
+      "insurance": {
+        "compliance": "የኢንሹራንስ ማስጠንቀቂያዎች"
+      },
+      "inspection": {
+        "compliance": "የፍተሻ ማስጠንቀቂያዎች"
       }
     },
     "channels": {
@@ -1482,7 +1530,8 @@
     "recipients": {
       "requester": "ደንበኛ",
       "driver": "አሽከርካሪ",
-      "applicant": "አመልካች"
+      "applicant": "አመልካች",
+      "fleet_manager": "የመኪና ቡድን አስተዳዳሪ"
     },
     "modules": {
       "rideRequests": {
@@ -1492,6 +1541,14 @@
       "userRegistrations": {
         "title": "የተጠቃሚ ምዝገባዎች",
         "description": "ደንበኛ ሲመዘገብ እና መለያው ሲጸድቅ ወይም ሲሰረዝ የሚላኩ መልዕክቶች።"
+      },
+      "insurance": {
+        "title": "የኢንሹራንስ ተገዢነት",
+        "description": "የተሽከርካሪ ኢንሹራንስ መጨረሻው ሲቃረብ ወይም ጊዜው ሲያልፍ የሚላኩ ማስጠንቀቂያዎች።"
+      },
+      "inspection": {
+        "title": "የፍተሻ ተገዢነት",
+        "description": "የተሽከርካሪ ፍተሻ መጨረሻው ሲቃረብ ወይም ጊዜው ሲያልፍ የሚላኩ ማስጠንቀቂያዎች።"
       }
     },
     "events": {
@@ -1537,6 +1594,26 @@
         "rejected": {
           "title": "ምዝገባ ተቀባይነት አላገኘም",
           "description": "አስተዳዳሪ በመጠባበቅ ላይ ያለን ምዝገባ ሲሰርዝ ይላካል።"
+        }
+      },
+      "insurance": {
+        "due_soon": {
+          "title": "ኢንሹራንስ መቀጠል ያለበት",
+          "description": "የተሽከርካሪ ኢንሹራንስ መጨረሻው ሲቃረብ ይላካል።"
+        },
+        "expired": {
+          "title": "ኢንሹራንስ ጊዜው አልፏል",
+          "description": "የተሽከርካሪ ኢንሹራንስ መጨረሻው ሲያልፍ ይላካል።"
+        }
+      },
+      "inspection": {
+        "due_soon": {
+          "title": "ፍተሻ መቀጠል ያለበት",
+          "description": "የተሽከርካሪ ፍተሻ መጨረሻው ሲቃረብ ይላካል።"
+        },
+        "expired": {
+          "title": "ፍተሻ ጊዜው አልፏል",
+          "description": "የተሽከርካሪ ፍተሻ መጨረሻው ሲያልፍ ይላካል።"
         }
       }
     },
@@ -1607,12 +1684,15 @@
     },
     "moduleLabels": {
       "ride_requests": "የጉዞ ጥያቄዎች",
-      "user_registrations": "የተጠቃሚ ምዝገባዎች"
+      "user_registrations": "የተጠቃሚ ምዝገባዎች",
+      "insurance": "የኢንሹራንስ ተገዢነት",
+      "inspection": "የፍተሻ ተገዢነት"
     },
     "recipientLabels": {
       "requester": "ደንበኛ",
       "driver": "አሽከርካሪ",
-      "applicant": "አመልካች"
+      "applicant": "አመልካች",
+      "fleet_manager": "የመኪና ቡድን አስተዳዳሪ"
     },
     "channelLabels": {
       "email": "ኢሜይል",

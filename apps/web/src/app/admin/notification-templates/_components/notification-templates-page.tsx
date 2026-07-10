@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { MessagesSquare } from "lucide-react";
 import { useAuth, useLocale } from "@/components/shared/providers";
@@ -17,8 +17,12 @@ import {
   getAdminNotificationsMessages,
 } from "@/translations";
 import { cn } from "@/lib/utils";
-import { NotificationTemplatesChannelsSummary } from "./notification-templates-header-actions";
 import { NotificationTemplatesSettings } from "./notification-templates-settings";
+import {
+  NOTIFICATION_MODULE_ORDER,
+  parseNotificationModule,
+} from "./notification-template-modules";
+import { MODULE_EVENTS } from "./notification-template-shared";
 
 export function NotificationTemplatesPage() {
   const router = useRouter();
@@ -29,13 +33,13 @@ export function NotificationTemplatesPage() {
   const copy = getAdminNotificationTemplatesMessages(locale);
   const canRead = hasPermission(PERMISSIONS.notifications.read);
   const canWrite = hasPermission(PERMISSIONS.notifications.write);
-  const [stats, setStats] = useState({ enabled: 0, total: 0 });
 
   useEffect(() => {
     if (!searchParams.get("module")) {
+      const defaultModule = NOTIFICATION_MODULE_ORDER[0];
       const params = new URLSearchParams(searchParams.toString());
-      params.set("module", "ride_requests");
-      params.set("event", "created");
+      params.set("module", defaultModule);
+      params.set("event", MODULE_EVENTS[defaultModule][0]);
       router.replace(`/admin/notification-templates?${params.toString()}`, { scroll: false });
     }
   }, [router, searchParams]);
@@ -46,32 +50,24 @@ export function NotificationTemplatesPage() {
 
   return (
     <div className="min-w-0 space-y-6">
-      <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-        <div className="min-w-0 space-y-3">
-          <Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>
-          <div className="flex items-start gap-3">
-            <div className={adminIconBoxClass}>
-              <MessagesSquare className="size-5" />
-            </div>
-            <div className="min-w-0">
-              <h1 className={cn("text-2xl font-extrabold tracking-tight", adminHeadingClass)}>
-                {copy.title}
-              </h1>
-              <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-500">
-                {copy.description}
-              </p>
-            </div>
+      <div className="min-w-0 space-y-3">
+        <Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>
+        <div className="flex items-start gap-3">
+          <div className={adminIconBoxClass}>
+            <MessagesSquare className="size-5" />
+          </div>
+          <div className="min-w-0">
+            <h1 className={cn("text-2xl font-extrabold tracking-tight", adminHeadingClass)}>
+              {copy.title}
+            </h1>
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-500">
+              {copy.description}
+            </p>
           </div>
         </div>
-
-        <NotificationTemplatesChannelsSummary
-          enabled={stats.enabled}
-          total={stats.total}
-          className="w-full xl:w-auto"
-        />
       </div>
 
-      <NotificationTemplatesSettings canWrite={canWrite} onStatsChange={setStats} />
+      <NotificationTemplatesSettings canWrite={canWrite} />
     </div>
   );
 }

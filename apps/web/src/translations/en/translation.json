@@ -1382,7 +1382,7 @@
   "adminNotificationTemplates": {
     "eyebrow": "System settings",
     "title": "Message templates",
-    "description": "Configure email and SMS messages for ride requests and user registration approval across the platform.",
+    "description": "Configure email and SMS templates across ride requests, registrations, compliance, and future notification areas.",
     "placeholders": {
       "title": "Message placeholders",
       "description": "Insert these tokens in email subjects and message bodies. They are replaced with real data when a notification is sent.",
@@ -1395,6 +1395,14 @@
         "userRegistrations": {
           "title": "User registrations",
           "description": "Available for registration submitted, approved, and declined templates."
+        },
+        "insurance": {
+          "title": "Insurance compliance",
+          "description": "Available for insurance due-soon and expired alert templates."
+        },
+        "inspection": {
+          "title": "Inspection compliance",
+          "description": "Available for inspection due-soon and expired alert templates."
         }
       },
       "items": {
@@ -1418,6 +1426,31 @@
           "organization_name": "Organization or company name",
           "rejection_reason": "Reason when registration is declined",
           "reference": "Short application reference code"
+        },
+        "insurance": {
+          "vehicle_plate": "Vehicle plate number",
+          "vehicle_type": "Vehicle type name",
+          "vehicle_class": "Vehicle class name",
+          "assigned_driver_name": "Assigned driver full name",
+          "insurance_provider": "Insurance provider name",
+          "insurance_policy_number": "Insurance policy number",
+          "insurance_expires_at": "Insurance expiry date",
+          "days_until_expiry": "Days until insurance expires",
+          "days_overdue": "Days since insurance expired",
+          "reference": "Short vehicle reference code"
+        },
+        "inspection": {
+          "vehicle_plate": "Vehicle plate number",
+          "vehicle_type": "Vehicle type name",
+          "vehicle_class": "Vehicle class name",
+          "assigned_driver_name": "Assigned driver full name",
+          "inspection_center": "Inspection center name",
+          "inspection_certificate_number": "Inspection certificate number",
+          "inspection_performed_at": "Inspection performed date",
+          "inspection_expires_at": "Inspection expiry date",
+          "days_until_expiry": "Days until inspection expires",
+          "days_overdue": "Days since inspection expired",
+          "reference": "Short vehicle reference code"
         }
       }
     },
@@ -1450,7 +1483,11 @@
     "saving": "Saving...",
     "shell": {
       "modulePickerTitle": "Notification area",
-      "modulePickerDescription": "Choose which workflows these messages apply to.",
+      "modulePickerDescription": "Switch between workflows to edit their message templates.",
+      "moduleSearchPlaceholder": "Search areas...",
+      "moduleSearchEmpty": "No areas match your search.",
+      "moduleEventCount": "{count} events",
+      "contextPathLabel": "Current template location",
       "eventPickerTitle": "Trigger event",
       "eventPickerDescription": "Select when the message should be sent, then edit each channel on the right.",
       "eventSearchPlaceholder": "Search events...",
@@ -1465,6 +1502,11 @@
       "deliveryLogLinkDescription": "Sent, skipped, and failed deliveries",
       "readOnlyHint": "You have view-only access. Contact an administrator to edit templates."
     },
+    "moduleCategories": {
+      "operations": "Operations",
+      "accounts": "Accounts",
+      "compliance": "Compliance"
+    },
     "eventGroups": {
       "ride_requests": {
         "booking": "Booking",
@@ -1473,6 +1515,12 @@
       },
       "user_registrations": {
         "registration": "Account lifecycle"
+      },
+      "insurance": {
+        "compliance": "Insurance alerts"
+      },
+      "inspection": {
+        "compliance": "Inspection alerts"
       }
     },
     "channels": {
@@ -1482,7 +1530,8 @@
     "recipients": {
       "requester": "Customer",
       "driver": "Driver",
-      "applicant": "Applicant"
+      "applicant": "Applicant",
+      "fleet_manager": "Fleet manager"
     },
     "modules": {
       "rideRequests": {
@@ -1492,6 +1541,14 @@
       "userRegistrations": {
         "title": "User registrations",
         "description": "Messages sent when a customer registers and their account is approved or declined."
+      },
+      "insurance": {
+        "title": "Insurance compliance",
+        "description": "Alerts sent when vehicle insurance is approaching expiry or already expired."
+      },
+      "inspection": {
+        "title": "Inspection compliance",
+        "description": "Alerts sent when vehicle inspection is approaching expiry or already expired."
       }
     },
     "events": {
@@ -1537,6 +1594,26 @@
         "rejected": {
           "title": "Registration declined",
           "description": "Sent when an admin rejects a pending registration."
+        }
+      },
+      "insurance": {
+        "due_soon": {
+          "title": "Insurance due soon",
+          "description": "Sent when a vehicle insurance policy is approaching its expiry date."
+        },
+        "expired": {
+          "title": "Insurance expired",
+          "description": "Sent when a vehicle insurance policy has passed its expiry date."
+        }
+      },
+      "inspection": {
+        "due_soon": {
+          "title": "Inspection due soon",
+          "description": "Sent when a vehicle inspection certificate is approaching its expiry date."
+        },
+        "expired": {
+          "title": "Inspection expired",
+          "description": "Sent when a vehicle inspection certificate has passed its expiry date."
         }
       }
     },
@@ -1607,12 +1684,15 @@
     },
     "moduleLabels": {
       "ride_requests": "Ride requests",
-      "user_registrations": "User registrations"
+      "user_registrations": "User registrations",
+      "insurance": "Insurance compliance",
+      "inspection": "Inspection compliance"
     },
     "recipientLabels": {
       "requester": "Customer",
       "driver": "Driver",
-      "applicant": "Applicant"
+      "applicant": "Applicant",
+      "fleet_manager": "Fleet manager"
     },
     "channelLabels": {
       "email": "Email",
