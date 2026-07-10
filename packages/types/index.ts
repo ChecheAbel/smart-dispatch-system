@@ -376,6 +376,8 @@ export type VehicleHistoryEventType =
   | "maintenance_updated"
   | "maintenance_completed"
   | "maintenance_cancelled"
+  | "fuel_logged"
+  | "fuel_updated"
   | "expiry_updated";
 
 export type VehicleComplianceStatus = "expired" | "due_soon" | "ok" | "not_set";
@@ -448,6 +450,34 @@ export interface VehicleMaintenanceLog {
   completed_at: string | null;
   next_due_at: string | null;
   next_due_km: number | null;
+  created_by_user_id: string | null;
+  created_by: {
+    id: string;
+    name: string;
+  } | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type VehicleFuelType = "diesel" | "petrol" | "other";
+
+export type VehicleFuelLogSource = "manual" | "driver_app" | "import";
+
+export interface VehicleFuelLog {
+  id: string;
+  vehicle_id: string;
+  logged_at: string;
+  odometer_km: number;
+  quantity_liters: number;
+  total_cost: number | null;
+  price_per_liter: number | null;
+  fuel_type: VehicleFuelType;
+  station_name: string | null;
+  receipt_reference: string | null;
+  source: VehicleFuelLogSource;
+  notes: string | null;
+  distance_since_last_km: number | null;
+  consumption_km_per_liter: number | null;
   created_by_user_id: string | null;
   created_by: {
     id: string;

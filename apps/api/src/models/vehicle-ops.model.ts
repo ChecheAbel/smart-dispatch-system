@@ -1,5 +1,10 @@
 import type { Prisma } from "../generated/prisma";
-import { VehicleHistoryEventType, VehicleMaintenanceStatus } from "../generated/prisma";
+import {
+  VehicleFuelLogSource,
+  VehicleFuelType,
+  VehicleHistoryEventType,
+  VehicleMaintenanceStatus,
+} from "../generated/prisma";
 import { prisma } from "../db/prisma";
 
 export type CreateVehicleMaintenanceInput = {
@@ -188,4 +193,149 @@ export function parseVehicleMaintenanceStatus(value: unknown): VehicleMaintenanc
 
 export function isOpenMaintenanceStatus(status: VehicleMaintenanceStatus) {
   return status === VehicleMaintenanceStatus.open || status === VehicleMaintenanceStatus.in_progress;
+}
+
+export type CreateVehicleFuelLogInput = {
+  vehicleId: string;
+  loggedAt: Date;
+  odometerKm: number;
+  quantityLiters: number;
+  totalCost?: number | null;
+  fuelType?: VehicleFuelType;
+  stationName?: string | null;
+  receiptReference?: string | null;
+  source?: VehicleFuelLogSource;
+  notes?: string | null;
+  createdById?: string | null;
+};
+
+export type UpdateVehicleFuelLogInput = {
+  loggedAt?: Date;
+  odometerKm?: number;
+  quantityLiters?: number;
+  totalCost?: number | null;
+  fuelType?: VehicleFuelType;
+  stationName?: string | null;
+  receiptReference?: string | null;
+  notes?: string | null;
+};
+
+const fuelInclude = {
+  createdBy: {
+    select: {
+      id: true,
+      firstName: true,
+      middleName: true,
+      lastName: true,
+    },
+  },
+} as const;
+
+export async function listVehicleFuelLogs(
+  vehicleId: string,
+  options?: { skip?: number; take?: number },
+) {
+  return prisma.vehicleFuelLog.findMany({
+    where: { vehicleId },
+    include: fuelInclude,
+    orderBy: [{ loggedAt: "desc" }, { createdAt: "desc" }],
+    skip: options?.skip ?? 0,
+    take: options?.take ?? 20,
+  });
+}
+
+export async function countVehicleFuelLogs(vehicleId: string) {
+  return prisma.vehicleFuelLog.count({ where: { vehicleId } });
+}
+
+export async function findVehicleFuelLogById(id: string) {
+  return prisma.vehicleFuelLog.findUnique({
+    where: { id },
+    include: fuelInclude,
+  });
+}
+
+export async function createVehicleFuelLog(input: CreateVehicleFuelLogInput) {
+  return prisma.vehicleFuelLog.create({
+    data: {
+      vehicleId: input.vehicleId,
+      loggedAt: input.loggedAt,
+      odometerKm: input.odometerKm,
+      quantityLiters: input.quantityLiters,
+      totalCost: input.totalCost ?? null,
+      fuelType: input.fuelType ?? VehicleFuelType.diesel,
+      stationName: input.stationName?.trim() || null,
+      receiptReference: input.receiptReference?.trim() || null,
+      source: input.source ?? VehicleFuelLogSource.manual,
+      notes: input.notes?.trim() || null,
+      createdById: input.createdById ?? null,
+    },
+    include: fuelInclude,
+  });
+}
+
+export async function updateVehicleFuelLog(id: string, input: UpdateVehicleFuelLogInput) {
+  return prisma.vehicleFuelLog.update({
+    where: { id },
+    data: {
+      loggedAt: input.loggedAt,
+      odometerKm: input.odometerKm,
+      quantityLiters: input.quantityLiters,
+      totalCost: input.totalCost,
+      fuelType: input.fuelType,
+      stationName: input.stationName === undefined ? undefined : input.stationName?.trim() || null,
+      receiptReference:
+        input.receiptReference === undefined
+          ? undefined
+          : input.receiptReference?.trim() || null,
+      notes: input.notes === undefined ? undefined : input.notes?.trim() || null,
+    },
+    include: fuelInclude,
+  });
+}
+
+export function parseVehicleFuelType(value: unknown): VehicleFuelType | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim().toLowerCase();
+  return Object.values(VehicleFuelType).includes(normalized as VehicleFuelType)
+    ? (normalized as VehicleFuelType)
+    : undefined;
+}
+
+export function parseVehicleFuelLogSource(value: unknown): VehicleFuelLogSource | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim().toLowerCase();
+  return Object.values(VehicleFuelLogSource).includes(normalized as VehicleFuelLogSource)
+    ? (normalized as VehicleFuelLogSource)
+    : undefined;
+}
+
+export async function findPreviousVehicleFuelLog(vehicleId: string, loggedAt: Date, id?: string) {
+  return prisma.vehicleFuelLog.findFirst({
+    where: {
+      vehicleId,
+      loggedAt: { lt: loggedAt },
+      ...(id ? { id: { not: id } } : {}),
+    },
+    orderBy: [{ loggedAt: "desc" }, { createdAt: "desc" }],
+    select: { odometerKm: true, loggedAt: true },
+  });
+}
+
+export async function buildVehicleFuelPreviousOdometerMap(vehicleId: string) {
+  const entries = await prisma.vehicleFuelLog.findMany({
+    where: { vehicleId },
+    orderBy: [{ loggedAt: "asc" }, { createdAt: "asc" }],
+    select: { id: true, odometerKm: true },
+  });
+
+  const map = new Map<string, number | null>();
+  let previous: number | null = null;
+
+  for (const entry of entries) {
+    map.set(entry.id, previous);
+    previous = entry.odometerKm;
+  }
+
+  return map;
 }

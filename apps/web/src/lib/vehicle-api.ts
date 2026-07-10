@@ -2,6 +2,8 @@ import type {
   Vehicle,
   VehicleComplianceSummary,
   VehicleDriverOption,
+  VehicleFuelLog,
+  VehicleFuelType,
   VehicleHistoryEvent,
   VehicleMaintenanceLog,
   VehicleMaintenanceStatus,
@@ -66,6 +68,19 @@ export type CreateVehicleMaintenanceInput = {
 
 export type UpdateVehicleMaintenanceInput = Partial<CreateVehicleMaintenanceInput>;
 
+export type CreateVehicleFuelLogInput = {
+  logged_at?: string;
+  odometer_km: number;
+  quantity_liters: number;
+  total_cost: number;
+  fuel_type?: VehicleFuelType;
+  station_name: string;
+  receipt_reference?: string | null;
+  notes?: string | null;
+};
+
+export type UpdateVehicleFuelLogInput = Partial<CreateVehicleFuelLogInput>;
+
 export async function fetchVehicles(params: FetchVehiclesParams = {}) {
   const { data } = await apiClient.get("/api/vehicles", { params });
   return unwrapPaginatedApiResponse<Vehicle>(data);
@@ -121,6 +136,28 @@ export async function updateVehicleMaintenance(
 ) {
   const { data } = await apiClient.patch(`/api/vehicles/${id}/maintenance/${maintenanceId}`, input);
   return unwrapApiResponse<{ maintenance_log: VehicleMaintenanceLog }>(data).maintenance_log;
+}
+
+export async function fetchVehicleFuelLogs(
+  id: string,
+  params: { page?: number; limit?: number } = {},
+) {
+  const { data } = await apiClient.get(`/api/vehicles/${id}/fuel`, { params });
+  return unwrapPaginatedApiResponse<VehicleFuelLog>(data);
+}
+
+export async function createVehicleFuelLog(id: string, input: CreateVehicleFuelLogInput) {
+  const { data } = await apiClient.post(`/api/vehicles/${id}/fuel`, input);
+  return unwrapApiResponse<{ fuel_log: VehicleFuelLog }>(data).fuel_log;
+}
+
+export async function updateVehicleFuelLog(
+  id: string,
+  fuelLogId: string,
+  input: UpdateVehicleFuelLogInput,
+) {
+  const { data } = await apiClient.patch(`/api/vehicles/${id}/fuel/${fuelLogId}`, input);
+  return unwrapApiResponse<{ fuel_log: VehicleFuelLog }>(data).fuel_log;
 }
 
 export async function fetchVehicleComplianceSummary() {

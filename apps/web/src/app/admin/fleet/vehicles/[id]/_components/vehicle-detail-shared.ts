@@ -3,6 +3,7 @@ import {
   CalendarClock,
   ClipboardList,
   Droplets,
+  Fuel,
   Gauge,
   History,
   ShieldCheck,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 import type {
   Vehicle,
+  VehicleFuelType,
   VehicleHistoryEvent,
   VehicleMaintenanceStatus,
 } from "@smart-dispatch/types";
@@ -47,7 +49,9 @@ export {
 
 export const textareaClassName = complianceTextareaClassName;
 
-export type DetailTab = "overview" | "compliance" | "maintenance" | "history";
+export type DetailTab = "overview" | "compliance" | "maintenance" | "fuel" | "history";
+
+export const FUEL_TYPES: VehicleFuelType[] = ["diesel", "petrol", "other"];
 
 export const MAINTENANCE_STATUSES: VehicleMaintenanceStatus[] = [
   "open",
@@ -76,7 +80,9 @@ export function maintenanceTypeIcon(slug: string) {
 }
 
 export function parseTab(value: string | null): DetailTab {
-  if (value === "compliance" || value === "maintenance" || value === "history") return value;
+  if (value === "compliance" || value === "maintenance" || value === "fuel" || value === "history") {
+    return value;
+  }
   return "overview";
 }
 
@@ -127,8 +133,49 @@ export function formatMaintenanceDateTime(value: string, locale?: string) {
   });
 }
 
+export function formatFuelDateTime(value: string, locale?: string) {
+  return formatMaintenanceDateTime(value, locale);
+}
+
+export function formatFuelQuantity(value: number) {
+  return `${value.toLocaleString(undefined, { maximumFractionDigits: 2 })} L`;
+}
+
+export function fuelTypeIcon(type: VehicleFuelType) {
+  switch (type) {
+    case "petrol":
+      return Fuel;
+    case "diesel":
+      return Droplets;
+    default:
+      return Fuel;
+  }
+}
+
+export function fuelEfficiencyClass(value: number | null) {
+  if (value === null) {
+    return "border-slate-200 bg-slate-50 text-slate-600";
+  }
+
+  return "border-emerald-200 bg-emerald-50 text-emerald-800";
+}
+
+export function formatFuelEfficiency(
+  value: number | null,
+  copy: { efficiencyValue: string; notSet: string; efficiencyUnavailable: string },
+) {
+  if (value === null) {
+    return copy.efficiencyUnavailable;
+  }
+
+  return copy.efficiencyValue.replace("{value}", String(value));
+}
+
 export function historyIcon(eventType: VehicleHistoryEvent["event_type"]) {
   switch (eventType) {
+    case "fuel_logged":
+    case "fuel_updated":
+      return Fuel;
     case "maintenance_opened":
     case "maintenance_updated":
     case "maintenance_completed":

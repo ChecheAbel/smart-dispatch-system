@@ -1,5 +1,9 @@
 import type { Prisma } from "../generated/prisma";
-import type { VehicleHistoryEvent, VehicleMaintenanceLog } from "@smart-dispatch/types";
+import type {
+  VehicleFuelLog,
+  VehicleHistoryEvent,
+  VehicleMaintenanceLog,
+} from "@smart-dispatch/types";
 import {
   toPublicMaintenanceWorkTypeSummary,
 } from "./maintenance-work-type.mapper";
@@ -85,6 +89,93 @@ export function toPublicVehicleMaintenanceLog(
     created_at: log.createdAt.toISOString(),
     updated_at: log.updatedAt.toISOString(),
   };
+}
+
+type DbFuelLog = {
+  id: string;
+  vehicleId: string;
+  loggedAt: Date;
+  odometerKm: number;
+  quantityLiters: Prisma.Decimal;
+  totalCost: Prisma.Decimal | null;
+  fuelType: VehicleFuelLog["fuel_type"];
+  stationName: string | null;
+  receiptReference: string | null;
+  source: VehicleFuelLog["source"];
+  notes: string | null;
+  createdById: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  createdBy: DbPerson | null;
+};
+
+function computeFuelEfficiency(
+  log: Pick<DbFuelLog, "odometerKm" | "quantityLiters">,
+  previousOdometerKm: number | null | undefined,
+) {
+  if (previousOdometerKm === null || previousOdometerKm === undefined) {
+    return { distance_since_last_km: null, consumption_km_per_liter: null };
+  }
+
+  const distance = log.odometerKm - previousOdometerKm;
+  const quantity = Number(log.quantityLiters);
+
+  if (distance <= 0 || quantity <= 0) {
+    return { distance_since_last_km: null, consumption_km_per_liter: null };
+  }
+
+  return {
+    distance_since_last_km: distance,
+    consumption_km_per_liter: Math.round((distance / quantity) * 100) / 100,
+  };
+}
+
+export function toPublicVehicleFuelLog(
+  log: DbFuelLog,
+  options?: { previousOdometerKm?: number | null },
+): VehicleFuelLog {
+  const quantityLiters = decimalToNumber(log.quantityLiters) ?? 0;
+  const totalCost = decimalToNumber(log.totalCost);
+  const pricePerLiter =
+    totalCost !== null && quantityLiters > 0
+      ? Math.round((totalCost / quantityLiters) * 100) / 100
+      : null;
+  const efficiency = computeFuelEfficiency(log, options?.previousOdometerKm);
+
+  return {
+    id: log.id,
+    vehicle_id: log.vehicleId,
+    logged_at: log.loggedAt.toISOString(),
+    odometer_km: log.odometerKm,
+    quantity_liters: quantityLiters,
+    total_cost: totalCost,
+    price_per_liter: pricePerLiter,
+    fuel_type: log.fuelType,
+    station_name: log.stationName,
+    receipt_reference: log.receiptReference,
+    source: log.source,
+    notes: log.notes,
+    distance_since_last_km: efficiency.distance_since_last_km,
+    consumption_km_per_liter: efficiency.consumption_km_per_liter,
+    created_by_user_id: log.createdById,
+    created_by: log.createdBy
+      ? {
+          id: log.createdBy.id,
+          name: formatPersonName(log.createdBy),
+        }
+      : null,
+    created_at: log.createdAt.toISOString(),
+    updated_at: log.updatedAt.toISOString(),
+  };
+}
+
+export function toPublicVehicleFuelLogs(
+  logs: DbFuelLog[],
+  previousOdometerById: Map<string, number | null>,
+): VehicleFuelLog[] {
+  return logs.map((log) =>
+    toPublicVehicleFuelLog(log, { previousOdometerKm: previousOdometerById.get(log.id) }),
+  );
 }
 
 export function toPublicVehicleHistoryEvent(event: {

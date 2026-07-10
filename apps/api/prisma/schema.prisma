@@ -137,6 +137,7 @@ model User {
   rideRequests      RideRequest[]
   assignedDispatchRideRequests RideRequest[] @relation("RideRequestAssignedDriver")
   vehicleMaintenanceLogs VehicleMaintenanceLog[] @relation("VehicleMaintenanceCreatedBy")
+  vehicleFuelLogs        VehicleFuelLog[]        @relation("VehicleFuelCreatedBy")
   vehicleHistoryEvents   VehicleHistoryEvent[] @relation("VehicleHistoryActor")
 
   @@index([email])
@@ -417,6 +418,7 @@ model Vehicle {
   assignedDriver           User?         @relation("VehicleAssignedDriver", fields: [assignedDriverUserId], references: [id], onDelete: SetNull)
   rideRequestAssignments   RideRequest[] @relation("RideRequestAssignedVehicle")
   maintenanceLogs          VehicleMaintenanceLog[]
+  fuelLogs                 VehicleFuelLog[]
   historyEvents            VehicleHistoryEvent[]
 
   @@index([vehicleTypeId])
@@ -478,6 +480,45 @@ model VehicleMaintenanceLog {
   @@map("vehicle_maintenance_logs")
 }
 
+enum VehicleFuelType {
+  diesel
+  petrol
+  other
+
+  @@map("vehicle_fuel_type")
+}
+
+enum VehicleFuelLogSource {
+  manual
+  driver_app
+  import
+
+  @@map("vehicle_fuel_log_source")
+}
+
+model VehicleFuelLog {
+  id               String               @id @default(uuid()) @db.Uuid
+  vehicleId        String               @map("vehicle_id") @db.Uuid
+  loggedAt         DateTime             @map("logged_at") @db.Timestamptz
+  odometerKm       Int                  @map("odometer_km")
+  quantityLiters   Decimal              @map("quantity_liters") @db.Decimal(10, 2)
+  totalCost        Decimal?             @map("total_cost") @db.Decimal(12, 2)
+  fuelType         VehicleFuelType      @default(diesel) @map("fuel_type")
+  stationName      String?              @map("station_name") @db.VarChar(200)
+  receiptReference String?              @map("receipt_reference") @db.VarChar(100)
+  source           VehicleFuelLogSource @default(manual)
+  notes            String?              @db.Text
+  createdById      String?              @map("created_by_id") @db.Uuid
+  createdAt        DateTime             @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime             @updatedAt @map("updated_at") @db.Timestamptz
+  vehicle          Vehicle              @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  createdBy        User?                @relation("VehicleFuelCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([vehicleId, loggedAt])
+  @@index([createdById])
+  @@map("vehicle_fuel_logs")
+}
+
 enum VehicleHistoryEventType {
   created
   status_changed
@@ -487,6 +528,8 @@ enum VehicleHistoryEventType {
   maintenance_updated
   maintenance_completed
   maintenance_cancelled
+  fuel_logged
+  fuel_updated
   expiry_updated
 
   @@map("vehicle_history_event_type")

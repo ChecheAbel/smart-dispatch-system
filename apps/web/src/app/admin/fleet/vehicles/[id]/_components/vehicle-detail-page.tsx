@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, CalendarClock, ClipboardList, History, ShieldCheck, Truck, Wrench } from "lucide-react";
+import { ArrowLeft, CalendarClock, ClipboardList, Fuel, History, ShieldCheck, Truck, Wrench } from "lucide-react";
 import type {
   Vehicle,
+  VehicleFuelLog,
   VehicleHistoryEvent,
   VehicleMaintenanceLog,
 } from "@smart-dispatch/types";
@@ -27,6 +28,7 @@ import {
 } from "@/lib/permissions";
 import {
   fetchVehicleById,
+  fetchVehicleFuelLogs,
   fetchVehicleHistory,
   fetchVehicleMaintenance,
   updateVehicleMaintenance,
@@ -36,7 +38,9 @@ import { formatMessage, getAdminComplianceMessages, getAdminVehiclesMessages } f
 import { cn } from "@/lib/utils";
 import { UpdateComplianceSheet } from "@/app/admin/compliance/_components/update-compliance-sheet";
 import { CreateMaintenanceSheet } from "./create-maintenance-sheet";
+import { CreateFuelSheet } from "./create-fuel-sheet";
 import { VehicleDetailComplianceTab } from "./vehicle-detail-compliance-tab";
+import { VehicleDetailFuelTab } from "./vehicle-detail-fuel-tab";
 import { VehicleDetailHistoryTab } from "./vehicle-detail-history-tab";
 import { VehicleDetailMaintenanceTab } from "./vehicle-detail-maintenance-tab";
 import { VehicleDetailOverviewTab } from "./vehicle-detail-overview-tab";
@@ -72,9 +76,12 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
   const [tab, setTab] = useState<DetailTab>(parseTab(searchParams.get("tab")));
   const [history, setHistory] = useState<VehicleHistoryEvent[]>([]);
   const [maintenance, setMaintenance] = useState<VehicleMaintenanceLog[]>([]);
+  const [fuelLogs, setFuelLogs] = useState<VehicleFuelLog[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [maintenanceLoading, setMaintenanceLoading] = useState(false);
+  const [fuelLoading, setFuelLoading] = useState(false);
   const [maintenanceSheetOpen, setMaintenanceSheetOpen] = useState(false);
+  const [fuelSheetOpen, setFuelSheetOpen] = useState(false);
   const [complianceSheetOpen, setComplianceSheetOpen] = useState(false);
   const [complianceSheetType, setComplianceSheetType] = useState<ComplianceSheetType>("insurance");
   const [isPending, startTransition] = useTransition();
@@ -135,8 +142,24 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
     vehicleId,
   ]);
 
+  const loadFuel = useCallback(async () => {
+    setFuelLoading(true);
+    try {
+      const result = await fetchVehicleFuelLogs(vehicleId, { page: 1, limit: 50 });
+      setFuelLogs(result.data);
+    } catch (error) {
+      showErrorToast({
+        title: detail.toast.loadFuelFailed.title,
+        description:
+          error instanceof Error ? error.message : detail.toast.loadFuelFailed.description,
+      });
+    } finally {
+      setFuelLoading(false);
+    }
+  }, [detail.toast.loadFuelFailed.description, detail.toast.loadFuelFailed.title, vehicleId]);
+
   useEffect(() => {
-    if (!canViewFleetOps && (tab === "maintenance" || tab === "history")) {
+    if (!canViewFleetOps && (tab === "maintenance" || tab === "fuel" || tab === "history")) {
       setTab("compliance");
     }
   }, [canViewFleetOps, tab]);
@@ -154,7 +177,8 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
     if (!canRead || !vehicle) return;
     if (tab === "history") void loadHistory();
     if (tab === "maintenance") void loadMaintenance();
-  }, [canRead, loadHistory, loadMaintenance, tab, vehicle]);
+    if (tab === "fuel") void loadFuel();
+  }, [canRead, loadFuel, loadHistory, loadMaintenance, tab, vehicle]);
 
   function changeTab(next: DetailTab) {
     setTab(next);
@@ -184,6 +208,13 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
     await Promise.all([
       loadVehicle(),
       loadMaintenance(),
+      tab === "history" ? loadHistory() : Promise.resolve(),
+    ]);
+  }
+
+  async function handleFuelSaved() {
+    await Promise.all([
+      loadFuel(),
       tab === "history" ? loadHistory() : Promise.resolve(),
     ]);
   }
@@ -230,12 +261,16 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
           ? { id: "maintenance" as const, label: detail.tabs.maintenance, icon: Wrench }
           : null,
         canViewFleetOps
+          ? { id: "fuel" as const, label: detail.tabs.fuel, icon: Fuel }
+          : null,
+        canViewFleetOps
           ? { id: "history" as const, label: detail.tabs.history, icon: History }
           : null,
       ].filter((item): item is NonNullable<typeof item> => item !== null),
     [
       canViewFleetOps,
       detail.tabs.compliance,
+      detail.tabs.fuel,
       detail.tabs.history,
       detail.tabs.maintenance,
       detail.tabs.overview,
@@ -449,6 +484,17 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
         />
       ) : null}
 
+      {tab === "fuel" ? (
+        <VehicleDetailFuelTab
+          vehicle={vehicle}
+          detail={detail}
+          canWrite={canWriteFleet}
+          fuelLogs={fuelLogs}
+          fuelLoading={fuelLoading}
+          onOpenCreateSheet={() => setFuelSheetOpen(true)}
+        />
+      ) : null}
+
       {tab === "history" ? (
         <VehicleDetailHistoryTab
           detail={detail}
@@ -463,6 +509,13 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
         type={complianceSheetType}
         vehicle={vehicle}
         onSuccess={() => void handleComplianceSaved()}
+      />
+
+      <CreateFuelSheet
+        open={fuelSheetOpen}
+        onOpenChange={setFuelSheetOpen}
+        vehicle={vehicle}
+        onSuccess={() => void handleFuelSaved()}
       />
 
       <CreateMaintenanceSheet

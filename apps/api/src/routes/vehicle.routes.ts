@@ -6,6 +6,8 @@ import { requirePermission } from "../middleware/require-permission";
 import { toPublicDriverOption, toPublicVehicle } from "../mappers/vehicle.mapper";
 import {
   toPublicVehicleHistoryEvent,
+  toPublicVehicleFuelLog,
+  toPublicVehicleFuelLogs,
   toPublicVehicleMaintenanceLog,
 } from "../mappers/vehicle-ops.mapper";
 import { userHasPermission } from "../models/permission.model";
@@ -24,20 +26,27 @@ import {
   updateVehicle,
 } from "../models/vehicle.model";
 import {
+  buildVehicleFuelPreviousOdometerMap,
   countOpenVehicleMaintenance,
+  countVehicleFuelLogs,
   countVehicleHistoryEvents,
   countVehicleMaintenanceLogs,
+  createVehicleFuelLog,
   createVehicleHistoryEvent,
   createVehicleMaintenanceLog,
+  findVehicleFuelLogById,
   findVehicleMaintenanceLogById,
   isOpenMaintenanceStatus,
+  listVehicleFuelLogs,
   listVehicleHistoryEvents,
   listVehicleMaintenanceLogs,
+  parseVehicleFuelType,
   parseVehicleMaintenanceStatus,
+  updateVehicleFuelLog,
   updateVehicleMaintenanceLog,
 } from "../models/vehicle-ops.model";
+import { VehicleFuelLogSource, VehicleHistoryEventType, VehicleStatus } from "../generated/prisma";
 import { resolveMaintenanceWorkTypeId } from "../models/maintenance-work-type.model";
-import { VehicleHistoryEventType, VehicleStatus } from "../generated/prisma";
 import { findVehicleTypeById } from "../models/vehicle-type.model";
 import { findVehicleClassById } from "../models/vehicle-class.model";
 import { isVehicleTypeClassAllowed } from "../models/vehicle-type-class.model";
@@ -82,6 +91,29 @@ function parseOptionalNumber(value: unknown) {
     return Number.isFinite(parsed) ? parsed : undefined;
   }
   return undefined;
+}
+
+function parseLoggedAt(value: unknown) {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  if (!trimmed) return undefined;
+  const date = new Date(trimmed.includes("T") ? trimmed : `${trimmed}T12:00:00.000Z`);
+  if (Number.isNaN(date.getTime())) return undefined;
+  return date;
+}
+
+function parsePositiveInteger(value: unknown) {
+  const parsed = parseOptionalNumber(value);
+  if (parsed === undefined || parsed === null) return undefined;
+  const integer = Math.trunc(parsed);
+  return integer > 0 ? integer : undefined;
+}
+
+function parsePositiveQuantity(value: unknown) {
+  const parsed = parseOptionalNumber(value);
+  if (parsed === undefined || parsed === null) return undefined;
+  return parsed > 0 ? parsed : undefined;
 }
 
 function parseComplianceBody(body: Record<string, unknown>) {
@@ -474,6 +506,210 @@ router.patch(
       return sendSuccess(res, {
         maintenance_log: toPublicVehicleMaintenanceLog(log, {
           locale: getRequestLocale(req),
+        }),
+      });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.get(
+  "/:id/fuel",
+  requirePermission("vehicles.read"),
+  async (req: Request, res: Response) => {
+    try {
+      const vehicle = await findVehicleById(req.params.id);
+      if (!vehicle) {
+        return sendError(res, "Vehicle not found.", 404);
+      }
+
+      const pagination = parsePaginationQuery(req.query);
+      const result = await paginate(
+        pagination,
+        () => countVehicleFuelLogs(vehicle.id),
+        (skip, take) => listVehicleFuelLogs(vehicle.id, { skip, take }),
+      );
+      const previousOdometerById = await buildVehicleFuelPreviousOdometerMap(vehicle.id);
+
+      return sendPaginatedSuccess(
+        res,
+        toPublicVehicleFuelLogs(result.data, previousOdometerById),
+        result.pagination,
+      );
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.post(
+  "/:id/fuel",
+  requirePermission("vehicles.write"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const vehicle = await findVehicleById(req.params.id);
+      if (!vehicle) {
+        return sendError(res, "Vehicle not found.", 404);
+      }
+
+      const odometerKm = parsePositiveInteger(req.body?.odometer_km);
+      const quantityLiters = parsePositiveQuantity(req.body?.quantity_liters);
+      const loggedAt = parseLoggedAt(req.body?.logged_at) ?? new Date();
+      const fuelType = parseVehicleFuelType(req.body?.fuel_type);
+
+      if (odometerKm === undefined) {
+        return sendError(res, "A valid odometer reading (km) is required.", 400);
+      }
+
+      if (quantityLiters === undefined) {
+        return sendError(res, "A valid fuel quantity (liters) is required.", 400);
+      }
+
+      if (req.body?.fuel_type !== undefined && !fuelType) {
+        return sendError(res, "A valid fuel type is required.", 400);
+      }
+
+      const totalCost = parsePositiveQuantity(req.body?.total_cost);
+      const stationName = getOptionalString(req.body?.station_name);
+
+      if (totalCost === undefined) {
+        return sendError(res, "A valid total cost is required.", 400);
+      }
+
+      if (!stationName) {
+        return sendError(res, "A station name is required.", 400);
+      }
+
+      const log = await createVehicleFuelLog({
+        vehicleId: vehicle.id,
+        loggedAt,
+        odometerKm,
+        quantityLiters,
+        totalCost,
+        fuelType,
+        stationName,
+        receiptReference: getOptionalString(req.body?.receipt_reference),
+        source: VehicleFuelLogSource.manual,
+        notes: getOptionalString(req.body?.notes),
+        createdById: req.user?.id,
+      });
+
+      await createVehicleHistoryEvent({
+        vehicleId: vehicle.id,
+        eventType: VehicleHistoryEventType.fuel_logged,
+        summary: `Fuel refill logged: ${quantityLiters} L at ${odometerKm} km`,
+        actorUserId: req.user?.id,
+        metadata: {
+          fuel_log_id: log.id,
+          quantity_liters: quantityLiters,
+          odometer_km: odometerKm,
+        },
+      });
+
+      const previousOdometerById = await buildVehicleFuelPreviousOdometerMap(vehicle.id);
+
+      return sendSuccess(
+        res,
+        {
+          fuel_log: toPublicVehicleFuelLog(log, {
+            previousOdometerKm: previousOdometerById.get(log.id) ?? null,
+          }),
+        },
+        { status: 201 },
+      );
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.patch(
+  "/:id/fuel/:fuelLogId",
+  requirePermission("vehicles.write"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const vehicle = await findVehicleById(req.params.id);
+      if (!vehicle) {
+        return sendError(res, "Vehicle not found.", 404);
+      }
+
+      const existingLog = await findVehicleFuelLogById(req.params.fuelLogId);
+      if (!existingLog || existingLog.vehicleId !== vehicle.id) {
+        return sendError(res, "Fuel log not found.", 404);
+      }
+
+      const odometerKm =
+        req.body?.odometer_km !== undefined
+          ? parsePositiveInteger(req.body.odometer_km)
+          : undefined;
+      const quantityLiters =
+        req.body?.quantity_liters !== undefined
+          ? parsePositiveQuantity(req.body.quantity_liters)
+          : undefined;
+      const loggedAt =
+        req.body?.logged_at !== undefined ? parseLoggedAt(req.body.logged_at) : undefined;
+      const fuelType =
+        req.body?.fuel_type !== undefined ? parseVehicleFuelType(req.body.fuel_type) : undefined;
+
+      if (req.body?.odometer_km !== undefined && odometerKm === undefined) {
+        return sendError(res, "A valid odometer reading (km) is required.", 400);
+      }
+
+      if (req.body?.quantity_liters !== undefined && quantityLiters === undefined) {
+        return sendError(res, "A valid fuel quantity (liters) is required.", 400);
+      }
+
+      if (req.body?.logged_at !== undefined && !loggedAt) {
+        return sendError(res, "A valid refill date is required.", 400);
+      }
+
+      if (req.body?.fuel_type !== undefined && !fuelType) {
+        return sendError(res, "A valid fuel type is required.", 400);
+      }
+
+      if (req.body?.total_cost !== undefined) {
+        const totalCost = parsePositiveQuantity(req.body.total_cost);
+        if (totalCost === undefined) {
+          return sendError(res, "A valid total cost is required.", 400);
+        }
+      }
+
+      if (req.body?.station_name !== undefined) {
+        const stationName = getOptionalString(req.body.station_name);
+        if (!stationName) {
+          return sendError(res, "A station name is required.", 400);
+        }
+      }
+
+      const log = await updateVehicleFuelLog(existingLog.id, {
+        loggedAt,
+        odometerKm,
+        quantityLiters,
+        totalCost: parseOptionalNumber(req.body?.total_cost),
+        fuelType,
+        stationName: getOptionalString(req.body?.station_name),
+        receiptReference: getOptionalString(req.body?.receipt_reference),
+        notes: getOptionalString(req.body?.notes),
+      });
+
+      await createVehicleHistoryEvent({
+        vehicleId: vehicle.id,
+        eventType: VehicleHistoryEventType.fuel_updated,
+        summary: `Fuel log updated: ${Number(log.quantityLiters)} L at ${log.odometerKm} km`,
+        actorUserId: req.user?.id,
+        metadata: {
+          fuel_log_id: log.id,
+          quantity_liters: Number(log.quantityLiters),
+          odometer_km: log.odometerKm,
+        },
+      });
+
+      const previousOdometerById = await buildVehicleFuelPreviousOdometerMap(vehicle.id);
+
+      return sendSuccess(res, {
+        fuel_log: toPublicVehicleFuelLog(log, {
+          previousOdometerKm: previousOdometerById.get(log.id) ?? null,
         }),
       });
     } catch (error) {

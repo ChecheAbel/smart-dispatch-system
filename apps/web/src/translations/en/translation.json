@@ -2225,6 +2225,7 @@
         "overview": "Overview",
         "compliance": "Compliance",
         "maintenance": "Maintenance",
+        "fuel": "Fuel",
         "history": "History"
       },
       "overview": {
@@ -2342,6 +2343,78 @@
           "costValue": "{amount}"
         }
       },
+      "fuel": {
+        "createTitle": "Log fuel refill",
+        "createSubtitle": "Record a refill for {plate}",
+        "listTitle": "Fuel logs",
+        "logCount": "{count} refills logged",
+        "refillFallback": "{quantity} refill",
+        "emptyTitle": "No refills logged",
+        "emptyHint": "Record liters, odometer, and cost after each refill to track consumption.",
+        "openForm": "Log refill",
+        "closeForm": "Cancel",
+        "loggedAt": "Refill date",
+        "odometer": "Odometer (km)",
+        "odometerPlaceholder": "e.g. 45200",
+        "odometerRequired": "Enter a valid odometer reading.",
+        "quantity": "Fuel (liters)",
+        "quantityPlaceholder": "e.g. 45.5",
+        "quantityRequired": "Enter a valid fuel quantity.",
+        "fuelType": "Fuel type",
+        "cost": "Total cost",
+        "costPlaceholder": "e.g. 3200",
+        "pricePerLiter": "Price per liter",
+        "station": "Station",
+        "stationPlaceholder": "e.g. Total Bole",
+        "stationRequired": "Enter the station name.",
+        "costRequired": "Enter a valid total cost.",
+        "stationAndCost": "Station & cost",
+        "stationAndCostHint": "Where the refill happened and how much you paid.",
+        "optional": "Optional",
+        "receipt": "Receipt reference",
+        "receiptPlaceholder": "Receipt or invoice number",
+        "notes": "Notes",
+        "notesPlaceholder": "Optional notes about this refill…",
+        "noNotes": "No notes provided.",
+        "create": "Save log",
+        "saving": "Saving...",
+        "loggedByLabel": "Logged by",
+        "loggedOnLabel": "Logged on",
+        "loggedByUnknown": "System",
+        "viewDetails": "View details",
+        "notSet": "—",
+        "kmValue": "{count} km",
+        "costValue": "{amount}",
+        "efficiency": "Consumption",
+        "efficiencyValue": "{value} km/L",
+        "efficiencyUnavailable": "—",
+        "distanceSinceLast": "Distance since last refill",
+        "tableColumns": {
+          "fuelType": "Fuel type",
+          "refill": "Refill",
+          "quantity": "Liters",
+          "efficiency": "Consumption",
+          "loggedBy": "Logged by",
+          "loggedOn": "Logged on",
+          "actions": "Actions"
+        },
+        "detailSheet": {
+          "title": "Fuel log details",
+          "description": "Full refill record including odometer, cost, and consumption.",
+          "overview": "Overview",
+          "request": "Record",
+          "refillDetails": "Refill & mileage",
+          "costAndEfficiency": "Station & cost",
+          "lastUpdated": "Last updated",
+          "notSet": "Not set",
+          "close": "Close"
+        }
+      },
+      "fuelTypes": {
+        "diesel": "Diesel",
+        "petrol": "Petrol",
+        "other": "Other"
+      },
       "maintenanceTypes": {
         "scheduled": "Scheduled",
         "repair": "Repair",
@@ -2364,7 +2437,7 @@
         "title": "Vehicle history",
         "empty": "No history events yet.",
         "emptyTitle": "History is empty",
-        "emptyHint": "Assignments, status changes, maintenance, and expiry updates will show up here.",
+        "emptyHint": "Assignments, status changes, maintenance, fuel logs, and expiry updates will show up here.",
         "by": "by {name}"
       },
       "historyEventTypes": {
@@ -2376,6 +2449,8 @@
         "maintenance_updated": "Maintenance updated",
         "maintenance_completed": "Maintenance completed",
         "maintenance_cancelled": "Maintenance cancelled",
+        "fuel_logged": "Fuel refill logged",
+        "fuel_updated": "Fuel log updated",
         "expiry_updated": "Expiry dates updated"
       },
       "toast": {
@@ -2389,6 +2464,10 @@
         },
         "loadMaintenanceFailed": {
           "title": "Could not load maintenance logs",
+          "description": "Please try again in a moment."
+        },
+        "loadFuelFailed": {
+          "title": "Could not load fuel logs",
           "description": "Please try again in a moment."
         },
         "expirySaved": {
@@ -2409,6 +2488,14 @@
         },
         "maintenanceFailed": {
           "title": "Could not save maintenance",
+          "description": "Please check the form and try again."
+        },
+        "fuelCreated": {
+          "title": "Fuel log saved",
+          "description": "The refill was recorded for this vehicle."
+        },
+        "fuelFailed": {
+          "title": "Could not save fuel log",
           "description": "Please check the form and try again."
         }
       }

@@ -52,6 +52,7 @@ const DEFAULT_PERMISSIONS = [
   { slug: "driver.upcoming", module: "driver", action: "upcoming", description: "Driver can list upcoming trips and connect to the upcoming-trips Socket.IO namespace (/api/ride-requests/driver/upcoming)" },
   { slug: "driver.history", module: "driver", action: "history", description: "Driver can list past trips (GET /api/ride-requests/driver/history)" },
   { slug: "driver.maintenance", module: "driver", action: "maintenance", description: "Driver can list and request maintenance for their assigned vehicle (GET/POST /api/ride-requests/driver/maintenance)" },
+  { slug: "driver.fuel", module: "driver", action: "fuel", description: "Driver can list and log fuel refills for their assigned vehicle (GET/POST /api/ride-requests/driver/fuel)" },
   { slug: "customer_dashboard.read", module: "customer_dashboard", action: "read", description: "View customer dashboard" },
   { slug: "customer_profile.read", module: "customer_profile", action: "read", description: "View customer profile" },
   { slug: "customer_requests.read", module: "customer_requests", action: "read", description: "View and book ride requests" },
@@ -481,6 +482,9 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "vehicles.maintenance.list", method: "GET", path: "/api/vehicles/:id/maintenance", description: "List vehicle maintenance logs", permissionSlug: "vehicles.read" },
   { slug: "vehicles.maintenance.create", method: "POST", path: "/api/vehicles/:id/maintenance", description: "Create vehicle maintenance log", permissionSlug: "vehicles.write" },
   { slug: "vehicles.maintenance.update", method: "PATCH", path: "/api/vehicles/:id/maintenance/:maintenanceId", description: "Update vehicle maintenance log", permissionSlug: "vehicles.write" },
+  { slug: "vehicles.fuel.list", method: "GET", path: "/api/vehicles/:id/fuel", description: "List vehicle fuel logs", permissionSlug: "vehicles.read" },
+  { slug: "vehicles.fuel.create", method: "POST", path: "/api/vehicles/:id/fuel", description: "Create vehicle fuel log", permissionSlug: "vehicles.write" },
+  { slug: "vehicles.fuel.update", method: "PATCH", path: "/api/vehicles/:id/fuel/:fuelLogId", description: "Update vehicle fuel log", permissionSlug: "vehicles.write" },
   { slug: "maintenance_work_types.list", method: "GET", path: "/api/maintenance-work-types", description: "List maintenance work types", permissionSlug: "maintenance_work_types.read" },
   { slug: "maintenance_work_types.active", method: "GET", path: "/api/maintenance-work-types/active", description: "List active maintenance work types", permissionSlug: "maintenance_work_types.read" },
   { slug: "maintenance_work_types.create", method: "POST", path: "/api/maintenance-work-types", description: "Create maintenance work type", permissionSlug: "maintenance_work_types.write" },
@@ -518,6 +522,9 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "ride_requests.driver_maintenance_list", method: "GET", path: "/api/ride-requests/driver/maintenance", description: "List maintenance logs for the driver's assigned vehicle", permissionSlug: "driver.maintenance" },
   { slug: "ride_requests.driver_maintenance_create", method: "POST", path: "/api/ride-requests/driver/maintenance", description: "Create a maintenance request for the driver's assigned vehicle", permissionSlug: "driver.maintenance" },
   { slug: "ride_requests.driver_maintenance_update", method: "PATCH", path: "/api/ride-requests/driver/maintenance/:maintenanceId", description: "Update a maintenance log on the driver's assigned vehicle", permissionSlug: "driver.maintenance" },
+  { slug: "ride_requests.driver_fuel_list", method: "GET", path: "/api/ride-requests/driver/fuel", description: "List fuel logs for the driver's assigned vehicle", permissionSlug: "driver.fuel" },
+  { slug: "ride_requests.driver_fuel_create", method: "POST", path: "/api/ride-requests/driver/fuel", description: "Create a fuel log for the driver's assigned vehicle", permissionSlug: "driver.fuel" },
+  { slug: "ride_requests.driver_fuel_update", method: "PATCH", path: "/api/ride-requests/driver/fuel/:fuelLogId", description: "Update a fuel log on the driver's assigned vehicle", permissionSlug: "driver.fuel" },
   { slug: "admin_ride_requests.list", method: "GET", path: "/api/admin/ride-requests", description: "List all ride requests", permissionSlug: "ride_requests.read" },
   { slug: "admin_ride_requests.get", method: "GET", path: "/api/admin/ride-requests/:id", description: "Get ride request for admin review", permissionSlug: "ride_requests.read" },
   { slug: "admin_ride_requests.assignable_vehicles", method: "GET", path: "/api/admin/ride-requests/:id/assignable-vehicles", description: "List assignable vehicles for ride request", permissionSlug: "ride_requests.read" },
@@ -668,7 +675,7 @@ async function seedDriverRolePermissions() {
 
   const permissions = await prisma.permission.findMany({
     where: {
-      slug: { in: ["driver.vehicle", "driver.upcoming", "driver.history", "driver.maintenance"] },
+      slug: { in: ["driver.vehicle", "driver.upcoming", "driver.history", "driver.maintenance", "driver.fuel"] },
     },
     orderBy: { slug: "asc" },
   });

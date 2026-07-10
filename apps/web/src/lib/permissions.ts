@@ -77,6 +77,7 @@ export const PERMISSIONS = {
     upcoming: "driver.upcoming",
     history: "driver.history",
     maintenance: "driver.maintenance",
+    fuel: "driver.fuel",
   },
 } as const;
 

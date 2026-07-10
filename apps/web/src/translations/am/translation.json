@@ -2225,6 +2225,7 @@
         "overview": "አጠቃላይ እይታ",
         "compliance": "ተገዢነት",
         "maintenance": "ጥገና",
+        "fuel": "ነዳጅ",
         "history": "ታሪክ"
       },
       "overview": {
@@ -2342,6 +2343,78 @@
           "costValue": "{amount}"
         }
       },
+      "fuel": {
+        "createTitle": "የነዳጅ ሙሌ መመዝገብ",
+        "createSubtitle": "ለ {plate} ሙሌ ያስመዝግቡ",
+        "listTitle": "የነዳጅ መዝገቦች",
+        "logCount": "{count} ሙሌዎች ተመዝግበዋል",
+        "refillFallback": "{quantity} ሙሌ",
+        "emptyTitle": "ምንም ሙሌ አልተመዘገበም",
+        "emptyHint": "ከእያንዳንዱ ሙሌ በኋላ ሊትር፣ ኦዶሜትር እና ወጪ ያስመዝግቡ።",
+        "openForm": "ሙሌ መመዝገብ",
+        "closeForm": "ሰርዝ",
+        "loggedAt": "የሙሌ ቀን",
+        "odometer": "ኦዶሜትር (ኪ.ሜ)",
+        "odometerPlaceholder": "ለምሳሌ 45200",
+        "odometerRequired": "ትክክለኛ ኦዶሜትር ያስገቡ።",
+        "quantity": "ነዳጅ (ሊትር)",
+        "quantityPlaceholder": "ለምሳሌ 45.5",
+        "quantityRequired": "ትክክለኛ የነዳጅ መጠን ያስገቡ።",
+        "fuelType": "የነዳጅ አይነት",
+        "cost": "ጠቅላላ ወጪ",
+        "costPlaceholder": "ለምሳሌ 3200",
+        "pricePerLiter": "በሊትር ዋጋ",
+        "station": "መደብር",
+        "stationPlaceholder": "ለምሳሌ ቶታል ቦሌ",
+        "stationRequired": "የመደብሩን ስም ያስገቡ።",
+        "costRequired": "ትክክለኛ ጠቅላላ ወጪ ያስገቡ።",
+        "stationAndCost": "መደብር እና ወጪ",
+        "stationAndCostHint": "ሙሌው የተካሄደበት ቦታ እና የተከፈለው መጠን።",
+        "optional": "አማራጭ",
+        "receipt": "የደረሰኝ ማጣቀሻ",
+        "receiptPlaceholder": "የደረሰኝ ወይም የክፍያ ቁጥር",
+        "notes": "ማስታወሻዎች",
+        "notesPlaceholder": "ስለዚህ ሙሌ አማራጭ ማስታወሻ…",
+        "noNotes": "ምንም ማስታወሻ አልተሰጠም።",
+        "create": "መዝገብ አስቀምጥ",
+        "saving": "በማስቀመጥ ላይ…",
+        "loggedByLabel": "የመዘገበው",
+        "loggedOnLabel": "የተመዘገበበት",
+        "loggedByUnknown": "ስርዓት",
+        "viewDetails": "ዝርዝሮችን ይመልከቱ",
+        "notSet": "—",
+        "kmValue": "{count} ኪ.ሜ",
+        "costValue": "{amount}",
+        "efficiency": "ፍጆታ",
+        "efficiencyValue": "{value} ኪ.ሜ/ሊ",
+        "efficiencyUnavailable": "—",
+        "distanceSinceLast": "ከቀድሞው ሙሌ በኋላ ያለው ርቀት",
+        "tableColumns": {
+          "fuelType": "የነዳጅ አይነት",
+          "refill": "ሙሌ",
+          "quantity": "ሊትር",
+          "efficiency": "ፍጆታ",
+          "loggedBy": "የመዘገበው",
+          "loggedOn": "የተመዘገበበት",
+          "actions": "ድርጊቶች"
+        },
+        "detailSheet": {
+          "title": "የነዳጅ መዝገብ ዝርዝር",
+          "description": "ኦዶሜትር፣ ወጪ እና ፍጆታን ጨምሮ ሙላዊ የሙሌ መዝገብ።",
+          "overview": "አጠቃላይ እይታ",
+          "request": "መዝገብ",
+          "refillDetails": "ሙሌ እና ኪሎሜትር",
+          "costAndEfficiency": "መደብር እና ወጪ",
+          "lastUpdated": "የተዘመነበት",
+          "notSet": "አልተሞላም",
+          "close": "ዝጋ"
+        }
+      },
+      "fuelTypes": {
+        "diesel": "ዲዘል",
+        "petrol": "ቤንዚን",
+        "other": "ሌላ"
+      },
       "maintenanceTypes": {
         "scheduled": "ታቅዶ",
         "repair": "ጥገና",
@@ -2364,7 +2437,7 @@
         "title": "የተሽከርካሪ ታሪክ",
         "empty": "እስካሁን የታሪክ ክስተት የለም።",
         "emptyTitle": "ታሪክ ባዶ ነው",
-        "emptyHint": "ምደባ፣ የሁኔታ ለውጥ፣ ጥገና እና የማብቂያ ቀን ዝመናዎች እዚህ ይታያሉ።",
+        "emptyHint": "ምደባ፣ የሁኔታ ለውጥ፣ ጥገና፣ የነዳጅ መዝገቦች እና የማብቂያ ቀን ዝመናዎች እዚህ ይታያሉ።",
         "by": "በ {name}"
       },
       "historyEventTypes": {
@@ -2376,6 +2449,8 @@
         "maintenance_updated": "ጥገና ተዘምኗል",
         "maintenance_completed": "ጥገና ተጠናቋል",
         "maintenance_cancelled": "ጥገና ተሰርዟል",
+        "fuel_logged": "የነዳጅ ሙሌ ተመዝግቧል",
+        "fuel_updated": "የነዳጅ መዝገብ ተዘምኗል",
         "expiry_updated": "የማብቂያ ቀኖች ተዘምነዋል"
       },
       "toast": {
@@ -2389,6 +2464,10 @@
         },
         "loadMaintenanceFailed": {
           "title": "የጥገና መዝገቦችን መጫን አልተቻለም",
+          "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
+        },
+        "loadFuelFailed": {
+          "title": "የነዳጅ መዝገቦችን መጫን አልተቻለም",
           "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
         },
         "expirySaved": {
@@ -2409,6 +2488,14 @@
         },
         "maintenanceFailed": {
           "title": "ጥገናን ማስቀመጥ አልተቻለም",
+          "description": "እባክዎ ቅጹን ያረጋግጡና እንደገና ይሞክሩ።"
+        },
+        "fuelCreated": {
+          "title": "የነዳጅ መዝገብ ተቀምጧል",
+          "description": "ሙሌው ለዚህ ተሽከርካሪ ተመዝግቧል።"
+        },
+        "fuelFailed": {
+          "title": "የነዳጅ መዝገብ ማስቀመጥ አልተቻለም",
           "description": "እባክዎ ቅጹን ያረጋግጡና እንደገና ይሞክሩ።"
         }
       }
