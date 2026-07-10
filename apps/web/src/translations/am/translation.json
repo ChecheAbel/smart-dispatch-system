@@ -290,7 +290,11 @@
     "eyebrow": "አጠቃላይ እይታ",
     "title": "ዳሽቦርድ",
     "welcome": "እንኳን ደህና መጡ፣ {name}",
-    "description": "በስማርት ዲስፓች ውስጥ የተጠቃሚዎች፣ መኪና ብዛት እና ቦታዎች ቀጥታ ማጠቃለያ።",
+    "description": "ለመድረክዎ የራስ መሪ ቁጥሮች፣ ከዚያም ለዲስፓች፣ መኪና ብዛት፣ ተገዢነት እና እድገት የሪፖርት ግራፎች።",
+    "core": {
+      "title": "የመድረክ ማጠቃለያ",
+      "description": "ለሰዎች፣ መኪና ብዛት እና ጂኦግራፊ የራስ መሪ ቁጥሮች"
+    },
     "stats": {
       "usersTitle": "ተጠቃሚዎች",
       "usersDescription": "{active} ንቁ መለያዎች",
@@ -299,13 +303,88 @@
       "locationsTitle": "ቦታዎች",
       "locationsDescription": "{active} ንቁ የዲስፓች ቦታዎች",
       "regionsTitle": "ክልሎች",
-      "regionsDescription": "የተዋቀሩ አስተዳደራዊ ክልሎች"
+      "regionsDescription": "የተዋቀሩ አስተዳደራዊ ክልሎች",
+      "pendingRegistrationsTitle": "በመጠባበቅ ላይ ያሉ ምዝገባዎች",
+      "pendingRegistrationsDescription": "ለግምገማ በመጠባበቅ ላይ ያሉ የምዝገባ ጥያቄዎች"
     },
     "registrations": {
       "title": "የደንበኛ ምዝገባዎች",
       "description": "በራስ-ሰር ምዝገባ ጥያቄዎች ለግምገማ በመጠባበቅ ላይ ወይም ከተጠናቀቁ በኋላ"
     },
+    "operations": {
+      "title": "የጉዞ ጥያቄዎች",
+      "description": "የደንበኛ ቦታ ማስያዣ ሂደት እና ቀጥታ ዲስፓችዎች",
+      "pendingTitle": "በግምገማ ላይ",
+      "pendingDescription": "የአስተዳዳሪ ማረጋገጫ በመጠባበቅ ላይ",
+      "upcomingTitle": "መጪ ጉዞዎች",
+      "upcomingDescription": "የተረጋገጡ እና የታሰቡ",
+      "inProgressTitle": "በመስራት ላይ",
+      "inProgressDescription": "አሁን በመንገድ ላይ"
+    },
+    "compliance": {
+      "title": "የመኪና ብዛት ተገዢነት",
+      "description": "በመላው መኪና ብዛት የኢንሹራንስ እና የምርመራ መዝጊያ",
+      "attentionTitle": "ትኩረት ይፈልጋል",
+      "attentionDescription": "ጊዜው ያለፈ ወይም በቅርቡ የሚያበቃ",
+      "insuranceExpiredTitle": "ኢንሹራንስ ጊዜው አልፏል",
+      "insuranceExpiredDescription": "ሽፋን ያለቋቸው ተሽከርካሪዎች",
+      "inspectionExpiredTitle": "ምርመራ ጊዜው አልፏል",
+      "inspectionExpiredDescription": "ምርመራው ያለፈባቸው ተሽከርካሪዎች"
+    },
     "comingSoon": "በቅርቡ ይመጣል",
+    "charts": {
+      "operationsEyebrow": "ዲስፓች",
+      "operationsTitle": "የዲስፓች ሪፖርት",
+      "operationsDescription": "የጉዞ ጥያቄ መጠን፣ የሂደት ሁኔታ እና የክልል ፍላጎት",
+      "fleetEyebrow": "መኪና ብዛት",
+      "fleetTitle": "የመኪና ብዛት ሪፖርት",
+      "fleetDescription": "የተሽከርካሪ ተገኝነት፣ ተገዢነት እና የነዳጅ ወጪ",
+      "registrationsEyebrow": "እድገት",
+      "registrationsTitle": "የደንበኛ እድገት",
+      "registrationsDescription": "በጊዜ ላይ የራስ-ሰር ምዝገባ እንቅስቃሴ",
+      "totalLabel": "ጠቅላላ",
+      "vehiclesLabel": "ተሽከርካሪዎች",
+      "attentionLabel": "ትኩረት",
+      "rideTrendTitle": "የጉዞ ጥያቄዎች በጊዜ",
+      "rideStatusTitle": "ጥያቄዎች በሁኔታ",
+      "rideStatusDescription": "የአሁኑ የሂደት ክፍፍል",
+      "rideRegionTitle": "ጥያቄዎች በክልል",
+      "rideRegionDescription": "እያንዳንዱ አሞሌ በክልል ስም የተሰየመ ነው፤ ቁጥሩ የጥያቄ ብዛትን ያሳያል",
+      "unassignedRegion": "ክልል አልተመደበም",
+      "fleetStatusTitle": "ተሽከርካሪዎች በሁኔታ",
+      "fleetStatusDescription": "ንቁ፣ ጥገና እና ከአገልግሎት ውጭ መኪና ብዛት",
+      "complianceTitle": "የተገዢነት ማጠቃለያ",
+      "complianceDescription": "{count} ተሽከርካሪዎች ትኩረት ይፈልጋሉ",
+      "fuelSpendTitle": "የነዳጅ ወጪ በጊዜ",
+      "registrationTrendTitle": "አዲስ ምዝገባዎች",
+      "periodLabel": "ያለፉት {days} ቀናት",
+      "requestsLabel": "ጥያቄዎች",
+      "registrationsLabel": "ምዝገባዎች",
+      "fuelCostLabel": "ወጪ",
+      "fuelLitersLabel": "ሊትር",
+      "insuranceLabel": "ኢንሹራንስ",
+      "inspectionLabel": "ምርመራ",
+      "empty": "ለዚህ ጊዜ ውሂብ የለም",
+      "noAccess": "ለመለያዎ እስካሁን ምንም የሪፖርት ሞጁል አይገኝም።",
+      "rideStatuses": {
+        "pending": "በመጠባበቅ ላይ",
+        "confirmed": "የተረጋገጠ",
+        "in_progress": "በመስራት ላይ",
+        "completed": "ተጠናቋል",
+        "cancelled": "ተሰርዟል"
+      },
+      "vehicleStatuses": {
+        "active": "ንቁ",
+        "maintenance": "ጥገና",
+        "retired": "ከአገልግሎት ውጭ"
+      },
+      "complianceStatuses": {
+        "expired": "ጊዜው አልፏል",
+        "due_soon": "በቅርቡ ያበቃ",
+        "ok": "ትክክል",
+        "not_set": "አልተሞላም"
+      }
+    },
     "comingSoonStats": {
       "bookingsTitle": "ንቁ ቦታ ማስያዣዎች",
       "bookingsDescription": "በመጠባበቅ ላይ እና የተረጋገጡ የጉዞ ጥያቄዎች",
@@ -332,15 +411,20 @@
       "title": "የመኪና ብዛት ማጠቃለያ",
       "description": "የተሽከርካሪ አይነቶች እና የክወና ሁኔታ",
       "types": "የተሽከርካሪ አይነቶች",
+      "typesDescription": "በመኪና ዝርዝር ውስጥ ንቁ ምድቦች",
       "active": "ንቁ ተሽከርካሪዎች",
+      "activeDescription": "ለዲስፓች ዝግጁ",
       "assigned": "ለሹፌሮች የተመደቡ",
-      "maintenance": "በጥገና ላይ"
+      "assignedDescription": "ከሹፌር ጋር የተገናኙ ተሽከርካሪዎች",
+      "maintenance": "በጥገና ላይ",
+      "maintenanceDescription": "በጊዜያዊ ሁኔታ ከአገልግሎት ውጭ"
     },
     "access": {
       "title": "ሰዎች እና መዳረሻ",
       "description": "መለያዎች እና የሚና ማዋቀር",
       "roles": "ሚናዎች",
-      "activeUsers": "ንቁ ተጠቃሚዎች",
+      "rolesDescription": "የተዋቀሩ የፈቃድ ቡድኖች",
+      "activeUsers": "{active} ንቁ መለያዎች",
       "totalUsers": "ጠቅላላ ተጠቃሚዎች"
     },
     "quickLinks": {
@@ -348,8 +432,15 @@
       "description": "ብዙ ጊዜ የሚጠቀሙትን የአስተዳደር ሞጁሎች ይክፈቱ",
       "users": "ተጠቃሚዎችን ያስተዳድሩ",
       "vehicles": "የመኪና ብዛት ተሽከርካሪዎች",
+      "rideRequests": "የጉዞ ጥያቄዎች",
+      "compliance": "የመኪና ብዛት ተገዢነት",
       "locations": "የዲስፓች ቦታዎች",
-      "regions": "ክልሎች"
+      "regions": "ክልሎች",
+      "registrations": "ምዝገባዎች",
+      "farePlans": "የክፍያ ዕቅዶች",
+      "notifications": "የማሳወቂያ አብነቶች",
+      "auditLogs": "የኦዲት መዝገቦች",
+      "roles": "ሚናዎች እና ፈቃዶች"
     },
     "system": {
       "title": "የክፍያ ሁኔታ",

@@ -290,7 +290,11 @@
     "eyebrow": "Overview",
     "title": "Dashboard",
     "welcome": "Welcome back, {name}",
-    "description": "Live snapshot of users, fleet, and locations across Smart Dispatch.",
+    "description": "Headline counts for your platform, plus reporting charts for dispatch, fleet, compliance, and growth.",
+    "core": {
+      "title": "Platform overview",
+      "description": "Headline counts for people, fleet, and geography"
+    },
     "stats": {
       "usersTitle": "Users",
       "usersDescription": "{active} active accounts",
@@ -299,13 +303,88 @@
       "locationsTitle": "Locations",
       "locationsDescription": "{active} active dispatch sites",
       "regionsTitle": "Regions",
-      "regionsDescription": "Administrative regions configured"
+      "regionsDescription": "Administrative regions configured",
+      "pendingRegistrationsTitle": "Pending sign-ups",
+      "pendingRegistrationsDescription": "Registration applications awaiting review"
     },
     "registrations": {
       "title": "Customer registrations",
       "description": "Self-service sign-up applications awaiting or completed review"
     },
+    "operations": {
+      "title": "Ride requests",
+      "description": "Customer booking pipeline and live dispatches",
+      "pendingTitle": "Pending review",
+      "pendingDescription": "Awaiting admin confirmation",
+      "upcomingTitle": "Upcoming trips",
+      "upcomingDescription": "Confirmed and scheduled",
+      "inProgressTitle": "In progress",
+      "inProgressDescription": "Currently on the road"
+    },
+    "compliance": {
+      "title": "Fleet compliance",
+      "description": "Insurance and inspection expiry across the fleet",
+      "attentionTitle": "Needs attention",
+      "attentionDescription": "Expired or due soon",
+      "insuranceExpiredTitle": "Insurance expired",
+      "insuranceExpiredDescription": "Vehicles with lapsed coverage",
+      "inspectionExpiredTitle": "Inspection expired",
+      "inspectionExpiredDescription": "Vehicles overdue for inspection"
+    },
     "comingSoon": "Coming soon",
+    "charts": {
+      "operationsEyebrow": "Dispatch",
+      "operationsTitle": "Dispatch reporting",
+      "operationsDescription": "Ride request volume, pipeline status, and regional demand",
+      "fleetEyebrow": "Fleet",
+      "fleetTitle": "Fleet reporting",
+      "fleetDescription": "Vehicle availability, compliance exposure, and fuel spend",
+      "registrationsEyebrow": "Growth",
+      "registrationsTitle": "Customer growth",
+      "registrationsDescription": "Self-service registration activity over time",
+      "totalLabel": "Total",
+      "vehiclesLabel": "Vehicles",
+      "attentionLabel": "Attention",
+      "rideTrendTitle": "Ride requests over time",
+      "rideStatusTitle": "Requests by status",
+      "rideStatusDescription": "Current pipeline distribution",
+      "rideRegionTitle": "Requests by region",
+      "rideRegionDescription": "Each bar is labeled with the region name; the number shows request count",
+      "unassignedRegion": "No region assigned",
+      "fleetStatusTitle": "Vehicles by status",
+      "fleetStatusDescription": "Active, maintenance, and retired fleet share",
+      "complianceTitle": "Compliance snapshot",
+      "complianceDescription": "{count} vehicles need attention",
+      "fuelSpendTitle": "Fuel spend over time",
+      "registrationTrendTitle": "New registrations",
+      "periodLabel": "Last {days} days",
+      "requestsLabel": "Requests",
+      "registrationsLabel": "Registrations",
+      "fuelCostLabel": "Cost",
+      "fuelLitersLabel": "Liters",
+      "insuranceLabel": "Insurance",
+      "inspectionLabel": "Inspection",
+      "empty": "No data for this period",
+      "noAccess": "No reporting modules are available for your account yet.",
+      "rideStatuses": {
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "in_progress": "In progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "vehicleStatuses": {
+        "active": "Active",
+        "maintenance": "Maintenance",
+        "retired": "Retired"
+      },
+      "complianceStatuses": {
+        "expired": "Expired",
+        "due_soon": "Due soon",
+        "ok": "Valid",
+        "not_set": "Not set"
+      }
+    },
     "comingSoonStats": {
       "bookingsTitle": "Active bookings",
       "bookingsDescription": "Pending and confirmed trip requests",
@@ -332,15 +411,20 @@
       "title": "Fleet overview",
       "description": "Vehicle types and operational status",
       "types": "Vehicle types",
+      "typesDescription": "Active categories in the fleet catalog",
       "active": "Active vehicles",
+      "activeDescription": "Ready for dispatch",
       "assigned": "Assigned to drivers",
-      "maintenance": "In maintenance"
+      "assignedDescription": "Vehicles with a linked driver",
+      "maintenance": "In maintenance",
+      "maintenanceDescription": "Temporarily out of service"
     },
     "access": {
       "title": "People & access",
       "description": "Accounts and role configuration",
       "roles": "Roles",
-      "activeUsers": "Active users",
+      "rolesDescription": "Permission groups configured",
+      "activeUsers": "{active} active accounts",
       "totalUsers": "Total users"
     },
     "quickLinks": {
@@ -348,8 +432,15 @@
       "description": "Jump to frequently used admin modules",
       "users": "Manage users",
       "vehicles": "Fleet vehicles",
+      "rideRequests": "Ride requests",
+      "compliance": "Fleet compliance",
       "locations": "Dispatch locations",
-      "regions": "Regions"
+      "regions": "Regions",
+      "registrations": "Registrations",
+      "farePlans": "Fare plans",
+      "notifications": "Notification templates",
+      "auditLogs": "Audit logs",
+      "roles": "Roles & permissions"
     },
     "system": {
       "title": "Session status",

@@ -646,6 +646,49 @@ export type RideRequestStatus =
   | "completed"
   | "cancelled";
 
+export type AdminDashboardDailyCount = {
+  date: string;
+  count: number;
+};
+
+export type AdminDashboardFuelDaily = {
+  date: string;
+  total_cost: number;
+  total_liters: number;
+};
+
+export type AdminDashboardCompliancePoint = {
+  status: VehicleComplianceStatus;
+  count: number;
+};
+
+export type AdminDashboardAnalytics = {
+  period_days: number;
+  ride_requests: {
+    by_status: Record<RideRequestStatus, number>;
+    trend: AdminDashboardDailyCount[];
+    by_region: Array<{
+      region_id: string | null;
+      region_name: string;
+      count: number;
+    }>;
+  } | null;
+  fleet: {
+    by_status: Record<VehicleStatus, number>;
+    compliance: {
+      insurance: AdminDashboardCompliancePoint[];
+      inspection: AdminDashboardCompliancePoint[];
+      vehicles_needing_attention: number;
+    } | null;
+  } | null;
+  fuel: {
+    trend: AdminDashboardFuelDaily[];
+  } | null;
+  registrations: {
+    trend: AdminDashboardDailyCount[];
+  } | null;
+};
+
 export interface RideRequestLocalizedName {
   locale: string;
   name: string;
