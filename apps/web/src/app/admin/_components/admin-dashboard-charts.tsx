@@ -70,6 +70,10 @@ type AdminDashboardChartsProps = {
   analytics: AdminDashboardAnalytics | null;
   loading: boolean;
   locale: SupportedLocale;
+  canReadRideRequests: boolean;
+  canReadVehicles: boolean;
+  canViewCompliance: boolean;
+  canViewRegistrations: boolean;
 };
 
 type DonutSlice = {
@@ -196,7 +200,15 @@ function toLegendItems(
   return items.filter((item) => item.value > 0);
 }
 
-export function AdminDashboardCharts({ analytics, loading, locale }: AdminDashboardChartsProps) {
+export function AdminDashboardCharts({
+  analytics,
+  loading,
+  locale,
+  canReadRideRequests,
+  canReadVehicles,
+  canViewCompliance,
+  canViewRegistrations,
+}: AdminDashboardChartsProps) {
   const copy = getAdminDashboardMessages(locale);
   const charts = copy.charts;
   const rideTrendGradientId = useId().replace(/:/g, "");
@@ -279,9 +291,25 @@ export function AdminDashboardCharts({ analytics, loading, locale }: AdminDashbo
     { key: "inspection", label: charts.inspectionLabel, color: dashboardChartTheme.accent },
   ];
 
+  const showRideRequests = (loading && canReadRideRequests) || Boolean(analytics?.ride_requests);
+  const showFleetSection =
+    (loading && canReadVehicles) || Boolean(analytics?.fleet || analytics?.fuel);
+  const showFleetStatus = (loading && canReadVehicles) || Boolean(analytics?.fleet);
+  const showCompliance =
+    (loading && (canReadVehicles || canViewCompliance)) ||
+    Boolean(analytics?.fleet?.compliance);
+  const showFuel = (loading && canReadVehicles) || Boolean(analytics?.fuel);
+  const showRegistrations =
+    (loading && canViewRegistrations) || Boolean(analytics?.registrations);
+
+  const rideRequests = analytics?.ride_requests;
+  const fleet = analytics?.fleet;
+  const fuel = analytics?.fuel;
+  const registrations = analytics?.registrations;
+
   return (
     <div className="space-y-6">
-      {analytics?.ride_requests ? (
+      {showRideRequests ? (
         <ChartSection
           eyebrow={charts.operationsEyebrow}
           title={charts.operationsTitle}
@@ -294,12 +322,13 @@ export function AdminDashboardCharts({ analytics, loading, locale }: AdminDashbo
               highlight={rideTrendTotal}
               highlightLabel={charts.totalLabel}
               loading={loading}
-              empty={!hasTrendData(analytics.ride_requests.trend)}
+              empty={!loading && rideRequests ? !hasTrendData(rideRequests.trend) : false}
               emptyLabel={charts.empty}
               className="xl:col-span-8"
             >
+              {!loading && rideRequests ? (
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={analytics.ride_requests.trend} margin={dashboardChartMargins}>
+                <AreaChart data={rideRequests.trend} margin={dashboardChartMargins}>
                   <defs>
                     <linearGradient id={rideTrendGradientId} x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor={dashboardChartTheme.brand} stopOpacity={0.32} />
@@ -343,6 +372,7 @@ export function AdminDashboardCharts({ analytics, loading, locale }: AdminDashbo
                   />
                 </AreaChart>
               </ResponsiveContainer>
+              ) : null}
             </DashboardChartCard>
 
             <DashboardChartCard
@@ -351,11 +381,12 @@ export function AdminDashboardCharts({ analytics, loading, locale }: AdminDashbo
               highlight={rideStatusTotal}
               highlightLabel={charts.totalLabel}
               loading={loading}
-              empty={rideStatusTotal === 0}
+              empty={!loading && rideStatusTotal === 0}
               emptyLabel={charts.empty}
               className="xl:col-span-4"
-              footer={<DashboardChartLegend items={rideStatusLegend} />}
+              footer={!loading ? <DashboardChartLegend items={rideStatusLegend} /> : undefined}
             >
+              {!loading ? (
               <DashboardDonutChart
                 slices={rideStatuses.map((item) => ({
                   key: item.status,
@@ -366,6 +397,7 @@ export function AdminDashboardCharts({ analytics, loading, locale }: AdminDashbo
                 total={rideStatusTotal}
                 centerLabel={charts.totalLabel}
               />
+              ) : null}
             </DashboardChartCard>
 
             <DashboardChartCard
@@ -374,11 +406,12 @@ export function AdminDashboardCharts({ analytics, loading, locale }: AdminDashbo
               highlight={regionChartRows.reduce((total, row) => total + row.count, 0)}
               highlightLabel={charts.totalLabel}
               loading={loading}
-              empty={regionChartRows.length === 0}
+              empty={!loading && regionChartRows.length === 0}
               emptyLabel={charts.empty}
               className="xl:col-span-12"
               contentClassName="!h-auto"
             >
+              {!loading && rideRequests ? (
               <div style={{ height: regionChartHeight }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart
@@ -430,30 +463,32 @@ export function AdminDashboardCharts({ analytics, loading, locale }: AdminDashbo
                   </BarChart>
                 </ResponsiveContainer>
               </div>
+              ) : null}
             </DashboardChartCard>
           </div>
         </ChartSection>
       ) : null}
 
-      {analytics?.fleet || analytics?.fuel ? (
+      {showFleetSection ? (
         <ChartSection
           eyebrow={charts.fleetEyebrow}
           title={charts.fleetTitle}
           description={charts.fleetDescription}
         >
           <div className="grid gap-4 xl:grid-cols-12">
-            {analytics?.fleet ? (
+            {showFleetStatus ? (
               <DashboardChartCard
                 title={charts.fleetStatusTitle}
                 description={charts.fleetStatusDescription}
                 highlight={fleetStatusTotal}
                 highlightLabel={charts.vehiclesLabel}
                 loading={loading}
-                empty={fleetStatusTotal === 0}
+                empty={!loading && fleetStatusTotal === 0}
                 emptyLabel={charts.empty}
                 className="xl:col-span-4"
-                footer={<DashboardChartLegend items={fleetStatusLegend} />}
+                footer={!loading ? <DashboardChartLegend items={fleetStatusLegend} /> : undefined}
               >
+                {!loading ? (
                 <DashboardDonutChart
                   slices={fleetStatuses.map((item) => ({
                     key: item.status,
@@ -464,25 +499,31 @@ export function AdminDashboardCharts({ analytics, loading, locale }: AdminDashbo
                   total={fleetStatusTotal}
                   centerLabel={charts.vehiclesLabel}
                 />
+                ) : null}
               </DashboardChartCard>
             ) : null}
 
-            {analytics?.fleet?.compliance ? (
+            {showCompliance ? (
               <DashboardChartCard
                 title={charts.complianceTitle}
                 description={formatMessage(charts.complianceDescription, {
-                  count: String(analytics.fleet.compliance.vehicles_needing_attention),
+                  count: String(fleet?.compliance?.vehicles_needing_attention ?? 0),
                 })}
-                highlight={analytics.fleet.compliance.vehicles_needing_attention}
+                highlight={fleet?.compliance?.vehicles_needing_attention}
                 highlightLabel={charts.attentionLabel}
                 loading={loading}
-                empty={complianceChartData.every(
-                  (item) => item.insurance === 0 && item.inspection === 0,
-                )}
+                empty={
+                  !loading
+                    ? complianceChartData.every(
+                        (item) => item.insurance === 0 && item.inspection === 0,
+                      )
+                    : false
+                }
                 emptyLabel={charts.empty}
                 className="xl:col-span-8"
-                footer={<DashboardChartLegend items={complianceLegend} />}
+                footer={!loading ? <DashboardChartLegend items={complianceLegend} /> : undefined}
               >
+                {!loading && fleet?.compliance ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={complianceChartData} margin={dashboardChartMargins} barGap={6}>
                     <CartesianGrid {...dashboardChartGrid} />
@@ -522,22 +563,24 @@ export function AdminDashboardCharts({ analytics, loading, locale }: AdminDashbo
                     />
                   </BarChart>
                 </ResponsiveContainer>
+                ) : null}
               </DashboardChartCard>
             ) : null}
 
-            {analytics?.fuel ? (
+            {showFuel ? (
               <DashboardChartCard
                 title={charts.fuelSpendTitle}
                 description={periodLabel}
                 highlight={formatCurrency(fuelSpendTotal, locale)}
                 highlightLabel={charts.fuelCostLabel}
                 loading={loading}
-                empty={!hasTrendData(analytics.fuel.trend)}
+                empty={!loading && fuel ? !hasTrendData(fuel.trend) : false}
                 emptyLabel={charts.empty}
                 className="xl:col-span-12"
               >
+                {!loading && fuel ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={analytics.fuel.trend} margin={dashboardChartMargins} barCategoryGap="28%">
+                  <BarChart data={fuel.trend} margin={dashboardChartMargins} barCategoryGap="28%">
                     <defs>
                       <linearGradient id={fuelBarGradientId} x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0%" stopColor={dashboardChartTheme.brandMid} stopOpacity={0.95} />
@@ -583,13 +626,14 @@ export function AdminDashboardCharts({ analytics, loading, locale }: AdminDashbo
                     />
                   </BarChart>
                 </ResponsiveContainer>
+                ) : null}
               </DashboardChartCard>
             ) : null}
           </div>
         </ChartSection>
       ) : null}
 
-      {analytics?.registrations ? (
+      {showRegistrations ? (
         <ChartSection
           eyebrow={charts.registrationsEyebrow}
           title={charts.registrationsTitle}
@@ -601,11 +645,12 @@ export function AdminDashboardCharts({ analytics, loading, locale }: AdminDashbo
             highlight={registrationTotal}
             highlightLabel={charts.totalLabel}
             loading={loading}
-            empty={!hasTrendData(analytics.registrations.trend)}
+            empty={!loading && registrations ? !hasTrendData(registrations.trend) : false}
             emptyLabel={charts.empty}
           >
+            {!loading && registrations ? (
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={analytics.registrations.trend} margin={dashboardChartMargins}>
+                <ComposedChart data={registrations.trend} margin={dashboardChartMargins}>
                   <defs>
                     <linearGradient id={registrationLineGradientId} x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor={dashboardChartTheme.gold} stopOpacity={0.22} />
@@ -657,6 +702,7 @@ export function AdminDashboardCharts({ analytics, loading, locale }: AdminDashbo
                   />
                 </ComposedChart>
               </ResponsiveContainer>
+            ) : null}
           </DashboardChartCard>
         </ChartSection>
       ) : null}

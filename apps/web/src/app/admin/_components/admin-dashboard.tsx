@@ -197,11 +197,8 @@ export function AdminDashboard() {
     };
   }, [locale]);
 
-  const hasReporting =
-    analytics?.ride_requests ||
-    analytics?.fleet ||
-    analytics?.fuel ||
-    analytics?.registrations;
+  const hasReportingAccess =
+    canReadRideRequests || canReadVehicles || canViewRegistrations;
 
   return (
     <div className="space-y-8">
@@ -229,8 +226,16 @@ export function AdminDashboard() {
         canViewRegistrations={canViewRegistrations}
       />
 
-      {hasReporting || loading ? (
-        <AdminDashboardCharts analytics={analytics} loading={loading} locale={locale} />
+      {hasReportingAccess ? (
+        <AdminDashboardCharts
+          analytics={analytics}
+          loading={loading}
+          locale={locale}
+          canReadRideRequests={canReadRideRequests}
+          canReadVehicles={canReadVehicles}
+          canViewCompliance={canViewCompliance}
+          canViewRegistrations={canViewRegistrations}
+        />
       ) : (
         <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/70 px-6 py-12 text-center text-sm text-slate-500">
           {copy.charts.noAccess}
