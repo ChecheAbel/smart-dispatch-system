@@ -133,14 +133,15 @@ export function MyContractsPage() {
       columns={columns}
       fetchData={loadEnrollments}
       getRowKey={(row) => row.id}
+      showIndexColumn
       renderRowActions={(row) =>
         row.invoice ? (
           <Button
-            type="button"
             variant="ghost"
             size="icon-sm"
             className="text-slate-500 hover:bg-[#1C3A34]/6 hover:text-[#1C3A34]"
             render={<Link href={`/dashboard/my-invoices/${row.invoice!.id}`} />}
+            nativeButton={false}
             aria-label={row.invoice.reference_number}
           >
             <Eye className="size-4" />

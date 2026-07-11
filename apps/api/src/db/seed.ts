@@ -135,6 +135,7 @@ const SEED_REGISTRY: Record<SeedTarget, SeedRunner> = {
       "vehicle-types",
       "vehicle-classes",
       "vehicle-type-classes",
+      "vehicles",
       "fare-plans",
     ],
   },

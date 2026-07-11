@@ -239,6 +239,7 @@ export function RideRequestHistoryPage() {
         columns={columns}
         fetchData={fetchData}
         getRowKey={(row) => row.id}
+        showIndexColumn
         emptyIcon={Route}
         emptyTitle={historyCopy.emptyTitle}
         emptyDescription={historyCopy.emptyDescription}

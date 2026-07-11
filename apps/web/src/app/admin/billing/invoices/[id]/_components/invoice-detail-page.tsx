@@ -166,7 +166,7 @@ export function InvoiceDetailPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-3">
-          <Button variant="ghost" size="sm" className="-ml-2 text-slate-600" render={<Link href="/admin/billing/invoices" />}>
+          <Button variant="ghost" size="sm" className="-ml-2 text-slate-600" render={<Link href="/admin/billing/invoices" />} nativeButton={false}>
             <ArrowLeft className="size-4" />
             {copy.detail.back}
           </Button>

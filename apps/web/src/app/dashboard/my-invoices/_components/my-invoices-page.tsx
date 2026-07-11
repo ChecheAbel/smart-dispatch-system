@@ -208,6 +208,7 @@ export function MyInvoicesPage() {
         columns={columns}
         fetchData={loadInvoices}
         getRowKey={(invoice) => invoice.id}
+        showIndexColumn
         refreshDeps={[statusFilter]}
         toolbarActions={
           <StatusFilterSelect

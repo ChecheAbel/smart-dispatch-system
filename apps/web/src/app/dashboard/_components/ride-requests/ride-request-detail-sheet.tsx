@@ -11,7 +11,6 @@ import {
   Navigation,
   Route,
   Shield,
-  Truck,
   UserRound,
   Users,
 } from "lucide-react";
@@ -44,6 +43,7 @@ import {
 import {
   RideRequestContractSummaryCard,
 } from "./ride-request-contract-info";
+import { RideRequestDispatchAssignmentSection } from "./ride-request-dispatch-assignment";
 
 const LazyRideRequestRouteMap = dynamic(
   () =>
@@ -372,47 +372,20 @@ export function RideRequestDetailSheet({
           ) : null}
 
           {!dispatchPanel && (request.assigned_vehicle || request.assigned_driver) ? (
-            <DetailSection title={historyCopy.detailAssignmentSection} icon={Truck}>
-              <div className="grid gap-3 rounded-xl border border-slate-200/80 bg-white p-3.5 sm:grid-cols-2">
-                <DetailRow
-                  label={historyCopy.detailAssignedVehicle}
-                  value={
-                    request.assigned_vehicle
-                      ? [
-                          request.assigned_vehicle.plate_number,
-                          [request.assigned_vehicle.make, request.assigned_vehicle.model]
-                            .filter(Boolean)
-                            .join(" "),
-                        ]
-                          .filter(Boolean)
-                          .join(" · ")
-                      : "—"
-                  }
-                />
-                <DetailRow
-                  label={historyCopy.detailAssignedDriver}
-                  value={request.assigned_driver?.name ?? "—"}
-                />
-                {request.assigned_driver?.mobile_number ? (
-                  <DetailRow
-                    label={historyCopy.detailAssignedDriverMobile}
-                    value={request.assigned_driver.mobile_number}
-                  />
-                ) : null}
-                {request.started_at ? (
-                  <DetailRow
-                    label={historyCopy.detailTripStartedAt}
-                    value={formatSubmittedAt(request.started_at, locale)}
-                  />
-                ) : null}
-                {request.completed_at ? (
-                  <DetailRow
-                    label={historyCopy.detailTripCompletedAt}
-                    value={formatSubmittedAt(request.completed_at, locale)}
-                  />
-                ) : null}
-              </div>
-            </DetailSection>
+            <RideRequestDispatchAssignmentSection
+              request={request}
+              locale={locale}
+              title={historyCopy.detailAssignmentSection}
+              labels={{
+                sectionDescription: historyCopy.detailAssignmentSectionDescription,
+                assignedBadge: historyCopy.detailAssignmentAssignedBadge,
+                vehicle: historyCopy.detailAssignedVehicle,
+                driver: historyCopy.detailAssignedDriver,
+                assignedAt: historyCopy.detailAssignedAt,
+                tripStartedAt: historyCopy.detailTripStartedAt,
+                tripCompletedAt: historyCopy.detailTripCompletedAt,
+              }}
+            />
           ) : null}
 
           {dispatchPanel}
