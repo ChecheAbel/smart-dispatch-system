@@ -26,15 +26,12 @@ import {
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
 import { fetchContractById, fetchContractEnrollments } from "@/lib/contract-api";
-import { generateInvoice } from "@/lib/invoice-api";
 import { fetchActiveRegions } from "@/lib/region-api";
 import { fetchActiveVehicleClasses } from "@/lib/vehicle-class-api";
 import { fetchActiveVehicleTypes } from "@/lib/vehicle-type-api";
 import { PERMISSIONS } from "@/lib/permissions";
 import { formatMessage, getAdminContractsMessages } from "@/translations";
-import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
-import { formatContractTermRange } from "@/app/dashboard/_components/ride-requests/ride-request-utils";
 import { CreateContractSheet } from "@/app/admin/billing/contracts/_components/create-contract-sheet";
 
 const STATUS_BADGE_CLASS: Record<ContractStatus, string> = {
@@ -59,6 +56,38 @@ function formatDate(value: string, locale: string) {
   });
 }
 
+type EnrollmentPeriodStatus = "active" | "upcoming" | "ended";
+
+function getEnrollmentPeriodStatus(
+  enrollment: Pick<ContractEnrollment, "starts_at" | "ends_at">,
+): EnrollmentPeriodStatus {
+  const today = new Date();
+  today.setUTCHours(12, 0, 0, 0);
+
+  const start = new Date(`${enrollment.starts_at.slice(0, 10)}T12:00:00.000Z`);
+  const end = new Date(`${enrollment.ends_at.slice(0, 10)}T12:00:00.000Z`);
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return "active";
+  }
+
+  if (today < start) {
+    return "upcoming";
+  }
+
+  if (today > end) {
+    return "ended";
+  }
+
+  return "active";
+}
+
+const ENROLLMENT_STATUS_CLASS: Record<EnrollmentPeriodStatus, string> = {
+  active: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  upcoming: "border-sky-200 bg-sky-50 text-sky-800",
+  ended: "border-amber-200 bg-amber-50 text-amber-800",
+};
+
 type ScopeLabels = {
   regions: string[];
   vehicleTypes: string[];
@@ -72,7 +101,6 @@ export function ContractDetailPage() {
   const copy = getAdminContractsMessages(locale);
   const canRead = hasPermission(PERMISSIONS.contracts.read);
   const canWrite = hasPermission(PERMISSIONS.contracts.write);
-  const canInvoice = hasPermission(PERMISSIONS.invoices.write);
   const [contract, setContract] = useState<Contract | null>(null);
   const [enrollments, setEnrollments] = useState<ContractEnrollment[]>([]);
   const [scopeLabels, setScopeLabels] = useState<ScopeLabels>({
@@ -83,30 +111,6 @@ export function ContractDetailPage() {
   const [loading, setLoading] = useState(true);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [generatingEnrollmentId, setGeneratingEnrollmentId] = useState<string | null>(null);
-
-  async function handleGenerateInvoice(enrollmentId: string, issue: boolean) {
-    setGeneratingEnrollmentId(enrollmentId);
-    try {
-      const invoice = await generateInvoice({
-        contract_enrollment_id: enrollmentId,
-        issue,
-      });
-      showSuccessToast({
-        title: copy.detail.generateInvoice,
-        description: formatMessage(copy.detail.generateInvoiceSuccess, {
-          reference: invoice.reference_number,
-        }),
-      });
-    } catch {
-      showErrorToast({
-        title: copy.detail.generateInvoiceFailed,
-        description: copy.detail.generateInvoiceFailed,
-      });
-    } finally {
-      setGeneratingEnrollmentId(null);
-    }
-  }
 
   useEffect(() => {
     if (!canRead || !params.id) return;
@@ -202,10 +206,13 @@ export function ContractDetailPage() {
           <p className="text-sm text-slate-500">{copy.toast.loadFailed.description}</p>
         </div>
         <Button
+          variant="ghost"
+          size="sm"
+          className="-ml-2 text-slate-600"
           render={<Link href="/admin/billing/contracts" />}
           nativeButton={false}
-          className={adminPrimaryButtonClass}
         >
+          <ArrowLeft className="size-4" />
           {copy.detail.back}
         </Button>
       </div>
@@ -215,13 +222,14 @@ export function ContractDetailPage() {
   return (
     <div className="mx-auto w-full min-w-0 max-w-6xl space-y-5 sm:space-y-6">
       <Button
+        variant="ghost"
+        size="sm"
+        className="-ml-2 text-slate-600"
         render={<Link href="/admin/billing/contracts" />}
         nativeButton={false}
-        variant="ghost"
-        className="-ml-1 h-9 max-w-full px-2 text-sm text-slate-600 hover:bg-[#1C3A34]/6 hover:text-[#1C3A34] sm:-ml-2 sm:text-base"
       >
-        <ArrowLeft className="size-4 shrink-0" />
-        <span className="truncate">{copy.detail.back}</span>
+        <ArrowLeft className="size-4" />
+        {copy.detail.back}
       </Button>
 
       <section
@@ -354,11 +362,18 @@ export function ContractDetailPage() {
       </div>
 
       <section className={cn(adminCardClass, "space-y-4 rounded-2xl p-4 sm:space-y-5 sm:p-5 lg:p-6")}>
-        <SectionHeader
-          icon={FileText}
-          title={copy.detail.enrollments}
-          description={copy.detail.enrollmentsDescription}
-        />
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <SectionHeader
+            icon={FileText}
+            title={copy.detail.enrollments}
+            description={copy.detail.enrollmentsDescription}
+          />
+          {enrollments.length > 0 ? (
+            <Badge variant="outline" className="text-xs text-slate-600">
+              {formatMessage(copy.detail.enrollmentCount, { count: enrollments.length })}
+            </Badge>
+          ) : null}
+        </div>
 
         {enrollments.length === 0 ? (
           <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-8 text-center">
@@ -370,65 +385,61 @@ export function ContractDetailPage() {
             <table className="min-w-full divide-y divide-slate-200 text-sm">
               <thead className="bg-slate-50/80">
                 <tr>
+                  <th className="w-12 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    #
+                  </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                     {copy.detail.enrollmentCustomer}
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    {copy.detail.enrollmentTerm}
+                    {copy.detail.enrollmentStarts}
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    {copy.detail.enrollmentEnds}
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                    {copy.detail.enrollmentStatus}
                   </th>
                   <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
                     {copy.detail.enrollmentCreated}
                   </th>
-                  {canInvoice ? (
-                    <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
-                      {copy.detail.enrollmentActions}
-                    </th>
-                  ) : null}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
-                {enrollments.map((enrollment) => (
-                  <tr key={enrollment.id}>
-                    <td className="px-4 py-3 align-top">
-                      <p className="font-medium text-slate-800">{enrollment.requester.name}</p>
-                      <p className="mt-0.5 text-xs text-slate-500">{enrollment.requester.email}</p>
-                      <p className="text-xs text-slate-500">{enrollment.requester.mobile_number}</p>
-                    </td>
-                    <td className="px-4 py-3 align-top text-slate-700">
-                      {formatContractTermRange(
-                        { starts_at: enrollment.starts_at, ends_at: enrollment.ends_at },
-                        locale,
-                      )}
-                    </td>
-                    <td className="px-4 py-3 align-top text-slate-600">
-                      {formatDate(enrollment.created_at, locale)}
-                    </td>
-                    {canInvoice ? (
-                      <td className="px-4 py-3 align-top text-right">
-                        <div className="flex flex-wrap justify-end gap-2">
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="outline"
-                            disabled={generatingEnrollmentId === enrollment.id}
-                            onClick={() => handleGenerateInvoice(enrollment.id, false)}
-                          >
-                            {copy.detail.generateInvoice}
-                          </Button>
-                          <Button
-                            type="button"
-                            size="sm"
-                            className={adminPrimaryButtonClass}
-                            disabled={generatingEnrollmentId === enrollment.id}
-                            onClick={() => handleGenerateInvoice(enrollment.id, true)}
-                          >
-                            {copy.detail.generateInvoiceIssue}
-                          </Button>
-                        </div>
+                {enrollments.map((enrollment, index) => {
+                  const periodStatus = getEnrollmentPeriodStatus(enrollment);
+                  const statusLabel =
+                    periodStatus === "active"
+                      ? copy.detail.enrollmentStatusActive
+                      : periodStatus === "upcoming"
+                        ? copy.detail.enrollmentStatusUpcoming
+                        : copy.detail.enrollmentStatusEnded;
+
+                  return (
+                    <tr key={enrollment.id} className="hover:bg-slate-50/60">
+                      <td className="px-4 py-3 text-center text-slate-500 tabular-nums">{index + 1}</td>
+                      <td className="px-4 py-3 align-top">
+                        <p className="font-medium text-slate-800">{enrollment.requester.name}</p>
+                        <p className="mt-0.5 text-xs text-slate-500">{enrollment.requester.email}</p>
+                        <p className="text-xs text-slate-500">{enrollment.requester.mobile_number}</p>
                       </td>
-                    ) : null}
-                  </tr>
-                ))}
+                      <td className="px-4 py-3 align-top text-slate-700">
+                        {formatDate(enrollment.starts_at, locale)}
+                      </td>
+                      <td className="px-4 py-3 align-top text-slate-700">
+                        {formatDate(enrollment.ends_at, locale)}
+                      </td>
+                      <td className="px-4 py-3 align-top">
+                        <Badge className={cn("text-xs", ENROLLMENT_STATUS_CLASS[periodStatus])}>
+                          {statusLabel}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3 align-top text-slate-600">
+                        {formatDate(enrollment.created_at, locale)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

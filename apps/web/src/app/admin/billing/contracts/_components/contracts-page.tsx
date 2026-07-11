@@ -249,6 +249,7 @@ export function ContractsPage() {
         columns={columns}
         fetchData={loadContracts}
         getRowKey={(contract) => contract.id}
+        showIndexColumn
         renderRowActions={canWrite || canDelete ? renderRowActions : undefined}
         toolbarActions={
           canWrite ? (

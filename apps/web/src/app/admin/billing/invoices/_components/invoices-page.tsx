@@ -261,6 +261,7 @@ export function InvoicesPage() {
         columns={columns}
         fetchData={loadInvoices}
         getRowKey={(invoice) => invoice.id}
+        showIndexColumn
         renderRowActions={canWrite || canDelete ? renderRowActions : undefined}
         emptyTitle={copy.empty.title}
         emptyDescription={copy.empty.description}
