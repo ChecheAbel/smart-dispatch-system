@@ -15,6 +15,7 @@ export type ParsedRideRequestPayload = {
   dropoffLatitude: number | null;
   dropoffLongitude: number | null;
   scheduledAt: Date | null;
+  contractId: string | null;
 };
 
 function parseCoordinate(value: unknown) {
@@ -71,6 +72,7 @@ export function parseRideRequestPayload(body: unknown):
   const dropoffLatitude = parseCoordinate((body as { dropoff_latitude?: unknown })?.dropoff_latitude);
   const dropoffLongitude = parseCoordinate((body as { dropoff_longitude?: unknown })?.dropoff_longitude);
   const scheduledAt = parseScheduledAt((body as { scheduled_at?: unknown })?.scheduled_at);
+  const contractId = getOptionalString((body as { contract_id?: unknown })?.contract_id);
 
   if (!pickupAddress) {
     return { ok: false, error: "Pickup address is required." };
@@ -107,6 +109,7 @@ export function parseRideRequestPayload(body: unknown):
       dropoffLatitude,
       dropoffLongitude,
       scheduledAt,
+      contractId: contractId ?? null,
     },
   };
 }

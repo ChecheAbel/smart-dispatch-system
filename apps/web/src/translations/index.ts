@@ -22,12 +22,16 @@ import type {
   AdminRegionsMessages,
   AdminLocationsMessages,
   AdminFarePlansMessages,
+  AdminContractsMessages,
+  AdminInvoicesMessages,
   AdminShellMessages,
   CustomerShellMessages,
   AdminDashboardMessages,
   CustomerDashboardMessages,
   CustomerRequestsMessages,
   CustomerRequestHistoryMessages,
+  CustomerContractsMessages,
+  CustomerInvoicesMessages,
   AdminProfileMessages,
   Translations,
 } from "./types";
@@ -58,12 +62,16 @@ export type {
   AdminRegionsMessages,
   AdminLocationsMessages,
   AdminFarePlansMessages,
+  AdminContractsMessages,
+  AdminInvoicesMessages,
   AdminShellMessages,
   CustomerShellMessages,
   AdminDashboardMessages,
   CustomerDashboardMessages,
   CustomerRequestsMessages,
   CustomerRequestHistoryMessages,
+  CustomerContractsMessages,
+  CustomerInvoicesMessages,
   AdminProfileMessages,
   Translations,
 };
@@ -175,6 +183,14 @@ export function getAdminFarePlansMessages(locale: SupportedLocale): AdminFarePla
   return getTranslations(locale).adminFarePlans;
 }
 
+export function getAdminContractsMessages(locale: SupportedLocale): AdminContractsMessages {
+  return getTranslations(locale).adminContracts;
+}
+
+export function getAdminInvoicesMessages(locale: SupportedLocale): AdminInvoicesMessages {
+  return getTranslations(locale).adminInvoices;
+}
+
 export function getAdminShellMessages(locale: SupportedLocale): AdminShellMessages {
   return getTranslations(locale).adminShell;
 }
@@ -199,6 +215,14 @@ export function getCustomerRequestHistoryMessages(
   locale: SupportedLocale,
 ): CustomerRequestHistoryMessages {
   return getTranslations(locale).customerRequestHistory;
+}
+
+export function getCustomerContractsMessages(locale: SupportedLocale): CustomerContractsMessages {
+  return getTranslations(locale).customerContracts;
+}
+
+export function getCustomerInvoicesMessages(locale: SupportedLocale): CustomerInvoicesMessages {
+  return getTranslations(locale).customerInvoices;
 }
 
 export function getAdminProfileMessages(locale: SupportedLocale): AdminProfileMessages {

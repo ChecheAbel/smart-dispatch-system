@@ -1,12 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { startOfDay } from "date-fns";
-import { CalendarClock, Car, MapPin, Route } from "lucide-react";
+import { CalendarClock, Car, Check, FileText, MapPin, Route } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { RideRequest, RideRequestLocationOption } from "@smart-dispatch/types";
+import type { RideRequestContractOption, RideRequestLocationOption } from "@smart-dispatch/types";
 import { useLocale, usePermission } from "@/components/shared/providers";
 import {
   AdminSelectField,
@@ -18,16 +17,17 @@ import {
   AdminTimePicker,
   type TimeValue,
 } from "@/components/shared/admin-time-picker";
-import { RecentRideRequestListItem } from "@/app/dashboard/_components/ride-requests/recent-request-list-item";
-import { RideRequestDetailSheet } from "@/app/dashboard/_components/ride-requests/ride-request-detail-sheet";
 import {
   buildLocationAddress,
   buildVehicleTypeLabel,
   combineScheduledDateTime,
+  resolveTripContract,
   emptyRideRequestForm,
   filterLocationsByRegion,
+  buildDropoffLocationItems,
   getMinTimeForDate,
   isTimeBeforeMin,
+  type BillingMode,
   type CoordinateState,
   type RideRequestFieldErrors,
   type RideRequestFormState,
@@ -41,7 +41,6 @@ import {
   adminBadgeGoldClass,
   adminCardClass,
   adminHeadingClass,
-  adminIconBoxClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
 import {
@@ -50,11 +49,9 @@ import {
 } from "@/lib/map/coordinates";
 import {
   createRideRequest,
-  fetchMyRideRequests,
   fetchRideRequestFormOptions,
   type RideRequestVehicleTypeOption,
 } from "@/lib/ride-request-api";
-import { USER_MY_REQUESTS_PATH } from "@/lib/auth-paths";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { formatMessage, getCustomerRequestsMessages } from "@/translations";
 import { cn } from "@/lib/utils";
@@ -69,30 +66,77 @@ const LazyCoordinateMapPicker = dynamic<CoordinateMapPickerProps>(
 
 type CustomerRequestsCopy = ReturnType<typeof getCustomerRequestsMessages>;
 
-type FormSectionProps = {
-  icon: LucideIcon;
+type RideRequestStepId = "billing" | "route" | "trip" | "notes";
+
+type RideRequestStep = {
+  id: RideRequestStepId;
   title: string;
-  description?: string;
-  children: ReactNode;
-  className?: string;
+  description: string;
+  icon: LucideIcon;
 };
 
-function FormSection({ icon: Icon, title, description, children, className }: FormSectionProps) {
+type VerticalStepperProps = {
+  steps: RideRequestStep[];
+  currentStep: number;
+  onStepClick: (index: number) => void;
+};
+
+function VerticalStepper({ steps, currentStep, onStepClick }: VerticalStepperProps) {
   return (
-    <section className={cn("space-y-4", className)}>
-      <div className="flex items-start gap-3">
-        <div className={adminIconBoxClass}>
-          <Icon className="size-4" />
-        </div>
-        <div className="min-w-0 flex-1 space-y-0.5">
-          <h3 className={cn("text-sm font-bold", adminHeadingClass)}>{title}</h3>
-          {description ? (
-            <p className="text-xs leading-relaxed text-slate-500">{description}</p>
-          ) : null}
-        </div>
-      </div>
-      <div className="pl-11">{children}</div>
-    </section>
+    <nav aria-label="Request progress" className="w-full lg:max-w-xs">
+      <ol className="space-y-0">
+        {steps.map((step, index) => {
+          const isComplete = index < currentStep;
+          const isCurrent = index === currentStep;
+          const isUpcoming = index > currentStep;
+          const StepIcon = step.icon;
+
+          return (
+            <li key={step.id} className="relative flex gap-3 pb-6 last:pb-0">
+              {index < steps.length - 1 ? (
+                <span
+                  className={cn(
+                    "absolute left-[15px] top-8 bottom-0 w-px",
+                    isComplete ? "bg-[#1C3A34]/30" : "bg-slate-200",
+                  )}
+                  aria-hidden
+                />
+              ) : null}
+              <button
+                type="button"
+                disabled={isUpcoming}
+                onClick={() => onStepClick(index)}
+                className={cn(
+                  "relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full border-2 text-sm font-bold transition-colors",
+                  isComplete && "border-[#1C3A34] bg-[#1C3A34] text-white",
+                  isCurrent && "border-[#1C3A34] bg-white text-[#1C3A34] shadow-sm",
+                  isUpcoming && "border-slate-200 bg-white text-slate-400",
+                  !isUpcoming && "cursor-pointer hover:opacity-90",
+                  isUpcoming && "cursor-default",
+                )}
+                aria-current={isCurrent ? "step" : undefined}
+              >
+                {isComplete ? <Check className="size-4" /> : index + 1}
+              </button>
+              <div className={cn("min-w-0 flex-1 pt-0.5", isUpcoming && "opacity-55")}>
+                <div className="flex items-center gap-2">
+                  <StepIcon className="size-3.5 shrink-0 text-[#1C3A34]/70" aria-hidden />
+                  <p
+                    className={cn(
+                      "text-sm font-semibold",
+                      isCurrent ? "text-[#1C3A34]" : "text-slate-700",
+                    )}
+                  >
+                    {step.title}
+                  </p>
+                </div>
+                <p className="mt-1 text-xs leading-relaxed text-slate-500">{step.description}</p>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
   );
 }
 
@@ -272,6 +316,7 @@ function LocationStopFields({
 
       {!showBackup ? (
         <AdminSelectField
+          key={`${labels.id}-saved-location-${locationId || "empty"}-${locationItems.map((item) => item.value).join(",")}`}
           id={`${labels.id}-saved-location`}
           label={labels.saved}
           value={locationId || null}
@@ -331,6 +376,7 @@ export function RideRequestPage() {
   const copy = getCustomerRequestsMessages(locale);
   const canSubmitRequest = usePermission("customer_requests.write");
   const [form, setForm] = useState<RideRequestFormState>(emptyRideRequestForm);
+  const [billingMode, setBillingMode] = useState<BillingMode>("one_time");
   const [pickupCoordinates, setPickupCoordinates] = useState<CoordinateState>({});
   const [dropoffCoordinates, setDropoffCoordinates] = useState<CoordinateState>({});
   const [pickupLocationId, setPickupLocationId] = useState("");
@@ -346,8 +392,47 @@ export function RideRequestPage() {
   const [regions, setRegions] = useState<Array<{ label: string; value: string }>>([]);
   const [pickupLocations, setPickupLocations] = useState<RideRequestLocationOption[]>([]);
   const [dropoffLocations, setDropoffLocations] = useState<RideRequestLocationOption[]>([]);
-  const [requests, setRequests] = useState<RideRequest[]>([]);
-  const [detailRequest, setDetailRequest] = useState<RideRequest | null>(null);
+  const [contracts, setContracts] = useState<RideRequestContractOption[]>([]);
+  const [currentStep, setCurrentStep] = useState(0);
+
+  const steps = useMemo<RideRequestStep[]>(() => {
+    const nextSteps: RideRequestStep[] = [];
+
+    if (contracts.length > 0) {
+      nextSteps.push({
+        id: "billing",
+        title: copy.stepBilling,
+        description: copy.sectionBillingDescription,
+        icon: FileText,
+      });
+    }
+
+    nextSteps.push(
+      {
+        id: "route",
+        title: copy.stepRoute,
+        description: copy.sectionRouteDescription,
+        icon: MapPin,
+      },
+      {
+        id: "trip",
+        title: copy.stepTrip,
+        description: copy.sectionTripDetailsDescription,
+        icon: Car,
+      },
+      {
+        id: "notes",
+        title: copy.stepNotes,
+        description: copy.sectionNotesDescription,
+        icon: CalendarClock,
+      },
+    );
+
+    return nextSteps;
+  }, [contracts.length, copy]);
+
+  const currentStepId = steps[currentStep]?.id ?? "route";
+  const isLastStep = currentStep === steps.length - 1;
 
   const vehicleTypeItems = useMemo(
     () =>
@@ -379,11 +464,6 @@ export function RideRequestPage() {
     [form.regionId, pickupLocations],
   );
 
-  const filteredDropoffLocations = useMemo(
-    () => filterLocationsByRegion(dropoffLocations, form.regionId),
-    [form.regionId, dropoffLocations],
-  );
-
   const pickupLocationItems = useMemo(
     () =>
       filteredPickupLocations.map((location) => ({
@@ -395,15 +475,40 @@ export function RideRequestPage() {
 
   const dropoffLocationItems = useMemo(
     () =>
-      filteredDropoffLocations.map((location) => ({
-        label: location.name,
-        value: location.id,
-      })),
-    [filteredDropoffLocations],
+      buildDropoffLocationItems(
+        filterLocationsByRegion(dropoffLocations, form.regionId),
+        pickupLocations,
+        pickupLocationId,
+        useCustomPickup,
+        copy.pickupTag,
+      ),
+    [
+      copy.pickupTag,
+      dropoffLocations,
+      form.regionId,
+      pickupLocations,
+      pickupLocationId,
+      useCustomPickup,
+    ],
   );
 
   const showPickupBackup = pickupLocationItems.length === 0 || useCustomPickup;
   const showDropoffBackup = dropoffLocationItems.length === 0 || useCustomDropoff;
+
+  const tripContractResolution = useMemo(
+    () =>
+      resolveTripContract(contracts, {
+        regionId: form.regionId,
+        vehicleTypeId: form.vehicleTypeId,
+        vehicleClassId: form.vehicleClassId,
+      }),
+    [contracts, form.regionId, form.vehicleClassId, form.vehicleTypeId],
+  );
+
+
+  useEffect(() => {
+    setCurrentStep((step) => Math.min(step, Math.max(steps.length - 1, 0)));
+  }, [steps.length]);
 
   const scheduledMinTime = useMemo(() => getMinTimeForDate(scheduledDate), [scheduledDate]);
 
@@ -435,10 +540,7 @@ export function RideRequestPage() {
       setLoading(true);
 
       try {
-        const [options, rideRequests] = await Promise.all([
-          fetchRideRequestFormOptions(locale),
-          fetchMyRideRequests(locale),
-        ]);
+        const options = await fetchRideRequestFormOptions(locale);
 
         if (cancelled) return;
 
@@ -451,7 +553,7 @@ export function RideRequestPage() {
         );
         setPickupLocations(options.pickup_locations);
         setDropoffLocations(options.dropoff_locations);
-        setRequests(rideRequests);
+        setContracts(options.contracts);
       } catch (error) {
         if (!cancelled) {
           showErrorToast({
@@ -490,19 +592,34 @@ export function RideRequestPage() {
       });
       setDropoffLocationId((currentDropoffId) => {
         if (!currentDropoffId) return currentDropoffId;
-        const stillValid = dropoffLocations.some(
+        const stillValidInDropoff = dropoffLocations.some(
           (location) =>
             location.id === currentDropoffId &&
             (!value || location.region_id === value),
         );
-        return stillValid ? currentDropoffId : "";
+        const stillValidAsSelectedPickup =
+          currentDropoffId === pickupLocationId &&
+          !useCustomPickup &&
+          pickupLocations.some(
+            (location) =>
+              location.id === currentDropoffId &&
+              (!value || location.region_id === value),
+          );
+
+        return stillValidInDropoff || stillValidAsSelectedPickup ? currentDropoffId : "";
       });
     }
 
     setErrors((current) => {
-      if (!current[key]) return current;
       const next = { ...current };
-      delete next[key];
+      if (current[key]) delete next[key];
+      if (
+        billingMode === "contract" &&
+        (key === "regionId" || key === "vehicleTypeId" || key === "vehicleClassId") &&
+        current.billing
+      ) {
+        delete next.billing;
+      }
       return next;
     });
   }
@@ -524,6 +641,13 @@ export function RideRequestPage() {
       latitude: location.latitude,
       longitude: location.longitude,
     });
+
+    if (dropoffLocationId === locationId) {
+      setDropoffLocationId("");
+      setForm((current) => ({ ...current, dropoffAddress: "" }));
+      setDropoffCoordinates({});
+    }
+
     setErrors((current) => {
       const next = { ...current };
       delete next.pickupAddress;
@@ -534,7 +658,9 @@ export function RideRequestPage() {
   }
 
   function applyDropoffLocation(locationId: string) {
-    const location = dropoffLocations.find((entry) => entry.id === locationId);
+    const location =
+      dropoffLocations.find((entry) => entry.id === locationId) ??
+      pickupLocations.find((entry) => entry.id === locationId);
     if (!location) {
       return;
     }
@@ -680,6 +806,7 @@ export function RideRequestPage() {
 
   function resetFormState() {
     setForm(emptyRideRequestForm);
+    setBillingMode("one_time");
     setPickupCoordinates({});
     setDropoffCoordinates({});
     setPickupLocationId("");
@@ -689,37 +816,12 @@ export function RideRequestPage() {
     setScheduledDate(undefined);
     setScheduledTime(undefined);
     setErrors({});
+    setCurrentStep(0);
   }
 
-  function clearScheduledError() {
-    setErrors((current) => {
-      if (!current.scheduledAt) return current;
-      const next = { ...current };
-      delete next.scheduledAt;
-      return next;
-    });
-  }
-
-  function handleScheduledDateChange(date: Date | undefined) {
-    setScheduledDate(date);
-    if (!date) {
-      setScheduledTime(undefined);
-    }
-    clearScheduledError();
-  }
-
-  function handleScheduledTimeChange(time: TimeValue | undefined) {
-    setScheduledTime(time);
-    clearScheduledError();
-  }
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setErrors({});
-
+  function collectRouteStepErrors(): RideRequestFieldErrors {
     const pickupAddress = form.pickupAddress.trim();
     const dropoffAddress = form.dropoffAddress.trim();
-    const passengerCount = Number(form.passengerCount);
     const nextErrors: RideRequestFieldErrors = {};
 
     if (!showPickupBackup) {
@@ -749,6 +851,27 @@ export function RideRequestPage() {
         nextErrors.dropoffCoordinates = copy.errors.dropoffCoordinatesRequired;
       }
     }
+
+    if (billingMode === "contract" && !form.regionId) {
+      nextErrors.regionId = copy.errors.regionRequired;
+    }
+
+    if (
+      !showPickupBackup &&
+      !showDropoffBackup &&
+      pickupLocationId &&
+      dropoffLocationId &&
+      pickupLocationId === dropoffLocationId
+    ) {
+      nextErrors.dropoffSavedLocation = copy.errors.dropoffSameAsPickup;
+    }
+
+    return nextErrors;
+  }
+
+  function collectTripStepErrors(): RideRequestFieldErrors {
+    const passengerCount = Number(form.passengerCount);
+    const nextErrors: RideRequestFieldErrors = {};
 
     if (!Number.isInteger(passengerCount) || passengerCount < 1 || passengerCount > 50) {
       nextErrors.passengerCount = copy.errors.passengerCountInvalid;
@@ -784,17 +907,111 @@ export function RideRequestPage() {
       }
     }
 
-    if (Object.keys(nextErrors).length > 0) {
-      setErrors(nextErrors);
+    if (billingMode === "contract") {
+      if (!form.vehicleTypeId) {
+        nextErrors.vehicleTypeId = copy.errors.vehicleTypeRequiredForContract;
+      }
+
+      if (!form.vehicleClassId) {
+        nextErrors.vehicleClassId = copy.errors.vehicleClassRequiredForContract;
+      }
+
+      if (tripContractResolution.status === "none") {
+        nextErrors.billing = copy.errors.contractRequired;
+      } else if (tripContractResolution.status === "ambiguous") {
+        nextErrors.billing = copy.errors.contractAmbiguous;
+      }
+    }
+
+    return nextErrors;
+  }
+
+  function collectStepErrors(stepId: RideRequestStepId): RideRequestFieldErrors {
+    switch (stepId) {
+      case "billing":
+        return {};
+      case "route":
+        return collectRouteStepErrors();
+      case "trip":
+        return collectTripStepErrors();
+      case "notes":
+        return {
+          ...collectRouteStepErrors(),
+          ...collectTripStepErrors(),
+        };
+      default:
+        return {};
+    }
+  }
+
+  function goToStep(index: number) {
+    if (index < 0 || index >= steps.length || index > currentStep) {
       return;
     }
+
+    setErrors({});
+    setCurrentStep(index);
+  }
+
+  function handleNext() {
+    const stepErrors = collectStepErrors(currentStepId);
+
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors(stepErrors);
+      return;
+    }
+
+    setErrors({});
+    setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
+  }
+
+  function handleBack() {
+    setErrors({});
+    setCurrentStep((step) => Math.max(step - 1, 0));
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const nextErrors = collectStepErrors("notes");
+
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
+
+      const routeErrors = collectRouteStepErrors();
+      const tripErrors = collectTripStepErrors();
+
+      if (Object.keys(routeErrors).length > 0) {
+        const routeStepIndex = steps.findIndex((step) => step.id === "route");
+        if (routeStepIndex >= 0) {
+          setCurrentStep(routeStepIndex);
+        }
+      } else if (Object.keys(tripErrors).length > 0) {
+        const tripStepIndex = steps.findIndex((step) => step.id === "trip");
+        if (tripStepIndex >= 0) {
+          setCurrentStep(tripStepIndex);
+        }
+      }
+
+      return;
+    }
+
+    setErrors({});
+
+    const pickupAddress = form.pickupAddress.trim();
+    const dropoffAddress = form.dropoffAddress.trim();
+    const passengerCount = Number(form.passengerCount);
+    const matchedContractId =
+      billingMode === "contract" && tripContractResolution.status === "matched"
+        ? tripContractResolution.contract.id
+        : null;
 
     setSubmitting(true);
 
     const combinedSchedule = combineScheduledDateTime(scheduledDate, scheduledTime);
 
     try {
-      const rideRequest = await createRideRequest({
+      await createRideRequest({
         pickup_address: pickupAddress,
         dropoff_address: dropoffAddress,
         pickup_location_id: pickupLocationId || null,
@@ -809,9 +1026,9 @@ export function RideRequestPage() {
         passenger_count: passengerCount,
         scheduled_at: combinedSchedule ? combinedSchedule.toISOString() : null,
         notes: form.notes.trim() || null,
+        contract_id: matchedContractId,
       });
 
-      setRequests((current) => [rideRequest, ...current]);
       resetFormState();
       showSuccessToast({ title: copy.toast.submitted });
     } catch (error) {
@@ -821,6 +1038,28 @@ export function RideRequestPage() {
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function clearScheduledError() {
+    setErrors((current) => {
+      if (!current.scheduledAt) return current;
+      const next = { ...current };
+      delete next.scheduledAt;
+      return next;
+    });
+  }
+
+  function handleScheduledDateChange(date: Date | undefined) {
+    setScheduledDate(date);
+    if (!date) {
+      setScheduledTime(undefined);
+    }
+    clearScheduledError();
+  }
+
+  function handleScheduledTimeChange(time: TimeValue | undefined) {
+    setScheduledTime(time);
+    clearScheduledError();
   }
 
   const formDisabled = submitting || loading;
@@ -845,243 +1084,294 @@ export function RideRequestPage() {
           <CardDescription>{copy.formDescription}</CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
-          <form className="space-y-8" onSubmit={(event) => void handleSubmit(event)}>
-            <FormSection
-              icon={MapPin}
-              title={copy.sectionRoute}
-              description={copy.sectionRouteDescription}
-            >
-              <div className="space-y-5">
-                <AdminSelectField
-                  id="region"
-                  label={copy.region}
-                  value={form.regionId || null}
-                  onValueChange={(value) => updateField("regionId", value)}
-                  items={regions}
-                  placeholder={copy.regionPlaceholder}
-                  optional
-                  optionalLabel={copy.optional}
-                  disabled={formDisabled}
-                  hint={copy.regionFilterHint}
-                />
-
-                <div className="rounded-2xl border border-slate-200/80 bg-[#f8fafb]/40 p-4 sm:p-5">
-                  <RouteStop variant="pickup" label={copy.pickupAddress}>
-                    <LocationStopFields
-                      copy={copy}
-                      kind="pickup"
-                      showBackup={showPickupBackup}
-                      hasSavedOptions={pickupLocationItems.length > 0}
-                      locationItems={pickupLocationItems}
-                      locationId={pickupLocationId}
-                      onLocationChange={handlePickupLocationChange}
-                      onEnableCustom={enableCustomPickup}
-                      onEnableSaved={enableSavedPickup}
-                      address={form.pickupAddress}
-                      onAddressChange={(value) => updateField("pickupAddress", value)}
-                      coordinates={pickupCoordinates}
-                      onCoordinatesChange={updatePickupCoordinates}
-                      errors={errors}
-                      formDisabled={formDisabled}
-                      loading={loading}
-                    />
-                  </RouteStop>
-
-                  <RouteStop variant="dropoff" label={copy.dropoffAddress} isLast>
-                    <LocationStopFields
-                      copy={copy}
-                      kind="dropoff"
-                      showBackup={showDropoffBackup}
-                      hasSavedOptions={dropoffLocationItems.length > 0}
-                      locationItems={dropoffLocationItems}
-                      locationId={dropoffLocationId}
-                      onLocationChange={handleDropoffLocationChange}
-                      onEnableCustom={enableCustomDropoff}
-                      onEnableSaved={enableSavedDropoff}
-                      address={form.dropoffAddress}
-                      onAddressChange={(value) => updateField("dropoffAddress", value)}
-                      coordinates={dropoffCoordinates}
-                      onCoordinatesChange={updateDropoffCoordinates}
-                      errors={errors}
-                      formDisabled={formDisabled}
-                      loading={loading}
-                      mapDefaultCenter={dropoffMapCenter}
-                    />
-                  </RouteStop>
-                </div>
-              </div>
-            </FormSection>
-
-            <FormSection
-              icon={Car}
-              title={copy.sectionTripDetails}
-              description={copy.sectionTripDetailsDescription}
-            >
-              <div className="space-y-5 rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-5">
-                <div className="grid gap-4 md:grid-cols-2">
-                  <AdminSelectField
-                    id="vehicle-type"
-                    label={copy.vehicleType}
-                    value={form.vehicleTypeId || null}
-                    onValueChange={updateVehicleTypeId}
-                    items={vehicleTypeItems}
-                    placeholder={copy.vehicleTypePlaceholder}
-                    optional
-                    optionalLabel={copy.optional}
-                    disabled={formDisabled}
-                  />
-                  <AdminSelectField
-                    id="vehicle-class"
-                    label={copy.vehicleClass}
-                    value={form.vehicleClassId || null}
-                    onValueChange={(value) => updateField("vehicleClassId", value)}
-                    items={vehicleClassItems}
-                    placeholder={copy.vehicleClassPlaceholder}
-                    optional
-                    optionalLabel={copy.optional}
-                    disabled={formDisabled || !form.vehicleTypeId}
-                    error={errors.vehicleClassId}
-                  />
-                </div>
-
-                <div className="grid gap-4 md:grid-cols-3">
-                  <AdminTextField
-                    id="passenger-count"
-                    label={copy.passengerCount}
-                    type="number"
-                    min={1}
-                    max={passengerMax}
-                    value={form.passengerCount}
-                    onChange={(event) => updateField("passengerCount", event.target.value)}
-                    error={errors.passengerCount}
-                    disabled={formDisabled}
-                  />
-                  <AdminDatePicker
-                    id="scheduled-date"
-                    label={copy.scheduledDate}
-                    placeholder={copy.pickDate}
-                    clearLabel={copy.clearDate}
-                    todayLabel={copy.today}
-                    value={scheduledDate}
-                    minDate={startOfDay(new Date())}
-                    disabled={formDisabled}
-                    onChange={handleScheduledDateChange}
-                  />
-                  <AdminTimePicker
-                    id="scheduled-time"
-                    label={copy.scheduledTime}
-                    placeholder={copy.pickTime}
-                    clearLabel={copy.clearTime}
-                    hourLabel={copy.hour}
-                    minuteLabel={copy.minute}
-                    periodLabel={copy.period}
-                    amLabel={copy.am}
-                    pmLabel={copy.pm}
-                    applyLabel={copy.applyTime}
-                    value={scheduledTime}
-                    minTime={scheduledMinTime}
-                    locale={locale}
-                    hour12
-                    disabled={formDisabled || !scheduledDate}
-                    onChange={handleScheduledTimeChange}
-                  />
-                </div>
-                {errors.scheduledAt ? (
-                  <p className="text-xs text-red-600">{errors.scheduledAt}</p>
-                ) : (
-                  <p className="text-xs leading-relaxed text-slate-500">{copy.scheduledAtHint}</p>
-                )}
-              </div>
-            </FormSection>
-
-            <FormSection icon={CalendarClock} title={copy.sectionNotes} description={copy.sectionNotesDescription}>
-              <AdminTextareaField
-                id="notes"
-                label={copy.notes}
-                value={form.notes}
-                onChange={(event) => updateField("notes", event.target.value)}
-                placeholder={copy.notesPlaceholder}
-                optional
-                optionalLabel={copy.optional}
-                disabled={formDisabled}
-                maxLength={1000}
-                rows={3}
+          <form onSubmit={(event) => void handleSubmit(event)}>
+            <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
+              <VerticalStepper
+                steps={steps}
+                currentStep={currentStep}
+                onStepClick={goToStep}
               />
-            </FormSection>
 
-            <div className="-mx-6 -mb-6 flex flex-col gap-3 border-t border-slate-200/80 bg-[#f8fafb]/70 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                {!canSubmitRequest ? (
-                  <p className="text-xs text-slate-500">{copy.submitDisabledNoPermission}</p>
-                ) : (
-                  <p className="text-xs text-slate-500">{copy.submitHint}</p>
-                )}
+              <div className="min-w-0 flex-1 space-y-6">
+                <div className="space-y-1 border-b border-slate-100 pb-4 lg:hidden">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+                    {formatMessage(copy.stepProgress, {
+                      current: currentStep + 1,
+                      total: steps.length,
+                    })}
+                  </p>
+                  <p className="text-base font-semibold text-[#1C3A34]">
+                    {steps[currentStep]?.title}
+                  </p>
+                </div>
+
+                {currentStepId === "billing" ? (
+                  <div className="space-y-4">
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <button
+                        type="button"
+                        disabled={formDisabled}
+                        onClick={() => {
+                          setBillingMode("one_time");
+                          setErrors((current) => {
+                            if (!current.billing) return current;
+                            const next = { ...current };
+                            delete next.billing;
+                            return next;
+                          });
+                        }}
+                        className={cn(
+                          "rounded-xl border p-4 text-left transition-all",
+                          billingMode === "one_time"
+                            ? "border-[#1C3A34] bg-[#1C3A34]/5 shadow-sm"
+                            : "border-slate-200 bg-white hover:border-slate-300",
+                          formDisabled && "pointer-events-none opacity-60",
+                        )}
+                      >
+                        <p className="text-sm font-semibold text-slate-800">{copy.billingOneTime}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                          {copy.billingOneTimeDescription}
+                        </p>
+                      </button>
+                      <button
+                        type="button"
+                        disabled={formDisabled}
+                        onClick={() => setBillingMode("contract")}
+                        className={cn(
+                          "rounded-xl border p-4 text-left transition-all",
+                          billingMode === "contract"
+                            ? "border-[#1C3A34] bg-[#1C3A34]/5 shadow-sm"
+                            : "border-slate-200 bg-white hover:border-slate-300",
+                          formDisabled && "pointer-events-none opacity-60",
+                        )}
+                      >
+                        <p className="text-sm font-semibold text-slate-800">{copy.billingContract}</p>
+                        <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                          {copy.billingContractDescription}
+                        </p>
+                      </button>
+                    </div>
+
+                    {billingMode === "contract" && errors.billing ? (
+                      <p className="text-sm text-red-600">{errors.billing}</p>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {currentStepId === "route" ? (
+                  <div className="space-y-5">
+                    <AdminSelectField
+                      id="region"
+                      label={copy.region}
+                      value={form.regionId || null}
+                      onValueChange={(value) => updateField("regionId", value)}
+                      items={regions}
+                      placeholder={copy.regionPlaceholder}
+                      optional={billingMode !== "contract"}
+                      optionalLabel={copy.optional}
+                      disabled={formDisabled}
+                      hint={copy.regionFilterHint}
+                      error={errors.regionId}
+                    />
+
+                    <div className="rounded-2xl border border-slate-200/80 bg-[#f8fafb]/40 p-4 sm:p-5">
+                      <RouteStop variant="pickup" label={copy.pickupAddress}>
+                        <LocationStopFields
+                          copy={copy}
+                          kind="pickup"
+                          showBackup={showPickupBackup}
+                          hasSavedOptions={pickupLocationItems.length > 0}
+                          locationItems={pickupLocationItems}
+                          locationId={pickupLocationId}
+                          onLocationChange={handlePickupLocationChange}
+                          onEnableCustom={enableCustomPickup}
+                          onEnableSaved={enableSavedPickup}
+                          address={form.pickupAddress}
+                          onAddressChange={(value) => updateField("pickupAddress", value)}
+                          coordinates={pickupCoordinates}
+                          onCoordinatesChange={updatePickupCoordinates}
+                          errors={errors}
+                          formDisabled={formDisabled}
+                          loading={loading}
+                        />
+                      </RouteStop>
+
+                      <RouteStop variant="dropoff" label={copy.dropoffAddress} isLast>
+                        <LocationStopFields
+                          copy={copy}
+                          kind="dropoff"
+                          showBackup={showDropoffBackup}
+                          hasSavedOptions={dropoffLocationItems.length > 0}
+                          locationItems={dropoffLocationItems}
+                          locationId={dropoffLocationId}
+                          onLocationChange={handleDropoffLocationChange}
+                          onEnableCustom={enableCustomDropoff}
+                          onEnableSaved={enableSavedDropoff}
+                          address={form.dropoffAddress}
+                          onAddressChange={(value) => updateField("dropoffAddress", value)}
+                          coordinates={dropoffCoordinates}
+                          onCoordinatesChange={updateDropoffCoordinates}
+                          errors={errors}
+                          formDisabled={formDisabled}
+                          loading={loading}
+                          mapDefaultCenter={dropoffMapCenter}
+                        />
+                      </RouteStop>
+                    </div>
+                  </div>
+                ) : null}
+
+                {currentStepId === "trip" ? (
+                  <div className="space-y-5 rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-5">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <AdminSelectField
+                        id="vehicle-type"
+                        label={copy.vehicleType}
+                        value={form.vehicleTypeId || null}
+                        onValueChange={updateVehicleTypeId}
+                        items={vehicleTypeItems}
+                        placeholder={copy.vehicleTypePlaceholder}
+                        optional={billingMode !== "contract"}
+                        optionalLabel={copy.optional}
+                        disabled={formDisabled}
+                        error={errors.vehicleTypeId}
+                      />
+                      <AdminSelectField
+                        id="vehicle-class"
+                        label={copy.vehicleClass}
+                        value={form.vehicleClassId || null}
+                        onValueChange={(value) => updateField("vehicleClassId", value)}
+                        items={vehicleClassItems}
+                        placeholder={copy.vehicleClassPlaceholder}
+                        optional={billingMode !== "contract"}
+                        optionalLabel={copy.optional}
+                        disabled={formDisabled || !form.vehicleTypeId}
+                        error={errors.vehicleClassId}
+                      />
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-3">
+                      <AdminTextField
+                        id="passenger-count"
+                        label={copy.passengerCount}
+                        type="number"
+                        min={1}
+                        max={passengerMax}
+                        value={form.passengerCount}
+                        onChange={(event) => updateField("passengerCount", event.target.value)}
+                        error={errors.passengerCount}
+                        disabled={formDisabled}
+                      />
+                      <AdminDatePicker
+                        id="scheduled-date"
+                        label={copy.scheduledDate}
+                        placeholder={copy.pickDate}
+                        clearLabel={copy.clearDate}
+                        todayLabel={copy.today}
+                        value={scheduledDate}
+                        minDate={startOfDay(new Date())}
+                        disabled={formDisabled}
+                        onChange={handleScheduledDateChange}
+                      />
+                      <AdminTimePicker
+                        id="scheduled-time"
+                        label={copy.scheduledTime}
+                        placeholder={copy.pickTime}
+                        clearLabel={copy.clearTime}
+                        hourLabel={copy.hour}
+                        minuteLabel={copy.minute}
+                        periodLabel={copy.period}
+                        amLabel={copy.am}
+                        pmLabel={copy.pm}
+                        applyLabel={copy.applyTime}
+                        value={scheduledTime}
+                        minTime={scheduledMinTime}
+                        locale={locale}
+                        hour12
+                        disabled={formDisabled || !scheduledDate}
+                        onChange={handleScheduledTimeChange}
+                      />
+                    </div>
+                    {errors.scheduledAt ? (
+                      <p className="text-xs text-red-600">{errors.scheduledAt}</p>
+                    ) : (
+                      <p className="text-xs leading-relaxed text-slate-500">{copy.scheduledAtHint}</p>
+                    )}
+
+                    {billingMode === "contract" && errors.billing ? (
+                      <p className="text-sm text-red-600">{errors.billing}</p>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {currentStepId === "notes" ? (
+                  <div className="space-y-4">
+                    <AdminTextareaField
+                      id="notes"
+                      label={copy.notes}
+                      value={form.notes}
+                      onChange={(event) => updateField("notes", event.target.value)}
+                      placeholder={copy.notesPlaceholder}
+                      optional
+                      optionalLabel={copy.optional}
+                      disabled={formDisabled}
+                      maxLength={1000}
+                      rows={4}
+                    />
+                    <p className="text-xs leading-relaxed text-slate-500">{copy.submitHint}</p>
+                  </div>
+                ) : null}
+
+                <div className="flex flex-col gap-3 border-t border-slate-200/80 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    {!canSubmitRequest ? (
+                      <p className="text-xs text-slate-500">{copy.submitDisabledNoPermission}</p>
+                    ) : (
+                      <p className="hidden text-xs text-slate-500 sm:block">
+                        {formatMessage(copy.stepProgress, {
+                          current: currentStep + 1,
+                          total: steps.length,
+                        })}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center">
+                    {currentStep > 0 ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full sm:w-auto"
+                        disabled={formDisabled}
+                        onClick={handleBack}
+                      >
+                        {copy.back}
+                      </Button>
+                    ) : null}
+                    {isLastStep ? (
+                      <Button
+                        type="submit"
+                        className={cn(adminPrimaryButtonClass, "w-full sm:w-auto")}
+                        disabled={submitDisabled}
+                      >
+                        {submitting ? copy.submitting : copy.submit}
+                      </Button>
+                    ) : (
+                      <Button
+                        type="button"
+                        className={cn(adminPrimaryButtonClass, "w-full sm:w-auto")}
+                        disabled={formDisabled}
+                        onClick={handleNext}
+                      >
+                        {copy.next}
+                      </Button>
+                    )}
+                  </div>
+                </div>
               </div>
-              <Button
-                type="submit"
-                className={cn(adminPrimaryButtonClass, "w-full sm:w-auto")}
-                disabled={submitDisabled}
-              >
-                {submitting ? copy.submitting : copy.submit}
-              </Button>
             </div>
           </form>
         </CardContent>
       </Card>
-
-      <Card className={cn(adminCardClass, "overflow-hidden")}>
-        <CardHeader className="gap-2 border-b border-slate-200/80 bg-gradient-to-r from-[#f8fafb] to-white">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="space-y-2">
-              <CardTitle className="flex items-center gap-2">
-                <CalendarClock className="size-4 text-[#1C3A34]" />
-                {copy.recentTitle}
-              </CardTitle>
-              <CardDescription>{copy.recentDescription}</CardDescription>
-            </div>
-            {requests.length > 0 ? (
-              <Link
-                href={USER_MY_REQUESTS_PATH}
-                className="inline-flex h-8 items-center rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-[#1C3A34] hover:bg-[#f8fafb]"
-              >
-                {copy.viewAllRequests}
-              </Link>
-            ) : null}
-          </div>
-        </CardHeader>
-        <CardContent className="p-0">
-          {loading ? (
-            <p className="px-6 py-8 text-sm text-slate-500">{copy.loading}</p>
-          ) : requests.length === 0 ? (
-            <div className="mx-6 my-8 rounded-xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-10 text-center">
-              <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-full bg-[#1C3A34]/8">
-                <Route className="size-4 text-[#1C3A34]" />
-              </div>
-              <p className="text-sm font-semibold text-slate-700">{copy.emptyTitle}</p>
-              <p className="mt-1 text-sm text-slate-500">{copy.emptyDescription}</p>
-            </div>
-          ) : (
-            <div className="divide-y divide-slate-100">
-              {requests.map((request) => (
-                <RecentRideRequestListItem
-                  key={request.id}
-                  request={request}
-                  copy={copy}
-                  locale={locale}
-                  onViewDetails={setDetailRequest}
-                />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <RideRequestDetailSheet
-        request={detailRequest}
-        open={Boolean(detailRequest)}
-        locale={locale}
-        onOpenChange={(open) => !open && setDetailRequest(null)}
-      />
     </div>
   );
 }

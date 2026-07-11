@@ -255,14 +255,16 @@ export function AdminRideRequestReviewSheet({
         onOpenChange={(next) => !isBusy && onOpenChange(next)}
         dispatchPanel={
           request ? (
-            <AdminRideRequestDispatchPanel
-              request={request}
-              locale={locale}
-              canWrite={canWrite}
-              submitting={submitting === "assign" || submitting === "unassign" ? submitting : null}
-              onAssign={handleAssign}
-              onUnassign={handleUnassign}
-            />
+            <div className="space-y-4">
+              <AdminRideRequestDispatchPanel
+                request={request}
+                locale={locale}
+                canWrite={canWrite}
+                submitting={submitting === "assign" || submitting === "unassign" ? submitting : null}
+                onAssign={handleAssign}
+                onUnassign={handleUnassign}
+              />
+            </div>
           ) : null
         }
         manageActions={

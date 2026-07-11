@@ -68,6 +68,16 @@ export const PERMISSIONS = {
     write: "fare_plans.write",
     delete: "fare_plans.delete",
   },
+  contracts: {
+    read: "contracts.read",
+    write: "contracts.write",
+    delete: "contracts.delete",
+  },
+  invoices: {
+    read: "invoices.read",
+    write: "invoices.write",
+    delete: "invoices.delete",
+  },
   ride_requests: {
     read: "ride_requests.read",
     write: "ride_requests.write",
@@ -78,6 +88,15 @@ export const PERMISSIONS = {
     history: "driver.history",
     maintenance: "driver.maintenance",
     fuel: "driver.fuel",
+  },
+  customer: {
+    dashboard: "customer_dashboard.read",
+    requests: {
+      read: "customer_requests.read",
+      write: "customer_requests.write",
+    },
+    contracts: "customer_contracts.read",
+    invoices: "customer_invoices.read",
   },
 } as const;
 

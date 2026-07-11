@@ -145,7 +145,8 @@ export type NotificationModule =
   | "ride_requests"
   | "user_registrations"
   | "insurance"
-  | "inspection";
+  | "inspection"
+  | "invoices";
 
 export type RideRequestNotificationEvent =
   | "created"
@@ -159,6 +160,8 @@ export type RideRequestNotificationEvent =
 export type UserRegistrationNotificationEvent = "submitted" | "approved" | "rejected";
 
 export type ComplianceNotificationEvent = "due_soon" | "expired";
+
+export type InvoiceNotificationEvent = "generated" | "due_soon" | "overdue";
 
 export type NotificationTemplateRecipient =
   | "requester"
@@ -229,6 +232,24 @@ export const INSPECTION_NOTIFICATION_PLACEHOLDERS = [
   "reference",
 ] as const;
 
+export const INVOICE_NOTIFICATION_PLACEHOLDERS = [
+  "invoice_reference",
+  "contract_reference",
+  "contract_title",
+  "customer_name",
+  "organization_name",
+  "billing_contact_name",
+  "period_start",
+  "period_end",
+  "total_amount",
+  "currency",
+  "due_at",
+  "days_until_due",
+  "days_overdue",
+  "payment_terms_days",
+  "reference",
+] as const;
+
 export type RideRequestNotificationPlaceholder =
   (typeof RIDE_REQUEST_NOTIFICATION_PLACEHOLDERS)[number];
 
@@ -241,6 +262,9 @@ export type InsuranceNotificationPlaceholder =
 export type InspectionNotificationPlaceholder =
   (typeof INSPECTION_NOTIFICATION_PLACEHOLDERS)[number];
 
+export type InvoiceNotificationPlaceholder =
+  (typeof INVOICE_NOTIFICATION_PLACEHOLDERS)[number];
+
 export const NOTIFICATION_TEMPLATE_PLACEHOLDERS: Record<
   NotificationModule,
   readonly string[]
@@ -249,6 +273,7 @@ export const NOTIFICATION_TEMPLATE_PLACEHOLDERS: Record<
   user_registrations: USER_REGISTRATION_NOTIFICATION_PLACEHOLDERS,
   insurance: INSURANCE_NOTIFICATION_PLACEHOLDERS,
   inspection: INSPECTION_NOTIFICATION_PLACEHOLDERS,
+  invoices: INVOICE_NOTIFICATION_PLACEHOLDERS,
 };
 
 /** @deprecated Use NotificationTemplate */
@@ -742,6 +767,8 @@ export interface RideRequest {
   notes: string | null;
   status: RideRequestStatus;
   rejection_reason: string | null;
+  contract_id: string | null;
+  contract?: RideRequestContractSummary | null;
   assigned_vehicle_id: string | null;
   assigned_vehicle?: {
     id: string;
@@ -785,6 +812,206 @@ export interface RideRequestRequesterSummary {
   last_name: string;
   email: string;
   mobile_number: string;
+}
+
+export type ContractStatus = "draft" | "active" | "expired" | "cancelled";
+
+export type ContractBillingInterval = "per_trip" | "monthly" | "quarterly" | "annually";
+
+export interface ContractFarePlanSummary {
+  id: string;
+  slug: string;
+  name: string;
+  pricing_model: PricingModel;
+  currency: string;
+  base_fare: number;
+  is_active: boolean;
+}
+
+export interface Contract {
+  id: string;
+  reference_number: string;
+  title: string;
+  status: ContractStatus;
+  fare_plan_id: string | null;
+  fare_plan: ContractFarePlanSummary | null;
+  notes: string | null;
+  billing_interval: ContractBillingInterval;
+  payment_terms_days: number | null;
+  region_ids: string[];
+  vehicle_type_ids: string[];
+  vehicle_class_ids: string[];
+  created_by_user_id: string | null;
+  created_by: {
+    id: string;
+    name: string;
+  } | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface RideRequestContractSummary {
+  id: string;
+  reference_number: string;
+  title: string;
+  status: ContractStatus;
+  billing_interval: ContractBillingInterval;
+}
+
+export interface ContractEnrollment {
+  id: string;
+  contract_id: string;
+  requester_user_id: string;
+  requester: {
+    id: string;
+    name: string;
+    email: string;
+    mobile_number: string;
+  };
+  starts_at: string;
+  ends_at: string;
+  created_at: string;
+}
+
+export type InvoiceStatus = "draft" | "issued" | "paid" | "void";
+
+export interface InvoiceContractSummary {
+  id: string;
+  reference_number: string;
+  title: string;
+  billing_interval: ContractBillingInterval;
+  payment_terms_days: number | null;
+}
+
+export interface InvoiceEnrollmentSummary {
+  id: string;
+  starts_at: string;
+  ends_at: string;
+}
+
+export interface InvoiceRequesterSummary {
+  id: string;
+  name: string;
+  email: string;
+  mobile_number: string;
+  organization_name: string | null;
+  billing_contact_name: string | null;
+  billing_contact_email: string | null;
+}
+
+export interface InvoiceLineItemFarePlanSummary {
+  id: string;
+  slug: string;
+  name: string;
+  pricing_model: PricingModel;
+}
+
+export interface InvoiceLineItemRideSummary {
+  id: string;
+  pickup_address: string;
+  dropoff_address: string;
+  completed_at: string | null;
+  status: RideRequestStatus;
+}
+
+export interface InvoiceLineItem {
+  id: string;
+  ride_request_id: string;
+  description: string;
+  quantity: number;
+  unit_amount: number;
+  line_total: number;
+  fare_plan_id: string | null;
+  fare_plan: InvoiceLineItemFarePlanSummary | null;
+  distance_km: number | null;
+  duration_minutes: number | null;
+  pricing_snapshot: Record<string, unknown> | null;
+  ride_request: InvoiceLineItemRideSummary;
+  created_at: string;
+}
+
+export interface Invoice {
+  id: string;
+  reference_number: string;
+  status: InvoiceStatus;
+  contract_id: string;
+  contract: InvoiceContractSummary;
+  contract_enrollment_id: string | null;
+  contract_enrollment: InvoiceEnrollmentSummary | null;
+  requester_user_id: string;
+  requester: InvoiceRequesterSummary;
+  period_start: string;
+  period_end: string;
+  subtotal: number;
+  total_amount: number;
+  currency: string;
+  payment_terms_days: number | null;
+  issued_at: string | null;
+  due_at: string | null;
+  paid_at: string | null;
+  voided_at: string | null;
+  notes: string | null;
+  line_items: InvoiceLineItem[];
+  line_item_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export type CustomerVisibleInvoiceStatus = Exclude<InvoiceStatus, "draft">;
+
+export interface CustomerInvoiceSummary {
+  id: string;
+  reference_number: string;
+  status: CustomerVisibleInvoiceStatus;
+  total_amount: number;
+  currency: string;
+  due_at: string | null;
+  paid_at: string | null;
+  issued_at: string | null;
+}
+
+export interface CustomerContractEnrollment {
+  id: string;
+  starts_at: string;
+  ends_at: string;
+  created_at: string;
+  contract: RideRequestContractSummary & {
+    payment_terms_days: number | null;
+  };
+  invoice: CustomerInvoiceSummary | null;
+}
+
+export interface CustomerInvoice {
+  id: string;
+  reference_number: string;
+  status: CustomerVisibleInvoiceStatus;
+  contract: InvoiceContractSummary;
+  contract_enrollment: InvoiceEnrollmentSummary | null;
+  period_start: string;
+  period_end: string;
+  subtotal: number;
+  total_amount: number;
+  currency: string;
+  payment_terms_days: number | null;
+  issued_at: string | null;
+  due_at: string | null;
+  paid_at: string | null;
+  voided_at: string | null;
+  notes: string | null;
+  line_items: InvoiceLineItem[];
+  line_item_count: number;
+  created_at: string;
+}
+
+export interface RideRequestContractOption extends RideRequestContractSummary {
+  billing_interval: ContractBillingInterval;
+  current_enrollment: {
+    starts_at: string;
+    ends_at: string;
+  } | null;
+  region_ids: string[];
+  vehicle_type_ids: string[];
+  vehicle_class_ids: string[];
 }
 
 export interface AdminRideRequest extends RideRequest {

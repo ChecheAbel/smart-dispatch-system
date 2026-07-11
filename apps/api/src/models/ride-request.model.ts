@@ -1,7 +1,11 @@
-import type { RideRequestStatus } from "@smart-dispatch/types";
+import type { ContractBillingInterval, RideRequestStatus } from "@smart-dispatch/types";
 import { Prisma } from "../generated/prisma";
 import { prisma } from "../db/prisma";
+import { ensureContractEnrollment } from "./contract-enrollment.model";
+import { findActiveContractById } from "./contract.model";
 import { findVehicleById } from "./vehicle.model";
+import { ensureTripBillingSnapshot } from "../services/trip-billing.service";
+import { tryAutoInvoiceCompletedTrip } from "../services/invoice-automation.service";
 import {
   canCancelRideRequest,
   canEditRideRequest,
@@ -23,6 +27,7 @@ export type CreateRideRequestInput = {
   scheduledAt?: Date | null;
   passengerCount: number;
   notes?: string | null;
+  contractId?: string | null;
 };
 
 export type UpdateRideRequestInput = Omit<CreateRideRequestInput, "requesterUserId">;
@@ -74,6 +79,15 @@ const rideRequestInclude = {
       lastName: true,
       email: true,
       mobileNumber: true,
+    },
+  },
+  contract: {
+    select: {
+      id: true,
+      referenceNumber: true,
+      title: true,
+      status: true,
+      billingInterval: true,
     },
   },
 } as const;
@@ -212,6 +226,7 @@ export async function createRideRequest(input: CreateRideRequestInput) {
   return prisma.rideRequest.create({
     data: {
       requesterUserId: input.requesterUserId,
+      contractId: input.contractId ?? null,
       ...buildRideRequestData(input),
     },
     include: rideRequestInclude,
@@ -398,10 +413,44 @@ export async function updateRideRequestStatusAdmin(
     data.completedAt = new Date();
   }
 
-  return prisma.rideRequest.update({
-    where: { id },
-    data,
-    include: rideRequestAdminInclude,
+  return prisma.$transaction(async (tx) => {
+    if (
+      status === "confirmed" &&
+      existing.status !== "confirmed" &&
+      existing.contractId
+    ) {
+      const contract = await findActiveContractById(existing.contractId);
+      if (!contract) {
+        throw new Error("Linked contract is not available.");
+      }
+
+      await ensureContractEnrollment({
+        contractId: existing.contractId,
+        requesterUserId: existing.requesterUserId,
+        scheduledAt: existing.scheduledAt,
+        acceptedAt: new Date(),
+        billingInterval: contract.billingInterval as ContractBillingInterval,
+        client: tx,
+      });
+    }
+
+    const updated = await tx.rideRequest.update({
+      where: { id },
+      data,
+      include: rideRequestAdminInclude,
+    });
+
+    if (status === "completed" && updated.contractId) {
+      await ensureTripBillingSnapshot(updated.id, tx);
+    }
+
+    return updated;
+  }).then(async (updated) => {
+    if (status === "completed" && updated.contractId) {
+      await tryAutoInvoiceCompletedTrip(updated.id);
+    }
+
+    return updated;
   });
 }
 

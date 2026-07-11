@@ -1,10 +1,12 @@
 import type {
+  InvoiceNotificationEvent,
   NotificationModule,
   NotificationTemplateRecipient,
   RideRequestNotificationEvent,
   UserRegistrationNotificationEvent,
 } from "@smart-dispatch/types";
 import { findRideRequestById } from "../models/ride-request.model";
+import { findInvoiceById } from "../models/invoice.model";
 import { findUserByIdWithRoles } from "../models/user.model";
 import {
   findNotificationTemplateById,
@@ -105,6 +107,26 @@ function buildInspectionSampleContext(): TemplateContext {
   };
 }
 
+function buildInvoiceSampleContext(): TemplateContext {
+  return {
+    invoice_reference: "INV-2026-0001",
+    contract_reference: "CTR-2026-0001",
+    contract_title: "Ministry shuttle agreement",
+    customer_name: "Jane Doe",
+    organization_name: "Acme Trading PLC",
+    billing_contact_name: "Finance Team",
+    period_start: "1 Jul 2026",
+    period_end: "31 Jul 2026",
+    total_amount: "12,450.00",
+    currency: "ETB",
+    due_at: "14 Aug 2026",
+    days_until_due: "3",
+    days_overdue: "5",
+    payment_terms_days: "14",
+    reference: "INV-2026-0001",
+  };
+}
+
 function buildSampleContextForModule(module: NotificationModule): TemplateContext {
   switch (module) {
     case "user_registrations":
@@ -113,9 +135,52 @@ function buildSampleContextForModule(module: NotificationModule): TemplateContex
       return buildInsuranceSampleContext();
     case "inspection":
       return buildInspectionSampleContext();
+    case "invoices":
+      return buildInvoiceSampleContext();
     default:
       return buildRideRequestSampleContext();
   }
+}
+
+function formatDateOnly(value: Date | null | undefined) {
+  if (!value) {
+    return "—";
+  }
+
+  return value.toLocaleDateString("en-GB", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function formatMoneyAmount(value: number | null | undefined) {
+  if (value == null || !Number.isFinite(value)) {
+    return "—";
+  }
+
+  return value.toLocaleString("en-GB", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+}
+
+function daysUntil(date: Date | null | undefined, from: Date = new Date()) {
+  if (!date) {
+    return "—";
+  }
+
+  const diffMs = date.getTime() - from.getTime();
+  return String(Math.max(0, Math.ceil(diffMs / 86_400_000)));
+}
+
+function daysOverdue(date: Date | null | undefined, from: Date = new Date()) {
+  if (!date) {
+    return "—";
+  }
+
+  const diffMs = from.getTime() - date.getTime();
+  return String(Math.max(0, Math.ceil(diffMs / 86_400_000)));
 }
 
 function buildRideRequestContext(
@@ -154,6 +219,31 @@ function buildUserRegistrationContext(
   };
 }
 
+function buildInvoiceContext(
+  invoice: NonNullable<Awaited<ReturnType<typeof findInvoiceById>>>,
+): TemplateContext {
+  const profile = invoice.requester.requesterProfile;
+
+  return {
+    invoice_reference: invoice.referenceNumber,
+    contract_reference: invoice.contract.referenceNumber,
+    contract_title: invoice.contract.title,
+    customer_name: formatPersonName(invoice.requester),
+    organization_name: profile?.organizationName ?? "—",
+    billing_contact_name: profile?.billingContactName ?? "—",
+    period_start: formatDateOnly(invoice.periodStart),
+    period_end: formatDateOnly(invoice.periodEnd),
+    total_amount: formatMoneyAmount(Number(invoice.totalAmount)),
+    currency: invoice.currency,
+    due_at: formatDateOnly(invoice.dueAt),
+    days_until_due: daysUntil(invoice.dueAt),
+    days_overdue: daysOverdue(invoice.dueAt),
+    payment_terms_days:
+      invoice.paymentTermsDays != null ? String(invoice.paymentTermsDays) : "—",
+    reference: invoice.referenceNumber,
+  };
+}
+
 function resolveRideRequestContact(
   rideRequest: NonNullable<Awaited<ReturnType<typeof findRideRequestById>>>,
   recipient: NotificationTemplateRecipient,
@@ -176,6 +266,24 @@ function resolveUserRegistrationContact(
   return channel === "email" ? user.email?.trim() || null : user.mobileNumber?.trim() || null;
 }
 
+function resolveInvoiceContact(
+  invoice: NonNullable<Awaited<ReturnType<typeof findInvoiceById>>>,
+  recipient: NotificationTemplateRecipient,
+  channel: "email" | "sms",
+) {
+  if (recipient !== "requester") {
+    return null;
+  }
+
+  const profile = invoice.requester.requesterProfile;
+
+  if (channel === "email") {
+    return profile?.billingContactEmail?.trim() || invoice.requester.email?.trim() || null;
+  }
+
+  return invoice.requester.mobileNumber?.trim() || null;
+}
+
 function moduleToEntityType(module: NotificationModule) {
   switch (module) {
     case "ride_requests":
@@ -185,6 +293,8 @@ function moduleToEntityType(module: NotificationModule) {
     case "insurance":
     case "inspection":
       return "vehicle";
+    case "invoices":
+      return "invoice";
   }
 }
 
@@ -349,6 +459,22 @@ export async function sendUserRegistrationNotifications(
   );
 }
 
+export async function sendInvoiceNotifications(
+  event: InvoiceNotificationEvent,
+  invoiceId: string,
+) {
+  const invoice = await findInvoiceById(invoiceId);
+  if (!invoice) {
+    return;
+  }
+
+  const context = buildInvoiceContext(invoice);
+
+  await dispatchTemplates("invoices", event, invoiceId, context, (template) =>
+    resolveInvoiceContact(invoice, template.recipient, template.channel),
+  );
+}
+
 export function queueRideRequestNotifications(
   event: RideRequestNotificationEvent,
   rideRequestId: string,
@@ -362,6 +488,13 @@ export function queueUserRegistrationNotifications(
   options: { rejectionReason?: string | null } = {},
 ) {
   void sendUserRegistrationNotifications(event, userId, options);
+}
+
+export function queueInvoiceNotifications(
+  event: InvoiceNotificationEvent,
+  invoiceId: string,
+) {
+  void sendInvoiceNotifications(event, invoiceId);
 }
 
 export async function sendNotificationTemplateTest(

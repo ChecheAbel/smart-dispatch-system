@@ -47,6 +47,8 @@ import {
 import { VehicleFuelLogSource, VehicleHistoryEventType, VehicleStatus } from "../generated/prisma";
 import { listActiveRegions } from "../models/region.model";
 import { listActiveBookingLocations } from "../models/location.model";
+import { listActiveContracts, getContractScopeIds, formatContractDate } from "../models/contract.model";
+import { listRelevantEnrollmentsForUser } from "../models/contract-enrollment.model";
 import { listActiveVehicleTypesWithAllowedClasses } from "../models/vehicle-type-class.model";
 import { recordAuditLog } from "../services/audit-log.service";
 import { queueRideRequestNotifications } from "../services/notification-dispatch.service";
@@ -152,13 +154,37 @@ router.get(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const locale = getRequestLocale(req);
+      const userId = req.user?.id;
+      if (!userId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
       const regionId = getOptionalString(req.query.region_id);
-      const [vehicleTypes, regions, pickupLocations, dropoffLocations] = await Promise.all([
+      const [vehicleTypes, regions, pickupLocations, dropoffLocations, contracts, enrollments] =
+        await Promise.all([
         listActiveVehicleTypesWithAllowedClasses(),
         listActiveRegions(),
         listActiveBookingLocations({ regionId: regionId ?? undefined, canPickup: true }),
         listActiveBookingLocations({ regionId: regionId ?? undefined, canDropoff: true }),
+        listActiveContracts(),
+        listRelevantEnrollmentsForUser(userId),
       ]);
+
+      const enrollmentByContractId = new Map<
+        string,
+        { starts_at: string | null; ends_at: string | null }
+      >();
+
+      for (const enrollment of enrollments) {
+        if (enrollmentByContractId.has(enrollment.contractId)) {
+          continue;
+        }
+
+        enrollmentByContractId.set(enrollment.contractId, {
+          starts_at: formatContractDate(enrollment.startsAt),
+          ends_at: formatContractDate(enrollment.endsAt),
+        });
+      }
 
       return sendSuccess(res, {
         vehicle_types: vehicleTypes.map((vehicleType) => ({
@@ -174,6 +200,20 @@ router.get(
         dropoff_locations: dropoffLocations.map((location) =>
           toRideRequestLocationOption(location, { locale }),
         ),
+        contracts: contracts.map((contract) => {
+          const scope = getContractScopeIds(contract);
+          return {
+            id: contract.id,
+            reference_number: contract.referenceNumber,
+            title: contract.title,
+            status: contract.status,
+            billing_interval: contract.billingInterval,
+            current_enrollment: enrollmentByContractId.get(contract.id) ?? null,
+            region_ids: scope.regionIds,
+            vehicle_type_ids: scope.vehicleTypeIds,
+            vehicle_class_ids: scope.vehicleClassIds,
+          };
+        }),
       });
     } catch (error) {
       return handleRouteError(res, error);
@@ -843,6 +883,7 @@ router.post(
         scheduledAt: parsed.data.scheduledAt,
         passengerCount: parsed.data.passengerCount,
         notes: parsed.data.notes,
+        contractId: parsed.data.contractId,
       });
 
       await recordAuditLog({

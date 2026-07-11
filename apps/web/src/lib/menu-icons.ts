@@ -14,6 +14,7 @@ import {
   Menu,
   MessageSquare,
   Receipt,
+  ReceiptText,
   Route,
   ScrollText,
   Settings,
@@ -24,6 +25,7 @@ import {
   UserRound,
   Wrench,
   Coins,
+  FileText,
 } from "lucide-react";
 
 const MENU_ICON_MAP: Record<string, LucideIcon> = {
@@ -71,6 +73,10 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   billing: Receipt,
   coins: Coins,
   "fare-plans": Coins,
+  "file-text": FileText,
+  contracts: FileText,
+  "receipt-text": ReceiptText,
+  invoices: ReceiptText,
 };
 
 export function getMenuIcon(icon?: string | null): LucideIcon {

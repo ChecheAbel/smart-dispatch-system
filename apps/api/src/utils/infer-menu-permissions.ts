@@ -12,6 +12,8 @@ const ADMIN_MODULES = [
   "regions",
   "locations",
   "fare_plans",
+  "contracts",
+  "invoices",
   "ride_requests",
 ] as const;
 
@@ -94,11 +96,19 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
   }
 
   if (normalizedSlug === "billing") {
-    return ["fare_plans.read"];
+    return ["fare_plans.read", "contracts.read", "invoices.read"];
   }
 
   if (normalizedSlug === "fare-plans") {
     return ["fare_plans.read"];
+  }
+
+  if (normalizedSlug === "contracts") {
+    return ["contracts.read"];
+  }
+
+  if (normalizedSlug === "invoices") {
+    return ["invoices.read"];
   }
 
   if (normalizedSlug === "dispatch") {
@@ -121,6 +131,14 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
     return ["customer_requests.read"];
   }
 
+  if (normalizedSlug === "customer-contracts") {
+    return ["customer_contracts.read"];
+  }
+
+  if (normalizedSlug === "customer-invoices") {
+    return ["customer_invoices.read"];
+  }
+
   if (normalizedPath === "/dashboard") {
     return ["customer_dashboard.read"];
   }
@@ -135,6 +153,14 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
 
   if (normalizedPath?.startsWith("/dashboard/my-requests")) {
     return ["customer_requests.read"];
+  }
+
+  if (normalizedPath?.startsWith("/dashboard/my-contracts")) {
+    return ["customer_contracts.read"];
+  }
+
+  if (normalizedPath?.startsWith("/dashboard/my-invoices")) {
+    return ["customer_invoices.read"];
   }
 
   if (isAdminModule(normalizedSlug)) {

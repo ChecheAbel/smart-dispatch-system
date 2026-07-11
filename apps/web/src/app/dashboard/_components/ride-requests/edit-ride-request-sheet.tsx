@@ -44,6 +44,7 @@ import {
   buildVehicleTypeLabel,
   combineScheduledDateTime,
   filterLocationsByRegion,
+  buildDropoffLocationItems,
   getMinTimeForDate,
   splitScheduledDateTime,
   type CoordinateState,
@@ -198,11 +199,21 @@ export function EditRideRequestSheet({
 
   const dropoffLocationItems = useMemo(
     () =>
-      filterLocationsByRegion(dropoffLocations, form?.regionId ?? "").map((location) => ({
-        label: location.name,
-        value: location.id,
-      })),
-    [dropoffLocations, form?.regionId],
+      buildDropoffLocationItems(
+        filterLocationsByRegion(dropoffLocations, form?.regionId ?? ""),
+        pickupLocations,
+        pickupLocationId,
+        useCustomPickup,
+        copy.pickupTag,
+      ),
+    [
+      copy.pickupTag,
+      dropoffLocations,
+      form?.regionId,
+      pickupLocations,
+      pickupLocationId,
+      useCustomPickup,
+    ],
   );
 
   const showPickupBackup = pickupLocationItems.length === 0 || useCustomPickup;
@@ -232,10 +243,18 @@ export function EditRideRequestSheet({
       regionId: form.regionId || location.region_id,
     });
     setPickupCoordinates({ latitude: location.latitude, longitude: location.longitude });
+
+    if (dropoffLocationId === locationId) {
+      setDropoffLocationId("");
+      setForm({ ...form, dropoffAddress: "" });
+      setDropoffCoordinates({});
+    }
   }
 
   function applyDropoffLocation(locationId: string) {
-    const location = dropoffLocations.find((entry) => entry.id === locationId);
+    const location =
+      dropoffLocations.find((entry) => entry.id === locationId) ??
+      pickupLocations.find((entry) => entry.id === locationId);
     if (!location || !form) return;
 
     setDropoffLocationId(locationId);
@@ -275,6 +294,16 @@ export function EditRideRequestSheet({
       if (!isValidCoordinatePair(dropoffCoordinates.latitude, dropoffCoordinates.longitude)) {
         nextErrors.dropoffCoordinates = copy.errors.dropoffCoordinatesRequired;
       }
+    }
+
+    if (
+      !showPickupBackup &&
+      !showDropoffBackup &&
+      pickupLocationId &&
+      dropoffLocationId &&
+      pickupLocationId === dropoffLocationId
+    ) {
+      nextErrors.dropoffSavedLocation = copy.errors.dropoffSameAsPickup;
     }
 
     if (!Number.isInteger(passengerCount) || passengerCount < 1 || passengerCount > 50) {

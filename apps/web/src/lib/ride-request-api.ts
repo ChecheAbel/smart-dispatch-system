@@ -2,6 +2,7 @@ import type {
   ApiPaginatedResponse,
   Region,
   RideRequest,
+  RideRequestContractOption,
   RideRequestLocationOption,
   RideRequestStatus,
   VehicleClass,
@@ -19,6 +20,7 @@ export type RideRequestFormOptions = {
   regions: Region[];
   pickup_locations: RideRequestLocationOption[];
   dropoff_locations: RideRequestLocationOption[];
+  contracts: RideRequestContractOption[];
 };
 
 export type CreateRideRequestInput = {
@@ -36,6 +38,7 @@ export type CreateRideRequestInput = {
   passenger_count: number;
   scheduled_at?: string | null;
   notes?: string | null;
+  contract_id?: string | null;
 };
 
 export type UpdateRideRequestInput = CreateRideRequestInput;

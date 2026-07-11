@@ -21,10 +21,14 @@ import { registerVehicleTypeRoutes } from "./routes/vehicle-type.routes";
 import { registerVehicleClassRoutes } from "./routes/vehicle-class.routes";
 import { registerMaintenanceWorkTypeRoutes } from "./routes/maintenance-work-type.routes";
 import { registerFarePlanRoutes } from "./routes/fare-plan.routes";
+import { registerContractRoutes } from "./routes/contract.routes";
+import { registerInvoiceRoutes } from "./routes/invoice.routes";
+import { registerCustomerBillingRoutes } from "./routes/customer-billing.routes";
 import { registerRideRequestRoutes } from "./routes/ride-request.routes";
 import { registerAdminRideRequestRoutes } from "./routes/admin-ride-request.routes";
 import { registerAdminDashboardRoutes } from "./routes/dashboard.routes";
 import { registerDriverUpcomingTripsSocket } from "./websocket/driver-upcoming-trips.socket";
+import { startInvoiceAutomationScheduler } from "./services/scheduler.service";
 import { requestLogger } from "./middleware/request-logger";
 import { ensureDriverLicenseUploadDir, getDriverLicenseUploadDir } from "./utils/driver-license-upload";
 import { sendSuccess } from "./utils/response";
@@ -57,6 +61,9 @@ registerVehicleRoutes(app);
 registerRegionRoutes(app);
 registerLocationRoutes(app);
 registerFarePlanRoutes(app);
+registerContractRoutes(app);
+registerInvoiceRoutes(app);
+registerCustomerBillingRoutes(app);
 registerRideRequestRoutes(app);
 registerAdminRideRequestRoutes(app);
 registerAdminDashboardRoutes(app);
@@ -80,6 +87,7 @@ async function start() {
   await migrate();
   server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
+    startInvoiceAutomationScheduler();
   });
 }
 

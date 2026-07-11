@@ -139,6 +139,9 @@ model User {
   vehicleMaintenanceLogs VehicleMaintenanceLog[] @relation("VehicleMaintenanceCreatedBy")
   vehicleFuelLogs        VehicleFuelLog[]        @relation("VehicleFuelCreatedBy")
   vehicleHistoryEvents   VehicleHistoryEvent[] @relation("VehicleHistoryActor")
+  createdContracts       Contract[]            @relation("ContractCreatedBy")
+  contractEnrollments    ContractEnrollment[]  @relation("ContractEnrollmentRequester")
+  invoices               Invoice[]             @relation("InvoiceRequester")
 
   @@index([email])
   @@index([mobileNumber])
@@ -207,6 +210,7 @@ enum NotificationModule {
   user_registrations
   insurance
   inspection
+  invoices
 
   @@map("notification_module")
 }
@@ -620,6 +624,9 @@ model FarePlan {
   vehicleType        VehicleType?  @relation(fields: [vehicleTypeId], references: [id], onDelete: SetNull)
   vehicleClass       VehicleClass? @relation(fields: [vehicleClassId], references: [id], onDelete: SetNull)
   region             Region?       @relation(fields: [regionId], references: [id], onDelete: SetNull)
+  contracts          Contract[]
+  rideRequests       RideRequest[]
+  invoiceLineItems   InvoiceLineItem[]
 
   @@index([vehicleTypeId])
   @@index([vehicleClassId])
@@ -627,6 +634,131 @@ model FarePlan {
   @@index([pricingModel])
   @@index([isActive])
   @@map("fare_plans")
+}
+
+enum ContractStatus {
+  draft
+  active
+  expired
+  cancelled
+
+  @@map("contract_status")
+}
+
+enum ContractBillingInterval {
+  per_trip
+  monthly
+  quarterly
+  annually
+
+  @@map("contract_billing_interval")
+}
+
+model Contract {
+  id               String                  @id @default(uuid()) @db.Uuid
+  referenceNumber  String                  @unique @map("reference_number") @db.VarChar(50)
+  title            String                  @db.VarChar(200)
+  status           ContractStatus          @default(draft)
+  farePlanId       String?                 @map("fare_plan_id") @db.Uuid
+  notes            String?                 @db.Text
+  billingInterval  ContractBillingInterval @default(per_trip) @map("billing_interval")
+  paymentTermsDays Int?                    @map("payment_terms_days")
+  regionIds        Json                    @default("[]") @map("region_ids") @db.JsonB
+  vehicleTypeIds   Json                    @default("[]") @map("vehicle_type_ids") @db.JsonB
+  vehicleClassIds  Json                    @default("[]") @map("vehicle_class_ids") @db.JsonB
+  createdById      String?                 @map("created_by_id") @db.Uuid
+  createdAt        DateTime                @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime                @updatedAt @map("updated_at") @db.Timestamptz
+  farePlan         FarePlan?               @relation(fields: [farePlanId], references: [id], onDelete: SetNull)
+  createdBy        User?                   @relation("ContractCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  rideRequests     RideRequest[]
+  enrollments      ContractEnrollment[]
+  invoices         Invoice[]
+
+  @@index([status])
+  @@map("contracts")
+}
+
+model ContractEnrollment {
+  id              String   @id @default(uuid()) @db.Uuid
+  contractId      String   @map("contract_id") @db.Uuid
+  requesterUserId String   @map("requester_user_id") @db.Uuid
+  startsAt        DateTime @map("starts_at") @db.Date
+  endsAt          DateTime @map("ends_at") @db.Date
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  contract        Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  requester       User     @relation("ContractEnrollmentRequester", fields: [requesterUserId], references: [id], onDelete: Cascade)
+  invoices        Invoice[]
+
+  @@index([contractId])
+  @@index([requesterUserId])
+  @@index([startsAt])
+  @@index([endsAt])
+  @@map("contract_enrollments")
+}
+
+enum InvoiceStatus {
+  draft
+  issued
+  paid
+  void
+
+  @@map("invoice_status")
+}
+
+model Invoice {
+  id                   String          @id @default(uuid()) @db.Uuid
+  referenceNumber      String          @unique @map("reference_number") @db.VarChar(50)
+  status               InvoiceStatus   @default(draft)
+  contractId           String          @map("contract_id") @db.Uuid
+  contractEnrollmentId String?         @map("contract_enrollment_id") @db.Uuid
+  requesterUserId      String          @map("requester_user_id") @db.Uuid
+  periodStart          DateTime        @map("period_start") @db.Date
+  periodEnd            DateTime        @map("period_end") @db.Date
+  subtotal             Decimal         @db.Decimal(14, 2)
+  totalAmount          Decimal         @map("total_amount") @db.Decimal(14, 2)
+  currency             String          @default("ETB") @db.VarChar(3)
+  paymentTermsDays     Int?            @map("payment_terms_days")
+  issuedAt             DateTime?       @map("issued_at") @db.Timestamptz
+  dueAt                DateTime?       @map("due_at") @db.Timestamptz
+  paidAt               DateTime?       @map("paid_at") @db.Timestamptz
+  voidedAt             DateTime?       @map("voided_at") @db.Timestamptz
+  notes                String?         @db.Text
+  createdAt            DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime        @updatedAt @map("updated_at") @db.Timestamptz
+  contract             Contract        @relation(fields: [contractId], references: [id], onDelete: Restrict)
+  contractEnrollment   ContractEnrollment? @relation(fields: [contractEnrollmentId], references: [id], onDelete: SetNull)
+  requester            User            @relation("InvoiceRequester", fields: [requesterUserId], references: [id], onDelete: Restrict)
+  lineItems            InvoiceLineItem[]
+
+  @@index([contractId])
+  @@index([contractEnrollmentId])
+  @@index([requesterUserId])
+  @@index([status])
+  @@index([issuedAt(sort: Desc)])
+  @@map("invoices")
+}
+
+model InvoiceLineItem {
+  id              String      @id @default(uuid()) @db.Uuid
+  invoiceId       String      @map("invoice_id") @db.Uuid
+  rideRequestId   String      @unique @map("ride_request_id") @db.Uuid
+  description     String      @db.VarChar(500)
+  quantity        Int         @default(1)
+  unitAmount      Decimal     @map("unit_amount") @db.Decimal(14, 2)
+  lineTotal       Decimal     @map("line_total") @db.Decimal(14, 2)
+  farePlanId      String?     @map("fare_plan_id") @db.Uuid
+  distanceKm      Decimal?    @map("distance_km") @db.Decimal(10, 3)
+  durationMinutes Int?        @map("duration_minutes")
+  pricingSnapshot Json?       @map("pricing_snapshot") @db.JsonB
+  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz
+  invoice         Invoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  rideRequest     RideRequest @relation(fields: [rideRequestId], references: [id], onDelete: Restrict)
+  farePlan        FarePlan?   @relation(fields: [farePlanId], references: [id], onDelete: SetNull)
+
+  @@index([invoiceId])
+  @@map("invoice_line_items")
 }
 
 enum RideRequestStatus {
@@ -658,19 +790,28 @@ model RideRequest {
   notes            String?           @db.VarChar(1000)
   status           RideRequestStatus @default(pending)
   rejectionReason  String?           @map("rejection_reason") @db.VarChar(500)
+  contractId       String?           @map("contract_id") @db.Uuid
   assignedVehicleId    String?       @map("assigned_vehicle_id") @db.Uuid
   assignedDriverUserId String?       @map("assigned_driver_user_id") @db.Uuid
   assignedAt           DateTime?     @map("assigned_at") @db.Timestamptz
   startedAt            DateTime?     @map("started_at") @db.Timestamptz
   completedAt          DateTime?     @map("completed_at") @db.Timestamptz
+  farePlanId           String?           @map("fare_plan_id") @db.Uuid
+  distanceKm           Decimal?          @map("distance_km") @db.Decimal(10, 3)
+  durationMinutes      Int?              @map("duration_minutes")
+  billableAmount       Decimal?          @map("billable_amount") @db.Decimal(14, 2)
+  billableCurrency     String?           @map("billable_currency") @db.VarChar(3)
   createdAt        DateTime          @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime          @updatedAt @map("updated_at") @db.Timestamptz
   requester        User              @relation(fields: [requesterUserId], references: [id], onDelete: Cascade)
+  farePlan         FarePlan?         @relation(fields: [farePlanId], references: [id], onDelete: SetNull)
+  invoiceLineItem  InvoiceLineItem?
   vehicleType      VehicleType?      @relation(fields: [vehicleTypeId], references: [id], onDelete: SetNull)
   vehicleClass     VehicleClass?     @relation(fields: [vehicleClassId], references: [id], onDelete: SetNull)
   region           Region?           @relation(fields: [regionId], references: [id], onDelete: SetNull)
   pickupLocation   Location?         @relation("RideRequestPickupLocation", fields: [pickupLocationId], references: [id], onDelete: SetNull)
   dropoffLocation  Location?         @relation("RideRequestDropoffLocation", fields: [dropoffLocationId], references: [id], onDelete: SetNull)
+  contract         Contract?         @relation(fields: [contractId], references: [id], onDelete: SetNull)
   assignedVehicle  Vehicle?          @relation("RideRequestAssignedVehicle", fields: [assignedVehicleId], references: [id], onDelete: SetNull)
   assignedDriver   User?             @relation("RideRequestAssignedDriver", fields: [assignedDriverUserId], references: [id], onDelete: SetNull)
 
@@ -679,6 +820,7 @@ model RideRequest {
   @@index([status])
   @@index([assignedVehicleId])
   @@index([assignedDriverUserId])
+  @@index([contractId])
   @@index([pickupLocationId])
   @@index([dropoffLocationId])
   @@index([createdAt(sort: Desc)])

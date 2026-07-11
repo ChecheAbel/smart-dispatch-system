@@ -37,9 +37,11 @@ import {
   formatMessage,
   getCustomerRequestHistoryMessages,
   getCustomerRequestsMessages,
+  getAdminContractsMessages,
 } from "@/translations";
 import { cn } from "@/lib/utils";
 import { RideRequestStats } from "./ride-request-stats";
+import { RideRequestContractBadge } from "@/app/dashboard/_components/ride-requests/ride-request-contract-info";
 import { EditRideRequestSheet } from "@/app/dashboard/_components/ride-requests/edit-ride-request-sheet";
 import { RideRequestDetailSheet } from "@/app/dashboard/_components/ride-requests/ride-request-detail-sheet";
 import {
@@ -114,6 +116,7 @@ export function RideRequestHistoryPage() {
   const { locale } = useLocale();
   const historyCopy = getCustomerRequestHistoryMessages(locale);
   const requestCopy = getCustomerRequestsMessages(locale);
+  const contractCopy = getAdminContractsMessages(locale);
   const canWrite = usePermission("customer_requests.write");
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>(STATUS_FILTER_ALL);
   const [detailRequest, setDetailRequest] = useState<RideRequest | null>(null);
@@ -148,9 +151,15 @@ export function RideRequestHistoryPage() {
         id: "route",
         header: historyCopy.routeColumn,
         cell: (row) => (
-          <div className="min-w-0 space-y-0.5">
+          <div className="min-w-0 space-y-1">
             <p className="truncate text-sm font-medium text-[#1C3A34]">{row.pickup_address}</p>
             <p className="truncate text-sm text-slate-500">{row.dropoff_address}</p>
+            {row.contract ? (
+              <RideRequestContractBadge
+                contract={row.contract}
+                billingIntervalLabels={contractCopy.billingIntervals}
+              />
+            ) : null}
           </div>
         ),
       },
@@ -182,7 +191,7 @@ export function RideRequestHistoryPage() {
         ),
       },
     ],
-    [historyCopy, locale, requestCopy],
+    [contractCopy.billingIntervals, historyCopy, locale, requestCopy],
   );
 
   async function handleCancel() {

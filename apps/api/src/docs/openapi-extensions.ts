@@ -10,6 +10,7 @@ export const extensionTags = [
   { name: "Vehicles", description: "Fleet vehicle registry and default driver assignment (admin only)" },
   { name: "Maintenance Work Types", description: "Configurable maintenance work categories used by vehicle maintenance logs (admin only)" },
   { name: "Admin Ride Requests", description: "Ride request review, dispatch, status management, and driver trip views." },
+  { name: "Contracts", description: "Customer commercial agreements linked to fare plans and ride requests (admin only)" },
 ] as const;
 
 const rideRequestStatusEnumDescriptions = {
@@ -442,6 +443,168 @@ export const extensionSchemas = {
         },
       },
     ],
+  },
+  VehicleFuelLog: {
+    type: "object",
+    description:
+      "Fuel refill log for a vehicle. `price_per_liter`, `distance_since_last_km`, and `consumption_km_per_liter` are derived when the log is returned.",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      vehicle_id: { type: "string", format: "uuid" },
+      logged_at: { type: "string", format: "date-time" },
+      odometer_km: { type: "integer", minimum: 0 },
+      quantity_liters: { type: "number", minimum: 0 },
+      total_cost: { type: "number", nullable: true },
+      price_per_liter: {
+        type: "number",
+        nullable: true,
+        description: "Calculated as `total_cost / quantity_liters` when both values are present.",
+      },
+      fuel_type: { type: "string", enum: ["diesel", "petrol", "other"] },
+      station_name: { type: "string", nullable: true },
+      receipt_reference: { type: "string", nullable: true },
+      source: { type: "string", enum: ["manual", "driver_app", "import"] },
+      notes: { type: "string", nullable: true },
+      distance_since_last_km: {
+        type: "number",
+        nullable: true,
+        description: "Kilometers driven since the previous fuel log on this vehicle.",
+      },
+      consumption_km_per_liter: {
+        type: "number",
+        nullable: true,
+        description: "Fuel efficiency derived from the previous odometer reading.",
+      },
+      created_by_user_id: { type: "string", format: "uuid", nullable: true },
+      created_by: {
+        type: "object",
+        nullable: true,
+        properties: {
+          id: { type: "string", format: "uuid" },
+          name: { type: "string" },
+        },
+      },
+      created_at: { type: "string", format: "date-time" },
+      updated_at: { type: "string", format: "date-time" },
+    },
+  },
+  VehicleFuelInput: {
+    type: "object",
+    required: ["odometer_km", "quantity_liters", "total_cost", "station_name"],
+    properties: {
+      logged_at: {
+        type: "string",
+        format: "date-time",
+        description: "Refill timestamp. Defaults to the current time when omitted.",
+      },
+      odometer_km: { type: "integer", minimum: 1, description: "Odometer reading in kilometers." },
+      quantity_liters: { type: "number", minimum: 0, description: "Fuel quantity in liters." },
+      total_cost: { type: "number", minimum: 0, description: "Total amount paid for the refill." },
+      fuel_type: {
+        type: "string",
+        enum: ["diesel", "petrol", "other"],
+        default: "diesel",
+      },
+      station_name: { type: "string", description: "Fuel station or vendor name." },
+      receipt_reference: { type: "string", nullable: true },
+      notes: { type: "string", nullable: true },
+    },
+  },
+  VehicleFuelUpdateInput: {
+    type: "object",
+    properties: {
+      logged_at: { type: "string", format: "date-time" },
+      odometer_km: { type: "integer", minimum: 1 },
+      quantity_liters: { type: "number", minimum: 0 },
+      total_cost: { type: "number", minimum: 0 },
+      fuel_type: { type: "string", enum: ["diesel", "petrol", "other"] },
+      station_name: { type: "string" },
+      receipt_reference: { type: "string", nullable: true },
+      notes: { type: "string", nullable: true },
+    },
+  },
+  ContractFarePlanSummary: {
+    type: "object",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      slug: { type: "string" },
+      name: { type: "string" },
+      pricing_model: { type: "string", enum: ["flat", "distance", "time", "hybrid"] },
+      currency: { type: "string" },
+      base_fare: { type: "number" },
+      is_active: { type: "boolean" },
+    },
+  },
+  Contract: {
+    type: "object",
+    description: "Open commercial agreement with operational scope limits.",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      reference_number: {
+        type: "string",
+        example: "CTR-2026-0001",
+        description: "Auto-generated as CTR-{year}-{####} when the contract is created.",
+      },
+      title: { type: "string" },
+      status: { type: "string", enum: ["draft", "active", "expired", "cancelled"] },
+      fare_plan_id: { type: "string", format: "uuid", nullable: true },
+      fare_plan: { allOf: [{ $ref: "#/components/schemas/ContractFarePlanSummary" }], nullable: true },
+      notes: { type: "string", nullable: true },
+      billing_interval: {
+        type: "string",
+        enum: ["per_trip", "monthly", "quarterly", "annually"],
+      },
+      payment_terms_days: { type: "integer", nullable: true },
+      region_ids: { type: "array", items: { type: "string", format: "uuid" } },
+      vehicle_type_ids: { type: "array", items: { type: "string", format: "uuid" } },
+      vehicle_class_ids: { type: "array", items: { type: "string", format: "uuid" } },
+      created_by_user_id: { type: "string", format: "uuid", nullable: true },
+      created_by: {
+        type: "object",
+        nullable: true,
+        properties: {
+          id: { type: "string", format: "uuid" },
+          name: { type: "string" },
+        },
+      },
+      created_at: { type: "string", format: "date-time" },
+      updated_at: { type: "string", format: "date-time" },
+    },
+  },
+  ContractInput: {
+    type: "object",
+    required: ["title"],
+    properties: {
+      title: { type: "string" },
+      status: { type: "string", enum: ["draft", "active", "expired", "cancelled"], default: "draft" },
+      fare_plan_id: { type: "string", format: "uuid", nullable: true },
+      notes: { type: "string", nullable: true },
+      billing_interval: {
+        type: "string",
+        enum: ["per_trip", "monthly", "quarterly", "annually"],
+      },
+      payment_terms_days: { type: "integer", nullable: true },
+      region_ids: { type: "array", items: { type: "string", format: "uuid" } },
+      vehicle_type_ids: { type: "array", items: { type: "string", format: "uuid" } },
+      vehicle_class_ids: { type: "array", items: { type: "string", format: "uuid" } },
+    },
+  },
+  ContractUpdateInput: {
+    type: "object",
+    properties: {
+      title: { type: "string" },
+      status: { type: "string", enum: ["draft", "active", "expired", "cancelled"] },
+      fare_plan_id: { type: "string", format: "uuid", nullable: true },
+      notes: { type: "string", nullable: true },
+      billing_interval: {
+        type: "string",
+        enum: ["per_trip", "monthly", "quarterly", "annually"],
+      },
+      payment_terms_days: { type: "integer", nullable: true },
+      region_ids: { type: "array", items: { type: "string", format: "uuid" } },
+      vehicle_type_ids: { type: "array", items: { type: "string", format: "uuid" } },
+      vehicle_class_ids: { type: "array", items: { type: "string", format: "uuid" } },
+    },
   },
   AdminRideRequest: {
     type: "object",
@@ -1386,6 +1549,144 @@ export const extensionPaths = {
       },
     },
   },
+  "/api/vehicles/{id}/fuel": {
+    get: {
+      tags: ["Vehicles"],
+      summary: "List vehicle fuel logs",
+      description:
+        "Returns paginated fuel refill logs for a vehicle. Each log includes derived efficiency fields based on the previous log's odometer reading.\n\n" +
+        "- Permission: `vehicles.read`",
+      security,
+      parameters: [
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        { $ref: "#/components/parameters/Page" },
+        { $ref: "#/components/parameters/Limit" },
+      ],
+      responses: {
+        "200": {
+          description: "Paginated fuel logs",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/VehicleFuelLog" },
+                  },
+                  pagination: { $ref: "#/components/schemas/PaginationMeta" },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+    post: {
+      tags: ["Vehicles"],
+      summary: "Create vehicle fuel log",
+      description:
+        "Creates a fuel refill log on a vehicle.\n\n" +
+        "- Permission: `vehicles.write`\n" +
+        "- `station_name` and `total_cost` are required.\n" +
+        "- Logs created here use `source: manual` and append a `fuel_logged` vehicle history event.",
+      security,
+      parameters: [
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/VehicleFuelInput" },
+          },
+        },
+      },
+      responses: {
+        "201": {
+          description: "Fuel log created",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      fuel_log: { $ref: "#/components/schemas/VehicleFuelLog" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+  },
+  "/api/vehicles/{id}/fuel/{fuelLogId}": {
+    patch: {
+      tags: ["Vehicles"],
+      summary: "Update vehicle fuel log",
+      description:
+        "Updates a fuel refill log on a vehicle.\n\n" +
+        "- Permission: `vehicles.write`\n" +
+        "- When provided, `station_name` and `total_cost` must be valid non-empty values.\n" +
+        "- Appends a `fuel_updated` vehicle history event.",
+      security,
+      parameters: [
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "fuelLogId",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/VehicleFuelUpdateInput" },
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: "Fuel log updated",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      fuel_log: { $ref: "#/components/schemas/VehicleFuelLog" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+  },
   "/api/maintenance-work-types/active": {
     get: {
       tags: ["Maintenance Work Types"],
@@ -1863,6 +2164,188 @@ export const extensionPaths = {
       },
     },
   },
+  "/api/contracts": {
+    get: {
+      tags: ["Contracts"],
+      summary: "List customer contracts",
+      description: "Requires `contracts.read`.",
+      security,
+      parameters: [
+        { $ref: "#/components/parameters/Page" },
+        { $ref: "#/components/parameters/Limit" },
+        { $ref: "#/components/parameters/Locale" },
+        { name: "search", in: "query", schema: { type: "string" }, description: "Search reference number or title" },
+        {
+          name: "status",
+          in: "query",
+          schema: { type: "string", enum: ["draft", "active", "expired", "cancelled"] },
+        },
+      ],
+      responses: {
+        "200": {
+          description: "Paginated contract list",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: { type: "array", items: { $ref: "#/components/schemas/Contract" } },
+                  pagination: { $ref: "#/components/schemas/PaginationMeta" },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+    post: {
+      tags: ["Contracts"],
+      summary: "Create customer contract",
+      description: "Requires `contracts.write`.",
+      security,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/ContractInput" },
+          },
+        },
+      },
+      responses: {
+        "201": {
+          description: "Contract created",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: { contract: { $ref: "#/components/schemas/Contract" } },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "409": { $ref: "#/components/responses/Conflict" },
+      },
+    },
+  },
+  "/api/contracts/{id}": {
+    get: {
+      tags: ["Contracts"],
+      summary: "Get customer contract",
+      security,
+      parameters: [
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        { $ref: "#/components/parameters/Locale" },
+      ],
+      responses: {
+        "200": {
+          description: "Contract details",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      contract: { $ref: "#/components/schemas/Contract" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+    patch: {
+      tags: ["Contracts"],
+      summary: "Update customer contract",
+      description: "Requires `contracts.write`.",
+      security,
+      parameters: [
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        { $ref: "#/components/parameters/Locale" },
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/ContractUpdateInput" },
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: "Contract updated",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: { contract: { $ref: "#/components/schemas/Contract" } },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+        "409": { $ref: "#/components/responses/Conflict" },
+      },
+    },
+    delete: {
+      tags: ["Contracts"],
+      summary: "Delete customer contract",
+      description: "Requires `contracts.delete`. Fails with 409 when linked ride requests exist.",
+      security,
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+      responses: {
+        "200": {
+          description: "Contract deleted",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: { message: { type: "string" } },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+        "409": { $ref: "#/components/responses/Conflict" },
+      },
+    },
+  },
   "/api/ride-requests/driver/vehicle": {
     get: {
       tags: ["Vehicles"],
@@ -2103,6 +2586,139 @@ export const extensionPaths = {
                     type: "object",
                     properties: {
                       maintenance_log: { $ref: "#/components/schemas/VehicleMaintenanceLog" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+  },
+  "/api/ride-requests/driver/fuel": {
+    get: {
+      tags: ["Vehicles"],
+      summary: "List fuel logs for driver's assigned vehicle",
+      description:
+        "Lists fuel refill logs for the vehicle assigned to the authenticated driver. Each log includes derived efficiency fields based on the previous log's odometer reading.\n\n" +
+        "- Permission: `driver.fuel`\n" +
+        "- Returns 404 if the driver has no assigned vehicle.",
+      security,
+      parameters: [
+        { $ref: "#/components/parameters/Page" },
+        { $ref: "#/components/parameters/Limit" },
+      ],
+      responses: {
+        "200": {
+          description: "Paginated fuel logs",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/VehicleFuelLog" },
+                  },
+                  pagination: { $ref: "#/components/schemas/PaginationMeta" },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+    post: {
+      tags: ["Vehicles"],
+      summary: "Log fuel refill for driver's assigned vehicle",
+      description:
+        "Creates a fuel refill log on the vehicle assigned to the authenticated driver.\n\n" +
+        "- Permission: `driver.fuel`\n" +
+        "- `station_name` and `total_cost` are required.\n" +
+        "- Logs created here use `source: driver_app` and append a `fuel_logged` vehicle history event.",
+      security,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/VehicleFuelInput" },
+          },
+        },
+      },
+      responses: {
+        "201": {
+          description: "Fuel log created",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      fuel_log: { $ref: "#/components/schemas/VehicleFuelLog" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+  },
+  "/api/ride-requests/driver/fuel/{fuelLogId}": {
+    patch: {
+      tags: ["Vehicles"],
+      summary: "Update fuel log on driver's assigned vehicle",
+      description:
+        "Updates a fuel refill log that belongs to the vehicle assigned to the authenticated driver.\n\n" +
+        "- Permission: `driver.fuel`\n" +
+        "- When provided, `station_name` and `total_cost` must be valid non-empty values.",
+      security,
+      parameters: [
+        {
+          name: "fuelLogId",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/VehicleFuelUpdateInput" },
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: "Fuel log updated",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      fuel_log: { $ref: "#/components/schemas/VehicleFuelLog" },
                     },
                   },
                 },

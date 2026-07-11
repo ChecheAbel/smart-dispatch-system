@@ -33,11 +33,13 @@ import {
   formatSubmittedAt,
   statusBadgeClass,
 } from "@/app/dashboard/_components/ride-requests/ride-request-utils";
+import { RideRequestContractBadge } from "@/app/dashboard/_components/ride-requests/ride-request-contract-info";
 import { fetchAdminRideRequests } from "@/lib/admin-ride-request-api";
 import { PERMISSIONS } from "@/lib/permissions";
 import { adminBadgeGoldClass, adminFilterLabelClass } from "@/lib/admin-theme";
 import {
   formatMessage,
+  getAdminContractsMessages,
   getAdminRideRequestsMessages,
   getCustomerRequestsMessages,
 } from "@/translations";
@@ -122,6 +124,7 @@ export function AdminRideRequestsPage() {
   const { hasPermission } = useAuth();
   const copy = getAdminRideRequestsMessages(locale);
   const requestCopy = getCustomerRequestsMessages(locale);
+  const contractCopy = getAdminContractsMessages(locale);
   const canRead = hasPermission(PERMISSIONS.ride_requests.read);
   const canWrite = hasPermission(PERMISSIONS.ride_requests.write);
   const [statusFilter, setStatusFilter] = useState<AdminRideRequestListFilter>(STATUS_FILTER_ALL);
@@ -176,6 +179,20 @@ export function AdminRideRequestsPage() {
         cell: (request) => formatRoute(request),
       },
       {
+        id: "contract",
+        header: copy.columns.contract,
+        cellClassName: "min-w-[10rem]",
+        cell: (request) =>
+          request.contract ? (
+            <RideRequestContractBadge
+              contract={request.contract}
+              billingIntervalLabels={contractCopy.billingIntervals}
+            />
+          ) : (
+            <span className="text-sm text-slate-400">{copy.columns.oneTimeBilling}</span>
+          ),
+      },
+      {
         id: "scheduled",
         header: copy.columns.scheduled,
         cellClassName: "text-slate-500",
@@ -211,7 +228,7 @@ export function AdminRideRequestsPage() {
         cell: (request) => formatSubmittedAt(request.created_at, locale),
       },
     ],
-    [copy.columns, locale, requestCopy],
+    [contractCopy.billingIntervals, copy.columns, locale, requestCopy],
   );
 
   const loadRideRequests = useCallback(
@@ -275,7 +292,7 @@ export function AdminRideRequestsPage() {
         showIndexColumn
         renderRowActions={renderRowActions}
         actionsColumnHeader={copy.columns.actions}
-        minTableWidth="1080px"
+        minTableWidth="1240px"
         emptyIcon={ClipboardList}
         emptyTitle={copy.empty.title}
         emptyDescription={copy.empty.description}

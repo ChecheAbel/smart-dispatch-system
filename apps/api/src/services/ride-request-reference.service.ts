@@ -1,4 +1,7 @@
 import {
+  findActiveContractsMatchingRideScope,
+} from "../models/contract.model";
+import {
   findRegionByIdIfActive,
   findVehicleClassByIdIfActive,
   findVehicleTypeByIdIfActive,
@@ -59,6 +62,22 @@ export async function validateRideRequestReferences(payload: ParsedRideRequestPa
 
     if (payload.regionId && dropoffLocation.regionId !== payload.regionId) {
       return "Drop-off location does not belong to the selected region.";
+    }
+  }
+
+  if (payload.contractId) {
+    const matchingContracts = await findActiveContractsMatchingRideScope({
+      regionId: payload.regionId,
+      vehicleTypeId: payload.vehicleTypeId,
+      vehicleClassId: payload.vehicleClassId,
+    });
+
+    if (matchingContracts.length === 0) {
+      return "No active contract covers this trip.";
+    }
+
+    if (!matchingContracts.some((contract) => contract.id === payload.contractId)) {
+      return "This trip does not match the selected contract scope.";
     }
   }
 

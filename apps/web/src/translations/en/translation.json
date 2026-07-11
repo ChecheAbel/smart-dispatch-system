@@ -94,7 +94,26 @@
     "title": "Request Ride",
     "description": "Tell us where to pick you up and where you are going. Our dispatch team will review and assign a vehicle.",
     "formTitle": "New ride request",
-    "formDescription": "Fill in your trip details below. You can track submitted requests in the list underneath.",
+    "formDescription": "Complete each step to submit your ride request.",
+    "stepProgress": "Step {current} of {total}",
+    "stepBilling": "Billing",
+    "stepRoute": "Route",
+    "stepTrip": "Trip details",
+    "stepNotes": "Review & submit",
+    "back": "Back",
+    "next": "Continue",
+    "sectionBilling": "How is this trip billed?",
+    "sectionBillingDescription": "Choose one-time billing or bill under your active contract. The matching contract is applied automatically from your trip details.",
+    "billingOneTime": "One-time ride",
+    "billingOneTimeDescription": "Standard trip billed at regular rates.",
+    "billingContract": "Under a contract",
+    "billingContractDescription": "We will match your trip to the active contract for your region, vehicle type, and class within the contract term.",
+    "contractAutoMatchPending": "No active contract covers these trip details.",
+    "contractMatched": "This trip will be billed under {reference} · {title}.",
+    "contractActiveTerm": "Current billing period: {term}.",
+    "contractProjectedTerm": "Once accepted, billing period: {term}.",
+    "contractTermStartsOnPickup": "Billing starts on your scheduled pickup date after dispatch accepts this request.",
+    "contractTermStartsOnAcceptance": "Billing starts on the date dispatch accepts this request.",
     "sectionRoute": "Your route",
     "sectionRouteDescription": "Choose your pickup and drop-off points. Saved locations are shown first.",
     "sectionTripDetails": "Trip details",
@@ -110,6 +129,7 @@
     "pickupSavedLocation": "Saved pickup location",
     "pickupSavedLocationPlaceholder": "Choose a saved pickup point",
     "pickupLocation": "Pickup point",
+    "pickupTag": "pickup",
     "dropoffAddress": "Drop-off address",
     "dropoffAddressPlaceholder": "e.g. Kazanchis, near Meskel Square",
     "dropoffSavedLocation": "Saved drop-off location",
@@ -181,14 +201,21 @@
       "dropoffRequired": "Drop-off address is required.",
       "pickupSavedRequired": "Select a saved pickup location.",
       "dropoffSavedRequired": "Select a saved drop-off location.",
+      "dropoffSameAsPickup": "Drop-off must be different from the pickup location.",
       "pickupCoordinatesRequired": "Select the pickup point on the map.",
       "dropoffCoordinatesRequired": "Select the drop-off point on the map.",
       "passengerCountInvalid": "Enter a valid passenger count between 1 and 50.",
       "passengerExceedsCapacity": "Passenger count exceeds the selected vehicle capacity ({capacity}).",
       "vehicleClassRequiresType": "Select a vehicle type before choosing a vehicle class.",
       "vehicleClassInvalid": "Selected vehicle class is not available for this vehicle type.",
+      "regionRequired": "Region is required for contract billing.",
+      "vehicleTypeRequiredForContract": "Vehicle type is required for contract billing.",
+      "vehicleClassRequiredForContract": "Vehicle class is required for contract billing.",
       "scheduledAtPast": "Pickup time must be in the future.",
       "scheduledAtIncomplete": "Select both a pickup date and time, or leave both empty.",
+      "contractRequired": "No active contract covers your region and vehicle selections.",
+      "contractAmbiguous": "More than one contract matches these trip details. Contact support.",
+      "contractScopeMismatch": "The selected contract does not match your trip details.",
       "submitFailed": "Failed to submit ride request."
     },
     "toast": {
@@ -254,6 +281,12 @@
     "detailRejectionReason": "Rejection reason",
     "detailRejectionReasonHint": "Provided by dispatch when this request was rejected.",
     "detailAssignmentSection": "Dispatch assignment",
+    "detailContractSection": "Contract billing",
+    "detailContractReference": "Reference",
+    "detailContractTitle": "Agreement",
+    "detailContractBillingInterval": "Billing cycle",
+    "detailContractStatus": "Contract status",
+    "contractPendingHint": "Awaiting dispatch approval. Contract billing starts once this request is confirmed.",
     "detailAssignedVehicle": "Assigned vehicle",
     "detailAssignedDriver": "Assigned driver",
     "detailAssignedDriverMobile": "Driver mobile",
@@ -284,6 +317,114 @@
     "toast": {
       "updated": "Ride request updated successfully.",
       "cancelled": "Ride request cancelled."
+    }
+  },
+  "customerContracts": {
+    "eyebrow": "Billing",
+    "title": "My Contracts",
+    "description": "View your active and past contract enrollment periods.",
+    "searchPlaceholder": "Search by contract reference or title…",
+    "itemLabel": "enrollments",
+    "columns": {
+      "contract": "Contract",
+      "period": "Enrollment period",
+      "billingInterval": "Billing cycle",
+      "status": "Contract status",
+      "invoice": "Latest invoice",
+      "paymentTerms": "Payment terms"
+    },
+    "invoiceNone": "No invoice yet",
+    "paymentTermsValue": "{days} days",
+    "paymentTermsPerTrip": "Per trip",
+    "empty": {
+      "title": "No contract enrollments",
+      "description": "Contract billing periods appear here after dispatch confirms a contract ride request.",
+      "searchDescription": "Try a different search term."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to your contracts is required to open this page.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    }
+  },
+  "customerInvoices": {
+    "eyebrow": "Billing",
+    "title": "My Invoices",
+    "description": "Review issued invoices, payment due dates, and trip line items.",
+    "searchPlaceholder": "Search by reference or contract…",
+    "itemLabel": "invoices",
+    "statusFilter": "Status",
+    "statusAll": "All statuses",
+    "stats": {
+      "totalTitle": "Total invoices",
+      "totalDescription": "All invoices issued to your account",
+      "outstandingTitle": "Outstanding",
+      "outstandingDescription": "Issued and awaiting payment",
+      "paidTitle": "Paid",
+      "paidDescription": "Invoices you have settled",
+      "overdueTitle": "Overdue",
+      "overdueDescription": "Past due and not yet paid"
+    },
+    "columns": {
+      "reference": "Reference",
+      "contract": "Contract",
+      "period": "Period",
+      "total": "Total",
+      "status": "Status",
+      "due": "Due date",
+      "actions": "Actions"
+    },
+    "status": {
+      "issued": "Issued",
+      "paid": "Paid",
+      "void": "Void"
+    },
+    "actions": {
+      "view": "View details",
+      "menuLabel": "Actions for {name}"
+    },
+    "empty": {
+      "title": "No invoices found",
+      "description": "Issued invoices for your contract trips will appear here.",
+      "searchDescription": "Try a different search term or clear the status filter."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to your invoices is required to open this page.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "detail": {
+      "back": "Back to invoices",
+      "summaryTitle": "Invoice summary",
+      "contractTitle": "Contract",
+      "periodTitle": "Billing period",
+      "paymentTermsTitle": "Payment terms",
+      "paymentTermsValue": "Net {days} days",
+      "issuedTitle": "Issued",
+      "dueTitle": "Due date",
+      "paidTitle": "Paid",
+      "voidedTitle": "Voided",
+      "notesTitle": "Notes",
+      "lineItemsTitle": "Trip line items",
+      "lineItemsDescription": "Completed trips included on this invoice.",
+      "lineItemTrip": "Trip",
+      "lineItemAmount": "Amount",
+      "lineItemCompleted": "Completed",
+      "subtotal": "Subtotal",
+      "total": "Total due",
+      "notFound": "Invoice not found."
+    },
+    "toast": {
+      "loadFailed": {
+        "title": "Could not load invoice",
+        "description": "Please try again or refresh the page."
+      }
     }
   },
   "adminDashboard": {
@@ -905,6 +1046,8 @@
       "assignment": "Assigned",
       "status": "Status",
       "submitted": "Submitted",
+      "contract": "Billing",
+      "oneTimeBilling": "One-time",
       "actions": "Actions"
     },
     "empty": {
@@ -983,7 +1126,17 @@
       "assigning": "Assigning...",
       "unassign": "Remove assignment",
       "unassigning": "Removing...",
-      "startTripScheduleBlocked": "Trip can start after the scheduled pickup time ({time})."
+      "startTripScheduleBlocked": "Trip can start after the scheduled pickup time ({time}).",
+      "contractSection": "Billing contract",
+      "contractSectionDescription": "Link this trip to an active contract. Any customer can use an open agreement once their trip is linked.",
+      "contractLabel": "Contract",
+      "contractPlaceholder": "Select a contract",
+      "contractNone": "No contract",
+      "contractStatus": "Contract status",
+      "contractSave": "Save contract link",
+      "contractSaving": "Saving...",
+      "contractSaved": "Contract link updated.",
+      "contractSaveFailed": "Failed to update contract link."
     },
     "rejectModal": {
       "title": "Reject ride request?",
@@ -1494,6 +1647,10 @@
         "inspection": {
           "title": "Inspection compliance",
           "description": "Available for inspection due-soon and expired alert templates."
+        },
+        "invoices": {
+          "title": "Invoices & billing",
+          "description": "Available for invoice generated, due-soon, and overdue templates."
         }
       },
       "items": {
@@ -1542,6 +1699,23 @@
           "days_until_expiry": "Days until inspection expires",
           "days_overdue": "Days since inspection expired",
           "reference": "Short vehicle reference code"
+        },
+        "invoices": {
+          "invoice_reference": "Invoice reference number",
+          "contract_reference": "Contract reference number",
+          "contract_title": "Contract title",
+          "customer_name": "Customer full name",
+          "organization_name": "Organization name",
+          "billing_contact_name": "Billing contact name",
+          "period_start": "Billing period start date",
+          "period_end": "Billing period end date",
+          "total_amount": "Invoice total amount",
+          "currency": "Currency code",
+          "due_at": "Payment due date",
+          "days_until_due": "Days until payment is due",
+          "days_overdue": "Days since payment was due",
+          "payment_terms_days": "Contract payment terms in days",
+          "reference": "Invoice reference number"
         }
       }
     },
@@ -1612,6 +1786,9 @@
       },
       "inspection": {
         "compliance": "Inspection alerts"
+      },
+      "invoices": {
+        "billing": "Invoice billing"
       }
     },
     "channels": {
@@ -1640,6 +1817,10 @@
       "inspection": {
         "title": "Inspection compliance",
         "description": "Alerts sent when vehicle inspection is approaching expiry or already expired."
+      },
+      "invoices": {
+        "title": "Invoices & billing",
+        "description": "Messages sent when invoices are generated, due soon, or overdue."
       }
     },
     "events": {
@@ -1705,6 +1886,20 @@
         "expired": {
           "title": "Inspection expired",
           "description": "Sent when a vehicle inspection certificate has passed its expiry date."
+        }
+      },
+      "invoices": {
+        "generated": {
+          "title": "Invoice generated",
+          "description": "Sent when a contract invoice is automatically or manually issued."
+        },
+        "due_soon": {
+          "title": "Payment due soon",
+          "description": "Sent when an issued invoice is approaching its due date."
+        },
+        "overdue": {
+          "title": "Payment overdue",
+          "description": "Sent when an issued invoice has passed its due date."
         }
       }
     },
@@ -1777,7 +1972,8 @@
       "ride_requests": "Ride requests",
       "user_registrations": "User registrations",
       "insurance": "Insurance compliance",
-      "inspection": "Inspection compliance"
+      "inspection": "Inspection compliance",
+      "invoices": "Invoices & billing"
     },
     "recipientLabels": {
       "requester": "Customer",
@@ -3140,6 +3336,304 @@
       "loadFailed": {
         "title": "Load failed",
         "description": "Could not load the fare plan."
+      }
+    }
+  },
+  "adminContracts": {
+    "eyebrow": "Billing",
+    "title": "Contracts",
+    "description": "Manage open commercial agreements and their operational scope.",
+    "searchPlaceholder": "Search by reference or title...",
+    "newContract": "New contract",
+    "itemLabel": "contract",
+    "openAgreement": "Open agreement",
+    "participantCount": "{count} customers",
+    "linkedTripCount": "{count} linked trips",
+    "noLinkedTripsYet": "No linked trips yet",
+    "noTermYet": "Pending linked trips",
+    "allCustomers": "All customers",
+    "allRegions": "All regions",
+    "allVehicleTypes": "All vehicle types",
+    "allVehicleClasses": "All vehicle classes",
+    "noFarePlan": "No linked fare plan",
+    "columns": {
+      "reference": "Reference",
+      "title": "Title",
+      "participants": "Participants",
+      "customer": "Customer",
+      "term": "Term",
+      "farePlan": "Fare plan",
+      "trips": "Trips",
+      "status": "Status",
+      "created": "Created",
+      "actions": "Actions"
+    },
+    "status": {
+      "draft": "Draft",
+      "active": "Active",
+      "expired": "Expired",
+      "cancelled": "Cancelled"
+    },
+    "segments": {
+      "individual": "Individual",
+      "business": "Business",
+      "government": "Government"
+    },
+    "empty": {
+      "title": "No contracts found",
+      "description": "Customer contracts will appear here once they are created.",
+      "searchDescription": "Try a different search term."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to contracts is required to open this page.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "actions": {
+      "view": "View details",
+      "edit": "Edit",
+      "delete": "Delete",
+      "menuLabel": "Actions for {name}"
+    },
+    "stats": {
+      "title": "Total contracts",
+      "description": "All customer agreements in the platform",
+      "activeTitle": "Active contracts",
+      "activeDescription": "Agreements currently in force",
+      "tripsTitle": "Linked trips",
+      "tripsDescription": "Ride requests billed to contracts"
+    },
+    "form": {
+      "createTitle": "New contract",
+      "editTitle": "Edit contract",
+      "createDescription": "Define agreement terms and operational scope.",
+      "editDescription": "Update contract terms and operational scope.",
+      "referenceNumber": "Reference number",
+      "referencePlaceholder": "Auto-generated if left blank",
+      "title": "Contract title",
+      "titlePlaceholder": "Ministry shuttle agreement",
+      "customer": "Customer account",
+      "customerPlaceholder": "Select a customer",
+      "status": "Status",
+      "termFromTripsHint": "Billing periods begin when dispatch accepts a ride request, using the scheduled pickup date when available.",
+      "startsAt": "Start date",
+      "endsAt": "End date",
+      "billingTitle": "Billing cycle",
+      "billingDescription": "Define how often the customer is invoiced under this contract.",
+      "billingInterval": "Billing interval",
+      "billingIntervalPlaceholder": "Select billing interval",
+      "paymentTermsDays": "Payment terms (days)",
+      "paymentTermsDaysPlaceholder": "e.g. 30",
+      "paymentTermsDaysHint": "Number of days after invoice date before payment is due.",
+      "pickDate": "Pick a date",
+      "clearDate": "Clear",
+      "today": "Today",
+      "farePlan": "Linked fare plan",
+      "farePlanDescription": "Optional default pricing applied to trips billed under this contract.",
+      "farePlanPlaceholder": "Select a fare plan",
+      "notes": "Notes",
+      "notesPlaceholder": "Commercial terms, billing notes, or internal remarks",
+      "scopeTitle": "Operational scope",
+      "scopeDescription": "Select the regions and vehicle preferences covered by this contract.",
+      "regions": "Regions",
+      "vehicleTypes": "Vehicle types",
+      "vehicleClasses": "Vehicle classes",
+      "optional": "(optional)",
+      "cancel": "Cancel",
+      "create": "Create contract",
+      "creating": "Creating...",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "loading": "Loading contract..."
+    },
+    "detail": {
+      "back": "Back to contracts",
+      "overview": "Agreement overview",
+      "scope": "Scope",
+      "linkedTrips": "Linked ride requests",
+      "linkedTripsDescription": "Trips assigned to this contract for billing and reporting.",
+      "noLinkedTrips": "No ride requests are linked to this contract yet.",
+      "participants": "Agreed customers",
+      "noParticipants": "No customers have linked ride requests to this contract yet.",
+      "customer": "Customer",
+      "segment": "Customer segment",
+      "organization": "Organization",
+      "term": "Contract term",
+      "termUnset": "Not set",
+      "customerTermHint": "After acceptance, billing starts on the scheduled pickup date when one is set; otherwise it starts on the acceptance date. The end date follows the billing cycle.",
+      "billingInterval": "Billing interval",
+      "paymentTerms": "Payment terms",
+      "paymentTermsValue": "Net {days} days",
+      "termFromTripsHint": "Billing periods begin when dispatch accepts a ride request, using the scheduled pickup date when available.",
+      "farePlan": "Fare plan",
+      "notes": "Notes",
+      "enrollments": "Customer enrollments",
+      "enrollmentsDescription": "Billing periods created when dispatch confirms ride requests under this contract.",
+      "noEnrollments": "No enrollments yet",
+      "noEnrollmentsDescription": "Enrollments appear here after dispatch confirms a customer's contract ride request.",
+      "enrollmentCustomer": "Customer",
+      "enrollmentTerm": "Billing period",
+      "enrollmentCreated": "Created",
+      "enrollmentActions": "Actions",
+      "generateInvoice": "Generate invoice",
+      "generateInvoiceIssue": "Generate & issue",
+      "generateInvoiceSuccess": "Invoice {reference} created.",
+      "generateInvoiceFailed": "Could not generate invoice."
+    },
+    "tripColumns": {
+      "customer": "Customer",
+      "status": "Status",
+      "route": "Route",
+      "scheduled": "Scheduled pickup",
+      "created": "Created"
+    },
+    "billingIntervals": {
+      "per_trip": "Per trip",
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "annually": "Annually"
+    },
+    "errors": {
+      "titleRequired": "Contract title is required.",
+      "customerRequired": "Customer account is required.",
+      "startsAtRequired": "Start date is required.",
+      "endsAtRequired": "End date is required.",
+      "dateRangeInvalid": "End date must be on or after the start date.",
+      "billingIntervalRequired": "Billing interval is required.",
+      "paymentTermsRequired": "Payment terms are required for this billing interval.",
+      "paymentTermsInvalid": "Payment terms must be between 1 and 365 days.",
+      "regionsRequired": "Select at least one region.",
+      "vehicleTypesRequired": "Select at least one vehicle type.",
+      "vehicleClassesRequired": "Select at least one vehicle class.",
+      "submitFailed": "Could not save the contract."
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "Contract created",
+        "description": "{title} was added successfully."
+      },
+      "updateSuccess": {
+        "title": "Contract updated",
+        "description": "{title} was saved successfully."
+      },
+      "deleteSuccess": {
+        "title": "Contract deleted",
+        "description": "{title} was removed."
+      },
+      "deleteFailed": {
+        "title": "Delete failed",
+        "description": "Could not delete the contract."
+      },
+      "loadFailed": {
+        "title": "Load failed",
+        "description": "Could not load the contract."
+      }
+    },
+    "deleteModal": {
+      "title": "Delete contract",
+      "description": "This permanently removes {title}. Contracts with linked ride requests cannot be deleted.",
+      "confirm": "Delete contract",
+      "cancel": "Cancel"
+    }
+  },
+  "adminInvoices": {
+    "eyebrow": "Billing",
+    "title": "Invoices",
+    "description": "Generate and manage contract invoices from completed trips.",
+    "searchPlaceholder": "Search by reference, contract, or customer...",
+    "itemLabel": "invoice",
+    "stats": {
+      "totalTitle": "Total invoices",
+      "totalDescription": "All invoices generated on the platform",
+      "draftTitle": "Drafts",
+      "draftDescription": "Generated but not yet issued",
+      "issuedTitle": "Outstanding",
+      "issuedDescription": "Issued and awaiting payment",
+      "paidTitle": "Paid",
+      "paidDescription": "Invoices settled by customers"
+    },
+    "columns": {
+      "reference": "Reference",
+      "contract": "Contract",
+      "customer": "Customer",
+      "period": "Period",
+      "total": "Total",
+      "status": "Status",
+      "due": "Due",
+      "actions": "Actions"
+    },
+    "status": {
+      "draft": "Draft",
+      "issued": "Issued",
+      "paid": "Paid",
+      "void": "Void"
+    },
+    "empty": {
+      "title": "No invoices found",
+      "description": "Invoices appear here after you generate them from a contract enrollment.",
+      "searchDescription": "Try a different search term."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to invoices is required to open this page.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "actions": {
+      "view": "View details",
+      "issue": "Issue",
+      "markPaid": "Mark paid",
+      "void": "Void",
+      "menuLabel": "Actions for {name}"
+    },
+    "detail": {
+      "back": "Back to invoices",
+      "summary": "Invoice summary",
+      "summaryDescription": "Billing period, payment terms, and totals.",
+      "lineItems": "Line items",
+      "lineItemsDescription": "Completed trips included on this invoice.",
+      "customer": "Bill to",
+      "contract": "Contract",
+      "period": "Billing period",
+      "paymentTerms": "Payment terms",
+      "paymentTermsValue": "Net {days} days",
+      "subtotal": "Subtotal",
+      "total": "Total",
+      "issuedAt": "Issued",
+      "dueAt": "Due date",
+      "paidAt": "Paid",
+      "notes": "Notes",
+      "tripRoute": "Route",
+      "tripAmount": "Amount",
+      "distance": "Distance",
+      "duration": "Duration",
+      "noLineItems": "No line items"
+    },
+    "toast": {
+      "issueSuccess": {
+        "title": "Invoice issued",
+        "description": "{reference} is now issued."
+      },
+      "markPaidSuccess": {
+        "title": "Invoice paid",
+        "description": "{reference} was marked as paid."
+      },
+      "voidSuccess": {
+        "title": "Invoice voided",
+        "description": "{reference} was voided."
+      },
+      "actionFailed": {
+        "title": "Action failed",
+        "description": "Could not update the invoice."
+      },
+      "loadFailed": {
+        "title": "Load failed",
+        "description": "Could not load the invoice."
       }
     }
   },

@@ -11,3 +11,5 @@ export const USER_DASHBOARD_PATH = "/dashboard";
 export const USER_PROFILE_PATH = "/dashboard/profile";
 export const USER_REQUESTS_PATH = "/dashboard/requests";
 export const USER_MY_REQUESTS_PATH = "/dashboard/my-requests";
+export const USER_MY_CONTRACTS_PATH = "/dashboard/my-contracts";
+export const USER_MY_INVOICES_PATH = "/dashboard/my-invoices";

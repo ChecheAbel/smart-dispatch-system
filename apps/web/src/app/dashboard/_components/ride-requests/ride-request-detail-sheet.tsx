@@ -30,6 +30,7 @@ import { adminHeadingClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
 import { isValidCoordinatePair } from "@/lib/map/coordinates";
 import {
   formatMessage,
+  getAdminContractsMessages,
   getCustomerRequestHistoryMessages,
   getCustomerRequestsMessages,
 } from "@/translations";
@@ -40,6 +41,9 @@ import {
   formatSubmittedAt,
   statusBadgeClass,
 } from "./ride-request-utils";
+import {
+  RideRequestContractSummaryCard,
+} from "./ride-request-contract-info";
 
 const LazyRideRequestRouteMap = dynamic(
   () =>
@@ -219,6 +223,7 @@ export function RideRequestDetailSheet({
 }: RideRequestDetailSheetProps) {
   const historyCopy = getCustomerRequestHistoryMessages(locale as "en" | "am");
   const requestCopy = getCustomerRequestsMessages(locale as "en" | "am");
+  const contractCopy = getAdminContractsMessages(locale as "en" | "am");
 
   const sheetTitle = title ?? historyCopy.detailTitle;
   const sheetDescription = description ?? historyCopy.detailDescription;
@@ -327,6 +332,24 @@ export function RideRequestDetailSheet({
                   <DetailRow label={requesterLabels.mobile} value={requester.mobile_number} />
                 </div>
               </div>
+            </DetailSection>
+          ) : null}
+
+          {request.contract ? (
+            <DetailSection title={historyCopy.detailContractSection} icon={FileText}>
+              <RideRequestContractSummaryCard
+                contract={request.contract}
+                billingIntervalLabels={contractCopy.billingIntervals}
+                contractStatusLabels={contractCopy.status}
+                pending={request.status === "pending"}
+                labels={{
+                  reference: historyCopy.detailContractReference,
+                  title: historyCopy.detailContractTitle,
+                  billingInterval: historyCopy.detailContractBillingInterval,
+                  status: historyCopy.detailContractStatus,
+                  pendingHint: historyCopy.contractPendingHint,
+                }}
+              />
             </DetailSection>
           ) : null}
 

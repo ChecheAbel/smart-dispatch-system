@@ -94,7 +94,26 @@
     "title": "ጉዞ ጠይቅ",
     "description": "እንዴት እንደሚወሰዱ እና ወዴት እንደሚሄዱ ይንገሩን። የዲስፓች ቡድናችን ያስተውላል እና ተሽከርካሪ ይመድባል።",
     "formTitle": "አዲስ የጉዞ ጥያቄ",
-    "formDescription": "የጉዞ ዝርዝሮችዎን ከታች ይሙሉ። የተላኩ ጥያቄዎች በታች ባለው ዝርዝር ውስጥ ማየት ይችላሉ።",
+    "formDescription": "ጥያቄዎን ለመላክ እያንዳንዱን ደረጃ ያጠናቅቁ።",
+    "stepProgress": "ደረጃ {current} ከ {total}",
+    "stepBilling": "ክፍያ",
+    "stepRoute": "መስመር",
+    "stepTrip": "የጉዞ ዝርዝሮች",
+    "stepNotes": "ግምገማ እና ማስገባት",
+    "back": "ተመለስ",
+    "next": "ቀጥል",
+    "sectionBilling": "ይህ ጉዞ እንዴት ይከፈላል?",
+    "sectionBillingDescription": "አንድ ጊዜ ክፍያ ወይም ንቁ ውል ስር ይክፈሉ። የሚመጣው ውል ከጉዞ ዝርዝሮችዎ በራስ-ሰር ይመረጣል።",
+    "billingOneTime": "አንድ ጊዜ ጉዞ",
+    "billingOneTimeDescription": "በመደበኛ ዋጋ የሚከፈል ጉዞ።",
+    "billingContract": "በውል ስር",
+    "billingContractDescription": "ጉዞዎን ከክልል፣ የተሽከርካሪ አይነት እና ክፍል ጋር የሚዛመድ ንቁ ውል ጋር እናገናኛለን።",
+    "contractAutoMatchPending": "ከእነዚህ ጉዞ ዝርዝሮች ጋር የሚዛመድ ንቁ ውል የለም።",
+    "contractMatched": "ይህ ጉዞ በ {reference} · {title} ውል ስር ይከፈላል።",
+    "contractActiveTerm": "የአሁኑ የክፍያ ጊዜ፦ {term}።",
+    "contractProjectedTerm": "ከተቀበለ በኋላ የክፍያ ጊዜ፦ {term}።",
+    "contractTermStartsOnPickup": "ዲስፓች ጥያቄዎን ከተቀበለ በኋላ ክፍያ በታሰበው የመነሻ ቀን ይጀምራል።",
+    "contractTermStartsOnAcceptance": "ክፍያ ዲስፓች ጥያቄዎን በተቀበለበት ቀን ይጀምራል።",
     "sectionRoute": "የእርስዎ መስመር",
     "sectionRouteDescription": "የመውሰድ እና የመውረድ ነጥቦችዎን ይምረጡ። የተቀመጡ ቦታዎች በመጀመሪያ ይታያሉ።",
     "sectionTripDetails": "የጉዞ ዝርዝሮች",
@@ -110,6 +129,7 @@
     "pickupSavedLocation": "የተቀመጠ የመውሰድ ቦታ",
     "pickupSavedLocationPlaceholder": "የተቀመጠ የመውሰድ ነጥብ ይምረጡ",
     "pickupLocation": "የመውሰድ ነጥብ",
+    "pickupTag": "መውሰድ",
     "dropoffAddress": "የመውረድ አድራሻ",
     "dropoffAddressPlaceholder": "ለምሳሌ ቃዛንቺስ፣ ከመስቀል አደባባይ አቅራቢያ",
     "dropoffSavedLocation": "የተቀመጠ የመውረድ ቦታ",
@@ -181,14 +201,21 @@
       "dropoffRequired": "የመውረድ አድራሻ ያስፈልጋል።",
       "pickupSavedRequired": "የተቀመጠ የመውሰድ ቦታ ይምረጡ።",
       "dropoffSavedRequired": "የተቀመጠ የመውረድ ቦታ ይምረጡ።",
+      "dropoffSameAsPickup": "የመውረድ ቦታ ከመውሰድ ቦታ መለያየት አለበት።",
       "pickupCoordinatesRequired": "በካርታው ላይ የመውሰድ ነጥብ ይምረጡ።",
       "dropoffCoordinatesRequired": "በካርታው ላይ የመውረድ ነጥብ ይምረጡ።",
       "passengerCountInvalid": "በ1 እና 50 መካከል ትክክለኛ የተሳፋሪ ብዛት ያስገቡ።",
       "passengerExceedsCapacity": "የተሳፋሪ ብዛት ከተመረጠው የተሽከርካሪ አቅም ({capacity}) በላይ ነው።",
       "vehicleClassRequiresType": "የተሽከርካሪ ክፍል ከመምረጥዎ በፊት የተሽከርካሪ አይነት ይምረጡ።",
       "vehicleClassInvalid": "የተመረጠው የተሽከርካሪ ክፍል ለዚህ የተሽከርካሪ አይነት አይገኝም።",
+      "regionRequired": "ለየውል ክፍያ ክልል ያስፈልጋል።",
+      "vehicleTypeRequiredForContract": "ለየውል ክፍያ የተሽከርካሪ አይነት ያስፈልጋል።",
+      "vehicleClassRequiredForContract": "ለየውል ክፍያ የተሽከርካሪ ክፍል ያስፈልጋል።",
       "scheduledAtPast": "የመውሰድ ሰዓት በወደፊት መሆን አለበት።",
       "scheduledAtIncomplete": "የመውሰድ ቀን እና ሰዓት ሁለቱንም ይምረጡ፣ ወይም ሁለቱንም ባዶ ይተውት።",
+      "contractRequired": "ከክልልዎ እና የተሽከርካሪ ምርጫዎች ጋር የሚዛመድ ንቁ ውል የለም።",
+      "contractAmbiguous": "ከእነዚህ ጉዞ ዝርዝሮች ጋር ከአንድ በላይ ውሎች ይዛመዳሉ። ድጋፍን ያግኙ።",
+      "contractScopeMismatch": "የተመረጠው ውል ከጉዞ ዝርዝሮችዎ ጋር አይዛመድም።",
       "submitFailed": "የጉዞ ጥያቄ ማስገባት አልተሳካም።"
     },
     "toast": {
@@ -254,6 +281,12 @@
     "detailRejectionReason": "የመከልከል ምክንያት",
     "detailRejectionReasonHint": "ጥያቄው በተሰረዘበት ጊዜ በመላኪያ የቀረበ መልሳሽ።",
     "detailAssignmentSection": "የመላኪያ መመደብ",
+    "detailContractSection": "የውል ክፍያ",
+    "detailContractReference": "ማጣቀሻ",
+    "detailContractTitle": "ስምምነት",
+    "detailContractBillingInterval": "የክፍያ ዑደት",
+    "detailContractStatus": "የውል ሁኔታ",
+    "contractPendingHint": "የመላኪያ ፍቃድ በመጠባበቅ ላይ ነው። ይህ ጥያቄ ከተረጋገጠ በኋላ የውል ክፍያ ይጀምራል።",
     "detailAssignedVehicle": "የተመደበ ተሽከርካሪ",
     "detailAssignedDriver": "የተመደበ አሽከርካሪ",
     "detailAssignedDriverMobile": "የአሽከርካሪ ሞባይል",
@@ -284,6 +317,114 @@
     "toast": {
       "updated": "የጉዞ ጥያቄ በተሳካ ሁኔታ ተዘምኗል።",
       "cancelled": "የጉዞ ጥያቄ ተሰርዟል።"
+    }
+  },
+  "customerContracts": {
+    "eyebrow": "ክፍያ",
+    "title": "ኮንትራቶቼ",
+    "description": "ንቁ እና ያለፉ የኮንትራት መመዝገብ ጊዜያትዎን ይመልከቱ።",
+    "searchPlaceholder": "በኮንትራት ማጣቀሻ ወይም ርዕስ ይፈልጉ…",
+    "itemLabel": "መመዝገቦች",
+    "columns": {
+      "contract": "ኮንትራት",
+      "period": "የመመዝገብ ጊዜ",
+      "billingInterval": "የክፍያ ዑደት",
+      "status": "የኮንትራት ሁኔታ",
+      "invoice": "የቅርብ ጊዜ ደረሰኝ",
+      "paymentTerms": "የክፍያ ጊዜ"
+    },
+    "invoiceNone": "እስካሁን ደረሰኝ የለም",
+    "paymentTermsValue": "{days} ቀናት",
+    "paymentTermsPerTrip": "በጉዞ",
+    "empty": {
+      "title": "የኮንትራት መመዝገብ የለም",
+      "description": "የኮንትራት ጉዞ ጥያቄ ከተረጋገጠ በኋላ የክፍያ ጊዜያት እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የኮንትራት መመልከቻ ፈቃድ ያስፈልጋል።",
+      "sessionHint": "ፈቃዶች በቅርቡ ከተቀየሩ፣ ክፍለ ጊዜዎን ለማደስ እንደገና ይውጡና ይግቡ።",
+      "permissionNote": "መዳረሻ በ역할 ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ሂድ"
+    }
+  },
+  "customerInvoices": {
+    "eyebrow": "ክፍያ",
+    "title": "ደረሰኞቼ",
+    "description": "የተሰጡ ደረሰኞችን፣ የክፍያ መክፈያ ጊዜ እና የጉዞ ዝርዝሮችን ይመልከቱ።",
+    "searchPlaceholder": "በማጣቀሻ ወይም በኮንትራት ይፈልጉ…",
+    "itemLabel": "ደረሰኞች",
+    "statusFilter": "ሁኔታ",
+    "statusAll": "ሁሉም ሁኔታዎች",
+    "stats": {
+      "totalTitle": "ጠቅላላ ደረሰኞች",
+      "totalDescription": "ለመለያዎ የተሰጡ ደረሰኞች",
+      "outstandingTitle": "ያልተከፈሉ",
+      "outstandingDescription": "ተሰጥተው ክፍያ በመጠባበቅ ላይ",
+      "paidTitle": "ተከፍለዋል",
+      "paidDescription": "የተከፈሉ ደረሰኞች",
+      "overdueTitle": "ጊዜያቸው ያለፈ",
+      "overdueDescription": "የመክፈያ ጊዜያቸው ያለፈ እና አልተከፈሉም"
+    },
+    "columns": {
+      "reference": "ማጣቀሻ",
+      "contract": "ኮንትራት",
+      "period": "ጊዜ",
+      "total": "ጠቅላላ",
+      "status": "ሁኔታ",
+      "due": "የመክፈያ ጊዜ",
+      "actions": "ተግባሮች"
+    },
+    "status": {
+      "issued": "ተሰጥቷል",
+      "paid": "ተከፍሏል",
+      "void": "ተሰርዟል"
+    },
+    "actions": {
+      "view": "ዝርዝር ይመልከቱ",
+      "menuLabel": "ለ{name} ተግባሮች"
+    },
+    "empty": {
+      "title": "ደረሰኝ አልተገኘም",
+      "description": "ለኮንትራት ጉዞዎች የተሰጡ ደረሰኞች እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ ወይም የሁኔታ ማጣሪያውን ያጽዱ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የደረሰኝ መመልከቻ ፈቃድ ያስፈልጋል።",
+      "sessionHint": "ፈቃዶች በቅርቡ ከተቀየሩ፣ ክፍለ ጊዜዎን ለማደስ እንደገና ይውጡና ይግቡ።",
+      "permissionNote": "መዳረሻ በ역할 ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ሂድ"
+    },
+    "detail": {
+      "back": "ወደ ደረሰኞች ተመለስ",
+      "summaryTitle": "የደረሰኝ ማጠቃለያ",
+      "contractTitle": "ኮንትራት",
+      "periodTitle": "የክፍያ ጊዜ",
+      "paymentTermsTitle": "የክፍያ ጊዜ",
+      "paymentTermsValue": "Net {days} ቀናት",
+      "issuedTitle": "ተሰጥቷል",
+      "dueTitle": "የመክፈያ ጊዜ",
+      "paidTitle": "ተከፍሏል",
+      "voidedTitle": "ተሰርዟል",
+      "notesTitle": "ማስታወሻዎች",
+      "lineItemsTitle": "የጉዞ ዝርዝሮች",
+      "lineItemsDescription": "በዚህ ደረሰኝ ላይ የተካተቱ የተጠናቀቁ ጉዞዎች።",
+      "lineItemTrip": "ጉዞ",
+      "lineItemAmount": "መጠን",
+      "lineItemCompleted": "ተጠናቋል",
+      "subtotal": "ንዑስ ድምር",
+      "total": "ጠቅላላ የሚከፈል",
+      "notFound": "ደረሰኝ አልተገኘም።"
+    },
+    "toast": {
+      "loadFailed": {
+        "title": "ደረሰኝ መጫን አልተሳካም",
+        "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+      }
     }
   },
   "adminDashboard": {
@@ -905,6 +1046,8 @@
       "assignment": "የተመደበ",
       "status": "ሁኔታ",
       "submitted": "ተላከ",
+      "contract": "ክፍያ",
+      "oneTimeBilling": "አንድ ጊዜ",
       "actions": "እርምጃዎች"
     },
     "empty": {
@@ -983,7 +1126,17 @@
       "assigning": "በመመደብ ላይ…",
       "unassign": "መመደብ አስወግድ",
       "unassigning": "በማስወገድ ላይ…",
-      "startTripScheduleBlocked": "ጉዞው ከታቀደው የመውሰድ ጊዜ ({time}) በኋላ ሊጀመር ይችላል።"
+      "startTripScheduleBlocked": "ጉዞው ከታቀደው የመውሰድ ጊዜ ({time}) በኋላ ሊጀመር ይችላል።",
+      "contractSection": "የክፍያ ውል",
+      "contractSectionDescription": "ይህን ጉዞ ከንቁ ውል ጋር ያገናኙ። ጉዞው ከተገናኘ በኋላ ማንኛውም ደንበኛ ክፍት ስምምነት መጠቀም ይችላል።",
+      "contractLabel": "ውል",
+      "contractPlaceholder": "ውል ይምረጡ",
+      "contractNone": "ውል የለም",
+      "contractStatus": "የውል ሁኔታ",
+      "contractSave": "የውል አገናኝ አስቀምጥ",
+      "contractSaving": "በማስቀመጥ ላይ…",
+      "contractSaved": "የውል አገናኝ ተዘምኗል።",
+      "contractSaveFailed": "የውል አገናኝ ማዘመን አልተሳካም።"
     },
     "rejectModal": {
       "title": "የጉዞ ጥያቄ ይሰረዝ?",
@@ -1494,6 +1647,10 @@
         "inspection": {
           "title": "የፍተሻ ተገዢነት",
           "description": "ለፍተሻ መቀጠል ያለበት እና ጊዜው ያለፈበት ማስጠንቀቂያ አብነቶች ይገኛሉ።"
+        },
+        "invoices": {
+          "title": "ደረሰኞች እና ክፍያ",
+          "description": "ለደረሰኝ መፍጠር፣ የመክፈያ ጊዜ ሲቃረብ እና ጊዜው ሲያልፍ አብነቶች ይገኛሉ።"
         }
       },
       "items": {
@@ -1542,6 +1699,23 @@
           "days_until_expiry": "እስከ መጨረሻው የቀሩ ቀናት",
           "days_overdue": "ከመጨረሻው በኋላ የቀሩ ቀናት",
           "reference": "አጭር የተሽከርካሪ ማጣቀሻ ኮድ"
+        },
+        "invoices": {
+          "invoice_reference": "የደረሰኝ ማጣቀሻ",
+          "contract_reference": "የውል ማጣቀሻ",
+          "contract_title": "የውል ርዕስ",
+          "customer_name": "የደንበኛ ሙሉ ስም",
+          "organization_name": "የድርጅት ስም",
+          "billing_contact_name": "የክፍያ ተገናኝ ስም",
+          "period_start": "የክፍያ ጊዜ መጀመሪያ",
+          "period_end": "የክፍያ ጊዜ መጨረሻ",
+          "total_amount": "የደረሰኝ ጠቅላላ መጠን",
+          "currency": "የገንዘብ አይነት",
+          "due_at": "የመክፈያ ቀን",
+          "days_until_due": "እስከ መክፈያ የቀሩ ቀናት",
+          "days_overdue": "ከመክፈያ በኋላ የቀሩ ቀናት",
+          "payment_terms_days": "የክፍያ ውሎች በቀናት",
+          "reference": "የደረሰኝ ማጣቀሻ"
         }
       }
     },
@@ -1612,6 +1786,9 @@
       },
       "inspection": {
         "compliance": "የፍተሻ ማስጠንቀቂያዎች"
+      },
+      "invoices": {
+        "billing": "የደረሰኝ ክፍያ"
       }
     },
     "channels": {
@@ -1640,6 +1817,10 @@
       "inspection": {
         "title": "የፍተሻ ተገዢነት",
         "description": "የተሽከርካሪ ፍተሻ መጨረሻው ሲቃረብ ወይም ጊዜው ሲያልፍ የሚላኩ ማስጠንቀቂያዎች።"
+      },
+      "invoices": {
+        "title": "ደረሰኞች እና ክፍያ",
+        "description": "ደረሰኝ ሲፈጠር፣ የመክፈያ ጊዜ ሲቃረብ ወይም ጊዜው ሲያልፍ የሚላኩ መልዕክቶች።"
       }
     },
     "events": {
@@ -1705,6 +1886,20 @@
         "expired": {
           "title": "ፍተሻ ጊዜው አልፏል",
           "description": "የተሽከርካሪ ፍተሻ መጨረሻው ሲያልፍ ይላካል።"
+        }
+      },
+      "invoices": {
+        "generated": {
+          "title": "ደረሰኝ ተፈጥሯል",
+          "description": "የኮንትራት ደረሰኝ በራስ-ሰር ወይም በእጅ ሲወጣ ይላካል።"
+        },
+        "due_soon": {
+          "title": "መክፈያ ጊዜው ቀርቧል",
+          "description": "የወጣ ደረሰኝ የመክፈያ ጊዜው ሲቃረብ ይላካል።"
+        },
+        "overdue": {
+          "title": "መክፈያ ጊዜው አልፏል",
+          "description": "የወጣ ደረሰኝ የመክፈያ ጊዜው ሲያልፍ ይላካል።"
         }
       }
     },
@@ -1777,7 +1972,8 @@
       "ride_requests": "የጉዞ ጥያቄዎች",
       "user_registrations": "የተጠቃሚ ምዝገባዎች",
       "insurance": "የኢንሹራንስ ተገዢነት",
-      "inspection": "የፍተሻ ተገዢነት"
+      "inspection": "የፍተሻ ተገዢነት",
+      "invoices": "ደረሰኞች እና ክፍያ"
     },
     "recipientLabels": {
       "requester": "ደንበኛ",
@@ -3140,6 +3336,304 @@
       "loadFailed": {
         "title": "መጫን አልተሳካም",
         "description": "የክፍያ ዕቅዱን መጫን አልተቻለም።"
+      }
+    }
+  },
+  "adminContracts": {
+    "eyebrow": "ክፍያ",
+    "title": "ውሎች",
+    "description": "ክፍት የንግድ ስምምነቶችን እና የክወና ክልላቸውን ያስተዳድሩ።",
+    "searchPlaceholder": "በማጣቀሻ ወይም በርዕስ ይፈልጉ...",
+    "newContract": "አዲስ ውል",
+    "itemLabel": "ውል",
+    "openAgreement": "ክፍት ስምምነት",
+    "participantCount": "{count} ደንበኞች",
+    "linkedTripCount": "{count} የተገናኙ ጉዞዎች",
+    "noLinkedTripsYet": "እስካሁን የተገናኙ ጉዞዎች የሉም",
+    "noTermYet": "የተገናኙ ጉዞዎች በመጠባበቅ ላይ",
+    "allCustomers": "ሁሉም ደንበኞች",
+    "allRegions": "ሁሉም ክልሎች",
+    "allVehicleTypes": "ሁሉም የተሽከርካሪ አይነቶች",
+    "allVehicleClasses": "ሁሉም የተሽከርካሪ ክፍሎች",
+    "noFarePlan": "የተገናኘ የክፍያ ዕቅድ የለም",
+    "columns": {
+      "reference": "ማጣቀሻ",
+      "title": "ርዕስ",
+      "participants": "ተሳታፊዎች",
+      "customer": "ደንበኛ",
+      "term": "ጊዜ",
+      "farePlan": "የክፍያ ዕቅድ",
+      "trips": "ጉዞዎች",
+      "status": "ሁኔታ",
+      "created": "ተፈጥሯል",
+      "actions": "እርምጃዎች"
+    },
+    "status": {
+      "draft": "ረቂቅ",
+      "active": "ንቁ",
+      "expired": "ጊዜው አልፏል",
+      "cancelled": "ተሰርዟል"
+    },
+    "segments": {
+      "individual": "ግለሰብ",
+      "business": "ንግድ",
+      "government": "መንግስት"
+    },
+    "empty": {
+      "title": "ምንም ውል አልተገኘም",
+      "description": "የደንበኛ ውሎች ከተፈጠሩ በኋላ እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፍቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የውሎችን ለማየት ፍቃድ ያስፈልጋል።",
+      "sessionHint": "ፍቃዶች ቅርብ ጊዜ ከተቀየሩ፣ ክፍለ ጊዜዎን ለማደስ ይውጡና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፍቃዶች ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
+    "actions": {
+      "view": "ዝርዝር ይመልከቱ",
+      "edit": "አርትዕ",
+      "delete": "ሰርዝ",
+      "menuLabel": "ለ {name} እርምጃዎች"
+    },
+    "stats": {
+      "title": "ጠቅላላ ውሎች",
+      "description": "በመድረኩ ላይ ያሉ ሁሉም የደንበኛ ስምምነቶች",
+      "activeTitle": "ንቁ ውሎች",
+      "activeDescription": "አሁን በአገልግሎት ላይ ያሉ ስምምነቶች",
+      "tripsTitle": "የተገናኙ ጉዞዎች",
+      "tripsDescription": "ለውሎች የተመደቡ የጉዞ ጥያቄዎች"
+    },
+    "form": {
+      "createTitle": "አዲስ ውል",
+      "editTitle": "ውል አርትዕ",
+      "createDescription": "የስምምነት ውሎችን እና የክወና ክልልን ይግለጹ። የመጀመሪያ እና የመጨረሻ ቀኖች ከተገናኙ የጉዞ ጥያቄዎች በራስ-ሰር ይሞላሉ።",
+      "editDescription": "የውል ውሎችን እና የክወና ክልልን ያዘምኑ።",
+      "referenceNumber": "ማጣቀሻ ቁጥር",
+      "referencePlaceholder": "ባዶ ከቀረ በራስ-ሰር ይፈጠራል",
+      "title": "የውል ርዕስ",
+      "titlePlaceholder": "የሚኒስትሪ የመጓዝ ስምምነት",
+      "customer": "የደንበኛ መለያ",
+      "customerPlaceholder": "ደንበኛ ይምረጡ",
+      "status": "ሁኔታ",
+      "termFromTripsHint": "የክፍያ ጊዜዎች ዲስፓች የጉዞ ጥያቄ ሲቀበል ይጀምራሉ፤ ታሰቢያ ቀን ካለ የመነሻ ቀኑን ይጠቀማሉ።",
+      "startsAt": "የመጀመሪያ ቀን",
+      "endsAt": "የመጨረሻ ቀን",
+      "billingTitle": "የክፍያ ዑደት",
+      "billingDescription": "ደንበኛው በዚህ ውል ስር ምን ያህል ብዙ ጊዜ እንደሚከፈል ይግለጹ።",
+      "billingInterval": "የክፍያ ዑደት",
+      "billingIntervalPlaceholder": "የክፍያ ዑደት ይምረጡ",
+      "paymentTermsDays": "የክፍያ ውሎች (ቀናት)",
+      "paymentTermsDaysPlaceholder": "ለምሳሌ 30",
+      "paymentTermsDaysHint": "ከደረሰኝ ቀን በኋላ ክፍያ እስኪከፈል ያለው ቀን ብዛት።",
+      "pickDate": "ቀን ይምረጡ",
+      "clearDate": "አጽዳ",
+      "today": "ዛሬ",
+      "farePlan": "የተገናኘ የክፍያ ዕቅድ",
+      "farePlanDescription": "በዚህ ውል ስር ለሚከፈሉ ጉዞዎች አማራጭ ነባሪ ዋጋ።",
+      "farePlanPlaceholder": "የክፍያ ዕቅድ ይምረጡ",
+      "notes": "ማስታወሻዎች",
+      "notesPlaceholder": "የንግድ ውሎች፣ የክፍያ ማስታወሻዎች ወይም ውስጣዊ ማስታወሻዎች",
+      "scopeTitle": "የክወና ክልል",
+      "scopeDescription": "በዚህ ውል ስር ለሚሸፍኑ ክልሎች እና የተሽከርካሪ ምርጫዎች ይምረጡ።",
+      "regions": "ክልሎች",
+      "vehicleTypes": "የተሽከርካሪ አይነቶች",
+      "vehicleClasses": "የተሽከርካሪ ክፍሎች",
+      "optional": "(አማራጭ)",
+      "cancel": "ሰርዝ",
+      "create": "ውል ፍጠር",
+      "creating": "በመፍጠር ላይ...",
+      "save": "ለውጦችን አስቀምጥ",
+      "saving": "በማስቀመጥ ላይ...",
+      "loading": "ውል በመጫን ላይ..."
+    },
+    "detail": {
+      "back": "ወደ ውሎች ተመለስ",
+      "overview": "የስምምነት ማጠቃለያ",
+      "scope": "ክልል",
+      "linkedTrips": "የተገናኙ የጉዞ ጥያቄዎች",
+      "linkedTripsDescription": "ለክፍያ እና ሪፖርት ለዚህ ውል የተመደቡ ጉዞዎች።",
+      "noLinkedTrips": "እስካሁን ምንም የጉዞ ጥያቄ ከዚህ ውል ጋር አልተገናኘም።",
+      "participants": "የተስማሙ ደንበኞች",
+      "noParticipants": "እስካሁን ምንም ደንበኛ የጉዞ ጥያቄዎቹን ከዚህ ውል ጋር አልገናኘም።",
+      "customer": "ደንበኛ",
+      "segment": "የደንበኛ ክፍል",
+      "organization": "ድርጅት",
+      "term": "የውል ጊዜ",
+      "termUnset": "አልተዘጋጀም",
+      "customerTermHint": "ከተቀበለ በኋላ ክፍያ በታሰበው የመነሻ ቀን ይጀምራል፤ ቀን ካልተመረጠ በተቀበለበት ቀን ይጀምራል። የመጨረሻ ቀኑ ከየክፍያ ዑደት ይሰላል።",
+      "billingInterval": "የክፍያ ዑደት",
+      "paymentTerms": "የክፍያ ውሎች",
+      "paymentTermsValue": "ኔት {days} ቀናት",
+      "termFromTripsHint": "የክፍያ ጊዜዎች ዲስፓች የጉዞ ጥያቄ ሲቀበል ይጀምራሉ፤ ታሰቢያ ቀን ካለ የመነሻ ቀኑን ይጠቀማሉ።",
+      "farePlan": "የክፍያ ዕቅድ",
+      "notes": "ማስታወሻዎች",
+      "enrollments": "የደንበኛ ተሳትፎዎች",
+      "enrollmentsDescription": "ዲስፓች በዚህ ውል ስር የጉዞ ጥያቄ ሲያረጋግጥ የሚፈጠሩ የክፍያ ጊዜዎች።",
+      "noEnrollments": "እስካሁን ተሳትፎ የለም",
+      "noEnrollmentsDescription": "ዲስፓች የደንበኛውን የውል ጉዞ ጥያቄ ከረጋገጠ በኋላ ተሳትፎዎች እዚህ ይታያሉ።",
+      "enrollmentCustomer": "ደንበኛ",
+      "enrollmentTerm": "የክፍያ ጊዜ",
+      "enrollmentCreated": "ተፈጠረ",
+      "enrollmentActions": "ተግባሮች",
+      "generateInvoice": "ደረሰኝ ፍጠር",
+      "generateInvoiceIssue": "ፍጠር እና አውጣ",
+      "generateInvoiceSuccess": "ደረሰኝ {reference} ተፈጥሯል።",
+      "generateInvoiceFailed": "ደረሰኝ መፍጠር አልተሳካም።"
+    },
+    "tripColumns": {
+      "customer": "ደንበኛ",
+      "status": "ሁኔታ",
+      "route": "መንገድ",
+      "scheduled": "የታሰበ መነሻ",
+      "created": "ተፈጥሯል"
+    },
+    "billingIntervals": {
+      "per_trip": "በእያንዳንዱ ጉዞ",
+      "monthly": "ወርሃዊ",
+      "quarterly": "ሩብ ዓመታዊ",
+      "annually": "ዓመታዊ"
+    },
+    "errors": {
+      "titleRequired": "የውል ርዕስ ያስፈልጋል።",
+      "customerRequired": "የደንበኛ መለያ ያስፈልጋል።",
+      "startsAtRequired": "የመጀመሪያ ቀን ያስፈልጋል።",
+      "endsAtRequired": "የመጨረሻ ቀን ያስፈልጋል።",
+      "dateRangeInvalid": "የመጨረሻ ቀን ከመጀመሪያ ቀን በኋላ ወይም እኩል መሆን አለበት።",
+      "billingIntervalRequired": "የክፍያ ዑደት ያስፈልጋል።",
+      "paymentTermsRequired": "ለዚህ የክፍያ ዑደት የክፍያ ውሎች ያስፈልጋሉ።",
+      "paymentTermsInvalid": "የክፍያ ውሎች በ1 እና 365 ቀናት መካከል መሆን አለባቸው።",
+      "regionsRequired": "ቢያንስ አንድ ክልል ይምረጡ።",
+      "vehicleTypesRequired": "ቢያንስ አንድ የተሽከርካሪ አይነት ይምረጡ።",
+      "vehicleClassesRequired": "ቢያንስ አንድ የተሽከርካሪ ክፍል ይምረጡ።",
+      "submitFailed": "ውሉን ማስቀመጥ አልተቻለም።"
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "ውል ተፈጥሯል",
+        "description": "{title} በተሳካ ሁኔታ ታክሏል።"
+      },
+      "updateSuccess": {
+        "title": "ውል ተዘምኗል",
+        "description": "{title} በተሳካ ሁኔታ ተቀምጧል።"
+      },
+      "deleteSuccess": {
+        "title": "ውል ተሰርዟል",
+        "description": "{title} ተወግዷል።"
+      },
+      "deleteFailed": {
+        "title": "መሰረዝ አልተሳካም",
+        "description": "ውሉን መሰረዝ አልተቻለም።"
+      },
+      "loadFailed": {
+        "title": "መጫን አልተሳካም",
+        "description": "ውሉን መጫን አልተቻለም።"
+      }
+    },
+    "deleteModal": {
+      "title": "ውል ሰርዝ",
+      "description": "ይህ {title}ን ለዘለዓለም ያስወግዳል። የተገናኙ የጉዞ ጥያቄዎች ያሉት ውሎች ሊሰረዙ አይችሉም።",
+      "confirm": "ውል ሰርዝ",
+      "cancel": "ሰርዝ"
+    }
+  },
+  "adminInvoices": {
+    "eyebrow": "ክፍያ",
+    "title": "ደረሰኞች",
+    "description": "ከተጠናቀቁ ጉዞዎች የኮንትራት ደረሰኞችን ይፍጠሩ እና ያስተዳድሩ።",
+    "searchPlaceholder": "በማጣቀሻ፣ በውል ወይም በደንበኛ ፈልግ...",
+    "itemLabel": "ደረሰኝ",
+    "stats": {
+      "totalTitle": "ጠቅላላ ደረሰኞች",
+      "totalDescription": "በመድረኩ ላይ የተፈጠሩ ሁሉም ደረሰኞች",
+      "draftTitle": "ረቂቆች",
+      "draftDescription": "ተፈጥረዋል ግን ገና አልወጡም",
+      "issuedTitle": "ያልተከፈሉ",
+      "issuedDescription": "ወጥተዋል እና ክፍያ በመጠበቅ ላይ",
+      "paidTitle": "የተከፈሉ",
+      "paidDescription": "በደንበኞች የተከፈሉ ደረሰኞች"
+    },
+    "columns": {
+      "reference": "ማጣቀሻ",
+      "contract": "ውል",
+      "customer": "ደንበኛ",
+      "period": "ጊዜ",
+      "total": "ጠቅላላ",
+      "status": "ሁኔታ",
+      "due": "የመክፈያ ጊዜ",
+      "actions": "ተግባሮች"
+    },
+    "status": {
+      "draft": "ረቂቅ",
+      "issued": "ወጥቷል",
+      "paid": "ተከፍሏል",
+      "void": "ተሰርዟል"
+    },
+    "empty": {
+      "title": "ደረሰኝ አልተገኘም",
+      "description": "ከኮንትራት መመዝገቢያ ካደረሰኝ ከፈጠሩ በኋላ ደረሰኞች እዚህ ይታያሉ።",
+      "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የደረሰኝ መመልከቻ ፈቃድ ያስፈልጋል።",
+      "sessionHint": "ፈቃዶች ተቀይረው ከሆነ፣ ክፍያዎን ለማደስ ይውጡ እና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በ역할 ፈቃዶች ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ"
+    },
+    "actions": {
+      "view": "ዝርዝር ይመልከቱ",
+      "issue": "ያውጡ",
+      "markPaid": "ተከፍሏል ምልክት",
+      "void": "ሰርዝ",
+      "menuLabel": "ለ {name} ተግባሮች"
+    },
+    "detail": {
+      "back": "ወደ ደረሰኞች",
+      "summary": "የደረሰኝ ማጠቃለያ",
+      "summaryDescription": "የክፍያ ጊዜ፣ የመክፈያ ውሎች እና ጠቅላላዎች።",
+      "lineItems": "የመስመር ንጥሎች",
+      "lineItemsDescription": "በዚህ ደረሰኝ ላይ የተካተቱ የተጠናቀቁ ጉዞዎች።",
+      "customer": "ክፍያ ለ",
+      "contract": "ውል",
+      "period": "የክፍያ ጊዜ",
+      "paymentTerms": "የመክፈያ ውሎች",
+      "paymentTermsValue": "Net {days} ቀናት",
+      "subtotal": "ንዑስ ድምር",
+      "total": "ጠቅላላ",
+      "issuedAt": "ወጣ",
+      "dueAt": "የመክፈያ ቀን",
+      "paidAt": "ተከፍሏል",
+      "notes": "ማስታወሻዎች",
+      "tripRoute": "መስመር",
+      "tripAmount": "መጠን",
+      "distance": "ርቀት",
+      "duration": "ጊዜ",
+      "noLineItems": "መስመር ንጥሎች የሉም"
+    },
+    "toast": {
+      "issueSuccess": {
+        "title": "ደረሰኝ ወጥቷል",
+        "description": "{reference} አሁን ወጥቷል።"
+      },
+      "markPaidSuccess": {
+        "title": "ደረሰኝ ተከፍሏል",
+        "description": "{reference} እንደተከፈለ ምልክት ተደርጎበታል።"
+      },
+      "voidSuccess": {
+        "title": "ደረሰኝ ተሰርዟል",
+        "description": "{reference} ተሰርዟል።"
+      },
+      "actionFailed": {
+        "title": "ተግባር አልተሳካም",
+        "description": "ደረሰኙን ማዘመን አልተቻለም።"
+      },
+      "loadFailed": {
+        "title": "መጫን አልተሳካም",
+        "description": "ደረሰኙን መጫን አልተቻለም።"
       }
     }
   },

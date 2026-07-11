@@ -295,11 +295,60 @@ const USER_REGISTRATION_RULES: NotificationTemplateSeed[] = [
   },
 ];
 
+const INVOICE_RULES: NotificationTemplateSeed[] = [
+  {
+    module: "invoices",
+    event: "generated",
+    channel: "email",
+    recipient: "requester",
+    subject: "Invoice {invoice_reference} issued",
+    body: "Hello {customer_name}, invoice {invoice_reference} for contract {contract_title} ({contract_reference}) covering {period_start} to {period_end} has been issued. Total: {total_amount} {currency}. Payment due by {due_at}.",
+  },
+  {
+    module: "invoices",
+    event: "generated",
+    channel: "sms",
+    recipient: "requester",
+    body: "Smart Dispatch: invoice {invoice_reference} for {total_amount} {currency} is due by {due_at}.",
+  },
+  {
+    module: "invoices",
+    event: "due_soon",
+    channel: "email",
+    recipient: "requester",
+    subject: "Payment due soon: {invoice_reference}",
+    body: "Hello {customer_name}, invoice {invoice_reference} for {total_amount} {currency} is due on {due_at} ({days_until_due} days remaining). Contract: {contract_title}.",
+  },
+  {
+    module: "invoices",
+    event: "due_soon",
+    channel: "sms",
+    recipient: "requester",
+    body: "Smart Dispatch: invoice {invoice_reference} ({total_amount} {currency}) is due in {days_until_due} days ({due_at}).",
+  },
+  {
+    module: "invoices",
+    event: "overdue",
+    channel: "email",
+    recipient: "requester",
+    subject: "Overdue invoice: {invoice_reference}",
+    body: "Hello {customer_name}, invoice {invoice_reference} for {total_amount} {currency} was due on {due_at} and is now {days_overdue} days overdue. Contract: {contract_title}.",
+  },
+  {
+    module: "invoices",
+    event: "overdue",
+    channel: "sms",
+    recipient: "requester",
+    body: "Smart Dispatch: invoice {invoice_reference} is {days_overdue} days overdue. Amount {total_amount} {currency}.",
+  },
+];
+
 const DEFAULT_TEMPLATES = [
   ...RIDE_REQUEST_RULES,
   ...USER_REGISTRATION_RULES,
   ...INSURANCE_RULES,
   ...INSPECTION_RULES,
+  ...INVOICE_RULES,
 ];
 
 export async function ensureNotificationTemplates() {

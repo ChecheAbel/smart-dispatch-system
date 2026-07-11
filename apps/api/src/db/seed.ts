@@ -11,6 +11,7 @@ import { seedVehicleClasses } from "./seed-vehicle-classes";
 import { seedVehicleTypeClasses } from "./seed-vehicle-type-classes";
 import { seedVehicles } from "./seed-vehicles";
 import { seedFarePlans } from "./seed-fare-plans";
+import { seedBillingDemo, runClearBillingDemo } from "./seed-billing-demo";
 
 const DEFAULT_ROLES = [
   {
@@ -55,6 +56,8 @@ export const SEED_TARGETS = [
   "vehicles",
   "fare-plans",
   "admin",
+  "billing-demo",
+  "billing-demo-clear",
 ] as const;
 
 export type SeedTarget = (typeof SEED_TARGETS)[number];
@@ -120,6 +123,25 @@ const SEED_REGISTRY: Record<SeedTarget, SeedRunner> = {
     label: "admin user",
     run: seedAdminUser,
     deps: ["roles", "access"],
+  },
+  "billing-demo": {
+    label: "billing demo (customer, contracts, ride requests, invoices)",
+    run: seedBillingDemo,
+    deps: [
+      "roles",
+      "access",
+      "regions",
+      "locations",
+      "vehicle-types",
+      "vehicle-classes",
+      "vehicle-type-classes",
+      "fare-plans",
+    ],
+  },
+  "billing-demo-clear": {
+    label: "clear billing demo data",
+    run: runClearBillingDemo,
+    deps: [],
   },
 };
 

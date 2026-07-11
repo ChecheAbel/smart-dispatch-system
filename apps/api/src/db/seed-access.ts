@@ -46,6 +46,12 @@ const DEFAULT_PERMISSIONS = [
   { slug: "fare_plans.read", module: "fare_plans", action: "read", description: "View fare plans" },
   { slug: "fare_plans.write", module: "fare_plans", action: "write", description: "Create and update fare plans" },
   { slug: "fare_plans.delete", module: "fare_plans", action: "delete", description: "Delete fare plans" },
+  { slug: "contracts.read", module: "contracts", action: "read", description: "View customer contracts" },
+  { slug: "contracts.write", module: "contracts", action: "write", description: "Create and update customer contracts" },
+  { slug: "contracts.delete", module: "contracts", action: "delete", description: "Delete customer contracts" },
+  { slug: "invoices.read", module: "invoices", action: "read", description: "View invoices" },
+  { slug: "invoices.write", module: "invoices", action: "write", description: "Generate and manage invoices" },
+  { slug: "invoices.delete", module: "invoices", action: "delete", description: "Void invoices" },
   { slug: "ride_requests.read", module: "ride_requests", action: "read", description: "View customer ride requests in admin dispatch" },
   { slug: "ride_requests.write", module: "ride_requests", action: "write", description: "Approve, assign, start, complete, or reject ride requests" },
   { slug: "driver.vehicle", module: "driver", action: "vehicle", description: "Driver can get their assigned vehicle (GET /api/ride-requests/driver/vehicle)" },
@@ -57,6 +63,8 @@ const DEFAULT_PERMISSIONS = [
   { slug: "customer_profile.read", module: "customer_profile", action: "read", description: "View customer profile" },
   { slug: "customer_requests.read", module: "customer_requests", action: "read", description: "View and book ride requests" },
   { slug: "customer_requests.write", module: "customer_requests", action: "write", description: "Submit ride requests" },
+  { slug: "customer_contracts.read", module: "customer_contracts", action: "read", description: "View enrolled contracts in the customer portal" },
+  { slug: "customer_invoices.read", module: "customer_invoices", action: "read", description: "View issued invoices in the customer portal" },
 ] as const;
 
 const REMOVED_MENU_SLUGS = ["permissions", "endpoints", "registration-forms", "customer-portal", "customer-profile", "user", "notifications-email", "notifications-sms"] as const;
@@ -399,6 +407,28 @@ const DEFAULT_MENUS = [
     ],
   },
   {
+    slug: "contracts",
+    path: "/admin/billing/contracts",
+    icon: "file-text",
+    sortOrder: 20,
+    parentSlug: "billing",
+    translations: [
+      { locale: "en", label: "Contracts" },
+      { locale: "am", label: "ውሎች" },
+    ],
+  },
+  {
+    slug: "invoices",
+    path: "/admin/billing/invoices",
+    icon: "receipt-text",
+    sortOrder: 30,
+    parentSlug: "billing",
+    translations: [
+      { locale: "en", label: "Invoices" },
+      { locale: "am", label: "ደረሰኞች" },
+    ],
+  },
+  {
     slug: "customer-dashboard",
     path: "/dashboard",
     icon: "layout-dashboard",
@@ -429,6 +459,28 @@ const DEFAULT_MENUS = [
     translations: [
       { locale: "en", label: "My Requests" },
       { locale: "am", label: "ጥያቄዎቼ" },
+    ],
+  },
+  {
+    slug: "customer-contracts",
+    path: "/dashboard/my-contracts",
+    icon: "file-text",
+    sortOrder: 74,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "My Contracts" },
+      { locale: "am", label: "ኮንትራቶቼ" },
+    ],
+  },
+  {
+    slug: "customer-invoices",
+    path: "/dashboard/my-invoices",
+    icon: "receipt-text",
+    sortOrder: 75,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "My Invoices" },
+      { locale: "am", label: "ደረሰኞቼ" },
     ],
   },
 ] as const;
@@ -509,12 +561,29 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "fare_plans.create", method: "POST", path: "/api/fare-plans", description: "Create fare plan", permissionSlug: "fare_plans.write" },
   { slug: "fare_plans.update", method: "PATCH", path: "/api/fare-plans/:id", description: "Update fare plan", permissionSlug: "fare_plans.write" },
   { slug: "fare_plans.delete", method: "DELETE", path: "/api/fare-plans/:id", description: "Delete fare plan", permissionSlug: "fare_plans.delete" },
+  { slug: "contracts.list", method: "GET", path: "/api/contracts", description: "List customer contracts", permissionSlug: "contracts.read" },
+  { slug: "contracts.get", method: "GET", path: "/api/contracts/:id", description: "Get customer contract", permissionSlug: "contracts.read" },
+  { slug: "contracts.create", method: "POST", path: "/api/contracts", description: "Create customer contract", permissionSlug: "contracts.write" },
+  { slug: "contracts.update", method: "PATCH", path: "/api/contracts/:id", description: "Update customer contract", permissionSlug: "contracts.write" },
+  { slug: "contracts.delete", method: "DELETE", path: "/api/contracts/:id", description: "Delete customer contract", permissionSlug: "contracts.delete" },
+  { slug: "contracts.enrollments", method: "GET", path: "/api/contracts/:id/enrollments", description: "List contract enrollments", permissionSlug: "contracts.read" },
+  { slug: "invoices.list", method: "GET", path: "/api/invoices", description: "List invoices", permissionSlug: "invoices.read" },
+  { slug: "invoices.get", method: "GET", path: "/api/invoices/:id", description: "Get invoice", permissionSlug: "invoices.read" },
+  { slug: "invoices.generate", method: "POST", path: "/api/invoices/generate", description: "Generate invoice from contract enrollment or trip", permissionSlug: "invoices.write" },
+  { slug: "invoices.run_automation", method: "POST", path: "/api/invoices/run-automation", description: "Run invoice automation job manually", permissionSlug: "invoices.write" },
+  { slug: "invoices.issue", method: "POST", path: "/api/invoices/:id/issue", description: "Issue draft invoice", permissionSlug: "invoices.write" },
+  { slug: "invoices.mark_paid", method: "POST", path: "/api/invoices/:id/mark-paid", description: "Mark invoice as paid", permissionSlug: "invoices.write" },
+  { slug: "invoices.void", method: "POST", path: "/api/invoices/:id/void", description: "Void invoice", permissionSlug: "invoices.delete" },
   { slug: "ride_requests.form_options", method: "GET", path: "/api/ride-requests/form-options", description: "Ride request form options", permissionSlug: "customer_requests.read" },
   { slug: "ride_requests.list", method: "GET", path: "/api/ride-requests", description: "List ride requests", permissionSlug: "customer_requests.read" },
   { slug: "ride_requests.get", method: "GET", path: "/api/ride-requests/:id", description: "Get ride request", permissionSlug: "customer_requests.read" },
   { slug: "ride_requests.create", method: "POST", path: "/api/ride-requests", description: "Create ride request", permissionSlug: "customer_requests.write" },
   { slug: "ride_requests.update", method: "PATCH", path: "/api/ride-requests/:id", description: "Update ride request", permissionSlug: "customer_requests.write" },
   { slug: "ride_requests.cancel", method: "POST", path: "/api/ride-requests/:id/cancel", description: "Cancel ride request", permissionSlug: "customer_requests.write" },
+  { slug: "customer_billing.contract_enrollments.list", method: "GET", path: "/api/me/contract-enrollments", description: "List contract enrollments for current customer", permissionSlug: "customer_contracts.read" },
+  { slug: "customer_billing.contract_enrollments.get", method: "GET", path: "/api/me/contract-enrollments/:id", description: "Get contract enrollment for current customer", permissionSlug: "customer_contracts.read" },
+  { slug: "customer_billing.invoices.list", method: "GET", path: "/api/me/invoices", description: "List invoices for current customer", permissionSlug: "customer_invoices.read" },
+  { slug: "customer_billing.invoices.get", method: "GET", path: "/api/me/invoices/:id", description: "Get invoice for current customer", permissionSlug: "customer_invoices.read" },
   { slug: "ride_requests.driver_vehicle", method: "GET", path: "/api/ride-requests/driver/vehicle", description: "Get vehicle assigned to driver", permissionSlug: "driver.vehicle" },
   { slug: "ride_requests.driver_upcoming", method: "GET", path: "/api/ride-requests/driver/upcoming", description: "List upcoming trips for driver", permissionSlug: "driver.upcoming" },
   { slug: "ride_requests.driver_upcoming_ws", method: "GET", path: "SOCKET /api/ride-requests/driver/upcoming", description: "Live upcoming trips Socket.IO namespace for driver", permissionSlug: "driver.upcoming" },
@@ -657,7 +726,15 @@ async function seedUserRolePermissions() {
 
   const permissions = await prisma.permission.findMany({
     where: {
-      slug: { in: ["customer_dashboard.read", "customer_requests.read", "customer_requests.write"] },
+      slug: {
+        in: [
+          "customer_dashboard.read",
+          "customer_requests.read",
+          "customer_requests.write",
+          "customer_contracts.read",
+          "customer_invoices.read",
+        ],
+      },
     },
     orderBy: { slug: "asc" },
   });

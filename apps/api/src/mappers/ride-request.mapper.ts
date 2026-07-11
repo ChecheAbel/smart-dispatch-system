@@ -1,5 +1,5 @@
 import type { Prisma } from "../generated/prisma";
-import type { AdminRideRequest, RideRequest } from "@smart-dispatch/types";
+import type { AdminRideRequest, ContractBillingInterval, ContractStatus, RideRequest } from "@smart-dispatch/types";
 import {
   parseVehicleClassTranslationsMap,
   vehicleClassTranslationsMapToArray,
@@ -49,6 +49,7 @@ type DbRideRequest = {
   notes: string | null;
   status: RideRequest["status"];
   rejectionReason: string | null;
+  contractId: string | null;
   assignedVehicleId: string | null;
   assignedDriverUserId: string | null;
   assignedAt: Date | null;
@@ -120,6 +121,13 @@ type DbRideRequest = {
     lastName: string;
     email: string;
     mobileNumber: string;
+  } | null;
+  contract?: {
+    id: string;
+    referenceNumber: string;
+    title: string;
+    status: ContractStatus;
+    billingInterval: string;
   } | null;
 };
 
@@ -269,6 +277,16 @@ export function toPublicRideRequest(
     notes: rideRequest.notes,
     status: rideRequest.status,
     rejection_reason: rideRequest.rejectionReason,
+    contract_id: rideRequest.contractId,
+    contract: rideRequest.contract
+      ? {
+          id: rideRequest.contract.id,
+          reference_number: rideRequest.contract.referenceNumber,
+          title: rideRequest.contract.title,
+          status: rideRequest.contract.status as ContractStatus,
+          billing_interval: rideRequest.contract.billingInterval as ContractBillingInterval,
+        }
+      : null,
     assigned_vehicle_id: rideRequest.assignedVehicleId,
     assigned_vehicle: rideRequest.assignedVehicle
       ? {
