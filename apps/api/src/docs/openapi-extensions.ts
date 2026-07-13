@@ -301,6 +301,10 @@ export const extensionSchemas = {
         type: "string",
         enum: ["open", "in_progress", "completed", "cancelled"],
       },
+      location_type: {
+        type: "string",
+        enum: ["internal", "external"],
+      },
       title: { type: "string" },
       description: { type: "string", nullable: true },
       vendor: { type: "string", nullable: true },
@@ -358,6 +362,11 @@ export const extensionSchemas = {
             enum: ["open", "in_progress", "completed", "cancelled"],
             default: "open",
           },
+          location_type: {
+            type: "string",
+            enum: ["internal", "external"],
+            default: "external",
+          },
           title: { type: "string" },
           description: { type: "string", nullable: true },
           vendor: { type: "string", nullable: true },
@@ -380,6 +389,10 @@ export const extensionSchemas = {
           status: {
             type: "string",
             enum: ["open", "in_progress", "completed", "cancelled"],
+          },
+          location_type: {
+            type: "string",
+            enum: ["internal", "external"],
           },
           title: { type: "string" },
           description: { type: "string", nullable: true },
@@ -404,6 +417,11 @@ export const extensionSchemas = {
             type: "string",
             enum: ["open", "in_progress", "completed", "cancelled"],
             default: "open",
+          },
+          location_type: {
+            type: "string",
+            enum: ["internal", "external"],
+            default: "external",
           },
           title: {
             type: "string",
@@ -430,6 +448,10 @@ export const extensionSchemas = {
           status: {
             type: "string",
             enum: ["open", "in_progress", "completed", "cancelled"],
+          },
+          location_type: {
+            type: "string",
+            enum: ["internal", "external"],
           },
           title: { type: "string" },
           description: { type: "string", nullable: true },
@@ -461,6 +483,7 @@ export const extensionSchemas = {
         description: "Calculated as `total_cost / quantity_liters` when both values are present.",
       },
       fuel_type: { type: "string", enum: ["diesel", "petrol", "other"] },
+      location_type: { type: "string", enum: ["internal", "external"] },
       station_name: { type: "string", nullable: true },
       receipt_reference: { type: "string", nullable: true },
       source: { type: "string", enum: ["manual", "driver_app", "import"] },
@@ -505,6 +528,11 @@ export const extensionSchemas = {
         enum: ["diesel", "petrol", "other"],
         default: "diesel",
       },
+      location_type: {
+        type: "string",
+        enum: ["internal", "external"],
+        default: "external",
+      },
       station_name: { type: "string", description: "Fuel station or vendor name." },
       receipt_reference: { type: "string", nullable: true },
       notes: { type: "string", nullable: true },
@@ -518,6 +546,7 @@ export const extensionSchemas = {
       quantity_liters: { type: "number", minimum: 0 },
       total_cost: { type: "number", minimum: 0 },
       fuel_type: { type: "string", enum: ["diesel", "petrol", "other"] },
+      location_type: { type: "string", enum: ["internal", "external"] },
       station_name: { type: "string" },
       receipt_reference: { type: "string", nullable: true },
       notes: { type: "string", nullable: true },

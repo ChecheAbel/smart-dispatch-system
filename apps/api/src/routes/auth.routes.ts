@@ -191,35 +191,14 @@ export function registerAuthRoutes(app: Express) {
 
   app.post("/api/auth/token", async (req: Request, res: Response) => {
     try {
-      const grantType = typeof req.body?.grant_type === "string" ? req.body.grant_type : "";
+      const refreshToken = typeof req.body?.refresh_token === "string" ? req.body.refresh_token : "";
 
-      if (grantType === "password") {
-        const email = typeof req.body?.email === "string" ? req.body.email : "";
-        const password = typeof req.body?.password === "string" ? req.body.password : "";
-        const result = await loginWithPassword(email, password);
-
-        await recordAuditLog({
-          req,
-          actorUserId: result.user.id,
-          action: "login",
-          module: "auth",
-          entityType: "user",
-          entityId: result.user.id,
-          entityLabel: result.user.email,
-          summary: "User signed in",
-        });
-
-        return sendSuccess(res, result);
+      if (!refreshToken) {
+        return sendError(res, "Refresh token is required.", 400);
       }
 
-      if (grantType === "refresh_token") {
-        const refreshToken =
-          typeof req.body?.refresh_token === "string" ? req.body.refresh_token : "";
-        const result = await refreshAccessToken(refreshToken);
-        return sendSuccess(res, result);
-      }
-
-      return sendError(res, "Unsupported grant_type. Use 'password' or 'refresh_token'.", 400);
+      const result = await refreshAccessToken(refreshToken);
+      return sendSuccess(res, result);
     } catch (error) {
       return handleRouteError(res, error);
     }

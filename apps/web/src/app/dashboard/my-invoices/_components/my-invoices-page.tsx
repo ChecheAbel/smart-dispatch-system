@@ -31,7 +31,6 @@ import {
 import {
   adminBadgeGoldClass,
   adminBadgeSuccessClass,
-  adminFilterLabelClass,
   adminHeadingClass,
 } from "@/lib/admin-theme";
 import { USER_DASHBOARD_PATH } from "@/lib/auth-paths";
@@ -92,23 +91,24 @@ function StatusFilterSelect({
   ];
 
   return (
-    <div className="flex items-center gap-2">
-      <span className={adminFilterLabelClass}>{label}</span>
-      <Select value={value} onValueChange={(next) => onChange(next as StatusFilterValue)}>
-        <SelectTrigger className="h-9 w-[180px] bg-white">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent align="end">
-          <SelectGroup>
-            {options.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
-    </div>
+    <Select
+      items={options}
+      value={value}
+      onValueChange={(next) => onChange(next as StatusFilterValue)}
+    >
+      <SelectTrigger className="h-9 w-[180px] bg-white">
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent align="end">
+        <SelectGroup>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
   );
 }
 

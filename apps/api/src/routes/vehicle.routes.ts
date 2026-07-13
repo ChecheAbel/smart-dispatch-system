@@ -42,6 +42,8 @@ import {
   listVehicleMaintenanceLogs,
   parseVehicleFuelType,
   parseVehicleMaintenanceStatus,
+  parseMaintenanceLocationType,
+  parseFuelLocationType,
   updateVehicleFuelLog,
   updateVehicleMaintenanceLog,
 } from "../models/vehicle-ops.model";
@@ -341,6 +343,7 @@ router.post(
         type: req.body?.type,
       });
       const status = parseVehicleMaintenanceStatus(req.body?.status);
+      const locationType = parseMaintenanceLocationType(req.body?.location_type);
       const title = getString(req.body?.title);
 
       if (!workTypeId) {
@@ -351,10 +354,15 @@ router.post(
         return sendError(res, "Maintenance title is required.", 400);
       }
 
+      if (req.body?.location_type !== undefined && !locationType) {
+        return sendError(res, "A valid maintenance location type is required.", 400);
+      }
+
       const log = await createVehicleMaintenanceLog({
         vehicleId: vehicle.id,
         workTypeId,
         status,
+        locationType,
         title,
         description: getOptionalString(req.body?.description),
         vendor: getOptionalString(req.body?.vendor),
@@ -428,6 +436,7 @@ router.patch(
             })
           : undefined;
       const status = parseVehicleMaintenanceStatus(req.body?.status);
+      const locationType = parseMaintenanceLocationType(req.body?.location_type);
       const title = getOptionalString(req.body?.title);
 
       if (
@@ -443,6 +452,10 @@ router.patch(
         return sendError(res, "A valid maintenance status is required.", 400);
       }
 
+      if (req.body?.location_type !== undefined && !locationType) {
+        return sendError(res, "A valid maintenance location type is required.", 400);
+      }
+
       if (req.body?.title !== undefined && !title) {
         return sendError(res, "Maintenance title is required.", 400);
       }
@@ -450,6 +463,7 @@ router.patch(
       const log = await updateVehicleMaintenanceLog(existingLog.id, {
         workTypeId: workTypeId ?? undefined,
         status,
+        locationType,
         title: title ?? undefined,
         description: getOptionalString(req.body?.description),
         vendor: getOptionalString(req.body?.vendor),
@@ -557,6 +571,7 @@ router.post(
       const quantityLiters = parsePositiveQuantity(req.body?.quantity_liters);
       const loggedAt = parseLoggedAt(req.body?.logged_at) ?? new Date();
       const fuelType = parseVehicleFuelType(req.body?.fuel_type);
+      const locationType = parseFuelLocationType(req.body?.location_type);
 
       if (odometerKm === undefined) {
         return sendError(res, "A valid odometer reading (km) is required.", 400);
@@ -568,6 +583,10 @@ router.post(
 
       if (req.body?.fuel_type !== undefined && !fuelType) {
         return sendError(res, "A valid fuel type is required.", 400);
+      }
+
+      if (req.body?.location_type !== undefined && !locationType) {
+        return sendError(res, "A valid fuel location type is required.", 400);
       }
 
       const totalCost = parsePositiveQuantity(req.body?.total_cost);
@@ -588,6 +607,7 @@ router.post(
         quantityLiters,
         totalCost,
         fuelType,
+        locationType,
         stationName,
         receiptReference: getOptionalString(req.body?.receipt_reference),
         source: VehicleFuelLogSource.manual,
@@ -651,6 +671,8 @@ router.patch(
         req.body?.logged_at !== undefined ? parseLoggedAt(req.body.logged_at) : undefined;
       const fuelType =
         req.body?.fuel_type !== undefined ? parseVehicleFuelType(req.body.fuel_type) : undefined;
+      const locationType =
+        req.body?.location_type !== undefined ? parseFuelLocationType(req.body.location_type) : undefined;
 
       if (req.body?.odometer_km !== undefined && odometerKm === undefined) {
         return sendError(res, "A valid odometer reading (km) is required.", 400);
@@ -666,6 +688,10 @@ router.patch(
 
       if (req.body?.fuel_type !== undefined && !fuelType) {
         return sendError(res, "A valid fuel type is required.", 400);
+      }
+
+      if (req.body?.location_type !== undefined && !locationType) {
+        return sendError(res, "A valid fuel location type is required.", 400);
       }
 
       if (req.body?.total_cost !== undefined) {
@@ -688,6 +714,7 @@ router.patch(
         quantityLiters,
         totalCost: parseOptionalNumber(req.body?.total_cost),
         fuelType,
+        locationType,
         stationName: getOptionalString(req.body?.station_name),
         receiptReference: getOptionalString(req.body?.receipt_reference),
         notes: getOptionalString(req.body?.notes),

@@ -349,33 +349,18 @@ export const openApiSpec = {
     "/api/auth/token": {
       post: {
         tags: ["Auth"],
-        summary: "Issue or refresh tokens",
-        description:
-          "OAuth-style token endpoint. Use `grant_type: password` to sign in, or `grant_type: refresh_token` to rotate tokens.",
+        summary: "Refresh access token",
+        description: "Rotates the access token using a valid refresh token.",
         requestBody: {
           required: true,
           content: {
             "application/json": {
               schema: {
-                oneOf: [
-                  {
-                    type: "object",
-                    required: ["grant_type", "email", "password"],
-                    properties: {
-                      grant_type: { type: "string", enum: ["password"] },
-                      email: { type: "string", format: "email" },
-                      password: { type: "string", format: "password" },
-                    },
-                  },
-                  {
-                    type: "object",
-                    required: ["grant_type", "refresh_token"],
-                    properties: {
-                      grant_type: { type: "string", enum: ["refresh_token"] },
-                      refresh_token: { type: "string" },
-                    },
-                  },
-                ],
+                type: "object",
+                required: ["refresh_token"],
+                properties: {
+                  refresh_token: { type: "string" },
+                },
               },
             },
           },

@@ -4,6 +4,8 @@ import {
   VehicleFuelType,
   VehicleHistoryEventType,
   VehicleMaintenanceStatus,
+  MaintenanceLocationType,
+  FuelLocationType,
 } from "../generated/prisma";
 import { prisma } from "../db/prisma";
 
@@ -21,6 +23,7 @@ export type CreateVehicleMaintenanceInput = {
   nextDueAt?: Date | null;
   nextDueKm?: number | null;
   createdById?: string | null;
+  locationType?: MaintenanceLocationType;
 };
 
 export type UpdateVehicleMaintenanceInput = {
@@ -35,6 +38,7 @@ export type UpdateVehicleMaintenanceInput = {
   completedAt?: Date | null;
   nextDueAt?: Date | null;
   nextDueKm?: number | null;
+  locationType?: MaintenanceLocationType;
 };
 
 export type CreateVehicleHistoryEventInput = {
@@ -110,7 +114,7 @@ export async function countOpenVehicleMaintenance(vehicleId: string) {
 export async function listVehicleMaintenanceLogs(
   vehicleId: string,
   options?: { skip?: number; take?: number; status?: VehicleMaintenanceStatus },
-) {
+): Promise<Prisma.VehicleMaintenanceLogGetPayload<{ include: typeof maintenanceInclude }>[]> {
   return prisma.vehicleMaintenanceLog.findMany({
     where: {
       vehicleId,
@@ -135,14 +139,18 @@ export async function countVehicleMaintenanceLogs(
   });
 }
 
-export async function findVehicleMaintenanceLogById(id: string) {
+export async function findVehicleMaintenanceLogById(
+  id: string,
+): Promise<Prisma.VehicleMaintenanceLogGetPayload<{ include: typeof maintenanceInclude }> | null> {
   return prisma.vehicleMaintenanceLog.findUnique({
     where: { id },
     include: maintenanceInclude,
   });
 }
 
-export async function createVehicleMaintenanceLog(input: CreateVehicleMaintenanceInput) {
+export async function createVehicleMaintenanceLog(
+  input: CreateVehicleMaintenanceInput,
+): Promise<Prisma.VehicleMaintenanceLogGetPayload<{ include: typeof maintenanceInclude }>> {
   return prisma.vehicleMaintenanceLog.create({
     data: {
       vehicleId: input.vehicleId,
@@ -158,12 +166,16 @@ export async function createVehicleMaintenanceLog(input: CreateVehicleMaintenanc
       nextDueAt: input.nextDueAt ?? null,
       nextDueKm: input.nextDueKm ?? null,
       createdById: input.createdById ?? null,
+      locationType: input.locationType ?? MaintenanceLocationType.external,
     },
     include: maintenanceInclude,
   });
 }
 
-export async function updateVehicleMaintenanceLog(id: string, input: UpdateVehicleMaintenanceInput) {
+export async function updateVehicleMaintenanceLog(
+  id: string,
+  input: UpdateVehicleMaintenanceInput,
+): Promise<Prisma.VehicleMaintenanceLogGetPayload<{ include: typeof maintenanceInclude }>> {
   return prisma.vehicleMaintenanceLog.update({
     where: { id },
     data: {
@@ -178,6 +190,7 @@ export async function updateVehicleMaintenanceLog(id: string, input: UpdateVehic
       completedAt: input.completedAt,
       nextDueAt: input.nextDueAt,
       nextDueKm: input.nextDueKm,
+      locationType: input.locationType,
     },
     include: maintenanceInclude,
   });
@@ -188,6 +201,14 @@ export function parseVehicleMaintenanceStatus(value: unknown): VehicleMaintenanc
   const normalized = value.trim().toLowerCase();
   return Object.values(VehicleMaintenanceStatus).includes(normalized as VehicleMaintenanceStatus)
     ? (normalized as VehicleMaintenanceStatus)
+    : undefined;
+}
+
+export function parseMaintenanceLocationType(value: unknown): MaintenanceLocationType | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim().toLowerCase();
+  return Object.values(MaintenanceLocationType).includes(normalized as MaintenanceLocationType)
+    ? (normalized as MaintenanceLocationType)
     : undefined;
 }
 
@@ -202,6 +223,7 @@ export type CreateVehicleFuelLogInput = {
   quantityLiters: number;
   totalCost?: number | null;
   fuelType?: VehicleFuelType;
+  locationType?: FuelLocationType;
   stationName?: string | null;
   receiptReference?: string | null;
   source?: VehicleFuelLogSource;
@@ -215,6 +237,7 @@ export type UpdateVehicleFuelLogInput = {
   quantityLiters?: number;
   totalCost?: number | null;
   fuelType?: VehicleFuelType;
+  locationType?: FuelLocationType;
   stationName?: string | null;
   receiptReference?: string | null;
   notes?: string | null;
@@ -264,6 +287,7 @@ export async function createVehicleFuelLog(input: CreateVehicleFuelLogInput) {
       quantityLiters: input.quantityLiters,
       totalCost: input.totalCost ?? null,
       fuelType: input.fuelType ?? VehicleFuelType.diesel,
+      locationType: input.locationType ?? FuelLocationType.external,
       stationName: input.stationName?.trim() || null,
       receiptReference: input.receiptReference?.trim() || null,
       source: input.source ?? VehicleFuelLogSource.manual,
@@ -283,6 +307,7 @@ export async function updateVehicleFuelLog(id: string, input: UpdateVehicleFuelL
       quantityLiters: input.quantityLiters,
       totalCost: input.totalCost,
       fuelType: input.fuelType,
+      locationType: input.locationType,
       stationName: input.stationName === undefined ? undefined : input.stationName?.trim() || null,
       receiptReference:
         input.receiptReference === undefined
@@ -307,6 +332,14 @@ export function parseVehicleFuelLogSource(value: unknown): VehicleFuelLogSource 
   const normalized = value.trim().toLowerCase();
   return Object.values(VehicleFuelLogSource).includes(normalized as VehicleFuelLogSource)
     ? (normalized as VehicleFuelLogSource)
+    : undefined;
+}
+
+export function parseFuelLocationType(value: unknown): FuelLocationType | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim().toLowerCase();
+  return Object.values(FuelLocationType).includes(normalized as FuelLocationType)
+    ? (normalized as FuelLocationType)
     : undefined;
 }
 

@@ -73,8 +73,8 @@
       "requestsDescription": "Pending vehicle dispatch requests",
       "tripsTitle": "Trips in progress",
       "tripsDescription": "Live trips currently on the road",
-      "profileTitle": "Profile",
-      "profileDescription": "Account settings and preferences"
+      "invoicesTitle": "Unpaid invoices",
+      "invoicesDescription": "Invoices awaiting payment"
     },
     "comingSoonCharts": {
       "sectionTitle": "Activity insights",
@@ -3572,6 +3572,10 @@
     "description": "Generate and manage contract invoices from completed trips.",
     "searchPlaceholder": "Search by reference, contract, or customer...",
     "itemLabel": "invoice",
+    "filters": {
+      "status": "Status",
+      "statusAll": "All statuses"
+    },
     "stats": {
       "totalTitle": "Total invoices",
       "totalDescription": "All invoices generated on the platform",

@@ -367,6 +367,8 @@ export type VehicleMaintenanceType = string;
 
 export type VehicleMaintenanceStatus = "open" | "in_progress" | "completed" | "cancelled";
 
+export type MaintenanceLocationType = "internal" | "external";
+
 export interface MaintenanceWorkTypeTranslation {
   locale: string;
   name: string;
@@ -466,6 +468,7 @@ export interface VehicleMaintenanceLog {
   /** Slug alias of `work_type` for backward compatibility. */
   type: string;
   status: VehicleMaintenanceStatus;
+  location_type: MaintenanceLocationType;
   title: string;
   description: string | null;
   vendor: string | null;
@@ -488,6 +491,8 @@ export type VehicleFuelType = "diesel" | "petrol" | "other";
 
 export type VehicleFuelLogSource = "manual" | "driver_app" | "import";
 
+export type FuelLocationType = "internal" | "external";
+
 export interface VehicleFuelLog {
   id: string;
   vehicle_id: string;
@@ -497,6 +502,7 @@ export interface VehicleFuelLog {
   total_cost: number | null;
   price_per_liter: number | null;
   fuel_type: VehicleFuelType;
+  location_type: FuelLocationType;
   station_name: string | null;
   receipt_reference: string | null;
   source: VehicleFuelLogSource;

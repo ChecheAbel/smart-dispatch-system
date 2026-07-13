@@ -3,6 +3,8 @@ import type {
   VehicleFuelLog,
   VehicleHistoryEvent,
   VehicleMaintenanceLog,
+  MaintenanceLocationType,
+  FuelLocationType,
 } from "@smart-dispatch/types";
 import {
   toPublicMaintenanceWorkTypeSummary,
@@ -33,6 +35,7 @@ type DbMaintenanceLog = {
   vehicleId: string;
   workTypeId: string;
   status: VehicleMaintenanceLog["status"];
+  locationType: string;
   title: string;
   description: string | null;
   vendor: string | null;
@@ -70,6 +73,7 @@ export function toPublicVehicleMaintenanceLog(
     work_type: workType,
     type: workType.slug,
     status: log.status,
+    location_type: log.locationType as MaintenanceLocationType,
     title: log.title,
     description: log.description,
     vendor: log.vendor,
@@ -99,6 +103,7 @@ type DbFuelLog = {
   quantityLiters: Prisma.Decimal;
   totalCost: Prisma.Decimal | null;
   fuelType: VehicleFuelLog["fuel_type"];
+  locationType: string;
   stationName: string | null;
   receiptReference: string | null;
   source: VehicleFuelLog["source"];
@@ -151,6 +156,7 @@ export function toPublicVehicleFuelLog(
     total_cost: totalCost,
     price_per_liter: pricePerLiter,
     fuel_type: log.fuelType,
+    location_type: log.locationType as FuelLocationType,
     station_name: log.stationName,
     receipt_reference: log.receiptReference,
     source: log.source,

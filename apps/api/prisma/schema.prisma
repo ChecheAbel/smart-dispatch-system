@@ -462,6 +462,7 @@ model VehicleMaintenanceLog {
   vehicleId    String                    @map("vehicle_id") @db.Uuid
   workTypeId   String                    @map("work_type_id") @db.Uuid
   status       VehicleMaintenanceStatus  @default(open)
+  locationType MaintenanceLocationType   @default(external) @map("location_type")
   title        String                    @db.VarChar(200)
   description  String?                   @db.Text
   vendor       String?                   @db.VarChar(200)
@@ -482,6 +483,20 @@ model VehicleMaintenanceLog {
   @@index([status])
   @@index([workTypeId])
   @@map("vehicle_maintenance_logs")
+}
+
+enum MaintenanceLocationType {
+  internal
+  external
+
+  @@map("maintenance_location_type")
+}
+
+enum FuelLocationType {
+  internal
+  external
+
+  @@map("fuel_location_type")
 }
 
 enum VehicleFuelType {
@@ -508,6 +523,7 @@ model VehicleFuelLog {
   quantityLiters   Decimal              @map("quantity_liters") @db.Decimal(10, 2)
   totalCost        Decimal?             @map("total_cost") @db.Decimal(12, 2)
   fuelType         VehicleFuelType      @default(diesel) @map("fuel_type")
+  locationType     FuelLocationType     @default(external) @map("location_type")
   stationName      String?              @map("station_name") @db.VarChar(200)
   receiptReference String?              @map("receipt_reference") @db.VarChar(100)
   source           VehicleFuelLogSource @default(manual)

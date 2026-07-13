@@ -73,8 +73,8 @@
       "requestsDescription": "በመጠባበቅ ላይ ያሉ የተሽከርካሪ ጥያቄዎች",
       "tripsTitle": "በመንገድ ላይ ያሉ ጉዞዎች",
       "tripsDescription": "አሁን በመንገድ ላይ ያሉ ቀጥተኛ ጉዞዎች",
-      "profileTitle": "መገለጫ",
-      "profileDescription": "የመለያ ቅንብሮች እና ምርጫዎች"
+      "invoicesTitle": "ያልተከፈሉ ደረሰኞች",
+      "invoicesDescription": "ክፍያ የሚጠባበቁ ደረሰኞች"
     },
     "comingSoonCharts": {
       "sectionTitle": "የእንቅስቃሴ ግንዛቤ",
@@ -3572,6 +3572,10 @@
     "description": "ከተጠናቀቁ ጉዞዎች የኮንትራት ደረሰኞችን ይፍጠሩ እና ያስተዳድሩ።",
     "searchPlaceholder": "በማጣቀሻ፣ በውል ወይም በደንበኛ ፈልግ...",
     "itemLabel": "ደረሰኝ",
+    "filters": {
+      "status": "ሁኔታ",
+      "statusAll": "ሁሉም ሁኔታዎች"
+    },
     "stats": {
       "totalTitle": "ጠቅላላ ደረሰኞች",
       "totalDescription": "በመድረኩ ላይ የተፈጠሩ ሁሉም ደረሰኞች",

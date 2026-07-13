@@ -139,7 +139,14 @@ export function VehicleDetailMaintenanceTab({
                           <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-[#1C3A34]/[0.06] text-[#1C3A34]">
                             <TypeIcon className="size-3.5" />
                           </span>
-                          <span className="font-medium">{log.work_type.name}</span>
+                          <span className="flex flex-col">
+                            <span className="font-medium">{log.work_type.name}</span>
+                            <span className="text-[10px] text-slate-400 capitalize">
+                              {log.location_type === "internal"
+                                ? (locale === "am" ? "ውስጣዊ" : "Internal")
+                                : (locale === "am" ? "ውጫዊ" : "External")}
+                            </span>
+                          </span>
                         </span>
                       </td>
                       <td className="max-w-[12rem] px-4 py-2.5">
