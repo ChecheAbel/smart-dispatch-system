@@ -29,12 +29,12 @@ export default function Enterprises() {
     <section id="platform" className="bg-white py-16 sm:py-20 lg:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-10 sm:mb-14">
-          <p className="text-[#C9B87A] font-bold text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase mb-3">— Unified Platform —</p>
+          <p className="text-[#C9B87A] font-bold text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase mb-3">Unified Platform</p>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1C3A34] tracking-tight px-2">
             One System, Full Control
           </h2>
           <p className="mt-3 sm:mt-4 text-slate-500 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed px-2">
-            Every module is built in—booking through invoicing, all in one place.
+            Every module is built in, from booking through invoicing, all in one place.
           </p>
         </div>
 

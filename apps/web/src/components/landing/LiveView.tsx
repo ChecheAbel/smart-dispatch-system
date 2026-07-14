@@ -15,7 +15,7 @@ export default function LiveView() {
     <section id="live-view" className="bg-white py-16 sm:py-20 lg:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-10 sm:mb-14">
-          <p className="text-[#C9B87A] font-bold text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase mb-3">— Operations Console —</p>
+          <p className="text-[#C9B87A] font-bold text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase mb-3">Operations Console</p>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1C3A34] tracking-tight px-2">
             Your Dispatch Command Center
           </h2>
@@ -87,10 +87,10 @@ export default function LiveView() {
               {/* KPI strip */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                 {[
-                  { label: "Active Bookings", value: "47",   badge: "+8 today",  color: "emerald" },
-                  { label: "Trips in Progress", value: "23", badge: "On track", color: "blue" },
-                  { label: "Fleet Online", value: "86%", badge: "32 vehicles", color: "amber" },
-                  { label: "Revenue Today", value: "₿ 184K", badge: "↑ 12%", color: "green" },
+                  { label: "Active Requests", value: "47",   badge: "+8 today",  color: "emerald" },
+                  { label: "Active Trips", value: "23", badge: "On track", color: "blue" },
+                  { label: "Compliance Alerts", value: "16", badge: "Needs attention", color: "amber" },
+                  { label: "Revenue Today", value: "184K ETB", badge: "↑ 12%", color: "green" },
                 ].map((kpi) => (
                   <div key={kpi.label} className="bg-slate-50 border border-slate-100 rounded-xl p-3 sm:p-4">
                     <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider leading-tight">{kpi.label}</p>

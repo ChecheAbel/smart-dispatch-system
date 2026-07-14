@@ -325,10 +325,10 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
       <Button
         render={<Link href="/admin/fleet/vehicles" />}
         nativeButton={false}
-        variant="ghost"
-        className="-ml-1 h-9 max-w-full px-2 text-sm text-slate-600 hover:bg-[#1C3A34]/6 hover:text-[#1C3A34] sm:-ml-2 sm:text-base"
+        variant="outline"
+        className="inline-flex h-8 max-w-full items-center gap-2 rounded-full border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 shadow-sm hover:border-[#1C3A34]/20 hover:bg-[#1C3A34]/[0.03] hover:text-[#1C3A34] sm:h-9 sm:px-3.5"
       >
-        <ArrowLeft className="size-4 shrink-0" />
+        <ArrowLeft className="size-3.5 shrink-0" />
         <span className="truncate">{detail.backToList}</span>
       </Button>
 

@@ -64,6 +64,16 @@ const rideRequestInclude = {
   region: true,
   pickupLocation: true,
   dropoffLocation: true,
+  requester: {
+    select: {
+      id: true,
+      firstName: true,
+      middleName: true,
+      lastName: true,
+      email: true,
+      mobileNumber: true,
+    },
+  },
   assignedVehicle: {
     include: {
       vehicleType: true,
@@ -94,16 +104,6 @@ const rideRequestInclude = {
 
 const rideRequestAdminInclude = {
   ...rideRequestInclude,
-  requester: {
-    select: {
-      id: true,
-      firstName: true,
-      middleName: true,
-      lastName: true,
-      email: true,
-      mobileNumber: true,
-    },
-  },
   assignedVehicle: {
     include: {
       vehicleType: true,
@@ -256,6 +256,13 @@ export async function listRideRequestsForUser(
 export async function findRideRequestForUser(id: string, requesterUserId: string) {
   return prisma.rideRequest.findFirst({
     where: { id, requesterUserId },
+    include: rideRequestInclude,
+  });
+}
+
+export async function findRideRequestForDriver(id: string, driverUserId: string) {
+  return prisma.rideRequest.findFirst({
+    where: { id, assignedDriverUserId: driverUserId },
     include: rideRequestInclude,
   });
 }
@@ -466,6 +473,7 @@ export async function assignRideRequestAdmin(id: string, vehicleId: string) {
       assignedVehicleId: vehicleId,
       assignedDriverUserId: vehicle.assignedDriverUserId,
       assignedAt: new Date(),
+      status: "confirmed",
     },
     include: rideRequestAdminInclude,
   });
@@ -478,6 +486,7 @@ export async function unassignRideRequestAdmin(id: string) {
       assignedVehicleId: null,
       assignedDriverUserId: null,
       assignedAt: null,
+      status: "pending",
     },
     include: rideRequestAdminInclude,
   });
@@ -493,7 +502,7 @@ export async function updateRideRequestForUser(
     return null;
   }
 
-  if (!canEditRideRequest(existing.status)) {
+  if (!canEditRideRequest(existing.status, existing.createdAt)) {
     return { error: "This ride request can no longer be edited." as const };
   }
 

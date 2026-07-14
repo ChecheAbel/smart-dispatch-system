@@ -4,8 +4,8 @@ export type AdminRideRequestStatusAction = "confirm" | "reject" | "start" | "com
 
 const ADMIN_CONFIRM_FROM: RideRequestStatus[] = ["pending"];
 const ADMIN_REJECT_FROM: RideRequestStatus[] = ["pending", "confirmed"];
-const ADMIN_ASSIGN_FROM: RideRequestStatus[] = ["confirmed"];
-const ADMIN_UNASSIGN_FROM: RideRequestStatus[] = ["confirmed"];
+const ADMIN_ASSIGN_FROM: RideRequestStatus[] = ["pending", "confirmed"];
+const ADMIN_UNASSIGN_FROM: RideRequestStatus[] = ["pending", "confirmed"];
 const ADMIN_START_FROM: RideRequestStatus[] = ["confirmed"];
 const ADMIN_COMPLETE_FROM: RideRequestStatus[] = ["in_progress"];
 
@@ -111,4 +111,39 @@ export function validateAdminRideRequestStatusAction(
   }
 
   return null;
+}
+
+export type DriverRideRequestStatusAction = "start" | "complete";
+
+export function validateDriverRideRequestStatusAction(
+  status: RideRequestStatus,
+  action: DriverRideRequestStatusAction,
+  options?: { scheduledAt?: Date | null },
+): string | null {
+  if (action === "start") {
+    if (status !== "confirmed") {
+      return "Only confirmed ride requests can be started.";
+    }
+
+    if (isRideRequestScheduledInFuture(options?.scheduledAt)) {
+      return "This trip cannot be started before the scheduled pickup time.";
+    }
+  }
+
+  if (action === "complete" && status !== "in_progress") {
+    return "Only in-progress ride requests can be completed.";
+  }
+
+  return null;
+}
+
+export function getDriverRideRequestTargetStatus(
+  action: DriverRideRequestStatusAction,
+): RideRequestStatus {
+  switch (action) {
+    case "start":
+      return "in_progress";
+    case "complete":
+      return "completed";
+  }
 }

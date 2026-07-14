@@ -25,19 +25,16 @@ export type InvoiceAutomationResult = {
   errors: string[];
 };
 
-function getDueReminderDays() {
-  const parsed = Number.parseInt(process.env.INVOICE_DUE_REMINDER_DAYS ?? "3", 10);
-  return Number.isFinite(parsed) && parsed >= 0 ? parsed : 3;
-}
-
 function isAutomationError(error: unknown) {
   if (!(error instanceof Error)) {
     return true;
   }
 
-  return !["INVOICE_ALREADY_EXISTS", "NO_BILLABLE_TRIPS", "TRIP_ALREADY_INVOICED"].includes(
-    error.message,
-  );
+  return ![
+    "INVOICE_ALREADY_EXISTS",
+    "NO_BILLABLE_TRIPS",
+    "TRIP_ALREADY_INVOICED",
+  ].includes(error.message);
 }
 
 async function processEndedEnrollmentInvoices(result: InvoiceAutomationResult) {
@@ -56,7 +53,10 @@ async function processEndedEnrollmentInvoices(result: InvoiceAutomationResult) {
       queueInvoiceNotifications("generated", invoice.id);
     } catch (error) {
       if (isAutomationError(error)) {
-        const message = error instanceof Error ? error.message : "Unknown enrollment invoice error.";
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unknown enrollment invoice error.";
         result.errors.push(`Enrollment ${enrollment.id}: ${message}`);
       }
     }
@@ -73,7 +73,10 @@ async function processPerTripInvoices(result: InvoiceAutomationResult) {
       queueInvoiceNotifications("generated", invoice.id);
     } catch (error) {
       if (isAutomationError(error)) {
-        const message = error instanceof Error ? error.message : "Unknown per-trip invoice error.";
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Unknown per-trip invoice error.";
         result.errors.push(`Ride ${ride.id}: ${message}`);
       }
     }
@@ -96,7 +99,10 @@ async function notifyInvoices(
       await sendInvoiceNotifications(event, invoice.id);
       result[counterKey] += 1;
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown invoice reminder error.";
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unknown invoice reminder error.";
       result.errors.push(`Invoice ${invoice.referenceNumber}: ${message}`);
     }
   }
@@ -115,7 +121,7 @@ export async function runInvoiceAutomation(): Promise<InvoiceAutomationResult> {
   await processEndedEnrollmentInvoices(result);
   await processPerTripInvoices(result);
 
-  const dueSoonInvoices = await findDueSoonInvoices(getDueReminderDays());
+  const dueSoonInvoices = await findDueSoonInvoices();
   await notifyInvoices(dueSoonInvoices, "due_soon", result, "dueSoonNotified");
 
   const overdueInvoices = await findOverdueInvoices();
@@ -137,8 +143,13 @@ export async function tryAutoInvoiceCompletedTrip(rideRequestId: string) {
     return invoice;
   } catch (error) {
     if (isAutomationError(error)) {
-      const message = error instanceof Error ? error.message : "Unknown per-trip invoice error.";
-      console.error(`[InvoiceAutomation] Failed to auto-invoice trip ${ride.id}: ${message}`);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Unknown per-trip invoice error.";
+      console.error(
+        `[InvoiceAutomation] Failed to auto-invoice trip ${ride.id}: ${message}`,
+      );
     }
 
     return null;
@@ -150,16 +161,24 @@ export function isInvoiceAutomationEnabled() {
 }
 
 export function getInvoiceAutomationIntervalMs() {
-  const parsed = Number.parseInt(process.env.INVOICE_AUTOMATION_INTERVAL_MS ?? "3600000", 10);
+  const parsed = Number.parseInt(
+    process.env.INVOICE_AUTOMATION_INTERVAL_MS ?? "3600000",
+    10,
+  );
   return Number.isFinite(parsed) && parsed >= 60_000 ? parsed : 3_600_000;
 }
 
 export function getInvoiceAutomationStartupDelayMs() {
-  const parsed = Number.parseInt(process.env.INVOICE_AUTOMATION_STARTUP_DELAY_MS ?? "30000", 10);
+  const parsed = Number.parseInt(
+    process.env.INVOICE_AUTOMATION_STARTUP_DELAY_MS ?? "30000",
+    10,
+  );
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : 30_000;
 }
 
-export function formatInvoiceAutomationSummary(result: InvoiceAutomationResult) {
+export function formatInvoiceAutomationSummary(
+  result: InvoiceAutomationResult,
+) {
   const today = getUtcToday().toISOString().slice(0, 10);
   return `[InvoiceAutomation ${today}] enrollments=${result.enrollmentsInvoiced}/${result.enrollmentsChecked}, per_trip=${result.perTripInvoiced}, due_soon=${result.dueSoonNotified}, overdue=${result.overdueNotified}, errors=${result.errors.length}`;
 }

@@ -98,6 +98,15 @@ model RolePermission {
   @@map("role_permissions")
 }
 
+model AppSetting {
+  key        String   @id @db.VarChar(100)
+  value      Json     @db.JsonB
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("app_settings")
+}
+
 enum AccountStatus {
   active
   suspended
@@ -404,6 +413,8 @@ model Vehicle {
   year                     Int?
   status                   VehicleStatus @default(active)
   notes                    String?       @db.Text
+  photoUrl                 String?       @map("photo_url") @db.VarChar(500)
+  images                   String[]      @default([])
   insuranceProvider        String?       @map("insurance_provider") @db.VarChar(150)
   insurancePolicyNumber    String?       @map("insurance_policy_number") @db.VarChar(80)
   insuranceIssuedAt        DateTime?     @map("insurance_issued_at") @db.Date
@@ -462,7 +473,6 @@ model VehicleMaintenanceLog {
   vehicleId    String                    @map("vehicle_id") @db.Uuid
   workTypeId   String                    @map("work_type_id") @db.Uuid
   status       VehicleMaintenanceStatus  @default(open)
-  locationType MaintenanceLocationType   @default(external) @map("location_type")
   title        String                    @db.VarChar(200)
   description  String?                   @db.Text
   vendor       String?                   @db.VarChar(200)
@@ -483,20 +493,6 @@ model VehicleMaintenanceLog {
   @@index([status])
   @@index([workTypeId])
   @@map("vehicle_maintenance_logs")
-}
-
-enum MaintenanceLocationType {
-  internal
-  external
-
-  @@map("maintenance_location_type")
-}
-
-enum FuelLocationType {
-  internal
-  external
-
-  @@map("fuel_location_type")
 }
 
 enum VehicleFuelType {
@@ -523,7 +519,6 @@ model VehicleFuelLog {
   quantityLiters   Decimal              @map("quantity_liters") @db.Decimal(10, 2)
   totalCost        Decimal?             @map("total_cost") @db.Decimal(12, 2)
   fuelType         VehicleFuelType      @default(diesel) @map("fuel_type")
-  locationType     FuelLocationType     @default(external) @map("location_type")
   stationName      String?              @map("station_name") @db.VarChar(200)
   receiptReference String?              @map("receipt_reference") @db.VarChar(100)
   source           VehicleFuelLogSource @default(manual)

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { CircleDollarSign, Fuel, Gauge, Plus, Store } from "lucide-react";
-import type { Vehicle, VehicleFuelType, FuelLocationType } from "@smart-dispatch/types";
+import type { Vehicle, VehicleFuelType } from "@smart-dispatch/types";
 import { AdminDatePicker } from "@/components/shared/admin-date-picker";
 import { useLocale } from "@/components/shared/providers";
 import { Button } from "@/components/ui/button";
@@ -27,14 +27,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import {
   FUEL_TYPES,
@@ -60,7 +52,6 @@ type FuelFormState = {
   quantity_liters: string;
   total_cost: string;
   fuel_type: VehicleFuelType;
-  location_type: FuelLocationType;
   station_name: string;
   receipt_reference: string;
   notes: string;
@@ -73,7 +64,6 @@ function emptyFuelForm(): FuelFormState {
     quantity_liters: "",
     total_cost: "",
     fuel_type: "diesel",
-    location_type: "external",
     station_name: "",
     receipt_reference: "",
     notes: "",
@@ -97,28 +87,6 @@ export function CreateFuelSheet({
   const copy = getAdminVehiclesMessages(locale);
   const detail = copy.detail;
   const fuelCopy = detail.fuel;
-
-  const fuelTypeLabel = fuelCopy.fuelType;
-  const locationTypeLabel = locale === "am" ? "የነዳጅ መሙያ ቦታ" : "Location Type";
-  const internalLabel = locale === "am" ? "ውስጣዊ (Internal)" : "Internal";
-  const externalLabel = locale === "am" ? "ውጫዊ (External)" : "External";
-
-  const fuelTypeItems = useMemo(
-    () =>
-      FUEL_TYPES.map((type) => ({
-        label: detail.fuelTypes[type],
-        value: type,
-      })),
-    [detail.fuelTypes]
-  );
-
-  const locationTypeItems = useMemo(
-    () => [
-      { label: internalLabel, value: "internal" },
-      { label: externalLabel, value: "external" },
-    ],
-    [internalLabel, externalLabel]
-  );
 
   const [form, setForm] = useState<FuelFormState>(emptyFuelForm());
   const [fieldErrors, setFieldErrors] = useState<FuelFieldErrors>({});
@@ -182,7 +150,6 @@ export function CreateFuelSheet({
         quantity_liters: quantityLiters,
         total_cost: totalCost,
         fuel_type: form.fuel_type,
-        location_type: form.location_type,
         station_name: stationName,
         receipt_reference: form.receipt_reference.trim() || null,
         notes: form.notes.trim() || null,
@@ -310,67 +277,33 @@ export function CreateFuelSheet({
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="fuel-sheet-type" className="text-sm font-semibold text-slate-800">
-                    {fuelTypeLabel}
-                  </Label>
-                  <Select
-                    items={fuelTypeItems}
-                    value={form.fuel_type}
-                    onValueChange={(value) =>
-                      updateForm((current) => ({
-                        ...current,
-                        fuel_type: (value ?? "diesel") as VehicleFuelType,
-                      }))
-                    }
-                    disabled={submitting}
-                  >
-                    <SelectTrigger
-                      id="fuel-sheet-type"
-                      className={cn(adminInputClass, "w-full bg-white text-left font-normal flex items-center justify-between")}
-                    >
-                      <SelectValue placeholder={fuelTypeLabel} />
-                    </SelectTrigger>
-                    <SelectContent side="bottom" align="start">
-                      <SelectGroup>
-                        {FUEL_TYPES.map((fuelType) => (
-                          <SelectItem key={fuelType} value={fuelType}>
+                <div className="space-y-3">
+                  <Label className="text-sm font-semibold text-slate-800">{fuelCopy.fuelType}</Label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {FUEL_TYPES.map((fuelType) => {
+                      const Icon = fuelTypeIcon(fuelType);
+                      const selected = form.fuel_type === fuelType;
+                      return (
+                        <button
+                          key={fuelType}
+                          type="button"
+                          disabled={submitting}
+                          onClick={() => updateForm((current) => ({ ...current, fuel_type: fuelType }))}
+                          className={cn(
+                            "flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-center transition",
+                            selected
+                              ? "border-[#1C3A34] bg-[#1C3A34] text-white shadow-sm"
+                              : "border-slate-200 bg-white text-slate-600 hover:border-[#1C3A34]/30 hover:bg-[#1C3A34]/[0.03]",
+                          )}
+                        >
+                          <Icon className="size-4 shrink-0" />
+                          <span className="text-[11px] font-medium leading-tight">
                             {detail.fuelTypes[fuelType]}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="fuel-sheet-location-type" className="text-sm font-semibold text-slate-800">
-                    {locationTypeLabel}
-                  </Label>
-                  <Select
-                    items={locationTypeItems}
-                    value={form.location_type}
-                    onValueChange={(value) =>
-                      updateForm((current) => ({
-                        ...current,
-                        location_type: (value ?? "external") as FuelLocationType,
-                      }))
-                    }
-                    disabled={submitting}
-                  >
-                    <SelectTrigger
-                      id="fuel-sheet-location-type"
-                      className={cn(adminInputClass, "w-full bg-white text-left font-normal flex items-center justify-between")}
-                    >
-                      <SelectValue placeholder={locationTypeLabel} />
-                    </SelectTrigger>
-                    <SelectContent side="bottom" align="start">
-                      <SelectGroup>
-                        <SelectItem value="internal">{internalLabel}</SelectItem>
-                        <SelectItem value="external">{externalLabel}</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div className="space-y-4 rounded-xl border border-slate-100 bg-slate-50/40 p-4">

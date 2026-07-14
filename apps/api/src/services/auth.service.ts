@@ -25,7 +25,7 @@ import {
   normalizeEthiopianMobileNumber,
 } from "../utils/validation";
 
-const ACCESS_TOKEN_TTL_SECONDS = 60 * 15;
+const ACCESS_TOKEN_TTL_SECONDS = 60;
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000;
 

@@ -73,8 +73,8 @@
       "requestsDescription": "በመጠባበቅ ላይ ያሉ የተሽከርካሪ ጥያቄዎች",
       "tripsTitle": "በመንገድ ላይ ያሉ ጉዞዎች",
       "tripsDescription": "አሁን በመንገድ ላይ ያሉ ቀጥተኛ ጉዞዎች",
-      "invoicesTitle": "ያልተከፈሉ ደረሰኞች",
-      "invoicesDescription": "ክፍያ የሚጠባበቁ ደረሰኞች"
+      "profileTitle": "መገለጫ",
+      "profileDescription": "የመለያ ቅንብሮች እና ምርጫዎች"
     },
     "comingSoonCharts": {
       "sectionTitle": "የእንቅስቃሴ ግንዛቤ",
@@ -275,6 +275,7 @@
     "detailCanEdit": "ማስተካከል ይቻላል",
     "detailCanCancel": "መሰረዝ ይቻላል",
     "detailCancelDeadline": "የመሰረዝ ጊዜ ገደብ",
+    "detailEditDeadline": "የማስተካከያ ጊዜ ገደብ",
     "detailYes": "አዎ",
     "detailNo": "አይ",
     "detailAsap": "በተቻለ ፍጥነት",
@@ -304,11 +305,12 @@
     "detailMapDuration": "ግምታዊ የመንገድ ጊዜ",
     "detailMapStraightLine": "ቀጥተኛ መስመር",
     "policyEdit": "ጥያቄው በመጠባበቅ ላይ እስካለ ድረስ ማርትዕ ይችላሉ።",
-    "policyCancel": "ጥያቄው በመጠባበቅ ላይ ሲሆን ከመላክ በኋላ በ15 ደቂቃ ውስጥ መሰረዝ ይችላሉ።",
+    "policyEditDeadline": "ከ{time} በፊት ያሻሽሉ",
+    "policyCancel": "ጥያቄው በመጠባበቅ ላይ እስካለ ድረስ መሰረዝ ይችላሉ።",
     "policyCancelDeadline": "ከ{time} በፊት ይሰርዙ",
     "policyLocked": "ጥያቄው ከመለያዎ በኋላ ሊቀየር አይችልም።",
     "notEditable": "በመጠባበቅ ላይ ያሉ ጥያቄዎች ብቻ ሊስተካከሉ ይችላሉ።",
-    "notCancellable": "መሰረዝ ለበመጠባበቅ ላይ ያሉ እና ከመላክ በ15 ደቂቃ ውስጥ ያሉ ጥያቄዎች ብቻ ይገኛል።",
+    "notCancellable": "መሰረዝ የሚቻለው ከተዘጋጀው የመጨረሻ ጊዜ በፊት ለሚገኙ በመጠባበቅ ላይ ያሉ ጥያቄዎች ብቻ ነው።",
     "emptyTitle": "ጥያቄ አልተገኘም",
     "emptyDescription": "ጉዞ ጥያቄ ከላኩ በኋላ እዚህ ይታያሉ።",
     "emptySearchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ ወይም የሁኔታ ማጣሪያውን ያጽዱ።",
@@ -475,17 +477,17 @@
     "operations": {
       "title": "የጉዞ ጥያቄዎች",
       "description": "የደንበኛ ቦታ ማስያዣ ሂደት እና ቀጥታ ዲስፓችዎች",
-      "pendingTitle": "በግምገማ ላይ",
+      "pendingTitle": "የጉዞ ጥያቄዎች (በግምገማ ላይ)",
       "pendingDescription": "የአስተዳዳሪ ማረጋገጫ በመጠባበቅ ላይ",
       "upcomingTitle": "መጪ ጉዞዎች",
       "upcomingDescription": "የተረጋገጡ እና የታሰቡ",
-      "inProgressTitle": "በመስራት ላይ",
+      "inProgressTitle": "በሂደት ላይ ያሉ ጉዞዎች",
       "inProgressDescription": "አሁን በመንገድ ላይ"
     },
     "compliance": {
       "title": "የመኪና ብዛት ተገዢነት",
       "description": "በመላው መኪና ብዛት የኢንሹራንስ እና የምርመራ መዝጊያ",
-      "attentionTitle": "ትኩረት ይፈልጋል",
+      "attentionTitle": "የተገዢነት ማስጠንቀቂያዎች",
       "attentionDescription": "ጊዜው ያለፈ ወይም በቅርቡ የሚያበቃ",
       "insuranceExpiredTitle": "ኢንሹራንስ ጊዜው አልፏል",
       "insuranceExpiredDescription": "ሽፋን ያለቋቸው ተሽከርካሪዎች",
@@ -1684,7 +1686,9 @@
           "vehicle_plate": "የተመደበ ተሽከርካሪ ታብራ",
           "rejection_reason": "ጥያቄ ሲቀበል አልባይ ምክንያት",
           "status": "የአሁኑ የጥያቄ ሁኔታ",
-          "reference": "አጭር የጥያቄ ማጣቀሻ ኮድ"
+          "reference": "አጭር የጥያቄ ማጣቀሻ ኮድ",
+          "cancel_deadline_minutes": "የተዋቀረ የመሰረዝ ጊዜ በደቂቃ",
+          "cancel_deadline_at": "የመሰረዝ የመጨረሻ ጊዜ"
         },
         "userRegistrations": {
           "applicant_name": "የአመልካች ሙሉ ስም",
@@ -2877,9 +2881,11 @@
         "classificationDescription": "የተሽከርካሪ አይነት፣ የአገልግሎት ክፍል እና የክወና ሁኔታ።",
         "assignment": "ነባሪ ሹፌር",
         "assignmentDescription": "በምዝገብ ጊዜ አማራጭ ነው። በጉዞ መላኪያ ላይ ከመጠቀም በፊት ያስፈልጋል።",
-        "details": "የተሽከርካሪ ዝርዝሮች",
-        "detailsDescription": "መለያ፣ የአምራች መረጃ እና አማራጭ የመኪና ብዛት ማስታወሻዎች።"
+      "details": "የተሽከርካሪ ዝርዝሮች",
+      "detailsDescription": "መለያ፣ የአምራች መረጃ፣ አማራጭ የመኪና ብዛት ማስታወሻዎች፣ እና የተሽከርካሪ ምስሎች።"
       },
+      "vehicleImages": "የተሽከርካሪ ፎቶዎች",
+      "vehicleImagesEmpty": "እስካሁን ፎቶ አልተጫነም።",
       "vehicleType": "የተሽከርካሪ አይነት",
       "vehicleTypePlaceholder": "አይነት ይምረጡ",
       "vehicleClass": "የተሽከርካሪ ክፍል",
@@ -2897,9 +2903,12 @@
       "year": "ዓመት",
       "yearPlaceholder": "2024",
       "status": "ሁኔታ",
-      "notes": "ማስታወሻዎች",
-      "notesPlaceholder": "አማራጭ ማስታወሻዎች",
-      "optional": "(አማራጭ)",
+    "notes": "ማስታወሻዎች",
+    "notesPlaceholder": "አማራጭ ማስታወሻዎች",
+    "images": "የተሽከርካሪ ምስሎች",
+    "imagesHint": "አንድ ወይም ከዚያ በላይ JPG፣ PNG ወይም WEBP ምስሎች ይስቀሉ።",
+    "imagesSelected": "{count} ምስል(ዎች) ተመርጠዋል",
+    "optional": "(አማራጭ)",
       "cancel": "ሰርዝ",
       "create": "ተሽከርካሪ ፍጠር",
       "creating": "በመፍጠር ላይ...",
@@ -3572,10 +3581,6 @@
     "description": "ከተጠናቀቁ ጉዞዎች የኮንትራት ደረሰኞችን ይፍጠሩ እና ያስተዳድሩ።",
     "searchPlaceholder": "በማጣቀሻ፣ በውል ወይም በደንበኛ ፈልግ...",
     "itemLabel": "ደረሰኝ",
-    "filters": {
-      "status": "ሁኔታ",
-      "statusAll": "ሁሉም ሁኔታዎች"
-    },
     "stats": {
       "totalTitle": "ጠቅላላ ደረሰኞች",
       "totalDescription": "በመድረኩ ላይ የተፈጠሩ ሁሉም ደረሰኞች",
@@ -3935,6 +3940,82 @@
       "deleteFailed": {
         "title": "Endpoint መሰረዝ አልተቻለም",
         "description": "እባክዎ ትንሽ ቆይተው እንደገና ይሞክሩ።"
+      }
+    }
+  },
+  "adminDeadlineSettings": {
+    "eyebrow": "የስርዓት ቅንብሮች",
+    "title": "የጊዜ ገደብ ማዕከል",
+    "description": "ለውድድር ጥያቄዎች፣ ለክፍያ መጠየቂያዎች እና ለተገዢነት ማንቂያዎች ጥቅም ላይ የሚውሉትን የስርዓት-አቀፍ የጊዜ ገደቦችን እዚህ ያዋቅሩ።",
+    "loading": "የጊዜ ገደብ ቅንብሮችን በመጫን ላይ...",
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህንን ገጽ ለመክፈት የስርዓት ቅንብሮችን የማየት መብት ያስፈልጋል። እባክዎ አስተዳዳሪን ለእርስዎ ሚና system_settings.read ፈቃድ እንዲሰጥዎ ይጠይቁ።",
+      "sessionHint": "ፈቃዶች በቅርቡ ከተቀየሩ፣ እባክዎ ክፍለ-ጊዜዎን ለማደስ በመጀመሪያ ዘግተው ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚናዎ ፈቃዶች የሚቆጣጠር ነው።",
+      "goToDashboard": "ወደ ዳሽቦርድ ሂድ"
+    },
+    "previews": {
+      "minutes": "{value} ደቂቃዎች",
+      "days": "{value} ቀናት",
+      "empty": "—"
+    },
+    "modules": {
+      "ride_request_cancel_grace_minutes": {
+        "title": "የጉዞ ጥያቄዎች",
+        "description": "ደንበኞች በመጠባበቅ ላይ ያለ የጉዞ ጥያቄን ለምን ያህል ጊዜ መሰረዝ እንደሚችሉ ይቆጣጠሩ።",
+        "helper": "በጉዞ ጥያቄ ዝርዝሮች፣ ስረዛ ደንቦች እና የመልዕክት አብነቶች ጥቅም ላይ ይውላል።",
+        "label": "የስረዛ ጊዜ ገደብ"
+      },
+      "ride_request_edit_grace_minutes": {
+        "title": "የጉዞ ጥያቄዎች ማስተካከያ",
+        "description": "ደንበኞች የጉዞ ጥያቄ ካስገቡ በኋላ ለምን ያህል ጊዜ ማስተካከል እንደሚችሉ ይቆጣጠሩ።",
+        "helper": "በጉዞ ጥያቄ ዝርዝሮች፣ ማስተካከያ ደንቦች እና ቅጾች ውስጥ ጥቅም ላይ ይውላል።",
+        "label": "የማስተካከያ ጊዜ ገደብ"
+      },
+      "invoice_due_soon_days": {
+        "title": "የክፍያ መጠየቂያዎች",
+        "description": "የክፍያ መጠየቂያ ጊዜው ከማብቃቱ ስንት ቀናት በፊት ወደ 'በቅርቡ የሚከፈል' መስኮት እንደሚገባ ይግለጹ።",
+        "helper": "ለክፍያ መጠየቂያ ማሳሰቢያዎች፣ ለዳሽቦርድ ምልክቶች እና ለክፍያ የስራ ፍሰቶች ጥቅም ላይ ይውላል።",
+        "label": "የቅርብ ጊዜ ገደብ መስኮት"
+      },
+      "insurance_due_soon_days": {
+        "title": "የኢንሹራንስ ተገዢነት",
+        "description": "የኢንሹራንስ መዝገቦች በቅርቡ እንደሚ ጊዜያቸው የሚያበቁ መቼ ጎልተው መታየት እንዳለባቸው ይወስኑ።",
+        "helper": "በተሽከርካሪ ተገዢነት እይታዎች እና በኢንሹራንስ ማንቂያ አብነቶች ውስጥ ጥቅም ላይ ይውላል።",
+        "label": "የቅርብ ጊዜ ገደብ መስኮት"
+      },
+      "inspection_due_soon_days": {
+        "title": "የምርመራ ተገዢነት",
+        "description": "የምርመራ መዝገቦች በቅርቡ እንደሚ ጊዜያቸው የሚያበቁ መቼ ጎልተው መታየት እንዳለባቸው ይወስኑ።",
+        "helper": "በተሽከርካሪ ተገዢነት እይታዎች እና በምርመራ ማንቂያ አብነቶች ውስጥ ጥቅም ላይ ይውላል።",
+        "label": "የቅርብ ጊዜ ገደብ መስኮት"
+      }
+    },
+    "configure": {
+      "title": "የሞጁል የጊዜ ገደቦችን ያዋቅሩ",
+      "description": "እያንዳንዱ ቅንብር ተዛማጅ ማሳሰቢያዎችን፣ ዳሽቦርዶችን እና የመልዕክት አብነቶችን ያዘምናል።",
+      "rangeInfo": "በ {min} እና {max} {suffix} መካከል ያለ እሴት ያስገቡ።",
+      "saveButton": "ቅንብር አስቀምጥ",
+      "savingButton": "በማስቀመጥ ላይ..."
+    },
+    "toast": {
+      "loadFailed": {
+        "title": "የጊዜ ገደብ ቅንብሮችን መጫን አልተቻለም",
+        "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+      },
+      "updateSuccess": {
+        "title": "የጊዜ ገደብ ቅንብሮች ተዘምነዋል",
+        "description": "የጊዜ ገደብ አማራጮቹ በተሳካ ሁኔታ ተቀምጠዋል።"
+      },
+      "updateFailed": {
+        "title": "ቅንብሮቹን ማስቀመጥ አልተቻለም",
+        "description": "እባክዎ እሴቶቹን ያረጋግጡና እንደገና ይሞክሩ።"
+      },
+      "invalidValues": {
+        "title": "ልክ ያልሆኑ የጊዜ ገደብ እሴቶች",
+        "description": "እባክዎ ለእያንዳንዱ ሞጁል በተፈቀደው ክልል ውስጥ ያሉ ትክክለኛ እሴቶችን ያስገቡ።"
       }
     }
   }

@@ -71,6 +71,11 @@ apiClient.interceptors.request.use((config) => {
   }
 
   config.headers["Accept-Language"] = getStoredLocale();
+
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+  }
+
   return config;
 });
 

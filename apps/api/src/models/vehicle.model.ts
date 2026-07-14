@@ -1,5 +1,6 @@
 import { VehicleHistoryEventType, VehicleStatus } from "../generated/prisma";
 import { prisma } from "../db/prisma";
+import { getDeadlineSettings } from "./app-setting.model";
 import { findUserByIdWithRoles } from "./user.model";
 import { createVehicleHistoryEvent } from "./vehicle-ops.model";
 
@@ -14,6 +15,7 @@ export type CreateVehicleInput = {
   year?: number | null;
   status?: VehicleStatus;
   notes?: string | null;
+  images?: string[];
   insuranceProvider?: string | null;
   insurancePolicyNumber?: string | null;
   insuranceIssuedAt?: Date | null;
@@ -39,6 +41,7 @@ export type UpdateVehicleInput = {
   year?: number | null;
   status?: VehicleStatus;
   notes?: string | null;
+  images?: string[];
   insuranceProvider?: string | null;
   insurancePolicyNumber?: string | null;
   insuranceIssuedAt?: Date | null;
@@ -72,12 +75,7 @@ export type VehicleComplianceStatus = "expired" | "due_soon" | "ok" | "not_set";
 export type VehicleComplianceSummary = {
   total_vehicles: number;
   vehicles_needing_attention: number;
-} & Record<
-  VehicleComplianceType,
-  Record<VehicleComplianceStatus, number>
->;
-
-const COMPLIANCE_DUE_SOON_DAYS = 30;
+} & Record<VehicleComplianceType, Record<VehicleComplianceStatus, number>>;
 
 const vehicleInclude = {
   vehicleType: true,
@@ -99,19 +97,27 @@ export async function assertAssignableDriver(userId: string) {
     throw new Error("DRIVER_NOT_FOUND");
   }
 
-  const isDriver = user.authRoles.some((authRole) => authRole.role.slug === "driver");
+  const isDriver = user.authRoles.some(
+    (authRole) => authRole.role.slug === "driver",
+  );
   if (!isDriver) {
     throw new Error("USER_NOT_DRIVER");
   }
 
-  if (user.accountStatus !== "active" || user.accountActivation !== "activated") {
+  if (
+    user.accountStatus !== "active" ||
+    user.accountActivation !== "activated"
+  ) {
     throw new Error("DRIVER_NOT_ACTIVE");
   }
 
   return user;
 }
 
-async function clearDriverFromOtherVehicles(driverUserId: string, exceptVehicleId?: string) {
+async function clearDriverFromOtherVehicles(
+  driverUserId: string,
+  exceptVehicleId?: string,
+) {
   await prisma.vehicle.updateMany({
     where: {
       assignedDriverUserId: driverUserId,
@@ -130,7 +136,9 @@ export async function findVehicleById(id: string) {
 
 function startOfTodayUtc() {
   const now = new Date();
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  return new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()),
+  );
 }
 
 function complianceExpiryField(type: VehicleComplianceType) {
@@ -163,7 +171,9 @@ function buildComplianceExpiryWhere(
   const field = complianceExpiryField(type);
   const today = startOfTodayUtc();
   const dueSoonEnd = new Date(today);
-  dueSoonEnd.setUTCDate(dueSoonEnd.getUTCDate() + COMPLIANCE_DUE_SOON_DAYS);
+  dueSoonEnd.setUTCDate(
+    dueSoonEnd.getUTCDate() + getDeadlineSettings().insurance_due_soon_days,
+  );
 
   switch (status) {
     case "not_set":
@@ -182,7 +192,9 @@ function buildVehicleWhere(filter?: ListVehiclesFilter) {
 
   return {
     ...(filter?.vehicleTypeId ? { vehicleTypeId: filter.vehicleTypeId } : {}),
-    ...(filter?.vehicleClassId ? { vehicleClassId: filter.vehicleClassId } : {}),
+    ...(filter?.vehicleClassId
+      ? { vehicleClassId: filter.vehicleClassId }
+      : {}),
     ...(filter?.status ? { status: filter.status } : {}),
     ...(filter?.assignedDriverUserId
       ? { assignedDriverUserId: filter.assignedDriverUserId }
@@ -190,20 +202,35 @@ function buildVehicleWhere(filter?: ListVehiclesFilter) {
     ...(filter?.unassignedOnly ? { assignedDriverUserId: null } : {}),
     ...(filter?.assignedOnly ? { assignedDriverUserId: { not: null } } : {}),
     ...(filter?.complianceType && filter?.complianceStatus
-      ? buildComplianceExpiryWhere(filter.complianceType, filter.complianceStatus)
+      ? buildComplianceExpiryWhere(
+          filter.complianceType,
+          filter.complianceStatus,
+        )
       : {}),
     ...(search
       ? {
           OR: [
             { plateNumber: { contains: search, mode: "insensitive" as const } },
-            { chassisNumber: { contains: search, mode: "insensitive" as const } },
+            {
+              chassisNumber: { contains: search, mode: "insensitive" as const },
+            },
             { make: { contains: search, mode: "insensitive" as const } },
             { model: { contains: search, mode: "insensitive" as const } },
             {
               assignedDriver: {
                 OR: [
-                  { firstName: { contains: search, mode: "insensitive" as const } },
-                  { lastName: { contains: search, mode: "insensitive" as const } },
+                  {
+                    firstName: {
+                      contains: search,
+                      mode: "insensitive" as const,
+                    },
+                  },
+                  {
+                    lastName: {
+                      contains: search,
+                      mode: "insensitive" as const,
+                    },
+                  },
                   { email: { contains: search, mode: "insensitive" as const } },
                 ],
               },
@@ -239,7 +266,9 @@ export async function countVehicles(filter?: ListVehiclesFilter) {
 export async function getVehicleComplianceSummary(): Promise<VehicleComplianceSummary> {
   const today = startOfTodayUtc();
   const dueSoonEnd = new Date(today);
-  dueSoonEnd.setUTCDate(dueSoonEnd.getUTCDate() + COMPLIANCE_DUE_SOON_DAYS);
+  dueSoonEnd.setUTCDate(
+    dueSoonEnd.getUTCDate() + getDeadlineSettings().inspection_due_soon_days,
+  );
 
   const vehicles = await prisma.vehicle.findMany({
     select: {
@@ -278,12 +307,16 @@ export async function getVehicleComplianceSummary(): Promise<VehicleComplianceSu
   return summary;
 }
 
-export function parseVehicleComplianceType(value: unknown): VehicleComplianceType | undefined {
+export function parseVehicleComplianceType(
+  value: unknown,
+): VehicleComplianceType | undefined {
   if (value === "insurance" || value === "inspection") return value;
   return undefined;
 }
 
-export function parseVehicleComplianceStatus(value: unknown): VehicleComplianceStatus | undefined {
+export function parseVehicleComplianceStatus(
+  value: unknown,
+): VehicleComplianceStatus | undefined {
   if (
     value === "expired" ||
     value === "due_soon" ||
@@ -324,14 +357,24 @@ function buildComplianceData(input: {
     ...(input.insurancePolicyNumber !== undefined
       ? { insurancePolicyNumber: textKey(input.insurancePolicyNumber) }
       : {}),
-    ...(input.insuranceIssuedAt !== undefined ? { insuranceIssuedAt: input.insuranceIssuedAt } : {}),
-    ...(input.insuranceExpiresAt !== undefined ? { insuranceExpiresAt: input.insuranceExpiresAt } : {}),
-    ...(input.insuranceNotes !== undefined ? { insuranceNotes: textKey(input.insuranceNotes) } : {}),
+    ...(input.insuranceIssuedAt !== undefined
+      ? { insuranceIssuedAt: input.insuranceIssuedAt }
+      : {}),
+    ...(input.insuranceExpiresAt !== undefined
+      ? { insuranceExpiresAt: input.insuranceExpiresAt }
+      : {}),
+    ...(input.insuranceNotes !== undefined
+      ? { insuranceNotes: textKey(input.insuranceNotes) }
+      : {}),
     ...(input.inspectionCenter !== undefined
       ? { inspectionCenter: textKey(input.inspectionCenter) }
       : {}),
     ...(input.inspectionCertificateNumber !== undefined
-      ? { inspectionCertificateNumber: textKey(input.inspectionCertificateNumber) }
+      ? {
+          inspectionCertificateNumber: textKey(
+            input.inspectionCertificateNumber,
+          ),
+        }
       : {}),
     ...(input.inspectionPerformedAt !== undefined
       ? { inspectionPerformedAt: input.inspectionPerformedAt }
@@ -380,7 +423,10 @@ function complianceChanged(
   existing: Parameters<typeof complianceSnapshot>[0],
   next: Parameters<typeof complianceSnapshot>[0],
 ) {
-  return JSON.stringify(complianceSnapshot(existing)) !== JSON.stringify(complianceSnapshot(next));
+  return (
+    JSON.stringify(complianceSnapshot(existing)) !==
+    JSON.stringify(complianceSnapshot(next))
+  );
 }
 
 export async function createVehicle(input: CreateVehicleInput) {
@@ -403,6 +449,7 @@ export async function createVehicle(input: CreateVehicleInput) {
       year: input.year ?? null,
       status: input.status ?? VehicleStatus.active,
       notes: input.notes?.trim() || null,
+      images: input.images ?? [],
       ...buildComplianceData({
         insuranceProvider: input.insuranceProvider ?? null,
         insurancePolicyNumber: input.insurancePolicyNumber ?? null,
@@ -473,6 +520,7 @@ export async function updateVehicle(id: string, input: UpdateVehicleInput) {
       year: input.year,
       status: input.status,
       notes: input.notes,
+      images: input.images,
       ...buildComplianceData(input),
     },
     include: vehicleInclude,
@@ -535,7 +583,8 @@ export function parseVehicleStatus(value: unknown): VehicleStatus | undefined {
   if (typeof value !== "string") return undefined;
   const normalized = value.trim().toLowerCase();
   if (normalized === VehicleStatus.active) return VehicleStatus.active;
-  if (normalized === VehicleStatus.maintenance) return VehicleStatus.maintenance;
+  if (normalized === VehicleStatus.maintenance)
+    return VehicleStatus.maintenance;
   if (normalized === VehicleStatus.retired) return VehicleStatus.retired;
   return undefined;
 }

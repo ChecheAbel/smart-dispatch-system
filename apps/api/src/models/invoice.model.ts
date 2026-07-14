@@ -2,6 +2,7 @@ import type { InvoiceStatus } from "@smart-dispatch/types";
 import { Prisma } from "../generated/prisma";
 import { prisma } from "../db/prisma";
 import { getUtcToday } from "./contract.model";
+import { getDeadlineSettings } from "./app-setting.model";
 
 export type ListInvoicesFilter = {
   search?: string;
@@ -100,9 +101,13 @@ const invoiceInclude = {
   },
 } as const;
 
-export type DbInvoice = Prisma.InvoiceGetPayload<{ include: typeof invoiceInclude }>;
+export type DbInvoice = Prisma.InvoiceGetPayload<{
+  include: typeof invoiceInclude;
+}>;
 
-function buildInvoiceWhere(filter: ListInvoicesFilter): Prisma.InvoiceWhereInput {
+function buildInvoiceWhere(
+  filter: ListInvoicesFilter,
+): Prisma.InvoiceWhereInput {
   const where: Prisma.InvoiceWhereInput = {};
 
   if (filter.status) {
@@ -121,7 +126,11 @@ function buildInvoiceWhere(filter: ListInvoicesFilter): Prisma.InvoiceWhereInput
     const search = filter.search.trim();
     where.OR = [
       { referenceNumber: { contains: search, mode: "insensitive" } },
-      { contract: { referenceNumber: { contains: search, mode: "insensitive" } } },
+      {
+        contract: {
+          referenceNumber: { contains: search, mode: "insensitive" },
+        },
+      },
       { contract: { title: { contains: search, mode: "insensitive" } } },
       {
         requester: {
@@ -197,7 +206,11 @@ function buildCustomerInvoiceWhere(
       {
         OR: [
           { referenceNumber: { contains: search, mode: "insensitive" } },
-          { contract: { referenceNumber: { contains: search, mode: "insensitive" } } },
+          {
+            contract: {
+              referenceNumber: { contains: search, mode: "insensitive" },
+            },
+          },
           { contract: { title: { contains: search, mode: "insensitive" } } },
         ],
       },
@@ -230,7 +243,10 @@ export async function countCustomerInvoices(
   });
 }
 
-export async function findInvoiceForRequester(id: string, requesterUserId: string) {
+export async function findInvoiceForRequester(
+  id: string,
+  requesterUserId: string,
+) {
   return prisma.invoice.findFirst({
     where: {
       id,
@@ -284,7 +300,12 @@ export async function createInvoice(input: CreateInvoiceInput) {
 export async function updateInvoiceStatus(
   id: string,
   status: InvoiceStatus,
-  timestamps?: { issuedAt?: Date | null; dueAt?: Date | null; paidAt?: Date | null; voidedAt?: Date | null },
+  timestamps?: {
+    issuedAt?: Date | null;
+    dueAt?: Date | null;
+    paidAt?: Date | null;
+    voidedAt?: Date | null;
+  },
 ) {
   return prisma.invoice.update({
     where: { id },
@@ -369,7 +390,9 @@ export async function invoiceExistsForEnrollmentPeriod(
   });
 }
 
-export async function findEndedEnrollmentsPendingInvoice(asOf: Date = getUtcToday()) {
+export async function findEndedEnrollmentsPendingInvoice(
+  asOf: Date = getUtcToday(),
+) {
   const enrollments = await prisma.contractEnrollment.findMany({
     where: {
       endsAt: { lt: asOf },
@@ -434,11 +457,22 @@ export async function findUnbilledPerTripRides(rideRequestId?: string) {
 
 function endOfUtcDay(date: Date) {
   return new Date(
-    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 23, 59, 59, 999),
+    Date.UTC(
+      date.getUTCFullYear(),
+      date.getUTCMonth(),
+      date.getUTCDate(),
+      23,
+      59,
+      59,
+      999,
+    ),
   );
 }
 
-export async function findDueSoonInvoices(daysBeforeDue: number, asOf: Date = new Date()) {
+export async function findDueSoonInvoices(
+  daysBeforeDue: number = getDeadlineSettings().invoice_due_soon_days,
+  asOf: Date = new Date(),
+) {
   const end = endOfUtcDay(new Date(asOf));
   end.setUTCDate(end.getUTCDate() + daysBeforeDue);
 

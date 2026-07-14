@@ -27,6 +27,7 @@ export async function performTokenRefresh(
       const { data } = await axios.post(
         `${API_URL}/api/auth/token`,
         {
+          grant_type: "refresh_token",
           refresh_token: refreshToken,
         },
         { headers: { "Content-Type": "application/json" } },

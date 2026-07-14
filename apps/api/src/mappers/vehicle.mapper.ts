@@ -24,6 +24,7 @@ type DbVehicle = {
   year: number | null;
   status: "active" | "maintenance" | "retired";
   notes: string | null;
+  images: string[];
   insuranceProvider: string | null;
   insurancePolicyNumber: string | null;
   insuranceIssuedAt: Date | null;
@@ -85,6 +86,7 @@ export function toPublicVehicle(
       id: vehicleType.id,
       slug: vehicleType.slug,
       name: vehicleType.name,
+      passenger_capacity: vehicleType.passenger_capacity,
     },
     vehicle_class_id: vehicle.vehicleClassId,
     vehicle_class: {
@@ -106,6 +108,7 @@ export function toPublicVehicle(
     year: vehicle.year,
     status: vehicle.status,
     notes: vehicle.notes,
+    images: vehicle.images,
     insurance_provider: vehicle.insuranceProvider,
     insurance_policy_number: vehicle.insurancePolicyNumber,
     insurance_issued_at: dateToIsoDate(vehicle.insuranceIssuedAt),

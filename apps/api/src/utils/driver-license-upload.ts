@@ -35,12 +35,13 @@ export function getDriverLicenseUploadDir() {
 }
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
-const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/x-webp"]);
 
 const MIME_TO_EXTENSION: Record<string, string> = {
   "image/jpeg": ".jpg",
   "image/png": ".png",
   "image/webp": ".webp",
+  "image/x-webp": ".webp",
 };
 
 export function ensureDriverLicenseUploadDir() {

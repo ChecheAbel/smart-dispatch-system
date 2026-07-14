@@ -19,6 +19,7 @@ import {
   canCancelRideRequest,
   canEditRideRequest,
   getRideRequestCancelDeadline,
+  getRideRequestEditDeadline,
 } from "../services/ride-request-policy.service";
 import {
   canAdminAssignRideRequest,
@@ -33,6 +34,14 @@ import {
 type DbRideRequest = {
   id: string;
   requesterUserId: string;
+  requester?: {
+    id: string;
+    firstName: string;
+    middleName: string | null;
+    lastName: string;
+    email: string;
+    mobileNumber: string;
+  } | null;
   vehicleTypeId: string | null;
   vehicleClassId: string | null;
   regionId: string | null;
@@ -90,14 +99,6 @@ type DbRideRequest = {
     id: string;
     translations: Prisma.JsonValue;
   } | null;
-  requester?: {
-    id: string;
-    firstName: string;
-    middleName: string | null;
-    lastName: string;
-    email: string;
-    mobileNumber: string;
-  };
   assignedVehicle?: {
     id: string;
     plateNumber: string;
@@ -193,6 +194,16 @@ export function toPublicRideRequest(
   return {
     id: rideRequest.id,
     requester_user_id: rideRequest.requesterUserId,
+    requester: rideRequest.requester
+      ? {
+          id: rideRequest.requester.id,
+          first_name: rideRequest.requester.firstName,
+          middle_name: rideRequest.requester.middleName,
+          last_name: rideRequest.requester.lastName,
+          email: rideRequest.requester.email,
+          mobile_number: rideRequest.requester.mobileNumber,
+        }
+      : null,
     vehicle_type_id: rideRequest.vehicleTypeId,
     vehicle_type: rideRequest.vehicleType
       ? {
@@ -343,11 +354,15 @@ export function toPublicRideRequest(
     completed_at: rideRequest.completedAt?.toISOString() ?? null,
     created_at: rideRequest.createdAt.toISOString(),
     updated_at: rideRequest.updatedAt.toISOString(),
-    can_edit: canEditRideRequest(rideRequest.status),
+    can_edit: canEditRideRequest(rideRequest.status, rideRequest.createdAt),
     can_cancel: canCancelRideRequest(rideRequest.status, rideRequest.createdAt),
     cancel_deadline_at:
       rideRequest.status === "pending"
         ? getRideRequestCancelDeadline(rideRequest.createdAt).toISOString()
+        : null,
+    edit_deadline_at:
+      rideRequest.status === "pending"
+        ? getRideRequestEditDeadline(rideRequest.createdAt).toISOString()
         : null,
   };
 }

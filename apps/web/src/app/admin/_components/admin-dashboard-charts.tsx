@@ -139,13 +139,13 @@ function ChartSection({
   children: ReactNode;
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-      <div className="border-b border-slate-100 bg-gradient-to-r from-[#1C3A34]/[0.05] via-white to-white px-4 py-4 sm:px-5">
+    <section className="space-y-4">
+      <div className="space-y-1">
         <p className={adminEyebrowClass}>{eyebrow}</p>
-        <h3 className={cn("mt-1 text-lg font-bold", adminHeadingClass)}>{title}</h3>
-        <p className="mt-1 max-w-3xl text-sm text-slate-500">{description}</p>
+        <h3 className={cn("text-lg font-bold tracking-tight", adminHeadingClass)}>{title}</h3>
+        <p className="text-sm text-slate-500">{description}</p>
       </div>
-      <div className="space-y-4 p-4 sm:p-5">{children}</div>
+      <div>{children}</div>
     </section>
   );
 }
@@ -308,7 +308,7 @@ export function AdminDashboardCharts({
   const registrations = analytics?.registrations;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
       {showRideRequests ? (
         <ChartSection
           eyebrow={charts.operationsEyebrow}

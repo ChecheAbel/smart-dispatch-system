@@ -51,6 +51,7 @@ import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { CreateVehicleSheet } from "./create-vehicle-sheet";
 import { AssignVehicleDriverSheet } from "./assign-vehicle-driver-sheet";
 import { VehicleStats } from "./vehicle-stats";
+import { getVehiclePhotoUrl } from "@/lib/vehicle-photo";
 
 const VEHICLE_STATUSES: VehicleStatus[] = ["active", "maintenance", "retired"];
 
@@ -225,12 +226,38 @@ export function VehiclesPage() {
   const vehicleColumns = useMemo<DataTableColumn<Vehicle>[]>(
     () => {
       const empty = copy.columnEmpty;
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
       function emptyCellLabel(text: string) {
         return <span className="text-sm text-slate-400 italic">{text}</span>;
       }
 
       return [
+      {
+        id: "image",
+        header: "",
+        cellClassName: "w-16",
+        cell: (vehicle) => {
+          const preview = vehicle.images?.[0];
+
+          if (!preview) {
+            return (
+              <div className="relative flex size-12 items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-200 bg-gradient-to-br from-slate-100 to-slate-50">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(28,58,52,0.08),_transparent_60%)]" />
+                <Truck className="relative size-5 text-slate-300" />
+              </div>
+            );
+          }
+
+          const photoUrl = getVehiclePhotoUrl(preview, apiBaseUrl);
+
+          return (
+            <div className="h-12 w-12 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
+              <img src={photoUrl ?? preview} alt={vehicle.plate_number} className="h-full w-full object-cover" />
+            </div>
+          );
+        },
+      },
       {
         id: "plate",
         header: copy.columns.plate,

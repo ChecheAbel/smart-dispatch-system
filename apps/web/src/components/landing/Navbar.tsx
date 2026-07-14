@@ -5,11 +5,10 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import BrandLogo from "@/components/landing/BrandLogo";
-import { USER_SIGN_IN_PATH } from "@/lib/auth-paths";
 
 const NAV_LINKS = [
-  { label: "Features", href: "#features" },
   { label: "Console", href: "#live-view" },
+  { label: "Features", href: "#features" },
   { label: "Platform", href: "#platform" },
   { label: "Contact", href: "#contact" },
 ] as const;
@@ -27,29 +26,29 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    const sectionIds = NAV_LINKS.map((link) => link.href.slice(1));
-    const sections = sectionIds
-      .map((id) => document.getElementById(id))
-      .filter((el): el is HTMLElement => el !== null);
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 120;
 
-    if (sections.length === 0) return;
+      const activeLink = NAV_LINKS.find((link) => {
+        const section = document.getElementById(link.href.slice(1));
+        if (!section) return false;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+        const top = section.offsetTop;
+        const bottom = top + section.offsetHeight;
 
-        if (visible[0]?.target.id) {
-          const next = visible[0].target.id;
-          setActiveSection((prev) => (prev === next ? prev : next));
-        }
-      },
-      { rootMargin: "-40% 0px -50% 0px", threshold: [0, 0.25, 0.5] },
-    );
+        return scrollPosition >= top && scrollPosition < bottom;
+      });
 
-    sections.forEach((section) => observer.observe(section));
-    return () => observer.disconnect();
+      if (activeLink) {
+        setActiveSection(activeLink.href.slice(1));
+      } else if (window.scrollY < 100) {
+        setActiveSection("");
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -69,7 +68,7 @@ export default function Navbar() {
     <>
       <header
         className={cn(
-          "sticky top-0 z-50 w-full transition-all duration-300",
+          "fixed top-0 left-0 right-0 z-40 w-full transition-all duration-300",
           scrolled
             ? "border-b border-white/10 bg-[#1C3A34]/95 shadow-lg shadow-black/10 backdrop-blur-md"
             : "border-b border-transparent bg-[#1C3A34]",
@@ -110,7 +109,7 @@ export default function Navbar() {
           {/* Desktop actions */}
           <div className="hidden lg:flex items-center gap-2 shrink-0">
             <Link
-              href={USER_SIGN_IN_PATH}
+              href="/book"
               className="inline-flex items-center gap-2 bg-[#C9B87A] hover:bg-[#d9ca8e] text-[#1C3A34] font-bold text-[13px] px-5 py-2.5 rounded-full tracking-wide transition-all duration-200 hover:shadow-lg hover:shadow-[#C9B87A]/25 hover:-translate-y-px"
             >
               Book now
@@ -133,7 +132,7 @@ export default function Navbar() {
       {/* Mobile menu overlay — only mounted while open to avoid blocking scroll */}
       {mobileMenuOpen && (
       <div
-        className="fixed inset-0 z-40 lg:hidden"
+        className="fixed inset-0 z-[9998] lg:hidden"
         aria-hidden={false}
       >
         <button
@@ -172,7 +171,7 @@ export default function Navbar() {
 
           <div className="px-4 pb-6 pt-2 border-t border-white/10 space-y-2">
             <Link
-              href={USER_SIGN_IN_PATH}
+              href="/book"
               onClick={closeMobileMenu}
               className="flex items-center justify-center w-full bg-[#C9B87A] text-[#1C3A34] font-bold text-sm py-3.5 rounded-xl hover:bg-[#d9ca8e] transition-colors"
             >

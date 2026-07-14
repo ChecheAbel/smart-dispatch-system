@@ -25,6 +25,10 @@ export const PERMISSIONS = {
     write: "notifications.write",
     delete: "notifications.delete",
   },
+  system_settings: {
+    read: "system_settings.read",
+    write: "system_settings.write",
+  },
   audit_logs: {
     read: "audit_logs.read",
   },
@@ -84,6 +88,7 @@ export const PERMISSIONS = {
   },
   driver: {
     vehicle: "driver.vehicle",
+    trip: "driver.trip",
     upcoming: "driver.upcoming",
     history: "driver.history",
     maintenance: "driver.maintenance",

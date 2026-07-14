@@ -8,6 +8,7 @@ import type {
 import { findRideRequestById } from "../models/ride-request.model";
 import { findInvoiceById } from "../models/invoice.model";
 import { findUserByIdWithRoles } from "../models/user.model";
+import { getRideRequestSettings } from "../models/app-setting.model";
 import {
   findNotificationTemplateById,
   listEnabledNotificationTemplates,
@@ -61,6 +62,8 @@ function buildRideRequestSampleContext(): TemplateContext {
     rejection_reason: "No vehicles available for the requested time.",
     status: "confirmed",
     reference: "A1B2C3D4",
+    cancel_deadline_minutes: "15",
+    cancel_deadline_at: "15 Jul 2026, 14:45",
   };
 }
 
@@ -186,6 +189,11 @@ function daysOverdue(date: Date | null | undefined, from: Date = new Date()) {
 function buildRideRequestContext(
   rideRequest: NonNullable<Awaited<ReturnType<typeof findRideRequestById>>>,
 ): TemplateContext {
+  const cancelDeadlineMinutes = getRideRequestSettings().ride_request_cancel_grace_minutes;
+  const cancelDeadlineAt = new Date(
+    rideRequest.createdAt.getTime() + cancelDeadlineMinutes * 60 * 1000,
+  );
+
   return {
     requester_name: rideRequest.requester
       ? formatPersonName(rideRequest.requester)
@@ -201,6 +209,8 @@ function buildRideRequestContext(
     rejection_reason: rideRequest.rejectionReason ?? "—",
     status: rideRequest.status,
     reference: rideRequest.id.slice(0, 8).toUpperCase(),
+    cancel_deadline_minutes: String(cancelDeadlineMinutes),
+    cancel_deadline_at: formatScheduledAt(cancelDeadlineAt),
   };
 }
 

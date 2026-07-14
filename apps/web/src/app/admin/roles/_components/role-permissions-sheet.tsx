@@ -292,7 +292,7 @@ export function RolePermissionsSheet({
 
       try {
         const [permissionsResult, rolePermissions] = await Promise.all([
-          fetchPermissions({ page: 1, limit: 100 }),
+          fetchPermissions({ page: 1, limit: 1000 }),
           fetchRolePermissions(roleId),
         ]);
 

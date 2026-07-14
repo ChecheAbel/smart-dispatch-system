@@ -1,5 +1,6 @@
 "use client";
 
+import { Suspense } from "react";
 import AuthShell from "@/components/auth/AuthShell";
 import { AuthBackToHomeLink } from "@/components/auth/AuthBackToHomeLink";
 import UserSignInForm from "@/components/auth/UserSignInForm";
@@ -22,7 +23,9 @@ const USER_SIGN_IN_SHELL = {
 export function UserSignInPage() {
   return (
     <AuthShell {...USER_SIGN_IN_SHELL} leadingAction={<AuthBackToHomeLink />}>
-      <UserSignInForm />
+      <Suspense fallback={<div className="py-10 text-center text-slate-400">Loading sign in form...</div>}>
+        <UserSignInForm />
+      </Suspense>
     </AuthShell>
   );
 }

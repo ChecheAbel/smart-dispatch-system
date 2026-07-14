@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Loader2, Lock, Mail, XCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -30,6 +30,10 @@ function getRejectionReason(error: unknown) {
 
 export default function UserSignInForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect");
+  const targetRedirect = redirect || USER_DASHBOARD_PATH;
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -47,7 +51,7 @@ export default function UserSignInForm() {
         if (cancelled) return;
 
         if (session) {
-          router.replace(USER_DASHBOARD_PATH);
+          router.replace(targetRedirect);
           return;
         }
 
@@ -64,7 +68,7 @@ export default function UserSignInForm() {
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [router, targetRedirect]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -84,7 +88,7 @@ export default function UserSignInForm() {
       }
 
       saveAuthSession(session, remember);
-      router.push(USER_DASHBOARD_PATH);
+      router.push(targetRedirect);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Sign in failed. Please try again.";
@@ -250,7 +254,7 @@ export default function UserSignInForm() {
       <p className="mt-6 text-center text-sm text-slate-500">
         Don&apos;t have an account?{" "}
         <Link
-          href={USER_REGISTER_PATH}
+          href={redirect ? `${USER_REGISTER_PATH}?redirect=${encodeURIComponent(redirect)}` : USER_REGISTER_PATH}
           className="font-semibold text-[#1C3A34] hover:text-[#C9B87A] transition-colors"
         >
           Register now

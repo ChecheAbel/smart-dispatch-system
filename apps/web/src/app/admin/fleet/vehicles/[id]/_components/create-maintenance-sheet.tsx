@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import {
   ChevronDown,
   CircleDollarSign,
@@ -10,7 +10,6 @@ import {
   Wrench,
 } from "lucide-react";
 import type {
-  MaintenanceLocationType,
   MaintenanceWorkType,
   Vehicle,
   VehicleMaintenanceStatus,
@@ -40,14 +39,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import {
   formatDateInputValue,
@@ -61,7 +52,6 @@ import {
 type MaintenanceFormState = {
   work_type_id: string;
   status: VehicleMaintenanceStatus;
-  location_type: MaintenanceLocationType;
   description: string;
   vendor: string;
   cost_amount: string;
@@ -74,7 +64,6 @@ function emptyMaintenanceForm(defaultWorkTypeId = ""): MaintenanceFormState {
   return {
     work_type_id: defaultWorkTypeId,
     status: "open",
-    location_type: "external",
     description: "",
     vendor: "",
     cost_amount: "",
@@ -106,32 +95,6 @@ export function CreateMaintenanceSheet({
   const [workTypes, setWorkTypes] = useState<MaintenanceWorkType[]>([]);
   const [workTypesLoading, setWorkTypesLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-
-  const locationTypeLabel = locale === "am" ? "የጥገና ቦታ (ውስጥ/ውጭ)" : "Location Type";
-  const internalLabel = locale === "am" ? "ውስጣዊ (Internal)" : "Internal";
-  const externalLabel = locale === "am" ? "ውጫዊ (External)" : "External";
-
-  const workTypeItems = useMemo(
-    () => workTypes.map((t) => ({ label: t.name, value: t.id })),
-    [workTypes]
-  );
-
-  const statusItems = useMemo(
-    () =>
-      MAINTENANCE_STATUSES.map((status) => ({
-        label: detail.maintenanceStatuses[status],
-        value: status,
-      })),
-    [detail.maintenanceStatuses]
-  );
-
-  const locationTypeItems = useMemo(
-    () => [
-      { label: internalLabel, value: "internal" },
-      { label: externalLabel, value: "external" },
-    ],
-    [internalLabel, externalLabel]
-  );
 
   useEffect(() => {
     if (!open) {
@@ -184,7 +147,6 @@ export function CreateMaintenanceSheet({
       await createVehicleMaintenance(vehicle.id, {
         work_type_id: selectedWorkType.id,
         status: form.status,
-        location_type: form.location_type,
         title: selectedWorkType.name,
         description: form.description.trim() || null,
         vendor: form.vendor.trim() || null,
@@ -248,100 +210,75 @@ export function CreateMaintenanceSheet({
               </div>
 
               <div className="space-y-5 px-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="maintenance-work-type" className="text-sm font-semibold text-slate-800">
+                <div className="space-y-3">
+                  <Label className="text-sm font-semibold text-slate-800">
                     {maintenanceCopy.type}
                   </Label>
-                  <Select
-                    items={workTypeItems}
-                    value={form.work_type_id}
-                    onValueChange={(value) =>
-                      setForm((current) => ({
-                        ...current,
-                        work_type_id: value ?? "",
-                      }))
-                    }
-                    disabled={submitting || workTypesLoading}
-                  >
-                    <SelectTrigger
-                      id="maintenance-work-type"
-                      className={cn(adminInputClass, "w-full bg-white text-left font-normal flex items-center justify-between")}
-                    >
-                      <SelectValue placeholder={maintenanceCopy.type} />
-                    </SelectTrigger>
-                    <SelectContent side="bottom" align="start">
-                      <SelectGroup>
-                        {workTypes.map((workType) => (
-                          <SelectItem key={workType.id} value={workType.id}>
-                            {workType.name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {workTypesLoading ? (
+                      <p className="col-span-full text-sm text-slate-500">{detail.loading}</p>
+                    ) : workTypes.length === 0 ? (
+                      <p className="col-span-full text-sm text-slate-500">
+                        {maintenanceCopy.emptyHint}
+                      </p>
+                    ) : (
+                      workTypes.map((workType) => {
+                        const Icon = maintenanceTypeIcon(workType.slug);
+                        const selected = form.work_type_id === workType.id;
+                        return (
+                          <button
+                            key={workType.id}
+                            type="button"
+                            disabled={submitting}
+                            onClick={() =>
+                              setForm((current) => ({
+                                ...current,
+                                work_type_id: workType.id,
+                              }))
+                            }
+                            className={cn(
+                              "flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-center transition",
+                              selected
+                                ? "border-[#1C3A34] bg-[#1C3A34] text-white shadow-sm"
+                                : "border-slate-200 bg-white text-slate-600 hover:border-[#1C3A34]/30 hover:bg-[#1C3A34]/[0.03]",
+                            )}
+                          >
+                            <Icon className="size-4 shrink-0" />
+                            <span className="text-[11px] font-medium leading-tight">
+                              {workType.name}
+                            </span>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="maintenance-status" className="text-sm font-semibold text-slate-800">
+                <div className="space-y-3">
+                  <Label className="text-sm font-semibold text-slate-800">
                     {maintenanceCopy.status}
                   </Label>
-                  <Select
-                    items={statusItems}
-                    value={form.status}
-                    onValueChange={(value) =>
-                      setForm((current) => ({
-                        ...current,
-                        status: (value ?? "open") as VehicleMaintenanceStatus,
-                      }))
-                    }
-                    disabled={submitting}
-                  >
-                    <SelectTrigger
-                      id="maintenance-status"
-                      className={cn(adminInputClass, "w-full bg-white text-left font-normal flex items-center justify-between")}
-                    >
-                      <SelectValue placeholder={maintenanceCopy.status} />
-                    </SelectTrigger>
-                    <SelectContent side="bottom" align="start">
-                      <SelectGroup>
-                        {MAINTENANCE_STATUSES.map((status) => (
-                          <SelectItem key={status} value={status}>
-                            {detail.maintenanceStatuses[status]}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="maintenance-location-type" className="text-sm font-semibold text-slate-800">
-                    {locationTypeLabel}
-                  </Label>
-                  <Select
-                    items={locationTypeItems}
-                    value={form.location_type}
-                    onValueChange={(value) =>
-                      setForm((current) => ({
-                        ...current,
-                        location_type: (value ?? "external") as MaintenanceLocationType,
-                      }))
-                    }
-                    disabled={submitting}
-                  >
-                    <SelectTrigger
-                      id="maintenance-location-type"
-                      className={cn(adminInputClass, "w-full bg-white text-left font-normal flex items-center justify-between")}
-                    >
-                      <SelectValue placeholder={locationTypeLabel} />
-                    </SelectTrigger>
-                    <SelectContent side="bottom" align="start">
-                      <SelectGroup>
-                        <SelectItem value="internal">{internalLabel}</SelectItem>
-                        <SelectItem value="external">{externalLabel}</SelectItem>
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
+                  <div className="flex flex-wrap gap-2">
+                    {MAINTENANCE_STATUSES.map((status) => {
+                      const selected = form.status === status;
+                      return (
+                        <button
+                          key={status}
+                          type="button"
+                          disabled={submitting}
+                          onClick={() => setForm((current) => ({ ...current, status }))}
+                          className={cn(
+                            "inline-flex items-center rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
+                            selected
+                              ? cn(maintenanceStatusClass(status), "ring-1 ring-current/20")
+                              : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-700",
+                          )}
+                        >
+                          {detail.maintenanceStatuses[status]}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
                 <div className="space-y-1.5 rounded-xl border border-slate-100 bg-slate-50/40 p-4">

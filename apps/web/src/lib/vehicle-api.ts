@@ -7,8 +7,6 @@ import type {
   VehicleHistoryEvent,
   VehicleMaintenanceLog,
   VehicleMaintenanceStatus,
-  MaintenanceLocationType,
-  FuelLocationType,
   VehicleStatus,
 } from "@smart-dispatch/types";
 import { apiClient } from "./api-client";
@@ -50,6 +48,7 @@ export type CreateVehicleInput = {
   inspection_expires_at?: string | null;
   inspection_notes?: string | null;
   registration_expires_at?: string | null;
+  images?: string[];
 };
 
 export type UpdateVehicleInput = Partial<CreateVehicleInput>;
@@ -66,7 +65,6 @@ export type CreateVehicleMaintenanceInput = {
   completed_at?: string | null;
   next_due_at?: string | null;
   next_due_km?: number | null;
-  location_type?: MaintenanceLocationType;
 };
 
 export type UpdateVehicleMaintenanceInput = Partial<CreateVehicleMaintenanceInput>;
@@ -77,7 +75,6 @@ export type CreateVehicleFuelLogInput = {
   quantity_liters: number;
   total_cost: number;
   fuel_type?: VehicleFuelType;
-  location_type?: FuelLocationType;
   station_name: string;
   receipt_reference?: string | null;
   notes?: string | null;
@@ -169,12 +166,12 @@ export async function fetchVehicleComplianceSummary() {
   return unwrapApiResponse<{ summary: VehicleComplianceSummary }>(data).summary;
 }
 
-export async function createVehicle(input: CreateVehicleInput) {
+export async function createVehicle(input: CreateVehicleInput | FormData) {
   const { data } = await apiClient.post("/api/vehicles", input);
   return unwrapApiResponse<{ vehicle: Vehicle }>(data).vehicle;
 }
 
-export async function updateVehicle(id: string, input: UpdateVehicleInput) {
+export async function updateVehicle(id: string, input: UpdateVehicleInput | FormData) {
   const { data } = await apiClient.patch(`/api/vehicles/${id}`, input);
   return unwrapApiResponse<{ vehicle: Vehicle }>(data).vehicle;
 }
@@ -182,4 +179,13 @@ export async function updateVehicle(id: string, input: UpdateVehicleInput) {
 export async function deleteVehicle(id: string) {
   const { data } = await apiClient.delete(`/api/vehicles/${id}`);
   return unwrapApiResponse<{ message: string }>(data);
+}
+
+export async function fetchPublicVehicles() {
+  const { data } = await apiClient.get("/api/vehicles/public");
+  return unwrapApiResponse<{
+    vehicles: Vehicle[];
+    types: import("@smart-dispatch/types").VehicleType[];
+    classes: import("@smart-dispatch/types").VehicleClass[];
+  }>(data);
 }

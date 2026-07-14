@@ -95,10 +95,6 @@ export function MaintenanceLogDetailSheet({
   const canComplete = canWrite && (log.status === "open" || log.status === "in_progress");
   const notSet = sheetCopy.notSet;
 
-  const locationLabel = log.location_type === "internal"
-    ? (locale === "am" ? "ውስጣዊ" : "Internal")
-    : (locale === "am" ? "ውጫዊ" : "External");
-
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -125,9 +121,6 @@ export function MaintenanceLogDetailSheet({
                   <Badge variant="outline" className="border-slate-200 bg-white text-slate-600">
                     {log.work_type.name}
                   </Badge>
-                  <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
-                    {locationLabel}
-                  </Badge>
                 </div>
                 {vehicle ? (
                   <p className="font-mono text-sm font-semibold text-[#1C3A34]">
@@ -151,11 +144,6 @@ export function MaintenanceLogDetailSheet({
                 <h3 className="mb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">
                   {sheetCopy.request}
                 </h3>
-                <DetailRow
-                  icon={Store}
-                  label={locale === "am" ? "የጥገና ቦታ" : "Location"}
-                  value={locationLabel}
-                />
                 <DetailRow
                   icon={UserRound}
                   label={maintenanceCopy.requestedByLabel}

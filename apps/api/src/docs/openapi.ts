@@ -349,8 +349,8 @@ export const openApiSpec = {
     "/api/auth/token": {
       post: {
         tags: ["Auth"],
-        summary: "Refresh access token",
-        description: "Rotates the access token using a valid refresh token.",
+        summary: "Refresh tokens",
+        description: "Rotates JWT access and refresh tokens using an active refresh token.",
         requestBody: {
           required: true,
           content: {
@@ -359,7 +359,7 @@ export const openApiSpec = {
                 type: "object",
                 required: ["refresh_token"],
                 properties: {
-                  refresh_token: { type: "string" },
+                  refresh_token: { type: "string", description: "The active refresh token to rotate." },
                 },
               },
             },

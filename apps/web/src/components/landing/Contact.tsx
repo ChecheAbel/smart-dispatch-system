@@ -14,7 +14,7 @@ export default function Contact() {
     <section id="contact" className="bg-[#f8f7f4] py-16 sm:py-20 lg:py-24">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-8 sm:mb-12">
-          <p className="text-[#C9B87A] font-bold text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase mb-3">— Get in Touch —</p>
+          <p className="text-[#C9B87A] font-bold text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase mb-3">Get in Touch</p>
           <h2 className="text-3xl sm:text-4xl font-extrabold text-[#1C3A34] tracking-tight px-2">Talk to Our Team</h2>
           <p className="mt-3 text-slate-500 text-sm sm:text-base leading-relaxed px-2">
             Interested in Smart Dispatch? Reach out for a demo, pricing, or to learn how the platform can power your mobility operation.

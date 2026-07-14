@@ -235,7 +235,11 @@ export function RideRequestDetailSheet({
 
   const policyMessage = request
     ? request.can_edit
-      ? historyCopy.policyEdit
+      ? request.edit_deadline_at
+        ? formatMessage(historyCopy.policyEditDeadline, {
+            time: formatSubmittedAt(request.edit_deadline_at, locale),
+          })
+        : historyCopy.policyEdit
       : request.can_cancel
         ? request.cancel_deadline_at
           ? formatMessage(historyCopy.policyCancelDeadline, {
@@ -479,6 +483,13 @@ export function RideRequestDetailSheet({
                 label={historyCopy.detailCanCancel}
                 value={request.can_cancel ? historyCopy.detailYes : historyCopy.detailNo}
               />
+              {request.edit_deadline_at ? (
+                <DetailRow
+                  className="sm:col-span-2"
+                  label={historyCopy.detailEditDeadline}
+                  value={formatSubmittedAt(request.edit_deadline_at, locale)}
+                />
+              ) : null}
               {request.cancel_deadline_at ? (
                 <DetailRow
                   className="sm:col-span-2"

@@ -14,9 +14,11 @@ import {
   countRideRequestsForDriver,
   createRideRequest,
   findRideRequestForUser,
+  findRideRequestForDriver,
   listRideRequestsForDriver,
   listRideRequestsForUser,
   updateRideRequestForUser,
+  updateRideRequestStatusAdmin,
 } from "../models/ride-request.model";
 import { listVehicles, updateVehicle } from "../models/vehicle.model";
 import { toPublicVehicle } from "../mappers/vehicle.mapper";
@@ -51,6 +53,12 @@ import { listActiveContracts, getContractScopeIds, formatContractDate } from "..
 import { listRelevantEnrollmentsForUser } from "../models/contract-enrollment.model";
 import { listActiveVehicleTypesWithAllowedClasses } from "../models/vehicle-type-class.model";
 import { recordAuditLog } from "../services/audit-log.service";
+import {
+  validateDriverRideRequestStatusAction,
+  getDriverRideRequestTargetStatus,
+  type DriverRideRequestStatusAction,
+} from "../services/ride-request-admin-policy.service";
+import { syncDriverUpcomingTripsAfterChange } from "../services/driver-upcoming-trips-sync.service";
 import { queueRideRequestNotifications } from "../services/notification-dispatch.service";
 import { parseRideRequestPayload } from "../services/ride-request-payload.service";
 import { validateRideRequestReferences } from "../services/ride-request-reference.service";
@@ -810,6 +818,120 @@ router.patch(
         fuel_log: toPublicVehicleFuelLog(log, {
           previousOdometerKm: previousOdometerById.get(log.id) ?? null,
         }),
+      });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.get(
+  "/driver/:id",
+  requirePermission("driver.trip"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const locale = getRequestLocale(req);
+      const userId = req.user?.id;
+      const rideRequestId = req.params.id;
+
+      if (!userId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      const rideRequest = await findRideRequestForDriver(rideRequestId, userId);
+      if (!rideRequest) {
+        return sendError(res, "Ride request not found.", 404);
+      }
+
+      return sendSuccess(res, {
+        ride_request: toPublicRideRequest(rideRequest, { locale }),
+      });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+const DRIVER_STATUS_ACTIONS = new Set<DriverRideRequestStatusAction>([
+  "start",
+  "complete",
+]);
+
+function parseDriverStatusAction(value: unknown): DriverRideRequestStatusAction | null {
+  if (typeof value !== "string" || !DRIVER_STATUS_ACTIONS.has(value as DriverRideRequestStatusAction)) {
+    return null;
+  }
+  return value as DriverRideRequestStatusAction;
+}
+
+router.post(
+  "/driver/:id/status",
+  requirePermission("driver.trip"),
+  auditMutations(),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const locale = getRequestLocale(req);
+      const userId = req.user?.id;
+      const rideRequestId = req.params.id;
+      const action = parseDriverStatusAction(req.body?.action);
+
+      if (!userId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      if (!action) {
+        return sendError(res, "A valid action is required.", 400);
+      }
+
+      const existing = await findRideRequestForDriver(rideRequestId, userId);
+      if (!existing) {
+        return sendError(res, "Ride request not found or not assigned to you.", 404);
+      }
+
+      const validationError = validateDriverRideRequestStatusAction(existing.status, action, {
+        scheduledAt: existing.scheduledAt,
+      });
+      if (validationError) {
+        return sendError(res, validationError, 409);
+      }
+
+      const nextStatus = getDriverRideRequestTargetStatus(action);
+      const updated = await updateRideRequestStatusAdmin(rideRequestId, nextStatus);
+
+      if (!updated) {
+        return sendError(res, "Ride request not found.", 404);
+      }
+
+      await recordAuditLog({
+        actorUserId: userId,
+        action: "update",
+        module: "ride_requests",
+        entityType: "ride_request",
+        entityId: updated.id,
+        entityLabel: `${updated.pickupAddress} → ${updated.dropoffAddress}`,
+        summary: `Driver updated status to ${nextStatus}`,
+        req,
+      });
+
+      if (action === "start") {
+        queueRideRequestNotifications("started", updated.id);
+      } else if (action === "complete") {
+        queueRideRequestNotifications("completed", updated.id);
+      }
+
+      syncDriverUpcomingTripsAfterChange({
+        before: {
+          id: existing.id,
+          status: existing.status,
+          assignedDriverUserId: existing.assignedDriverUserId,
+          assignedVehicleId: existing.assignedVehicleId,
+          scheduledAt: existing.scheduledAt,
+        },
+        after: updated,
+      });
+
+      return sendSuccess(res, {
+        ride_request: toPublicRideRequest(updated, { locale }),
       });
     } catch (error) {
       return handleRouteError(res, error);

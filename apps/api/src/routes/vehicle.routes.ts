@@ -1,3 +1,4 @@
+import multer from "multer";
 import { Router, type Request, type Response } from "express";
 import { auditMutations } from "../middleware/audit-mutation";
 import { authenticate, type AuthenticatedRequest } from "../middleware/authenticate";
@@ -42,22 +43,40 @@ import {
   listVehicleMaintenanceLogs,
   parseVehicleFuelType,
   parseVehicleMaintenanceStatus,
-  parseMaintenanceLocationType,
-  parseFuelLocationType,
   updateVehicleFuelLog,
   updateVehicleMaintenanceLog,
 } from "../models/vehicle-ops.model";
 import { VehicleFuelLogSource, VehicleHistoryEventType, VehicleStatus } from "../generated/prisma";
 import { resolveMaintenanceWorkTypeId } from "../models/maintenance-work-type.model";
-import { findVehicleTypeById } from "../models/vehicle-type.model";
-import { findVehicleClassById } from "../models/vehicle-class.model";
+import { findVehicleTypeById, listVehicleTypes } from "../models/vehicle-type.model";
+import { findVehicleClassById, listVehicleClasses } from "../models/vehicle-class.model";
+import { toPublicVehicleType } from "../mappers/vehicle-type.mapper";
+import { toPublicVehicleClass } from "../mappers/vehicle-class.mapper";
 import { isVehicleTypeClassAllowed } from "../models/vehicle-type-class.model";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
-import { getOptionalString, getString, parseBoolean } from "../utils/validation";
+import { buildVehiclePhotoUrl, vehiclePhotoUpload } from "../utils/vehicle-photo-upload";
+import { getOptionalString, getString, getStringArray, parseBoolean } from "../utils/validation";
 import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
 
 const router = Router();
+
+router.get("/public", async (req: Request, res: Response) => {
+  try {
+    const locale = parseLocale(req.query, req.headers["accept-language"]);
+    const vehicles = await listVehicles({});
+    const types = await listVehicleTypes({});
+    const classes = await listVehicleClasses({});
+
+    return sendSuccess(res, {
+      vehicles: vehicles.map((v) => toPublicVehicle(v, { locale })),
+      types: types.map((t) => toPublicVehicleType(t, { locale })),
+      classes: classes.map((c) => toPublicVehicleClass(c, { locale })),
+    });
+  } catch (error) {
+    return handleRouteError(res, error);
+  }
+});
 
 router.use(authenticate, authorize("admin"), auditMutations());
 
@@ -67,8 +86,14 @@ function getRequestLocale(req: Request) {
 
 function parseYear(value: unknown) {
   if (value === null) return null;
-  if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
-  const year = Math.trunc(value);
+  const parsed =
+    typeof value === "number"
+      ? value
+      : typeof value === "string" && value.trim()
+        ? Number(value)
+        : undefined;
+  if (parsed === undefined || !Number.isFinite(parsed)) return undefined;
+  const year = Math.trunc(parsed);
   if (year < 1900 || year > 2100) return undefined;
   return year;
 }
@@ -343,7 +368,6 @@ router.post(
         type: req.body?.type,
       });
       const status = parseVehicleMaintenanceStatus(req.body?.status);
-      const locationType = parseMaintenanceLocationType(req.body?.location_type);
       const title = getString(req.body?.title);
 
       if (!workTypeId) {
@@ -354,15 +378,10 @@ router.post(
         return sendError(res, "Maintenance title is required.", 400);
       }
 
-      if (req.body?.location_type !== undefined && !locationType) {
-        return sendError(res, "A valid maintenance location type is required.", 400);
-      }
-
       const log = await createVehicleMaintenanceLog({
         vehicleId: vehicle.id,
         workTypeId,
         status,
-        locationType,
         title,
         description: getOptionalString(req.body?.description),
         vendor: getOptionalString(req.body?.vendor),
@@ -436,7 +455,6 @@ router.patch(
             })
           : undefined;
       const status = parseVehicleMaintenanceStatus(req.body?.status);
-      const locationType = parseMaintenanceLocationType(req.body?.location_type);
       const title = getOptionalString(req.body?.title);
 
       if (
@@ -452,10 +470,6 @@ router.patch(
         return sendError(res, "A valid maintenance status is required.", 400);
       }
 
-      if (req.body?.location_type !== undefined && !locationType) {
-        return sendError(res, "A valid maintenance location type is required.", 400);
-      }
-
       if (req.body?.title !== undefined && !title) {
         return sendError(res, "Maintenance title is required.", 400);
       }
@@ -463,7 +477,6 @@ router.patch(
       const log = await updateVehicleMaintenanceLog(existingLog.id, {
         workTypeId: workTypeId ?? undefined,
         status,
-        locationType,
         title: title ?? undefined,
         description: getOptionalString(req.body?.description),
         vendor: getOptionalString(req.body?.vendor),
@@ -571,7 +584,6 @@ router.post(
       const quantityLiters = parsePositiveQuantity(req.body?.quantity_liters);
       const loggedAt = parseLoggedAt(req.body?.logged_at) ?? new Date();
       const fuelType = parseVehicleFuelType(req.body?.fuel_type);
-      const locationType = parseFuelLocationType(req.body?.location_type);
 
       if (odometerKm === undefined) {
         return sendError(res, "A valid odometer reading (km) is required.", 400);
@@ -583,10 +595,6 @@ router.post(
 
       if (req.body?.fuel_type !== undefined && !fuelType) {
         return sendError(res, "A valid fuel type is required.", 400);
-      }
-
-      if (req.body?.location_type !== undefined && !locationType) {
-        return sendError(res, "A valid fuel location type is required.", 400);
       }
 
       const totalCost = parsePositiveQuantity(req.body?.total_cost);
@@ -607,7 +615,6 @@ router.post(
         quantityLiters,
         totalCost,
         fuelType,
-        locationType,
         stationName,
         receiptReference: getOptionalString(req.body?.receipt_reference),
         source: VehicleFuelLogSource.manual,
@@ -671,8 +678,6 @@ router.patch(
         req.body?.logged_at !== undefined ? parseLoggedAt(req.body.logged_at) : undefined;
       const fuelType =
         req.body?.fuel_type !== undefined ? parseVehicleFuelType(req.body.fuel_type) : undefined;
-      const locationType =
-        req.body?.location_type !== undefined ? parseFuelLocationType(req.body.location_type) : undefined;
 
       if (req.body?.odometer_km !== undefined && odometerKm === undefined) {
         return sendError(res, "A valid odometer reading (km) is required.", 400);
@@ -688,10 +693,6 @@ router.patch(
 
       if (req.body?.fuel_type !== undefined && !fuelType) {
         return sendError(res, "A valid fuel type is required.", 400);
-      }
-
-      if (req.body?.location_type !== undefined && !locationType) {
-        return sendError(res, "A valid fuel location type is required.", 400);
       }
 
       if (req.body?.total_cost !== undefined) {
@@ -714,7 +715,6 @@ router.patch(
         quantityLiters,
         totalCost: parseOptionalNumber(req.body?.total_cost),
         fuelType,
-        locationType,
         stationName: getOptionalString(req.body?.station_name),
         receiptReference: getOptionalString(req.body?.receipt_reference),
         notes: getOptionalString(req.body?.notes),
@@ -745,166 +745,226 @@ router.patch(
   },
 );
 
-router.post("/", requirePermission("vehicles.write"), async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const locale = getRequestLocale(req);
-    const plateNumber = getString(req.body?.plate_number);
-    const chassisNumber = getString(req.body?.chassis_number);
-    const vehicleTypeId = getString(req.body?.vehicle_type_id);
-    const vehicleClassId = getString(req.body?.vehicle_class_id);
-    const status = parseVehicleStatus(req.body?.status);
-    const year = parseYear(req.body?.year);
-    const assignedDriverUserId = parseAssignedDriverUserId(req.body?.assigned_driver_user_id);
+router.post("/", requirePermission("vehicles.write"), (req: AuthenticatedRequest, res: Response) => {
+  vehiclePhotoUpload.any()(req, res, async (uploadError) => {
+    if (uploadError) {
+      if (uploadError instanceof multer.MulterError) {
+        if (uploadError.code === "LIMIT_FILE_SIZE") {
+          return sendError(res, "Vehicle image must be 5 MB or smaller.", 400);
+        }
 
-    if (assignedDriverUserId) {
-      const canAssign = await assertCanAssignVehicleDriver(req, res);
-      if (!canAssign) {
-        return;
+        return sendError(res, `${uploadError.message}: ${uploadError.field}`, 400);
       }
+
+      return sendError(
+        res,
+        uploadError instanceof Error ? uploadError.message : "Upload failed.",
+        400,
+      );
     }
 
-    if (!plateNumber) {
-      return sendError(res, "Plate number is required.", 400);
+    if (((req.files as Express.Multer.File[]) ?? []).length > 8) {
+      return sendError(res, "You can upload a maximum of 8 vehicle images.", 400);
     }
 
-    if (!chassisNumber) {
-      return sendError(res, "Chassis number is required.", 400);
-    }
+    try {
+      const locale = getRequestLocale(req);
+      const plateNumber = getString(req.body?.plate_number);
+      const chassisNumber = getString(req.body?.chassis_number);
+      const vehicleTypeId = getString(req.body?.vehicle_type_id);
+      const vehicleClassId = getString(req.body?.vehicle_class_id);
+      const status = parseVehicleStatus(req.body?.status);
+      const year = parseYear(req.body?.year);
+      const assignedDriverUserId = parseAssignedDriverUserId(req.body?.assigned_driver_user_id);
+      const uploadedImages = (req.files ?? [])
+        .filter((file): file is Express.Multer.File => Boolean(file))
+        .map((file) => buildVehiclePhotoUrl(file.filename));
+      const existingImages = getStringArray(req.body?.vehicle_images_existing);
 
-    if (!vehicleTypeId) {
-      return sendError(res, "Vehicle type is required.", 400);
-    }
-
-    if (!vehicleClassId) {
-      return sendError(res, "Vehicle class is required.", 400);
-    }
-
-    const vehicleType = await findVehicleTypeById(vehicleTypeId);
-    if (!vehicleType) {
-      return sendError(res, "Vehicle type not found.", 404);
-    }
-
-    const vehicleClass = await findVehicleClassById(vehicleClassId);
-    if (!vehicleClass) {
-      return sendError(res, "Vehicle class not found.", 404);
-    }
-
-    const typeClassAllowed = await isVehicleTypeClassAllowed(vehicleTypeId, vehicleClassId);
-    if (!typeClassAllowed) {
-      return sendError(res, "Selected vehicle class is not allowed for this vehicle type.", 400);
-    }
-
-    const vehicle = await createVehicle({
-      plateNumber,
-      chassisNumber,
-      vehicleTypeId,
-      vehicleClassId,
-      assignedDriverUserId,
-      make: getOptionalString(req.body?.make),
-      model: getOptionalString(req.body?.model),
-      year: year ?? null,
-      status,
-      notes: getOptionalString(req.body?.notes),
-      ...parseComplianceBody(req.body ?? {}),
-      actorUserId: req.user?.id,
-    });
-
-    return sendSuccess(
-      res,
-      { vehicle: toPublicVehicle(vehicle, { locale }) },
-      { status: 201 },
-    );
-  } catch (error) {
-    const message = mapDriverAssignmentError(error);
-    if (message) {
-      return sendError(res, message, 400);
-    }
-    return handleRouteError(res, error);
-  }
-});
-
-router.patch("/:id", requirePermission("vehicles.write", "compliance.write"), async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const locale = getRequestLocale(req);
-    const existing = await findVehicleById(req.params.id);
-    if (!existing) {
-      return sendError(res, "Vehicle not found.", 404);
-    }
-
-    if (!(await assertCanPatchVehicle(req, res))) {
-      return;
-    }
-
-    if (req.body?.assigned_driver_user_id !== undefined) {
-      const assignedDriverUserId = parseAssignedDriverUserId(req.body.assigned_driver_user_id);
-      const nextDriverId = assignedDriverUserId ?? null;
-      const currentDriverId = existing.assignedDriverUserId ?? null;
-
-      if (nextDriverId !== currentDriverId) {
+      if (assignedDriverUserId) {
         const canAssign = await assertCanAssignVehicleDriver(req, res);
         if (!canAssign) {
           return;
         }
       }
-    }
 
-    const vehicleTypeId = getOptionalString(req.body?.vehicle_type_id);
-    const vehicleClassId = getOptionalString(req.body?.vehicle_class_id);
-    if (vehicleTypeId) {
+      if (!plateNumber) {
+        return sendError(res, "Plate number is required.", 400);
+      }
+
+      if (!chassisNumber) {
+        return sendError(res, "Chassis number is required.", 400);
+      }
+
+      if (!vehicleTypeId) {
+        return sendError(res, "Vehicle type is required.", 400);
+      }
+
+      if (!vehicleClassId) {
+        return sendError(res, "Vehicle class is required.", 400);
+      }
+
       const vehicleType = await findVehicleTypeById(vehicleTypeId);
       if (!vehicleType) {
         return sendError(res, "Vehicle type not found.", 404);
       }
-    }
 
-    if (vehicleClassId) {
       const vehicleClass = await findVehicleClassById(vehicleClassId);
       if (!vehicleClass) {
         return sendError(res, "Vehicle class not found.", 404);
       }
+
+      const typeClassAllowed = await isVehicleTypeClassAllowed(vehicleTypeId, vehicleClassId);
+      if (!typeClassAllowed) {
+        return sendError(res, "Selected vehicle class is not allowed for this vehicle type.", 400);
+      }
+
+      const vehicle = await createVehicle({
+        plateNumber,
+        chassisNumber,
+        vehicleTypeId,
+        vehicleClassId,
+        assignedDriverUserId,
+        make: getOptionalString(req.body?.make),
+        model: getOptionalString(req.body?.model),
+        year: year ?? null,
+        status,
+        notes: getOptionalString(req.body?.notes),
+        images: uploadedImages,
+        ...parseComplianceBody(req.body ?? {}),
+        actorUserId: req.user?.id,
+      });
+
+      return sendSuccess(
+        res,
+        { vehicle: toPublicVehicle(vehicle, { locale }) },
+        { status: 201 },
+      );
+    } catch (error) {
+      const message = mapDriverAssignmentError(error);
+      if (message) {
+        return sendError(res, message, 400);
+      }
+      return handleRouteError(res, error);
+    }
+  });
+});
+
+router.patch("/:id", requirePermission("vehicles.write", "compliance.write"), (req: AuthenticatedRequest, res: Response) => {
+  vehiclePhotoUpload.any()(req, res, async (uploadError) => {
+    if (uploadError) {
+      if (uploadError instanceof multer.MulterError) {
+        if (uploadError.code === "LIMIT_FILE_SIZE") {
+          return sendError(res, "Vehicle image must be 5 MB or smaller.", 400);
+        }
+
+        return sendError(res, `${uploadError.message}: ${uploadError.field}`, 400);
+      }
+
+      return sendError(
+        res,
+        uploadError instanceof Error ? uploadError.message : "Upload failed.",
+        400,
+      );
     }
 
-    const resolvedVehicleTypeId = vehicleTypeId ?? existing.vehicleTypeId;
-    const resolvedVehicleClassId = vehicleClassId ?? existing.vehicleClassId;
-    const typeClassAllowed = await isVehicleTypeClassAllowed(
-      resolvedVehicleTypeId,
-      resolvedVehicleClassId,
-    );
-    if (!typeClassAllowed) {
-      return sendError(res, "Selected vehicle class is not allowed for this vehicle type.", 400);
+    if (((req.files as Express.Multer.File[]) ?? []).length > 8) {
+      return sendError(res, "You can upload a maximum of 8 vehicle images.", 400);
     }
 
-    const assignedDriverUserId = parseAssignedDriverUserId(req.body?.assigned_driver_user_id);
+    try {
+      const locale = getRequestLocale(req);
+      const existing = await findVehicleById(req.params.id);
+      if (!existing) {
+        return sendError(res, "Vehicle not found.", 404);
+      }
 
-    if (req.body?.chassis_number !== undefined && !getString(req.body?.chassis_number)) {
-      return sendError(res, "Chassis number is required.", 400);
+      if (!(await assertCanPatchVehicle(req, res))) {
+        return;
+      }
+
+      if (req.body?.assigned_driver_user_id !== undefined) {
+        const assignedDriverUserId = parseAssignedDriverUserId(req.body.assigned_driver_user_id);
+        const nextDriverId = assignedDriverUserId ?? null;
+        const currentDriverId = existing.assignedDriverUserId ?? null;
+
+        if (nextDriverId !== currentDriverId) {
+          const canAssign = await assertCanAssignVehicleDriver(req, res);
+          if (!canAssign) {
+            return;
+          }
+        }
+      }
+
+      const vehicleTypeId = getOptionalString(req.body?.vehicle_type_id);
+      const vehicleClassId = getOptionalString(req.body?.vehicle_class_id);
+      if (vehicleTypeId) {
+        const vehicleType = await findVehicleTypeById(vehicleTypeId);
+        if (!vehicleType) {
+          return sendError(res, "Vehicle type not found.", 404);
+        }
+      }
+
+      if (vehicleClassId) {
+        const vehicleClass = await findVehicleClassById(vehicleClassId);
+        if (!vehicleClass) {
+          return sendError(res, "Vehicle class not found.", 404);
+        }
+      }
+
+      const resolvedVehicleTypeId = vehicleTypeId ?? existing.vehicleTypeId;
+      const resolvedVehicleClassId = vehicleClassId ?? existing.vehicleClassId;
+
+      const isTypeChanged = vehicleTypeId && vehicleTypeId !== existing.vehicleTypeId;
+      const isClassChanged = vehicleClassId && vehicleClassId !== existing.vehicleClassId;
+
+      if (isTypeChanged || isClassChanged) {
+        const typeClassAllowed = await isVehicleTypeClassAllowed(
+          resolvedVehicleTypeId,
+          resolvedVehicleClassId,
+        );
+        if (!typeClassAllowed) {
+          return sendError(res, "Selected vehicle class is not allowed for this vehicle type.", 400);
+        }
+      }
+
+      const assignedDriverUserId = parseAssignedDriverUserId(req.body?.assigned_driver_user_id);
+      const uploadedImages = (req.files ?? [])
+        .filter((file): file is Express.Multer.File => Boolean(file))
+        .map((file) => buildVehiclePhotoUrl(file.filename));
+      const existingImages = getStringArray(req.body?.vehicle_images_existing);
+
+      if (req.body?.chassis_number !== undefined && !getString(req.body?.chassis_number)) {
+        return sendError(res, "Chassis number is required.", 400);
+      }
+
+      const vehicle = await updateVehicle(req.params.id, {
+        plateNumber: getOptionalString(req.body?.plate_number) ?? undefined,
+        chassisNumber: getOptionalString(req.body?.chassis_number),
+        vehicleTypeId: vehicleTypeId ?? undefined,
+        vehicleClassId: vehicleClassId ?? undefined,
+        assignedDriverUserId,
+        make: getOptionalString(req.body?.make),
+        model: getOptionalString(req.body?.model),
+        year: parseYear(req.body?.year),
+        status: parseVehicleStatus(req.body?.status),
+        notes: getOptionalString(req.body?.notes),
+        images: [...existingImages, ...uploadedImages],
+        ...parseComplianceBody(req.body ?? {}),
+        actorUserId: req.user?.id,
+      });
+
+      return sendSuccess(res, {
+        vehicle: toPublicVehicle(vehicle, { locale }),
+      });
+    } catch (error) {
+      const message = mapDriverAssignmentError(error);
+      if (message) {
+        return sendError(res, message, 400);
+      }
+      return handleRouteError(res, error);
     }
-
-    const vehicle = await updateVehicle(req.params.id, {
-      plateNumber: getOptionalString(req.body?.plate_number) ?? undefined,
-      chassisNumber: getOptionalString(req.body?.chassis_number),
-      vehicleTypeId: vehicleTypeId ?? undefined,
-      vehicleClassId: vehicleClassId ?? undefined,
-      assignedDriverUserId,
-      make: getOptionalString(req.body?.make),
-      model: getOptionalString(req.body?.model),
-      year: parseYear(req.body?.year),
-      status: parseVehicleStatus(req.body?.status),
-      notes: getOptionalString(req.body?.notes),
-      ...parseComplianceBody(req.body ?? {}),
-      actorUserId: req.user?.id,
-    });
-
-    return sendSuccess(res, {
-      vehicle: toPublicVehicle(vehicle, { locale }),
-    });
-  } catch (error) {
-    const message = mapDriverAssignmentError(error);
-    if (message) {
-      return sendError(res, message, 400);
-    }
-    return handleRouteError(res, error);
-  }
+  });
 });
 
 router.delete("/:id", requirePermission("vehicles.delete"), async (req: Request, res: Response) => {

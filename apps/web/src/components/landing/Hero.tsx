@@ -13,19 +13,19 @@ export default function Hero() {
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center gap-6 sm:gap-8">
         {/* Headline */}
         <h1 className="text-[2rem] leading-[1.1] sm:text-5xl lg:text-7xl font-extrabold text-white tracking-tight max-w-4xl animate-landing-fade-up [animation-delay:100ms]">
-          Run Your Entire{" "}
+          Ethiopia's Premier{" "}
           <span className="relative inline-block">
             <span className="bg-gradient-to-r from-[#C9B87A] via-[#e8d69a] to-[#C9B87A] bg-clip-text text-transparent">
-              Mobility Operation
+              Corporate Dispatch
             </span>
             <span className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#C9B87A]/60 to-transparent" />
           </span>
-          {" "}in One Place
+          {" "}& Fleet Platform
         </h1>
 
         {/* Subheading */}
         <p className="text-base sm:text-lg lg:text-xl text-white/60 max-w-2xl leading-relaxed font-light tracking-wide animate-landing-fade-up [animation-delay:220ms] px-1">
-          Smart Dispatch is an all-in-one platform for booking, dispatching, fleet and driver management, billing, and invoicing—built for operators who need premium control at scale.
+          Smart Dispatch is a localized, enterprise-grade platform for corporate contracts, booking dispatches, driver shifts, and ETB invoicing, built for fleet operators and transport agencies in Ethiopia.
         </p>
 
         {/* CTA Buttons */}
@@ -47,9 +47,9 @@ export default function Hero() {
         {/* Stats bar */}
         <div className="mt-2 sm:mt-6 w-full grid grid-cols-1 min-[480px]:grid-cols-3 gap-px bg-white/10 rounded-2xl overflow-hidden border border-white/10 animate-landing-fade-up [animation-delay:460ms] max-w-lg min-[480px]:max-w-none">
           {[
-            { num: "6+", label: "Core Modules" },
-            { num: "Real-time", label: "Dispatch Engine" },
-            { num: "End-to-end", label: "Billing & Invoices" },
+            { num: "English & Amharic", label: "Locales supported" },
+            { num: "Invoicing in Birr", label: "Corporate billing" },
+            { num: "Region-Based", label: "Pricing & rules" },
           ].map((stat) => (
             <div key={stat.label} className="bg-white/5 backdrop-blur-sm px-4 sm:px-6 lg:px-8 py-4 sm:py-5 text-center">
               <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#C9B87A] tracking-tight">{stat.num}</div>

@@ -33,6 +33,7 @@ import type {
   CustomerContractsMessages,
   CustomerInvoicesMessages,
   AdminProfileMessages,
+  AdminDeadlineSettingsMessages,
   Translations,
 } from "./types";
 
@@ -73,6 +74,7 @@ export type {
   CustomerContractsMessages,
   CustomerInvoicesMessages,
   AdminProfileMessages,
+  AdminDeadlineSettingsMessages,
   Translations,
 };
 export { formatMessage } from "./format";
@@ -227,4 +229,10 @@ export function getCustomerInvoicesMessages(locale: SupportedLocale): CustomerIn
 
 export function getAdminProfileMessages(locale: SupportedLocale): AdminProfileMessages {
   return getTranslations(locale).adminProfile;
+}
+
+export function getAdminDeadlineSettingsMessages(
+  locale: SupportedLocale,
+): AdminDeadlineSettingsMessages {
+  return getTranslations(locale).adminDeadlineSettings;
 }

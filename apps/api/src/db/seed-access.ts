@@ -21,6 +21,8 @@ const DEFAULT_PERMISSIONS = [
   { slug: "notifications.read", module: "notifications", action: "read", description: "View notification settings" },
   { slug: "notifications.write", module: "notifications", action: "write", description: "Manage notification settings" },
   { slug: "notifications.delete", module: "notifications", action: "delete", description: "Delete notification resources" },
+  { slug: "system_settings.read", module: "system_settings", action: "read", description: "View system settings" },
+  { slug: "system_settings.write", module: "system_settings", action: "write", description: "Update system settings" },
   { slug: "audit_logs.read", module: "audit_logs", action: "read", description: "View audit logs" },
   { slug: "vehicle_types.read", module: "vehicle_types", action: "read", description: "View vehicle types" },
   { slug: "vehicle_types.write", module: "vehicle_types", action: "write", description: "Create and update vehicle types" },
@@ -55,6 +57,7 @@ const DEFAULT_PERMISSIONS = [
   { slug: "ride_requests.read", module: "ride_requests", action: "read", description: "View customer ride requests in admin dispatch" },
   { slug: "ride_requests.write", module: "ride_requests", action: "write", description: "Approve, assign, start, complete, or reject ride requests" },
   { slug: "driver.vehicle", module: "driver", action: "vehicle", description: "Driver can get their assigned vehicle (GET /api/ride-requests/driver/vehicle)" },
+  { slug: "driver.trip", module: "driver", action: "trip", description: "Driver can get trip details for assigned rides (GET /api/ride-requests/driver/:id)" },
   { slug: "driver.upcoming", module: "driver", action: "upcoming", description: "Driver can list upcoming trips and connect to the upcoming-trips Socket.IO namespace (/api/ride-requests/driver/upcoming)" },
   { slug: "driver.history", module: "driver", action: "history", description: "Driver can list past trips (GET /api/ride-requests/driver/history)" },
   { slug: "driver.maintenance", module: "driver", action: "maintenance", description: "Driver can list and request maintenance for their assigned vehicle (GET/POST /api/ride-requests/driver/maintenance)" },
@@ -228,6 +231,17 @@ const DEFAULT_MENUS = [
     translations: [
       { locale: "en", label: "Delivery Log" },
       { locale: "am", label: "የማድረስ መዝገብ" },
+    ],
+  },
+  {
+    slug: "deadline-settings",
+    path: "/admin/system-settings/deadline",
+    icon: "clock",
+    sortOrder: 40,
+    parentSlug: "system-settings",
+    translations: [
+      { locale: "en", label: "Deadline Hub" },
+      { locale: "am", label: "የጊዜ ገደብ ማዕከል" },
     ],
   },
   {
@@ -585,6 +599,8 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "customer_billing.invoices.list", method: "GET", path: "/api/me/invoices", description: "List invoices for current customer", permissionSlug: "customer_invoices.read" },
   { slug: "customer_billing.invoices.get", method: "GET", path: "/api/me/invoices/:id", description: "Get invoice for current customer", permissionSlug: "customer_invoices.read" },
   { slug: "ride_requests.driver_vehicle", method: "GET", path: "/api/ride-requests/driver/vehicle", description: "Get vehicle assigned to driver", permissionSlug: "driver.vehicle" },
+  { slug: "ride_requests.driver_trip", method: "GET", path: "/api/ride-requests/driver/:id", description: "Get trip details for an assigned driver ride", permissionSlug: "driver.trip" },
+  { slug: "ride_requests.driver_trip_status", method: "POST", path: "/api/ride-requests/driver/:id/status", description: "Change status of assigned driver ride (start/complete)", permissionSlug: "driver.trip" },
   { slug: "ride_requests.driver_upcoming", method: "GET", path: "/api/ride-requests/driver/upcoming", description: "List upcoming trips for driver", permissionSlug: "driver.upcoming" },
   { slug: "ride_requests.driver_upcoming_ws", method: "GET", path: "SOCKET /api/ride-requests/driver/upcoming", description: "Live upcoming trips Socket.IO namespace for driver", permissionSlug: "driver.upcoming" },
   { slug: "ride_requests.driver_history", method: "GET", path: "/api/ride-requests/driver/history", description: "List trip history for driver", permissionSlug: "driver.history" },
@@ -600,7 +616,6 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "admin_ride_requests.assignable_vehicles", method: "GET", path: "/api/admin/ride-requests/:id/assignable-vehicles", description: "List assignable vehicles for ride request", permissionSlug: "ride_requests.read" },
   { slug: "admin_ride_requests.assign", method: "POST", path: "/api/admin/ride-requests/:id/assign", description: "Assign vehicle to ride request", permissionSlug: "ride_requests.write" },
   { slug: "admin_ride_requests.unassign", method: "POST", path: "/api/admin/ride-requests/:id/unassign", description: "Unassign vehicle from ride request", permissionSlug: "ride_requests.write" },
-  { slug: "admin_ride_requests.status", method: "POST", path: "/api/admin/ride-requests/:id/status", description: "Update ride request dispatch status", permissionSlug: "ride_requests.write" },
 ];
 
 async function seedPermissions() {
@@ -753,7 +768,7 @@ async function seedDriverRolePermissions() {
 
   const permissions = await prisma.permission.findMany({
     where: {
-      slug: { in: ["driver.vehicle", "driver.upcoming", "driver.history", "driver.maintenance", "driver.fuel"] },
+      slug: { in: ["driver.vehicle", "driver.trip", "driver.upcoming", "driver.history", "driver.maintenance", "driver.fuel"] },
     },
     orderBy: { slug: "asc" },
   });

@@ -193,6 +193,8 @@ export const RIDE_REQUEST_NOTIFICATION_PLACEHOLDERS = [
   "rejection_reason",
   "status",
   "reference",
+  "cancel_deadline_minutes",
+  "cancel_deadline_at",
 ] as const;
 
 export const USER_REGISTRATION_NOTIFICATION_PLACEHOLDERS = [
@@ -367,8 +369,6 @@ export type VehicleMaintenanceType = string;
 
 export type VehicleMaintenanceStatus = "open" | "in_progress" | "completed" | "cancelled";
 
-export type MaintenanceLocationType = "internal" | "external";
-
 export interface MaintenanceWorkTypeTranslation {
   locale: string;
   name: string;
@@ -425,6 +425,7 @@ export interface Vehicle {
     id: string;
     slug: string;
     name: string;
+    passenger_capacity: number | null;
   };
   vehicle_class_id: string;
   vehicle_class?: {
@@ -444,6 +445,7 @@ export interface Vehicle {
   year: number | null;
   status: VehicleStatus;
   notes: string | null;
+  images: string[];
   insurance_provider: string | null;
   insurance_policy_number: string | null;
   insurance_issued_at: string | null;
@@ -468,7 +470,6 @@ export interface VehicleMaintenanceLog {
   /** Slug alias of `work_type` for backward compatibility. */
   type: string;
   status: VehicleMaintenanceStatus;
-  location_type: MaintenanceLocationType;
   title: string;
   description: string | null;
   vendor: string | null;
@@ -491,8 +492,6 @@ export type VehicleFuelType = "diesel" | "petrol" | "other";
 
 export type VehicleFuelLogSource = "manual" | "driver_app" | "import";
 
-export type FuelLocationType = "internal" | "external";
-
 export interface VehicleFuelLog {
   id: string;
   vehicle_id: string;
@@ -502,7 +501,6 @@ export interface VehicleFuelLog {
   total_cost: number | null;
   price_per_liter: number | null;
   fuel_type: VehicleFuelType;
-  location_type: FuelLocationType;
   station_name: string | null;
   receipt_reference: string | null;
   source: VehicleFuelLogSource;
@@ -729,6 +727,7 @@ export interface RideRequestLocalizedName {
 export interface RideRequest {
   id: string;
   requester_user_id: string;
+  requester?: RideRequestRequesterSummary | null;
   vehicle_type_id: string | null;
   vehicle_type?: {
     id: string;
@@ -809,6 +808,7 @@ export interface RideRequest {
   can_edit: boolean;
   can_cancel: boolean;
   cancel_deadline_at: string | null;
+  edit_deadline_at: string | null;
 }
 
 export interface RideRequestRequesterSummary {

@@ -191,10 +191,11 @@ export function registerAuthRoutes(app: Express) {
 
   app.post("/api/auth/token", async (req: Request, res: Response) => {
     try {
-      const refreshToken = typeof req.body?.refresh_token === "string" ? req.body.refresh_token : "";
+      const refreshToken =
+        typeof req.body?.refresh_token === "string" ? req.body.refresh_token : "";
 
       if (!refreshToken) {
-        return sendError(res, "Refresh token is required.", 400);
+        return sendError(res, "refresh_token is required.", 400);
       }
 
       const result = await refreshAccessToken(refreshToken);

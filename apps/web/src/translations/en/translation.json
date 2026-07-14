@@ -73,8 +73,8 @@
       "requestsDescription": "Pending vehicle dispatch requests",
       "tripsTitle": "Trips in progress",
       "tripsDescription": "Live trips currently on the road",
-      "invoicesTitle": "Unpaid invoices",
-      "invoicesDescription": "Invoices awaiting payment"
+      "profileTitle": "Profile",
+      "profileDescription": "Account settings and preferences"
     },
     "comingSoonCharts": {
       "sectionTitle": "Activity insights",
@@ -275,6 +275,7 @@
     "detailCanEdit": "Can edit",
     "detailCanCancel": "Can cancel",
     "detailCancelDeadline": "Cancel deadline",
+    "detailEditDeadline": "Edit deadline",
     "detailYes": "Yes",
     "detailNo": "No",
     "detailAsap": "As soon as possible",
@@ -304,11 +305,12 @@
     "detailMapDuration": "Est. drive time",
     "detailMapStraightLine": "Straight-line",
     "policyEdit": "You can edit this request while it is still pending.",
-    "policyCancel": "You can cancel within 15 minutes of submitting while the request is pending.",
+    "policyEditDeadline": "Edit before {time}",
+    "policyCancel": "You can cancel while the request is still pending.",
     "policyCancelDeadline": "Cancel before {time}",
     "policyLocked": "This request can no longer be changed from your account.",
     "notEditable": "Only pending requests can be edited.",
-    "notCancellable": "Cancellation is only available for pending requests within 15 minutes of submission.",
+    "notCancellable": "Cancellation is only available for pending requests before the configured deadline.",
     "emptyTitle": "No requests found",
     "emptyDescription": "Your ride requests will appear here after you submit them.",
     "emptySearchDescription": "Try a different search term or clear the status filter.",
@@ -475,17 +477,17 @@
     "operations": {
       "title": "Ride requests",
       "description": "Customer booking pipeline and live dispatches",
-      "pendingTitle": "Pending review",
+      "pendingTitle": "Pending Ride Requests",
       "pendingDescription": "Awaiting admin confirmation",
       "upcomingTitle": "Upcoming trips",
       "upcomingDescription": "Confirmed and scheduled",
-      "inProgressTitle": "In progress",
+      "inProgressTitle": "Active Trips",
       "inProgressDescription": "Currently on the road"
     },
     "compliance": {
       "title": "Fleet compliance",
       "description": "Insurance and inspection expiry across the fleet",
-      "attentionTitle": "Needs attention",
+      "attentionTitle": "Compliance Alerts",
       "attentionDescription": "Expired or due soon",
       "insuranceExpiredTitle": "Insurance expired",
       "insuranceExpiredDescription": "Vehicles with lapsed coverage",
@@ -1684,7 +1686,9 @@
           "vehicle_plate": "Assigned vehicle plate number",
           "rejection_reason": "Reason when a request is declined",
           "status": "Current request status",
-          "reference": "Short request reference code"
+          "reference": "Short request reference code",
+          "cancel_deadline_minutes": "Configured cancel window in minutes",
+          "cancel_deadline_at": "Formatted cancel deadline time"
         },
         "userRegistrations": {
           "applicant_name": "Applicant full name",
@@ -2869,18 +2873,20 @@
         "4": "Bus",
         "5": "Motorcycle"
       },
-      "sections": {
-        "plate": "Plate registration",
+    "sections": {
+      "plate": "Plate registration",
         "plateDescription": "Ethiopian license plate format: region, category code, and serial number.",
         "platePreviewEmpty": "AA-1-31209",
         "classification": "Classification",
         "classificationDescription": "Vehicle category, service class, and operational status.",
         "assignment": "Default driver",
         "assignmentDescription": "Optional during registration. Required before this vehicle can be used in ride dispatch.",
-        "details": "Vehicle details",
-        "detailsDescription": "Identification, manufacturer information, and optional fleet notes."
-      },
-      "vehicleType": "Vehicle type",
+      "details": "Vehicle details",
+      "detailsDescription": "Identification, manufacturer information, optional fleet notes, and vehicle images."
+    },
+    "vehicleImages": "Vehicle photos",
+    "vehicleImagesEmpty": "No photos uploaded yet.",
+    "vehicleType": "Vehicle type",
       "vehicleTypePlaceholder": "Select type",
       "vehicleClass": "Vehicle class",
       "vehicleClassPlaceholder": "Select class",
@@ -2897,9 +2903,12 @@
       "year": "Year",
       "yearPlaceholder": "2024",
       "status": "Status",
-      "notes": "Notes",
-      "notesPlaceholder": "Optional notes",
-      "optional": "(optional)",
+  "notes": "Notes",
+  "notesPlaceholder": "Optional notes",
+  "images": "Vehicle images",
+  "imagesHint": "Upload one or more JPG, PNG, or WEBP images.",
+  "imagesSelected": "{count} image(s) selected",
+  "optional": "(optional)",
       "cancel": "Cancel",
       "create": "Create vehicle",
       "creating": "Creating...",
@@ -3572,10 +3581,6 @@
     "description": "Generate and manage contract invoices from completed trips.",
     "searchPlaceholder": "Search by reference, contract, or customer...",
     "itemLabel": "invoice",
-    "filters": {
-      "status": "Status",
-      "statusAll": "All statuses"
-    },
     "stats": {
       "totalTitle": "Total invoices",
       "totalDescription": "All invoices generated on the platform",
@@ -3935,6 +3940,82 @@
       "deleteFailed": {
         "title": "Could not delete endpoint",
         "description": "Please try again in a moment."
+      }
+    }
+  },
+  "adminDeadlineSettings": {
+    "eyebrow": "System settings",
+    "title": "Deadline hub",
+    "description": "Configure the platform-wide deadline windows used for ride requests, invoices, and compliance alerts.",
+    "loading": "Loading deadline settings...",
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to system settings is required to open this page. Ask an administrator to grant the system_settings.read permission for your role.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "previews": {
+      "minutes": "{value} minutes",
+      "days": "{value} days",
+      "empty": "—"
+    },
+    "modules": {
+      "ride_request_cancel_grace_minutes": {
+        "title": "Ride requests",
+        "description": "Control how long customers can cancel a pending ride request.",
+        "helper": "Used by ride request details, cancellation rules, and message templates.",
+        "label": "Cancel deadline"
+      },
+      "ride_request_edit_grace_minutes": {
+        "title": "Ride requests edit grace",
+        "description": "Control how long customers can edit a pending ride request after submission.",
+        "helper": "Used by ride request details, edit policies, and forms.",
+        "label": "Edit deadline"
+      },
+      "invoice_due_soon_days": {
+        "title": "Invoices",
+        "description": "Define how many days before due date an invoice enters the due-soon window.",
+        "helper": "Used for invoice reminders, dashboard flags, and payment workflows.",
+        "label": "Due-soon window"
+      },
+      "insurance_due_soon_days": {
+        "title": "Insurance compliance",
+        "description": "Set when insurance records should be highlighted as due soon.",
+        "helper": "Used across vehicle compliance views and insurance alert templates.",
+        "label": "Due-soon window"
+      },
+      "inspection_due_soon_days": {
+        "title": "Inspection compliance",
+        "description": "Set when inspection records should be highlighted as due soon.",
+        "helper": "Used across vehicle compliance views and inspection alert templates.",
+        "label": "Due-soon window"
+      }
+    },
+    "configure": {
+      "title": "Configure module deadlines",
+      "description": "Each setting updates the corresponding reminders, dashboards, and message templates.",
+      "rangeInfo": "Enter a value between {min} and {max} {suffix}.",
+      "saveButton": "Save setting",
+      "savingButton": "Saving..."
+    },
+    "toast": {
+      "loadFailed": {
+        "title": "Could not load deadline settings",
+        "description": "Please try again or refresh the page."
+      },
+      "updateSuccess": {
+        "title": "Deadline settings updated",
+        "description": "The deadline options have been saved successfully."
+      },
+      "updateFailed": {
+        "title": "Could not save settings",
+        "description": "Please verify the values and try again."
+      },
+      "invalidValues": {
+        "title": "Invalid deadline values",
+        "description": "Please enter valid values within the allowed range for every module."
       }
     }
   }

@@ -89,10 +89,6 @@ export function FuelLogDetailSheet({
     log.station_name?.trim() ||
     formatMessage(fuelCopy.refillFallback, { quantity: formatFuelQuantity(log.quantity_liters) });
 
-  const locationLabel = log.location_type === "internal"
-    ? (locale === "am" ? "ውስጣዊ" : "Internal")
-    : (locale === "am" ? "ውጫዊ" : "External");
-
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
@@ -122,9 +118,6 @@ export function FuelLogDetailSheet({
                   >
                     {formatFuelEfficiency(log.consumption_km_per_liter, fuelCopy)}
                   </Badge>
-                  <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700">
-                    {locationLabel}
-                  </Badge>
                 </div>
                 {vehicle ? (
                   <p className="font-mono text-sm font-semibold text-[#1C3A34]">
@@ -148,11 +141,6 @@ export function FuelLogDetailSheet({
                 <h3 className="mb-1 text-xs font-semibold tracking-wide text-slate-400 uppercase">
                   {sheetCopy.request}
                 </h3>
-                <DetailRow
-                  icon={Store}
-                  label={locale === "am" ? "የነዳጅ መሙያ ቦታ" : "Location"}
-                  value={locationLabel}
-                />
                 <DetailRow
                   icon={UserRound}
                   label={fuelCopy.loggedByLabel}

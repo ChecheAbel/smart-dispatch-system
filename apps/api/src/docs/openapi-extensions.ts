@@ -4,17 +4,47 @@
  */
 
 export const extensionTags = [
-  { name: "Notifications", description: "Email/SMS provider settings and message templates (admin only)" },
-  { name: "Notification Delivery Logs", description: "History of sent, skipped, and failed notification deliveries (admin only)" },
+  {
+    name: "Notifications",
+    description:
+      "Email/SMS provider settings and message templates (admin only)",
+  },
+  {
+    name: "System Settings",
+    description:
+      "Configurable platform settings such as deadline configurations (admin only)",
+  },
+  {
+    name: "Notification Delivery Logs",
+    description:
+      "History of sent, skipped, and failed notification deliveries (admin only)",
+  },
   { name: "Audit Logs", description: "Platform audit trail (admin only)" },
-  { name: "Vehicles", description: "Fleet vehicle registry and default driver assignment (admin only)" },
-  { name: "Maintenance Work Types", description: "Configurable maintenance work categories used by vehicle maintenance logs (admin only)" },
-  { name: "Admin Ride Requests", description: "Ride request review, dispatch, status management, and driver trip views." },
-  { name: "Contracts", description: "Customer commercial agreements linked to fare plans and ride requests (admin only)" },
+  {
+    name: "Vehicles",
+    description:
+      "Fleet vehicle registry and default driver assignment (admin only)",
+  },
+  {
+    name: "Maintenance Work Types",
+    description:
+      "Configurable maintenance work categories used by vehicle maintenance logs (admin only)",
+  },
+  {
+    name: "Admin Ride Requests",
+    description:
+      "Ride request review, dispatch, status management, and driver trip views.",
+  },
+  {
+    name: "Contracts",
+    description:
+      "Customer commercial agreements linked to fare plans and ride requests (admin only)",
+  },
 ] as const;
 
 const rideRequestStatusEnumDescriptions = {
-  pending: "Submitted and waiting for admin review. Admin only; never returned by driver endpoints.",
+  pending:
+    "Submitted and waiting for admin review. Admin only; never returned by driver endpoints.",
   confirmed: "Approved and scheduled",
   in_progress: "Trip has started",
   completed: "Trip finished",
@@ -64,7 +94,8 @@ export const extensionParameters = {
 export const extensionSchemas = {
   NotificationConfiguration: {
     type: "object",
-    description: "Provider configuration for a notification channel. Credential values in `settings` are masked in responses.",
+    description:
+      "Provider configuration for a notification channel. Credential values in `settings` are masked in responses.",
     properties: {
       id: { type: "string", format: "uuid" },
       channel: { type: "string", enum: ["email", "sms"] },
@@ -75,7 +106,10 @@ export const extensionSchemas = {
       reply_to: { type: "string", format: "email", nullable: true },
       sender_id: { type: "string", nullable: true },
       settings: { type: "object", additionalProperties: true },
-      has_credentials: { type: "boolean", description: "Whether API credentials are stored for this channel" },
+      has_credentials: {
+        type: "boolean",
+        description: "Whether API credentials are stored for this channel",
+      },
       created_at: { type: "string", format: "date-time" },
       updated_at: { type: "string", format: "date-time" },
     },
@@ -86,16 +120,32 @@ export const extensionSchemas = {
       "Message template for a module event and channel. Body and subject may include placeholders such as `{{requester_name}}` or `{{applicant_name}}` depending on module.",
     properties: {
       id: { type: "string", format: "uuid" },
-      module: { type: "string", enum: ["ride_requests", "user_registrations", "insurance", "inspection"] },
+      module: {
+        type: "string",
+        enum: [
+          "ride_requests",
+          "user_registrations",
+          "insurance",
+          "inspection",
+        ],
+      },
       event: {
         type: "string",
-        description: "Module-specific event slug (e.g. `created`, `approved`, `assigned`)",
+        description:
+          "Module-specific event slug (e.g. `created`, `approved`, `assigned`)",
         example: "created",
       },
       channel: { type: "string", enum: ["email", "sms"] },
-      recipient: { type: "string", enum: ["requester", "driver", "applicant", "fleet_manager"] },
+      recipient: {
+        type: "string",
+        enum: ["requester", "driver", "applicant", "fleet_manager"],
+      },
       is_enabled: { type: "boolean" },
-      subject: { type: "string", nullable: true, description: "Email subject (null for SMS)" },
+      subject: {
+        type: "string",
+        nullable: true,
+        description: "Email subject (null for SMS)",
+      },
       body: { type: "string" },
       created_at: { type: "string", format: "date-time" },
       updated_at: { type: "string", format: "date-time" },
@@ -106,18 +156,36 @@ export const extensionSchemas = {
     properties: {
       id: { type: "string", format: "uuid" },
       status: { type: "string", enum: ["sent", "skipped", "failed"] },
-      module: { type: "string", enum: ["ride_requests", "user_registrations", "insurance", "inspection"] },
+      module: {
+        type: "string",
+        enum: [
+          "ride_requests",
+          "user_registrations",
+          "insurance",
+          "inspection",
+        ],
+      },
       event: { type: "string" },
       channel: { type: "string", enum: ["email", "sms"] },
-      recipient: { type: "string", enum: ["requester", "driver", "applicant", "fleet_manager"] },
+      recipient: {
+        type: "string",
+        enum: ["requester", "driver", "applicant", "fleet_manager"],
+      },
       template_id: { type: "string", format: "uuid", nullable: true },
       entity_type: { type: "string", nullable: true, example: "ride_request" },
       entity_id: { type: "string", format: "uuid", nullable: true },
-      recipient_contact: { type: "string", nullable: true, description: "Email address or phone number used" },
+      recipient_contact: {
+        type: "string",
+        nullable: true,
+        description: "Email address or phone number used",
+      },
       subject: { type: "string", nullable: true },
       body_preview: { type: "string", nullable: true },
       error_message: { type: "string", nullable: true },
-      is_test: { type: "boolean", description: "True when sent from the admin test panel" },
+      is_test: {
+        type: "boolean",
+        description: "True when sent from the admin test panel",
+      },
       created_at: { type: "string", format: "date-time" },
     },
   },
@@ -136,7 +204,16 @@ export const extensionSchemas = {
       id: { type: "string", format: "uuid" },
       action: {
         type: "string",
-        enum: ["create", "update", "delete", "login", "logout", "assign", "revoke", "test"],
+        enum: [
+          "create",
+          "update",
+          "delete",
+          "login",
+          "logout",
+          "assign",
+          "revoke",
+          "test",
+        ],
       },
       module: { type: "string", example: "vehicles" },
       entity_type: { type: "string", nullable: true },
@@ -187,7 +264,8 @@ export const extensionSchemas = {
   },
   MaintenanceWorkTypeSummary: {
     type: "object",
-    description: "Localized summary of a maintenance work type embedded on maintenance logs.",
+    description:
+      "Localized summary of a maintenance work type embedded on maintenance logs.",
     properties: {
       id: { type: "string", format: "uuid" },
       slug: { type: "string", example: "repair" },
@@ -231,7 +309,8 @@ export const extensionSchemas = {
         type: "array",
         minItems: 1,
         items: { $ref: "#/components/schemas/MaintenanceWorkTypeTranslation" },
-        description: "At least one translation is required, including English (`en`). Slug is generated from the English name.",
+        description:
+          "At least one translation is required, including English (`en`). Slug is generated from the English name.",
       },
       is_active: { type: "boolean", default: true },
       sort_order: { type: "integer", default: 0 },
@@ -249,7 +328,11 @@ export const extensionSchemas = {
       vehicle_type: { $ref: "#/components/schemas/VehicleTypeSummary" },
       vehicle_class_id: { type: "string", format: "uuid" },
       vehicle_class: { $ref: "#/components/schemas/VehicleClassSummary" },
-      assigned_driver_user_id: { type: "string", format: "uuid", nullable: true },
+      assigned_driver_user_id: {
+        type: "string",
+        format: "uuid",
+        nullable: true,
+      },
       assigned_driver: {
         allOf: [{ $ref: "#/components/schemas/VehicleDriverSummary" }],
         nullable: true,
@@ -265,7 +348,12 @@ export const extensionSchemas = {
   },
   VehicleInput: {
     type: "object",
-    required: ["plate_number", "chassis_number", "vehicle_type_id", "vehicle_class_id"],
+    required: [
+      "plate_number",
+      "chassis_number",
+      "vehicle_type_id",
+      "vehicle_class_id",
+    ],
     properties: {
       plate_number: { type: "string", example: "AA-1-31209" },
       chassis_number: { type: "string" },
@@ -275,7 +363,8 @@ export const extensionSchemas = {
         type: "string",
         format: "uuid",
         nullable: true,
-        description: "Requires `vehicles.assign_driver` permission when setting a driver",
+        description:
+          "Requires `vehicles.assign_driver` permission when setting a driver",
       },
       make: { type: "string", nullable: true },
       model: { type: "string", nullable: true },
@@ -300,10 +389,6 @@ export const extensionSchemas = {
       status: {
         type: "string",
         enum: ["open", "in_progress", "completed", "cancelled"],
-      },
-      location_type: {
-        type: "string",
-        enum: ["internal", "external"],
       },
       title: { type: "string" },
       description: { type: "string", nullable: true },
@@ -362,11 +447,6 @@ export const extensionSchemas = {
             enum: ["open", "in_progress", "completed", "cancelled"],
             default: "open",
           },
-          location_type: {
-            type: "string",
-            enum: ["internal", "external"],
-            default: "external",
-          },
           title: { type: "string" },
           description: { type: "string", nullable: true },
           vendor: { type: "string", nullable: true },
@@ -389,10 +469,6 @@ export const extensionSchemas = {
           status: {
             type: "string",
             enum: ["open", "in_progress", "completed", "cancelled"],
-          },
-          location_type: {
-            type: "string",
-            enum: ["internal", "external"],
           },
           title: { type: "string" },
           description: { type: "string", nullable: true },
@@ -418,14 +494,10 @@ export const extensionSchemas = {
             enum: ["open", "in_progress", "completed", "cancelled"],
             default: "open",
           },
-          location_type: {
-            type: "string",
-            enum: ["internal", "external"],
-            default: "external",
-          },
           title: {
             type: "string",
-            description: "Optional. When omitted, the title is derived from the selected work type name.",
+            description:
+              "Optional. When omitted, the title is derived from the selected work type name.",
           },
           description: { type: "string", nullable: true },
           vendor: { type: "string", nullable: true },
@@ -448,10 +520,6 @@ export const extensionSchemas = {
           status: {
             type: "string",
             enum: ["open", "in_progress", "completed", "cancelled"],
-          },
-          location_type: {
-            type: "string",
-            enum: ["internal", "external"],
           },
           title: { type: "string" },
           description: { type: "string", nullable: true },
@@ -480,10 +548,10 @@ export const extensionSchemas = {
       price_per_liter: {
         type: "number",
         nullable: true,
-        description: "Calculated as `total_cost / quantity_liters` when both values are present.",
+        description:
+          "Calculated as `total_cost / quantity_liters` when both values are present.",
       },
       fuel_type: { type: "string", enum: ["diesel", "petrol", "other"] },
-      location_type: { type: "string", enum: ["internal", "external"] },
       station_name: { type: "string", nullable: true },
       receipt_reference: { type: "string", nullable: true },
       source: { type: "string", enum: ["manual", "driver_app", "import"] },
@@ -491,12 +559,14 @@ export const extensionSchemas = {
       distance_since_last_km: {
         type: "number",
         nullable: true,
-        description: "Kilometers driven since the previous fuel log on this vehicle.",
+        description:
+          "Kilometers driven since the previous fuel log on this vehicle.",
       },
       consumption_km_per_liter: {
         type: "number",
         nullable: true,
-        description: "Fuel efficiency derived from the previous odometer reading.",
+        description:
+          "Fuel efficiency derived from the previous odometer reading.",
       },
       created_by_user_id: { type: "string", format: "uuid", nullable: true },
       created_by: {
@@ -518,22 +588,33 @@ export const extensionSchemas = {
       logged_at: {
         type: "string",
         format: "date-time",
-        description: "Refill timestamp. Defaults to the current time when omitted.",
+        description:
+          "Refill timestamp. Defaults to the current time when omitted.",
       },
-      odometer_km: { type: "integer", minimum: 1, description: "Odometer reading in kilometers." },
-      quantity_liters: { type: "number", minimum: 0, description: "Fuel quantity in liters." },
-      total_cost: { type: "number", minimum: 0, description: "Total amount paid for the refill." },
+      odometer_km: {
+        type: "integer",
+        minimum: 1,
+        description: "Odometer reading in kilometers.",
+      },
+      quantity_liters: {
+        type: "number",
+        minimum: 0,
+        description: "Fuel quantity in liters.",
+      },
+      total_cost: {
+        type: "number",
+        minimum: 0,
+        description: "Total amount paid for the refill.",
+      },
       fuel_type: {
         type: "string",
         enum: ["diesel", "petrol", "other"],
         default: "diesel",
       },
-      location_type: {
+      station_name: {
         type: "string",
-        enum: ["internal", "external"],
-        default: "external",
+        description: "Fuel station or vendor name.",
       },
-      station_name: { type: "string", description: "Fuel station or vendor name." },
       receipt_reference: { type: "string", nullable: true },
       notes: { type: "string", nullable: true },
     },
@@ -546,7 +627,6 @@ export const extensionSchemas = {
       quantity_liters: { type: "number", minimum: 0 },
       total_cost: { type: "number", minimum: 0 },
       fuel_type: { type: "string", enum: ["diesel", "petrol", "other"] },
-      location_type: { type: "string", enum: ["internal", "external"] },
       station_name: { type: "string" },
       receipt_reference: { type: "string", nullable: true },
       notes: { type: "string", nullable: true },
@@ -558,7 +638,10 @@ export const extensionSchemas = {
       id: { type: "string", format: "uuid" },
       slug: { type: "string" },
       name: { type: "string" },
-      pricing_model: { type: "string", enum: ["flat", "distance", "time", "hybrid"] },
+      pricing_model: {
+        type: "string",
+        enum: ["flat", "distance", "time", "hybrid"],
+      },
       currency: { type: "string" },
       base_fare: { type: "number" },
       is_active: { type: "boolean" },
@@ -572,12 +655,19 @@ export const extensionSchemas = {
       reference_number: {
         type: "string",
         example: "CTR-2026-0001",
-        description: "Auto-generated as CTR-{year}-{####} when the contract is created.",
+        description:
+          "Auto-generated as CTR-{year}-{####} when the contract is created.",
       },
       title: { type: "string" },
-      status: { type: "string", enum: ["draft", "active", "expired", "cancelled"] },
+      status: {
+        type: "string",
+        enum: ["draft", "active", "expired", "cancelled"],
+      },
       fare_plan_id: { type: "string", format: "uuid", nullable: true },
-      fare_plan: { allOf: [{ $ref: "#/components/schemas/ContractFarePlanSummary" }], nullable: true },
+      fare_plan: {
+        allOf: [{ $ref: "#/components/schemas/ContractFarePlanSummary" }],
+        nullable: true,
+      },
       notes: { type: "string", nullable: true },
       billing_interval: {
         type: "string",
@@ -585,8 +675,14 @@ export const extensionSchemas = {
       },
       payment_terms_days: { type: "integer", nullable: true },
       region_ids: { type: "array", items: { type: "string", format: "uuid" } },
-      vehicle_type_ids: { type: "array", items: { type: "string", format: "uuid" } },
-      vehicle_class_ids: { type: "array", items: { type: "string", format: "uuid" } },
+      vehicle_type_ids: {
+        type: "array",
+        items: { type: "string", format: "uuid" },
+      },
+      vehicle_class_ids: {
+        type: "array",
+        items: { type: "string", format: "uuid" },
+      },
       created_by_user_id: { type: "string", format: "uuid", nullable: true },
       created_by: {
         type: "object",
@@ -605,7 +701,11 @@ export const extensionSchemas = {
     required: ["title"],
     properties: {
       title: { type: "string" },
-      status: { type: "string", enum: ["draft", "active", "expired", "cancelled"], default: "draft" },
+      status: {
+        type: "string",
+        enum: ["draft", "active", "expired", "cancelled"],
+        default: "draft",
+      },
       fare_plan_id: { type: "string", format: "uuid", nullable: true },
       notes: { type: "string", nullable: true },
       billing_interval: {
@@ -614,15 +714,24 @@ export const extensionSchemas = {
       },
       payment_terms_days: { type: "integer", nullable: true },
       region_ids: { type: "array", items: { type: "string", format: "uuid" } },
-      vehicle_type_ids: { type: "array", items: { type: "string", format: "uuid" } },
-      vehicle_class_ids: { type: "array", items: { type: "string", format: "uuid" } },
+      vehicle_type_ids: {
+        type: "array",
+        items: { type: "string", format: "uuid" },
+      },
+      vehicle_class_ids: {
+        type: "array",
+        items: { type: "string", format: "uuid" },
+      },
     },
   },
   ContractUpdateInput: {
     type: "object",
     properties: {
       title: { type: "string" },
-      status: { type: "string", enum: ["draft", "active", "expired", "cancelled"] },
+      status: {
+        type: "string",
+        enum: ["draft", "active", "expired", "cancelled"],
+      },
       fare_plan_id: { type: "string", format: "uuid", nullable: true },
       notes: { type: "string", nullable: true },
       billing_interval: {
@@ -631,32 +740,111 @@ export const extensionSchemas = {
       },
       payment_terms_days: { type: "integer", nullable: true },
       region_ids: { type: "array", items: { type: "string", format: "uuid" } },
-      vehicle_type_ids: { type: "array", items: { type: "string", format: "uuid" } },
-      vehicle_class_ids: { type: "array", items: { type: "string", format: "uuid" } },
+      vehicle_type_ids: {
+        type: "array",
+        items: { type: "string", format: "uuid" },
+      },
+      vehicle_class_ids: {
+        type: "array",
+        items: { type: "string", format: "uuid" },
+      },
     },
   },
   AdminRideRequest: {
     type: "object",
-    description: "Ride request as seen by admin dispatch. Driver is inherited from the assigned vehicle.",
+    description:
+      "Ride request as seen by admin dispatch. Driver is inherited from the assigned vehicle.",
     properties: {
       id: { type: "string", format: "uuid" },
       requester_user_id: { type: "string", format: "uuid" },
       pickup_address: { type: "string" },
+      pickup_latitude: { type: "number", nullable: true },
+      pickup_longitude: { type: "number", nullable: true },
       dropoff_address: { type: "string" },
+      dropoff_latitude: { type: "number", nullable: true },
+      dropoff_longitude: { type: "number", nullable: true },
       scheduled_at: { type: "string", format: "date-time", nullable: true },
       passenger_count: { type: "integer" },
       notes: { type: "string", nullable: true },
       status: { $ref: "#/components/schemas/RideRequestStatus" },
       rejection_reason: { type: "string", nullable: true },
       assigned_vehicle_id: { type: "string", format: "uuid", nullable: true },
-      assigned_vehicle: { $ref: "#/components/schemas/Vehicle", nullable: true },
-      assigned_driver_user_id: { type: "string", format: "uuid", nullable: true },
+      assigned_vehicle: {
+        $ref: "#/components/schemas/Vehicle",
+        nullable: true,
+      },
+      assigned_driver_user_id: {
+        type: "string",
+        format: "uuid",
+        nullable: true,
+      },
       assigned_driver: {
         allOf: [{ $ref: "#/components/schemas/VehicleDriverSummary" }],
         nullable: true,
       },
       created_at: { type: "string", format: "date-time" },
       updated_at: { type: "string", format: "date-time" },
+    },
+  },
+  RideRequestRequesterSummary: {
+    type: "object",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      first_name: { type: "string" },
+      middle_name: { type: "string", nullable: true },
+      last_name: { type: "string" },
+      email: { type: "string" },
+      mobile_number: { type: "string" },
+    },
+  },
+  RideRequest: {
+    type: "object",
+    description: "Ride request as returned to the requester.",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      requester_user_id: { type: "string", format: "uuid" },
+      requester: {
+        $ref: "#/components/schemas/RideRequestRequesterSummary",
+        nullable: true,
+      },
+      pickup_address: { type: "string" },
+      pickup_latitude: { type: "number", nullable: true },
+      pickup_longitude: { type: "number", nullable: true },
+      dropoff_address: { type: "string" },
+      dropoff_latitude: { type: "number", nullable: true },
+      dropoff_longitude: { type: "number", nullable: true },
+      scheduled_at: { type: "string", format: "date-time", nullable: true },
+      passenger_count: { type: "integer" },
+      notes: { type: "string", nullable: true },
+      status: { $ref: "#/components/schemas/RideRequestStatus" },
+      rejection_reason: { type: "string", nullable: true },
+      contract_id: { type: "string", format: "uuid", nullable: true },
+      assigned_vehicle_id: { type: "string", format: "uuid", nullable: true },
+      assigned_vehicle: {
+        $ref: "#/components/schemas/Vehicle",
+        nullable: true,
+      },
+      assigned_driver_user_id: {
+        type: "string",
+        format: "uuid",
+        nullable: true,
+      },
+      assigned_driver: {
+        allOf: [{ $ref: "#/components/schemas/VehicleDriverSummary" }],
+        nullable: true,
+      },
+      assigned_at: { type: "string", format: "date-time", nullable: true },
+      started_at: { type: "string", format: "date-time", nullable: true },
+      completed_at: { type: "string", format: "date-time", nullable: true },
+      created_at: { type: "string", format: "date-time" },
+      updated_at: { type: "string", format: "date-time" },
+      can_edit: { type: "boolean" },
+      can_cancel: { type: "boolean" },
+      cancel_deadline_at: {
+        type: "string",
+        format: "date-time",
+        nullable: true,
+      },
     },
   },
   DriverRideRequest: {
@@ -666,16 +854,31 @@ export const extensionSchemas = {
     properties: {
       id: { type: "string", format: "uuid" },
       requester_user_id: { type: "string", format: "uuid" },
+      requester: {
+        $ref: "#/components/schemas/RideRequestRequesterSummary",
+        nullable: true,
+      },
       pickup_address: { type: "string" },
+      pickup_latitude: { type: "number", nullable: true },
+      pickup_longitude: { type: "number", nullable: true },
       dropoff_address: { type: "string" },
+      dropoff_latitude: { type: "number", nullable: true },
+      dropoff_longitude: { type: "number", nullable: true },
       scheduled_at: { type: "string", format: "date-time", nullable: true },
       passenger_count: { type: "integer" },
       notes: { type: "string", nullable: true },
       status: { $ref: "#/components/schemas/RideRequestDriverStatus" },
       rejection_reason: { type: "string", nullable: true },
       assigned_vehicle_id: { type: "string", format: "uuid", nullable: true },
-      assigned_vehicle: { $ref: "#/components/schemas/Vehicle", nullable: true },
-      assigned_driver_user_id: { type: "string", format: "uuid", nullable: true },
+      assigned_vehicle: {
+        $ref: "#/components/schemas/Vehicle",
+        nullable: true,
+      },
+      assigned_driver_user_id: {
+        type: "string",
+        format: "uuid",
+        nullable: true,
+      },
       assigned_driver: {
         allOf: [{ $ref: "#/components/schemas/VehicleDriverSummary" }],
         nullable: true,
@@ -693,7 +896,8 @@ export const extensionSchemas = {
   RideRequestDriverStatus: {
     type: "string",
     enum: ["confirmed", "in_progress", "completed", "cancelled"],
-    description: "Statuses exposed to drivers after admin review and assignment. `pending` is excluded.",
+    description:
+      "Statuses exposed to drivers after admin review and assignment. `pending` is excluded.",
     "x-enumDescriptions": rideRequestDriverStatusEnumDescriptions,
   },
   RideRequestHistoryStatus: {
@@ -705,7 +909,8 @@ export const extensionSchemas = {
   RideRequestUpcomingStatus: {
     type: "string",
     enum: ["confirmed", "in_progress"],
-    description: "Active trip statuses returned by the driver upcoming endpoint.",
+    description:
+      "Active trip statuses returned by the driver upcoming endpoint.",
     "x-enumDescriptions": rideRequestUpcomingStatusEnumDescriptions,
   },
 } as const;
@@ -728,7 +933,15 @@ export const extensionPaths = {
         {
           name: "module",
           in: "query",
-          schema: { type: "string", enum: ["ride_requests", "user_registrations", "insurance", "inspection"] },
+          schema: {
+            type: "string",
+            enum: [
+              "ride_requests",
+              "user_registrations",
+              "insurance",
+              "inspection",
+            ],
+          },
           description: "Filter templates for a single module",
         },
       ],
@@ -746,7 +959,9 @@ export const extensionPaths = {
                     properties: {
                       templates: {
                         type: "array",
-                        items: { $ref: "#/components/schemas/NotificationTemplate" },
+                        items: {
+                          $ref: "#/components/schemas/NotificationTemplate",
+                        },
                       },
                     },
                   },
@@ -805,7 +1020,9 @@ export const extensionPaths = {
                     properties: {
                       templates: {
                         type: "array",
-                        items: { $ref: "#/components/schemas/NotificationTemplate" },
+                        items: {
+                          $ref: "#/components/schemas/NotificationTemplate",
+                        },
                       },
                     },
                   },
@@ -844,7 +1061,8 @@ export const extensionPaths = {
               properties: {
                 to: {
                   type: "string",
-                  description: "Email address or phone number. Uses admin profile contact when omitted.",
+                  description:
+                    "Email address or phone number. Uses admin profile contact when omitted.",
                 },
               },
             },
@@ -863,10 +1081,15 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      delivery: { $ref: "#/components/schemas/NotificationTestDelivery" },
+                      delivery: {
+                        $ref: "#/components/schemas/NotificationTestDelivery",
+                      },
                     },
                   },
-                  message: { type: "string", example: "Test notification sent successfully." },
+                  message: {
+                    type: "string",
+                    example: "Test notification sent successfully.",
+                  },
                 },
               },
             },
@@ -883,7 +1106,8 @@ export const extensionPaths = {
     get: {
       tags: ["Notifications"],
       summary: "Get notification channel configuration",
-      description: "Returns email or SMS provider settings. Sensitive credential fields are masked.",
+      description:
+        "Returns email or SMS provider settings. Sensitive credential fields are masked.",
       security,
       parameters: [
         {
@@ -905,7 +1129,9 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      configuration: { $ref: "#/components/schemas/NotificationConfiguration" },
+                      configuration: {
+                        $ref: "#/components/schemas/NotificationConfiguration",
+                      },
                     },
                   },
                 },
@@ -922,7 +1148,8 @@ export const extensionPaths = {
     patch: {
       tags: ["Notifications"],
       summary: "Update notification channel configuration",
-      description: "Upserts email or SMS provider settings. SMS currently supports AfroSMS only.",
+      description:
+        "Upserts email or SMS provider settings. SMS currently supports AfroSMS only.",
       security,
       parameters: [
         {
@@ -962,7 +1189,9 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      configuration: { $ref: "#/components/schemas/NotificationConfiguration" },
+                      configuration: {
+                        $ref: "#/components/schemas/NotificationConfiguration",
+                      },
                     },
                   },
                 },
@@ -980,7 +1209,8 @@ export const extensionPaths = {
     post: {
       tags: ["Notifications"],
       summary: "Send test SMS",
-      description: "Sends a plain test SMS using the configured SMS provider. Email test uses template test endpoint instead.",
+      description:
+        "Sends a plain test SMS using the configured SMS provider. Email test uses template test endpoint instead.",
       security,
       parameters: [
         {
@@ -1016,7 +1246,9 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      delivery: { $ref: "#/components/schemas/NotificationTestDelivery" },
+                      delivery: {
+                        $ref: "#/components/schemas/NotificationTestDelivery",
+                      },
                     },
                   },
                   message: { type: "string" },
@@ -1035,7 +1267,8 @@ export const extensionPaths = {
     get: {
       tags: ["Notification Delivery Logs"],
       summary: "List notification delivery logs",
-      description: "Paginated history of notification send attempts including production dispatches and admin tests.",
+      description:
+        "Paginated history of notification send attempts including production dispatches and admin tests.",
       security,
       parameters: [
         { $ref: "#/components/parameters/Page" },
@@ -1054,7 +1287,15 @@ export const extensionPaths = {
         {
           name: "module",
           in: "query",
-          schema: { type: "string", enum: ["ride_requests", "user_registrations", "insurance", "inspection"] },
+          schema: {
+            type: "string",
+            enum: [
+              "ride_requests",
+              "user_registrations",
+              "insurance",
+              "inspection",
+            ],
+          },
         },
         {
           name: "channel",
@@ -1063,8 +1304,16 @@ export const extensionPaths = {
         },
         { name: "event", in: "query", schema: { type: "string" } },
         { name: "is_test", in: "query", schema: { type: "boolean" } },
-        { name: "from", in: "query", schema: { type: "string", format: "date-time" } },
-        { name: "to", in: "query", schema: { type: "string", format: "date-time" } },
+        {
+          name: "from",
+          in: "query",
+          schema: { type: "string", format: "date-time" },
+        },
+        {
+          name: "to",
+          in: "query",
+          schema: { type: "string", format: "date-time" },
+        },
       ],
       responses: {
         "200": {
@@ -1077,7 +1326,9 @@ export const extensionPaths = {
                   success: { type: "boolean", enum: [true] },
                   data: {
                     type: "array",
-                    items: { $ref: "#/components/schemas/NotificationDeliveryLog" },
+                    items: {
+                      $ref: "#/components/schemas/NotificationDeliveryLog",
+                    },
                   },
                   pagination: { $ref: "#/components/schemas/PaginationMeta" },
                 },
@@ -1096,7 +1347,12 @@ export const extensionPaths = {
       summary: "Get notification delivery log",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
       ],
       responses: {
         "200": {
@@ -1110,7 +1366,9 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      delivery_log: { $ref: "#/components/schemas/NotificationDeliveryLog" },
+                      delivery_log: {
+                        $ref: "#/components/schemas/NotificationDeliveryLog",
+                      },
                     },
                   },
                 },
@@ -1139,13 +1397,34 @@ export const extensionPaths = {
           in: "query",
           schema: {
             type: "string",
-            enum: ["create", "update", "delete", "login", "logout", "assign", "revoke", "test"],
+            enum: [
+              "create",
+              "update",
+              "delete",
+              "login",
+              "logout",
+              "assign",
+              "revoke",
+              "test",
+            ],
           },
         },
-        { name: "actor_user_id", in: "query", schema: { type: "string", format: "uuid" } },
+        {
+          name: "actor_user_id",
+          in: "query",
+          schema: { type: "string", format: "uuid" },
+        },
         { name: "entity_type", in: "query", schema: { type: "string" } },
-        { name: "from", in: "query", schema: { type: "string", format: "date-time" } },
-        { name: "to", in: "query", schema: { type: "string", format: "date-time" } },
+        {
+          name: "from",
+          in: "query",
+          schema: { type: "string", format: "date-time" },
+        },
+        {
+          name: "to",
+          in: "query",
+          schema: { type: "string", format: "date-time" },
+        },
       ],
       responses: {
         "200": {
@@ -1156,7 +1435,10 @@ export const extensionPaths = {
                 type: "object",
                 properties: {
                   success: { type: "boolean", enum: [true] },
-                  data: { type: "array", items: { $ref: "#/components/schemas/AuditLog" } },
+                  data: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/AuditLog" },
+                  },
                   pagination: { $ref: "#/components/schemas/PaginationMeta" },
                 },
               },
@@ -1174,7 +1456,12 @@ export const extensionPaths = {
       summary: "Get audit log entry",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
       ],
       responses: {
         "200": {
@@ -1212,14 +1499,29 @@ export const extensionPaths = {
         { $ref: "#/components/parameters/Limit" },
         { $ref: "#/components/parameters/Locale" },
         { name: "search", in: "query", schema: { type: "string" } },
-        { name: "vehicle_type_id", in: "query", schema: { type: "string", format: "uuid" } },
-        { name: "vehicle_class_id", in: "query", schema: { type: "string", format: "uuid" } },
+        {
+          name: "vehicle_type_id",
+          in: "query",
+          schema: { type: "string", format: "uuid" },
+        },
+        {
+          name: "vehicle_class_id",
+          in: "query",
+          schema: { type: "string", format: "uuid" },
+        },
         {
           name: "status",
           in: "query",
-          schema: { type: "string", enum: ["active", "maintenance", "retired"] },
+          schema: {
+            type: "string",
+            enum: ["active", "maintenance", "retired"],
+          },
         },
-        { name: "assigned_driver_user_id", in: "query", schema: { type: "string", format: "uuid" } },
+        {
+          name: "assigned_driver_user_id",
+          in: "query",
+          schema: { type: "string", format: "uuid" },
+        },
         { name: "unassigned_only", in: "query", schema: { type: "boolean" } },
         { name: "assigned_only", in: "query", schema: { type: "boolean" } },
       ],
@@ -1232,7 +1534,10 @@ export const extensionPaths = {
                 type: "object",
                 properties: {
                   success: { type: "boolean", enum: [true] },
-                  data: { type: "array", items: { $ref: "#/components/schemas/Vehicle" } },
+                  data: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/Vehicle" },
+                  },
                   pagination: { $ref: "#/components/schemas/PaginationMeta" },
                 },
               },
@@ -1246,7 +1551,8 @@ export const extensionPaths = {
     post: {
       tags: ["Vehicles"],
       summary: "Create vehicle",
-      description: "Requires `vehicles.write`. Setting `assigned_driver_user_id` additionally requires `vehicles.assign_driver`.",
+      description:
+        "Requires `vehicles.write`. Setting `assigned_driver_user_id` additionally requires `vehicles.assign_driver`.",
       security,
       parameters: [{ $ref: "#/components/parameters/Locale" }],
       requestBody: {
@@ -1268,7 +1574,9 @@ export const extensionPaths = {
                   success: { type: "boolean", enum: [true] },
                   data: {
                     type: "object",
-                    properties: { vehicle: { $ref: "#/components/schemas/Vehicle" } },
+                    properties: {
+                      vehicle: { $ref: "#/components/schemas/Vehicle" },
+                    },
                   },
                 },
               },
@@ -1289,7 +1597,12 @@ export const extensionPaths = {
         "Returns active driver accounts for the vehicle driver assignment UI. Requires `vehicles.assign_driver` permission.",
       security,
       parameters: [
-        { name: "search", in: "query", schema: { type: "string" }, description: "Search name, email, or mobile" },
+        {
+          name: "search",
+          in: "query",
+          schema: { type: "string" },
+          description: "Search name, email, or mobile",
+        },
       ],
       responses: {
         "200": {
@@ -1305,7 +1618,9 @@ export const extensionPaths = {
                     properties: {
                       drivers: {
                         type: "array",
-                        items: { $ref: "#/components/schemas/VehicleDriverOption" },
+                        items: {
+                          $ref: "#/components/schemas/VehicleDriverOption",
+                        },
                       },
                     },
                   },
@@ -1325,7 +1640,12 @@ export const extensionPaths = {
       summary: "Get vehicle",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
         { $ref: "#/components/parameters/Locale" },
       ],
       responses: {
@@ -1339,7 +1659,9 @@ export const extensionPaths = {
                   success: { type: "boolean", enum: [true] },
                   data: {
                     type: "object",
-                    properties: { vehicle: { $ref: "#/components/schemas/Vehicle" } },
+                    properties: {
+                      vehicle: { $ref: "#/components/schemas/Vehicle" },
+                    },
                   },
                 },
               },
@@ -1358,7 +1680,12 @@ export const extensionPaths = {
         "Requires `vehicles.write`. Changing `assigned_driver_user_id` requires `vehicles.assign_driver`. A driver can only be linked to one vehicle at a time.",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
         { $ref: "#/components/parameters/Locale" },
       ],
       requestBody: {
@@ -1388,7 +1715,9 @@ export const extensionPaths = {
                   success: { type: "boolean", enum: [true] },
                   data: {
                     type: "object",
-                    properties: { vehicle: { $ref: "#/components/schemas/Vehicle" } },
+                    properties: {
+                      vehicle: { $ref: "#/components/schemas/Vehicle" },
+                    },
                   },
                 },
               },
@@ -1407,7 +1736,12 @@ export const extensionPaths = {
       description: "Requires `vehicles.delete`.",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
       ],
       responses: {
         "200": {
@@ -1439,7 +1773,12 @@ export const extensionPaths = {
         "- Permission: `vehicles.read`",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
         { $ref: "#/components/parameters/Page" },
         { $ref: "#/components/parameters/Limit" },
         { $ref: "#/components/parameters/Locale" },
@@ -1464,7 +1803,9 @@ export const extensionPaths = {
                   success: { type: "boolean", enum: [true] },
                   data: {
                     type: "array",
-                    items: { $ref: "#/components/schemas/VehicleMaintenanceLog" },
+                    items: {
+                      $ref: "#/components/schemas/VehicleMaintenanceLog",
+                    },
                   },
                   pagination: { $ref: "#/components/schemas/PaginationMeta" },
                 },
@@ -1487,7 +1828,12 @@ export const extensionPaths = {
         "- Opening maintenance on an active vehicle can move that vehicle to `maintenance` status.",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
         { $ref: "#/components/parameters/Locale" },
       ],
       requestBody: {
@@ -1510,7 +1856,9 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      maintenance_log: { $ref: "#/components/schemas/VehicleMaintenanceLog" },
+                      maintenance_log: {
+                        $ref: "#/components/schemas/VehicleMaintenanceLog",
+                      },
                     },
                   },
                 },
@@ -1534,7 +1882,12 @@ export const extensionPaths = {
         "- Permission: `vehicles.write`",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
         {
           name: "maintenanceId",
           in: "path",
@@ -1547,7 +1900,9 @@ export const extensionPaths = {
         required: true,
         content: {
           "application/json": {
-            schema: { $ref: "#/components/schemas/VehicleMaintenanceUpdateInput" },
+            schema: {
+              $ref: "#/components/schemas/VehicleMaintenanceUpdateInput",
+            },
           },
         },
       },
@@ -1563,7 +1918,9 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      maintenance_log: { $ref: "#/components/schemas/VehicleMaintenanceLog" },
+                      maintenance_log: {
+                        $ref: "#/components/schemas/VehicleMaintenanceLog",
+                      },
                     },
                   },
                 },
@@ -1587,7 +1944,12 @@ export const extensionPaths = {
         "- Permission: `vehicles.read`",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
         { $ref: "#/components/parameters/Page" },
         { $ref: "#/components/parameters/Limit" },
       ],
@@ -1625,7 +1987,12 @@ export const extensionPaths = {
         "- Logs created here use `source: manual` and append a `fuel_logged` vehicle history event.",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
       ],
       requestBody: {
         required: true,
@@ -1673,7 +2040,12 @@ export const extensionPaths = {
         "- Appends a `fuel_updated` vehicle history event.",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
         {
           name: "fuelLogId",
           in: "path",
@@ -1739,7 +2111,9 @@ export const extensionPaths = {
                     properties: {
                       maintenance_work_types: {
                         type: "array",
-                        items: { $ref: "#/components/schemas/MaintenanceWorkType" },
+                        items: {
+                          $ref: "#/components/schemas/MaintenanceWorkType",
+                        },
                       },
                     },
                   },
@@ -1757,7 +2131,8 @@ export const extensionPaths = {
     get: {
       tags: ["Maintenance Work Types"],
       summary: "List maintenance work types",
-      description: "Paginated list of maintenance work types. Requires `maintenance_work_types.read`.",
+      description:
+        "Paginated list of maintenance work types. Requires `maintenance_work_types.read`.",
       security,
       parameters: [
         { $ref: "#/components/parameters/Page" },
@@ -1792,7 +2167,8 @@ export const extensionPaths = {
     post: {
       tags: ["Maintenance Work Types"],
       summary: "Create maintenance work type",
-      description: "Requires `maintenance_work_types.write`. English (`en`) translation is required to generate the slug.",
+      description:
+        "Requires `maintenance_work_types.write`. English (`en`) translation is required to generate the slug.",
       security,
       requestBody: {
         required: true,
@@ -1814,7 +2190,9 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      maintenance_work_type: { $ref: "#/components/schemas/MaintenanceWorkType" },
+                      maintenance_work_type: {
+                        $ref: "#/components/schemas/MaintenanceWorkType",
+                      },
                     },
                   },
                 },
@@ -1834,7 +2212,12 @@ export const extensionPaths = {
       summary: "Get maintenance work type",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
         { $ref: "#/components/parameters/Locale" },
       ],
       responses: {
@@ -1849,7 +2232,9 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      maintenance_work_type: { $ref: "#/components/schemas/MaintenanceWorkType" },
+                      maintenance_work_type: {
+                        $ref: "#/components/schemas/MaintenanceWorkType",
+                      },
                     },
                   },
                 },
@@ -1868,7 +2253,12 @@ export const extensionPaths = {
       description: "Requires `maintenance_work_types.write`.",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
       ],
       requestBody: {
         content: {
@@ -1889,7 +2279,9 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      maintenance_work_type: { $ref: "#/components/schemas/MaintenanceWorkType" },
+                      maintenance_work_type: {
+                        $ref: "#/components/schemas/MaintenanceWorkType",
+                      },
                     },
                   },
                 },
@@ -1910,7 +2302,12 @@ export const extensionPaths = {
         "Requires `maintenance_work_types.delete`. Returns 409 if the work type is referenced by maintenance logs.",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
       ],
       responses: {
         "200": {
@@ -1938,7 +2335,8 @@ export const extensionPaths = {
     get: {
       tags: ["Admin Ride Requests"],
       summary: "List ride requests",
-      description: "Admin view of all customer ride requests. Requires `ride_requests.read`.",
+      description:
+        "Admin view of all customer ride requests. Requires `ride_requests.read`.",
       security,
       parameters: [
         { $ref: "#/components/parameters/Page" },
@@ -1946,7 +2344,12 @@ export const extensionPaths = {
         { $ref: "#/components/parameters/Locale" },
         { name: "search", in: "query", schema: { type: "string" } },
         { $ref: "#/components/parameters/RideRequestStatus" },
-        { name: "upcoming", in: "query", schema: { type: "boolean" }, description: "Only scheduled future trips" },
+        {
+          name: "upcoming",
+          in: "query",
+          schema: { type: "boolean" },
+          description: "Only scheduled future trips",
+        },
       ],
       responses: {
         "200": {
@@ -1957,7 +2360,10 @@ export const extensionPaths = {
                 type: "object",
                 properties: {
                   success: { type: "boolean", enum: [true] },
-                  data: { type: "array", items: { $ref: "#/components/schemas/AdminRideRequest" } },
+                  data: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/AdminRideRequest" },
+                  },
                   pagination: { $ref: "#/components/schemas/PaginationMeta" },
                 },
               },
@@ -1975,7 +2381,12 @@ export const extensionPaths = {
       summary: "Get ride request",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
         { $ref: "#/components/parameters/Locale" },
       ],
       responses: {
@@ -1990,7 +2401,9 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      ride_request: { $ref: "#/components/schemas/AdminRideRequest" },
+                      ride_request: {
+                        $ref: "#/components/schemas/AdminRideRequest",
+                      },
                     },
                   },
                 },
@@ -2012,9 +2425,19 @@ export const extensionPaths = {
         "Returns active vehicles with an assigned driver that match the ride request type/class. Only available for confirmed requests (or when already assigned).",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
         { $ref: "#/components/parameters/Locale" },
-        { name: "search", in: "query", schema: { type: "string" }, description: "Filter by plate or driver" },
+        {
+          name: "search",
+          in: "query",
+          schema: { type: "string" },
+          description: "Filter by plate or driver",
+        },
       ],
       responses: {
         "200": {
@@ -2054,7 +2477,12 @@ export const extensionPaths = {
         "Assigns a fleet vehicle to a confirmed ride request. Driver is inherited from the vehicle's default driver. Requires `ride_requests.write`.",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
         { $ref: "#/components/parameters/Locale" },
       ],
       requestBody: {
@@ -2083,7 +2511,9 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      ride_request: { $ref: "#/components/schemas/AdminRideRequest" },
+                      ride_request: {
+                        $ref: "#/components/schemas/AdminRideRequest",
+                      },
                     },
                   },
                 },
@@ -2103,10 +2533,16 @@ export const extensionPaths = {
     post: {
       tags: ["Admin Ride Requests"],
       summary: "Unassign vehicle from ride request",
-      description: "Clears vehicle and driver assignment from a confirmed ride request.",
+      description:
+        "Clears vehicle and driver assignment from a confirmed ride request.",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
         { $ref: "#/components/parameters/Locale" },
       ],
       responses: {
@@ -2121,7 +2557,9 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      ride_request: { $ref: "#/components/schemas/AdminRideRequest" },
+                      ride_request: {
+                        $ref: "#/components/schemas/AdminRideRequest",
+                      },
                     },
                   },
                 },
@@ -2144,7 +2582,12 @@ export const extensionPaths = {
         "Admin workflow actions: `confirm`, `reject`, `start`, or `complete`. Reject accepts optional `rejection_reason`. Triggers notification templates when configured.",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
         { $ref: "#/components/parameters/Locale" },
       ],
       requestBody: {
@@ -2177,7 +2620,9 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      ride_request: { $ref: "#/components/schemas/AdminRideRequest" },
+                      ride_request: {
+                        $ref: "#/components/schemas/AdminRideRequest",
+                      },
                     },
                   },
                 },
@@ -2203,11 +2648,19 @@ export const extensionPaths = {
         { $ref: "#/components/parameters/Page" },
         { $ref: "#/components/parameters/Limit" },
         { $ref: "#/components/parameters/Locale" },
-        { name: "search", in: "query", schema: { type: "string" }, description: "Search reference number or title" },
+        {
+          name: "search",
+          in: "query",
+          schema: { type: "string" },
+          description: "Search reference number or title",
+        },
         {
           name: "status",
           in: "query",
-          schema: { type: "string", enum: ["draft", "active", "expired", "cancelled"] },
+          schema: {
+            type: "string",
+            enum: ["draft", "active", "expired", "cancelled"],
+          },
         },
       ],
       responses: {
@@ -2219,7 +2672,10 @@ export const extensionPaths = {
                 type: "object",
                 properties: {
                   success: { type: "boolean", enum: [true] },
-                  data: { type: "array", items: { $ref: "#/components/schemas/Contract" } },
+                  data: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/Contract" },
+                  },
                   pagination: { $ref: "#/components/schemas/PaginationMeta" },
                 },
               },
@@ -2254,7 +2710,9 @@ export const extensionPaths = {
                   success: { type: "boolean", enum: [true] },
                   data: {
                     type: "object",
-                    properties: { contract: { $ref: "#/components/schemas/Contract" } },
+                    properties: {
+                      contract: { $ref: "#/components/schemas/Contract" },
+                    },
                   },
                 },
               },
@@ -2274,7 +2732,12 @@ export const extensionPaths = {
       summary: "Get customer contract",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
         { $ref: "#/components/parameters/Locale" },
       ],
       responses: {
@@ -2308,7 +2771,12 @@ export const extensionPaths = {
       description: "Requires `contracts.write`.",
       security,
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } },
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
         { $ref: "#/components/parameters/Locale" },
       ],
       requestBody: {
@@ -2330,7 +2798,9 @@ export const extensionPaths = {
                   success: { type: "boolean", enum: [true] },
                   data: {
                     type: "object",
-                    properties: { contract: { $ref: "#/components/schemas/Contract" } },
+                    properties: {
+                      contract: { $ref: "#/components/schemas/Contract" },
+                    },
                   },
                 },
               },
@@ -2347,9 +2817,17 @@ export const extensionPaths = {
     delete: {
       tags: ["Contracts"],
       summary: "Delete customer contract",
-      description: "Requires `contracts.delete`. Fails with 409 when linked ride requests exist.",
+      description:
+        "Requires `contracts.delete`. Fails with 409 when linked ride requests exist.",
       security,
-      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
+      ],
       responses: {
         "200": {
           description: "Contract deleted",
@@ -2394,7 +2872,10 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      vehicle: { $ref: "#/components/schemas/Vehicle", nullable: true },
+                      vehicle: {
+                        $ref: "#/components/schemas/Vehicle",
+                        nullable: true,
+                      },
                     },
                   },
                 },
@@ -2406,6 +2887,194 @@ export const extensionPaths = {
       },
     },
   },
+  "/api/ride-requests/{id}": {
+    get: {
+      tags: ["Ride Requests"],
+      summary: "Get ride request",
+      description:
+        "Returns a ride request owned by the authenticated user, including the requester profile for display in trip detail screens.",
+      security,
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
+        { $ref: "#/components/parameters/Locale" },
+      ],
+      responses: {
+        "200": {
+          description: "Ride request details",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      ride_request: {
+                        $ref: "#/components/schemas/RideRequest",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+  },
+  "/api/ride-requests/driver/{id}": {
+    get: {
+      tags: ["Admin Ride Requests"],
+      summary: "Driver trip details",
+      description:
+        "Returns a single trip assigned to the authenticated driver. Requires `driver.trip`.",
+      security,
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
+        { $ref: "#/components/parameters/Locale" },
+      ],
+      responses: {
+        "200": {
+          description: "Trip details for the driver",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      ride_request: {
+                        $ref: "#/components/schemas/DriverRideRequest",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+  },
+  "/api/admin/system-settings/deadline": {
+    get: {
+      tags: ["System Settings"],
+      summary: "Get deadline hub settings",
+      description:
+        "Returns the configurable deadline windows used across ride requests, invoices, and compliance alerts.",
+      security,
+      responses: {
+        "200": {
+          description: "Current deadline setting",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      ride_request_cancel_grace_minutes: { type: "integer" },
+                      invoice_due_soon_days: { type: "integer" },
+                      insurance_due_soon_days: { type: "integer" },
+                      inspection_due_soon_days: { type: "integer" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+    patch: {
+      tags: ["System Settings"],
+      summary: "Update deadline hub settings",
+      description:
+        "Updates the configurable deadline windows used across ride requests, invoices, and compliance alerts. Requires `system_settings.write`.",
+      security,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                ride_request_cancel_grace_minutes: {
+                  type: "integer",
+                  minimum: 1,
+                  maximum: 1440,
+                },
+                invoice_due_soon_days: {
+                  type: "integer",
+                  minimum: 1,
+                  maximum: 365,
+                },
+                insurance_due_soon_days: {
+                  type: "integer",
+                  minimum: 1,
+                  maximum: 3650,
+                },
+                inspection_due_soon_days: {
+                  type: "integer",
+                  minimum: 1,
+                  maximum: 3650,
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: "Updated deadline setting",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      ride_request_cancel_grace_minutes: { type: "integer" },
+                      invoice_due_soon_days: { type: "integer" },
+                      insurance_due_soon_days: { type: "integer" },
+                      inspection_due_soon_days: { type: "integer" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+  },
   "/api/ride-requests/driver/upcoming": {
     get: {
       tags: ["Admin Ride Requests"],
@@ -2414,7 +3083,7 @@ export const extensionPaths = {
         "Lists rides where the authenticated user is the assigned driver. Only trips with upcoming driver statuses are returned. `pending` is never included because that status is admin review only.\n\n" +
         "**Socket.IO (real-time):** connect to namespace `/api/ride-requests/driver/upcoming` for live upcoming-trip updates.\n\n" +
         "- URL: `http://{host}` with namespace `/api/ride-requests/driver/upcoming`\n" +
-        "- Auth: `auth: { token: \"{access_token}\" }` on connect, or `Authorization: Bearer {access_token}` header\n" +
+        '- Auth: `auth: { token: "{access_token}" }` on connect, or `Authorization: Bearer {access_token}` header\n' +
         "- Permission: `driver.upcoming`\n" +
         "- Localized fields include a `translations` array with all languages (`en`, `am`, ...).\n\n" +
         "Server events:\n" +
@@ -2442,7 +3111,10 @@ export const extensionPaths = {
                 type: "object",
                 properties: {
                   success: { type: "boolean", enum: [true] },
-                  data: { type: "array", items: { $ref: "#/components/schemas/DriverRideRequest" } },
+                  data: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/DriverRideRequest" },
+                  },
                   pagination: { $ref: "#/components/schemas/PaginationMeta" },
                 },
               },
@@ -2475,7 +3147,10 @@ export const extensionPaths = {
                 type: "object",
                 properties: {
                   success: { type: "boolean", enum: [true] },
-                  data: { type: "array", items: { $ref: "#/components/schemas/DriverRideRequest" } },
+                  data: {
+                    type: "array",
+                    items: { $ref: "#/components/schemas/DriverRideRequest" },
+                  },
                   pagination: { $ref: "#/components/schemas/PaginationMeta" },
                 },
               },
@@ -2520,7 +3195,9 @@ export const extensionPaths = {
                   success: { type: "boolean", enum: [true] },
                   data: {
                     type: "array",
-                    items: { $ref: "#/components/schemas/VehicleMaintenanceLog" },
+                    items: {
+                      $ref: "#/components/schemas/VehicleMaintenanceLog",
+                    },
                   },
                   pagination: { $ref: "#/components/schemas/PaginationMeta" },
                 },
@@ -2547,7 +3224,9 @@ export const extensionPaths = {
         required: true,
         content: {
           "application/json": {
-            schema: { $ref: "#/components/schemas/DriverVehicleMaintenanceInput" },
+            schema: {
+              $ref: "#/components/schemas/DriverVehicleMaintenanceInput",
+            },
           },
         },
       },
@@ -2563,7 +3242,9 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      maintenance_log: { $ref: "#/components/schemas/VehicleMaintenanceLog" },
+                      maintenance_log: {
+                        $ref: "#/components/schemas/VehicleMaintenanceLog",
+                      },
                     },
                   },
                 },
@@ -2598,7 +3279,9 @@ export const extensionPaths = {
         required: true,
         content: {
           "application/json": {
-            schema: { $ref: "#/components/schemas/DriverVehicleMaintenanceUpdateInput" },
+            schema: {
+              $ref: "#/components/schemas/DriverVehicleMaintenanceUpdateInput",
+            },
           },
         },
       },
@@ -2614,7 +3297,9 @@ export const extensionPaths = {
                   data: {
                     type: "object",
                     properties: {
-                      maintenance_log: { $ref: "#/components/schemas/VehicleMaintenanceLog" },
+                      maintenance_log: {
+                        $ref: "#/components/schemas/VehicleMaintenanceLog",
+                      },
                     },
                   },
                 },

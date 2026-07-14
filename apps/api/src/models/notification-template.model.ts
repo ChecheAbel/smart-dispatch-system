@@ -32,14 +32,14 @@ const RIDE_REQUEST_RULES: NotificationTemplateSeed[] = [
     channel: "email",
     recipient: "requester",
     subject: "Ride request received",
-    body: "Hello {requester_name}, we received your ride request from {pickup} to {dropoff}. We will review it shortly.",
+    body: "Hello {requester_name}, we received your ride request from {pickup} to {dropoff}. You can cancel within {cancel_deadline_minutes} minutes.",
   },
   {
     module: "ride_requests",
     event: "created",
     channel: "sms",
     recipient: "requester",
-    body: "Smart Dispatch: your ride request from {pickup} to {dropoff} was received.",
+    body: "Smart Dispatch: your ride request from {pickup} to {dropoff} was received. Cancel within {cancel_deadline_minutes} minutes.",
   },
   {
     module: "ride_requests",
@@ -167,14 +167,14 @@ const RIDE_REQUEST_RULES: NotificationTemplateSeed[] = [
     channel: "email",
     recipient: "requester",
     subject: "Ride request cancelled",
-    body: "Hello {requester_name}, your ride request from {pickup} to {dropoff} has been cancelled.",
+    body: "Hello {requester_name}, your ride request from {pickup} to {dropoff} has been cancelled before {cancel_deadline_at}.",
   },
   {
     module: "ride_requests",
     event: "cancelled",
     channel: "sms",
     recipient: "requester",
-    body: "Smart Dispatch: your ride request from {pickup} to {dropoff} was cancelled.",
+    body: "Smart Dispatch: your ride request from {pickup} to {dropoff} was cancelled before {cancel_deadline_at}.",
   },
 ];
 

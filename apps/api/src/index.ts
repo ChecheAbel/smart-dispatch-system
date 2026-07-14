@@ -11,6 +11,7 @@ import { registerAuthRoutes } from "./routes/auth.routes";
 import { registerMenuRoutes } from "./routes/menu.routes";
 import { registerNotificationRoutes } from "./routes/notification.routes";
 import { registerNotificationDeliveryLogRoutes } from "./routes/notification-delivery-log.routes";
+import { registerSystemSettingsRoutes } from "./routes/system-settings.routes";
 import { registerPermissionRoutes } from "./routes/permission.routes";
 import { registerRoleRoutes } from "./routes/role.routes";
 import { registerUserRoutes } from "./routes/user.routes";
@@ -31,6 +32,8 @@ import { registerDriverUpcomingTripsSocket } from "./websocket/driver-upcoming-t
 import { startInvoiceAutomationScheduler } from "./services/scheduler.service";
 import { requestLogger } from "./middleware/request-logger";
 import { ensureDriverLicenseUploadDir, getDriverLicenseUploadDir } from "./utils/driver-license-upload";
+import { ensureVehicleUploadDir, getVehicleUploadDir } from "./utils/vehicle-photo-upload";
+import { loadAppSettings } from "./models/app-setting.model";
 import { sendSuccess } from "./utils/response";
 
 dotenv.config();
@@ -44,6 +47,8 @@ app.use(requestLogger);
 app.use(express.json());
 ensureDriverLicenseUploadDir();
 app.use("/uploads/driver-licenses", express.static(getDriverLicenseUploadDir()));
+ensureVehicleUploadDir();
+app.use("/uploads/vehicles", express.static(getVehicleUploadDir()));
 
 registerAuthRoutes(app);
 registerUserRoutes(app);
@@ -66,6 +71,7 @@ registerInvoiceRoutes(app);
 registerCustomerBillingRoutes(app);
 registerRideRequestRoutes(app);
 registerAdminRideRequestRoutes(app);
+registerSystemSettingsRoutes(app);
 registerAdminDashboardRoutes(app);
 registerDriverUpcomingTripsSocket(server);
 
@@ -85,6 +91,7 @@ app.use(
 
 async function start() {
   await migrate();
+  await loadAppSettings();
   server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
     startInvoiceAutomationScheduler();

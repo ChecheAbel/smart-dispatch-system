@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { Car, ClipboardList, CreditCard, UserRound } from "lucide-react";
+import { Car, ClipboardList, CreditCard, UserRound, X } from "lucide-react";
 import type { Vehicle, VehicleStatus } from "@smart-dispatch/types";
 import { createVehicle, fetchVehicleById, fetchVehicleDriverOptions, updateVehicle } from "@/lib/vehicle-api";
 import { fetchActiveVehicleTypes } from "@/lib/vehicle-type-api";
@@ -38,6 +38,8 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { VEHICLE_PHOTO_ACCEPT } from "@/lib/vehicle-photo";
+import { getVehiclePhotoUrl } from "@/lib/vehicle-photo";
 import {
   ETHIOPIAN_PLATE_CATEGORY_CODES,
   ETHIOPIAN_PLATE_REGION_CODES,
@@ -71,6 +73,10 @@ type VehicleFormState = {
   year: string;
   status: VehicleStatus;
   notes: string;
+  images: Array<
+    | { kind: "existing"; value: string; previewUrl: string }
+    | { kind: "new"; file: File; previewUrl: string }
+  >;
 };
 
 type FieldErrors = Partial<Record<keyof VehicleFormState, string>>;
@@ -88,10 +94,12 @@ const emptyForm: VehicleFormState = {
   year: "",
   status: "active",
   notes: "",
+  images: [],
 };
 
 function mapVehicleToForm(vehicle: Vehicle): VehicleFormState {
   const plate = parseEthiopianPlate(vehicle.plate_number);
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
 
   return {
     plateRegion: plate.region,
@@ -106,6 +114,11 @@ function mapVehicleToForm(vehicle: Vehicle): VehicleFormState {
     year: vehicle.year != null ? String(vehicle.year) : "",
     status: vehicle.status,
     notes: vehicle.notes ?? "",
+    images: (vehicle.images ?? []).map((image) => ({
+      kind: "existing" as const,
+      value: image,
+      previewUrl: getVehiclePhotoUrl(image, apiBaseUrl) ?? image,
+    })),
   };
 }
 
@@ -153,6 +166,47 @@ function FieldHint({ children, error }: { children?: ReactNode; error?: string }
   }
 
   return <p className="text-xs text-slate-500">{children}</p>;
+}
+
+function VehicleImagePreview({
+  image,
+  previewUrl,
+  index,
+  onRemove,
+}: {
+  image: VehicleFormState["images"][number];
+  previewUrl: string;
+  index: number;
+  onRemove: () => void;
+}) {
+  const label = image.kind === "existing" ? image.value.split("/").pop() ?? image.value : image.file.name;
+  const resolvedPreviewUrl =
+    image.kind === "existing"
+      ? getVehiclePhotoUrl(image.value, process.env.NEXT_PUBLIC_API_URL) ?? previewUrl
+      : previewUrl;
+
+  return (
+    <div className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="relative aspect-[4/3] bg-slate-100">
+        <img
+          src={resolvedPreviewUrl}
+          alt="Vehicle preview"
+          className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+        />
+        <button
+          type="button"
+          onClick={onRemove}
+          className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-900/70 text-white shadow-sm transition hover:bg-rose-600"
+          aria-label={`Remove image`}
+        >
+          <X className="size-4" />
+        </button>
+        <div className="absolute left-3 top-3 rounded-full bg-slate-900/70 px-2.5 py-1 text-[11px] font-semibold text-white">
+          {index + 1}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 const PLATE_FIELD_KEYS = ["plateRegion", "plateCode", "plateLicense"] as const;
@@ -261,14 +315,33 @@ export function CreateVehicleSheet({
     [formCopy.plateCodePlaceholder, plateCodeOptions],
   );
 
+  function resetFormState() {
+    setForm((current) => {
+      for (const image of current.images) {
+        if (image.kind === "new") {
+          URL.revokeObjectURL(image.previewUrl);
+        }
+      }
+
+      return emptyForm;
+    });
+    setFieldErrors({});
+    setError(null);
+    setSubmitting(false);
+    setLoading(false);
+    setOptionsLoading(false);
+  }
+
+  function handleOpenChange(nextOpen: boolean) {
+    if (!nextOpen) {
+      resetFormState();
+    }
+
+    onOpenChange(nextOpen);
+  }
+
   useEffect(() => {
     if (!open) {
-      setForm(emptyForm);
-      setFieldErrors({});
-      setError(null);
-      setSubmitting(false);
-      setLoading(false);
-      setOptionsLoading(false);
       return;
     }
 
@@ -318,14 +391,7 @@ export function CreateVehicleSheet({
 
     void loadOptions();
 
-    if (!isEdit) {
-      setForm(emptyForm);
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    if (!vehicleId) {
+    if (!isEdit || !vehicleId) {
       return () => {
         cancelled = true;
       };
@@ -382,6 +448,49 @@ export function CreateVehicleSheet({
       return next;
     });
     setError(null);
+  }
+
+  function updateImages(files: FileList | null) {
+    setForm((current) => {
+      for (const image of current.images) {
+        if (image.kind === "new") {
+          URL.revokeObjectURL(image.previewUrl);
+        }
+      }
+
+      const nextImages = files
+        ? Array.from(files).map((file) => ({
+            kind: "new" as const,
+            file,
+            previewUrl: URL.createObjectURL(file),
+          }))
+        : [];
+
+      return {
+        ...current,
+        images: nextImages,
+      };
+    });
+    setError(null);
+  }
+
+  function removeImage(indexToRemove: number) {
+    setForm((current) => {
+      const nextImages = current.images.filter((image, index) => {
+        if (index === indexToRemove) {
+          if (image.kind === "new") {
+            URL.revokeObjectURL(image.previewUrl);
+          }
+          return false;
+        }
+        return true;
+      });
+
+      return {
+        ...current,
+        images: nextImages,
+      };
+    });
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -447,22 +556,28 @@ export function CreateVehicleSheet({
     }
 
     const yearValue = form.year.trim();
-    const year = yearValue ? Number(yearValue) : null;
 
-    const payload = {
-      plate_number: plateNumber,
-      vehicle_type_id: vehicleTypeId,
-      vehicle_class_id: vehicleClassId,
-      ...(canAssignDriver
-        ? { assigned_driver_user_id: form.assignedDriverUserId || null }
-        : {}),
-      chassis_number: chassisNumber,
-      make: form.make.trim() || null,
-      model: form.model.trim() || null,
-      year,
-      status: form.status,
-      notes: form.notes.trim() || null,
-    };
+    const payload = new FormData();
+    payload.append("plate_number", plateNumber);
+    payload.append("vehicle_type_id", vehicleTypeId);
+    payload.append("vehicle_class_id", vehicleClassId);
+    if (canAssignDriver) {
+      payload.append("assigned_driver_user_id", form.assignedDriverUserId || "");
+    }
+    payload.append("chassis_number", chassisNumber);
+    payload.append("make", form.make.trim());
+    payload.append("model", form.model.trim());
+    payload.append("year", yearValue);
+    payload.append("status", form.status);
+    payload.append("notes", form.notes.trim());
+
+    for (const image of form.images) {
+      if (image.kind === "existing") {
+        payload.append("vehicle_images_existing", image.value);
+      } else {
+        payload.append("vehicle_images", image.file);
+      }
+    }
 
     setSubmitting(true);
 
@@ -513,7 +628,7 @@ export function CreateVehicleSheet({
     fieldErrors.plateRegion ?? fieldErrors.plateCode ?? fieldErrors.plateLicense;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent
         side="right"
         className="flex w-full flex-col gap-0 overflow-y-auto p-0 data-[side=right]:sm:max-w-xl data-[side=right]:lg:max-w-2xl"
@@ -881,13 +996,60 @@ export function CreateVehicleSheet({
                   className={textareaClassName}
                 />
               </div>
-            </FormSection>
 
-            {error ? (
-              <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                {error}
+              <div className="space-y-3">
+                <Label htmlFor="vehicle-images">{formCopy.images}</Label>
+                <label
+                  htmlFor="vehicle-images"
+                  className={cn(
+                    "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 px-5 py-8 text-center transition hover:border-[#1C3A34]/30 hover:bg-[#1C3A34]/[0.03]",
+                    fieldErrors.images && fieldErrorClassName,
+                  )}
+                >
+                  <div className="flex size-12 items-center justify-center rounded-full bg-white shadow-sm ring-1 ring-slate-200">
+                    <ClipboardList className="size-5 text-[#1C3A34]" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-sm font-semibold text-slate-800">
+                      {form.images.length > 0
+                        ? formatMessage(formCopy.imagesSelected, {
+                            count: String(form.images.length),
+                          })
+                        : formCopy.images}
+                    </p>
+                    <p className="text-xs leading-relaxed text-slate-500">{formCopy.imagesHint}</p>
+                  </div>
+                  <span className="inline-flex items-center rounded-full bg-[#1C3A34] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#C9B87A]">
+                    Browse files
+                  </span>
+                </label>
+                <input
+                  id="vehicle-images"
+                  type="file"
+                  multiple
+                  accept={VEHICLE_PHOTO_ACCEPT}
+                  onChange={(event) => updateImages(event.target.files)}
+                  className="sr-only"
+                />
+                {form.images.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                    {form.images.map((image, index) => (
+                      <VehicleImagePreview
+                        key={
+                          image.kind === "existing"
+                            ? image.value
+                            : `${image.file.name}-${image.file.lastModified}`
+                        }
+                        image={image}
+                        previewUrl={image.previewUrl}
+                        index={index}
+                        onRemove={() => removeImage(index)}
+                      />
+                    ))}
+                  </div>
+                ) : null}
               </div>
-            ) : null}
+            </FormSection>
           </form>
         )}
 

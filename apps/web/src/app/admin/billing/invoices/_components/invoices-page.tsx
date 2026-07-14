@@ -22,14 +22,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   adminBadgeGoldClass,
   adminBadgeSuccessClass,
 } from "@/lib/admin-theme";
@@ -161,18 +153,6 @@ export function InvoicesPage() {
   const canWrite = hasPermission(PERMISSIONS.invoices.write);
   const canDelete = hasPermission(PERMISSIONS.invoices.delete);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">("all");
-
-  const statusItems = useMemo(
-    () => [
-      { label: copy.filters.statusAll, value: "all" },
-      { label: copy.status.draft, value: "draft" },
-      { label: copy.status.issued, value: "issued" },
-      { label: copy.status.paid, value: "paid" },
-      { label: copy.status.void, value: "void" },
-    ],
-    [copy],
-  );
 
   const columns = useMemo<DataTableColumn<Invoice>[]>(
     () => [
@@ -244,10 +224,9 @@ export function InvoicesPage() {
         page,
         limit,
         search: search || undefined,
-        status: statusFilter === "all" ? undefined : statusFilter,
         locale,
       }),
-    [locale, statusFilter],
+    [locale],
   );
 
   const renderRowActions = useCallback(
@@ -272,7 +251,7 @@ export function InvoicesPage() {
       <InvoiceStats locale={locale} refreshKey={refreshKey} />
 
       <DataTable<Invoice>
-        key={`${locale}-${refreshKey}-${statusFilter}`}
+        key={`${locale}-${refreshKey}`}
         eyebrow={<Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>}
         title={copy.title}
         titleClassName="text-2xl font-extrabold tracking-tight"
@@ -288,30 +267,6 @@ export function InvoicesPage() {
         emptyDescription={copy.empty.description}
         emptySearchDescription={copy.empty.searchDescription}
         emptyIcon={Receipt}
-        refreshDeps={[locale, refreshKey, statusFilter]}
-        toolbarActions={
-          <Select
-            items={statusItems}
-            value={statusFilter}
-            onValueChange={(value) => setStatusFilter((value as InvoiceStatus) || "all")}
-          >
-            <SelectTrigger
-              id="invoice-status-filter"
-              className="h-10 w-full sm:w-48 rounded-lg border-slate-200 bg-white shadow-sm"
-            >
-              <SelectValue placeholder={copy.filters.status} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="all">{copy.filters.statusAll}</SelectItem>
-                <SelectItem value="draft">{copy.status.draft}</SelectItem>
-                <SelectItem value="issued">{copy.status.issued}</SelectItem>
-                <SelectItem value="paid">{copy.status.paid}</SelectItem>
-                <SelectItem value="void">{copy.status.void}</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        }
       />
     </div>
   );

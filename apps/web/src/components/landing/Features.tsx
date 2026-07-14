@@ -29,26 +29,26 @@ const features: {
   },
   {
     icon: Car,
-    title: "Fleet Management",
-    desc: "Monitor vehicle health, maintenance schedules, utilization, and compliance across your entire fleet from one dashboard.",
+    title: "Fleet Compliance",
+    desc: "Monitor vehicle inspections, insurance renewal deadlines, and regional permits with automated compliance alerts.",
     tag: "Fleet",
   },
   {
     icon: Users,
     title: "Driver Management",
-    desc: "Onboard drivers, track performance and availability, manage shifts, and enforce safety and compliance standards.",
+    desc: "Onboard drivers, track performance and availability, manage shifts, and enforce local safety standards.",
     tag: "Workforce",
   },
   {
     icon: Receipt,
-    title: "Billing",
-    desc: "Automate fare calculation, corporate accounts, payment collection, and revenue reporting with flexible pricing rules.",
+    title: "ETB Corporate Billing",
+    desc: "Manage custom corporate agreements, calculate region-based pricing, and track account balances in Birr.",
     tag: "Finance",
   },
   {
     icon: FileText,
-    title: "Invoicing",
-    desc: "Generate, send, and reconcile invoices automatically—linked to completed trips, contracts, and billing cycles.",
+    title: "Automated Invoices",
+    desc: "Generate, send, and reconcile localized PDF invoices automatically, tied to completed corporate ride logs.",
     tag: "Finance",
   },
 ];
@@ -58,12 +58,12 @@ export default function Features() {
     <section id="features" className="bg-[#f8f7f4] py-16 sm:py-20 lg:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center mb-10 sm:mb-16">
-          <p className="text-[#C9B87A] font-bold text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase mb-3">— Platform Capabilities —</p>
+          <p className="text-[#C9B87A] font-bold text-[10px] sm:text-xs tracking-[0.2em] sm:tracking-[0.25em] uppercase mb-3">Platform Capabilities</p>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1C3A34] tracking-tight px-2">
             Everything You Need to Operate
           </h2>
           <p className="mt-3 sm:mt-4 text-slate-500 text-base sm:text-lg max-w-2xl mx-auto leading-relaxed px-2">
-            One complete platform covering the full mobility lifecycle—from the first booking to the final invoice.
+            One complete platform covering the full mobility lifecycle, from the first booking to the final invoice.
           </p>
         </div>
 

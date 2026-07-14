@@ -202,14 +202,10 @@ export function AdminDashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="space-y-2">
-        <Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>
+      <div className="space-y-1">
         <h2 className={`text-2xl font-extrabold tracking-tight ${adminHeadingClass}`}>
-          {copy.title}
-        </h2>
-        <p className="text-sm font-medium text-slate-700">
           {formatMessage(copy.welcome, { name: displayName })}
-        </p>
+        </h2>
         <p className="max-w-3xl text-sm text-slate-500">{copy.description}</p>
       </div>
 

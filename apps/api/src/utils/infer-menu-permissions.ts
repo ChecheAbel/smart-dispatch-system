@@ -47,8 +47,21 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
     return ["users.read", "user_registrations.read"];
   }
 
-  if (normalizedSlug === "system-settings" || normalizedSlug === "notifications" || normalizedSlug === "notification-templates" || normalizedSlug === "notification-logs") {
-    return ["notifications.read"];
+  if (
+    normalizedSlug === "system-settings" ||
+    normalizedSlug === "notifications" ||
+    normalizedSlug === "notification-templates" ||
+    normalizedSlug === "notification-logs"
+  ) {
+    return ["notifications.read", "system_settings.read"];
+  }
+
+  if (normalizedSlug === "deadline-settings") {
+    return ["system_settings.read"];
+  }
+
+  if (normalizedPath === "/admin/system-settings/deadline") {
+    return ["system_settings.read"];
   }
 
   if (normalizedSlug === "fleet") {

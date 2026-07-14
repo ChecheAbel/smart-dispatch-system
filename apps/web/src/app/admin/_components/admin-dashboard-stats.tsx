@@ -308,10 +308,6 @@ export function AdminDashboardStats({
 
   return (
     <section className="space-y-4">
-      <div className="space-y-1">
-        <h3 className={`text-lg font-bold ${adminHeadingClass}`}>{copy.core.title}</h3>
-        <p className="text-sm text-slate-500">{copy.core.description}</p>
-      </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{cards}</div>
     </section>
   );
