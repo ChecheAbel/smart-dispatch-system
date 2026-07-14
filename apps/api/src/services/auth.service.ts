@@ -113,23 +113,32 @@ async function issueTokenPair(user: DbUser): Promise<AuthTokenResponse> {
   };
 }
 
-export async function loginWithPassword(email: string, password: string) {
-  if (!isValidEmail(email)) {
-    throw new AuthError("A valid email address is required.", 400);
-  }
+export async function loginWithPassword(username: string, password: string) {
+  const trimmedUsername = username.trim();
 
   if (!password) {
     throw new AuthError("Password is required.", 400);
   }
 
-  const user = await findUserByEmail(email);
+  let user = null;
+
+  if (isValidEmail(trimmedUsername)) {
+    user = await findUserByEmail(trimmedUsername);
+  } else {
+    const mobileNumber = normalizeEthiopianMobileNumber(trimmedUsername);
+    if (!mobileNumber) {
+      throw new AuthError("A valid email address or mobile number is required.", 400);
+    }
+    user = await findUserByMobileNumber(mobileNumber);
+  }
+
   if (!user) {
-    throw new AuthError("Invalid email or password.", 401);
+    throw new AuthError("Invalid username or password.", 401);
   }
 
   const passwordMatches = await bcrypt.compare(password, user.passwordHash);
   if (!passwordMatches) {
-    throw new AuthError("Invalid email or password.", 401);
+    throw new AuthError("Invalid username or password.", 401);
   }
 
   if (!isAccountUsable(user)) {

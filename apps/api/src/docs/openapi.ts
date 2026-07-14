@@ -311,16 +311,21 @@ export const openApiSpec = {
       post: {
         tags: ["Auth"],
         summary: "Sign in",
-        description: "Authenticate with email and password. Returns access and refresh tokens.",
+        description:
+          "Authenticate with username (email or mobile number) and password. Returns access and refresh tokens.",
         requestBody: {
           required: true,
           content: {
             "application/json": {
               schema: {
                 type: "object",
-                required: ["email", "password"],
+                required: ["username", "password"],
                 properties: {
-                  email: { type: "string", format: "email" },
+                  username: {
+                    type: "string",
+                    description: "Email address or Ethiopian mobile number",
+                    example: "you@company.com",
+                  },
                   password: { type: "string", format: "password", minLength: 8 },
                 },
               },

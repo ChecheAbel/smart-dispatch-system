@@ -34,9 +34,12 @@ function getAccountBlockReason(error: unknown) {
   return null;
 }
 
-export async function login(email: string, password: string) {
+export async function login(username: string, password: string) {
   try {
-    const { data } = await apiClient.post("/api/auth/login", { email, password });
+    const { data } = await apiClient.post("/api/auth/login", {
+      username: username.trim(),
+      password,
+    });
     return unwrapApiResponse<AuthTokenResponse>(data);
   } catch (error) {
     if (axios.isAxiosError(error)) {

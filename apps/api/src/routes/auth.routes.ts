@@ -168,9 +168,9 @@ export function registerAuthRoutes(app: Express) {
 
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
-      const email = typeof req.body?.email === "string" ? req.body.email : "";
+      const username = typeof req.body?.username === "string" ? req.body.username.trim() : "";
       const password = typeof req.body?.password === "string" ? req.body.password : "";
-      const result = await loginWithPassword(email, password);
+      const result = await loginWithPassword(username, password);
 
       await recordAuditLog({
         req,

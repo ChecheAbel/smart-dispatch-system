@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, Mail, Phone } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { login, resumeAdminSession } from "@/lib/auth-api";
@@ -11,9 +11,12 @@ import { ADMIN_DASHBOARD_PATH, ADMIN_FORGOT_PASSWORD_PATH } from "@/lib/auth-pat
 import { clearAuthSession, saveAuthSession } from "@/lib/auth-session";
 import { showErrorToast } from "@/lib/toast";
 
+type LoginMethod = "email" | "mobile";
+
 export default function AdminSignInForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [loginMethod, setLoginMethod] = useState<LoginMethod>("email");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
@@ -48,12 +51,18 @@ export default function AdminSignInForm() {
     };
   }, [router]);
 
+  function selectLoginMethod(method: LoginMethod) {
+    if (method === loginMethod) return;
+    setLoginMethod(method);
+    setUsername("");
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      const session = await login(email.trim(), password);
+      const session = await login(username.trim(), password);
 
       if (!session.user.roles.includes("admin")) {
         clearAuthSession();
@@ -89,6 +98,8 @@ export default function AdminSignInForm() {
     );
   }
 
+  const isEmailLogin = loginMethod === "email";
+
   return (
     <>
       <div className="hidden lg:block mb-8">
@@ -101,25 +112,67 @@ export default function AdminSignInForm() {
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 sm:p-8">
         <form className="space-y-5" onSubmit={handleSubmit}>
+          <div
+            className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1"
+            role="tablist"
+            aria-label="Sign in method"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isEmailLogin}
+              onClick={() => selectLoginMethod("email")}
+              disabled={isSubmitting}
+              className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all disabled:opacity-70 ${
+                isEmailLogin
+                  ? "bg-white text-[#1C3A34] shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              <Mail className="h-4 w-4" />
+              Email
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={!isEmailLogin}
+              onClick={() => selectLoginMethod("mobile")}
+              disabled={isSubmitting}
+              className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all disabled:opacity-70 ${
+                !isEmailLogin
+                  ? "bg-white text-[#1C3A34] shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              <Phone className="h-4 w-4" />
+              Mobile
+            </button>
+          </div>
+
           <div>
             <label
-              htmlFor="email"
+              htmlFor="username"
               className="block text-[10px] font-bold text-slate-400 tracking-[0.15em] uppercase mb-2"
             >
-              Email Address
+              {isEmailLogin ? "Email Address" : "Mobile Number"}
             </label>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+              {isEmailLogin ? (
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+              ) : (
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+              )}
               <input
-                id="email"
-                type="email"
-                autoComplete="email"
+                id="username"
+                type={isEmailLogin ? "email" : "tel"}
+                inputMode={isEmailLogin ? "email" : "tel"}
+                autoComplete={isEmailLogin ? "email" : "tel"}
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 disabled={isSubmitting}
                 className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all disabled:opacity-70"
-                placeholder="admin@company.com"
+                placeholder={isEmailLogin ? "admin@company.com" : "0911234567"}
               />
             </div>
           </div>

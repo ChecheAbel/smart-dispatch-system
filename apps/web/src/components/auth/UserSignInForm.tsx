@@ -3,13 +3,15 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Eye, EyeOff, Loader2, Lock, Mail, XCircle } from "lucide-react";
+import { Eye, EyeOff, Loader2, Lock, Mail, Phone, XCircle } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { AuthRequestError, login, resumeUserSession } from "@/lib/auth-api";
 import { USER_DASHBOARD_PATH, USER_REGISTER_PATH } from "@/lib/auth-paths";
 import { clearAuthSession, saveAuthSession } from "@/lib/auth-session";
 import { showErrorToast } from "@/lib/toast";
+
+type LoginMethod = "email" | "mobile";
 
 type SignInFormError = {
   rejectionReason: string;
@@ -34,7 +36,8 @@ export default function UserSignInForm() {
   const redirect = searchParams.get("redirect");
   const targetRedirect = redirect || USER_DASHBOARD_PATH;
 
-  const [email, setEmail] = useState("");
+  const [loginMethod, setLoginMethod] = useState<LoginMethod>("email");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [remember, setRemember] = useState(false);
@@ -70,13 +73,20 @@ export default function UserSignInForm() {
     };
   }, [router, targetRedirect]);
 
+  function selectLoginMethod(method: LoginMethod) {
+    if (method === loginMethod) return;
+    setLoginMethod(method);
+    setUsername("");
+    setFormError(null);
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setIsSubmitting(true);
     setFormError(null);
 
     try {
-      const session = await login(email.trim(), password);
+      const session = await login(username.trim(), password);
 
       if (!session.user.roles.includes("user")) {
         clearAuthSession();
@@ -132,6 +142,8 @@ export default function UserSignInForm() {
     );
   }
 
+  const isEmailLogin = loginMethod === "email";
+
   return (
     <>
       <div className="hidden lg:block mb-8">
@@ -161,28 +173,70 @@ export default function UserSignInForm() {
             </div>
           ) : null}
 
+          <div
+            className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1"
+            role="tablist"
+            aria-label="Sign in method"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={isEmailLogin}
+              onClick={() => selectLoginMethod("email")}
+              disabled={isSubmitting}
+              className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all disabled:opacity-70 ${
+                isEmailLogin
+                  ? "bg-white text-[#1C3A34] shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              <Mail className="h-4 w-4" />
+              Email
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={!isEmailLogin}
+              onClick={() => selectLoginMethod("mobile")}
+              disabled={isSubmitting}
+              className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-all disabled:opacity-70 ${
+                !isEmailLogin
+                  ? "bg-white text-[#1C3A34] shadow-sm"
+                  : "text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              <Phone className="h-4 w-4" />
+              Mobile
+            </button>
+          </div>
+
           <div>
             <label
-              htmlFor="user-email"
+              htmlFor="user-username"
               className="block text-[10px] font-bold text-slate-400 tracking-[0.15em] uppercase mb-2"
             >
-              Email Address
+              {isEmailLogin ? "Email Address" : "Mobile Number"}
             </label>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+              {isEmailLogin ? (
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+              ) : (
+                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+              )}
               <input
-                id="user-email"
-                type="email"
-                autoComplete="email"
+                id="user-username"
+                type={isEmailLogin ? "email" : "tel"}
+                inputMode={isEmailLogin ? "email" : "tel"}
+                autoComplete={isEmailLogin ? "email" : "tel"}
                 required
-                value={email}
+                value={username}
                 onChange={(e) => {
-                  setEmail(e.target.value);
+                  setUsername(e.target.value);
                   setFormError(null);
                 }}
                 disabled={isSubmitting}
                 className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all disabled:opacity-70"
-                placeholder="you@company.com"
+                placeholder={isEmailLogin ? "you@company.com" : "0911234567"}
               />
             </div>
           </div>
