@@ -116,7 +116,8 @@ export function AdminDatePicker({
                 caption_label: "text-sm font-semibold text-[#1C3A34]",
                 today: "rounded-lg bg-[#C9B87A]/15 font-semibold text-[#1C3A34]",
                 outside: "text-slate-300",
-                disabled: "text-slate-300 opacity-40",
+                disabled:
+                  "opacity-100 text-slate-400 [&_button]:text-slate-400 [&_button]:opacity-100 [&_button]:disabled:opacity-100 [&_button]:hover:bg-transparent [&_button]:hover:text-slate-400 cursor-not-allowed",
                 button_previous:
                   "text-[#1C3A34] hover:bg-[#1C3A34]/8 hover:text-[#1C3A34]",
                 button_next: "text-[#1C3A34] hover:bg-[#1C3A34]/8 hover:text-[#1C3A34]",

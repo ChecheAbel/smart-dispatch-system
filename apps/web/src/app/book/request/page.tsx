@@ -127,8 +127,9 @@ const COPY = {
     backToCatalog: "Back to Catalog",
     requestBooking: "Confirm Your Ride Requests",
     requestSubTitle: "Fill out the dispatch coordinates below to schedule assignments for your selected vehicles.",
-    signInPrompt: "Sign in to request vehicles. Registered requests are prioritized by our dispatchers.",
-    signInToBook: "Sign In / Register",
+    signInPrompt: "Please sign in to make a request.",
+    signInPromptDetail: "You can review the form below, but submitting a ride request requires an account.",
+    signInToBook: "Sign In to Continue",
     passengerDetails: "Passenger Details",
     passengerDetailsDesc: "Who will be traveling? Add their contact details for driver alerts.",
     tripDetails: "Trip Coordinates",
@@ -194,8 +195,9 @@ const COPY = {
     backToCatalog: "ወደ ካታሎግ ይመለሱ",
     requestBooking: "የጉዞ ጥያቄዎችዎን ያረጋግጡ",
     requestSubTitle: "ለመረጧቸው ተሽከርካሪዎች የጉዞ ምደባ ለማስያዝ ከታች ያለውን ቅጽ ይሙሉ::",
-    signInPrompt: "ተሽከርካሪዎችን ለመጠየቅ ይግቡ። የተመዘገቡ ጥያቄዎች በላኪዎቻችን ቅድሚያ ይሰጣቸዋል።",
-    signInToBook: "ይግቡ / ይመዝገቡ",
+    signInPrompt: "ጥያቄ ለማድረግ እባክዎ ይግቡ።",
+    signInPromptDetail: "ቅጹን ከዚህ በታች ማየት ይችላሉ፣ ነገር ግን የጉዞ ጥያቄ ለማስገባት መለያ ያስፈልጋል።",
+    signInToBook: "ለመቀጠል ይግቡ",
     passengerDetails: "የተሳፋሪ ዝርዝሮች",
     passengerDetailsDesc: "ማን ነው የሚጓዘው? የአሽከርካሪ ማንቂያዎችን ለመቀበል የስልክ ቁጥራቸውን ያክሉ::",
     tripDetails: "የጉዞ መጋጠሚያዎች",
@@ -772,6 +774,14 @@ function VehicleRequestPageContent() {
               <p className="text-sm text-slate-500 font-medium">{copy.requestSubTitle}</p>
             </div>
 
+            <div className="relative min-h-[360px]">
+              <div
+                className={cn(
+                  "space-y-8 transition-[filter,opacity] duration-300",
+                  !user && !isSuccess && "pointer-events-none select-none opacity-60",
+                )}
+                aria-hidden={!user && !isSuccess}
+              >
             {isSuccess ? (
               <div className="py-12 text-center flex flex-col items-center gap-5 border border-slate-100 rounded-3xl bg-slate-50/50 shadow-inner p-8">
                 <div className="h-20 w-20 bg-emerald-50 rounded-full flex items-center justify-center border-2 border-emerald-100 text-emerald-600 mb-2 animate-bounce">
@@ -875,24 +885,6 @@ function VehicleRequestPageContent() {
                     {copy.changeType}
                   </button>
                 </div>
-
-                {/* Guest login banner */}
-                {!user && (
-                  <div className="bg-[#1C3A34]/5 rounded-2xl border border-[#1C3A34]/15 p-5 flex flex-col sm:flex-row items-center gap-4 justify-between">
-                    <div className="flex gap-3 items-start text-left">
-                      <Lock className="h-5 w-5 text-[#C9B87A] shrink-0 mt-0.5" />
-                      <p className="text-xs font-semibold text-slate-650 leading-relaxed max-w-md">
-                        {copy.signInPrompt}
-                      </p>
-                    </div>
-                    <Link
-                      href={`/sign-in?redirect=/book/request?ids=${ids.join(",")}`}
-                      className="bg-[#C9B87A] hover:bg-[#d9ca8e] text-[#1C3A34] font-bold text-xs py-3 px-5 rounded-xl tracking-wide transition-all shadow-md shrink-0 w-full sm:w-auto text-center"
-                    >
-                      {copy.signInToBook}
-                    </Link>
-                  </div>
-                )}
 
                 {/* Form Section 1: Passengers info */}
                 <AdminFormSection title={copy.passengerDetails} description={copy.passengerDetailsDesc} icon={User}>
