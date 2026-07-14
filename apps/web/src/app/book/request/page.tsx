@@ -40,7 +40,16 @@ import { getStoredUser, clearAuthSession } from "@/lib/auth-session";
 import { fetchPublicVehicles } from "@/lib/vehicle-api";
 import type { Vehicle, User as AuthUser } from "@smart-dispatch/types";
 import BrandLogo from "@/components/landing/BrandLogo";
+import { VehiclePhotoMedia } from "@/components/book/vehicle-photo-media";
 import { getVehiclePhotoUrl } from "@/lib/vehicle-photo";
+import {
+  formatVehicleAvailableFrom,
+  getEarliestBookableAt,
+  getVehicleAvailableFrom,
+  isScheduleBeforeAvailableFrom,
+  isVehicleAvailableNow,
+  toScheduleTimeValue,
+} from "@/lib/vehicle-availability";
 import { LocaleProvider, useLocale } from "@/components/shared/providers";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -154,8 +163,10 @@ const COPY = {
     successText: "Your booking requests have been successfully queued. A platform dispatcher will assign professional drivers shortly and contact you at the mobile number provided.",
     signIn: "Sign In",
     statusAvailable: "Available Now",
-    statusBusy: "Busy - Available soon",
+    statusBusy: "In Service - Available:",
     selectedVehicles: "Selected Vehicles",
+    scheduleAvailableFromHint: "Earliest start based on selected vehicles:",
+    scheduleTooEarly: "Choose a date and time on or after the vehicle available-from time.",
     locationModeSaved: "Saved",
     locationModeCustom: "Custom",
     pickupAddressLabel: "Pickup Address",
@@ -219,8 +230,10 @@ const COPY = {
     successText: "የጉዞ ጥያቄዎችዎ በተሳካ ሁኔታ ተሰልፈዋል። ላኪዎች አሽከርካሪዎችን በቅርቡ ይመድባሉ እና በሰጡት ስልክ ቁጥር ያገኙዎታል።",
     signIn: "ግባ",
     statusAvailable: "አሁን ይገኛል",
-    statusBusy: "ሥራ ላይ - በቅርቡ ይገኛል",
+    statusBusy: "ስራ ላይ - የሚገኝበት ጊዜ፡",
     selectedVehicles: "የተመረጡ ተሽከርካሪዎች",
+    scheduleAvailableFromHint: "በተመረጡ ተሽከርካሪዎች መሠረት ቀድሞውኑ የሚያስችል ጊዜ፡",
+    scheduleTooEarly: "ከተሽከርካሪው የሚገኝበት ጊዜ በኋላ ቀንና ሰዓት ይምረጡ።",
     locationModeSaved: "የተቀመጠ",
     locationModeCustom: "ብጁ",
     pickupAddressLabel: "የመነሻ አድራሻ",
@@ -292,27 +305,6 @@ function LocationModeSwitch({
   );
 }
 
-function RequestVehicleImage({ imageUrl, alt }: { imageUrl?: string; alt: string }) {
-  const [hasError, setHasError] = useState(!imageUrl);
-
-  if (hasError) {
-    return (
-      <div className="h-full w-full flex items-center justify-center bg-white/5">
-        <Car className="h-10 w-10 text-white/15" />
-      </div>
-    );
-  }
-
-  return (
-    <img
-      src={imageUrl}
-      alt={alt}
-      className="h-full w-full object-cover"
-      onError={() => setHasError(true)}
-    />
-  );
-}
-
 function VehicleRequestPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -335,6 +327,7 @@ function VehicleRequestPageContent() {
   const [dropoffCoordinates, setDropoffCoordinates] = useState<CoordinateState>({}); 
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>(undefined);
   const [scheduledTime, setScheduledTime] = useState<TimeValue | undefined>(undefined);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -401,6 +394,48 @@ function VehicleRequestPageContent() {
 
 
 
+  const earliestBookableAt = useMemo(
+    () => getEarliestBookableAt(vehicles),
+    [vehicles],
+  );
+  const earliestBookableLabel = useMemo(
+    () => formatVehicleAvailableFrom(earliestBookableAt, locale),
+    [earliestBookableAt, locale],
+  );
+  const hasInServiceVehicle = useMemo(
+    () => vehicles.some((vehicle) => !isVehicleAvailableNow(vehicle.status)),
+    [vehicles],
+  );
+  const vehicleAvailabilityKey = useMemo(
+    () => vehicles.map((vehicle) => `${vehicle.id}:${vehicle.status}`).join("|"),
+    [vehicles],
+  );
+
+  useEffect(() => {
+    if (vehicles.length === 0) return;
+
+    const minAt = getEarliestBookableAt(vehicles);
+    const minDay = startOfDay(minAt);
+
+    if (hasInServiceVehicle) {
+      setScheduledDate(minDay);
+      setScheduledTime(toScheduleTimeValue(minAt));
+      setScheduleError(null);
+      return;
+    }
+
+    setScheduledDate((current) => {
+      if (!current) return current;
+      return startOfDay(current).getTime() < minDay.getTime() ? minDay : current;
+    });
+    setScheduledTime((current) => {
+      if (!current) return current;
+      const minMinutes = minAt.getHours() * 60 + minAt.getMinutes();
+      const currentMinutes = current.hour * 60 + current.minute;
+      return currentMinutes < minMinutes ? toScheduleTimeValue(minAt) : current;
+    });
+  }, [vehicleAvailabilityKey, hasInServiceVehicle, vehicles]);
+
   const pickupItems = useMemo(
     () => PICKUP_POINTS.map((pt) => ({ label: pt, value: pt })),
     [],
@@ -413,18 +448,29 @@ function VehicleRequestPageContent() {
 
   const scheduledMinTime = useMemo(() => {
     if (!scheduledDate) return undefined;
-    const today = startOfDay(new Date());
-    if (startOfDay(scheduledDate).getTime() !== today.getTime()) {
+    if (startOfDay(scheduledDate).getTime() !== startOfDay(earliestBookableAt).getTime()) {
       return undefined;
     }
-    const current = new Date();
-    return { hour: current.getHours(), minute: current.getMinutes() };
-  }, [scheduledDate]);
+    return {
+      hour: earliestBookableAt.getHours(),
+      minute: earliestBookableAt.getMinutes(),
+    };
+  }, [scheduledDate, earliestBookableAt]);
 
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!passengerName || !mobileNumber || !pickup || !dropoff) return;
 
+    if (
+      !scheduledDate ||
+      !scheduledTime ||
+      isScheduleBeforeAvailableFrom(scheduledDate, scheduledTime, earliestBookableAt)
+    ) {
+      setScheduleError(copy.scheduleTooEarly);
+      return;
+    }
+
+    setScheduleError(null);
     setIsSubmitting(true);
     // Simulate API request submission
     await new Promise((resolve) => setTimeout(resolve, 1500));
@@ -444,6 +490,7 @@ function VehicleRequestPageContent() {
     setUseCustomDropoff(false);
     setScheduledDate(undefined);
     setScheduledTime(undefined);
+    setScheduleError(null);
     setIsSuccess(false);
     router.push("/book");
   };
@@ -629,20 +676,29 @@ function VehicleRequestPageContent() {
                 >
                   {/* Photo Banner */}
                   <div className="h-36 w-full relative bg-white/5">
-                    <RequestVehicleImage
+                    <VehiclePhotoMedia
                       imageUrl={v.images?.[0] ? getVehiclePhotoUrl(v.images[0]) : undefined}
                       alt={`${v.make} ${v.model}`}
+                      tone="dark"
                     />
                     {/* Gradient overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
                     {/* Status badge overlay */}
-                    <span className={`absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border ${
-                      v.status === "available"
-                        ? "bg-emerald-500/20 border-emerald-400/30 text-emerald-300"
-                        : "bg-amber-500/20 border-amber-400/30 text-amber-300"
-                    }`}>
-                      {v.status === "available" ? "Available" : "Busy"}
-                    </span>
+                    {(() => {
+                      const available = isVehicleAvailableNow(v.status);
+                      const availableFrom = getVehicleAvailableFrom(v.status);
+                      return (
+                        <span className={`absolute top-2 left-2 max-w-[85%] text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wider border ${
+                          available
+                            ? "bg-emerald-500/20 border-emerald-400/30 text-emerald-300"
+                            : "bg-amber-500/20 border-amber-400/30 text-amber-300"
+                        }`}>
+                          {available
+                            ? copy.statusAvailable
+                            : `${copy.statusBusy} ${formatVehicleAvailableFrom(availableFrom, locale)}`}
+                        </span>
+                      );
+                    })()}
                   </div>
 
                   {/* Info panel */}
@@ -1001,6 +1057,12 @@ function VehicleRequestPageContent() {
 
                 {/* Form Section 3: Date & time details */}
                 <AdminFormSection title={copy.scheduleDetails} description={copy.scheduleDetailsDesc} icon={Calendar}>
+                  {hasInServiceVehicle ? (
+                    <p className="rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-xs font-medium text-amber-800">
+                      {copy.scheduleAvailableFromHint}{" "}
+                      <span className="font-bold">{earliestBookableLabel}</span>
+                    </p>
+                  ) : null}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <AdminDatePicker
                       id="request-scheduled-date"
@@ -1008,13 +1070,13 @@ function VehicleRequestPageContent() {
                       placeholder={copy.pickDate}
                       clearLabel={copy.clearDate}
                       todayLabel={copy.today}
-                      locale={locale}
+                      minDate={earliestBookableAt}
                       value={scheduledDate}
                       onChange={(date) => {
                         setScheduledDate(date);
                         setScheduledTime(undefined);
+                        setScheduleError(null);
                       }}
-                      required
                     />
 
                     <AdminTimePicker
@@ -1028,9 +1090,15 @@ function VehicleRequestPageContent() {
                       locale={locale}
                       hour12
                       disabled={!scheduledDate}
-                      onChange={setScheduledTime}
+                      onChange={(time) => {
+                        setScheduledTime(time);
+                        setScheduleError(null);
+                      }}
                     />
                   </div>
+                  {scheduleError ? (
+                    <p className="text-xs text-red-600">{scheduleError}</p>
+                  ) : null}
                 </AdminFormSection>
 
                 {/* Submit Action Buttons */}

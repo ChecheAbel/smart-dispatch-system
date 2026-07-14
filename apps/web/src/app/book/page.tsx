@@ -29,7 +29,13 @@ import { getStoredUser, clearAuthSession } from "@/lib/auth-session";
 import { fetchPublicVehicles } from "@/lib/vehicle-api";
 import type { Vehicle, VehicleType, VehicleClass, User as AuthUser } from "@smart-dispatch/types";
 import BrandLogo from "@/components/landing/BrandLogo";
+import { VehiclePhotoMedia } from "@/components/book/vehicle-photo-media";
 import { getVehiclePhotoUrl } from "@/lib/vehicle-photo";
+import {
+  formatVehicleAvailableFrom,
+  getVehicleAvailableFrom,
+  isVehicleAvailableNow,
+} from "@/lib/vehicle-availability";
 import { LocaleProvider, useLocale } from "@/components/shared/providers";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -86,27 +92,6 @@ const COPY = {
     noVehicles: "በፍለጋዎ መሰረት ምንም ተሽከርካሪ አልተገኘም።",
   },
 };
-
-function CatalogVehicleImage({ imageUrl, alt }: { imageUrl?: string; alt: string }) {
-  const [hasError, setHasError] = useState(!imageUrl);
-
-  if (hasError) {
-    return (
-      <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100/50 p-6">
-        <Car className="h-16 w-16 text-[#1C3A34]/15 group-hover:scale-110 transition-transform duration-500 ease-out" />
-      </div>
-    );
-  }
-
-  return (
-    <img
-      src={imageUrl}
-      alt={alt}
-      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-      onError={() => setHasError(true)}
-    />
-  );
-}
 
 function PublicVehiclesPageContent() {
   const router = useRouter();
@@ -175,24 +160,6 @@ function PublicVehiclesPageContent() {
     void loadData();
   }, []);
 
-  // Compute availability dates dynamically for busy vehicles (e.g. tomorrow at 8:30 AM)
-  const getAvailabilityDateString = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(8, 30, 0, 0);
-    
-    if (locale === "am") {
-      return `ነገ ጠዋት 2:30 ሰዓት`;
-    }
-    return tomorrow.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   // Filtered vehicles list
   const filteredVehicles = useMemo(() => {
     return vehicles.filter((v) => {
@@ -210,8 +177,8 @@ function PublicVehiclesPageContent() {
       
       const matchAvailability =
         availabilityFilter === "all" ||
-        (availabilityFilter === "available" && v.status === "active") ||
-        (availabilityFilter === "busy" && v.status !== "active");
+        (availabilityFilter === "available" && isVehicleAvailableNow(v.status)) ||
+        (availabilityFilter === "busy" && !isVehicleAvailableNow(v.status));
 
       return matchSearch && matchType && matchClass && matchAvailability;
     });
@@ -440,7 +407,11 @@ function PublicVehiclesPageContent() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                 {filteredVehicles.map((vehicle) => {
-                  const isAvailable = vehicle.status === "active";
+                  const isAvailable = isVehicleAvailableNow(vehicle.status);
+                  const availableFromLabel = formatVehicleAvailableFrom(
+                    getVehicleAvailableFrom(vehicle.status),
+                    locale,
+                  );
                   const isSelected = selectedIds.includes(vehicle.id);
                   return (
                     <div
@@ -498,9 +469,10 @@ function PublicVehiclesPageContent() {
                         </div>
 
                         {/* Image or Fallback */}
-                        <CatalogVehicleImage
+                        <VehiclePhotoMedia
                           imageUrl={vehicle.images?.[0] ? getVehiclePhotoUrl(vehicle.images[0]) : undefined}
                           alt={`${vehicle.make} ${vehicle.model}`}
+                          imgClassName="group-hover:scale-105 transition-transform duration-500 ease-out"
                         />
                       </div>
 
@@ -553,7 +525,7 @@ function PublicVehiclesPageContent() {
                                 <span className="text-emerald-700 font-bold">{copy.statusAvailable}</span>
                               ) : (
                                 <span className="text-amber-700 font-bold">
-                                  {copy.statusBusy} {getAvailabilityDateString()}
+                                  {copy.statusBusy} {availableFromLabel}
                                 </span>
                               )}
                             </p>

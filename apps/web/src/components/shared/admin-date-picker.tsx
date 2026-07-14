@@ -149,7 +149,17 @@ export function AdminDatePicker({
               variant="ghost"
               size="sm"
               className="h-8 font-medium text-[#1C3A34] hover:bg-[#1C3A34]/8"
-              onClick={() => handleSelect(startOfDay(new Date()))}
+              onClick={() => {
+                const today = startOfDay(new Date());
+                if (minDate && today < startOfDay(minDate)) {
+                  handleSelect(startOfDay(minDate));
+                  return;
+                }
+                if (maxDate && today > startOfDay(maxDate)) {
+                  return;
+                }
+                handleSelect(today);
+              }}
             >
               {todayLabel}
             </Button>

@@ -24,7 +24,13 @@ import { getStoredUser, clearAuthSession } from "@/lib/auth-session";
 import { fetchPublicVehicles } from "@/lib/vehicle-api";
 import type { Vehicle, User as AuthUser } from "@smart-dispatch/types";
 import BrandLogo from "@/components/landing/BrandLogo";
+import { VehiclePhotoMedia } from "@/components/book/vehicle-photo-media";
 import { getVehiclePhotoUrl } from "@/lib/vehicle-photo";
+import {
+  formatVehicleAvailableFrom,
+  getVehicleAvailableFrom,
+  isVehicleAvailableNow,
+} from "@/lib/vehicle-availability";
 import { LocaleProvider, useLocale } from "@/components/shared/providers";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -57,7 +63,7 @@ const COPY = {
     class: "Vehicle Class",
     type: "Vehicle Type",
     gallery: "Vehicle Photo Gallery",
-    noPhotos: "No uploaded photos available.",
+    noPhotos: "Photo coming soon",
     primaryInfo: "Primary Details",
     overview: "Vehicle Overview / Notes",
     guaranteedService: "Corporate Managed Fleet",
@@ -77,7 +83,7 @@ const COPY = {
     class: "የተሽከርካሪ ክፍል",
     type: "የተሽከርካሪ ዓይነት",
     gallery: "የተሽከርካሪ ፎቶዎች",
-    noPhotos: "የተጫኑ ፎቶዎች የሉም።",
+    noPhotos: "ፎቶ በቅርቡ ይጨመራል",
     primaryInfo: "ዋና መረጃ",
     overview: "የተሽከርካሪ አጠቃላይ መግለጫ / ማስታወሻዎች",
     guaranteedService: "በድርጅት የሚተዳደር መርከቦች",
@@ -148,24 +154,6 @@ function VehicleDetailPageContent({ id }: { id: string }) {
     void loadVehicle();
   }, [id]);
 
-  // Compute availability dates dynamically for busy vehicles
-  const getAvailabilityDateString = () => {
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    tomorrow.setHours(8, 30, 0, 0);
-    
-    if (locale === "am") {
-      return `ነገ ጠዋት 2:30 ሰዓት`;
-    }
-    return tomorrow.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 text-slate-800 antialiased flex flex-col font-sans">
@@ -206,7 +194,11 @@ function VehicleDetailPageContent({ id }: { id: string }) {
     );
   }
 
-  const isAvailable = vehicle.status === "active";
+  const isAvailable = isVehicleAvailableNow(vehicle.status);
+  const availableFromLabel = formatVehicleAvailableFrom(
+    getVehicleAvailableFrom(vehicle.status),
+    locale,
+  );
   const vehiclePhotos = vehicle.images ?? [];
   const activePhoto = vehiclePhotos[activeImageIndex];
 
@@ -348,7 +340,7 @@ function VehicleDetailPageContent({ id }: { id: string }) {
                 {isAvailable ? (
                   <span>{copy.statusAvailable}</span>
                 ) : (
-                  <span>{copy.statusBusy} {getAvailabilityDateString()}</span>
+                  <span>{copy.statusBusy} {availableFromLabel}</span>
                 )}
               </div>
             </div>
@@ -446,10 +438,10 @@ function VehicleDetailPageContent({ id }: { id: string }) {
                     }}
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center p-6 text-center text-slate-400">
-                    <Car className="h-20 w-20 text-slate-200 mb-2" />
-                    <p className="text-xs font-medium">{copy.noPhotos}</p>
-                  </div>
+                  <VehiclePhotoMedia
+                    imageUrl={null}
+                    alt={`${vehicle.make} ${vehicle.model}`}
+                  />
                 )}
 
                 {/* Floating specifications tags */}
