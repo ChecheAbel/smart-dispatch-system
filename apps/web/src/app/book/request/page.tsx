@@ -128,7 +128,7 @@ const COPY = {
     requestBooking: "Confirm Your Ride Requests",
     requestSubTitle: "Fill out the dispatch coordinates below to schedule assignments for your selected vehicles.",
     signInPrompt: "Please sign in to make a request.",
-    signInPromptDetail: "You can review the form below, but submitting a ride request requires an account.",
+    signInPromptDetail: "Create or sign in to your account to submit a ride request for the selected vehicles.",
     signInToBook: "Sign In to Continue",
     passengerDetails: "Passenger Details",
     passengerDetailsDesc: "Who will be traveling? Add their contact details for driver alerts.",
@@ -157,7 +157,6 @@ const COPY = {
     am: "AM",
     pm: "PM",
     applyTime: "Apply",
-    cancel: "Cancel",
     submitRequest: "Submit Dispatch Request",
     submitting: "Submitting coordinates...",
     successTitle: "Dispatch Requests Submitted!",
@@ -196,7 +195,7 @@ const COPY = {
     requestBooking: "የጉዞ ጥያቄዎችዎን ያረጋግጡ",
     requestSubTitle: "ለመረጧቸው ተሽከርካሪዎች የጉዞ ምደባ ለማስያዝ ከታች ያለውን ቅጽ ይሙሉ::",
     signInPrompt: "ጥያቄ ለማድረግ እባክዎ ይግቡ።",
-    signInPromptDetail: "ቅጹን ከዚህ በታች ማየት ይችላሉ፣ ነገር ግን የጉዞ ጥያቄ ለማስገባት መለያ ያስፈልጋል።",
+    signInPromptDetail: "ለተመረጡ ተሽከርካሪዎች የጉዞ ጥያቄ ለማስገባት መለያ ይፍጠሩ ወይም ይግቡ።",
     signInToBook: "ለመቀጠል ይግቡ",
     passengerDetails: "የተሳፋሪ ዝርዝሮች",
     passengerDetailsDesc: "ማን ነው የሚጓዘው? የአሽከርካሪ ማንቂያዎችን ለመቀበል የስልክ ቁጥራቸውን ያክሉ::",
@@ -225,7 +224,6 @@ const COPY = {
     am: "ጡዋት",
     pm: "ከሰዓት",
     applyTime: "ተግብር",
-    cancel: "ሰርዝ",
     submitRequest: "የመላኪያ ጥያቄን አስገባ",
     submitting: "መጋጠሚያዎችን በማስገባት ላይ...",
     successTitle: "የመላኪያ ጥያቄዎች ገብተዋል!",
@@ -774,15 +772,25 @@ function VehicleRequestPageContent() {
               <p className="text-sm text-slate-500 font-medium">{copy.requestSubTitle}</p>
             </div>
 
-            <div className="relative min-h-[360px]">
-              <div
-                className={cn(
-                  "space-y-8 transition-[filter,opacity] duration-300",
-                  !user && !isSuccess && "pointer-events-none select-none opacity-60",
-                )}
-                aria-hidden={!user && !isSuccess}
-              >
-            {isSuccess ? (
+            {!user && !isSuccess ? (
+              <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm sm:p-8">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#1C3A34]/8">
+                  <Lock className="h-5 w-5 text-[#1C3A34]" strokeWidth={1.75} />
+                </div>
+                <h3 className="text-lg font-extrabold tracking-tight text-[#1C3A34]">
+                  {copy.signInPrompt}
+                </h3>
+                <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-500">
+                  {copy.signInPromptDetail}
+                </p>
+                <Link
+                  href={`/sign-in?redirect=${encodeURIComponent(`/book/request?ids=${ids.join(",")}`)}`}
+                  className="mt-6 inline-flex w-full max-w-sm items-center justify-center gap-2 rounded-xl bg-[#1C3A34] px-5 py-3.5 text-sm font-bold tracking-wide text-white transition-colors hover:bg-[#254b43]"
+                >
+                  {copy.signInToBook}
+                </Link>
+              </div>
+            ) : isSuccess ? (
               <div className="py-12 text-center flex flex-col items-center gap-5 border border-slate-100 rounded-3xl bg-slate-50/50 shadow-inner p-8">
                 <div className="h-20 w-20 bg-emerald-50 rounded-full flex items-center justify-center border-2 border-emerald-100 text-emerald-600 mb-2 animate-bounce">
                   <CheckCircle2 className="h-10 w-10" />
@@ -1093,18 +1101,12 @@ function VehicleRequestPageContent() {
                   ) : null}
                 </AdminFormSection>
 
-                {/* Submit Action Buttons */}
-                <div className="pt-6 border-t border-slate-100 flex items-center justify-end gap-4">
-                  <Link
-                    href="/book"
-                    className="px-6 py-3 rounded-xl border border-slate-200 hover:bg-slate-50 font-bold text-xs transition-colors cursor-pointer text-slate-500 hover:text-slate-800 text-center"
-                  >
-                    {copy.cancel}
-                  </Link>
+                {/* Submit Action */}
+                <div className="pt-6 border-t border-slate-100">
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="flex-1 bg-[#1C3A34] hover:bg-[#254b43] disabled:bg-slate-350 text-white font-extrabold text-sm py-4 rounded-xl transition-all shadow-md hover:shadow-lg cursor-pointer text-center"
+                    className="w-full bg-[#1C3A34] hover:bg-[#254b43] disabled:bg-slate-350 text-white font-extrabold text-sm py-4 rounded-xl transition-all shadow-md hover:shadow-lg cursor-pointer text-center"
                   >
                     {isSubmitting ? copy.submitting : copy.submitRequest}
                   </button>
