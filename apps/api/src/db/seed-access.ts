@@ -70,7 +70,7 @@ const DEFAULT_PERMISSIONS = [
   { slug: "customer_invoices.read", module: "customer_invoices", action: "read", description: "View issued invoices in the customer portal" },
 ] as const;
 
-const REMOVED_MENU_SLUGS = ["permissions", "endpoints", "registration-forms", "customer-portal", "customer-profile", "user", "notifications-email", "notifications-sms"] as const;
+const REMOVED_MENU_SLUGS = ["permissions", "endpoints", "registration-forms", "customer-portal", "customer-profile", "user", "notifications-email", "notifications-sms", "customer-requests"] as const;
 
 const REMOVED_PERMISSION_SLUGS = [
   "permissions.read",
@@ -451,17 +451,6 @@ const DEFAULT_MENUS = [
     translations: [
       { locale: "en", label: "Dashboard" },
       { locale: "am", label: "ዳሽቦርድ" },
-    ],
-  },
-  {
-    slug: "customer-requests",
-    path: "/dashboard/requests",
-    icon: "route",
-    sortOrder: 72,
-    parentSlug: null,
-    translations: [
-      { locale: "en", label: "Request Ride" },
-      { locale: "am", label: "ጉዞ ጠይቅ" },
     ],
   },
   {
