@@ -46,6 +46,15 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { LOCALE_OPTIONS, type SupportedLocale } from "@/lib/locale";
+import dynamic from "next/dynamic";
+
+const LazyVehicleLiveMap = dynamic(
+  () =>
+    import("@/components/book/vehicle-live-map").then(
+      (mod) => mod.VehicleLiveMap,
+    ),
+  { ssr: false },
+);
 
 // Localized translations for the detail page
 const COPY = {
@@ -68,6 +77,8 @@ const COPY = {
     overview: "Vehicle Overview / Notes",
     guaranteedService: "Corporate Managed Fleet",
     guaranteedServiceDesc: "This vehicle is corporate-insured, maintained regularly, and operated by professional smart dispatchers.",
+    liveLocation: "Live Location Tracking",
+    liveLocationDesc: "Current simulated GPS position of this VIP vehicle.",
   },
   am: {
     backToCatalog: "ወደ ካታሎግ ይመለሱ",
@@ -88,8 +99,30 @@ const COPY = {
     overview: "የተሽከርካሪ አጠቃላይ መግለጫ / ማስታወሻዎች",
     guaranteedService: "በድርጅት የሚተዳደር መርከቦች",
     guaranteedServiceDesc: "ይህ ተሽከርካሪ በድርጅት የተመዘገበ፣ በየጊዜው የሚጠገን እና በባለሙያ መላኪያዎች የሚሰራ ነው።",
+    liveLocation: "የቀጥታ መገኛ መከታተያ",
+    liveLocationDesc: "የዚህ ቪአይፒ ተሽከርካሪ ወቅታዊ የጂፒኤስ አቀማመጥ።",
   },
 };
+
+function getVehicleMockLocation(vehicleId: string) {
+  // deterministic mock locations around Addis Ababa center for VIP fleets
+  const locations = [
+    { latitude: 9.0234, longitude: 38.7504, name: "Bole Airport VIP Terminal" },
+    { latitude: 9.0105, longitude: 38.7612, name: "Kazanchis Diplomatic Quarter" },
+    { latitude: 9.0302, longitude: 38.7421, name: "Piazza Government Offices" },
+    { latitude: 8.9942, longitude: 38.7305, name: "Sarbet Corporate Hub" },
+    { latitude: 9.0187, longitude: 38.7523, name: "Meskel Square Fleet Depot" },
+    { latitude: 9.0289, longitude: 38.7891, name: "CMC Executive Residence Block" },
+    { latitude: 9.0112, longitude: 38.7812, name: "Megenagna Transit Gateway" },
+  ];
+
+  let hash = 0;
+  for (let i = 0; i < vehicleId.length; i++) {
+    hash = vehicleId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % locations.length;
+  return locations[index];
+}
 
 function VehicleDetailPageContent({ id }: { id: string }) {
   const router = useRouter();
@@ -399,6 +432,28 @@ function VehicleDetailPageContent({ id }: { id: string }) {
                 </Link>
               </div>
             </div>
+
+            {/* Live Location Map Card */}
+            {(() => {
+              const mockLoc = getVehicleMockLocation(vehicle.id);
+              return (
+                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 text-left">
+                  <h3 className="text-sm font-extrabold text-[#1C3A34] uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-[#8f7d45] animate-bounce" />
+                    {copy.liveLocation}
+                  </h3>
+                  <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                    {copy.liveLocationDesc} ({mockLoc.name})
+                  </p>
+                  <LazyVehicleLiveMap
+                    latitude={mockLoc.latitude}
+                    longitude={mockLoc.longitude}
+                    popupText={`${vehicle.make} ${vehicle.model} (${vehicle.plate_number})`}
+                    height={200}
+                  />
+                </div>
+              );
+            })()}
 
             {/* Guaranteed Corporate Service Badge */}
             <div className="bg-[#1C3A34]/5 border border-[#1C3A34]/10 rounded-2xl p-5 flex gap-4 items-start">

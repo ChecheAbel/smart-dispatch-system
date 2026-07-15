@@ -49,7 +49,7 @@ export {
 
 export const textareaClassName = complianceTextareaClassName;
 
-export type DetailTab = "overview" | "compliance" | "maintenance" | "fuel" | "history";
+export type DetailTab = "overview" | "compliance" | "maintenance" | "fuel" | "history" | "tracking";
 
 export const FUEL_TYPES: VehicleFuelType[] = ["diesel", "petrol", "other"];
 
@@ -80,7 +80,7 @@ export function maintenanceTypeIcon(slug: string) {
 }
 
 export function parseTab(value: string | null): DetailTab {
-  if (value === "compliance" || value === "maintenance" || value === "fuel" || value === "history") {
+  if (value === "compliance" || value === "maintenance" || value === "fuel" || value === "history" || value === "tracking") {
     return value;
   }
   return "overview";

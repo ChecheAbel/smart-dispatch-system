@@ -1,4 +1,4 @@
-import { CalendarClock, ChevronRight, ClipboardList, ShieldCheck } from "lucide-react";
+import { CalendarClock, ChevronRight, ClipboardList, ShieldCheck, MapPin } from "lucide-react";
 import type { Vehicle } from "@smart-dispatch/types";
 import { Badge } from "@/components/ui/badge";
 import { getVehiclePhotoUrl } from "@/lib/vehicle-photo";
@@ -15,6 +15,35 @@ import {
   formatExpiryCountdown,
   getExpiryTone,
 } from "./vehicle-detail-shared";
+import dynamic from "next/dynamic";
+
+const LazyVehicleLiveMap = dynamic(
+  () =>
+    import("@/components/book/vehicle-live-map").then(
+      (mod) => mod.VehicleLiveMap,
+    ),
+  { ssr: false },
+);
+
+function getVehicleMockLocation(vehicleId: string) {
+  // deterministic mock locations around Addis Ababa center for VIP fleets
+  const locations = [
+    { latitude: 9.0234, longitude: 38.7504, name: "Bole Airport VIP Terminal" },
+    { latitude: 9.0105, longitude: 38.7612, name: "Kazanchis Diplomatic Quarter" },
+    { latitude: 9.0302, longitude: 38.7421, name: "Piazza Government Offices" },
+    { latitude: 8.9942, longitude: 38.7305, name: "Sarbet Corporate Hub" },
+    { latitude: 9.0187, longitude: 38.7523, name: "Meskel Square Fleet Depot" },
+    { latitude: 9.0289, longitude: 38.7891, name: "CMC Executive Residence Block" },
+    { latitude: 9.0112, longitude: 38.7812, name: "Megenagna Transit Gateway" },
+  ];
+
+  let hash = 0;
+  for (let i = 0; i < vehicleId.length; i++) {
+    hash = vehicleId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % locations.length;
+  return locations[index];
+}
 
 type VehicleDetailOverviewTabProps = {
   vehicle: Vehicle;

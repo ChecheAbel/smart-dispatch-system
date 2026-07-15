@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, CalendarClock, ClipboardList, Fuel, History, ShieldCheck, Truck, Wrench } from "lucide-react";
+import { ArrowLeft, CalendarClock, ClipboardList, Fuel, History, ShieldCheck, Truck, Wrench, MapPin } from "lucide-react";
 import type {
   Vehicle,
   VehicleFuelLog,
@@ -21,6 +21,34 @@ import {
   adminIconBoxClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
+import dynamic from "next/dynamic";
+
+const LazyVehicleLiveMap = dynamic(
+  () =>
+    import("@/components/book/vehicle-live-map").then(
+      (mod) => mod.VehicleLiveMap,
+    ),
+  { ssr: false },
+);
+
+function getVehicleMockLocation(vehicleId: string) {
+  const locations = [
+    { latitude: 9.0234, longitude: 38.7504, name: "Bole Airport VIP Terminal" },
+    { latitude: 9.0105, longitude: 38.7612, name: "Kazanchis Diplomatic Quarter" },
+    { latitude: 9.0302, longitude: 38.7421, name: "Piazza Government Offices" },
+    { latitude: 8.9942, longitude: 38.7305, name: "Sarbet Corporate Hub" },
+    { latitude: 9.0187, longitude: 38.7523, name: "Meskel Square Fleet Depot" },
+    { latitude: 9.0289, longitude: 38.7891, name: "CMC Executive Residence Block" },
+    { latitude: 9.0112, longitude: 38.7812, name: "Megenagna Transit Gateway" },
+  ];
+
+  let hash = 0;
+  for (let i = 0; i < vehicleId.length; i++) {
+    hash = vehicleId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const index = Math.abs(hash) % locations.length;
+  return locations[index];
+}
 import {
   canReadVehicle,
   canWriteCompliance as userCanWriteCompliance,
@@ -258,6 +286,9 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
         { id: "overview" as const, label: detail.tabs.overview, icon: ClipboardList },
         { id: "compliance" as const, label: detail.tabs.compliance, icon: ShieldCheck },
         canViewFleetOps
+          ? { id: "tracking" as const, label: "Live Tracking", icon: MapPin }
+          : null,
+        canViewFleetOps
           ? { id: "maintenance" as const, label: detail.tabs.maintenance, icon: Wrench }
           : null,
         canViewFleetOps
@@ -470,6 +501,34 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
           onEditInsurance={() => openComplianceSheet("insurance")}
           onEditInspection={() => openComplianceSheet("inspection")}
         />
+      ) : null}
+
+      {tab === "tracking" ? (
+        <section className={cn(adminCardClass, "space-y-4 rounded-2xl p-4 sm:space-y-5 sm:p-5 lg:p-6 text-left")}>
+          <div className="flex items-center gap-3">
+            <div className={adminIconBoxClass}>
+              <MapPin className="size-4 text-[#8f7d45] animate-bounce" />
+            </div>
+            <div>
+              <h2 className={cn("text-base", adminHeadingClass)}>Live Location Tracking</h2>
+              <p className="text-sm text-slate-500">
+                Real-time tracking of vehicle's current position and transit status.
+              </p>
+            </div>
+          </div>
+
+          {(() => {
+            const mockLoc = getVehicleMockLocation(vehicle.id);
+            return (
+              <LazyVehicleLiveMap
+                latitude={mockLoc.latitude}
+                longitude={mockLoc.longitude}
+                popupText={`${vehicle.make} ${vehicle.model} (${vehicle.plate_number})`}
+                height={380}
+              />
+            );
+          })()}
+        </section>
       ) : null}
 
       {tab === "maintenance" ? (
