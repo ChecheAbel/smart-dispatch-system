@@ -1,5 +1,6 @@
 import type { VehicleComplianceStatus } from "@smart-dispatch/types";
 import { formatMessage } from "@/translations";
+import { formatEthiopianDate } from "./ethiopian-calendar";
 
 export type ExpiryTone = "ok" | "dueSoon" | "expired" | "notSet";
 
@@ -56,7 +57,11 @@ export function expiryToneClass(tone: ExpiryTone) {
 
 export function formatComplianceDate(value: string | null | undefined, locale: string) {
   if (!value) return null;
-  return new Date(`${value}T00:00:00`).toLocaleDateString(locale, {
+  const date = new Date(`${value}T00:00:00`);
+  if (locale === "am") {
+    return formatEthiopianDate(date, "am");
+  }
+  return date.toLocaleDateString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",

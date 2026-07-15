@@ -2535,6 +2535,8 @@
       "tabs": {
         "overview": "አጠቃላይ እይታ",
         "compliance": "ተገዢነት",
+        "tracking": "ቀጥታ ክትትል",
+        "schedule": "የጊዜ ሰሌዳ",
         "maintenance": "ጥገና",
         "fuel": "ነዳጅ",
         "history": "ታሪክ"

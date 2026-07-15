@@ -43,6 +43,7 @@ import { adminBadgeGoldClass, adminFilterLabelClass, adminHeadingClass } from "@
 import { PERMISSIONS } from "@/lib/permissions";
 import { getAdminAuditLogsMessages } from "@/translations";
 import { cn } from "@/lib/utils";
+import { formatEthiopianDate, formatEthiopianTime } from "@/lib/ethiopian-calendar";
 
 const MODULE_OPTIONS = ["users", "roles", "menus", "notifications", "auth", "audit_logs", "vehicle_types", "vehicles", "regions", "locations"] as const;
 const ACTION_OPTIONS: AuditAction[] = [
@@ -57,7 +58,11 @@ const ACTION_OPTIONS: AuditAction[] = [
 ];
 
 function formatDateTime(value: string, locale: string) {
-  return new Date(value).toLocaleString(locale, {
+  const date = new Date(value);
+  if (locale === "am") {
+    return `${formatEthiopianDate(date, "am")} (${formatEthiopianTime(date, "am")})`;
+  }
+  return date.toLocaleString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",

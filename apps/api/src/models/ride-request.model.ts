@@ -42,6 +42,7 @@ export type ListRideRequestsAdminFilters = {
   status?: RideRequestStatus;
   search?: string;
   upcoming?: boolean;
+  vehicleId?: string;
 };
 
 export type ListRideRequestsForDriverFilters = {
@@ -176,6 +177,10 @@ function buildRideRequestAdminWhere(
       { requester: { email: { contains: search, mode: "insensitive" } } },
       { requester: { mobileNumber: { contains: search, mode: "insensitive" } } },
     ];
+  }
+
+  if (filters.vehicleId) {
+    where.assignedVehicleId = filters.vehicleId;
   }
 
   return where;

@@ -10,6 +10,7 @@ import {
   UserRound,
   Wrench,
 } from "lucide-react";
+import { formatEthiopianDate, formatEthiopianTime } from "@/lib/ethiopian-calendar";
 import type {
   Vehicle,
   VehicleFuelType,
@@ -49,7 +50,7 @@ export {
 
 export const textareaClassName = complianceTextareaClassName;
 
-export type DetailTab = "overview" | "compliance" | "maintenance" | "fuel" | "history" | "tracking";
+export type DetailTab = "overview" | "compliance" | "maintenance" | "fuel" | "history" | "tracking" | "schedule";
 
 export const FUEL_TYPES: VehicleFuelType[] = ["diesel", "petrol", "other"];
 
@@ -80,7 +81,14 @@ export function maintenanceTypeIcon(slug: string) {
 }
 
 export function parseTab(value: string | null): DetailTab {
-  if (value === "compliance" || value === "maintenance" || value === "fuel" || value === "history" || value === "tracking") {
+  if (
+    value === "compliance" ||
+    value === "maintenance" ||
+    value === "fuel" ||
+    value === "history" ||
+    value === "tracking" ||
+    value === "schedule"
+  ) {
     return value;
   }
   return "overview";
@@ -114,6 +122,9 @@ export function formatMaintenanceDate(value: string | null, locale?: string) {
   if (!value) return null;
   const date = new Date(value.includes("T") ? value : `${value}T00:00:00`);
   if (Number.isNaN(date.getTime())) return value;
+  if (locale === "am") {
+    return formatEthiopianDate(date, "am");
+  }
   return date.toLocaleDateString(locale, {
     year: "numeric",
     month: "short",
@@ -124,6 +135,9 @@ export function formatMaintenanceDate(value: string | null, locale?: string) {
 export function formatMaintenanceDateTime(value: string, locale?: string) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
+  if (locale === "am") {
+    return `${formatEthiopianDate(date, "am")} (${formatEthiopianTime(date, "am")})`;
+  }
   return date.toLocaleString(locale, {
     year: "numeric",
     month: "short",

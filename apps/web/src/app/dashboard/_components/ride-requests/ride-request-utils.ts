@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { startOfDay } from "date-fns";
 import type { getCustomerRequestsMessages } from "@/translations";
 import { formatMessage } from "@/translations";
+import { formatEthiopianDate, formatEthiopianTime } from "@/lib/ethiopian-calendar";
 
 export type RideRequestFormState = {
   pickupAddress: string;
@@ -204,6 +205,9 @@ export function formatContractTermRange(
     const parsed = new Date(`${dateOnly}T12:00:00.000Z`);
     if (Number.isNaN(parsed.getTime())) return "—";
 
+    if (locale === "am") {
+      return formatEthiopianDate(parsed, "am");
+    }
     return parsed.toLocaleDateString(locale, {
       year: "numeric",
       month: "short",
@@ -251,7 +255,12 @@ export function formatScheduledAt(value: string | null, locale: string) {
     return "—";
   }
 
-  return new Date(value).toLocaleString(locale, {
+  const date = new Date(value);
+  if (locale === "am") {
+    return `${formatEthiopianDate(date, "am")} ${formatEthiopianTime(date, "am")}`;
+  }
+
+  return date.toLocaleString(locale, {
     dateStyle: "medium",
     timeStyle: "short",
     hour12: true,
@@ -259,7 +268,12 @@ export function formatScheduledAt(value: string | null, locale: string) {
 }
 
 export function formatSubmittedAt(value: string, locale: string) {
-  return new Date(value).toLocaleString(locale, {
+  const date = new Date(value);
+  if (locale === "am") {
+    return `${formatEthiopianDate(date, "am")} ${formatEthiopianTime(date, "am")}`;
+  }
+
+  return date.toLocaleString(locale, {
     dateStyle: "medium",
     timeStyle: "short",
     hour12: true,

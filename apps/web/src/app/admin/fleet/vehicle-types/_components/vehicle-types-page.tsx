@@ -38,12 +38,10 @@ import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { CreateVehicleTypeSheet } from "./create-vehicle-type-sheet";
 import { VehicleTypeStats } from "./vehicle-type-stats";
 
+import { formatGlobalDate } from "@/lib/ethiopian-calendar";
+
 function formatDate(value: string, locale: string) {
-  return new Date(value).toLocaleDateString(locale, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return formatGlobalDate(value, locale);
 }
 
 function VehicleTypeRowActions({

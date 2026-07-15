@@ -100,7 +100,8 @@ router.get(
       const status = parseStatusFilter(req.query.status);
       const search = getOptionalString(req.query.search) ?? undefined;
       const upcoming = parseBoolean(req.query.upcoming) === true;
-      const filters = { status, search, upcoming: upcoming || undefined };
+      const vehicleId = getOptionalString(req.query.vehicleId) ?? undefined;
+      const filters = { status, search, upcoming: upcoming || undefined, vehicleId };
 
       const result = await paginate(
         pagination,

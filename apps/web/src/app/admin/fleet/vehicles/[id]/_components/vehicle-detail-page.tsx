@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, CalendarClock, ClipboardList, Fuel, History, ShieldCheck, Truck, Wrench, MapPin } from "lucide-react";
+import { ArrowLeft, CalendarClock, ClipboardList, Fuel, History, ShieldCheck, Truck, Wrench, MapPin, Calendar } from "lucide-react";
 import type {
   Vehicle,
   VehicleFuelLog,
@@ -72,6 +72,7 @@ import { VehicleDetailFuelTab } from "./vehicle-detail-fuel-tab";
 import { VehicleDetailHistoryTab } from "./vehicle-detail-history-tab";
 import { VehicleDetailMaintenanceTab } from "./vehicle-detail-maintenance-tab";
 import { VehicleDetailOverviewTab } from "./vehicle-detail-overview-tab";
+import { VehicleDetailScheduleTab } from "./vehicle-detail-schedule-tab";
 import {
   type DetailTab,
   expiryToneClass,
@@ -286,7 +287,10 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
         { id: "overview" as const, label: detail.tabs.overview, icon: ClipboardList },
         { id: "compliance" as const, label: detail.tabs.compliance, icon: ShieldCheck },
         canViewFleetOps
-          ? { id: "tracking" as const, label: "Live Tracking", icon: MapPin }
+          ? { id: "schedule" as const, label: (detail.tabs as any).schedule || "Schedule", icon: Calendar }
+          : null,
+        canViewFleetOps
+          ? { id: "tracking" as const, label: (detail.tabs as any).tracking || "Live Tracking", icon: MapPin }
           : null,
         canViewFleetOps
           ? { id: "maintenance" as const, label: detail.tabs.maintenance, icon: Wrench }
@@ -500,6 +504,13 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
           canWrite={canWriteCompliance}
           onEditInsurance={() => openComplianceSheet("insurance")}
           onEditInspection={() => openComplianceSheet("inspection")}
+        />
+      ) : null}
+
+      {tab === "schedule" ? (
+        <VehicleDetailScheduleTab
+          vehicle={vehicle}
+          locale={locale}
         />
       ) : null}
 

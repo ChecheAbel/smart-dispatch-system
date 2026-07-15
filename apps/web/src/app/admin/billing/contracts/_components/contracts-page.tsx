@@ -42,12 +42,10 @@ const STATUS_BADGE_CLASS: Record<ContractStatus, string> = {
   cancelled: "border-red-200 bg-red-50 text-red-700",
 };
 
+import { formatGlobalDate } from "@/lib/ethiopian-calendar";
+
 function formatDate(value: string, locale: string) {
-  return new Date(`${value}T12:00:00.000Z`).toLocaleDateString(locale, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return formatGlobalDate(`${value}T12:00:00.000Z`, locale);
 }
 
 function ContractRowActions({

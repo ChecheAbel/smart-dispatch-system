@@ -39,12 +39,13 @@ const STATUS_BADGE_CLASS: Record<InvoiceStatus, string> = {
   void: "border-red-200 bg-red-50 text-red-700",
 };
 
+import { formatGlobalDate } from "@/lib/ethiopian-calendar";
+
 function formatDate(value: string | null, locale: string) {
   if (!value) return "—";
   const dateOnly = value.includes("T") ? value.slice(0, 10) : value;
   const parsed = new Date(`${dateOnly}T12:00:00.000Z`);
-  if (Number.isNaN(parsed.getTime())) return "—";
-  return parsed.toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" });
+  return formatGlobalDate(parsed, locale);
 }
 
 function formatMoney(amount: number, currency: string, locale: string) {

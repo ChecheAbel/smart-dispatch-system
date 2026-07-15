@@ -27,17 +27,14 @@ import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { adminBadgeGoldClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
 import { PERMISSIONS } from "@/lib/permissions";
 import { DeleteConfirmModal } from "@/components/shared/delete-confirm-modal";
+import { formatGlobalDate } from "@/lib/ethiopian-calendar";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { CreateRoleSheet } from "./create-role-sheet";
 import { RolePermissionsSheet } from "./role-permissions-sheet";
 import { RoleStats } from "./role-stats";
 
 function formatDate(value: string, locale: string) {
-  return new Date(value).toLocaleDateString(locale, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return formatGlobalDate(value, locale);
 }
 
 function RoleRowActions({

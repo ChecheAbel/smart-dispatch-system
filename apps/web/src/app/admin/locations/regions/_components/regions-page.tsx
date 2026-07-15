@@ -32,6 +32,7 @@ import {
   adminBadgeSuccessClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
+import { formatGlobalDate } from "@/lib/ethiopian-calendar";
 import { PERMISSIONS } from "@/lib/permissions";
 import { DeleteConfirmModal } from "@/components/shared/delete-confirm-modal";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
@@ -39,11 +40,7 @@ import { CreateRegionSheet } from "./create-region-sheet";
 import { RegionStats } from "./region-stats";
 
 function formatDate(value: string, locale: string) {
-  return new Date(value).toLocaleDateString(locale, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return formatGlobalDate(value, locale);
 }
 
 function RegionRowActions({

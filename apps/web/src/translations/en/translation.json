@@ -2535,6 +2535,8 @@
       "tabs": {
         "overview": "Overview",
         "compliance": "Compliance",
+        "tracking": "Live Tracking",
+        "schedule": "Schedule",
         "maintenance": "Maintenance",
         "fuel": "Fuel",
         "history": "History"

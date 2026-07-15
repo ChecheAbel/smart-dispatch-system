@@ -9,6 +9,7 @@ export type FetchAdminRideRequestsParams = {
   status?: RideRequestStatus | "";
   search?: string;
   upcoming?: boolean;
+  vehicleId?: string;
 };
 
 export type AdminRideRequestStatusAction = "confirm" | "reject" | "start" | "complete";
@@ -22,6 +23,7 @@ export async function fetchAdminRideRequests(params: FetchAdminRideRequestsParam
       status: params.status || undefined,
       search: params.search || undefined,
       upcoming: params.upcoming ? true : undefined,
+      vehicleId: params.vehicleId || undefined,
     },
   });
   return unwrapPaginatedApiResponse<AdminRideRequest>(data);

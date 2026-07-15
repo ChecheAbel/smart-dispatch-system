@@ -41,12 +41,10 @@ import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { CreateMaintenanceWorkTypeSheet } from "./create-maintenance-work-type-sheet";
 import { MaintenanceWorkTypeStats } from "./maintenance-work-type-stats";
 
+import { formatGlobalDate } from "@/lib/ethiopian-calendar";
+
 function formatDate(value: string, locale: string) {
-  return new Date(value).toLocaleDateString(locale, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return formatGlobalDate(value, locale);
 }
 
 function MaintenanceWorkTypeRowActions({

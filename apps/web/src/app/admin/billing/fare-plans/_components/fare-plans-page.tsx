@@ -38,12 +38,10 @@ import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { CreateFarePlanSheet } from "./create-fare-plan-sheet";
 import { FarePlanStats } from "./fare-plan-stats";
 
+import { formatGlobalDate } from "@/lib/ethiopian-calendar";
+
 function formatDate(value: string, locale: string) {
-  return new Date(value).toLocaleDateString(locale, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return formatGlobalDate(value, locale);
 }
 
 function formatMoney(amount: number, currency: string, locale: string) {
