@@ -14,23 +14,16 @@ import {
   Calendar,
   MapPin,
   User,
-  Phone,
-  Clock,
   ArrowLeft,
   CheckCircle2,
   AlertCircle,
   Lock,
   Languages,
   ShieldCheck,
-  Check,
-  ChevronRight,
-  Info,
   LogOut,
-  UserRound,
   LayoutDashboard,
   X,
   ShoppingBag,
-  FileText,
   Repeat2,
   Zap,
   ArrowRight,
@@ -103,8 +96,8 @@ type CoordinateState = { latitude?: number; longitude?: number };
 const COPY = {
   en: {
     backToCatalog: "Back to Catalog",
-    requestBooking: "Confirm Your Ride Requests",
-    requestSubTitle: "Fill out the dispatch coordinates below to schedule assignments for your selected vehicles.",
+    requestBooking: "Confirm your ride request",
+    requestSubTitle: "Review your vehicles, choose a request type, and add trip details.",
     signInPrompt: "Please sign in to make a request.",
     signInPromptDetail: "Create or sign in to your account to submit a ride request for the selected vehicles.",
     signInToBook: "Sign In to Continue",
@@ -152,19 +145,34 @@ const COPY = {
     successTitle: "Your dispatch request is in the queue",
     successText: "Our dispatch team will review your booking and assign a driver. You’ll hear from us at the mobile number you provided.",
     successStepReview: "Dispatch reviews your request",
+    successStepReviewDesc: "Our team checks vehicle availability, schedule fit, and trip details before confirming.",
     successStepAssign: "A driver is assigned to your vehicles",
+    successStepAssignDesc: "Once approved, a driver is matched to your selected vehicles for the trip window.",
     successStepContact: "You’re contacted with trip details",
+    successStepContactDesc: "You’ll get confirmation and trip updates on the mobile number you provided.",
     errorEyebrow: "Submission failed",
     errorTitle: "We couldn’t submit your dispatch request",
     errorStepCheck: "Check your connection and form details",
+    errorStepCheckDesc: "Make sure your network is stable and required fields like region, locations, and schedule are complete.",
     errorStepRetry: "Try submitting the request again",
+    errorStepRetryDesc: "Return to the form, confirm your details, and submit once more.",
     errorStepSupport: "Contact support if the problem continues",
+    errorStepSupportDesc: "If the issue persists, reach out to support with the vehicles and time you tried to book.",
+    whatHappensNext: "What happens next",
+    whatYouCanDo: "What you can do",
     vehiclesSubmitted: "{count} vehicle submitted",
     vehiclesSubmittedPlural: "{count} vehicles submitted",
     signIn: "Sign In",
     statusAvailable: "Available Now",
     statusBusy: "In Service - Available:",
     selectedVehicles: "Selected Vehicles",
+    vehiclesReadyOne: "1 vehicle selected",
+    vehiclesReadyMany: "{count} vehicles selected",
+    removeVehicle: "Remove",
+    noVehiclesTitle: "No vehicles selected",
+    noVehiclesBody: "Pick one or more vehicles from the catalog to continue.",
+    returnToCatalog: "Return to catalog",
+    preparingForm: "Preparing booking form...",
     scheduleAvailableFromHint: "Earliest start based on selected vehicles:",
     scheduleTooEarly: "Choose a date and time on or after the vehicle available-from time.",
     scheduleEndBeforeStart: "End date and time must be on or after the start.",
@@ -182,19 +190,20 @@ const COPY = {
     mapRecenter: "Recenter map",
     backupLocationHint: "Type your address below and optionally pin the exact location on the map.",
     requestTypeTitle: "How would you like to proceed?",
-    requestTypeSubtitle: "Select the type of engagement for your selected vehicles before filling out the details.",
-    singleTrip: "Single Trip Request",
-    singleTripDesc: "A one-time dispatch for your selected vehicles. Ideal for immediate or scheduled one-off rides.",
-    contract: "Form a Contract",
-    contractDesc: "Establish a recurring dispatch agreement. Best for regular routes, recurring schedules, or corporate fleets.",
-    selectType: "Select",
+    requestTypeSubtitle: "Choose a request type, then fill in the trip details.",
+    singleTrip: "Single Trip",
+    singleTripDesc: "One-time dispatch for an immediate or scheduled ride.",
+    contract: "Contract",
+    contractDesc: "Recurring agreement for regular routes or ongoing fleet needs.",
+    selectType: "Continue",
     changeType: "Change",
     selectedType: "Request Type",
+    contactPhoneHint: "We’ll contact you on this number about your request status.",
   },
   am: {
     backToCatalog: "ወደ ካታሎግ ይመለሱ",
-    requestBooking: "የጉዞ ጥያቄዎችዎን ያረጋግጡ",
-    requestSubTitle: "ለመረጧቸው ተሽከርካሪዎች የጉዞ ምደባ ለማስያዝ ከታች ያለውን ቅጽ ይሙሉ::",
+    requestBooking: "የጉዞ ጥያቄዎን ያረጋግጡ",
+    requestSubTitle: "ተሽከርካሪዎችዎን ይገምግሙ፣ የጥያቄ ዓይነት ይምረጡ፣ እና የጉዞ ዝርዝሮችን ያክሉ።",
     signInPrompt: "ጥያቄ ለማድረግ እባክዎ ይግቡ።",
     signInPromptDetail: "ለተመረጡ ተሽከርካሪዎች የጉዞ ጥያቄ ለማስገባት መለያ ይፍጠሩ ወይም ይግቡ።",
     signInToBook: "ለመቀጠል ይግቡ",
@@ -242,19 +251,34 @@ const COPY = {
     successTitle: "የመላኪያ ጥያቄዎ በተራ ላይ ነው",
     successText: "የመላኪያ ቡድናችን ጥያቄዎን ይገመግማል እና አሽከርካሪ ይመድባል። በሰጡት ስልክ ቁጥር እናገኝዎታለን።",
     successStepReview: "መላኪያ ጥያቄዎን ይገመግማል",
+    successStepReviewDesc: "ቡድናችን የተሽከርካሪ ዝግጁነትን፣ የጊዜ ሰሌዳን እና የጉዞ ዝርዝሮችን ከማረጋገጥ በፊት ይፈትሻል።",
     successStepAssign: "ለተሽከርካሪዎችዎ አሽከርካሪ ይመደባል",
+    successStepAssignDesc: "ከተፈቀደ በኋላ ለተመረጡ ተሽከርካሪዎችዎ በጉዞ ጊዜ ውስጥ አሽከርካሪ ይመደባል።",
     successStepContact: "የጉዞ ዝርዝሮችን በስልክ ያገኛሉ",
+    successStepContactDesc: "በሰጡት ስልክ ቁጥር የማረጋገጫ እና የጉዞ ዝማኔዎችን ያገኛሉ።",
     errorEyebrow: "ማስገባት አልተሳካም",
     errorTitle: "የመላኪያ ጥያቄዎን ማስገባት አልተቻለም",
     errorStepCheck: "ግንኙነትዎን እና የቅጽ ዝርዝሮችን ያረጋግጡ",
+    errorStepCheckDesc: "አውታረ መረብዎ የተረጋጋ መሆኑን እና ክልል፣ ቦታዎች እና ጊዜ ሰሌዳ ያሉ አስፈላጊ መስኮች መሞላታቸውን ያረጋግጡ።",
     errorStepRetry: "ጥያቄውን እንደገና ለማስገባት ይሞክሩ",
+    errorStepRetryDesc: "ወደ ቅጹ ይመለሱ፣ ዝርዝሮችዎን ያረጋግጡ፣ እና እንደገና ያስገቡ።",
     errorStepSupport: "ችግሩ ከቀጠለ ድጋፍን ያግኙ",
+    errorStepSupportDesc: "ችግሩ ከቀጠለ፣ ስለ ሞከሯቸው ተሽከርካሪዎች እና ጊዜ ድጋፍን ያግኙ።",
+    whatHappensNext: "ቀጣይ ደረጃዎች",
+    whatYouCanDo: "ምን ማድረግ ይችላሉ",
     vehiclesSubmitted: "{count} ተሽከርካሪ ተልኳል",
     vehiclesSubmittedPlural: "{count} ተሽከርካሪዎች ተልከዋል",
     signIn: "ግባ",
     statusAvailable: "አሁን ይገኛል",
     statusBusy: "ስራ ላይ - የሚገኝበት ጊዜ፡",
     selectedVehicles: "የተመረጡ ተሽከርካሪዎች",
+    vehiclesReadyOne: "1 ተሽከርካሪ ተመርጧል",
+    vehiclesReadyMany: "{count} ተሽከርካሪዎች ተመርጠዋል",
+    removeVehicle: "አስወግድ",
+    noVehiclesTitle: "ምንም ተሽከርካሪ አልተመረጠም",
+    noVehiclesBody: "ለመቀጠል ከካታሎጉ አንድ ወይም ከዚያ በላይ ተሽከርካሪዎችን ይምረጡ።",
+    returnToCatalog: "ወደ ካታሎግ ይመለሱ",
+    preparingForm: "የቡኪንግ ቅጽ በማዘጋጀት ላይ...",
     scheduleAvailableFromHint: "በተመረጡ ተሽከርካሪዎች መሠረት ቀድሞውኑ የሚያስችል ጊዜ፡",
     scheduleTooEarly: "ከተሽከርካሪው የሚገኝበት ጊዜ በኋላ ቀንና ሰዓት ይምረጡ።",
     scheduleEndBeforeStart: "የመጨረሻ ቀንና ሰዓት ከመጀመሪያው በኋላ መሆን አለበት።",
@@ -264,22 +288,23 @@ const COPY = {
     pickupAddressPlaceholder: "ምሳሌ፡ ቦሌ አትላስ...",
     dropoffAddressLabel: "የመድረሻ አድራሻ",
     dropoffAddressPlaceholder: "ምሳሌ፡ ካዛንቺስ...",
-    pickupMapLabel: "መነሻን በ지도 ይሰኩ",
-    dropoffMapLabel: "መድረሻን በ지도 ይሰኩ",
+    pickupMapLabel: "መነሻን በካርታ ይሰኩ",
+    dropoffMapLabel: "መድረሻን በካርታ ይሰኩ",
     mapHint: "ትክክለኛ ቦታ ለማስቀመጥ ፒን ይጫኑ ወይም ይጎትቱ።",
-    mapLoading: "地図 በመጫን ላይ...",
-    mapEmpty: "ቦታ ለማስቀመጥ地図 ን ጠቅ ያድርጉ",
-    mapRecenter: "地図 ያዋሃዱ",
+    mapLoading: "ካርታ በመጫን ላይ...",
+    mapEmpty: "ቦታ ለማስቀመጥ ካርታውን ጠቅ ያድርጉ",
+    mapRecenter: "ካርታ ያዋሃዱ",
     backupLocationHint: "አድራሻ ያስገቡ እና ምርጫ ሆኖ ትክክለኛ ቦታ ያሰኩ።",
     requestTypeTitle: "እንዴት መቀጠል ይፈልጋሉ?",
-    requestTypeSubtitle: "ዝርዝሮቹን ከመሙላትዎ በፊት ለተመረጡ ተሽከርካሪዎቹ የጥያቄ ዓይነቱን ይምረጡ።",
-    singleTrip: "አንድ ጊዜ ጥያቄ",
-    singleTripDesc: "ለተመረጡ ተሽከርካሪዎቹ አንድ ጊዜ መላኪያ። ለፈጣን ወይም ለታቀደ አንድ ጊዜ ጉዞ ተስማሚ።",
-    contract: "ውል ያቋቁሙ",
-    contractDesc: "ቀጣይ መላኪያ ስምምነት ያቋቁሙ። ለተደጋጋሚ መስመሮች ወይም ለድርጅት መስፈርቶች ተስማሚ።",
-    selectType: "ይምረጡ",
+    requestTypeSubtitle: "የጥያቄ ዓይነት ይምረጡ፣ ከዚያ የጉዞ ዝርዝሮችን ይሙሉ።",
+    singleTrip: "አንድ ጊዜ ጉዞ",
+    singleTripDesc: "ለፈጣን ወይም ለታቀደ አንድ ጊዜ ጉዞ መላኪያ።",
+    contract: "ውል",
+    contractDesc: "ለተደጋጋሚ መስመሮች ወይም ቀጣይ የመርከብ ፍላጎት ስምምነት።",
+    selectType: "ቀጥል",
     changeType: "ቀይር",
     selectedType: "የጥያቄ ዓይነት",
+    contactPhoneHint: "ስለ ጥያቄዎ ሁኔታ በዚህ ስልክ ቁጥር እናገኝዎታለን።",
   },
 };
 
@@ -704,19 +729,242 @@ function VehicleRequestPageContent() {
     setOutcomeMessage(null);
   };
 
+  const vehiclesReadyLabel =
+    vehicles.length === 1
+      ? copy.vehiclesReadyOne
+      : copy.vehiclesReadyMany.replace("{count}", String(vehicles.length));
+
+  const pageHeader = (
+    <header className="relative z-40 border-b border-[#C9B87A]/10 bg-[#1C3A34] text-white">
+      <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+        <Link href="/" className="group flex shrink-0 items-center">
+          <BrandLogo priority className="transition-opacity group-hover:opacity-90" />
+        </Link>
+        <div className="flex items-center gap-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-9 w-9 rounded-xl border border-white/10 bg-white/5 text-white shadow-none transition-all hover:bg-white/10"
+                  aria-label="Select language"
+                />
+              }
+            >
+              <Languages className="h-[18px] w-[18px] text-[#C9B87A]" strokeWidth={1.75} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="z-[10000] min-w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
+              <DropdownMenuGroup>
+                <DropdownMenuRadioGroup
+                  value={locale}
+                  onValueChange={(value) => setLocale(value as SupportedLocale)}
+                >
+                  {LOCALE_OPTIONS.map((option) => (
+                    <DropdownMenuRadioItem
+                      key={option.value}
+                      value={option.value}
+                      className="cursor-pointer rounded-lg px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-100"
+                    >
+                      {option.nativeLabel}
+                    </DropdownMenuRadioItem>
+                  ))}
+                </DropdownMenuRadioGroup>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {!user ? (
+            <Link
+              href="/sign-in"
+              className="rounded-xl bg-[#C9B87A] px-4 py-2 text-sm font-bold tracking-wide text-[#1C3A34] transition-colors hover:bg-[#d4c48a] sm:px-5"
+            >
+              {copy.signIn}
+            </Link>
+          ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <button
+                    className="cursor-pointer rounded-full outline-none transition-all hover:scale-105 focus-visible:ring-2 focus-visible:ring-[#C9B87A]"
+                    aria-label="Account menu"
+                  />
+                }
+              >
+                <Avatar size="sm" className="size-9 cursor-pointer ring-2 ring-[#C9B87A]/50">
+                  <AvatarFallback className="bg-[#1C3A34] text-[11px] font-bold text-white hover:bg-[#254b43]">
+                    {getUserInitials(user)}
+                  </AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="z-[10000] w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="px-2 py-2 font-normal">
+                    <p className="truncate text-sm font-semibold text-[#1C3A34]">
+                      {user.first_name} {user.last_name}
+                    </p>
+                    <p className="truncate text-xs text-slate-500">{user.email}</p>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    className="cursor-pointer rounded-md px-2 py-1.5 text-sm text-slate-700 transition-colors hover:bg-slate-100"
+                    render={
+                      <Link href={user.roles.includes("admin") || user.roles.includes("super_admin") ? "/admin" : "/dashboard"} />
+                    }
+                  >
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    Console Dashboard
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    onClick={handleSignOut}
+                    className="cursor-pointer rounded-md px-2 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+
+  const isOutcomeView = outcome !== null;
+  const isSuccessOutcome = outcome === "success";
+
+  const selectedVehiclesPanel = (
+    <aside className="flex w-full flex-col justify-between bg-[#1C3A34] p-6 text-white sm:p-8 lg:w-5/12 lg:p-10 xl:p-12">
+      <div>
+        {!isOutcomeView ? (
+          <Link
+            href="/book"
+            className="mb-8 inline-flex items-center gap-1.5 text-xs font-semibold text-white/50 transition-colors hover:text-white"
+          >
+            <ArrowLeft className="size-4" />
+            {copy.backToCatalog}
+          </Link>
+        ) : (
+          <div className="mb-8 h-4" aria-hidden />
+        )}
+
+        <div className="mb-6 flex items-center gap-3.5">
+          <div className="flex size-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-[#C9B87A]">
+            {isSuccessOutcome ? (
+              <CheckCircle2 className="size-5" strokeWidth={2.25} />
+            ) : (
+              <ShoppingBag className="size-5" />
+            )}
+          </div>
+          <div>
+            <h1 className="text-xl font-extrabold tracking-tight sm:text-2xl">
+              {copy.selectedVehicles}
+            </h1>
+            <p className="mt-0.5 text-xs font-medium text-white/45">
+              {isSuccessOutcome
+                ? (vehicles.length === 1
+                    ? copy.vehiclesSubmitted
+                    : copy.vehiclesSubmittedPlural
+                  ).replace("{count}", String(vehicles.length))
+                : vehiclesReadyLabel}
+            </p>
+          </div>
+        </div>
+
+        <div className="max-h-[540px] space-y-4 overflow-y-auto pr-1">
+          {vehicles.map((v) => {
+            const available = isVehicleAvailableNow(v.status);
+            const availableFrom = getVehicleAvailableFrom(v.status);
+            const meta = [
+              v.vehicle_type?.name,
+              v.vehicle_class?.name,
+              v.year ? String(v.year) : null,
+              v.vehicle_type?.passenger_capacity
+                ? `${v.vehicle_type.passenger_capacity} seats`
+                : null,
+            ].filter(Boolean);
+
+            return (
+              <div
+                key={v.id}
+                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition-colors hover:bg-white/[0.08]"
+              >
+                <div className="relative h-36 w-full bg-white/5">
+                  <VehiclePhotoMedia
+                    imageUrl={v.images?.[0] ? getVehiclePhotoUrl(v.images[0]) : undefined}
+                    alt={`${v.make} ${v.model}`}
+                    tone="dark"
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  {!isOutcomeView ? (
+                    <span
+                      className={cn(
+                        "absolute left-2 top-2 max-w-[85%] rounded-full border px-2 py-0.5 text-[10px] font-bold tracking-wide",
+                        available
+                          ? "border-emerald-400/30 bg-emerald-500/20 text-emerald-300"
+                          : "border-amber-400/30 bg-amber-500/20 text-amber-300",
+                      )}
+                    >
+                      {available
+                        ? copy.statusAvailable
+                        : `${copy.statusBusy} ${formatVehicleAvailableFrom(availableFrom, locale)}`}
+                    </span>
+                  ) : null}
+                  {!isOutcomeView ? (
+                    <button
+                      type="button"
+                      onClick={() => removeVehicleId(v.id)}
+                      className="absolute right-2 top-2 flex size-7 items-center justify-center rounded-full bg-black/40 text-white/70 transition-colors hover:bg-rose-600 hover:text-white"
+                      aria-label={copy.removeVehicle}
+                    >
+                      <X className="size-3.5" strokeWidth={2.5} />
+                    </button>
+                  ) : null}
+                </div>
+
+                <div className="space-y-2 p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <h4 className="truncate text-sm font-bold text-white">
+                        {v.make} {v.model}
+                      </h4>
+                      {meta.length > 0 ? (
+                        <p className="mt-0.5 truncate text-[11px] font-medium text-white/45">
+                          {meta.join(" · ")}
+                        </p>
+                      ) : null}
+                    </div>
+                    <span className="shrink-0 rounded border border-white/15 bg-white/10 px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-white/80">
+                      {v.plate_number}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="mt-10 flex items-start gap-3 border-t border-white/10 pt-6 text-xs text-white/50">
+        <ShieldCheck className="mt-0.5 size-5 shrink-0 text-[#C9B87A]" />
+        <p className="leading-relaxed">
+          Platform encrypted ride scheduling. Assignees receive automated mobile coordinates.
+        </p>
+      </div>
+    </aside>
+  );
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 text-slate-800 antialiased flex flex-col font-sans">
-        <header className="relative z-40 bg-[#1C3A34] text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[72px] flex items-center justify-between">
-            <Link href="/" className="flex items-center shrink-0">
-              <BrandLogo priority />
-            </Link>
-          </div>
-        </header>
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#1C3A34]/10 border-t-[#C9B87A]" />
-          <p className="text-slate-400 text-sm font-semibold mt-4">Preparing booking form...</p>
+      <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased">
+        {pageHeader}
+        <div className="flex flex-1 flex-col items-center justify-center gap-4">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#1C3A34]/10 border-t-[#C9B87A]" />
+          <p className="text-sm font-medium text-slate-400">{copy.preparingForm}</p>
         </div>
       </div>
     );
@@ -724,20 +972,19 @@ function VehicleRequestPageContent() {
 
   if (vehicles.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-50 text-slate-800 antialiased flex flex-col font-sans">
-        <header className="relative z-40 bg-[#1C3A34] text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[72px] flex items-center justify-between">
-            <Link href="/" className="flex items-center shrink-0">
-              <BrandLogo priority />
-            </Link>
+      <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased">
+        {pageHeader}
+        <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
+          <div className="mb-5 flex size-16 items-center justify-center rounded-2xl border border-slate-100 bg-white">
+            <Car className="size-7 text-[#1C3A34]/35" strokeWidth={1.75} />
           </div>
-        </header>
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <Car className="h-16 w-16 text-slate-300 mb-4" />
-          <h2 className="text-xl font-bold text-[#1C3A34]">No Vehicles Selected</h2>
-          <p className="text-slate-500 text-sm mt-2">Select one or more vehicles in the catalog to submit a request.</p>
-          <Link href="/book" className="mt-5 bg-[#1C3A34] hover:bg-[#254b43] text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition-all">
-            Return to Catalog
+          <h2 className="text-xl font-extrabold tracking-tight text-[#1C3A34]">{copy.noVehiclesTitle}</h2>
+          <p className="mt-2 max-w-sm text-sm text-slate-500">{copy.noVehiclesBody}</p>
+          <Link
+            href="/book"
+            className="mt-6 inline-flex items-center justify-center rounded-xl bg-[#1C3A34] px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#254b43]"
+          >
+            {copy.returnToCatalog}
           </Link>
         </div>
       </div>
@@ -745,485 +992,260 @@ function VehicleRequestPageContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 antialiased flex flex-col font-sans">
-      {/* Header */}
-      <header className="relative z-40 bg-[#1C3A34] text-white border-b border-[#C9B87A]/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[72px] flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center group shrink-0">
-            <BrandLogo priority className="group-hover:opacity-90 transition-opacity" />
-          </Link>
-          
-          <div className="flex items-center gap-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9 rounded-xl border bg-white/5 border-white/10 hover:bg-white/10 text-white shadow-none transition-all"
-                    aria-label="Select language"
-                  />
-                }
-              >
-                <Languages className="h-[18px] w-[18px] text-[#C9B87A]" strokeWidth={1.75} />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-40 p-1.5 bg-white border border-slate-200 shadow-xl rounded-xl z-[10000]">
-                <DropdownMenuGroup>
-                  <DropdownMenuRadioGroup
-                    value={locale}
-                    onValueChange={(value) => setLocale(value as SupportedLocale)}
-                  >
-                    {LOCALE_OPTIONS.map((option) => (
-                      <DropdownMenuRadioItem
-                        key={option.value}
-                        value={option.value}
-                        className="rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
-                      >
-                        {option.nativeLabel}
-                      </DropdownMenuRadioItem>
-                    ))}
-                  </DropdownMenuRadioGroup>
-                </DropdownMenuGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {!user ? (
-              <Link
-                href="/sign-in"
-                className="bg-[#C9B87A] hover:bg-[#d9ca8e] text-[#1C3A34] font-bold text-xs sm:text-sm px-4 sm:px-5 py-2 rounded-full tracking-wide transition-all shadow-md hover:shadow-lg"
-              >
-                {copy.signIn}
-              </Link>
-            ) : (
-              <DropdownMenu>
-                <DropdownMenuTrigger
-                  render={
-                    <button
-                      className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#C9B87A] transition-all hover:scale-105 cursor-pointer"
-                      aria-label="Account menu"
-                    />
-                  }
-                >
-                  <Avatar size="sm" className="size-9 ring-2 ring-[#C9B87A]/50 cursor-pointer">
-                    <AvatarFallback className="text-[11px] font-bold text-white bg-[#1C3A34] hover:bg-[#254b43]">
-                      {getUserInitials(user)}
-                    </AvatarFallback>
-                  </Avatar>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 p-1.5 bg-white border border-slate-200 shadow-xl rounded-xl z-[10000]">
-                  <DropdownMenuGroup>
-                    <DropdownMenuLabel className="px-2 py-2 font-normal">
-                      <p className="truncate text-sm font-semibold text-[#1C3A34]">
-                        {user.first_name} {user.last_name}
-                      </p>
-                      <p className="truncate text-xs text-slate-500">{user.email}</p>
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      className="rounded-md px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
-                      render={
-                        <Link href={user.roles.includes("admin") || user.roles.includes("super_admin") ? "/admin" : "/dashboard"} />
-                      }
-                    >
-                      <LayoutDashboard className="h-4 w-4 mr-2" />
-                      Console Dashboard
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuGroup>
-                    <DropdownMenuItem
-                      onClick={handleSignOut}
-                      className="rounded-md px-2 py-1.5 text-sm text-red-600 hover:bg-red-55 cursor-pointer transition-colors"
-                    >
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sign Out
-                    </DropdownMenuItem>
-                  </DropdownMenuGroup>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
-          </div>
-        </div>
-      </header>
+    <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased">
+      {pageHeader}
 
       {outcome ? (
-        <div className="flex-1 bg-slate-50">
-          <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 sm:py-12">
-            <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm">
-              <div
-                className={cn(
-                  "relative px-6 py-10 text-center sm:px-8 sm:py-12",
-                  outcome === "success" ? "bg-[#1C3A34]" : "bg-[#5c2a2a]",
-                )}
-              >
-                <div
-                  className="pointer-events-none absolute inset-0 opacity-40"
-                  style={{
-                    backgroundImage:
+        <div className="flex min-h-[calc(100vh-72px)] flex-1 flex-col lg:flex-row">
+          {selectedVehiclesPanel}
+
+          <section className="flex w-full flex-1 flex-col bg-slate-50/80 px-6 py-8 sm:px-8 lg:w-7/12 lg:min-h-[calc(100vh-72px)] lg:px-10 lg:py-10 xl:px-12">
+            <div className="flex min-h-0 w-full flex-1 flex-col gap-6">
+              <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
+                <div className="flex h-full flex-col justify-center rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
+                  <div
+                    className={cn(
+                      "flex size-14 items-center justify-center rounded-2xl",
                       outcome === "success"
-                        ? "radial-gradient(circle at 20% 20%, rgba(201,184,122,0.35), transparent 45%), radial-gradient(circle at 80% 80%, rgba(201,184,122,0.2), transparent 40%)"
-                        : "radial-gradient(circle at 20% 20%, rgba(248,113,113,0.25), transparent 45%), radial-gradient(circle at 80% 80%, rgba(252,165,165,0.15), transparent 40%)",
-                  }}
-                  aria-hidden
-                />
-                <div
-                  className={cn(
-                    "relative mx-auto flex h-16 w-16 items-center justify-center rounded-2xl shadow-lg",
-                    outcome === "success"
-                      ? "bg-[#C9B87A] text-[#1C3A34]"
-                      : "bg-red-100 text-red-700",
-                  )}
-                >
-                  {outcome === "success" ? (
-                    <CheckCircle2 className="h-8 w-8" strokeWidth={2.25} />
-                  ) : (
-                    <AlertCircle className="h-8 w-8" strokeWidth={2.25} />
-                  )}
+                        ? "bg-[#C9B87A] text-[#1C3A34]"
+                        : "bg-red-100 text-red-700",
+                    )}
+                  >
+                    {outcome === "success" ? (
+                      <CheckCircle2 className="size-7" strokeWidth={2.25} />
+                    ) : (
+                      <AlertCircle className="size-7" strokeWidth={2.25} />
+                    )}
+                  </div>
+                  <p
+                    className={cn(
+                      "mt-5 text-xs font-bold uppercase tracking-wider",
+                      outcome === "success" ? "text-[#C9B87A]" : "text-red-600",
+                    )}
+                  >
+                    {outcome === "success" ? copy.successEyebrow : copy.errorEyebrow}
+                  </p>
+                  <h2 className="mt-2 text-2xl font-extrabold tracking-tight text-[#1C3A34] sm:text-3xl">
+                    {outcome === "success" ? copy.successTitle : copy.errorTitle}
+                  </h2>
+                  <p className="mt-3 text-sm leading-relaxed text-slate-500">
+                    {outcome === "success" ? copy.successText : outcomeMessage || copy.submitFailed}
+                  </p>
                 </div>
-                <p
-                  className={cn(
-                    "relative mt-5 text-[11px] font-bold uppercase tracking-[0.18em]",
-                    outcome === "success" ? "text-[#C9B87A]" : "text-red-200",
-                  )}
-                >
-                  {outcome === "success" ? copy.successEyebrow : copy.errorEyebrow}
-                </p>
-                <h3 className="relative mt-2 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
-                  {outcome === "success" ? copy.successTitle : copy.errorTitle}
-                </h3>
-                <p className="relative mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/70">
-                  {outcome === "success"
-                    ? copy.successText
-                    : outcomeMessage || copy.submitFailed}
-                </p>
+
+                <div className="flex h-full min-h-0 flex-col">
+                  <p className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">
+                    {outcome === "success" ? copy.whatHappensNext : copy.whatYouCanDo}
+                  </p>
+                  <ol className="grid min-h-0 flex-1 grid-rows-3 gap-3">
+                    {(outcome === "success"
+                      ? [
+                          {
+                            title: copy.successStepReview,
+                            body: copy.successStepReviewDesc,
+                          },
+                          {
+                            title: copy.successStepAssign,
+                            body: copy.successStepAssignDesc,
+                          },
+                          {
+                            title: copy.successStepContact,
+                            body: copy.successStepContactDesc,
+                          },
+                        ]
+                      : [
+                          {
+                            title: copy.errorStepCheck,
+                            body: copy.errorStepCheckDesc,
+                          },
+                          {
+                            title: copy.errorStepRetry,
+                            body: copy.errorStepRetryDesc,
+                          },
+                          {
+                            title: copy.errorStepSupport,
+                            body: copy.errorStepSupportDesc,
+                          },
+                        ]
+                    ).map((step, index) => (
+                      <li
+                        key={step.title}
+                        className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4"
+                      >
+                        <span
+                          className={cn(
+                            "flex size-9 shrink-0 items-center justify-center rounded-full text-sm font-extrabold",
+                            outcome === "success"
+                              ? "bg-[#1C3A34] text-[#C9B87A]"
+                              : "bg-red-700 text-red-100",
+                          )}
+                        >
+                          {index + 1}
+                        </span>
+                        <div className="min-w-0 space-y-1">
+                          <p className="text-sm font-extrabold leading-snug text-[#1C3A34]">
+                            {step.title}
+                          </p>
+                          <p className="text-sm leading-relaxed text-slate-500">{step.body}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
               </div>
 
-              <div className="space-y-6 px-6 py-7 sm:px-8">
-                {vehicles.length > 0 ? (
-                  <div className="rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3.5">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                      {copy.selectedVehicles}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold text-[#1C3A34]">
-                      {(vehicles.length === 1
-                        ? copy.vehiclesSubmitted
-                        : copy.vehiclesSubmittedPlural
-                      ).replace("{count}", String(vehicles.length))}
-                      {" · "}
-                      {vehicles.map((v) => `${v.make} ${v.model}`).join(", ")}
-                    </p>
-                  </div>
-                ) : null}
-
-                <ol className="space-y-3">
-                  {(outcome === "success"
-                    ? [copy.successStepReview, copy.successStepAssign, copy.successStepContact]
-                    : [copy.errorStepCheck, copy.errorStepRetry, copy.errorStepSupport]
-                  ).map((step, index) => (
-                    <li
-                      key={step}
-                      className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3.5"
+              <div className="flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row">
+                {outcome === "success" ? (
+                  <>
+                    <Link
+                      href="/dashboard/my-requests"
+                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1C3A34] px-5 py-3.5 text-sm font-extrabold text-white transition-colors hover:bg-[#254b43]"
                     >
-                      <span
-                        className={cn(
-                          "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-extrabold",
-                          outcome === "success"
-                            ? "bg-[#1C3A34] text-[#C9B87A]"
-                            : "bg-red-700 text-red-100",
-                        )}
-                      >
-                        {index + 1}
-                      </span>
-                      <span className="pt-1 text-sm font-medium leading-snug text-slate-700">
-                        {step}
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                  {outcome === "success" ? (
-                    <>
-                      <Link
-                        href="/dashboard/my-requests"
-                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1C3A34] px-5 py-3.5 text-sm font-extrabold text-white transition-colors hover:bg-[#254b43]"
-                      >
-                        {copy.viewMyRequests}
-                        <ArrowRight className="h-4 w-4" />
-                      </Link>
-                      <button
-                        type="button"
-                        onClick={resetForm}
-                        className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-[#1C3A34] transition-colors hover:border-[#1C3A34]/30 hover:bg-slate-50"
-                      >
-                        {copy.backToCatalog}
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        type="button"
-                        onClick={dismissOutcomeError}
-                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1C3A34] px-5 py-3.5 text-sm font-extrabold text-white transition-colors hover:bg-[#254b43]"
-                      >
-                        {copy.tryAgain}
-                        <ArrowRight className="h-4 w-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={resetForm}
-                        className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-[#1C3A34] transition-colors hover:border-[#1C3A34]/30 hover:bg-slate-50"
-                      >
-                        {copy.backToCatalog}
-                      </button>
-                    </>
-                  )}
-                </div>
+                      {copy.viewMyRequests}
+                      <ArrowRight className="size-4" />
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={resetForm}
+                      className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-[#1C3A34] transition-colors hover:bg-slate-50"
+                    >
+                      {copy.backToCatalog}
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={dismissOutcomeError}
+                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1C3A34] px-5 py-3.5 text-sm font-extrabold text-white transition-colors hover:bg-[#254b43]"
+                    >
+                      {copy.tryAgain}
+                      <ArrowRight className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={resetForm}
+                      className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-[#1C3A34] transition-colors hover:bg-slate-50"
+                    >
+                      {copy.backToCatalog}
+                    </button>
+                  </>
+                )}
               </div>
             </div>
-          </div>
+          </section>
         </div>
       ) : (
-      /* Main Split Layout Container */
-      <div className="flex-1 flex flex-col lg:flex-row min-h-screen">
-        
-        {/* LEFT COLUMN PANEL: Vehicle Highlights (Dark green branding background) */}
-        <div className="w-full lg:w-5/12 bg-[#1C3A34] text-white flex flex-col justify-between p-6 sm:p-8 lg:p-12">
-          <div>
-            {/* Back to Catalog Link */}
-            <Link
-              href="/book"
-              className="inline-flex items-center gap-1.5 text-white/50 hover:text-white text-xs font-semibold transition-all mb-8 cursor-pointer"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              {copy.backToCatalog}
-            </Link>
+        <div className="flex min-h-[calc(100vh-72px)] flex-1 flex-col lg:flex-row">
+          {selectedVehiclesPanel}
 
-            {/* Title */}
-            <div className="flex items-center gap-3.5 mb-6">
-              <div className="h-10 w-10 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center text-[#C9B87A]">
-                <ShoppingBag className="h-5 w-5" />
-              </div>
+          <section className="flex w-full flex-1 flex-col bg-slate-50/80 px-6 py-8 sm:px-8 lg:w-7/12 lg:px-10 lg:py-10 xl:px-12">
+            <div className="flex w-full flex-1 flex-col space-y-6">
               <div>
-                <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight leading-tight">
-                  {copy.selectedVehicles}
-                </h1>
-                <p className="text-xs text-white/40 font-medium mt-0.5">
-                  {vehicles.length} {vehicles.length === 1 ? "vehicle" : "vehicles"} ready to request
+                <h2 className="text-2xl font-extrabold tracking-tight text-[#1C3A34] sm:text-3xl">
+                  {copy.requestBooking}
+                </h2>
+                <p className="mt-2 max-w-xl text-sm font-medium leading-relaxed text-slate-500">
+                  {copy.requestSubTitle}
                 </p>
               </div>
-            </div>
 
-            {/* Scrollable list of vehicles */}
-            <div className="space-y-4 max-h-[540px] overflow-y-auto pr-1 scrollbar-thin">
-              {vehicles.map((v) => (
-                <div
-                  key={v.id}
-                  className="group relative flex flex-col gap-0 bg-white/5 border border-white/10 rounded-2xl overflow-hidden transition hover:bg-white/[0.08]"
-                >
-                  {/* Photo Banner */}
-                  <div className="h-36 w-full relative bg-white/5">
-                    <VehiclePhotoMedia
-                      imageUrl={v.images?.[0] ? getVehiclePhotoUrl(v.images[0]) : undefined}
-                      alt={`${v.make} ${v.model}`}
-                      tone="dark"
-                    />
-                    {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-                    {/* Status badge overlay */}
-                    {(() => {
-                      const available = isVehicleAvailableNow(v.status);
-                      const availableFrom = getVehicleAvailableFrom(v.status);
-                      return (
-                        <span className={`absolute top-2 left-2 max-w-[85%] text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wider border ${
-                          available
-                            ? "bg-emerald-500/20 border-emerald-400/30 text-emerald-300"
-                            : "bg-amber-500/20 border-amber-400/30 text-amber-300"
-                        }`}>
-                          {available
-                            ? copy.statusAvailable
-                            : `${copy.statusBusy} ${formatVehicleAvailableFrom(availableFrom, locale)}`}
-                        </span>
-                      );
-                    })()}
+              {!user ? (
+                <div className="flex flex-1 items-center justify-center">
+                  <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm sm:p-8">
+                    <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-[#1C3A34]/8">
+                      <Lock className="size-5 text-[#1C3A34]" strokeWidth={1.75} />
+                    </div>
+                    <h3 className="text-lg font-extrabold tracking-tight text-[#1C3A34]">
+                      {copy.signInPrompt}
+                    </h3>
+                    <p className="mx-auto mt-2 text-sm leading-relaxed text-slate-500">
+                      {copy.signInPromptDetail}
+                    </p>
+                    <Link
+                      href={`/sign-in?redirect=${encodeURIComponent(`/book/request?ids=${ids.join(",")}`)}`}
+                      className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[#1C3A34] px-5 py-3.5 text-sm font-bold text-white transition-colors hover:bg-[#254b43]"
+                    >
+                      {copy.signInToBook}
+                    </Link>
+                  </div>
+                </div>
+              ) : requestType === null ? (
+                <div className="space-y-5">
+                  <div>
+                    <h3 className="text-xl font-extrabold tracking-tight text-[#1C3A34]">
+                      {copy.requestTypeTitle}
+                    </h3>
+                    <p className="mt-1.5 text-sm leading-relaxed text-slate-500">
+                      {copy.requestTypeSubtitle}
+                    </p>
                   </div>
 
-                  {/* Info panel */}
-                  <div className="p-4 space-y-3">
-                    {/* Title row */}
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <h4 className="font-bold text-sm text-white leading-tight">{v.make} {v.model}</h4>
-                        <p className="text-white/40 text-[10px] mt-0.5 font-medium">{v.year}</p>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      onClick={() => setRequestType("single")}
+                      className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 text-left transition-colors hover:border-[#1C3A34]/45 sm:p-6"
+                    >
+                      <div className="flex size-11 items-center justify-center rounded-xl bg-[#1C3A34]/8">
+                        <Zap className="size-5 text-[#1C3A34]" strokeWidth={1.75} />
                       </div>
-                      {/* Plate */}
-                      <span className="font-mono text-[9px] bg-white/10 border border-white/15 px-2 py-1 rounded text-white/80 uppercase tracking-wider shrink-0">
-                        {v.plate_number}
+                      <div className="space-y-1.5">
+                        <h4 className="text-base font-extrabold text-[#1C3A34]">{copy.singleTrip}</h4>
+                        <p className="text-sm leading-relaxed text-slate-500">{copy.singleTripDesc}</p>
+                      </div>
+                      <span className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1C3A34] px-4 py-3 text-sm font-bold text-white">
+                        {copy.selectType}
+                        <ArrowRight className="size-4" />
                       </span>
-                    </div>
+                    </button>
 
-                    {/* Detail chips row */}
-                    <div className="flex flex-wrap gap-1.5">
-                      {v.vehicle_type?.name && (
-                        <span className="text-[9px] font-semibold bg-[#C9B87A]/15 border border-[#C9B87A]/25 text-[#C9B87A] px-2 py-0.5 rounded-full">
-                          {v.vehicle_type.name}
-                        </span>
-                      )}
-                      {v.vehicle_class?.name && (
-                        <span className="text-[9px] font-semibold bg-white/10 border border-white/15 text-white/70 px-2 py-0.5 rounded-full">
-                          {v.vehicle_class.name}
-                        </span>
-                      )}
-                      {v.vehicle_type?.passenger_capacity && (
-                        <span className="text-[9px] font-semibold bg-white/10 border border-white/15 text-white/70 px-2 py-0.5 rounded-full flex items-center gap-1">
-                          <User className="h-2.5 w-2.5" />
-                          {v.vehicle_type.passenger_capacity} seats
-                        </span>
-                      )}
-                      {v.color && (
-                        <span className="text-[9px] font-semibold bg-white/10 border border-white/15 text-white/70 px-2 py-0.5 rounded-full capitalize">
-                          {v.color}
-                        </span>
-                      )}
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setRequestType("contract")}
+                      className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 text-left transition-colors hover:border-[#C9B87A]/80 sm:p-6"
+                    >
+                      <div className="flex size-11 items-center justify-center rounded-xl bg-[#C9B87A]/15">
+                        <Repeat2 className="size-5 text-[#C9B87A]" strokeWidth={1.75} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <h4 className="text-base font-extrabold text-[#1C3A34]">{copy.contract}</h4>
+                        <p className="text-sm leading-relaxed text-slate-500">{copy.contractDesc}</p>
+                      </div>
+                      <span className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[#C9B87A]/50 bg-[#C9B87A]/15 px-4 py-3 text-sm font-bold text-[#1C3A34]">
+                        {copy.selectType}
+                        <ArrowRight className="size-4" />
+                      </span>
+                    </button>
                   </div>
-
-                  {/* Delete button */}
-                  <button
-                    onClick={() => removeVehicleId(v.id)}
-                    className="absolute top-2 right-2 h-6 w-6 rounded-full flex items-center justify-center bg-black/40 text-white/60 hover:bg-rose-600 hover:text-white transition-all cursor-pointer"
-                    aria-label="Remove vehicle"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
                 </div>
-              ))}
-            </div>
-
-            {/* Platform badging */}
-            <div className="mt-12 pt-6 border-t border-white/10 flex items-center gap-3.5 text-white/50 text-xs">
-              <ShieldCheck className="h-5 w-5 text-[#C9B87A] shrink-0" />
-              <p className="leading-relaxed">Platform encrypted ride scheduling. Assignees receive automated mobile coordinates.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN PANEL: Form Details (Spacious and creative full-page layout) */}
-        <div className="w-full lg:w-7/12 p-6 sm:p-8 lg:p-12 xl:p-16 flex flex-col justify-between pt-8 sm:pt-12 lg:pt-16">
-          
-          <div className="max-w-2xl w-full mx-auto space-y-8">
-            
-            {/* Header Titles */}
-            <div className="space-y-2">
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1C3A34] tracking-tight">{copy.requestBooking}</h2>
-              <p className="text-sm text-slate-500 font-medium">{copy.requestSubTitle}</p>
-            </div>
-
-            {!user ? (
-              <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm sm:p-8">
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#1C3A34]/8">
-                  <Lock className="h-5 w-5 text-[#1C3A34]" strokeWidth={1.75} />
-                </div>
-                <h3 className="text-lg font-extrabold tracking-tight text-[#1C3A34]">
-                  {copy.signInPrompt}
-                </h3>
-                <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-500">
-                  {copy.signInPromptDetail}
-                </p>
-                <Link
-                  href={`/sign-in?redirect=${encodeURIComponent(`/book/request?ids=${ids.join(",")}`)}`}
-                  className="mt-6 inline-flex w-full max-w-sm items-center justify-center gap-2 rounded-xl bg-[#1C3A34] px-5 py-3.5 text-sm font-bold tracking-wide text-white transition-colors hover:bg-[#254b43]"
-                >
-                  {copy.signInToBook}
-                </Link>
-              </div>
-            ) : requestType === null ? (
-              /* ── REQUEST TYPE SELECTOR ── */
-              <div className="space-y-6">
-                <div className="text-center space-y-1.5 py-4">
-                  <h3 className="text-xl font-extrabold text-[#1C3A34] tracking-tight">{copy.requestTypeTitle}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed max-w-lg mx-auto">{copy.requestTypeSubtitle}</p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  {/* Single Trip Card */}
-                  <button
-                    type="button"
-                    onClick={() => setRequestType("single")}
-                    className="group relative text-left flex flex-col gap-4 rounded-2xl border-2 border-slate-200 bg-white p-6 shadow-sm hover:border-[#1C3A34] hover:shadow-lg transition-all duration-200 cursor-pointer"
-                  >
-                    {/* Icon circle */}
-                    <div className="h-12 w-12 rounded-xl bg-[#1C3A34]/8 flex items-center justify-center group-hover:bg-[#1C3A34]/15 transition-colors">
-                      <Zap className="h-6 w-6 text-[#1C3A34]" strokeWidth={1.75} />
+              ) : (
+                <form onSubmit={handleBookingSubmit} className="mx-auto w-full max-w-2xl space-y-6">
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+                    <div className="flex items-center gap-2.5">
+                      {requestType === "single" ? (
+                        <Zap className="size-4 text-[#1C3A34]" strokeWidth={1.75} />
+                      ) : (
+                        <Repeat2 className="size-4 text-[#C9B87A]" strokeWidth={1.75} />
+                      )}
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                          {copy.selectedType}
+                        </p>
+                        <p className="text-sm font-extrabold text-[#1C3A34]">
+                          {requestType === "single" ? copy.singleTrip : copy.contract}
+                        </p>
+                      </div>
                     </div>
-                    <div className="space-y-1.5 flex-1">
-                      <h4 className="font-extrabold text-base text-[#1C3A34] group-hover:text-[#1C3A34]">
-                        {copy.singleTrip}
-                      </h4>
-                      <p className="text-xs text-slate-500 leading-relaxed">
-                        {copy.singleTripDesc}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#1C3A34] font-bold text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                      {copy.selectType} <ArrowRight className="h-3.5 w-3.5" />
-                    </div>
-                    {/* Hover accent border glow */}
-                    <span className="absolute inset-0 rounded-2xl ring-0 group-hover:ring-2 ring-[#1C3A34]/20 transition-all pointer-events-none" />
-                  </button>
-
-                  {/* Contract Card */}
-                  <button
-                    type="button"
-                    onClick={() => setRequestType("contract")}
-                    className="group relative text-left flex flex-col gap-4 rounded-2xl border-2 border-slate-200 bg-white p-6 shadow-sm hover:border-[#C9B87A] hover:shadow-lg transition-all duration-200 cursor-pointer"
-                  >
-                    {/* Icon circle */}
-                    <div className="h-12 w-12 rounded-xl bg-[#C9B87A]/10 flex items-center justify-center group-hover:bg-[#C9B87A]/20 transition-colors">
-                      <Repeat2 className="h-6 w-6 text-[#C9B87A]" strokeWidth={1.75} />
-                    </div>
-                    <div className="space-y-1.5 flex-1">
-                      <h4 className="font-extrabold text-base text-[#1C3A34] group-hover:text-[#1C3A34]">
-                        {copy.contract}
-                      </h4>
-                      <p className="text-xs text-slate-500 leading-relaxed">
-                        {copy.contractDesc}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[#C9B87A] font-bold text-xs opacity-0 group-hover:opacity-100 transition-opacity">
-                      {copy.selectType} <ArrowRight className="h-3.5 w-3.5" />
-                    </div>
-                    {/* Hover accent border glow */}
-                    <span className="absolute inset-0 rounded-2xl ring-0 group-hover:ring-2 ring-[#C9B87A]/30 transition-all pointer-events-none" />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleBookingSubmit} className="space-y-8">
-                
-                {/* Selected type badge + change button */}
-                <div className="flex items-center justify-between gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
-                  <div className="flex items-center gap-2.5">
-                    {requestType === "single" ? (
-                      <Zap className="h-4 w-4 text-[#1C3A34]" strokeWidth={1.75} />
-                    ) : (
-                      <Repeat2 className="h-4 w-4 text-[#C9B87A]" strokeWidth={1.75} />
-                    )}
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">{copy.selectedType}</p>
-                      <p className={`text-sm font-extrabold ${requestType === "single" ? "text-[#1C3A34]" : "text-[#b89d59]"}`}>
-                        {requestType === "single" ? copy.singleTrip : copy.contract}
-                      </p>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setRequestType(null)}
+                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition-colors hover:text-[#1C3A34]"
+                    >
+                      <Edit3 className="size-3.5" />
+                      {copy.changeType}
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setRequestType(null)}
-                    className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-[#1C3A34] transition-colors cursor-pointer"
-                  >
-                    <Edit3 className="h-3.5 w-3.5" />
-                    {copy.changeType}
-                  </button>
-                </div>
 
                 {/* Form Section 1: Passengers info */}
                 <AdminFormSection title={copy.passengerDetails} description={copy.passengerDetailsDesc} icon={User}>
@@ -1247,13 +1269,8 @@ function VehicleRequestPageContent() {
                         type="tel"
                         required
                       />
-                      <p className="text-[10px] text-slate-450 font-medium leading-normal flex items-start gap-1.5 mt-1 px-0.5 opacity-80">
-                        <span className="h-1 w-1 rounded-full bg-[#C9B87A] shrink-0 mt-1.5 animate-pulse" />
-                        <span>
-                          {locale === "am"
-                            ? "የጉዞ ጥያቄዎ ሁኔታን በተመለከተ በዚህ ስልክ ቁጥር ይገናኙዎታል።"
-                            : "You will be contacted via this phone number regarding your ride request status."}
-                        </span>
+                      <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+                        {copy.contactPhoneHint}
                       </p>
                     </div>
                   </div>
@@ -1592,22 +1609,21 @@ function VehicleRequestPageContent() {
                   ) : null}
                 </AdminFormSection>
 
-                {/* Submit Action */}
-                <div className="pt-6 border-t border-slate-100">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-[#1C3A34] hover:bg-[#254b43] disabled:bg-slate-350 text-white font-extrabold text-sm py-4 rounded-xl transition-all shadow-md hover:shadow-lg cursor-pointer text-center"
-                  >
-                    {isSubmitting ? copy.submitting : copy.submitRequest}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
-        </div>
 
-      </div>
+                  <div className="border-t border-slate-200 pt-6">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full rounded-xl bg-[#1C3A34] py-4 text-center text-sm font-extrabold text-white transition-colors hover:bg-[#254b43] disabled:cursor-not-allowed disabled:bg-slate-300"
+                    >
+                      {isSubmitting ? copy.submitting : copy.submitRequest}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </section>
+        </div>
       )}
     </div>
   );
