@@ -285,4 +285,58 @@ export async function findActiveContractById(id: string) {
   });
 }
 
+/**
+ * Prefer an existing contract for this requester instead of always minting a new one.
+ * Order: active scope match → active owned → draft owned (same billing interval).
+ */
+export async function findReusableContractForRequester(options: {
+  requesterUserId: string;
+  billingInterval: ContractBillingInterval;
+  regionId?: string | null;
+  vehicleTypeId?: string | null;
+  vehicleClassId?: string | null;
+}) {
+  const billingIntervals: ContractBillingInterval[] =
+    options.billingInterval === "per_trip"
+      ? ["per_trip"]
+      : ["monthly", "quarterly", "annually"];
+
+  const rideScope = {
+    regionId: options.regionId ?? null,
+    vehicleTypeId: options.vehicleTypeId ?? null,
+    vehicleClassId: options.vehicleClassId ?? null,
+  };
+
+  if (rideScope.regionId && rideScope.vehicleTypeId && rideScope.vehicleClassId) {
+    const scoped = await findActiveContractsMatchingRideScope(rideScope);
+    const scopedMatch = scoped.find((contract) =>
+      billingIntervals.includes(contract.billingInterval),
+    );
+    if (scopedMatch) {
+      return scopedMatch;
+    }
+  }
+
+  const activeOwned = await prisma.contract.findFirst({
+    where: {
+      createdById: options.requesterUserId,
+      billingInterval: { in: billingIntervals },
+      status: "active",
+    },
+    orderBy: { updatedAt: "desc" },
+  });
+  if (activeOwned) {
+    return activeOwned;
+  }
+
+  return prisma.contract.findFirst({
+    where: {
+      createdById: options.requesterUserId,
+      billingInterval: { in: billingIntervals },
+      status: "draft",
+    },
+    orderBy: { updatedAt: "desc" },
+  });
+}
+
 export type DbContract = NonNullable<Awaited<ReturnType<typeof findContractById>>>;

@@ -50,7 +50,7 @@ import {
 import { VehicleFuelLogSource, VehicleHistoryEventType, VehicleStatus } from "../generated/prisma";
 import { listActiveRegions } from "../models/region.model";
 import { listActiveBookingLocations } from "../models/location.model";
-import { listActiveContracts, getContractScopeIds, formatContractDate } from "../models/contract.model";
+import { listActiveContracts, getContractScopeIds, formatContractDate, findReusableContractForRequester } from "../models/contract.model";
 import { listRelevantEnrollmentsForUser } from "../models/contract-enrollment.model";
 import { listActiveVehicleTypesWithAllowedClasses } from "../models/vehicle-type-class.model";
 import { recordAuditLog } from "../services/audit-log.service";
@@ -1026,19 +1026,38 @@ router.post(
         requestsToCreate.push(baseRequestData);
       }
 
-      // Every trip needs a linked contract as the agreement record (bail-out / proof),
-      // unless the client already chose an existing contract_id.
-      const shouldGenerateContract = !baseRequestData.contractId;
+      // Prefer an existing matching contract; only mint a new agreement when none is found.
+      const isRecurringContract = parsed.data.requestType === "contract";
+      const billingInterval = isRecurringContract ? "monthly" : "per_trip";
+      const firstRequest = requestsToCreate[0];
+
+      let resolvedContractId = baseRequestData.contractId ?? null;
+      if (!resolvedContractId) {
+        const reusable = await findReusableContractForRequester({
+          requesterUserId: userId,
+          billingInterval,
+          regionId: firstRequest?.regionId,
+          vehicleTypeId: firstRequest?.vehicleTypeId,
+          vehicleClassId: firstRequest?.vehicleClassId,
+        });
+        resolvedContractId = reusable?.id ?? null;
+      }
+
+      const shouldGenerateContract = !resolvedContractId;
       const serviceDate =
         parsed.data.scheduledAt?.toISOString().split("T")[0] ??
         new Date().toISOString().split("T")[0];
-      const isRecurringContract = parsed.data.requestType === "contract";
       const contractTitle = shouldGenerateContract
         ? isRecurringContract
           ? `Contract Request - ${serviceDate}`
           : `Trip Agreement - ${serviceDate}`
         : undefined;
-      const billingInterval = isRecurringContract ? "monthly" : "per_trip";
+
+      if (resolvedContractId) {
+        for (const request of requestsToCreate) {
+          request.contractId = resolvedContractId;
+        }
+      }
 
       const createdRequests = await createBulkRideRequests({
         contractTitle,

@@ -1,13 +1,28 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { Calendar, Clock, MapPin, User, List, ChevronLeft, ChevronRight, Info } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  User,
+  List,
+  ChevronLeft,
+  ChevronRight,
+  Info,
+  MapPin,
+} from "lucide-react";
 import type { Vehicle, AdminRideRequest } from "@smart-dispatch/types";
 import { fetchAdminRideRequests } from "@/lib/admin-ride-request-api";
-import { formatEthiopianDate, gregorianToEthiopian, ETHIOPIAN_MONTHS_AM, formatEthiopianTime, ethiopianToGregorian } from "@/lib/ethiopian-calendar";
+import {
+  formatEthiopianDate,
+  gregorianToEthiopian,
+  ETHIOPIAN_MONTHS_AM,
+  formatEthiopianTime,
+  ethiopianToGregorian,
+} from "@/lib/ethiopian-calendar";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { adminCardClass, adminHeadingClass, adminIconBoxClass } from "@/lib/admin-theme";
+import { adminCardClass } from "@/lib/admin-theme";
 import { cn } from "@/lib/utils";
 
 type VehicleDetailScheduleTabProps = {
@@ -18,12 +33,94 @@ type VehicleDetailScheduleTabProps = {
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const WEEKDAYS_AM = ["እሑድ", "ሰኞ", "ማክሰኞ", "ረቡዕ", "ሐሙስ", "ዓርብ", "ቅዳሜ"];
 
+function startOfLocalDay(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function isSameLocalDay(left: Date, right: Date) {
+  return startOfLocalDay(left).getTime() === startOfLocalDay(right).getTime();
+}
+
+/** Inclusive occupancy: start day through return day (or start-only when no return). */
+function bookingOccupiesDay(booking: AdminRideRequest, day: Date) {
+  if (!booking.scheduled_at) return false;
+
+  const start = startOfLocalDay(new Date(booking.scheduled_at));
+  const end = startOfLocalDay(new Date(booking.scheduled_return_at ?? booking.scheduled_at));
+  const cell = startOfLocalDay(day);
+
+  return cell.getTime() >= start.getTime() && cell.getTime() <= end.getTime();
+}
+
+function bookingSpansMultipleDays(booking: AdminRideRequest) {
+  if (!booking.scheduled_at || !booking.scheduled_return_at) return false;
+  return (
+    startOfLocalDay(new Date(booking.scheduled_at)).getTime() !==
+    startOfLocalDay(new Date(booking.scheduled_return_at)).getTime()
+  );
+}
+
+function formatBookingWindow(booking: AdminRideRequest, locale: string) {
+  if (!booking.scheduled_at) return "—";
+
+  const startLabel =
+    locale === "am"
+      ? `${formatEthiopianDate(new Date(booking.scheduled_at), "am")} ${formatEthiopianTime(new Date(booking.scheduled_at), "am")}`
+      : new Date(booking.scheduled_at).toLocaleString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+  if (!booking.scheduled_return_at) {
+    return startLabel;
+  }
+
+  const endLabel =
+    locale === "am"
+      ? `${formatEthiopianDate(new Date(booking.scheduled_return_at), "am")} ${formatEthiopianTime(new Date(booking.scheduled_return_at), "am")}`
+      : new Date(booking.scheduled_return_at).toLocaleString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+  return `${startLabel} → ${endLabel}`;
+}
+
+function statusBadgeClass(status: string) {
+  if (status === "completed" || status === "confirmed") {
+    return "border-emerald-200 bg-emerald-50 text-emerald-800";
+  }
+  if (status === "in_progress") {
+    return "border-blue-200 bg-blue-50 text-blue-800";
+  }
+  if (status === "cancelled" || status === "rejected") {
+    return "border-rose-200 bg-rose-50 text-rose-700";
+  }
+  return "border-slate-200 bg-slate-50 text-slate-600";
+}
+
+function requesterInitials(booking: AdminRideRequest) {
+  const first = booking.requester?.first_name?.charAt(0) ?? "";
+  const last = booking.requester?.last_name?.charAt(0) ?? "";
+  return `${first}${last}`.toUpperCase() || "U";
+}
+
+function requesterName(booking: AdminRideRequest) {
+  const first = booking.requester?.first_name ?? "";
+  const last = booking.requester?.last_name ?? "";
+  return `${first} ${last}`.trim() || "Unknown requester";
+}
+
 export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailScheduleTabProps) {
   const [bookings, setBookings] = useState<AdminRideRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
-
-  // Single Source of Truth calendar state
   const [activeMonthDate, setActiveMonthDate] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(() => new Date());
 
@@ -32,9 +129,11 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
       setLoading(true);
       try {
         const result = await fetchAdminRideRequests({ vehicleId: vehicle.id, limit: 100 });
-        const sorted = [...result.data].sort(
-          (a, b) => new Date(b.scheduled_at).getTime() - new Date(a.scheduled_at).getTime()
-        );
+        const sorted = [...result.data].sort((a, b) => {
+          const aTime = a.scheduled_at ? new Date(a.scheduled_at).getTime() : 0;
+          const bTime = b.scheduled_at ? new Date(b.scheduled_at).getTime() : 0;
+          return bTime - aTime;
+        });
         setBookings(sorted);
       } catch (error) {
         console.error("Failed to load vehicle bookings", error);
@@ -45,14 +144,10 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
     void loadSchedule();
   }, [vehicle.id]);
 
-  const filteredBookings = bookings;
-
-  // Gregorian calendar calculations
   const year = activeMonthDate.getFullYear();
   const month = activeMonthDate.getMonth();
-
-  // Derived Ethiopian Month & Year calculations
   const eth = useMemo(() => gregorianToEthiopian(activeMonthDate), [activeMonthDate]);
+  const today = useMemo(() => startOfLocalDay(new Date()), []);
 
   const daysInMonth = useMemo(() => {
     if (locale === "am") {
@@ -63,74 +158,58 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
 
   const firstDayIndex = useMemo(() => {
     if (locale === "am") {
-      const firstDayDate = ethiopianToGregorian(eth.year, eth.month, 1);
-      return firstDayDate.getDay();
+      return ethiopianToGregorian(eth.year, eth.month, 1).getDay();
     }
     return new Date(year, month, 1).getDay();
   }, [year, month, eth, locale]);
 
   const daysGrid = useMemo(() => {
     const grid: (number | null)[] = [];
-    for (let i = 0; i < firstDayIndex; i++) {
-      grid.push(null);
-    }
-    for (let d = 1; d <= daysInMonth; d++) {
-      grid.push(d);
-    }
+    for (let i = 0; i < firstDayIndex; i++) grid.push(null);
+    for (let d = 1; d <= daysInMonth; d++) grid.push(d);
     return grid;
   }, [daysInMonth, firstDayIndex]);
 
-  // Derived Selected Day value relative to current view mode
   const selectedDayValue = useMemo(() => {
     if (!selectedDate) return null;
     if (locale === "am") {
       const ethSel = gregorianToEthiopian(selectedDate);
-      if (ethSel.year === eth.year && ethSel.month === eth.month) {
-        return ethSel.day;
-      }
-      return null;
-    } else {
-      if (selectedDate.getFullYear() === year && selectedDate.getMonth() === month) {
-        return selectedDate.getDate();
-      }
-      return null;
+      return ethSel.year === eth.year && ethSel.month === eth.month ? ethSel.day : null;
     }
+    return selectedDate.getFullYear() === year && selectedDate.getMonth() === month
+      ? selectedDate.getDate()
+      : null;
   }, [selectedDate, locale, eth, year, month]);
 
-  const getBookingsForDay = (day: number) => {
-    const cellDate =
-      locale === "am"
-        ? ethiopianToGregorian(eth.year, eth.month, day)
-        : new Date(year, month, day);
+  const getCellDate = (day: number) =>
+    locale === "am"
+      ? ethiopianToGregorian(eth.year, eth.month, day)
+      : new Date(year, month, day);
 
-    return filteredBookings.filter((b) => {
-      const bDate = new Date(b.scheduled_at);
-      return (
-        bDate.getFullYear() === cellDate.getFullYear() &&
-        bDate.getMonth() === cellDate.getMonth() &&
-        bDate.getDate() === cellDate.getDate()
-      );
-    });
-  };
+  const getBookingsForDay = (day: number) =>
+    bookings.filter((b) => bookingOccupiesDay(b, getCellDate(day)));
 
   const selectedDayBookings = useMemo(() => {
     if (!selectedDate) return [];
-    return filteredBookings.filter((b) => {
-      const bDate = new Date(b.scheduled_at);
-      return (
-        bDate.getFullYear() === selectedDate.getFullYear() &&
-        bDate.getMonth() === selectedDate.getMonth() &&
-        bDate.getDate() === selectedDate.getDate()
-      );
-    });
-  }, [selectedDate, filteredBookings]);
+    return bookings.filter((b) => bookingOccupiesDay(b, selectedDate));
+  }, [selectedDate, bookings]);
+
+  const occupiedDaysInMonth = useMemo(() => {
+    let count = 0;
+    for (let d = 1; d <= daysInMonth; d++) {
+      const cellDate =
+        locale === "am"
+          ? ethiopianToGregorian(eth.year, eth.month, d)
+          : new Date(year, month, d);
+      if (bookings.some((b) => bookingOccupiesDay(b, cellDate))) {
+        count += 1;
+      }
+    }
+    return count;
+  }, [bookings, daysInMonth, locale, eth.year, eth.month, year, month]);
 
   const handleSelectDay = (day: number) => {
-    const targetDate =
-      locale === "am"
-        ? ethiopianToGregorian(eth.year, eth.month, day)
-        : new Date(year, month, day);
-    setSelectedDate(targetDate);
+    setSelectedDate(getCellDate(day));
   };
 
   const handlePrevMonth = () => {
@@ -163,6 +242,12 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
     setSelectedDate(null);
   };
 
+  const handleGoToday = () => {
+    const now = new Date();
+    setActiveMonthDate(now);
+    setSelectedDate(startOfLocalDay(now));
+  };
+
   const monthLabel = useMemo(() => {
     if (locale === "am") {
       return `${ETHIOPIAN_MONTHS_AM[eth.month - 1]} ${eth.year} ዓ.ም.`;
@@ -174,85 +259,112 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
   }, [activeMonthDate, eth, locale]);
 
   const renderBookingCard = (booking: AdminRideRequest) => {
-    const formattedTime = formatEthiopianTime(new Date(booking.scheduled_at), locale);
-    const requesterName = `${booking.requester.first_name} ${booking.requester.last_name}`;
+    const multiDay = bookingSpansMultipleDays(booking);
 
     return (
-      <div
+      <article
         key={booking.id}
-        className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-all text-xs"
+        className="rounded-xl border border-slate-200 bg-white p-3.5 transition-colors hover:border-[#1C3A34]/25"
       >
-        <div className="flex justify-between items-start border-b border-slate-100 pb-2 mb-2">
-          <div className="flex items-center gap-2">
-            <Avatar className="size-6 border border-slate-100">
-              <AvatarFallback className="text-[10px] font-bold text-white bg-[#1C3A34]">
-                {requesterName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <Avatar className="size-8 border border-slate-100">
+              <AvatarFallback className="bg-[#1C3A34] text-[11px] font-bold text-white">
+                {requesterInitials(booking)}
               </AvatarFallback>
             </Avatar>
-            <span className="font-extrabold text-slate-800">{requesterName}</span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-extrabold text-[#1C3A34]">
+                {requesterName(booking)}
+              </p>
+              <p className="mt-0.5 flex items-start gap-1 text-xs text-slate-500">
+                <Clock className="mt-0.5 size-3 shrink-0 text-[#C9B87A]" />
+                <span>{formatBookingWindow(booking, locale)}</span>
+              </p>
+            </div>
           </div>
-          <Badge variant="outline" className={cn(
-            "capitalize font-bold text-[9px] px-2 py-0.5 rounded-full border",
-            booking.status === "completed" || booking.status === "confirmed"
-              ? "border-emerald-250 bg-emerald-50 text-emerald-800"
-              : booking.status === "in_progress"
-              ? "border-blue-200 bg-blue-50 text-blue-800 animate-pulse"
-              : "border-slate-200 bg-slate-50 text-slate-655"
-          )}>
-            {booking.status}
-          </Badge>
+          <div className="flex shrink-0 flex-col items-end gap-1.5">
+            <Badge
+              variant="outline"
+              className={cn(
+                "rounded-md border px-2 py-0.5 text-[10px] font-bold capitalize",
+                statusBadgeClass(booking.status),
+              )}
+            >
+              {booking.status}
+            </Badge>
+            {multiDay ? (
+              <span className="rounded-md bg-[#C9B87A]/15 px-1.5 py-0.5 text-[10px] font-bold text-[#1C3A34]">
+                Multi-day
+              </span>
+            ) : null}
+          </div>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          <div className="space-y-1">
-            <p className="text-[10px] text-slate-400 font-bold uppercase">Transit Info</p>
-            <p className="text-slate-600 font-semibold flex items-center gap-1">
-              <Clock className="size-3 text-[#8f7d45]" />
-              {formattedTime}
-            </p>
-            <p className="truncate text-slate-600">From: {booking.pickup_address}</p>
-            <p className="truncate text-slate-600">To: {booking.dropoff_address}</p>
-          </div>
-          <div className="space-y-1 sm:border-l sm:border-slate-150 sm:pl-3">
-            <p className="text-[10px] text-slate-400 font-bold uppercase">Chauffeur</p>
-            <p className="text-slate-700 font-semibold">{booking.assigned_driver?.name || "Unassigned"}</p>
-            {booking.notes && <p className="text-[10px] text-slate-500 italic">"{booking.notes}"</p>}
-          </div>
+        <div className="mt-3 space-y-1.5 border-t border-slate-100 pt-3">
+          <p className="flex items-start gap-1.5 text-xs text-slate-600">
+            <MapPin className="mt-0.5 size-3 shrink-0 text-emerald-600" />
+            <span className="truncate">{booking.pickup_address}</span>
+          </p>
+          <p className="flex items-start gap-1.5 text-xs text-slate-600">
+            <MapPin className="mt-0.5 size-3 shrink-0 text-rose-500" />
+            <span className="truncate">{booking.dropoff_address}</span>
+          </p>
+          <p className="pt-1 text-xs text-slate-500">
+            Driver:{" "}
+            <span className="font-semibold text-slate-700">
+              {booking.assigned_driver?.name || "Unassigned"}
+            </span>
+          </p>
         </div>
-      </div>
+      </article>
     );
   };
 
   if (loading) {
     return (
       <div className="space-y-4">
-        <div className="h-44 animate-pulse rounded-2xl bg-slate-100" />
-        <div className="h-44 animate-pulse rounded-2xl bg-slate-100" />
+        <div className="h-12 animate-pulse rounded-xl bg-slate-100" />
+        <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+          <div className="h-80 animate-pulse rounded-2xl bg-slate-100" />
+          <div className="h-80 animate-pulse rounded-2xl bg-slate-100" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-5 text-left font-sans antialiased">
-      {/* Tab Header Controls */}
-      <div className="flex items-center justify-end border-b border-slate-150 pb-4">
-        {/* View Mode Toggle */}
-        <div className="inline-flex rounded-xl bg-slate-100 p-1 ring-1 ring-slate-200/50 shrink-0">
+    <div className="space-y-4 text-left font-sans antialiased">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h3 className="text-sm font-extrabold text-[#1C3A34]">Vehicle schedule</h3>
+          <p className="mt-0.5 text-xs text-slate-500">
+            {occupiedDaysInMonth} occupied day{occupiedDaysInMonth === 1 ? "" : "s"} this month
+          </p>
+        </div>
+
+        <div className="inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1">
           <button
+            type="button"
             onClick={() => setViewMode("calendar")}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all",
-              viewMode === "calendar" ? "bg-white text-[#1C3A34] shadow-xs" : "text-slate-500 hover:text-slate-800"
+              "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors",
+              viewMode === "calendar"
+                ? "bg-[#1C3A34] text-white"
+                : "text-slate-500 hover:text-[#1C3A34]",
             )}
           >
             <Calendar className="size-3.5" />
             Calendar
           </button>
           <button
+            type="button"
             onClick={() => setViewMode("list")}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all",
-              viewMode === "list" ? "bg-white text-[#1C3A34] shadow-xs" : "text-slate-500 hover:text-slate-800"
+              "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors",
+              viewMode === "list"
+                ? "bg-[#1C3A34] text-white"
+                : "text-slate-500 hover:text-[#1C3A34]",
             )}
           >
             <List className="size-3.5" />
@@ -262,210 +374,274 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
       </div>
 
       {viewMode === "calendar" ? (
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)] items-start">
-          {/* CALENDAR VIEW */}
-          <div className={cn(adminCardClass, "p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white shadow-xs")}>
-            {/* Month Header Controller */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3 mb-4">
-              <h3 className="text-sm font-extrabold text-slate-800 capitalize">{monthLabel}</h3>
-              <div className="flex items-center gap-1">
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 sm:px-5">
+              <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={handlePrevMonth}
-                  className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-650 cursor-pointer"
+                  className="flex size-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50"
+                  aria-label="Previous month"
                 >
                   <ChevronLeft className="size-4" />
                 </button>
+                <h4 className="min-w-[9rem] text-center text-sm font-extrabold capitalize text-[#1C3A34]">
+                  {monthLabel}
+                </h4>
                 <button
+                  type="button"
                   onClick={handleNextMonth}
-                  className="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-655 cursor-pointer"
+                  className="flex size-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50"
+                  aria-label="Next month"
                 >
                   <ChevronRight className="size-4" />
                 </button>
               </div>
+              <button
+                type="button"
+                onClick={handleGoToday}
+                className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-[#1C3A34] transition-colors hover:bg-slate-50"
+              >
+                Today
+              </button>
             </div>
 
-            {/* Days Grid Header */}
-            <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-slate-400 mb-2">
-              {(locale === "am" ? WEEKDAYS_AM : WEEKDAYS).map((day) => (
-                <div key={day} className="py-1">{day}</div>
-              ))}
-            </div>
-
-            {/* Days Calendar Board */}
-            <div className="grid grid-cols-7 gap-1.5">
-              {daysGrid.map((day, idx) => {
-                if (day === null) {
-                  return <div key={`empty-${idx}`} className="aspect-square bg-slate-50/20 rounded-lg" />;
-                }
-
-                const dayBookings = getBookingsForDay(day);
-                const hasBookings = dayBookings.length > 0;
-                const isSelected = selectedDayValue === day;
-
-                return (
-                  <button
-                    key={`day-${day}`}
-                    onClick={() => handleSelectDay(day)}
-                    className={cn(
-                      "aspect-square rounded-xl flex flex-col items-center justify-between p-1.5 relative border transition-all cursor-pointer font-bold text-xs select-none",
-                      isSelected
-                        ? "bg-[#1C3A34] text-white border-[#1C3A34] shadow-md hover:bg-[#1C3A34]"
-                        : hasBookings
-                        ? "bg-slate-50 text-[#1C3A34] border-[#1C3A34]/25 hover:border-[#1C3A34] hover:bg-white"
-                        : "bg-white text-slate-700 border-slate-100 hover:border-slate-300 hover:bg-slate-50"
-                    )}
+            <div className="px-3 pb-4 pt-3 sm:px-4">
+              <div className="mb-2 grid grid-cols-7 gap-1">
+                {(locale === "am" ? WEEKDAYS_AM : WEEKDAYS).map((day) => (
+                  <div
+                    key={day}
+                    className="py-1.5 text-center text-[11px] font-bold uppercase tracking-wide text-slate-400"
                   >
-                    <span className="self-start text-[10px]">{day}</span>
-                    {hasBookings && (
-                      <span className={cn(
-                        "size-4 rounded-full text-[9px] font-extrabold flex items-center justify-center border",
-                        isSelected
-                          ? "bg-white text-[#1C3A34] border-white"
-                          : "bg-[#1C3A34] text-white border-[#1C3A34]"
-                      )}>
-                        {dayBookings.length}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+                    {day}
+                  </div>
+                ))}
+              </div>
 
-          {/* DAY DETAILS COLUMN */}
-          <div className="space-y-4">
-            {selectedDate !== null ? (
-              <div className={cn(adminCardClass, "p-4 sm:p-5 rounded-2xl border border-slate-200 bg-white space-y-4 shadow-xs")}>
-                <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
-                  <h3 className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
-                    <Calendar className="size-4 text-[#8f7d45]" />
-                    {locale === "am"
-                      ? formatEthiopianDate(selectedDate, "am")
-                      : selectedDate.toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                        })}
-                  </h3>
-                  <Badge className="bg-[#1C3A34] text-white text-[10px] font-bold">
-                    {selectedDayBookings.length} Trips
-                  </Badge>
+              <div className="grid grid-cols-7 gap-1">
+                {daysGrid.map((day, idx) => {
+                  if (day === null) {
+                    return <div key={`empty-${idx}`} className="min-h-[4.25rem] rounded-lg" />;
+                  }
+
+                  const cellDate = getCellDate(day);
+                  const dayBookings = getBookingsForDay(day);
+                  const hasBookings = dayBookings.length > 0;
+                  const hasMultiDay = dayBookings.some(bookingSpansMultipleDays);
+                  const isSelected = selectedDayValue === day;
+                  const isToday = isSameLocalDay(cellDate, today);
+
+                  return (
+                    <button
+                      key={`day-${day}`}
+                      type="button"
+                      onClick={() => handleSelectDay(day)}
+                      className={cn(
+                        "relative flex min-h-[4.25rem] flex-col items-stretch rounded-xl border p-1.5 text-left transition-colors",
+                        isSelected
+                          ? "border-[#1C3A34] bg-[#1C3A34] text-white"
+                          : hasBookings
+                            ? hasMultiDay
+                              ? "border-[#C9B87A]/50 bg-[#C9B87A]/12 text-[#1C3A34] hover:border-[#C9B87A]"
+                              : "border-[#1C3A34]/20 bg-[#1C3A34]/[0.04] text-[#1C3A34] hover:border-[#1C3A34]/40"
+                            : "border-transparent bg-slate-50/80 text-slate-700 hover:border-slate-200 hover:bg-white",
+                        isToday && !isSelected && "ring-2 ring-[#C9B87A]/70 ring-offset-1",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "text-[11px] font-bold",
+                          isSelected ? "text-white" : isToday ? "text-[#1C3A34]" : "text-slate-600",
+                        )}
+                      >
+                        {day}
+                      </span>
+
+                      {hasBookings ? (
+                        <div className="mt-auto space-y-1 pt-1">
+                          <div
+                            className={cn(
+                              "h-1 w-full rounded-full",
+                              isSelected
+                                ? "bg-[#C9B87A]"
+                                : hasMultiDay
+                                  ? "bg-[#C9B87A]"
+                                  : "bg-[#1C3A34]/50",
+                            )}
+                          />
+                          <span
+                            className={cn(
+                              "inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-extrabold",
+                              isSelected
+                                ? "bg-white/15 text-white"
+                                : "bg-white/80 text-[#1C3A34]",
+                            )}
+                          >
+                            {dayBookings.length}
+                          </span>
+                        </div>
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-slate-100 pt-3 text-[11px] font-medium text-slate-500">
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="size-2.5 rounded-sm bg-[#1C3A34]/35" />
+                  Single-day trip
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="size-2.5 rounded-sm bg-[#C9B87A]" />
+                  Multi-day / contract
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="size-2.5 rounded-full ring-2 ring-[#C9B87A]" />
+                  Today
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <aside className="rounded-2xl border border-slate-200 bg-white">
+            {selectedDate ? (
+              <div className="flex h-full flex-col">
+                <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3.5 sm:px-5">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      Selected day
+                    </p>
+                    <h4 className="mt-0.5 text-sm font-extrabold text-[#1C3A34]">
+                      {locale === "am"
+                        ? formatEthiopianDate(selectedDate, "am")
+                        : selectedDate.toLocaleDateString("en-US", {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })}
+                    </h4>
+                  </div>
+                  <span className="rounded-lg bg-[#1C3A34] px-2.5 py-1 text-[11px] font-bold text-white">
+                    {selectedDayBookings.length} trip
+                    {selectedDayBookings.length === 1 ? "" : "s"}
+                  </span>
                 </div>
 
-                {selectedDayBookings.length > 0 ? (
-                  <div className="space-y-3">
-                    {selectedDayBookings.map((booking) => renderBookingCard(booking))}
-                  </div>
-                ) : (
-                  <div className="py-8 flex flex-col items-center justify-center text-center text-slate-400">
-                    <Info className="size-6 text-slate-300 mb-2" />
-                    <p className="text-xs font-semibold">No bookings scheduled on this day</p>
-                  </div>
-                )}
+                <div className="max-h-[32rem] space-y-3 overflow-y-auto p-4 sm:p-5">
+                  {selectedDayBookings.length > 0 ? (
+                    selectedDayBookings.map((booking) => renderBookingCard(booking))
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-12 text-center">
+                      <div className="mb-3 flex size-12 items-center justify-center rounded-2xl bg-slate-50">
+                        <Info className="size-5 text-slate-300" />
+                      </div>
+                      <p className="text-sm font-bold text-slate-700">No bookings</p>
+                      <p className="mt-1 max-w-[14rem] text-xs text-slate-500">
+                        This vehicle is free on the selected day.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
-              <div className={cn(adminCardClass, "p-6 rounded-2xl border border-slate-200 bg-white text-center text-slate-400 shadow-xs")}>
-                <Calendar className="size-7 text-slate-350 mx-auto mb-2" />
-                <p className="text-xs font-semibold">Select a day on the calendar to view assignments</p>
+              <div className="flex flex-col items-center justify-center px-6 py-16 text-center">
+                <Calendar className="mb-3 size-8 text-slate-300" />
+                <p className="text-sm font-bold text-slate-700">Pick a day</p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Select a date to review trip assignments.
+                </p>
               </div>
             )}
-          </div>
+          </aside>
         </div>
       ) : (
-        /* LIST VIEW (Chrono Roadmap list) */
         <div className="space-y-4">
-          {filteredBookings.length > 0 ? (
-            <div className="relative border-l-2 border-[#1C3A34]/15 pl-6 ml-4 space-y-6">
-              {filteredBookings.map((booking) => {
-                const bDate = new Date(booking.scheduled_at);
-                const formattedDate =
-                  locale === "am"
-                    ? `${formatEthiopianDate(bDate, "am")} (${formatEthiopianTime(bDate, "am")})`
-                    : bDate.toLocaleDateString("en-US", {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      });
-                const requesterName = `${booking.requester.first_name} ${booking.requester.last_name}`;
+          {bookings.length > 0 ? (
+            <div className="relative ml-4 space-y-6 border-l-2 border-[#1C3A34]/15 pl-6">
+              {bookings.map((booking) => {
+                const formattedDate = formatBookingWindow(booking, locale);
+                const name = requesterName(booking);
 
                 return (
-                  <div key={booking.id} className="relative group">
-                    <span className="absolute -left-[37px] top-2 flex size-7 items-center justify-center rounded-full ring-4 ring-white shadow-md bg-[#1C3A34] text-white z-10">
+                  <div key={booking.id} className="relative">
+                    <span className="absolute -left-[37px] top-2 z-10 flex size-7 items-center justify-center rounded-full bg-[#1C3A34] text-white shadow-md ring-4 ring-white">
                       <User className="size-3.5" />
                     </span>
 
-                    <div className={cn(
-                      adminCardClass,
-                      "p-5 rounded-2xl border border-slate-200 bg-white shadow-xs transition-all duration-300 hover:shadow-md hover:border-slate-300 hover:scale-[1.005]"
-                    )}>
-                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 border-b border-slate-100 pb-3 mb-4">
+                    <div
+                      className={cn(
+                        adminCardClass,
+                        "rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:border-slate-300 hover:shadow-md",
+                      )}
+                    >
+                      <div className="mb-4 flex flex-col justify-between gap-3 border-b border-slate-100 pb-3 sm:flex-row sm:items-start">
                         <div className="flex items-center gap-3">
                           <Avatar className="size-10 border border-slate-100">
-                            <AvatarFallback className="text-xs font-bold text-white bg-[#1C3A34]">
-                              {requesterName.split(" ").map((n) => n[0]).join("").slice(0, 2).toUpperCase()}
+                            <AvatarFallback className="bg-[#1C3A34] text-xs font-bold text-white">
+                              {requesterInitials(booking)}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <h3 className="text-sm font-extrabold text-slate-800 flex items-center gap-2">
-                              <span className="text-[#1C3A34] font-extrabold">{requesterName}</span>
-                              <Badge className="bg-[#1C3A34]/8 text-[#1C3A34] hover:bg-[#1C3A34]/8 border-0 font-bold text-[9px] uppercase">Corporate</Badge>
-                            </h3>
-                            <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-1">
+                            <h3 className="text-sm font-extrabold text-[#1C3A34]">{name}</h3>
+                            <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
                               <Clock className="size-3.5 text-slate-400" />
                               <span className="font-medium">{formattedDate}</span>
                             </div>
                           </div>
                         </div>
-                        <div className="self-start sm:self-center">
-                          <Badge variant="outline" className={cn(
-                            "capitalize font-bold text-[10px] px-2.5 py-0.5 rounded-full border tracking-wide",
-                            booking.status === "completed" || booking.status === "confirmed"
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                              : booking.status === "in_progress"
-                              ? "border-blue-200 bg-blue-50 text-blue-800 animate-pulse"
-                              : "border-slate-250 bg-slate-50 text-slate-655"
-                          )}>
-                            {booking.status}
-                          </Badge>
-                        </div>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            "rounded-full border px-2.5 py-0.5 text-[10px] font-bold capitalize tracking-wide",
+                            statusBadgeClass(booking.status),
+                          )}
+                        >
+                          {booking.status}
+                        </Badge>
                       </div>
 
-                      <div className="grid gap-4 sm:grid-cols-12 text-xs">
-                        <div className="sm:col-span-7 space-y-2">
-                          <p className="font-extrabold text-[10px] tracking-wider text-slate-400 uppercase">VIP Transit Route</p>
-                          <div className="bg-slate-50 rounded-xl p-3 border border-slate-150/60 space-y-2 relative overflow-hidden">
-                            <div className="absolute left-[20px] top-[24px] bottom-[24px] w-0.5 border-l-2 border-dashed border-slate-300" />
-                            <div className="flex items-center gap-2.5 relative z-10">
-                              <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[9px] font-bold text-emerald-800">A</span>
-                              <span className="truncate font-semibold text-slate-700">{booking.pickup_address}</span>
+                      <div className="grid gap-4 text-xs sm:grid-cols-12">
+                        <div className="space-y-2 sm:col-span-7">
+                          <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                            Route
+                          </p>
+                          <div className="relative space-y-2 overflow-hidden rounded-xl border border-slate-100 bg-slate-50 p-3">
+                            <div className="absolute bottom-6 left-5 top-6 w-0.5 border-l-2 border-dashed border-slate-300" />
+                            <div className="relative z-10 flex items-center gap-2.5">
+                              <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[9px] font-bold text-emerald-800">
+                                A
+                              </span>
+                              <span className="truncate font-semibold text-slate-700">
+                                {booking.pickup_address}
+                              </span>
                             </div>
-                            <div className="flex items-center gap-2.5 relative z-10">
-                              <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-rose-100 text-[9px] font-bold text-rose-800">B</span>
-                              <span className="truncate font-semibold text-slate-700">{booking.dropoff_address}</span>
+                            <div className="relative z-10 flex items-center gap-2.5">
+                              <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-rose-100 text-[9px] font-bold text-rose-800">
+                                B
+                              </span>
+                              <span className="truncate font-semibold text-slate-700">
+                                {booking.dropoff_address}
+                              </span>
                             </div>
                           </div>
                         </div>
 
-                        <div className="sm:col-span-5 space-y-2 sm:border-l sm:border-slate-100 sm:pl-4 flex flex-col justify-between">
+                        <div className="flex flex-col justify-between space-y-2 sm:col-span-5 sm:border-l sm:border-slate-100 sm:pl-4">
                           <div>
-                            <p className="font-extrabold text-[10px] tracking-wider text-slate-400 uppercase">Assigned Protocol Driver</p>
-                            <div className="flex items-center gap-2.5 mt-2">
-                              <div className="size-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold border border-slate-200 text-xs">
-                                {booking.assigned_driver?.name?.charAt(0) || "D"}
-                              </div>
-                              <div>
-                                <p className="font-extrabold text-slate-700 text-xs">{booking.assigned_driver?.name || "Unassigned"}</p>
-                                <p className="text-[10px] text-slate-400 font-medium">VIP Chauffeur Service</p>
-                              </div>
-                            </div>
+                            <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+                              Driver
+                            </p>
+                            <p className="mt-2 text-xs font-extrabold text-slate-700">
+                              {booking.assigned_driver?.name || "Unassigned"}
+                            </p>
                           </div>
-                          {booking.notes && (
-                            <div className="mt-3 bg-[#1C3A34]/5 border border-[#1C3A34]/10 p-2.5 rounded-xl text-[11px] text-[#1c3a34]/80 italic">
-                              "{booking.notes}"
+                          {booking.notes ? (
+                            <div className="rounded-xl border border-[#1C3A34]/10 bg-[#1C3A34]/5 p-2.5 text-[11px] italic text-[#1C3A34]/80">
+                              &ldquo;{booking.notes}&rdquo;
                             </div>
-                          )}
+                          ) : null}
                         </div>
                       </div>
                     </div>
@@ -474,13 +650,18 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
               })}
             </div>
           ) : (
-            <div className={cn(adminCardClass, "flex flex-col items-center justify-center p-12 text-center rounded-2xl border border-dashed border-slate-200 bg-white")}>
-              <div className="flex size-14 items-center justify-center rounded-full bg-slate-50 ring-1 ring-slate-200 mb-3 shadow-inner">
+            <div
+              className={cn(
+                adminCardClass,
+                "flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center",
+              )}
+            >
+              <div className="mb-3 flex size-14 items-center justify-center rounded-full bg-slate-50 ring-1 ring-slate-200">
                 <Calendar className="size-6 text-slate-300" />
               </div>
               <p className="text-sm font-extrabold text-slate-800">No bookings scheduled</p>
-              <p className="text-xs text-slate-500 mt-1 max-w-xs leading-relaxed">
-                There are no ride requests matching this filter status for this vehicle.
+              <p className="mt-1 max-w-xs text-xs leading-relaxed text-slate-500">
+                There are no ride requests assigned to this vehicle yet.
               </p>
             </div>
           )}
