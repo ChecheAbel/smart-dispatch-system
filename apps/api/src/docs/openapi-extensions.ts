@@ -795,6 +795,15 @@ export const extensionSchemas = {
       last_name: { type: "string" },
       email: { type: "string" },
       mobile_number: { type: "string" },
+      requester_profile: {
+        type: "object",
+        nullable: true,
+        properties: {
+          segment: { type: "string", enum: ["individual", "business", "government"] },
+          organization_name: { type: "string", nullable: true },
+          government_entity_type: { type: "string", nullable: true },
+        },
+      },
     },
   },
   RideRequest: {

@@ -27,11 +27,24 @@ import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "
 
 const router = Router();
 
-router.use(authenticate, authorize("admin"), auditMutations());
-
 function getRequestLocale(req: Request) {
   return parseLocale(req.query, req.headers["accept-language"]);
 }
+
+router.get("/active", async (req: Request, res: Response) => {
+  try {
+    const locale = getRequestLocale(req);
+    const regions = await listActiveRegions();
+
+    return sendSuccess(res, {
+      regions: regions.map((region) => toPublicRegion(region, { locale })),
+    });
+  } catch (error) {
+    return handleRouteError(res, error);
+  }
+});
+
+router.use(authenticate, authorize("admin"), auditMutations());
 
 router.get("/", requirePermission("regions.read"), async (req: Request, res: Response) => {
   try {
@@ -53,19 +66,6 @@ router.get("/", requirePermission("regions.read"), async (req: Request, res: Res
       result.data.map((region) => toPublicRegion(region, { locale })),
       result.pagination,
     );
-  } catch (error) {
-    return handleRouteError(res, error);
-  }
-});
-
-router.get("/active", requirePermission("regions.read"), async (req: Request, res: Response) => {
-  try {
-    const locale = getRequestLocale(req);
-    const regions = await listActiveRegions();
-
-    return sendSuccess(res, {
-      regions: regions.map((region) => toPublicRegion(region, { locale })),
-    });
   } catch (error) {
     return handleRouteError(res, error);
   }

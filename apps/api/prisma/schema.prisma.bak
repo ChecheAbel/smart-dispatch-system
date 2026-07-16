@@ -797,7 +797,6 @@ model RideRequest {
   dropoffLatitude  Decimal?          @map("dropoff_latitude") @db.Decimal(10, 7)
   dropoffLongitude Decimal?          @map("dropoff_longitude") @db.Decimal(10, 7)
   scheduledAt      DateTime?         @map("scheduled_at") @db.Timestamptz
-  scheduledReturnAt DateTime?         @map("scheduled_return_at") @db.Timestamptz
   passengerCount   Int               @default(1) @map("passenger_count")
   notes            String?           @db.VarChar(1000)
   status           RideRequestStatus @default(pending)

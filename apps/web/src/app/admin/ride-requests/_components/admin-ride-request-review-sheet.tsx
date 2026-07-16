@@ -251,6 +251,9 @@ export function AdminRideRequestReviewSheet({
           description: copy.review.requesterSectionDescription,
           email: copy.review.email,
           mobile: copy.review.mobile,
+          organization: copy.review.organization,
+          governmentEntityType: copy.review.governmentEntityType,
+          segmentLabels: copy.review.segment,
         }}
         onOpenChange={(next) => !isBusy && onOpenChange(next)}
         dispatchPanel={

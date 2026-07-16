@@ -214,12 +214,14 @@ router.post("/", requirePermission("contracts.write"), async (req: Authenticated
       return sendError(res, "Billing interval is required.", 400);
     }
 
-    const paymentTermsDays = parseOptionalPaymentTermsDays(req.body?.payment_terms_days);
-    if (req.body?.payment_terms_days !== undefined && paymentTermsDays === null) {
+    const paymentTermsRaw = req.body?.payment_terms_days;
+    const paymentTermsDays = parseOptionalPaymentTermsDays(paymentTermsRaw);
+    if (paymentTermsRaw !== undefined && paymentTermsRaw !== null && paymentTermsDays === null) {
       return sendError(res, "Payment terms must be between 1 and 365 days.", 400);
     }
 
-    if (billingInterval !== "per_trip" && paymentTermsDays == null) {
+    const resolvedPaymentTermsDays = billingInterval === "per_trip" ? null : paymentTermsDays;
+    if (billingInterval !== "per_trip" && resolvedPaymentTermsDays == null) {
       return sendError(res, "Payment terms are required for this billing interval.", 400);
     }
 
@@ -229,7 +231,7 @@ router.post("/", requirePermission("contracts.write"), async (req: Authenticated
       farePlanId,
       notes: getOptionalString(req.body?.notes),
       billingInterval,
-      paymentTermsDays,
+      paymentTermsDays: resolvedPaymentTermsDays,
       regionIds: scope.regionIds,
       vehicleTypeIds: scope.vehicleTypeIds,
       vehicleClassIds: scope.vehicleClassIds,
@@ -280,17 +282,20 @@ router.patch("/:id", requirePermission("contracts.write"), async (req: Request, 
       return sendError(res, "Enter a valid billing interval.", 400);
     }
 
+    const paymentTermsRaw = req.body?.payment_terms_days;
     const paymentTermsDays =
-      req.body?.payment_terms_days !== undefined
-        ? parseOptionalPaymentTermsDays(req.body.payment_terms_days)
-        : undefined;
-    if (req.body?.payment_terms_days !== undefined && paymentTermsDays === null) {
+      paymentTermsRaw !== undefined ? parseOptionalPaymentTermsDays(paymentTermsRaw) : undefined;
+    if (paymentTermsRaw !== undefined && paymentTermsRaw !== null && paymentTermsDays === null) {
       return sendError(res, "Payment terms must be between 1 and 365 days.", 400);
     }
 
     const nextBillingInterval = billingInterval ?? existing.billingInterval;
     const nextPaymentTermsDays =
-      paymentTermsDays === undefined ? existing.paymentTermsDays : paymentTermsDays;
+      nextBillingInterval === "per_trip"
+        ? null
+        : paymentTermsDays === undefined
+          ? existing.paymentTermsDays
+          : paymentTermsDays;
 
     if (nextBillingInterval !== "per_trip" && nextPaymentTermsDays == null) {
       return sendError(res, "Payment terms are required for this billing interval.", 400);
@@ -302,7 +307,12 @@ router.patch("/:id", requirePermission("contracts.write"), async (req: Request, 
       farePlanId,
       notes: req.body?.notes !== undefined ? getOptionalString(req.body?.notes) : undefined,
       billingInterval,
-      paymentTermsDays,
+      paymentTermsDays:
+        nextBillingInterval === "per_trip"
+          ? null
+          : paymentTermsDays === undefined
+            ? undefined
+            : paymentTermsDays,
       regionIds: req.body?.region_ids !== undefined ? scope?.regionIds : undefined,
       vehicleTypeIds: req.body?.vehicle_type_ids !== undefined ? scope?.vehicleTypeIds : undefined,
       vehicleClassIds: req.body?.vehicle_class_ids !== undefined ? scope?.vehicleClassIds : undefined,

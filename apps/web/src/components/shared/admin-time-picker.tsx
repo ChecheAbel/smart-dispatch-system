@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { AdminField } from "./admin-form-field";
 import {
   Popover,
   PopoverContent,
@@ -52,6 +53,7 @@ type AdminTimePickerProps = {
   pmLabel?: string;
   applyLabel?: string;
   disabled?: boolean;
+  error?: string;
   locale?: string;
   hour12?: boolean;
   onChange: (value: TimeValue | undefined) => void;
@@ -131,6 +133,7 @@ export function AdminTimePicker({
   pmLabel = "PM",
   applyLabel = "Apply",
   disabled = false,
+  error,
   locale = "en",
   hour12 = false,
   onChange,
@@ -230,10 +233,7 @@ export function AdminTimePicker({
     (!minTime || !isTimeBefore(draftTimeValue, minTime));
 
   return (
-    <div className={cn("min-w-0 space-y-2", className)}>
-      <Label htmlFor={id} className={adminFilterLabelClass}>
-        {label}
-      </Label>
+    <AdminField label={label} htmlFor={id} error={error} className={className}>
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger
           render={
@@ -247,6 +247,7 @@ export function AdminTimePicker({
               className={cn(
                 adminDatePickerTriggerClass,
                 value ? "text-[#1C3A34]" : "text-slate-400",
+                error && "border-red-300 bg-red-50/60 text-red-900 focus-visible:border-red-400 focus-visible:ring-red-200/60",
               )}
             />
           }
@@ -299,7 +300,7 @@ export function AdminTimePicker({
               <Select
                 value={draftMinute}
                 onValueChange={(value) => setDraftMinute(value ?? "")}
-                disabled={disabled || draftHour === "" || (hour12 && !draftPeriod)}
+                disabled={disabled || draftHour === ""}
               >
                 <SelectTrigger className={cn(adminInputClass, "w-full")}>
                   <SelectValue placeholder={minuteLabel} />
@@ -382,7 +383,7 @@ export function AdminTimePicker({
           </div>
         </PopoverContent>
       </Popover>
-    </div>
+    </AdminField>
   );
 }
 

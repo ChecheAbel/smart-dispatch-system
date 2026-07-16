@@ -361,7 +361,10 @@ export function EditRideRequestSheet({
 
   return (
     <Sheet open={open} onOpenChange={(next) => !submitting && onOpenChange(next)}>
-      <SheetContent side="right" className="flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-xl">
+      <SheetContent
+        side="right"
+        className="flex w-full flex-col gap-0 overflow-hidden p-0 data-[side=right]:sm:max-w-2xl data-[side=right]:lg:max-w-3xl"
+      >
         <SheetHeader className="border-b border-slate-200/80 px-6 py-5">
           <SheetTitle className={adminHeadingClass}>{historyCopy.editTitle}</SheetTitle>
           <SheetDescription>{historyCopy.editDescription}</SheetDescription>

@@ -25,6 +25,7 @@ export type CreateRideRequestInput = {
   dropoffLatitude?: number | null;
   dropoffLongitude?: number | null;
   scheduledAt?: Date | null;
+  scheduledReturnAt?: Date | null;
   passengerCount: number;
   notes?: string | null;
   contractId?: string | null;
@@ -73,6 +74,13 @@ const rideRequestInclude = {
       lastName: true,
       email: true,
       mobileNumber: true,
+      requesterProfile: {
+        select: {
+          segment: true,
+          organizationName: true,
+          governmentEntityType: true,
+        },
+      },
     },
   },
   assignedVehicle: {
@@ -222,6 +230,7 @@ function buildRideRequestData(input: UpdateRideRequestInput) {
     dropoffLatitude: toDecimal(input.dropoffLatitude),
     dropoffLongitude: toDecimal(input.dropoffLongitude),
     scheduledAt: input.scheduledAt ?? null,
+    scheduledReturnAt: input.scheduledReturnAt ?? null,
     passengerCount: input.passengerCount,
     notes: input.notes?.trim() || null,
   };
@@ -235,6 +244,49 @@ export async function createRideRequest(input: CreateRideRequestInput) {
       ...buildRideRequestData(input),
     },
     include: rideRequestInclude,
+  });
+}
+
+export type CreateBulkRideRequestsInput = {
+  contractTitle?: string;
+  billingInterval?: ContractBillingInterval;
+  requests: CreateRideRequestInput[];
+};
+
+export async function createBulkRideRequests(input: CreateBulkRideRequestsInput) {
+  return prisma.$transaction(async (tx) => {
+    let contractId = null;
+
+    if (input.contractTitle) {
+      const { generateContractReferenceNumber } = await import("./contract.model");
+      const referenceNumber = await generateContractReferenceNumber();
+      
+      const contract = await tx.contract.create({
+        data: {
+          title: input.contractTitle,
+          referenceNumber,
+          status: "draft",
+          billingInterval: input.billingInterval ?? "per_trip",
+          createdById: input.requests[0]?.requesterUserId,
+        },
+      });
+      contractId = contract.id;
+    }
+
+    const createdRequests = [];
+    for (const req of input.requests) {
+      const created = await tx.rideRequest.create({
+        data: {
+          requesterUserId: req.requesterUserId,
+          contractId: contractId ?? req.contractId ?? null,
+          ...buildRideRequestData(req),
+        },
+        include: rideRequestInclude,
+      });
+      createdRequests.push(created);
+    }
+
+    return createdRequests;
   });
 }
 

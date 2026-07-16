@@ -197,7 +197,10 @@ export function AdminRideRequestsPage() {
         header: copy.columns.scheduled,
         cellClassName: "text-slate-500",
         cell: (request) =>
-          request.scheduled_at ? formatScheduledAt(request.scheduled_at, locale) : "—",
+          request.scheduled_at
+            ? formatScheduledAt(request.scheduled_at, locale) +
+              (request.scheduled_return_at ? ` - ${formatScheduledAt(request.scheduled_return_at, locale)}` : "")
+            : "—",
       },
       {
         id: "passengers",

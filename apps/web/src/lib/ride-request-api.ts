@@ -37,8 +37,15 @@ export type CreateRideRequestInput = {
   region_id?: string | null;
   passenger_count: number;
   scheduled_at?: string | null;
+  scheduled_return_at?: string | null;
   notes?: string | null;
   contract_id?: string | null;
+  request_type?: "single" | "contract";
+  selected_vehicles?: Array<{
+    vehicle_type_id?: string | null;
+    vehicle_class_id?: string | null;
+    quantity: number;
+  }>;
 };
 
 export type UpdateRideRequestInput = CreateRideRequestInput;
@@ -90,7 +97,7 @@ export async function fetchRideRequest(id: string, locale?: string) {
 
 export async function createRideRequest(input: CreateRideRequestInput) {
   const { data } = await apiClient.post("/api/ride-requests", input);
-  return unwrapApiResponse<{ ride_request: RideRequest }>(data).ride_request;
+  return unwrapApiResponse<{ ride_requests: RideRequest[] }>(data).ride_requests;
 }
 
 export async function updateRideRequest(id: string, input: UpdateRideRequestInput) {

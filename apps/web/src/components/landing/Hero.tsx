@@ -1,70 +1,145 @@
+"use client";
+
+import { motion } from "framer-motion";
+import { Car, Activity, MapPin } from "lucide-react";
+
 export default function Hero() {
   return (
-    <section className="relative w-full min-h-[calc(100dvh-72px)] flex items-center justify-center overflow-hidden bg-transparent py-12 sm:py-16 -mt-px">
-      {/* Background pattern */}
-      <div className="absolute inset-0 opacity-[0.07]">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_#C9B87A_0%,_transparent_65%)]" />
+    <section className="relative w-full min-h-[100dvh] flex items-center justify-center overflow-hidden bg-transparent pt-24 sm:pt-32 pb-12 sm:pb-16 -mt-px">
+      {/* Animated Background Mesh Gradients */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            opacity: [0.1, 0.15, 0.1],
+            rotate: [0, 90, 0],
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] bg-[radial-gradient(ellipse_at_center,_#C9B87A_0%,_transparent_50%)] rounded-full blur-[120px]"
+        />
+        <motion.div
+          animate={{
+            scale: [1, 1.3, 1],
+            opacity: [0.05, 0.1, 0.05],
+            rotate: [0, -90, 0],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute -bottom-[20%] -right-[10%] w-[60vw] h-[60vw] bg-[radial-gradient(ellipse_at_center,_#1C3A34_0%,_transparent_50%)] rounded-full blur-[100px]"
+        />
+        
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_40%,transparent_100%)] opacity-50" />
       </div>
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(28,58,52,0.9)_1px,transparent_1px),linear-gradient(to_bottom,rgba(28,58,52,0.9)_1px,transparent_1px)] bg-[size:80px_80px] [mask-image:radial-gradient(ellipse_70%_70%_at_50%_50%,#000_60%,transparent_100%)] opacity-30" />
 
-      {/* Radial gold glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(800px,100vw)] h-[min(800px,100vw)] bg-[#C9B87A] opacity-[0.04] rounded-full blur-[120px] pointer-events-none" />
+      {/* Floating Glass UI Elements */}
+      <div className="absolute inset-0 pointer-events-none hidden lg:block overflow-hidden">
+        <motion.div
+          animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-[25%] left-[10%] bg-[#122622]/60 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl flex items-center gap-3"
+        >
+          <div className="h-10 w-10 rounded-full bg-[#C9B87A]/20 flex items-center justify-center">
+            <Car className="h-5 w-5 text-[#C9B87A]" />
+          </div>
+          <div>
+            <div className="h-2 w-16 bg-white/20 rounded mb-2" />
+            <div className="h-2 w-10 bg-white/10 rounded" />
+          </div>
+        </motion.div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center gap-6 sm:gap-8">
+        <motion.div
+          animate={{ y: [0, 20, 0], rotate: [0, -5, 0] }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute top-[40%] right-[10%] bg-[#122622]/60 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl flex items-center gap-3"
+        >
+          <div className="h-10 w-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+            <Activity className="h-5 w-5 text-emerald-400" />
+          </div>
+          <div>
+            <div className="h-2 w-20 bg-white/20 rounded mb-2" />
+            <div className="h-2 w-12 bg-white/10 rounded" />
+          </div>
+        </motion.div>
+
+        <motion.div
+          animate={{ y: [0, -15, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute bottom-[25%] left-[15%] bg-[#122622]/60 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl flex items-center gap-3"
+        >
+          <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+            <MapPin className="h-5 w-5 text-blue-400" />
+          </div>
+          <div>
+            <div className="h-2 w-14 bg-white/20 rounded mb-2" />
+            <div className="h-2 w-8 bg-white/10 rounded" />
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center justify-center h-full gap-8 sm:gap-12">
+        
         {/* Headline */}
-        <h1 className="text-[2rem] leading-[1.1] sm:text-5xl lg:text-7xl font-extrabold text-white tracking-tight max-w-4xl animate-landing-fade-up [animation-delay:100ms]">
+        <motion.h1
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
+          className="text-4xl leading-[1.1] sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight max-w-5xl drop-shadow-2xl"
+        >
           Ethiopia's Premier{" "}
-          <span className="relative inline-block">
-            <span className="bg-gradient-to-r from-[#C9B87A] via-[#e8d69a] to-[#C9B87A] bg-clip-text text-transparent">
+          <br className="hidden sm:block" />
+          <span className="relative inline-block mt-2 sm:mt-4">
+            <span className="bg-gradient-to-r from-[#C9B87A] via-[#FFF2C2] to-[#C9B87A] bg-clip-text text-transparent bg-[length:200%_auto] animate-pulse">
               Corporate Dispatch
             </span>
-            <span className="absolute -bottom-1 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[#C9B87A]/60 to-transparent" />
+            <motion.span 
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 1, delay: 0.8, ease: "easeInOut" }}
+              className="absolute -bottom-2 lg:-bottom-4 left-0 right-0 h-[3px] lg:h-[4px] bg-gradient-to-r from-transparent via-[#C9B87A] to-transparent origin-left rounded-full" 
+            />
           </span>
-          {" "}& Fleet Platform
-        </h1>
+          <br className="hidden sm:block" /> & Fleet Platform
+        </motion.h1>
 
         {/* Subheading */}
-        <p className="text-base sm:text-lg lg:text-xl text-white/60 max-w-2xl leading-relaxed font-light tracking-wide animate-landing-fade-up [animation-delay:220ms] px-1">
-          Smart Dispatch is a localized, enterprise-grade platform for corporate contracts, booking dispatches, driver shifts, and ETB invoicing, built for fleet operators and transport agencies in Ethiopia.
-        </p>
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+          className="text-lg sm:text-xl lg:text-2xl text-white/70 max-w-3xl leading-relaxed font-light tracking-wide px-4"
+        >
+          A localized, enterprise-grade platform for corporate contracts, booking dispatches, driver shifts, and ETB invoicing, built specifically for Ethiopian transport agencies.
+        </motion.p>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center w-full max-w-md sm:max-w-none sm:w-auto animate-landing-fade-up [animation-delay:340ms]">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+          className="flex flex-col sm:flex-row gap-5 sm:gap-8 justify-center w-full max-w-md sm:max-w-none sm:w-auto mt-6"
+        >
           <a
-            href="#live-view"
-            className="w-full sm:w-auto bg-[#C9B87A] hover:bg-[#d9ca8e] text-[#1C3A34] font-bold text-[15px] px-8 py-3.5 sm:py-4 rounded-full tracking-wide transition-all duration-200 hover:shadow-xl hover:shadow-[#C9B87A]/20 hover:-translate-y-0.5 text-center"
+            href="#process"
+            className="group relative w-full sm:w-auto bg-gradient-to-b from-[#C9B87A] to-[#A4945A] hover:from-[#d9ca8e] hover:to-[#B6A46A] text-[#1C3A34] font-bold text-[17px] px-10 py-4 sm:py-5 rounded-full tracking-wide transition-all duration-300 hover:shadow-[0_0_40px_-5px_rgba(201,184,122,0.5)] hover:-translate-y-1 text-center overflow-hidden"
           >
-            See the Console
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out rounded-full" />
+            <span className="relative z-10 flex items-center justify-center gap-3">
+              See How It Works
+              <svg className="w-5 h-5 transition-transform group-hover:translate-x-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </span>
           </a>
           <a
             href="#features"
-            className="w-full sm:w-auto border border-white/15 hover:border-white/30 text-white/80 font-semibold text-[15px] px-8 py-3.5 sm:py-4 rounded-full tracking-wide transition-all duration-200 hover:bg-white/5 backdrop-blur-sm text-center"
+            className="w-full sm:w-auto border border-white/20 hover:border-[#C9B87A]/50 text-white font-semibold text-[17px] px-10 py-4 sm:py-5 rounded-full tracking-wide transition-all duration-300 hover:bg-white/5 backdrop-blur-md text-center hover:-translate-y-1"
           >
             Explore Features
           </a>
-        </div>
-
-        {/* Stats bar */}
-        <div className="mt-2 sm:mt-6 w-full grid grid-cols-1 min-[480px]:grid-cols-3 gap-px bg-white/10 rounded-2xl overflow-hidden border border-white/10 animate-landing-fade-up [animation-delay:460ms] max-w-lg min-[480px]:max-w-none">
-          {[
-            { num: "English & Amharic", label: "Locales supported" },
-            { num: "Invoicing in Birr", label: "Corporate billing" },
-            { num: "Region-Based", label: "Pricing & rules" },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-white/5 backdrop-blur-sm px-4 sm:px-6 lg:px-8 py-4 sm:py-5 text-center">
-              <div className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#C9B87A] tracking-tight">{stat.num}</div>
-              <div className="text-[10px] sm:text-xs text-white/50 mt-1 font-medium tracking-wider uppercase">{stat.label}</div>
-            </div>
-          ))}
-        </div>
+        </motion.div>
       </div>
 
-      {/* Clean wave divider */}
-      <div className="absolute bottom-0 left-0 right-0 leading-none animate-landing-fade-up [animation-delay:580ms]">
-        <svg viewBox="0 0 1440 72" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full" preserveAspectRatio="none">
-          <path d="M0,40 C360,80 1080,0 1440,40 L1440,72 L0,72 Z" fill="#ffffff" />
-        </svg>
-      </div>
+
     </section>
   );
 }

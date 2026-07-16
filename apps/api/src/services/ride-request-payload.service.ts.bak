@@ -14,6 +14,7 @@ export type ParsedRideRequestPayload = {
   pickupLongitude: number | null;
   dropoffLatitude: number | null;
   dropoffLongitude: number | null;
+  dropoffLongitude: number | null;
   scheduledAt: Date | null;
   scheduledReturnAt: Date | null;
   contractId: string | null;
@@ -22,7 +23,6 @@ export type ParsedRideRequestPayload = {
     vehicleClassId: string;
     quantity: number;
   }>;
-  requestType?: "single" | "contract";
 };
 
 function parseSelectedVehicles(value: unknown) {
@@ -101,7 +101,6 @@ export function parseRideRequestPayload(body: unknown):
   const scheduledReturnAt = parseScheduledAt((body as { scheduled_return_at?: unknown })?.scheduled_return_at);
   const contractId = getOptionalString((body as { contract_id?: unknown })?.contract_id);
   const selectedVehicles = parseSelectedVehicles((body as { selected_vehicles?: unknown })?.selected_vehicles);
-  const requestType = getOptionalString((body as { request_type?: unknown })?.request_type) as "single" | "contract" | undefined;
 
   if (!pickupAddress) {
     return { ok: false, error: "Pickup address is required." };
@@ -138,10 +137,9 @@ export function parseRideRequestPayload(body: unknown):
       dropoffLatitude,
       dropoffLongitude,
       scheduledAt,
-      scheduledReturnAt: scheduledReturnAt ?? null,
+      scheduledReturnAt,
       contractId: contractId ?? null,
       selectedVehicles,
-      requestType,
     },
   };
 }

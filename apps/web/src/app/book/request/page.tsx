@@ -18,6 +18,7 @@ import {
   Clock,
   ArrowLeft,
   CheckCircle2,
+  AlertCircle,
   Lock,
   Languages,
   ShieldCheck,
@@ -38,7 +39,19 @@ import {
 import { cn } from "@/lib/utils";
 import { getStoredUser, clearAuthSession } from "@/lib/auth-session";
 import { fetchPublicVehicles } from "@/lib/vehicle-api";
-import type { Vehicle, User as AuthUser } from "@smart-dispatch/types";
+import { fetchActiveRegions } from "@/lib/region-api";
+import { createRideRequest, fetchRideRequestFormOptions } from "@/lib/ride-request-api";
+import {
+  buildLocationAddress,
+  combineScheduledDateTime,
+  filterLocationsByRegion,
+} from "@/app/dashboard/_components/ride-requests/ride-request-utils";
+import type {
+  Vehicle,
+  User as AuthUser,
+  Region,
+  RideRequestLocationOption,
+} from "@smart-dispatch/types";
 import BrandLogo from "@/components/landing/BrandLogo";
 import { VehiclePhotoMedia } from "@/components/book/vehicle-photo-media";
 import { getVehiclePhotoUrl } from "@/lib/vehicle-photo";
@@ -86,41 +99,6 @@ const LazyCoordinateMapPicker = dynamic<CoordinateMapPickerProps>(
 
 type CoordinateState = { latitude?: number; longitude?: number };
 
-// Preset location options for the Saved dropdown
-const PICKUP_POINTS = [
-  "Bole International Airport",
-  "Meskel Square",
-  "Piazza",
-  "Sarbet",
-  "Kazanchis",
-  "CMC",
-  "Jemo",
-  "Megenagna",
-  "Gotera Interchange",
-  "Addis Ababa Stadium",
-  "Sheraton Addis",
-  "Skylight Hotel",
-  "ECA Headquarters",
-  "Hilton Hotel",
-];
-
-const DROPOFF_POINTS = [
-  "Bole International Airport",
-  "Meskel Square",
-  "Piazza",
-  "Sarbet",
-  "Kazanchis",
-  "CMC",
-  "Jemo",
-  "Megenagna",
-  "Gotera Interchange",
-  "Addis Ababa Stadium",
-  "Sheraton Addis",
-  "Skylight Hotel",
-  "ECA Headquarters",
-  "Hilton Hotel",
-];
-
 // Localized translations for the booking page
 const COPY = {
   en: {
@@ -136,16 +114,24 @@ const COPY = {
     tripDetailsDesc: "Specify where the driver will pick you up and drop you off.",
     scheduleDetails: "Schedule Plan",
     scheduleDetailsDesc: "Choose when you need the vehicles dispatched.",
+    scheduleDetailsDescContract: "Set the contract service window with a start and end date & time.",
     passengerName: "Passenger Full Name",
     passengerNamePlaceholder: "e.g. John Doe",
     mobileNumber: "Contact Mobile Number",
     mobileNumberPlaceholder: "e.g. +251 911...",
     pickupLocation: "Pickup Location",
-    pickupPlaceholder: "e.g. Bole Atlas, in front of...",
+    pickupPlaceholder: "Select a saved pickup location",
     dropoffLocation: "Drop-off Destination",
-    dropoffPlaceholder: "e.g. Kazanchis, ECA building...",
+    dropoffPlaceholder: "Select a saved drop-off location",
+    selectRegionFirst: "Select a service region to load saved locations.",
+    noSavedPickup: "No saved pickup locations for this region. Use a custom address.",
+    noSavedDropoff: "No saved drop-off locations for this region. Use a custom address.",
     scheduledDate: "Scheduled Date",
     scheduledTime: "Scheduled Time",
+    startDate: "Start Date",
+    startTime: "Start Time",
+    endDate: "End Date",
+    endTime: "End Time",
     pickDate: "Pick date",
     pickTime: "Pick time",
     clearDate: "Clear date",
@@ -159,14 +145,29 @@ const COPY = {
     applyTime: "Apply",
     submitRequest: "Submit Dispatch Request",
     submitting: "Submitting coordinates...",
-    successTitle: "Dispatch Requests Submitted!",
-    successText: "Your booking requests have been successfully queued. A platform dispatcher will assign professional drivers shortly and contact you at the mobile number provided.",
+    submitFailed: "Could not submit your ride request. Please try again.",
+    viewMyRequests: "View My Requests",
+    tryAgain: "Try again",
+    successEyebrow: "Request received",
+    successTitle: "Your dispatch request is in the queue",
+    successText: "Our dispatch team will review your booking and assign a driver. You’ll hear from us at the mobile number you provided.",
+    successStepReview: "Dispatch reviews your request",
+    successStepAssign: "A driver is assigned to your vehicles",
+    successStepContact: "You’re contacted with trip details",
+    errorEyebrow: "Submission failed",
+    errorTitle: "We couldn’t submit your dispatch request",
+    errorStepCheck: "Check your connection and form details",
+    errorStepRetry: "Try submitting the request again",
+    errorStepSupport: "Contact support if the problem continues",
+    vehiclesSubmitted: "{count} vehicle submitted",
+    vehiclesSubmittedPlural: "{count} vehicles submitted",
     signIn: "Sign In",
     statusAvailable: "Available Now",
     statusBusy: "In Service - Available:",
     selectedVehicles: "Selected Vehicles",
     scheduleAvailableFromHint: "Earliest start based on selected vehicles:",
     scheduleTooEarly: "Choose a date and time on or after the vehicle available-from time.",
+    scheduleEndBeforeStart: "End date and time must be on or after the start.",
     locationModeSaved: "Saved",
     locationModeCustom: "Custom",
     pickupAddressLabel: "Pickup Address",
@@ -203,16 +204,24 @@ const COPY = {
     tripDetailsDesc: "አሽከርካሪው የት እንደሚወስድዎት እና የት እንደሚያደርስዎት ይግለጹ::",
     scheduleDetails: "የጊዜ ሰሌዳ ዕቅድ",
     scheduleDetailsDesc: "ተሽከርካሪዎቹ መቼ እንዲላኩ እንደሚፈልጉ ይምረጡ::",
+    scheduleDetailsDescContract: "የውሉን የአገልግሎት ጊዜ በመጀመሪያ እና መጨረሻ ቀንና ሰዓት ይግለጹ።",
     passengerName: "የተሳፋሪ ሙሉ ስም",
     passengerNamePlaceholder: "ምሳሌ፡ ዮሐንስ አበበ",
     mobileNumber: "የመገናኛ ስልክ ቁጥር",
     mobileNumberPlaceholder: "ምሳሌ፡ +251 911...",
     pickupLocation: "የመነሻ ቦታ",
-    pickupPlaceholder: "ምሳሌ፡ ቦሌ አትላስ...",
+    pickupPlaceholder: "የተቀመጠ የመነሻ ቦታ ይምረጡ",
     dropoffLocation: "የመድረሻ ቦታ",
-    dropoffPlaceholder: "ምሳሌ፡ ካዛንቺስ...",
+    dropoffPlaceholder: "የተቀመጠ የመድረሻ ቦታ ይምረጡ",
+    selectRegionFirst: "የተቀመጡ ቦታዎችን ለመጫን የአገልግሎት ክልል ይምረጡ።",
+    noSavedPickup: "ለዚህ ክልል የተቀመጠ የመነሻ ቦታ የለም። ብጁ አድራሻ ይጠቀሙ።",
+    noSavedDropoff: "ለዚህ ክልል የተቀመጠ የመድረሻ ቦታ የለም። ብጁ አድራሻ ይጠቀሙ።",
     scheduledDate: "የተያዘለት ቀን",
     scheduledTime: "የተያዘለት ሰዓት",
+    startDate: "የመጀመሪያ ቀን",
+    startTime: "የመጀመሪያ ሰዓት",
+    endDate: "የመጨረሻ ቀን",
+    endTime: "የመጨረሻ ሰዓት",
     pickDate: "ቀን ይምረጡ",
     pickTime: "ሰዓት ይምረጡ",
     clearDate: "ቀን ያጽዱ",
@@ -226,14 +235,29 @@ const COPY = {
     applyTime: "ተግብር",
     submitRequest: "የመላኪያ ጥያቄን አስገባ",
     submitting: "መጋጠሚያዎችን በማስገባት ላይ...",
-    successTitle: "የመላኪያ ጥያቄዎች ገብተዋል!",
-    successText: "የጉዞ ጥያቄዎችዎ በተሳካ ሁኔታ ተሰልፈዋል። ላኪዎች አሽከርካሪዎችን በቅርቡ ይመድባሉ እና በሰጡት ስልክ ቁጥር ያገኙዎታል።",
+    submitFailed: "የጉዞ ጥያቄዎን ማስገባት አልተቻለም። እባክዎ እንደገና ይሞክሩ።",
+    viewMyRequests: "የእኔን ጥያቄዎች ይመልከቱ",
+    tryAgain: "እንደገና ይሞክሩ",
+    successEyebrow: "ጥያቄ ተቀብሏል",
+    successTitle: "የመላኪያ ጥያቄዎ በተራ ላይ ነው",
+    successText: "የመላኪያ ቡድናችን ጥያቄዎን ይገመግማል እና አሽከርካሪ ይመድባል። በሰጡት ስልክ ቁጥር እናገኝዎታለን።",
+    successStepReview: "መላኪያ ጥያቄዎን ይገመግማል",
+    successStepAssign: "ለተሽከርካሪዎችዎ አሽከርካሪ ይመደባል",
+    successStepContact: "የጉዞ ዝርዝሮችን በስልክ ያገኛሉ",
+    errorEyebrow: "ማስገባት አልተሳካም",
+    errorTitle: "የመላኪያ ጥያቄዎን ማስገባት አልተቻለም",
+    errorStepCheck: "ግንኙነትዎን እና የቅጽ ዝርዝሮችን ያረጋግጡ",
+    errorStepRetry: "ጥያቄውን እንደገና ለማስገባት ይሞክሩ",
+    errorStepSupport: "ችግሩ ከቀጠለ ድጋፍን ያግኙ",
+    vehiclesSubmitted: "{count} ተሽከርካሪ ተልኳል",
+    vehiclesSubmittedPlural: "{count} ተሽከርካሪዎች ተልከዋል",
     signIn: "ግባ",
     statusAvailable: "አሁን ይገኛል",
     statusBusy: "ስራ ላይ - የሚገኝበት ጊዜ፡",
     selectedVehicles: "የተመረጡ ተሽከርካሪዎች",
     scheduleAvailableFromHint: "በተመረጡ ተሽከርካሪዎች መሠረት ቀድሞውኑ የሚያስችል ጊዜ፡",
     scheduleTooEarly: "ከተሽከርካሪው የሚገኝበት ጊዜ በኋላ ቀንና ሰዓት ይምረጡ።",
+    scheduleEndBeforeStart: "የመጨረሻ ቀንና ሰዓት ከመጀመሪያው በኋላ መሆን አለበት።",
     locationModeSaved: "የተቀመጠ",
     locationModeCustom: "ብጁ",
     pickupAddressLabel: "የመነሻ አድራሻ",
@@ -319,18 +343,28 @@ function VehicleRequestPageContent() {
   const [requestType, setRequestType] = useState<"single" | "contract" | null>(null);
   const [passengerName, setPassengerName] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
+  const [regionId, setRegionId] = useState<string>("");
+  const [regions, setRegions] = useState<Region[]>([]);
+  const [pickupLocations, setPickupLocations] = useState<RideRequestLocationOption[]>([]);
+  const [dropoffLocations, setDropoffLocations] = useState<RideRequestLocationOption[]>([]);
+  const [pickupLocationId, setPickupLocationId] = useState("");
+  const [dropoffLocationId, setDropoffLocationId] = useState("");
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
   const [useCustomPickup, setUseCustomPickup] = useState(false);
   const [useCustomDropoff, setUseCustomDropoff] = useState(false);
   const [pickupCoordinates, setPickupCoordinates] = useState<CoordinateState>({});
   const [dropoffCoordinates, setDropoffCoordinates] = useState<CoordinateState>({}); 
+  const [loadingLocations, setLoadingLocations] = useState(false); 
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>(undefined);
   const [scheduledTime, setScheduledTime] = useState<TimeValue | undefined>(undefined);
+  const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
+  const [returnTime, setReturnTime] = useState<TimeValue | undefined>(undefined);
   const [scheduleError, setScheduleError] = useState<string | null>(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+  const [outcome, setOutcome] = useState<"success" | "error" | null>(null);
+  const [outcomeMessage, setOutcomeMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const storedUser = getStoredUser();
@@ -366,10 +400,14 @@ function VehicleRequestPageContent() {
         return;
       }
       try {
-        const data = await fetchPublicVehicles();
+        const [data, regionsData] = await Promise.all([
+          fetchPublicVehicles(),
+          fetchActiveRegions(locale)
+        ]);
         const found = data.vehicles.filter((v) => ids.includes(v.id));
         if (active) {
           setVehicles(found);
+          setRegions(regionsData);
         }
       } catch (err) {
         console.error("Failed to load vehicles:", err);
@@ -382,6 +420,38 @@ function VehicleRequestPageContent() {
       active = false;
     };
   }, [idsParam]);
+
+  useEffect(() => {
+    if (!user || !regionId) {
+      setPickupLocations([]);
+      setDropoffLocations([]);
+      return;
+    }
+
+    let active = true;
+    async function loadLocations() {
+      setLoadingLocations(true);
+      try {
+        const options = await fetchRideRequestFormOptions(locale, regionId);
+        if (!active) return;
+        setPickupLocations(options.pickup_locations);
+        setDropoffLocations(options.dropoff_locations);
+      } catch (err) {
+        console.error("Failed to load booking locations:", err);
+        if (active) {
+          setPickupLocations([]);
+          setDropoffLocations([]);
+        }
+      } finally {
+        if (active) setLoadingLocations(false);
+      }
+    }
+
+    void loadLocations();
+    return () => {
+      active = false;
+    };
+  }, [user, regionId, locale]);
 
   const removeVehicleId = (idToRemove: string) => {
     const nextIds = ids.filter((id) => id !== idToRemove);
@@ -436,15 +506,64 @@ function VehicleRequestPageContent() {
     });
   }, [vehicleAvailabilityKey, hasInServiceVehicle, vehicles]);
 
+  const regionPickupLocations = useMemo(
+    () => filterLocationsByRegion(pickupLocations, regionId),
+    [pickupLocations, regionId],
+  );
+  const regionDropoffLocations = useMemo(
+    () => filterLocationsByRegion(dropoffLocations, regionId),
+    [dropoffLocations, regionId],
+  );
+
+  const showCustomPickup = useCustomPickup || regionPickupLocations.length === 0;
+  const showCustomDropoff = useCustomDropoff || regionDropoffLocations.length === 0;
+
   const pickupItems = useMemo(
-    () => PICKUP_POINTS.map((pt) => ({ label: pt, value: pt })),
-    [],
+    () => regionPickupLocations.map((location) => ({ label: location.name, value: location.id })),
+    [regionPickupLocations],
   );
 
   const dropoffItems = useMemo(
-    () => DROPOFF_POINTS.map((pt) => ({ label: pt, value: pt })),
-    [],
+    () =>
+      regionDropoffLocations
+        .filter((location) => location.id !== pickupLocationId)
+        .map((location) => ({ label: location.name, value: location.id })),
+    [regionDropoffLocations, pickupLocationId],
   );
+
+  const clearTripLocations = () => {
+    setPickupLocationId("");
+    setDropoffLocationId("");
+    setPickup("");
+    setDropoff("");
+    setPickupCoordinates({});
+    setDropoffCoordinates({});
+    setUseCustomPickup(false);
+    setUseCustomDropoff(false);
+  };
+
+  const applyPickupLocation = (locationId: string) => {
+    const location = regionPickupLocations.find((entry) => entry.id === locationId);
+    if (!location) return;
+    setPickupLocationId(locationId);
+    setPickup(buildLocationAddress(location));
+    setPickupCoordinates({ latitude: location.latitude, longitude: location.longitude });
+    setUseCustomPickup(false);
+    if (dropoffLocationId === locationId) {
+      setDropoffLocationId("");
+      setDropoff("");
+      setDropoffCoordinates({});
+    }
+  };
+
+  const applyDropoffLocation = (locationId: string) => {
+    const location = regionDropoffLocations.find((entry) => entry.id === locationId);
+    if (!location) return;
+    setDropoffLocationId(locationId);
+    setDropoff(buildLocationAddress(location));
+    setDropoffCoordinates({ latitude: location.latitude, longitude: location.longitude });
+    setUseCustomDropoff(false);
+  };
 
   const scheduledMinTime = useMemo(() => {
     if (!scheduledDate) return undefined;
@@ -457,9 +576,20 @@ function VehicleRequestPageContent() {
     };
   }, [scheduledDate, earliestBookableAt]);
 
+  const returnMinTime = useMemo(() => {
+    if (!returnDate || !scheduledDate || !scheduledTime) return undefined;
+    if (startOfDay(returnDate).getTime() !== startOfDay(scheduledDate).getTime()) {
+      return undefined;
+    }
+    return { hour: scheduledTime.hour, minute: scheduledTime.minute };
+  }, [returnDate, scheduledDate, scheduledTime]);
+
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!passengerName || !mobileNumber || !pickup || !dropoff) return;
+    if (!user) return;
+    if (!requestType || !passengerName || !mobileNumber || !regionId || !pickup || !dropoff) return;
+    if (!showCustomPickup && !pickupLocationId) return;
+    if (!showCustomDropoff && !dropoffLocationId) return;
 
     if (
       !scheduledDate ||
@@ -470,18 +600,89 @@ function VehicleRequestPageContent() {
       return;
     }
 
+    const scheduledAt = combineScheduledDateTime(scheduledDate, scheduledTime);
+    if (!scheduledAt) {
+      setScheduleError(copy.scheduleTooEarly);
+      return;
+    }
+
+    let scheduledReturnAt: Date | null = null;
+    if (requestType === "contract") {
+      if (!returnDate || !returnTime) {
+        setScheduleError(copy.scheduleEndBeforeStart);
+        return;
+      }
+
+      const startMinutes = scheduledTime.hour * 60 + scheduledTime.minute;
+      const endMinutes = returnTime.hour * 60 + returnTime.minute;
+      const startDay = startOfDay(scheduledDate).getTime();
+      const endDay = startOfDay(returnDate).getTime();
+      if (endDay < startDay || (endDay === startDay && endMinutes < startMinutes)) {
+        setScheduleError(copy.scheduleEndBeforeStart);
+        return;
+      }
+
+      scheduledReturnAt = combineScheduledDateTime(returnDate, returnTime);
+      if (!scheduledReturnAt) {
+        setScheduleError(copy.scheduleEndBeforeStart);
+        return;
+      }
+    }
+
+    const selectedVehicles = vehicles
+      .filter((vehicle) => vehicle.vehicle_type_id && vehicle.vehicle_class_id)
+      .map((vehicle) => ({
+        vehicle_type_id: vehicle.vehicle_type_id,
+        vehicle_class_id: vehicle.vehicle_class_id,
+        quantity: 1,
+      }));
+
+    if (selectedVehicles.length === 0) {
+      setOutcome("error");
+      setOutcomeMessage(copy.submitFailed);
+      return;
+    }
+
     setScheduleError(null);
+    setOutcomeMessage(null);
     setIsSubmitting(true);
-    // Simulate API request submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setIsSuccess(true);
+
+    try {
+      await createRideRequest({
+        pickup_address: pickup.trim(),
+        dropoff_address: dropoff.trim(),
+        pickup_location_id: showCustomPickup ? null : pickupLocationId || null,
+        dropoff_location_id: showCustomDropoff ? null : dropoffLocationId || null,
+        pickup_latitude: pickupCoordinates.latitude ?? null,
+        pickup_longitude: pickupCoordinates.longitude ?? null,
+        dropoff_latitude: dropoffCoordinates.latitude ?? null,
+        dropoff_longitude: dropoffCoordinates.longitude ?? null,
+        region_id: regionId,
+        passenger_count: 1,
+        scheduled_at: scheduledAt.toISOString(),
+        scheduled_return_at: scheduledReturnAt?.toISOString() ?? null,
+        request_type: requestType,
+        selected_vehicles: selectedVehicles,
+        notes: `Passenger: ${passengerName.trim()} · Mobile: ${mobileNumber.trim()}`,
+      });
+      setOutcome("success");
+      setOutcomeMessage(null);
+    } catch (err) {
+      console.error("Failed to submit ride request:", err);
+      setOutcome("error");
+      setOutcomeMessage(err instanceof Error ? err.message : copy.submitFailed);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetForm = () => {
     setRequestType(null);
     setPassengerName("");
     setMobileNumber("");
+    setRegionId("");
+    setPickupLocationId("");
+    setDropoffLocationId("");
     setPickup("");
     setDropoff("");
     setPickupCoordinates({});
@@ -490,9 +691,17 @@ function VehicleRequestPageContent() {
     setUseCustomDropoff(false);
     setScheduledDate(undefined);
     setScheduledTime(undefined);
+    setReturnDate(undefined);
+    setReturnTime(undefined);
     setScheduleError(null);
-    setIsSuccess(false);
+    setOutcome(null);
+    setOutcomeMessage(null);
     router.push("/book");
+  };
+
+  const dismissOutcomeError = () => {
+    setOutcome(null);
+    setOutcomeMessage(null);
   };
 
   if (loading) {
@@ -637,7 +846,145 @@ function VehicleRequestPageContent() {
         </div>
       </header>
 
-      {/* Main Split Layout Container */}
+      {outcome ? (
+        <div className="flex-1 bg-slate-50">
+          <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-8 sm:px-6 sm:py-12">
+            <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm">
+              <div
+                className={cn(
+                  "relative px-6 py-10 text-center sm:px-8 sm:py-12",
+                  outcome === "success" ? "bg-[#1C3A34]" : "bg-[#5c2a2a]",
+                )}
+              >
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-40"
+                  style={{
+                    backgroundImage:
+                      outcome === "success"
+                        ? "radial-gradient(circle at 20% 20%, rgba(201,184,122,0.35), transparent 45%), radial-gradient(circle at 80% 80%, rgba(201,184,122,0.2), transparent 40%)"
+                        : "radial-gradient(circle at 20% 20%, rgba(248,113,113,0.25), transparent 45%), radial-gradient(circle at 80% 80%, rgba(252,165,165,0.15), transparent 40%)",
+                  }}
+                  aria-hidden
+                />
+                <div
+                  className={cn(
+                    "relative mx-auto flex h-16 w-16 items-center justify-center rounded-2xl shadow-lg",
+                    outcome === "success"
+                      ? "bg-[#C9B87A] text-[#1C3A34]"
+                      : "bg-red-100 text-red-700",
+                  )}
+                >
+                  {outcome === "success" ? (
+                    <CheckCircle2 className="h-8 w-8" strokeWidth={2.25} />
+                  ) : (
+                    <AlertCircle className="h-8 w-8" strokeWidth={2.25} />
+                  )}
+                </div>
+                <p
+                  className={cn(
+                    "relative mt-5 text-[11px] font-bold uppercase tracking-[0.18em]",
+                    outcome === "success" ? "text-[#C9B87A]" : "text-red-200",
+                  )}
+                >
+                  {outcome === "success" ? copy.successEyebrow : copy.errorEyebrow}
+                </p>
+                <h3 className="relative mt-2 text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+                  {outcome === "success" ? copy.successTitle : copy.errorTitle}
+                </h3>
+                <p className="relative mx-auto mt-3 max-w-md text-sm leading-relaxed text-white/70">
+                  {outcome === "success"
+                    ? copy.successText
+                    : outcomeMessage || copy.submitFailed}
+                </p>
+              </div>
+
+              <div className="space-y-6 px-6 py-7 sm:px-8">
+                {vehicles.length > 0 ? (
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3.5">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                      {copy.selectedVehicles}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold text-[#1C3A34]">
+                      {(vehicles.length === 1
+                        ? copy.vehiclesSubmitted
+                        : copy.vehiclesSubmittedPlural
+                      ).replace("{count}", String(vehicles.length))}
+                      {" · "}
+                      {vehicles.map((v) => `${v.make} ${v.model}`).join(", ")}
+                    </p>
+                  </div>
+                ) : null}
+
+                <ol className="space-y-3">
+                  {(outcome === "success"
+                    ? [copy.successStepReview, copy.successStepAssign, copy.successStepContact]
+                    : [copy.errorStepCheck, copy.errorStepRetry, copy.errorStepSupport]
+                  ).map((step, index) => (
+                    <li
+                      key={step}
+                      className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-slate-50/80 px-4 py-3.5"
+                    >
+                      <span
+                        className={cn(
+                          "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-extrabold",
+                          outcome === "success"
+                            ? "bg-[#1C3A34] text-[#C9B87A]"
+                            : "bg-red-700 text-red-100",
+                        )}
+                      >
+                        {index + 1}
+                      </span>
+                      <span className="pt-1 text-sm font-medium leading-snug text-slate-700">
+                        {step}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                  {outcome === "success" ? (
+                    <>
+                      <Link
+                        href="/dashboard/my-requests"
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1C3A34] px-5 py-3.5 text-sm font-extrabold text-white transition-colors hover:bg-[#254b43]"
+                      >
+                        {copy.viewMyRequests}
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                      <button
+                        type="button"
+                        onClick={resetForm}
+                        className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-[#1C3A34] transition-colors hover:border-[#1C3A34]/30 hover:bg-slate-50"
+                      >
+                        {copy.backToCatalog}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        onClick={dismissOutcomeError}
+                        className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1C3A34] px-5 py-3.5 text-sm font-extrabold text-white transition-colors hover:bg-[#254b43]"
+                      >
+                        {copy.tryAgain}
+                        <ArrowRight className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={resetForm}
+                        className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-[#1C3A34] transition-colors hover:border-[#1C3A34]/30 hover:bg-slate-50"
+                      >
+                        {copy.backToCatalog}
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+      /* Main Split Layout Container */
       <div className="flex-1 flex flex-col lg:flex-row min-h-screen">
         
         {/* LEFT COLUMN PANEL: Vehicle Highlights (Dark green branding background) */}
@@ -772,7 +1119,7 @@ function VehicleRequestPageContent() {
               <p className="text-sm text-slate-500 font-medium">{copy.requestSubTitle}</p>
             </div>
 
-            {!user && !isSuccess ? (
+            {!user ? (
               <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm sm:p-8">
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-[#1C3A34]/8">
                   <Lock className="h-5 w-5 text-[#1C3A34]" strokeWidth={1.75} />
@@ -789,22 +1136,6 @@ function VehicleRequestPageContent() {
                 >
                   {copy.signInToBook}
                 </Link>
-              </div>
-            ) : isSuccess ? (
-              <div className="py-12 text-center flex flex-col items-center gap-5 border border-slate-100 rounded-3xl bg-slate-50/50 shadow-inner p-8">
-                <div className="h-20 w-20 bg-emerald-50 rounded-full flex items-center justify-center border-2 border-emerald-100 text-emerald-600 mb-2 animate-bounce">
-                  <CheckCircle2 className="h-10 w-10" />
-                </div>
-                <h4 className="font-extrabold text-2xl text-[#1C3A34]">{copy.successTitle}</h4>
-                <p className="text-slate-500 text-sm leading-relaxed max-w-md mx-auto">
-                  {copy.successText}
-                </p>
-                <button
-                  onClick={resetForm}
-                  className="mt-4 bg-[#1C3A34] hover:bg-[#254b43] text-white font-extrabold text-sm px-8 py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg"
-                >
-                  Return to Catalog
-                </button>
               </div>
             ) : requestType === null ? (
               /* ── REQUEST TYPE SELECTOR ── */
@@ -932,33 +1263,77 @@ function VehicleRequestPageContent() {
                 <AdminFormSection title={copy.tripDetails} description={copy.tripDetailsDesc} icon={MapPin}>
                   <div className="space-y-6">
 
+                    {/* Region Selection */}
+                    <AdminSelectField
+                      id="region-selection"
+                      label={locale === "am" ? "የአገልግሎት ክልል" : "Service Region"}
+                      value={regionId || null}
+                      onValueChange={(value) => {
+                        setRegionId(value);
+                        clearTripLocations();
+                      }}
+                      items={regions.map(r => ({ label: r.name, value: r.id }))}
+                      disabled={isSubmitting}
+                      placeholder={locale === "am" ? "ክልል ይምረጡ" : "Select Region"}
+                      required
+                    />
+
                     {/* Pickup */}
                     <div className="space-y-3">
                       <div className="flex items-center justify-between gap-2 flex-wrap">
                         <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
                           {copy.pickupLocation}
                         </p>
-                        <LocationModeSwitch
-                          savedLabel={copy.locationModeSaved}
-                          customLabel={copy.locationModeCustom}
-                          useCustom={useCustomPickup}
-                          onSelectSaved={() => { setUseCustomPickup(false); setPickup(""); setPickupCoordinates({}); }}
-                          onSelectCustom={() => setUseCustomPickup(true)}
-                        />
+                        {regionPickupLocations.length > 0 ? (
+                          <LocationModeSwitch
+                            savedLabel={copy.locationModeSaved}
+                            customLabel={copy.locationModeCustom}
+                            useCustom={useCustomPickup}
+                            onSelectSaved={() => {
+                              setUseCustomPickup(false);
+                              setPickupLocationId("");
+                              setPickup("");
+                              setPickupCoordinates({});
+                            }}
+                            onSelectCustom={() => {
+                              setUseCustomPickup(true);
+                              setPickupLocationId("");
+                              setPickup("");
+                              setPickupCoordinates({});
+                            }}
+                          />
+                        ) : null}
                       </div>
-                      {!useCustomPickup ? (
-                        <AdminSelectField
-                          id="request-pickup-point"
-                          label=""
-                          value={pickup || null}
-                          onValueChange={(val) => setPickup(val)}
-                          items={pickupItems}
-                          placeholder={copy.pickupPlaceholder}
-                          required
-                        />
+                      {!regionId ? (
+                        <p className="text-xs text-slate-500">{copy.selectRegionFirst}</p>
+                      ) : loadingLocations ? (
+                        <p className="text-xs text-slate-400">{copy.mapLoading}</p>
+                      ) : !showCustomPickup ? (
+                        <div className="space-y-2">
+                          <AdminSelectField
+                            id="request-pickup-point"
+                            label=""
+                            value={pickupLocationId || null}
+                            onValueChange={applyPickupLocation}
+                            items={pickupItems}
+                            placeholder={copy.pickupPlaceholder}
+                            required
+                            disabled={isSubmitting}
+                          />
+                          {isValidCoordinatePair(pickupCoordinates.latitude, pickupCoordinates.longitude) && (
+                            <p className="text-[10px] text-[#1C3A34] font-semibold flex items-center gap-1.5">
+                              <span className="h-1.5 w-1.5 rounded-full bg-[#1C3A34] inline-block" />
+                              {pickupCoordinates.latitude?.toFixed(5)}, {pickupCoordinates.longitude?.toFixed(5)}
+                            </p>
+                          )}
+                        </div>
                       ) : (
                         <div className="space-y-3">
-                          <p className="text-xs leading-relaxed text-slate-500">{copy.backupLocationHint}</p>
+                          {regionPickupLocations.length === 0 ? (
+                            <p className="text-xs leading-relaxed text-slate-500">{copy.noSavedPickup}</p>
+                          ) : (
+                            <p className="text-xs leading-relaxed text-slate-500">{copy.backupLocationHint}</p>
+                          )}
                           <AdminTextField
                             id="request-pickup-address"
                             label={copy.pickupAddressLabel}
@@ -998,27 +1373,56 @@ function VehicleRequestPageContent() {
                         <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-500">
                           {copy.dropoffLocation}
                         </p>
-                        <LocationModeSwitch
-                          savedLabel={copy.locationModeSaved}
-                          customLabel={copy.locationModeCustom}
-                          useCustom={useCustomDropoff}
-                          onSelectSaved={() => { setUseCustomDropoff(false); setDropoff(""); setDropoffCoordinates({}); }}
-                          onSelectCustom={() => setUseCustomDropoff(true)}
-                        />
+                        {regionDropoffLocations.length > 0 ? (
+                          <LocationModeSwitch
+                            savedLabel={copy.locationModeSaved}
+                            customLabel={copy.locationModeCustom}
+                            useCustom={useCustomDropoff}
+                            onSelectSaved={() => {
+                              setUseCustomDropoff(false);
+                              setDropoffLocationId("");
+                              setDropoff("");
+                              setDropoffCoordinates({});
+                            }}
+                            onSelectCustom={() => {
+                              setUseCustomDropoff(true);
+                              setDropoffLocationId("");
+                              setDropoff("");
+                              setDropoffCoordinates({});
+                            }}
+                          />
+                        ) : null}
                       </div>
-                      {!useCustomDropoff ? (
-                        <AdminSelectField
-                          id="request-dropoff-point"
-                          label=""
-                          value={dropoff || null}
-                          onValueChange={(val) => setDropoff(val)}
-                          items={dropoffItems}
-                          placeholder={copy.dropoffPlaceholder}
-                          required
-                        />
+                      {!regionId ? (
+                        <p className="text-xs text-slate-500">{copy.selectRegionFirst}</p>
+                      ) : loadingLocations ? (
+                        <p className="text-xs text-slate-400">{copy.mapLoading}</p>
+                      ) : !showCustomDropoff ? (
+                        <div className="space-y-2">
+                          <AdminSelectField
+                            id="request-dropoff-point"
+                            label=""
+                            value={dropoffLocationId || null}
+                            onValueChange={applyDropoffLocation}
+                            items={dropoffItems}
+                            placeholder={copy.dropoffPlaceholder}
+                            required
+                            disabled={isSubmitting}
+                          />
+                          {isValidCoordinatePair(dropoffCoordinates.latitude, dropoffCoordinates.longitude) && (
+                            <p className="text-[10px] text-[#C9B87A] font-semibold flex items-center gap-1.5">
+                              <span className="h-1.5 w-1.5 rounded-full bg-[#C9B87A] inline-block" />
+                              {dropoffCoordinates.latitude?.toFixed(5)}, {dropoffCoordinates.longitude?.toFixed(5)}
+                            </p>
+                          )}
+                        </div>
                       ) : (
                         <div className="space-y-3">
-                          <p className="text-xs leading-relaxed text-slate-500">{copy.backupLocationHint}</p>
+                          {regionDropoffLocations.length === 0 ? (
+                            <p className="text-xs leading-relaxed text-slate-500">{copy.noSavedDropoff}</p>
+                          ) : (
+                            <p className="text-xs leading-relaxed text-slate-500">{copy.backupLocationHint}</p>
+                          )}
                           <AdminTextField
                             id="request-dropoff-address"
                             label={copy.dropoffAddressLabel}
@@ -1056,46 +1460,133 @@ function VehicleRequestPageContent() {
                 </AdminFormSection>
 
                 {/* Form Section 3: Date & time details */}
-                <AdminFormSection title={copy.scheduleDetails} description={copy.scheduleDetailsDesc} icon={Calendar}>
+                <AdminFormSection
+                  title={copy.scheduleDetails}
+                  description={
+                    requestType === "contract"
+                      ? copy.scheduleDetailsDescContract
+                      : copy.scheduleDetailsDesc
+                  }
+                  icon={Calendar}
+                >
                   {hasInServiceVehicle ? (
                     <p className="rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-xs font-medium text-amber-800">
                       {copy.scheduleAvailableFromHint}{" "}
                       <span className="font-bold">{earliestBookableLabel}</span>
                     </p>
                   ) : null}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <AdminDatePicker
-                      id="request-scheduled-date"
-                      label={copy.scheduledDate}
-                      placeholder={copy.pickDate}
-                      clearLabel={copy.clearDate}
-                      todayLabel={copy.today}
-                      minDate={earliestBookableAt}
-                      value={scheduledDate}
-                      onChange={(date) => {
-                        setScheduledDate(date);
-                        setScheduledTime(undefined);
-                        setScheduleError(null);
-                      }}
-                    />
 
-                    <AdminTimePicker
-                      id="request-scheduled-time"
-                      label={copy.scheduledTime}
-                      placeholder={copy.pickTime}
-                      clearLabel={copy.clearTime}
-                      applyLabel={copy.applyTime}
-                      value={scheduledTime}
-                      minTime={scheduledMinTime}
-                      locale={locale}
-                      hour12
-                      disabled={!scheduledDate}
-                      onChange={(time) => {
-                        setScheduledTime(time);
-                        setScheduleError(null);
-                      }}
-                    />
-                  </div>
+                  {requestType === "contract" ? (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <AdminDatePicker
+                          id="request-start-date"
+                          label={copy.startDate}
+                          placeholder={copy.pickDate}
+                          clearLabel={copy.clearDate}
+                          todayLabel={copy.today}
+                          minDate={earliestBookableAt}
+                          value={scheduledDate}
+                          onChange={(date) => {
+                            setScheduledDate(date);
+                            setScheduledTime(undefined);
+                            setScheduleError(null);
+                            if (
+                              date &&
+                              returnDate &&
+                              startOfDay(returnDate).getTime() < startOfDay(date).getTime()
+                            ) {
+                              setReturnDate(undefined);
+                              setReturnTime(undefined);
+                            }
+                          }}
+                        />
+                        <AdminTimePicker
+                          id="request-start-time"
+                          label={copy.startTime}
+                          placeholder={copy.pickTime}
+                          clearLabel={copy.clearTime}
+                          applyLabel={copy.applyTime}
+                          value={scheduledTime}
+                          minTime={scheduledMinTime}
+                          locale={locale}
+                          hour12
+                          disabled={!scheduledDate}
+                          onChange={(time) => {
+                            setScheduledTime(time);
+                            setScheduleError(null);
+                          }}
+                        />
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <AdminDatePicker
+                          id="request-end-date"
+                          label={copy.endDate}
+                          placeholder={copy.pickDate}
+                          clearLabel={copy.clearDate}
+                          todayLabel={copy.today}
+                          minDate={scheduledDate ?? earliestBookableAt}
+                          value={returnDate}
+                          disabled={!scheduledDate}
+                          onChange={(date) => {
+                            setReturnDate(date);
+                            setReturnTime(undefined);
+                            setScheduleError(null);
+                          }}
+                        />
+                        <AdminTimePicker
+                          id="request-end-time"
+                          label={copy.endTime}
+                          placeholder={copy.pickTime}
+                          clearLabel={copy.clearTime}
+                          applyLabel={copy.applyTime}
+                          value={returnTime}
+                          minTime={returnMinTime}
+                          locale={locale}
+                          hour12
+                          disabled={!returnDate}
+                          onChange={(time) => {
+                            setReturnTime(time);
+                            setScheduleError(null);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <AdminDatePicker
+                        id="request-scheduled-date"
+                        label={copy.scheduledDate}
+                        placeholder={copy.pickDate}
+                        clearLabel={copy.clearDate}
+                        todayLabel={copy.today}
+                        minDate={earliestBookableAt}
+                        value={scheduledDate}
+                        onChange={(date) => {
+                          setScheduledDate(date);
+                          setScheduledTime(undefined);
+                          setScheduleError(null);
+                        }}
+                      />
+
+                      <AdminTimePicker
+                        id="request-scheduled-time"
+                        label={copy.scheduledTime}
+                        placeholder={copy.pickTime}
+                        clearLabel={copy.clearTime}
+                        applyLabel={copy.applyTime}
+                        value={scheduledTime}
+                        minTime={scheduledMinTime}
+                        locale={locale}
+                        hour12
+                        disabled={!scheduledDate}
+                        onChange={(time) => {
+                          setScheduledTime(time);
+                          setScheduleError(null);
+                        }}
+                      />
+                    </div>
+                  )}
                   {scheduleError ? (
                     <p className="text-xs text-red-600">{scheduleError}</p>
                   ) : null}
@@ -1117,6 +1608,7 @@ function VehicleRequestPageContent() {
         </div>
 
       </div>
+      )}
     </div>
   );
 }

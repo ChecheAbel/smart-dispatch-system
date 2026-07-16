@@ -1,5 +1,5 @@
 import type { Prisma } from "../generated/prisma";
-import type { AdminRideRequest, ContractBillingInterval, ContractStatus, RideRequest } from "@smart-dispatch/types";
+import type { AdminRideRequest, ContractBillingInterval, ContractStatus, RequesterSegment, RideRequest } from "@smart-dispatch/types";
 import {
   parseVehicleClassTranslationsMap,
   vehicleClassTranslationsMapToArray,
@@ -41,6 +41,11 @@ type DbRideRequest = {
     lastName: string;
     email: string;
     mobileNumber: string;
+    requesterProfile?: {
+      segment: string;
+      organizationName: string | null;
+      governmentEntityType: string | null;
+    } | null;
   } | null;
   vehicleTypeId: string | null;
   vehicleClassId: string | null;
@@ -54,6 +59,7 @@ type DbRideRequest = {
   dropoffLatitude: Prisma.Decimal | null;
   dropoffLongitude: Prisma.Decimal | null;
   scheduledAt: Date | null;
+  scheduledReturnAt: Date | null;
   passengerCount: number;
   notes: string | null;
   status: RideRequest["status"];
@@ -184,6 +190,26 @@ function mapAssignedDriver(
   };
 }
 
+function toRideRequestRequesterSummary(
+  requester: NonNullable<DbRideRequest["requester"]>,
+) {
+  return {
+    id: requester.id,
+    first_name: requester.firstName,
+    middle_name: requester.middleName,
+    last_name: requester.lastName,
+    email: requester.email,
+    mobile_number: requester.mobileNumber,
+    requester_profile: requester.requesterProfile
+      ? {
+          segment: requester.requesterProfile.segment as RequesterSegment,
+          organization_name: requester.requesterProfile.organizationName,
+          government_entity_type: requester.requesterProfile.governmentEntityType,
+        }
+      : null,
+  };
+}
+
 export function toPublicRideRequest(
   rideRequest: DbRideRequest,
   options?: { locale?: string; includeAllTranslations?: boolean },
@@ -195,14 +221,7 @@ export function toPublicRideRequest(
     id: rideRequest.id,
     requester_user_id: rideRequest.requesterUserId,
     requester: rideRequest.requester
-      ? {
-          id: rideRequest.requester.id,
-          first_name: rideRequest.requester.firstName,
-          middle_name: rideRequest.requester.middleName,
-          last_name: rideRequest.requester.lastName,
-          email: rideRequest.requester.email,
-          mobile_number: rideRequest.requester.mobileNumber,
-        }
+      ? toRideRequestRequesterSummary(rideRequest.requester)
       : null,
     vehicle_type_id: rideRequest.vehicleTypeId,
     vehicle_type: rideRequest.vehicleType
@@ -284,6 +303,7 @@ export function toPublicRideRequest(
     dropoff_latitude: decimalToNumber(rideRequest.dropoffLatitude),
     dropoff_longitude: decimalToNumber(rideRequest.dropoffLongitude),
     scheduled_at: rideRequest.scheduledAt?.toISOString() ?? null,
+    scheduled_return_at: rideRequest.scheduledReturnAt?.toISOString() ?? null,
     passenger_count: rideRequest.passengerCount,
     notes: rideRequest.notes,
     status: rideRequest.status,
@@ -377,14 +397,7 @@ export function toAdminRideRequest(
   return {
     ...base,
     requester: rideRequest.requester
-      ? {
-          id: rideRequest.requester.id,
-          first_name: rideRequest.requester.firstName,
-          middle_name: rideRequest.requester.middleName,
-          last_name: rideRequest.requester.lastName,
-          email: rideRequest.requester.email,
-          mobile_number: rideRequest.requester.mobileNumber,
-        }
+      ? toRideRequestRequesterSummary(rideRequest.requester)
       : undefined,
     can_admin_confirm: canAdminConfirmRideRequest(rideRequest.status),
     can_admin_reject: canAdminRejectRideRequest(rideRequest.status),

@@ -5,7 +5,7 @@ import { format, startOfDay } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import { Label } from "@/components/ui/label";
+import { AdminField } from "./admin-form-field";
 import {
   Popover,
   PopoverContent,
@@ -29,6 +29,7 @@ type AdminDatePickerProps = {
   clearLabel?: string;
   todayLabel?: string;
   disabled?: boolean;
+  error?: string;
   onChange: (date: Date | undefined) => void;
   className?: string;
 };
@@ -43,6 +44,7 @@ export function AdminDatePicker({
   clearLabel = "Clear",
   todayLabel = "Today",
   disabled = false,
+  error,
   onChange,
   className,
 }: AdminDatePickerProps) {
@@ -62,10 +64,7 @@ export function AdminDatePicker({
   }
 
   return (
-    <div className={cn("min-w-0 space-y-2", className)}>
-      <Label htmlFor={id} className={adminFilterLabelClass}>
-        {label}
-      </Label>
+    <AdminField label={label} htmlFor={id} error={error} className={className}>
       <Popover open={open} onOpenChange={handleOpenChange}>
         <PopoverTrigger
           render={
@@ -79,6 +78,7 @@ export function AdminDatePicker({
               className={cn(
                 adminDatePickerTriggerClass,
                 value ? "text-[#1C3A34]" : "text-slate-400",
+                error && "border-red-300 bg-red-50/60 text-red-900 focus-visible:border-red-400 focus-visible:ring-red-200/60",
               )}
             />
           }
@@ -167,6 +167,6 @@ export function AdminDatePicker({
           </div>
         </PopoverContent>
       </Popover>
-    </div>
+    </AdminField>
   );
 }

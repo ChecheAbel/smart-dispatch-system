@@ -159,6 +159,7 @@
     "passengerCount": "Passengers",
     "passengersCount": "{count} passengers",
     "scheduledAt": "Pickup date & time",
+    "scheduledReturnAt": "Return date & time",
     "scheduledDate": "Pickup date",
     "scheduledTime": "Pickup time",
     "pickDate": "Pick a date",
@@ -260,6 +261,17 @@
     "saving": "Saving…",
     "detailTitle": "Request details",
     "detailDescription": "Full summary of your submitted ride request.",
+    "detailRequesterSection": "Requester",
+    "detailRequesterDescription": "Account used to submit this ride request.",
+    "detailRequesterEmail": "Email",
+    "detailRequesterMobile": "Mobile",
+    "detailOrganization": "Organization",
+    "detailGovernmentEntityType": "Government entity",
+    "detailRequesterSegment": {
+      "individual": "Individual",
+      "business": "Business",
+      "government": "Government"
+    },
     "detailRequestId": "Request ID",
     "detailLastUpdated": "Last updated",
     "detailRouteSection": "Route",
@@ -1069,7 +1081,7 @@
       "status": "Status",
       "submitted": "Submitted",
       "contract": "Billing",
-      "oneTimeBilling": "One-time",
+      "oneTimeBilling": "No contract",
       "actions": "Actions"
     },
     "empty": {
@@ -1112,6 +1124,13 @@
       "requesterSectionDescription": "Customer who submitted this ride request.",
       "email": "Email",
       "mobile": "Mobile",
+      "organization": "Organization",
+      "governmentEntityType": "Government entity",
+      "segment": {
+        "individual": "Individual",
+        "business": "Business",
+        "government": "Government"
+      },
       "approve": "Approve request",
       "approving": "Approving...",
       "reject": "Reject request",

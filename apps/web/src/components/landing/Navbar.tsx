@@ -5,11 +5,12 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import BrandLogo from "@/components/landing/BrandLogo";
+import { motion, AnimatePresence } from "framer-motion";
 
 const NAV_LINKS = [
-  { label: "Console", href: "#live-view" },
+  { label: "How it Works", href: "#process" },
   { label: "Features", href: "#features" },
-  { label: "Platform", href: "#platform" },
+  { label: "Benefits", href: "#benefits" },
   { label: "Contact", href: "#contact" },
 ] as const;
 
@@ -19,7 +20,7 @@ export default function Navbar() {
   const [activeSection, setActiveSection] = useState("");
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12);
+    const onScroll = () => setScrolled(window.scrollY > 20);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -66,24 +67,32 @@ export default function Navbar() {
 
   return (
     <>
-      <header
+      <motion.header
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         className={cn(
-          "fixed top-0 left-0 right-0 z-40 w-full transition-all duration-300",
-          scrolled
-            ? "border-b border-white/10 bg-[#1C3A34]/95 shadow-lg shadow-black/10 backdrop-blur-md"
-            : "border-b border-transparent bg-[#1C3A34]",
+          "fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500",
+          scrolled ? "pt-4" : "pt-0"
         )}
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[72px] flex items-center justify-between gap-4">
+        <div 
+          className={cn(
+            "mx-auto flex items-center justify-between transition-all duration-500",
+            scrolled 
+              ? "max-w-5xl px-4 sm:px-6 h-16 rounded-full border border-white/20 bg-[#1C3A34]/60 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] backdrop-blur-xl" 
+              : "max-w-7xl px-4 sm:px-6 h-[72px] bg-transparent border-transparent"
+          )}
+        >
           {/* Logo */}
-          <a href="/" className="flex items-center group shrink-0 min-w-0">
-            <BrandLogo priority className="group-hover:opacity-90 transition-opacity" />
+          <a href="/" className="flex items-center group shrink-0 min-w-0 z-10">
+            <BrandLogo priority className="group-hover:opacity-80 transition-opacity drop-shadow-md" />
           </a>
 
           {/* Desktop nav — centered pill */}
           <nav
             aria-label="Main navigation"
-            className="hidden lg:flex items-center gap-0.5 rounded-full border border-white/10 bg-white/[0.04] p-1"
+            className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-white/[0.03] p-1.5 backdrop-blur-md"
           >
             {NAV_LINKS.map((link) => {
               const id = link.href.slice(1);
@@ -93,24 +102,28 @@ export default function Navbar() {
                 <a
                   key={link.href}
                   href={link.href}
-                  className={cn(
-                    "relative px-4 py-2 rounded-full text-[13px] font-semibold tracking-wide transition-all duration-200",
-                    isActive
-                      ? "text-[#1C3A34] bg-[#C9B87A] shadow-sm shadow-[#C9B87A]/20"
-                      : "text-white/65 hover:text-white hover:bg-white/8",
-                  )}
+                  className="relative px-5 py-2 rounded-full text-[13px] font-semibold tracking-wide transition-colors z-10 group"
                 >
-                  {link.label}
+                  <span className={cn("relative z-10", isActive ? "text-[#1C3A34]" : "text-white/70 group-hover:text-white")}>
+                    {link.label}
+                  </span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="nav-pill"
+                      className="absolute inset-0 rounded-full bg-gradient-to-r from-[#C9B87A] to-[#E3D18F] shadow-[0_0_15px_-3px_rgba(201,184,122,0.4)]"
+                      transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                    />
+                  )}
                 </a>
               );
             })}
           </nav>
 
           {/* Desktop actions */}
-          <div className="hidden lg:flex items-center gap-2 shrink-0">
+          <div className="hidden lg:flex items-center gap-4 shrink-0 z-10">
             <Link
               href="/book"
-              className="inline-flex items-center gap-2 bg-[#C9B87A] hover:bg-[#d9ca8e] text-[#1C3A34] font-bold text-[13px] px-5 py-2.5 rounded-full tracking-wide transition-all duration-200 hover:shadow-lg hover:shadow-[#C9B87A]/25 hover:-translate-y-px"
+              className="inline-flex items-center gap-2 bg-[#C9B87A] hover:bg-[#E3D18F] text-[#1C3A34] font-bold text-[13px] px-6 py-2.5 rounded-full tracking-wide transition-all duration-300 hover:shadow-[0_0_20px_-5px_rgba(201,184,122,0.5)] hover:-translate-y-0.5"
             >
               Book now
             </Link>
@@ -120,67 +133,80 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setMobileMenuOpen((open) => !open)}
-            className="lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-xl border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-colors"
+            className="lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md transition-all active:scale-95"
             aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileMenuOpen}
           >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            <AnimatePresence mode="wait">
+              {mobileMenuOpen ? (
+                <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }}>
+                  <X className="h-5 w-5" />
+                </motion.div>
+              ) : (
+                <motion.div key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }}>
+                  <Menu className="h-5 w-5" />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </button>
         </div>
-      </header>
+      </motion.header>
 
-      {/* Mobile menu overlay — only mounted while open to avoid blocking scroll */}
-      {mobileMenuOpen && (
-      <div
-        className="fixed inset-0 z-[9998] lg:hidden"
-        aria-hidden={false}
-      >
-        <button
-          type="button"
-          className="absolute inset-0 bg-[#0f1f1c]/80 backdrop-blur-sm"
-          onClick={closeMobileMenu}
-          aria-label="Close menu"
-        />
+      {/* Mobile menu overlay */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[9998] lg:hidden bg-[#0f1f1c]/90 backdrop-blur-xl"
+            aria-hidden={false}
+          >
+            <div className="absolute top-[90px] left-4 right-4 bg-[#1C3A34]/80 border border-white/20 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-2xl">
+              <nav className="px-4 py-6 space-y-2" aria-label="Mobile navigation">
+                {NAV_LINKS.map((link, i) => {
+                  const id = link.href.slice(1);
+                  const isActive = activeSection === id;
 
-        <div className="absolute top-[72px] left-0 right-0 max-h-[calc(100dvh-72px)] overflow-y-auto border-b border-white/10 bg-[#162e29] shadow-2xl">
-          <nav className="px-4 py-5 space-y-1" aria-label="Mobile navigation">
-            {NAV_LINKS.map((link) => {
-              const id = link.href.slice(1);
-              const isActive = activeSection === id;
+                  return (
+                    <motion.a
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.1 }}
+                      key={link.href}
+                      href={link.href}
+                      onClick={closeMobileMenu}
+                      className={cn(
+                        "flex items-center justify-between px-5 py-4 rounded-2xl text-[15px] font-semibold transition-all active:scale-[0.98]",
+                        isActive
+                          ? "bg-gradient-to-r from-[#C9B87A]/20 to-transparent text-[#C9B87A] border border-[#C9B87A]/30 shadow-inner"
+                          : "text-white/80 hover:bg-white/10 hover:text-white"
+                      )}
+                    >
+                      {link.label}
+                      {isActive && (
+                        <motion.span layoutId="mobile-indicator" className="h-2 w-2 rounded-full bg-[#C9B87A] shadow-[0_0_10px_rgba(201,184,122,0.8)]" />
+                      )}
+                    </motion.a>
+                  );
+                })}
+              </nav>
 
-              return (
-                <a
-                  key={link.href}
-                  href={link.href}
-                  onClick={closeMobileMenu}
-                  className={cn(
-                    "flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-semibold transition-colors",
-                    isActive
-                      ? "bg-[#C9B87A]/15 text-[#C9B87A] border border-[#C9B87A]/25"
-                      : "text-white/80 hover:bg-white/5 hover:text-white",
-                  )}
-                >
-                  {link.label}
-                  {isActive && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-[#C9B87A]" />
-                  )}
-                </a>
-              );
-            })}
-          </nav>
-
-          <div className="px-4 pb-6 pt-2 border-t border-white/10 space-y-2">
-            <Link
-              href="/book"
-              onClick={closeMobileMenu}
-              className="flex items-center justify-center w-full bg-[#C9B87A] text-[#1C3A34] font-bold text-sm py-3.5 rounded-xl hover:bg-[#d9ca8e] transition-colors"
-            >
-              Book now
-            </Link>
-          </div>
-        </div>
-      </div>
-      )}
+              <div className="px-4 pb-6 pt-2 space-y-2">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
+                  <Link
+                    href="/book"
+                    onClick={closeMobileMenu}
+                    className="flex items-center justify-center w-full bg-gradient-to-r from-[#C9B87A] to-[#A4945A] text-[#1C3A34] font-bold text-base py-4 rounded-2xl shadow-lg active:scale-[0.98] transition-transform"
+                  >
+                    Book now
+                  </Link>
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

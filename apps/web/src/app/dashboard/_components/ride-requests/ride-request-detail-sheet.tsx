@@ -79,6 +79,10 @@ type RideRequestRequesterLabels = {
   description: string;
   email: string;
   mobile: string;
+  organization?: string;
+  segment?: string;
+  segmentLabels?: Record<"individual" | "business" | "government", string>;
+  governmentEntityType?: string;
 };
 
 type RideRequestDetailSheetProps = {
@@ -228,6 +232,7 @@ export function RideRequestDetailSheet({
   const sheetTitle = title ?? historyCopy.detailTitle;
   const sheetDescription = description ?? historyCopy.detailDescription;
   const sheetEmptyTitle = emptyTitle ?? historyCopy.emptyTitle;
+  const displayRequester = requester ?? request?.requester ?? undefined;
 
   if (!open) {
     return null;
@@ -288,11 +293,27 @@ export function RideRequestDetailSheet({
                 <CalendarClock className="mt-0.5 size-4 shrink-0 text-[#C9B87A]" />
                 <div className="min-w-0 space-y-1">
                   <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
-                    {requestCopy.scheduledAt}
+                    {request?.contract_id ? "START DATE & TIME" : requestCopy.scheduledAt}
                   </p>
                   <p className="text-base font-semibold text-[#1C3A34]">{scheduledLabel}</p>
                 </div>
               </div>
+              {request?.scheduled_return_at && (
+                <>
+                  <div className="hidden h-8 w-px bg-slate-200 sm:block" aria-hidden />
+                  <div className="flex min-w-0 items-start gap-2.5">
+                    <CalendarClock className="mt-0.5 size-4 shrink-0 text-[#C9B87A]" />
+                    <div className="min-w-0 space-y-1">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                        {request?.contract_id ? "END DATE & TIME" : (requestCopy.scheduledReturnAt ?? "RETURN DATE & TIME")}
+                      </p>
+                      <p className="text-base font-semibold text-[#1C3A34]">
+                        {formatScheduledAt(request.scheduled_return_at, locale)}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
               <Badge variant="outline" className={cn("shrink-0 text-xs", statusBadgeClass(request.status))}>
                 {requestCopy.status[request.status]}
               </Badge>
@@ -326,14 +347,42 @@ export function RideRequestDetailSheet({
             </div>
           </div>
 
-          {requester && requesterLabels ? (
+          {displayRequester && requesterLabels ? (
             <DetailSection title={requesterLabels.section} icon={UserRound}>
               <div className="rounded-xl border border-slate-200/80 bg-white p-3.5">
-                <p className="text-sm font-semibold text-[#1C3A34]">{formatRequesterName(requester)}</p>
-                <p className="mt-1 text-xs text-slate-500">{requesterLabels.description}</p>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-[#1C3A34]">{formatRequesterName(displayRequester)}</p>
+                    <p className="mt-1 text-xs text-slate-500">{requesterLabels.description}</p>
+                  </div>
+                  {displayRequester.requester_profile &&
+                  requesterLabels.segmentLabels?.[displayRequester.requester_profile.segment] ? (
+                    <Badge variant="outline" className="shrink-0 text-[10px] font-medium text-slate-600">
+                      {requesterLabels.segmentLabels[displayRequester.requester_profile.segment]}
+                    </Badge>
+                  ) : null}
+                </div>
                 <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                  <DetailRow label={requesterLabels.email} value={requester.email} />
-                  <DetailRow label={requesterLabels.mobile} value={requester.mobile_number} />
+                  {displayRequester.requester_profile &&
+                  (displayRequester.requester_profile.segment === "business" ||
+                    displayRequester.requester_profile.segment === "government") &&
+                  displayRequester.requester_profile.organization_name &&
+                  requesterLabels.organization ? (
+                    <DetailRow
+                      label={requesterLabels.organization}
+                      value={displayRequester.requester_profile.organization_name}
+                    />
+                  ) : null}
+                  {displayRequester.requester_profile?.segment === "government" &&
+                  displayRequester.requester_profile.government_entity_type &&
+                  requesterLabels.governmentEntityType ? (
+                    <DetailRow
+                      label={requesterLabels.governmentEntityType}
+                      value={displayRequester.requester_profile.government_entity_type}
+                    />
+                  ) : null}
+                  <DetailRow label={requesterLabels.email} value={displayRequester.email} />
+                  <DetailRow label={requesterLabels.mobile} value={displayRequester.mobile_number} />
                 </div>
               </div>
             </DetailSection>

@@ -78,6 +78,7 @@ export function RecentRideRequestListItem({
         <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-2.5 py-1 text-xs text-slate-600">
           <CalendarClock className="size-3 text-[#C9B87A]" />
           {formatScheduledAt(request.scheduled_at, locale)}
+          {request.scheduled_return_at && ` - ${formatScheduledAt(request.scheduled_return_at, locale)}`}
         </span>
         <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200/80 bg-white px-2.5 py-1 text-xs text-slate-600">
           <Users className="size-3 text-[#C9B87A]" />

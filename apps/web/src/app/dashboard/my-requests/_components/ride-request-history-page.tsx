@@ -178,6 +178,7 @@ export function RideRequestHistoryPage() {
         cell: (row) => (
           <span className="text-sm text-slate-600">
             {formatScheduledAt(row.scheduled_at, locale)}
+            {row.scheduled_return_at && ` - ${formatScheduledAt(row.scheduled_return_at, locale)}`}
           </span>
         ),
       },
@@ -306,6 +307,16 @@ export function RideRequestHistoryPage() {
         open={Boolean(detailRequest)}
         locale={locale}
         onOpenChange={(open: boolean) => !open && setDetailRequest(null)}
+        requester={detailRequest?.requester ?? undefined}
+        requesterLabels={{
+          section: historyCopy.detailRequesterSection,
+          description: historyCopy.detailRequesterDescription,
+          email: historyCopy.detailRequesterEmail,
+          mobile: historyCopy.detailRequesterMobile,
+          organization: historyCopy.detailOrganization,
+          governmentEntityType: historyCopy.detailGovernmentEntityType,
+          segmentLabels: historyCopy.detailRequesterSegment,
+        }}
       />
 
       <EditRideRequestSheet

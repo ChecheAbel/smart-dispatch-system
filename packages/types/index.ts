@@ -768,6 +768,7 @@ export interface RideRequest {
   dropoff_latitude: number | null;
   dropoff_longitude: number | null;
   scheduled_at: string | null;
+  scheduled_return_at: string | null;
   passenger_count: number;
   notes: string | null;
   status: RideRequestStatus;
@@ -818,6 +819,11 @@ export interface RideRequestRequesterSummary {
   last_name: string;
   email: string;
   mobile_number: string;
+  requester_profile: {
+    segment: RequesterSegment;
+    organization_name: string | null;
+    government_entity_type: string | null;
+  } | null;
 }
 
 export type ContractStatus = "draft" | "active" | "expired" | "cancelled";

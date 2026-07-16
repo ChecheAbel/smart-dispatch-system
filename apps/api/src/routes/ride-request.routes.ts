@@ -13,6 +13,7 @@ import {
   countRideRequestsForUser,
   countRideRequestsForDriver,
   createRideRequest,
+  createBulkRideRequests,
   findRideRequestForUser,
   findRideRequestForDriver,
   listRideRequestsForDriver,
@@ -989,7 +990,7 @@ router.post(
         return sendError(res, referenceError, 400);
       }
 
-      const rideRequest = await createRideRequest({
+      const baseRequestData = {
         requesterUserId: userId,
         vehicleTypeId: parsed.data.vehicleTypeId,
         vehicleClassId: parsed.data.vehicleClassId,
@@ -1003,29 +1004,69 @@ router.post(
         dropoffLatitude: parsed.data.dropoffLatitude,
         dropoffLongitude: parsed.data.dropoffLongitude,
         scheduledAt: parsed.data.scheduledAt,
+        scheduledReturnAt: parsed.data.scheduledReturnAt,
         passengerCount: parsed.data.passengerCount,
         notes: parsed.data.notes,
         contractId: parsed.data.contractId,
+      };
+
+      const requestsToCreate = [];
+
+      if (parsed.data.selectedVehicles && parsed.data.selectedVehicles.length > 0) {
+        for (const sv of parsed.data.selectedVehicles) {
+          for (let i = 0; i < sv.quantity; i++) {
+            requestsToCreate.push({
+              ...baseRequestData,
+              vehicleTypeId: sv.vehicleTypeId,
+              vehicleClassId: sv.vehicleClassId,
+            });
+          }
+        }
+      } else {
+        requestsToCreate.push(baseRequestData);
+      }
+
+      // Every trip needs a linked contract as the agreement record (bail-out / proof),
+      // unless the client already chose an existing contract_id.
+      const shouldGenerateContract = !baseRequestData.contractId;
+      const serviceDate =
+        parsed.data.scheduledAt?.toISOString().split("T")[0] ??
+        new Date().toISOString().split("T")[0];
+      const isRecurringContract = parsed.data.requestType === "contract";
+      const contractTitle = shouldGenerateContract
+        ? isRecurringContract
+          ? `Contract Request - ${serviceDate}`
+          : `Trip Agreement - ${serviceDate}`
+        : undefined;
+      const billingInterval = isRecurringContract ? "monthly" : "per_trip";
+
+      const createdRequests = await createBulkRideRequests({
+        contractTitle,
+        billingInterval,
+        requests: requestsToCreate,
       });
 
-      await recordAuditLog({
-        actorUserId: userId,
-        action: "create",
-        module: "customer_requests",
-        entityType: "ride_request",
-        entityId: rideRequest.id,
-        entityLabel: `${rideRequest.pickupAddress} → ${rideRequest.dropoffAddress}`,
-        summary: "Customer ride request submitted",
-        req,
-      });
+      for (let i = 0; i < createdRequests.length; i++) {
+        const rideRequest = createdRequests[i];
+        await recordAuditLog({
+          actorUserId: userId,
+          action: "create",
+          module: "customer_requests",
+          entityType: "ride_request",
+          entityId: rideRequest.id,
+          entityLabel: `${rideRequest.pickupAddress} → ${rideRequest.dropoffAddress}`,
+          summary: "Customer ride request submitted",
+          req,
+        });
 
-      queueRideRequestNotifications("created", rideRequest.id);
+        if (i === 0) {
+          queueRideRequestNotifications("created", rideRequest.id);
+        }
+      }
 
-      return sendSuccess(
-        res,
-        { ride_request: toPublicRideRequest(rideRequest, { locale }) },
-        { status: 201, message: "Ride request submitted successfully." },
-      );
+      return sendSuccess(res, { 
+        ride_requests: createdRequests.map((r) => toPublicRideRequest(r, { locale })) 
+      }, { status: 201, message: "Ride request submitted successfully." });
     } catch (error) {
       return handleRouteError(res, error);
     }

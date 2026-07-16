@@ -159,6 +159,7 @@
     "passengerCount": "ተሳፋሪዎች",
     "passengersCount": "{count} ተሳፋሪዎች",
     "scheduledAt": "የመውሰድ ቀን እና ሰዓት",
+    "scheduledReturnAt": "የመመለሻ ቀን እና ሰዓት",
     "scheduledDate": "የመውሰድ ቀን",
     "scheduledTime": "የመውሰድ ሰዓት",
     "pickDate": "ቀን ይምረጡ",
@@ -260,6 +261,17 @@
     "saving": "በመቀመጥ ላይ…",
     "detailTitle": "የጥያቄ ዝርዝር",
     "detailDescription": "የላኩትን የጉዞ ጥያቄ ሙሉ ማጠቃለያ።",
+    "detailRequesterSection": "ጠያቂ",
+    "detailRequesterDescription": "ይህን ጉዞ ጥያቄ ያስገባው መለያ።",
+    "detailRequesterEmail": "ኢሜይል",
+    "detailRequesterMobile": "ሞባይል",
+    "detailOrganization": "ድርጅት",
+    "detailGovernmentEntityType": "የመንግስት አካል",
+    "detailRequesterSegment": {
+      "individual": "ግለሰብ",
+      "business": "ንግድ",
+      "government": "መንግስት"
+    },
     "detailRequestId": "የጥያቄ መለያ",
     "detailLastUpdated": "ለመጨረሻ ጊዜ የተሻሻለ",
     "detailRouteSection": "መስመር",
@@ -1069,7 +1081,7 @@
       "status": "ሁኔታ",
       "submitted": "ተላከ",
       "contract": "ክፍያ",
-      "oneTimeBilling": "አንድ ጊዜ",
+      "oneTimeBilling": "ውል የለም",
       "actions": "እርምጃዎች"
     },
     "empty": {
@@ -1112,6 +1124,13 @@
       "requesterSectionDescription": "ይህን ጉዞ ጥያቄ ያስገባው ደንበኛ።",
       "email": "ኢሜይል",
       "mobile": "ሞባይል",
+      "organization": "ድርጅት",
+      "governmentEntityType": "የመንግስት አካል",
+      "segment": {
+        "individual": "ግለሰብ",
+        "business": "ንግድ",
+        "government": "መንግስት"
+      },
       "approve": "ጥያቄ ያረጋግጡ",
       "approving": "በማረጋገጥ ላይ…",
       "reject": "ጥያቄ ይቀበሉ",
