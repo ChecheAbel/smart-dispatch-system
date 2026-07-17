@@ -514,12 +514,14 @@ export async function updateRideRequestStatusAdmin(
     data.completedAt = new Date();
   }
 
+  const shouldEnsureEnrollment =
+    Boolean(existing.contractId) &&
+    (status === "confirmed" ||
+      status === "in_progress" ||
+      status === "completed");
+
   return prisma.$transaction(async (tx) => {
-    if (
-      status === "confirmed" &&
-      existing.status !== "confirmed" &&
-      existing.contractId
-    ) {
+    if (shouldEnsureEnrollment && existing.contractId) {
       const contract = await findActiveContractById(existing.contractId);
       if (!contract) {
         throw new Error("Linked contract is not available.");
@@ -561,15 +563,38 @@ export async function assignRideRequestAdmin(id: string, vehicleId: string) {
     return null;
   }
 
-  return prisma.rideRequest.update({
-    where: { id },
-    data: {
-      assignedVehicleId: vehicleId,
-      assignedDriverUserId: vehicle.assignedDriverUserId,
-      assignedAt: new Date(),
-      status: "confirmed",
-    },
-    include: rideRequestAdminInclude,
+  const existing = await findRideRequestById(id);
+  if (!existing) {
+    return null;
+  }
+
+  return prisma.$transaction(async (tx) => {
+    if (existing.contractId) {
+      const contract = await findActiveContractById(existing.contractId);
+      if (!contract) {
+        throw new Error("Linked contract is not available.");
+      }
+
+      await ensureContractEnrollment({
+        contractId: existing.contractId,
+        requesterUserId: existing.requesterUserId,
+        scheduledAt: existing.scheduledAt,
+        acceptedAt: new Date(),
+        billingInterval: contract.billingInterval as ContractBillingInterval,
+        client: tx,
+      });
+    }
+
+    return tx.rideRequest.update({
+      where: { id },
+      data: {
+        assignedVehicleId: vehicleId,
+        assignedDriverUserId: vehicle.assignedDriverUserId,
+        assignedAt: new Date(),
+        status: "confirmed",
+      },
+      include: rideRequestAdminInclude,
+    });
   });
 }
 

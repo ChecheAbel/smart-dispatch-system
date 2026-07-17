@@ -798,7 +798,7 @@
     "paymentTermsPerTrip": "Per trip",
     "empty": {
       "title": "No contract enrollments",
-      "description": "Contract billing periods appear here after dispatch confirms a contract ride request.",
+      "description": "Contract billing periods appear here after a contract ride is confirmed, assigned, or started.",
       "searchDescription": "Try a different search term."
     },
     "accessDenied": {

@@ -105,6 +105,14 @@ function statusBadgeClass(status: string) {
   return "border-slate-200 bg-slate-50 text-slate-600";
 }
 
+function formatStatusLabel(status: string) {
+  return status
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 function requesterInitials(booking: AdminRideRequest) {
   const first = booking.requester?.first_name?.charAt(0) ?? "";
   const last = booking.requester?.last_name?.charAt(0) ?? "";
@@ -287,11 +295,11 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
             <Badge
               variant="outline"
               className={cn(
-                "rounded-md border px-2 py-0.5 text-[10px] font-bold capitalize",
+                "rounded-md border px-2 py-0.5 text-[10px] font-bold",
                 statusBadgeClass(booking.status),
               )}
             >
-              {booking.status}
+              {formatStatusLabel(booking.status)}
             </Badge>
             {multiDay ? (
               <span className="rounded-md bg-[#C9B87A]/15 px-1.5 py-0.5 text-[10px] font-bold text-[#1C3A34]">
@@ -374,25 +382,25 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
       </div>
 
       {viewMode === "calendar" ? (
-        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.45fr)_minmax(0,1fr)]">
-          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-            <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 sm:px-5">
-              <div className="flex items-center gap-2">
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+          <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center justify-between gap-3 border-b border-slate-200 bg-slate-50/80 px-4 py-3 sm:px-5">
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={handlePrevMonth}
-                  className="flex size-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50"
+                  className="flex size-8 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-white hover:text-[#1C3A34]"
                   aria-label="Previous month"
                 >
                   <ChevronLeft className="size-4" />
                 </button>
-                <h4 className="min-w-[9rem] text-center text-sm font-extrabold capitalize text-[#1C3A34]">
+                <h4 className="min-w-[10rem] text-center text-base font-extrabold capitalize text-[#1C3A34]">
                   {monthLabel}
                 </h4>
                 <button
                   type="button"
                   onClick={handleNextMonth}
-                  className="flex size-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 transition-colors hover:bg-slate-50"
+                  className="flex size-8 items-center justify-center rounded-full text-slate-600 transition-colors hover:bg-white hover:text-[#1C3A34]"
                   aria-label="Next month"
                 >
                   <ChevronRight className="size-4" />
@@ -401,110 +409,124 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
               <button
                 type="button"
                 onClick={handleGoToday}
-                className="rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-bold text-[#1C3A34] transition-colors hover:bg-slate-50"
+                className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-[#1C3A34] transition-colors hover:border-[#1C3A34]/30"
               >
                 Today
               </button>
             </div>
 
-            <div className="px-3 pb-4 pt-3 sm:px-4">
-              <div className="mb-2 grid grid-cols-7 gap-1">
+            <div className="border-b border-slate-200 bg-white">
+              <div className="grid grid-cols-7">
                 {(locale === "am" ? WEEKDAYS_AM : WEEKDAYS).map((day) => (
                   <div
                     key={day}
-                    className="py-1.5 text-center text-[11px] font-bold uppercase tracking-wide text-slate-400"
+                    className="border-r border-slate-100 py-2.5 text-center text-[11px] font-bold uppercase tracking-wide text-slate-500 [&:nth-child(7n)]:border-r-0"
                   >
                     {day}
                   </div>
                 ))}
               </div>
+            </div>
 
-              <div className="grid grid-cols-7 gap-1">
-                {daysGrid.map((day, idx) => {
-                  if (day === null) {
-                    return <div key={`empty-${idx}`} className="min-h-[4.25rem] rounded-lg" />;
-                  }
-
-                  const cellDate = getCellDate(day);
-                  const dayBookings = getBookingsForDay(day);
-                  const hasBookings = dayBookings.length > 0;
-                  const hasMultiDay = dayBookings.some(bookingSpansMultipleDays);
-                  const isSelected = selectedDayValue === day;
-                  const isToday = isSameLocalDay(cellDate, today);
-
+            <div className="grid grid-cols-7 border-b border-slate-200">
+              {daysGrid.map((day, idx) => {
+                if (day === null) {
                   return (
-                    <button
-                      key={`day-${day}`}
-                      type="button"
-                      onClick={() => handleSelectDay(day)}
-                      className={cn(
-                        "relative flex min-h-[4.25rem] flex-col items-stretch rounded-xl border p-1.5 text-left transition-colors",
-                        isSelected
-                          ? "border-[#1C3A34] bg-[#1C3A34] text-white"
-                          : hasBookings
-                            ? hasMultiDay
-                              ? "border-[#C9B87A]/50 bg-[#C9B87A]/12 text-[#1C3A34] hover:border-[#C9B87A]"
-                              : "border-[#1C3A34]/20 bg-[#1C3A34]/[0.04] text-[#1C3A34] hover:border-[#1C3A34]/40"
-                            : "border-transparent bg-slate-50/80 text-slate-700 hover:border-slate-200 hover:bg-white",
-                        isToday && !isSelected && "ring-2 ring-[#C9B87A]/70 ring-offset-1",
-                      )}
-                    >
+                    <div
+                      key={`empty-${idx}`}
+                      className="min-h-[5.5rem] border-b border-r border-slate-100 bg-slate-50/60 [&:nth-child(7n)]:border-r-0"
+                    />
+                  );
+                }
+
+                const cellDate = getCellDate(day);
+                const dayBookings = getBookingsForDay(day);
+                const hasBookings = dayBookings.length > 0;
+                const isSelected = selectedDayValue === day;
+                const isToday = isSameLocalDay(cellDate, today);
+                const visibleBookings = dayBookings.slice(0, 2);
+                const overflowCount = dayBookings.length - visibleBookings.length;
+
+                return (
+                  <button
+                    key={`day-${day}`}
+                    type="button"
+                    onClick={() => handleSelectDay(day)}
+                    className={cn(
+                      "group relative flex min-h-[5.5rem] flex-col items-stretch border-b border-r border-slate-100 p-1.5 text-left transition-colors [&:nth-child(7n)]:border-r-0",
+                      isSelected
+                        ? "bg-[#1C3A34]/[0.06] ring-2 ring-inset ring-[#1C3A34]"
+                        : "bg-white hover:bg-slate-50/80",
+                    )}
+                  >
+                    <div className="mb-1 flex items-center justify-end">
                       <span
                         className={cn(
-                          "text-[11px] font-bold",
-                          isSelected ? "text-white" : isToday ? "text-[#1C3A34]" : "text-slate-600",
+                          "inline-flex size-7 items-center justify-center text-[13px] font-bold",
+                          isToday
+                            ? "rounded-full bg-[#1C3A34] text-white"
+                            : isSelected
+                              ? "rounded-full bg-[#C9B87A]/25 text-[#1C3A34]"
+                              : "text-slate-700",
                         )}
                       >
                         {day}
                       </span>
+                    </div>
 
-                      {hasBookings ? (
-                        <div className="mt-auto space-y-1 pt-1">
-                          <div
-                            className={cn(
-                              "h-1 w-full rounded-full",
-                              isSelected
-                                ? "bg-[#C9B87A]"
-                                : hasMultiDay
-                                  ? "bg-[#C9B87A]"
-                                  : "bg-[#1C3A34]/50",
-                            )}
-                          />
-                          <span
-                            className={cn(
-                              "inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-extrabold",
-                              isSelected
-                                ? "bg-white/15 text-white"
-                                : "bg-white/80 text-[#1C3A34]",
-                            )}
-                          >
-                            {dayBookings.length}
+                    {hasBookings ? (
+                      <div className="mt-auto flex min-w-0 flex-col gap-0.5">
+                        {visibleBookings.map((booking) => {
+                          const multiDay = bookingSpansMultipleDays(booking);
+                          return (
+                            <span
+                              key={booking.id}
+                              className={cn(
+                                "truncate rounded px-1 py-0.5 text-[10px] font-semibold leading-tight",
+                                multiDay
+                                  ? "bg-[#C9B87A]/25 text-[#1C3A34]"
+                                  : booking.status === "in_progress"
+                                    ? "bg-blue-100 text-blue-800"
+                                    : booking.status === "completed"
+                                      ? "bg-emerald-100 text-emerald-800"
+                                      : "bg-[#1C3A34]/10 text-[#1C3A34]",
+                              )}
+                            >
+                              {requesterName(booking)}
+                            </span>
+                          );
+                        })}
+                        {overflowCount > 0 ? (
+                          <span className="px-1 text-[10px] font-bold text-slate-500">
+                            +{overflowCount} more
                           </span>
-                        </div>
-                      ) : null}
-                    </button>
-                  );
-                })}
-              </div>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </button>
+                );
+              })}
+            </div>
 
-              <div className="mt-4 flex flex-wrap items-center gap-4 border-t border-slate-100 pt-3 text-[11px] font-medium text-slate-500">
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="size-2.5 rounded-sm bg-[#1C3A34]/35" />
-                  Single-day trip
+            <div className="flex flex-wrap items-center gap-4 px-4 py-3 text-[11px] font-medium text-slate-500 sm:px-5">
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-2.5 rounded-sm bg-[#1C3A34]/25" />
+                Single-day
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-2.5 rounded-sm bg-[#C9B87A]" />
+                Multi-day
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="inline-flex size-4 items-center justify-center rounded-full bg-[#1C3A34] text-[8px] font-bold text-white">
+                  {locale === "am" ? gregorianToEthiopian(today).day : today.getDate()}
                 </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="size-2.5 rounded-sm bg-[#C9B87A]" />
-                  Multi-day / contract
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="size-2.5 rounded-full ring-2 ring-[#C9B87A]" />
-                  Today
-                </span>
-              </div>
+                Today
+              </span>
             </div>
           </section>
 
-          <aside className="rounded-2xl border border-slate-200 bg-white">
+          <aside className="rounded-2xl border border-slate-200 bg-white shadow-sm">
             {selectedDate ? (
               <div className="flex h-full flex-col">
                 <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3.5 sm:px-5">
@@ -594,11 +616,11 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
                         <Badge
                           variant="outline"
                           className={cn(
-                            "rounded-full border px-2.5 py-0.5 text-[10px] font-bold capitalize tracking-wide",
+                            "rounded-full border px-2.5 py-0.5 text-[10px] font-bold tracking-wide",
                             statusBadgeClass(booking.status),
                           )}
                         >
-                          {booking.status}
+                          {formatStatusLabel(booking.status)}
                         </Badge>
                       </div>
 

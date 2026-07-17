@@ -5,6 +5,7 @@ import { MapPin, Radio, WifiOff } from "lucide-react";
 import type { Vehicle } from "@smart-dispatch/types";
 import { useVehicleLocation } from "@/hooks/use-vehicle-location";
 import { adminCardClass, adminHeadingClass, adminIconBoxClass } from "@/lib/admin-theme";
+import { getVehiclePhotoUrl } from "@/lib/vehicle-photo";
 import { cn } from "@/lib/utils";
 
 const LazyVehicleLiveMap = dynamic(
@@ -37,6 +38,9 @@ export function VehicleDetailTrackingTab({ vehicle }: VehicleDetailTrackingTabPr
   const { location, connected, loading, error, isLive } = useVehicleLocation(vehicle.id);
   const hasLocation = Boolean(location);
   const assignedDriver = vehicle.assigned_driver?.name;
+  const popupImageUrl = vehicle.images?.[0]
+    ? getVehiclePhotoUrl(vehicle.images[0])
+    : null;
 
   return (
     <section className={cn(adminCardClass, "space-y-4 rounded-2xl p-4 text-left sm:space-y-5 sm:p-5 lg:p-6")}>
@@ -114,6 +118,7 @@ export function VehicleDetailTrackingTab({ vehicle }: VehicleDetailTrackingTabPr
         latitude={location?.latitude ?? DEFAULT_CENTER.latitude}
         longitude={location?.longitude ?? DEFAULT_CENTER.longitude}
         popupText={`${vehicle.make ?? ""} ${vehicle.model ?? ""} (${vehicle.plate_number})`.trim()}
+        popupImageUrl={popupImageUrl}
         height={380}
         showMarker={hasLocation}
         lastUpdatedAt={location?.recorded_at ?? null}

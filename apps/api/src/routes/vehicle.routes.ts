@@ -52,6 +52,7 @@ import { findVehicleTypeById, listVehicleTypes } from "../models/vehicle-type.mo
 import { findVehicleClassById, listVehicleClasses } from "../models/vehicle-class.model";
 import { listVehicleOperationalBusyState } from "../models/ride-request.model";
 import { toPublicVehicleLocationSnapshot } from "../mappers/vehicle-location.mapper";
+import { findVehicleLocationByVehicleId } from "../models/vehicle-location.model";
 import { toPublicVehicleType } from "../mappers/vehicle-type.mapper";
 import { toPublicVehicleClass } from "../mappers/vehicle-class.mapper";
 import { isVehicleTypeClassAllowed } from "../models/vehicle-type-class.model";

@@ -7,13 +7,49 @@ import "leaflet/dist/leaflet.css";
 import { createMapMarkerIcon } from "@/lib/map/map-marker";
 import { Button } from "@/components/ui/button";
 import "@/components/shared/map-marker/map-marker.css";
+import "./vehicle-live-map-popup.css";
 
 const markerIcon = createMapMarkerIcon("active");
+
+const POPUP_OPTIONS: L.PopupOptions = {
+  className: "vehicle-live-map-popup",
+  maxWidth: 340,
+  minWidth: 300,
+  offset: [0, -4],
+};
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function buildVehicleLiveMapPopupHtml(popupText: string, imageUrl?: string | null) {
+  const title = escapeHtml(popupText);
+  const image = imageUrl
+    ? `<div class="vehicle-live-map-popup__image-wrap">
+        <img class="vehicle-live-map-popup__image" src="${escapeHtml(imageUrl)}" alt="" />
+      </div>`
+    : "";
+
+  return `
+    <div class="vehicle-live-map-popup__card">
+      ${image}
+      <div class="vehicle-live-map-popup__body">
+        <p class="vehicle-live-map-popup__title">${title}</p>
+      </div>
+    </div>
+  `;
+}
 
 export type VehicleLiveMapProps = {
   latitude: number;
   longitude: number;
   popupText: string;
+  popupImageUrl?: string | null;
   height?: number;
   showMarker?: boolean;
   lastUpdatedAt?: string | null;
@@ -23,6 +59,7 @@ export function VehicleLiveMap({
   latitude,
   longitude,
   popupText,
+  popupImageUrl = null,
   height = 380,
   showMarker = true,
   lastUpdatedAt = null,
@@ -79,20 +116,22 @@ export function VehicleLiveMap({
       return;
     }
 
+    const popupHtml = buildVehicleLiveMapPopupHtml(popupText, popupImageUrl);
+
     if (!markerRef.current) {
       const marker = L.marker([latitude, longitude], {
         icon: markerIcon,
       }).addTo(map);
 
-      marker.bindPopup(`<strong style="color: #1C3A34;">${popupText}</strong>`);
+      marker.bindPopup(popupHtml, POPUP_OPTIONS);
       markerRef.current = marker;
     } else {
       markerRef.current.setLatLng([latitude, longitude]);
-      markerRef.current.setPopupContent(`<strong style="color: #1C3A34;">${popupText}</strong>`);
+      markerRef.current.setPopupContent(popupHtml);
     }
 
     setDisplayCoords({ latitude, longitude });
-  }, [latitude, longitude, popupText, showMarker]);
+  }, [latitude, longitude, popupText, popupImageUrl, showMarker]);
 
   function handleZoomIn() {
     mapRef.current?.zoomIn();

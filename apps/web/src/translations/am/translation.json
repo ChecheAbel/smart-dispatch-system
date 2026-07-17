@@ -798,7 +798,7 @@
     "paymentTermsPerTrip": "በጉዞ",
     "empty": {
       "title": "የኮንትራት መመዝገብ የለም",
-      "description": "የኮንትራት ጉዞ ጥያቄ ከተረጋገጠ በኋላ የክፍያ ጊዜያት እዚህ ይታያሉ።",
+      "description": "የኮንትራት ጉዞ ጥያቄ ከተረጋገጠ፣ ተሽከርካሪ ከተመደበ ወይም ጉዞ ከተጀመረ በኋላ የክፍያ ጊዜያት እዚህ ይታያሉ።",
       "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
     },
     "accessDenied": {
