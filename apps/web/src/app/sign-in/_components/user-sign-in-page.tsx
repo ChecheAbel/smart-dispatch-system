@@ -3,27 +3,37 @@
 import { Suspense } from "react";
 import AuthShell from "@/components/auth/AuthShell";
 import { AuthBackToHomeLink } from "@/components/auth/AuthBackToHomeLink";
+import { AuthLanguageSwitcher } from "@/components/auth/AuthLanguageSwitcher";
 import UserSignInForm from "@/components/auth/UserSignInForm";
-
-const USER_SIGN_IN_SHELL = {
-  mobileTitle: "Customer Sign In",
-  desktopEyebrow: "— Customer Portal —",
-  desktopTitle: (
-    <>
-      Book with{" "}
-      <span className="bg-gradient-to-r from-[#C9B87A] via-[#e8d69a] to-[#C9B87A] bg-clip-text text-transparent">
-        Smart Dispatch
-      </span>
-    </>
-  ),
-  desktopDescription:
-    "Sign in to request vehicles, track bookings, and manage your organization profile.",
-} as const;
+import { useLocale } from "@/components/shared/providers/locale-context";
+import { getCustomerAuthMessages } from "@/translations";
 
 export function UserSignInPage() {
+  const { locale } = useLocale();
+  const copy = getCustomerAuthMessages(locale);
+
   return (
-    <AuthShell {...USER_SIGN_IN_SHELL} leadingAction={<AuthBackToHomeLink />}>
-      <Suspense fallback={<div className="py-10 text-center text-slate-400">Loading sign in form...</div>}>
+    <AuthShell
+      mobileTitle={copy.signIn.mobileTitle}
+      desktopEyebrow={copy.signIn.desktopEyebrow}
+      desktopTitle={
+        <>
+          {copy.signIn.desktopTitlePrefix}{" "}
+          <span className="bg-gradient-to-r from-[#C9B87A] via-[#e8d69a] to-[#C9B87A] bg-clip-text text-transparent">
+            {copy.signIn.desktopTitleHighlight}
+          </span>
+        </>
+      }
+      desktopDescription={copy.signIn.desktopDescription}
+      footerCopyright={copy.common.copyright}
+      leadingAction={<AuthBackToHomeLink />}
+      headerActions={<AuthLanguageSwitcher />}
+    >
+      <Suspense
+        fallback={
+          <div className="py-10 text-center text-slate-400">{copy.signIn.loadingForm}</div>
+        }
+      >
         <UserSignInForm />
       </Suspense>
     </AuthShell>

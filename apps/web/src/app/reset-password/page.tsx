@@ -4,7 +4,7 @@ import ResetPasswordForm from "@/components/auth/ResetPasswordForm";
 
 export const metadata: Metadata = {
   title: "Reset Password | Smart Dispatch",
-  description: "Set a new password using your Smart Dispatch administrator invitation link.",
+  description: "Set a new password using your Smart Dispatch password reset link.",
 };
 
 function ResetPasswordFallback() {
@@ -15,10 +15,10 @@ function ResetPasswordFallback() {
   );
 }
 
-export default function ResetPasswordPage() {
+export default function UserResetPasswordPage() {
   return (
     <Suspense fallback={<ResetPasswordFallback />}>
-      <ResetPasswordForm audience="admin" />
+      <ResetPasswordForm audience="customer" />
     </Suspense>
   );
 }

@@ -277,7 +277,11 @@ export function registerAuthRoutes(app: Express) {
       const email = typeof req.body?.email === "string" ? req.body.email : undefined;
       const mobileNumber =
         typeof req.body?.mobile_number === "string" ? req.body.mobile_number : undefined;
-      const result = await requestPasswordReset({ email, mobileNumber });
+      const portal =
+        req.body?.portal === "customer" || req.body?.portal === "admin"
+          ? req.body.portal
+          : undefined;
+      const result = await requestPasswordReset({ email, mobileNumber, portal });
       return sendSuccess(res, result, { message: result.message });
     } catch (error) {
       return handleRouteError(res, error);

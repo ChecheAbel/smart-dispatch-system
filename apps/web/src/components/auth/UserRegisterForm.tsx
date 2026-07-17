@@ -23,9 +23,12 @@ import {
 } from "lucide-react";
 import type { RequesterSegment } from "@smart-dispatch/types";
 import AuthShell from "@/components/auth/AuthShell";
+import { AuthBackToHomeLink } from "@/components/auth/AuthBackToHomeLink";
+import { AuthLanguageSwitcher } from "@/components/auth/AuthLanguageSwitcher";
+import { useLocale } from "@/components/shared/providers/locale-context";
 import { registerUserApplication } from "@/lib/auth-api";
 import {
-  ETHIOPIAN_MOBILE_INVALID_MESSAGE,
+  ETHIOPIA_MOBILE_COUNTRY_CODE,
   ETHIOPIAN_MOBILE_PLACEHOLDER,
   formatEthiopianMobileNumber,
   isValidEthiopianMobileLocal,
@@ -35,6 +38,9 @@ import { GOVERNMENT_ENTITY_TYPES, REQUESTER_SEGMENT_OPTIONS } from "@/lib/reques
 import { showErrorToast } from "@/lib/toast";
 import { isValidEmail } from "@/lib/validation";
 import { cn } from "@/lib/utils";
+import { formatMessage, getCustomerAuthMessages, type CustomerAuthMessages } from "@/translations";
+
+type RegisterCopy = CustomerAuthMessages["register"];
 
 const inputClassName =
   "w-full pl-11 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-slate-800 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all disabled:opacity-70";
@@ -100,87 +106,87 @@ function segmentIcon(segment: RequesterSegment) {
   }
 }
 
-function validateBasicInfoStep(form: FormState): FieldErrors {
+function validateBasicInfoStep(form: FormState, errorsCopy: RegisterCopy["errors"]): FieldErrors {
   const errors: FieldErrors = {};
 
-  if (!form.firstName.trim()) errors.firstName = "First name is required.";
-  if (!form.lastName.trim()) errors.lastName = "Last name is required.";
+  if (!form.firstName.trim()) errors.firstName = errorsCopy.firstNameRequired;
+  if (!form.lastName.trim()) errors.lastName = errorsCopy.lastNameRequired;
 
   const email = form.email.trim();
   if (!email) {
-    errors.email = "Email is required.";
+    errors.email = errorsCopy.emailRequired;
   } else if (!isValidEmail(email)) {
-    errors.email = "Enter a valid email address.";
+    errors.email = errorsCopy.emailInvalid;
   }
 
   if (!form.mobile.trim()) {
-    errors.mobile = "Mobile number is required.";
+    errors.mobile = errorsCopy.mobileRequired;
   } else if (!isValidEthiopianMobileLocal(form.mobile)) {
-    errors.mobile = ETHIOPIAN_MOBILE_INVALID_MESSAGE;
+    errors.mobile = errorsCopy.mobileInvalid;
   }
 
   if (!form.password) {
-    errors.password = "Password is required.";
+    errors.password = errorsCopy.passwordRequired;
   } else if (form.password.length < 8) {
-    errors.password = "Password must be at least 8 characters.";
+    errors.password = errorsCopy.passwordTooShort;
   }
 
   if (!form.confirmPassword) {
-    errors.confirmPassword = "Please confirm your password.";
+    errors.confirmPassword = errorsCopy.confirmPasswordRequired;
   } else if (form.password !== form.confirmPassword) {
-    errors.confirmPassword = "Passwords do not match.";
+    errors.confirmPassword = errorsCopy.passwordMismatch;
   }
 
   return errors;
 }
 
-function validateOrganizationStep(form: FormState): FieldErrors {
+function validateOrganizationStep(form: FormState, errorsCopy: RegisterCopy["errors"]): FieldErrors {
   const errors: FieldErrors = {};
 
   if (form.segment === "business") {
-    if (!form.organizationName.trim()) errors.organizationName = "Organization name is required.";
-    if (!form.jobTitle.trim()) errors.jobTitle = "Job title is required.";
+    if (!form.organizationName.trim()) errors.organizationName = errorsCopy.organizationNameRequired;
+    if (!form.jobTitle.trim()) errors.jobTitle = errorsCopy.jobTitleRequired;
     if (!form.organizationAddress.trim()) {
-      errors.organizationAddress = "Organization address is required.";
+      errors.organizationAddress = errorsCopy.organizationAddressRequired;
     }
-    if (!form.taxId.trim()) errors.taxId = "Tax ID / TIN is required.";
+    if (!form.taxId.trim()) errors.taxId = errorsCopy.taxIdRequired;
     if (!form.registrationNumber.trim()) {
-      errors.registrationNumber = "Business registration number is required.";
+      errors.registrationNumber = errorsCopy.registrationNumberRequired;
     }
   }
 
   if (form.segment === "government") {
     if (!form.organizationName.trim()) {
-      errors.organizationName = "Government organization name is required.";
+      errors.organizationName = errorsCopy.governmentOrgNameRequired;
     }
-    if (!form.jobTitle.trim()) errors.jobTitle = "Job title is required.";
+    if (!form.jobTitle.trim()) errors.jobTitle = errorsCopy.jobTitleRequired;
     if (!form.organizationAddress.trim()) {
-      errors.organizationAddress = "Organization address is required.";
+      errors.organizationAddress = errorsCopy.organizationAddressRequired;
     }
     if (!form.governmentEntityType.trim()) {
-      errors.governmentEntityType = "Government entity type is required.";
+      errors.governmentEntityType = errorsCopy.entityTypeRequired;
     }
     if (!form.officialReference.trim()) {
-      errors.officialReference = "Official reference / procurement code is required.";
+      errors.officialReference = errorsCopy.officialReferenceRequired;
     }
     if (!form.billingContactName.trim()) {
-      errors.billingContactName = "Billing contact name is required.";
+      errors.billingContactName = errorsCopy.billingContactNameRequired;
     }
     const billingEmail = form.billingContactEmail.trim();
     if (!billingEmail) {
-      errors.billingContactEmail = "Billing contact email is required.";
+      errors.billingContactEmail = errorsCopy.billingContactEmailRequired;
     } else if (!isValidEmail(billingEmail)) {
-      errors.billingContactEmail = "Enter a valid billing contact email.";
+      errors.billingContactEmail = errorsCopy.billingContactEmailInvalid;
     }
   }
 
   return errors;
 }
 
-function validateForm(form: FormState): FieldErrors {
+function validateForm(form: FormState, errorsCopy: RegisterCopy["errors"]): FieldErrors {
   return {
-    ...validateBasicInfoStep(form),
-    ...validateOrganizationStep(form),
+    ...validateBasicInfoStep(form, errorsCopy),
+    ...validateOrganizationStep(form, errorsCopy),
   };
 }
 
@@ -190,49 +196,54 @@ type RegistrationStep = {
   description: string;
 };
 
-function getRegistrationSteps(segment: RequesterSegment): RegistrationStep[] {
+function getRegistrationSteps(segment: RequesterSegment, copy: RegisterCopy): RegistrationStep[] {
   const steps: RegistrationStep[] = [
     {
       id: "account-type",
-      title: "Account type",
-      description: "Choose who will be requesting vehicles on this platform.",
+      title: copy.steps.accountType.title,
+      description: copy.steps.accountType.description,
     },
     {
       id: "basic-info",
-      title: "Basic information",
-      description: "Enter your personal details and create your login credentials.",
+      title: copy.steps.basicInfo.title,
+      description: copy.steps.basicInfo.description,
     },
   ];
 
   if (segment === "business") {
     steps.push({
       id: "business-details",
-      title: "Business details",
-      description: "Organization information used for billing and account verification.",
+      title: copy.steps.businessDetails.title,
+      description: copy.steps.businessDetails.description,
     });
   } else if (segment === "government") {
     steps.push({
       id: "government-details",
-      title: "Government details",
-      description: "Official agency information required for government transport requests.",
+      title: copy.steps.governmentDetails.title,
+      description: copy.steps.governmentDetails.description,
     });
   }
 
   return steps;
 }
 
-function validateAccountTypeStep(segment: RequesterSegment | null): FieldErrors {
+function validateAccountTypeStep(
+  segment: RequesterSegment | null,
+  errorsCopy: RegisterCopy["errors"],
+): FieldErrors {
   if (!segment) {
-    return { segment: "Please select an account type to continue." };
+    return { segment: errorsCopy.selectAccountType };
   }
   return {};
 }
 
-function segmentLabel(segment: RequesterSegment): string {
-  return REQUESTER_SEGMENT_OPTIONS.find((option) => option.value === segment)?.title ?? segment;
-}
-
-function SegmentBadge({ segment }: { segment: RequesterSegment }) {
+function SegmentBadge({
+  segment,
+  copy,
+}: {
+  segment: RequesterSegment;
+  copy: RegisterCopy;
+}) {
   const Icon = segmentIcon(segment);
 
   return (
@@ -241,8 +252,10 @@ function SegmentBadge({ segment }: { segment: RequesterSegment }) {
         <Icon className="h-4 w-4" />
       </div>
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Account type</p>
-        <p className="text-sm font-semibold text-[#1C3A34]">{segmentLabel(segment)}</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+          {copy.accountTypeLabel}
+        </p>
+        <p className="text-sm font-semibold text-[#1C3A34]">{copy.segments[segment].title}</p>
       </div>
     </div>
   );
@@ -251,9 +264,11 @@ function SegmentBadge({ segment }: { segment: RequesterSegment }) {
 function StepperHeader({
   steps,
   currentStep,
+  stepOfLabel,
 }: {
   steps: RegistrationStep[];
   currentStep: number;
+  stepOfLabel: string;
 }) {
   const step = steps[currentStep];
 
@@ -261,7 +276,7 @@ function StepperHeader({
     <div className="mb-8 space-y-4 border-b border-slate-100 pb-6">
       <div className="flex items-center justify-between gap-3">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-          Step {currentStep + 1} of {steps.length}
+          {stepOfLabel}
         </p>
         <p className="text-sm font-semibold text-[#1C3A34]">{step.title}</p>
       </div>
@@ -285,17 +300,21 @@ function StepperHeader({
 }
 
 function AccountTypeOptionCard({
-  option,
+  segment,
+  title,
+  description,
   selected,
   disabled,
   onSelect,
 }: {
-  option: (typeof REQUESTER_SEGMENT_OPTIONS)[number];
+  segment: RequesterSegment;
+  title: string;
+  description: string;
   selected: boolean;
   disabled: boolean;
   onSelect: () => void;
 }) {
-  const Icon = segmentIcon(option.value);
+  const Icon = segmentIcon(segment);
 
   return (
     <button
@@ -317,17 +336,19 @@ function AccountTypeOptionCard({
       >
         <Icon className="h-5 w-5" />
       </div>
-      <p className="text-[15px] font-semibold text-slate-900">{option.title}</p>
-      <p className="mt-2 text-sm leading-relaxed text-slate-500">{option.description}</p>
+      <p className="text-[15px] font-semibold text-slate-900">{title}</p>
+      <p className="mt-2 text-sm leading-relaxed text-slate-500">{description}</p>
     </button>
   );
 }
 
 function RegistrationAside({
+  copy,
   steps,
   currentStep,
   success = false,
 }: {
+  copy: RegisterCopy;
   steps?: RegistrationStep[];
   currentStep?: number;
   success?: boolean;
@@ -335,13 +356,11 @@ function RegistrationAside({
   if (success) {
     return (
       <div className="space-y-5 border-t border-white/10 pt-6">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9B87A]">What happens next</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9B87A]">
+          {copy.whatHappensNext}
+        </p>
         <ol className="space-y-4">
-          {[
-            "An administrator reviews your application.",
-            "You receive confirmation once your account is approved.",
-            "Sign in and start requesting vehicles on the platform.",
-          ].map((text, index) => (
+          {copy.nextSteps.map((text, index) => (
             <li key={text} className="flex gap-3">
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#C9B87A]/15 text-xs font-bold text-[#C9B87A]">
                 {index + 1}
@@ -361,7 +380,7 @@ function RegistrationAside({
   return (
     <div className="space-y-6 border-t border-white/10 pt-6">
       <div className="space-y-4">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9B87A]">Your progress</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9B87A]">{copy.yourProgress}</p>
         <ol className="space-y-4">
           {steps.map((step, index) => {
             const isComplete = index < currentStep;
@@ -395,19 +414,19 @@ function RegistrationAside({
       </div>
 
       <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.04] p-5">
-        <p className="text-sm font-semibold text-white/90">Why register?</p>
+        <p className="text-sm font-semibold text-white/90">{copy.whyRegister}</p>
         <ul className="space-y-3 text-sm text-white/55">
           <li className="flex gap-3">
             <Car className="mt-0.5 h-4 w-4 shrink-0 text-[#C9B87A]" />
-            Request vehicles for personal, business, or official use.
+            {copy.whyRegisterItems[0]}
           </li>
           <li className="flex gap-3">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#C9B87A]" />
-            Secure accounts verified by platform administrators.
+            {copy.whyRegisterItems[1]}
           </li>
           <li className="flex gap-3">
             <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-[#C9B87A]" />
-            Manage bookings and transport requests in one place.
+            {copy.whyRegisterItems[2]}
           </li>
         </ul>
       </div>
@@ -417,31 +436,38 @@ function RegistrationAside({
 
 function RegistrationShell({
   children,
+  copy,
   description,
   aside,
   contentAlign = "start",
+  copyright,
 }: {
   children: ReactNode;
+  copy: RegisterCopy;
   description: string;
   aside?: ReactNode;
   contentAlign?: "center" | "start";
+  copyright: string;
 }) {
   return (
     <AuthShell
-      mobileTitle="User Registration"
-      desktopEyebrow="— User Onboarding —"
+      mobileTitle={copy.mobileTitle}
+      desktopEyebrow={copy.desktopEyebrow}
       contentClassName="max-w-xl xl:max-w-2xl"
       contentAlign={contentAlign}
       desktopTitle={
         <>
-          Join{" "}
+          {copy.desktopTitlePrefix}{" "}
           <span className="bg-gradient-to-r from-[#C9B87A] via-[#e8d69a] to-[#C9B87A] bg-clip-text text-transparent">
-            Smart Dispatch
+            {copy.desktopTitleHighlight}
           </span>
         </>
       }
       desktopDescription={description}
       desktopAside={aside}
+      footerCopyright={copyright}
+      leadingAction={<AuthBackToHomeLink />}
+      headerActions={<AuthLanguageSwitcher />}
     >
       {children}
     </AuthShell>
@@ -449,8 +475,12 @@ function RegistrationShell({
 }
 
 export default function UserRegisterForm() {
+  const { locale } = useLocale();
+  const messages = getCustomerAuthMessages(locale);
+  const copy = messages.register;
+
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedSegment, setSelectedSegment] = useState<RequesterSegment | null>(null);
+  const [selectedSegment, setSelectedSegment] = useState<RequesterSegment | null>("individual");
   const [form, setForm] = useState<FormState>(emptyForm);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [showPassword, setShowPassword] = useState(false);
@@ -460,7 +490,7 @@ export default function UserRegisterForm() {
 
   const stepSegment =
     currentStep === 0 ? (selectedSegment ?? "individual") : form.segment;
-  const steps = getRegistrationSteps(stepSegment);
+  const steps = getRegistrationSteps(stepSegment, copy);
   const currentStepId = steps[currentStep]?.id;
   const isLastStep = currentStep === steps.length - 1;
   const activeSegment = selectedSegment ?? form.segment;
@@ -488,12 +518,12 @@ export default function UserRegisterForm() {
   function validateCurrentStep(): FieldErrors {
     switch (currentStepId) {
       case "account-type":
-        return validateAccountTypeStep(selectedSegment);
+        return validateAccountTypeStep(selectedSegment, copy.errors);
       case "basic-info":
-        return validateBasicInfoStep(form);
+        return validateBasicInfoStep(form, copy.errors);
       case "business-details":
       case "government-details":
-        return validateOrganizationStep(form);
+        return validateOrganizationStep(form, copy.errors);
       default:
         return {};
     }
@@ -501,7 +531,7 @@ export default function UserRegisterForm() {
 
   function goToNextStep() {
     if (currentStepId === "account-type") {
-      const errors = validateAccountTypeStep(selectedSegment);
+      const errors = validateAccountTypeStep(selectedSegment, copy.errors);
       if (Object.keys(errors).length > 0) {
         setFieldErrors(errors);
         return;
@@ -548,7 +578,7 @@ export default function UserRegisterForm() {
   }
 
   async function submitRegistration() {
-    const errors = validateForm(form);
+    const errors = validateForm(form, copy.errors);
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
@@ -579,9 +609,9 @@ export default function UserRegisterForm() {
       setSuccessMessage(result.message);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Registration failed. Please try again.";
+        error instanceof Error ? error.message : copy.errors.createFailedDescription;
       showErrorToast({
-        title: "Could not create account",
+        title: copy.errors.createFailedTitle,
         description: message,
       });
     } finally {
@@ -603,18 +633,20 @@ export default function UserRegisterForm() {
 
   const shellDescription =
     activeSegment === "individual"
-      ? "Create a personal account for individual vehicle requests."
+      ? copy.descriptions.individual
       : activeSegment === "business"
-        ? "Register your organization to request vehicles for business use."
+        ? copy.descriptions.business
         : activeSegment === "government"
-          ? "Register your government agency to request official transport services."
-          : "Create your Smart Dispatch account in a few simple steps.";
+          ? copy.descriptions.government
+          : copy.descriptions.default;
 
   if (successMessage) {
     return (
       <RegistrationShell
-        description="Sign up for Smart Dispatch and access the platform once your account is approved."
-        aside={<RegistrationAside success />}
+        copy={copy}
+        copyright={messages.common.copyright}
+        description={copy.descriptions.success}
+        aside={<RegistrationAside copy={copy} success />}
         contentAlign="center"
       >
         <div className="w-full rounded-3xl border border-slate-200/80 bg-white p-8 text-center shadow-xl shadow-slate-200/50 sm:p-10 lg:p-12">
@@ -625,21 +657,23 @@ export default function UserRegisterForm() {
           </div>
 
           <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#C9B87A]">
-            Application received
+            {copy.applicationReceived}
           </p>
           <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-[#1C3A34] sm:text-4xl">
-            Registration submitted
+            {copy.registrationSubmitted}
           </h2>
           <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-slate-500 sm:text-[15px]">
             {successMessage}
           </p>
 
           <div className="mx-auto mt-8 max-w-md rounded-2xl border border-slate-100 bg-slate-50/70 px-5 py-4 text-left lg:hidden">
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9B87A]">What happens next</p>
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9B87A]">
+              {copy.whatHappensNext}
+            </p>
             <ol className="mt-3 space-y-2.5 text-sm leading-relaxed text-slate-600">
-              <li>An administrator reviews your application.</li>
-              <li>You receive confirmation once your account is approved.</li>
-              <li>Sign in and start requesting vehicles on the platform.</li>
+              {copy.nextSteps.map((step) => (
+                <li key={step}>{step}</li>
+              ))}
             </ol>
           </div>
 
@@ -648,7 +682,7 @@ export default function UserRegisterForm() {
             className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#1C3A34] px-5 py-4 text-[15px] font-bold text-white border-b-[3px] border-[#C9B87A] transition-all hover:bg-[#162e29] hover:shadow-lg hover:shadow-[#1C3A34]/15 sm:mt-10"
           >
             <ArrowLeft className="h-4 w-4" />
-            Back to home
+            {messages.common.backToHome}
           </Link>
         </div>
       </RegistrationShell>
@@ -657,51 +691,62 @@ export default function UserRegisterForm() {
 
   const pageIntro =
     currentStepId === "account-type"
-      ? "Start by choosing the account type that best fits how you'll use Smart Dispatch."
+      ? copy.pageIntros.accountType
       : currentStepId === "basic-info"
-        ? "Tell us about yourself and set up your login credentials."
-        : "Provide the required organization details to complete your application.";
+        ? copy.pageIntros.basicInfo
+        : copy.pageIntros.organization;
+
+  const segmentOptions = REQUESTER_SEGMENT_OPTIONS.map((option) => ({
+    value: option.value,
+    title: copy.segments[option.value].title,
+    description: copy.segments[option.value].description,
+  }));
 
   return (
     <RegistrationShell
+      copy={copy}
+      copyright={messages.common.copyright}
       description={shellDescription}
-      aside={<RegistrationAside steps={steps} currentStep={currentStep} />}
+      aside={<RegistrationAside copy={copy} steps={steps} currentStep={currentStep} />}
     >
-      <Link
-        href="/"
-        className="mb-5 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition-colors hover:text-[#1C3A34]"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to home
-      </Link>
-
       <div className="rounded-3xl border border-slate-200/80 bg-white shadow-xl shadow-slate-200/50 p-8 sm:p-10 lg:p-12">
         <div className="mb-8 border-b border-slate-100 pb-8">
-          <h2 className="text-3xl font-extrabold text-[#1C3A34] tracking-tight">Create your account</h2>
+          <h2 className="text-3xl font-extrabold text-[#1C3A34] tracking-tight">{copy.pageTitle}</h2>
           <p className="mt-3 max-w-2xl text-sm sm:text-[15px] leading-relaxed text-slate-500">{pageIntro}</p>
         </div>
 
-        <StepperHeader steps={steps} currentStep={currentStep} />
+        <StepperHeader
+          steps={steps}
+          currentStep={currentStep}
+          stepOfLabel={formatMessage(copy.stepOf, {
+            current: currentStep + 1,
+            total: steps.length,
+          })}
+        />
 
         <form className="space-y-10" onSubmit={handleFormSubmit} noValidate>
           {currentStepId === "account-type" ? (
             <div className="space-y-6">
               <div className="space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  {REQUESTER_SEGMENT_OPTIONS.slice(0, 2).map((option) => (
+                  {segmentOptions.slice(0, 2).map((option) => (
                     <AccountTypeOptionCard
                       key={option.value}
-                      option={option}
+                      segment={option.value}
+                      title={option.title}
+                      description={option.description}
                       selected={selectedSegment === option.value}
                       disabled={isSubmitting}
                       onSelect={() => selectSegment(option.value)}
                     />
                   ))}
                 </div>
-                {REQUESTER_SEGMENT_OPTIONS.slice(2).map((option) => (
+                {segmentOptions.slice(2).map((option) => (
                   <AccountTypeOptionCard
                     key={option.value}
-                    option={option}
+                    segment={option.value}
+                    title={option.title}
+                    description={option.description}
                     selected={selectedSegment === option.value}
                     disabled={isSubmitting}
                     onSelect={() => selectSegment(option.value)}
@@ -716,7 +761,7 @@ export default function UserRegisterForm() {
 
           {currentStepId === "basic-info" ? (
             <div className="space-y-6">
-              <SegmentBadge segment={form.segment} />
+              <SegmentBadge segment={form.segment} copy={copy} />
 
               <div className="grid gap-6 sm:grid-cols-2">
                 <div>
@@ -724,7 +769,7 @@ export default function UserRegisterForm() {
                     htmlFor="user-first-name"
                     className={cn(labelClassName, fieldErrors.firstName && errorLabelClassName)}
                   >
-                    First name
+                    {copy.fields.firstName}
                   </label>
                   <div className="relative">
                     <UserRound className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -735,7 +780,7 @@ export default function UserRegisterForm() {
                       value={form.firstName}
                       onChange={(event) => updateField("firstName", event.target.value)}
                       disabled={isSubmitting}
-                      placeholder="First name"
+                      placeholder={copy.placeholders.firstName}
                       className={cn(inputClassName, fieldErrors.firstName && errorInputClassName)}
                     />
                   </div>
@@ -746,7 +791,8 @@ export default function UserRegisterForm() {
 
                 <div>
                   <label htmlFor="user-middle-name" className={labelClassName}>
-                    Middle name <span className="font-normal text-slate-400">(optional)</span>
+                    {copy.fields.middleName}{" "}
+                    <span className="font-normal text-slate-400">{copy.optional}</span>
                   </label>
                   <div className="relative">
                     <UserRound className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -757,7 +803,7 @@ export default function UserRegisterForm() {
                       value={form.middleName}
                       onChange={(event) => updateField("middleName", event.target.value)}
                       disabled={isSubmitting}
-                      placeholder="Middle name"
+                      placeholder={copy.placeholders.middleName}
                       className={inputClassName}
                     />
                   </div>
@@ -769,7 +815,7 @@ export default function UserRegisterForm() {
                   htmlFor="user-last-name"
                   className={cn(labelClassName, fieldErrors.lastName && errorLabelClassName)}
                 >
-                  Last name
+                  {copy.fields.lastName}
                 </label>
                 <div className="relative">
                   <UserRound className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -780,7 +826,7 @@ export default function UserRegisterForm() {
                     value={form.lastName}
                     onChange={(event) => updateField("lastName", event.target.value)}
                     disabled={isSubmitting}
-                    placeholder="Last name"
+                    placeholder={copy.placeholders.lastName}
                     className={cn(inputClassName, fieldErrors.lastName && errorInputClassName)}
                   />
                 </div>
@@ -795,7 +841,7 @@ export default function UserRegisterForm() {
                     htmlFor="user-email"
                     className={cn(labelClassName, fieldErrors.email && errorLabelClassName)}
                   >
-                    Email address
+                    {copy.fields.email}
                   </label>
                   <div className="relative">
                     <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -806,7 +852,7 @@ export default function UserRegisterForm() {
                       value={form.email}
                       onChange={(event) => updateField("email", event.target.value)}
                       disabled={isSubmitting}
-                      placeholder="you@example.com"
+                      placeholder={copy.placeholders.email}
                       className={cn(inputClassName, fieldErrors.email && errorInputClassName)}
                     />
                   </div>
@@ -820,22 +866,36 @@ export default function UserRegisterForm() {
                     htmlFor="user-mobile"
                     className={cn(labelClassName, fieldErrors.mobile && errorLabelClassName)}
                   >
-                    Mobile number
+                    {copy.fields.mobile}
                   </label>
-                  <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-                    <input
-                      id="user-mobile"
-                      type="tel"
-                      autoComplete="tel-national"
-                      value={form.mobile}
-                      onChange={(event) =>
-                        updateField("mobile", sanitizeEthiopianMobileInput(event.target.value))
-                      }
-                      disabled={isSubmitting}
-                      placeholder={ETHIOPIAN_MOBILE_PLACEHOLDER}
-                      className={cn(inputClassName, fieldErrors.mobile && errorInputClassName)}
-                    />
+                  <div
+                    className={cn(
+                      "flex overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm focus-within:border-[#1C3A34] focus-within:ring-2 focus-within:ring-[#1C3A34]/20 disabled:opacity-70",
+                      fieldErrors.mobile && "border-red-300 bg-red-50/60 focus-within:border-red-400 focus-within:ring-red-200/60",
+                    )}
+                  >
+                    <div className="flex shrink-0 items-center gap-2 border-r border-slate-200 bg-slate-50 px-3 text-sm text-slate-700">
+                      <span aria-hidden className="text-base leading-none">
+                        🇪🇹
+                      </span>
+                      <span className="font-semibold tabular-nums">{ETHIOPIA_MOBILE_COUNTRY_CODE}</span>
+                    </div>
+                    <div className="relative min-w-0 flex-1">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                      <input
+                        id="user-mobile"
+                        type="tel"
+                        inputMode="numeric"
+                        autoComplete="tel-national"
+                        value={form.mobile}
+                        onChange={(event) =>
+                          updateField("mobile", sanitizeEthiopianMobileInput(event.target.value))
+                        }
+                        disabled={isSubmitting}
+                        placeholder={ETHIOPIAN_MOBILE_PLACEHOLDER}
+                        className="w-full border-0 bg-transparent py-4 pl-10 pr-4 text-[15px] text-slate-800 outline-none disabled:opacity-70"
+                      />
+                    </div>
                   </div>
                   {fieldErrors.mobile ? (
                     <p className="mt-1.5 text-xs text-red-600">{fieldErrors.mobile}</p>
@@ -849,7 +909,7 @@ export default function UserRegisterForm() {
                     htmlFor="user-password"
                     className={cn(labelClassName, fieldErrors.password && errorLabelClassName)}
                   >
-                    Password
+                    {copy.fields.password}
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -860,14 +920,16 @@ export default function UserRegisterForm() {
                       value={form.password}
                       onChange={(event) => updateField("password", event.target.value)}
                       disabled={isSubmitting}
-                      placeholder="At least 8 characters"
+                      placeholder={copy.placeholders.password}
                       className={cn(inputClassName, "pr-11", fieldErrors.password && errorInputClassName)}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((open) => !open)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showPassword ? messages.common.hidePassword : messages.common.showPassword
+                      }
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -882,7 +944,7 @@ export default function UserRegisterForm() {
                     htmlFor="user-confirm-password"
                     className={cn(labelClassName, fieldErrors.confirmPassword && errorLabelClassName)}
                   >
-                    Confirm password
+                    {copy.fields.confirmPassword}
                   </label>
                   <div className="relative">
                     <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -893,7 +955,7 @@ export default function UserRegisterForm() {
                       value={form.confirmPassword}
                       onChange={(event) => updateField("confirmPassword", event.target.value)}
                       disabled={isSubmitting}
-                      placeholder="Re-enter password"
+                      placeholder={copy.placeholders.confirmPassword}
                       className={cn(
                         inputClassName,
                         "pr-11",
@@ -904,7 +966,11 @@ export default function UserRegisterForm() {
                       type="button"
                       onClick={() => setShowConfirmPassword((open) => !open)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                      aria-label={
+                        showConfirmPassword
+                          ? messages.common.hidePassword
+                          : messages.common.showPassword
+                      }
                     >
                       {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
@@ -919,14 +985,14 @@ export default function UserRegisterForm() {
 
           {currentStepId === "business-details" || currentStepId === "government-details" ? (
             <div className="space-y-6">
-              <SegmentBadge segment={form.segment} />
+              <SegmentBadge segment={form.segment} copy={copy} />
 
               <div>
                 <label
                   htmlFor="user-organization-name"
                   className={cn(labelClassName, fieldErrors.organizationName && errorLabelClassName)}
                 >
-                  {form.segment === "business" ? "Organization name" : "Agency / ministry name"}
+                  {form.segment === "business" ? copy.fields.organizationName : copy.fields.agencyName}
                 </label>
                 <div className="relative">
                   <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -936,7 +1002,7 @@ export default function UserRegisterForm() {
                     value={form.organizationName}
                     onChange={(event) => updateField("organizationName", event.target.value)}
                     disabled={isSubmitting}
-                    placeholder="Organization name"
+                    placeholder={copy.placeholders.organizationName}
                     className={cn(inputClassName, fieldErrors.organizationName && errorInputClassName)}
                   />
                 </div>
@@ -951,7 +1017,7 @@ export default function UserRegisterForm() {
                     htmlFor="user-job-title"
                     className={cn(labelClassName, fieldErrors.jobTitle && errorLabelClassName)}
                   >
-                    Job title
+                    {copy.fields.jobTitle}
                   </label>
                   <input
                     id="user-job-title"
@@ -959,7 +1025,7 @@ export default function UserRegisterForm() {
                     value={form.jobTitle}
                     onChange={(event) => updateField("jobTitle", event.target.value)}
                     disabled={isSubmitting}
-                    placeholder="Fleet manager"
+                    placeholder={copy.placeholders.jobTitle}
                     className={cn(plainInputClassName, fieldErrors.jobTitle && errorInputClassName)}
                   />
                   {fieldErrors.jobTitle ? (
@@ -976,7 +1042,7 @@ export default function UserRegisterForm() {
                         fieldErrors.governmentEntityType && errorLabelClassName,
                       )}
                     >
-                      Entity type
+                      {copy.fields.entityType}
                     </label>
                     <select
                       id="user-government-entity-type"
@@ -985,10 +1051,10 @@ export default function UserRegisterForm() {
                       disabled={isSubmitting}
                       className={cn(plainInputClassName, fieldErrors.governmentEntityType && errorInputClassName)}
                     >
-                      <option value="">Select entity type</option>
+                      <option value="">{copy.selectEntityType}</option>
                       {GOVERNMENT_ENTITY_TYPES.map((type) => (
                         <option key={type} value={type}>
-                          {type}
+                          {copy.entityTypes[type]}
                         </option>
                       ))}
                     </select>
@@ -1005,7 +1071,7 @@ export default function UserRegisterForm() {
                         fieldErrors.registrationNumber && errorLabelClassName,
                       )}
                     >
-                      Registration number
+                      {copy.fields.registrationNumber}
                     </label>
                     <input
                       id="user-registration-number"
@@ -1013,7 +1079,7 @@ export default function UserRegisterForm() {
                       value={form.registrationNumber}
                       onChange={(event) => updateField("registrationNumber", event.target.value)}
                       disabled={isSubmitting}
-                      placeholder="Business registration no."
+                      placeholder={copy.placeholders.registrationNumber}
                       className={cn(
                         plainInputClassName,
                         fieldErrors.registrationNumber && errorInputClassName,
@@ -1034,7 +1100,7 @@ export default function UserRegisterForm() {
                     fieldErrors.organizationAddress && errorLabelClassName,
                   )}
                 >
-                  Organization address
+                  {copy.fields.organizationAddress}
                 </label>
                 <div className="relative">
                   <MapPin className="absolute left-4 top-4 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -1044,7 +1110,7 @@ export default function UserRegisterForm() {
                     value={form.organizationAddress}
                     onChange={(event) => updateField("organizationAddress", event.target.value)}
                     disabled={isSubmitting}
-                    placeholder="Street, city, region"
+                    placeholder={copy.placeholders.organizationAddress}
                     className={cn(
                       inputClassName,
                       "min-h-[96px] resize-none py-3",
@@ -1063,7 +1129,7 @@ export default function UserRegisterForm() {
                     htmlFor="user-tax-id"
                     className={cn(labelClassName, fieldErrors.taxId && errorLabelClassName)}
                   >
-                    Tax ID / TIN
+                    {copy.fields.taxId}
                   </label>
                   <input
                     id="user-tax-id"
@@ -1071,7 +1137,7 @@ export default function UserRegisterForm() {
                     value={form.taxId}
                     onChange={(event) => updateField("taxId", event.target.value)}
                     disabled={isSubmitting}
-                    placeholder="Tax identification number"
+                    placeholder={copy.placeholders.taxId}
                     className={cn(plainInputClassName, fieldErrors.taxId && errorInputClassName)}
                   />
                   {fieldErrors.taxId ? (
@@ -1088,7 +1154,7 @@ export default function UserRegisterForm() {
                         fieldErrors.officialReference && errorLabelClassName,
                       )}
                     >
-                      Official reference / procurement code
+                      {copy.fields.officialReference}
                     </label>
                     <input
                       id="user-official-reference"
@@ -1096,7 +1162,7 @@ export default function UserRegisterForm() {
                       value={form.officialReference}
                       onChange={(event) => updateField("officialReference", event.target.value)}
                       disabled={isSubmitting}
-                      placeholder="Reference or procurement code"
+                      placeholder={copy.placeholders.officialReference}
                       className={cn(
                         plainInputClassName,
                         fieldErrors.officialReference && errorInputClassName,
@@ -1116,7 +1182,7 @@ export default function UserRegisterForm() {
                           fieldErrors.billingContactName && errorLabelClassName,
                         )}
                       >
-                        Billing contact name
+                        {copy.fields.billingContactName}
                       </label>
                       <input
                         id="user-billing-contact-name"
@@ -1124,7 +1190,7 @@ export default function UserRegisterForm() {
                         value={form.billingContactName}
                         onChange={(event) => updateField("billingContactName", event.target.value)}
                         disabled={isSubmitting}
-                        placeholder="Finance officer"
+                        placeholder={copy.placeholders.billingContactName}
                         className={cn(
                           plainInputClassName,
                           fieldErrors.billingContactName && errorInputClassName,
@@ -1143,7 +1209,7 @@ export default function UserRegisterForm() {
                           fieldErrors.billingContactEmail && errorLabelClassName,
                         )}
                       >
-                        Billing contact email
+                        {copy.fields.billingContactEmail}
                       </label>
                       <input
                         id="user-billing-contact-email"
@@ -1151,7 +1217,7 @@ export default function UserRegisterForm() {
                         value={form.billingContactEmail}
                         onChange={(event) => updateField("billingContactEmail", event.target.value)}
                         disabled={isSubmitting}
-                        placeholder="billing@agency.gov.et"
+                        placeholder={copy.placeholders.billingContactEmail}
                         className={cn(
                           plainInputClassName,
                           fieldErrors.billingContactEmail && errorInputClassName,
@@ -1176,7 +1242,7 @@ export default function UserRegisterForm() {
                 className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 px-5 py-4 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-70"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Back
+                {copy.back}
               </button>
             ) : (
               <span className="hidden sm:block" aria-hidden />
@@ -1190,13 +1256,13 @@ export default function UserRegisterForm() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Creating account…
+                  {copy.creatingAccount}
                 </>
               ) : isLastStep ? (
-                "Create Account"
+                copy.createAccount
               ) : (
                 <>
-                  Continue
+                  {copy.continue}
                   <ArrowRight className="h-4 w-4" />
                 </>
               )}

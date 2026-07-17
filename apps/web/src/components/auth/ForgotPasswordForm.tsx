@@ -9,7 +9,10 @@ import { AuthLanguageSwitcher } from "@/components/auth/AuthLanguageSwitcher";
 import { formatCountdown, OtpCodeInput } from "@/components/auth/OtpCodeInput";
 import { useLocale } from "@/components/shared/providers/locale-context";
 import { requestPasswordReset, resetPassword, verifyPasswordResetOtp } from "@/lib/auth-api";
-import { ADMIN_SIGN_IN_PATH } from "@/lib/auth-paths";
+import {
+  ADMIN_SIGN_IN_PATH,
+  USER_SIGN_IN_PATH,
+} from "@/lib/auth-paths";
 import {
   ETHIOPIA_MOBILE_COUNTRY_CODE,
   formatEthiopianMobileNumber,
@@ -17,21 +20,33 @@ import {
   sanitizeEthiopianMobileInput,
 } from "@/lib/ethiopian-mobile";
 import { showErrorToast } from "@/lib/toast";
-import { formatMessage, getAdminAuthMessages } from "@/translations";
+import {
+  formatMessage,
+  getAdminAuthMessages,
+  getCustomerAuthMessages,
+} from "@/translations";
 import { cn } from "@/lib/utils";
 
 type ResetMethod = "email" | "mobile";
 type MobileStep = "request" | "verify_otp" | "set_password";
+export type AuthAudience = "admin" | "customer";
 
 const OTP_EXPIRY_SECONDS = 10 * 60;
 const OTP_RESEND_COOLDOWN_SECONDS = 60;
 
-export default function ForgotPasswordForm() {
+type ForgotPasswordFormProps = {
+  audience?: AuthAudience;
+};
+
+export default function ForgotPasswordForm({ audience = "admin" }: ForgotPasswordFormProps) {
   const router = useRouter();
   const { locale } = useLocale();
-  const authCopy = getAdminAuthMessages(locale);
+  const authCopy =
+    audience === "customer" ? getCustomerAuthMessages(locale) : getAdminAuthMessages(locale);
   const copy = authCopy.forgotPassword;
   const common = authCopy.common;
+  const signInPath = audience === "customer" ? USER_SIGN_IN_PATH : ADMIN_SIGN_IN_PATH;
+  const portal = audience;
   const [resetMethod, setResetMethod] = useState<ResetMethod>("email");
   const [mobileStep, setMobileStep] = useState<MobileStep>("request");
   const [email, setEmail] = useState("");
@@ -88,6 +103,7 @@ export default function ForgotPasswordForm() {
     await requestPasswordReset({
       channel: "mobile",
       mobile_number: mobileNumberFormatted,
+      portal,
     });
   }
 
@@ -106,12 +122,12 @@ export default function ForgotPasswordForm() {
 
     try {
       if (isEmailReset) {
-        await requestPasswordReset({ channel: "email", email });
+        await requestPasswordReset({ channel: "email", email, portal });
         setEmailSent(true);
       } else {
         const formatted = formatEthiopianMobileNumber(mobile);
         setMobileNumberFormatted(formatted);
-        await requestPasswordReset({ channel: "mobile", mobile_number: formatted });
+        await requestPasswordReset({ channel: "mobile", mobile_number: formatted, portal });
         setMobileStep("verify_otp");
         startOtpTimers();
       }
@@ -183,7 +199,7 @@ export default function ForgotPasswordForm() {
 
     try {
       await resetPassword({ channel: "email", token: resetToken, password });
-      router.push(ADMIN_SIGN_IN_PATH);
+      router.push(signInPath);
     } catch (err) {
       showErrorToast({
         title: copy.errors.resetFailedTitle,
@@ -259,6 +275,16 @@ export default function ForgotPasswordForm() {
         : copy.desktopSubtitles.mobileRequest;
 
   const formattedMobileDisplay = `${ETHIOPIA_MOBILE_COUNTRY_CODE} ${mobile}`;
+  const emailFieldLabel =
+    audience === "admin" && "administratorEmail" in common
+      ? common.administratorEmail
+      : common.emailAddress;
+  const emailFieldPlaceholder =
+    audience === "admin" && "emailPlaceholder" in authCopy.signIn
+      ? authCopy.signIn.emailPlaceholder || undefined
+      : "emailPlaceholder" in common
+        ? common.emailPlaceholder || undefined
+        : undefined;
 
   return (
     <AuthShell
@@ -523,7 +549,7 @@ export default function ForgotPasswordForm() {
                 htmlFor="reset-identifier"
                 className="block text-[10px] font-bold text-slate-400 tracking-[0.15em] uppercase mb-2"
               >
-                {isEmailReset ? common.administratorEmail : common.mobileNumber}
+                {isEmailReset ? emailFieldLabel : common.mobileNumber}
               </label>
               {isEmailReset ? (
                 <div className="relative">
@@ -537,7 +563,7 @@ export default function ForgotPasswordForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all"
-                    placeholder={authCopy.signIn.emailPlaceholder || undefined}
+                    placeholder={emailFieldPlaceholder}
                   />
                 </div>
               ) : (
@@ -587,7 +613,7 @@ export default function ForgotPasswordForm() {
       </div>
 
       <p className="mt-6 text-center text-sm text-slate-500">
-        <Link href={ADMIN_SIGN_IN_PATH} className="font-semibold text-[#1C3A34] hover:text-[#C9B87A] transition-colors">
+        <Link href={signInPath} className="font-semibold text-[#1C3A34] hover:text-[#C9B87A] transition-colors">
           ← {common.backToSignIn}
         </Link>
       </p>

@@ -36,4 +36,5 @@ export type CustomerContractsMessages = Translations["customerContracts"];
 export type CustomerInvoicesMessages = Translations["customerInvoices"];
 export type AdminProfileMessages = Translations["adminProfile"];
 export type AdminAuthMessages = Translations["adminAuth"];
+export type CustomerAuthMessages = Translations["customerAuth"];
 export type LandingMessages = Translations["landing"];

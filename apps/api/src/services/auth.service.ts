@@ -203,6 +203,7 @@ export async function logout(refreshToken: string) {
 export async function requestPasswordReset(input: {
   email?: string;
   mobileNumber?: string;
+  portal?: "admin" | "customer";
 }) {
   const email = typeof input.email === "string" ? input.email.trim().toLowerCase() : "";
   const rawMobile =
@@ -210,6 +211,7 @@ export async function requestPasswordReset(input: {
   const mobileNumber = rawMobile ? normalizeEthiopianMobileNumber(rawMobile) : undefined;
   const hasEmail = Boolean(email);
   const hasMobile = Boolean(rawMobile);
+  const portal = input.portal === "customer" ? "customer" : "admin";
 
   if (!hasEmail && !hasMobile) {
     throw new AuthError("Email or mobile number is required.", 400);
@@ -244,7 +246,9 @@ export async function requestPasswordReset(input: {
       );
 
       const appUrl = process.env.APP_URL ?? "http://localhost:3000";
-      const resetLink = `${appUrl}/U@RQ$f/reset-password?token=${resetToken}`;
+      const resetPath =
+        portal === "customer" ? "/reset-password" : "/U@RQ$f/reset-password";
+      const resetLink = `${appUrl}${resetPath}?token=${resetToken}`;
 
       queuePasswordResetNotifications("email_requested", user.id, {
         resetLink,
@@ -271,8 +275,8 @@ export async function requestPasswordReset(input: {
 
   return {
     message: hasEmail
-      ? "If an administrator account exists for this email, a password reset invitation has been sent."
-      : "If an administrator account exists for this mobile number, a password reset code has been sent via SMS.",
+      ? "If an account exists for this email, a password reset invitation has been sent."
+      : "If an account exists for this mobile number, a password reset code has been sent via SMS.",
   };
 }
 

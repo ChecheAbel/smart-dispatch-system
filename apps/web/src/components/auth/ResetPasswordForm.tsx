@@ -5,13 +5,35 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, Eye, EyeOff, Loader2, Lock } from "lucide-react";
 import AuthShell from "@/components/auth/AuthShell";
+import { AuthLanguageSwitcher } from "@/components/auth/AuthLanguageSwitcher";
+import type { AuthAudience } from "@/components/auth/ForgotPasswordForm";
+import { useLocale } from "@/components/shared/providers/locale-context";
 import { resetPassword } from "@/lib/auth-api";
-import { ADMIN_FORGOT_PASSWORD_PATH, ADMIN_SIGN_IN_PATH } from "@/lib/auth-paths";
+import {
+  ADMIN_FORGOT_PASSWORD_PATH,
+  ADMIN_SIGN_IN_PATH,
+  USER_FORGOT_PASSWORD_PATH,
+  USER_SIGN_IN_PATH,
+} from "@/lib/auth-paths";
+import { getAdminAuthMessages, getCustomerAuthMessages } from "@/translations";
 
-export default function ResetPasswordForm() {
+type ResetPasswordFormProps = {
+  audience?: AuthAudience;
+};
+
+export default function ResetPasswordForm({ audience = "admin" }: ResetPasswordFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { locale } = useLocale();
+  const authCopy =
+    audience === "customer" ? getCustomerAuthMessages(locale) : getAdminAuthMessages(locale);
+  const copy = authCopy.resetPassword;
+  const forgotCopy = authCopy.forgotPassword;
+  const common = authCopy.common;
   const token = searchParams.get("token") ?? "";
+  const signInPath = audience === "customer" ? USER_SIGN_IN_PATH : ADMIN_SIGN_IN_PATH;
+  const forgotPasswordPath =
+    audience === "customer" ? USER_FORGOT_PASSWORD_PATH : ADMIN_FORGOT_PASSWORD_PATH;
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -26,12 +48,12 @@ export default function ResetPasswordForm() {
     setError("");
 
     if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+      setError(forgotCopy.errors.passwordTooShortDescription);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Passwords do not match.");
+      setError(forgotCopy.errors.passwordMismatchDescription);
       return;
     }
 
@@ -40,9 +62,9 @@ export default function ResetPasswordForm() {
     try {
       await resetPassword({ channel: "email", token, password });
       setSuccess(true);
-      setTimeout(() => router.push(ADMIN_SIGN_IN_PATH), 2500);
+      setTimeout(() => router.push(signInPath), 2500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to reset password.");
+      setError(err instanceof Error ? err.message : forgotCopy.errors.resetFailedTitle);
     } finally {
       setIsSubmitting(false);
     }
@@ -51,20 +73,20 @@ export default function ResetPasswordForm() {
   if (!token) {
     return (
       <AuthShell
-        mobileTitle="Invalid Link"
-        desktopEyebrow="— Reset Password —"
-        desktopTitle="Invalid Invitation"
-        desktopDescription="This password reset link is missing or malformed."
+        mobileTitle={copy.invalidLinkTitle}
+        desktopEyebrow={copy.desktopEyebrow}
+        desktopTitle={copy.invalidInvitationTitle}
+        desktopDescription={copy.invalidLinkDescription}
+        footerCopyright={common.copyright}
+        headerActions={<AuthLanguageSwitcher />}
       >
         <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 sm:p-8 text-center space-y-4">
-          <p className="text-sm text-slate-500 leading-relaxed">
-            Please request a new password reset invitation from the sign-in page.
-          </p>
+          <p className="text-sm text-slate-500 leading-relaxed">{copy.requestNewInvitation}</p>
           <Link
-            href={ADMIN_FORGOT_PASSWORD_PATH}
+            href={forgotPasswordPath}
             className="inline-flex text-sm font-semibold text-[#1C3A34] hover:text-[#C9B87A] transition-colors"
           >
-            Request new invitation →
+            {copy.requestNewInvitationCta}
           </Link>
         </div>
       </AuthShell>
@@ -73,24 +95,26 @@ export default function ResetPasswordForm() {
 
   return (
     <AuthShell
-      mobileTitle="Set New Password"
-      desktopEyebrow="— Reset Password —"
+      mobileTitle={copy.mobileTitle}
+      desktopEyebrow={copy.desktopEyebrow}
       desktopTitle={
         <>
-          Create a{" "}
+          {copy.desktopTitlePrefix}{" "}
           <span className="bg-gradient-to-r from-[#C9B87A] via-[#e8d69a] to-[#C9B87A] bg-clip-text text-transparent">
-            New Password
+            {copy.desktopTitleHighlight}
           </span>
         </>
       }
-      desktopDescription="Use the invitation link from your email to set a new administrator password."
+      desktopDescription={copy.desktopDescription}
+      footerCopyright={common.copyright}
+      headerActions={<AuthLanguageSwitcher />}
     >
       <div className="hidden lg:block mb-8">
-        <p className="text-[#C9B87A] font-bold text-xs tracking-[0.25em] uppercase mb-3">— Invitation Accepted —</p>
-        <h2 className="text-3xl font-extrabold text-[#1C3A34] tracking-tight">Set Your Password</h2>
-        <p className="mt-2 text-slate-500 text-sm leading-relaxed">
-          Choose a strong password for your administrator account.
+        <p className="text-[#C9B87A] font-bold text-xs tracking-[0.25em] uppercase mb-3">
+          {copy.formEyebrow}
         </p>
+        <h2 className="text-3xl font-extrabold text-[#1C3A34] tracking-tight">{copy.formTitle}</h2>
+        <p className="mt-2 text-slate-500 text-sm leading-relaxed">{copy.formDescription}</p>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 sm:p-8">
@@ -99,8 +123,8 @@ export default function ResetPasswordForm() {
             <div className="mx-auto h-14 w-14 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center">
               <CheckCircle2 className="h-7 w-7 text-emerald-600" />
             </div>
-            <h3 className="text-lg font-bold text-[#1C3A34]">Password updated</h3>
-            <p className="text-sm text-slate-500">Redirecting you to sign in…</p>
+            <h3 className="text-lg font-bold text-[#1C3A34]">{copy.passwordUpdated}</h3>
+            <p className="text-sm text-slate-500">{copy.redirecting}</p>
           </div>
         ) : (
           <form className="space-y-5" onSubmit={handleSubmit}>
@@ -109,7 +133,7 @@ export default function ResetPasswordForm() {
                 htmlFor="new-password"
                 className="block text-[10px] font-bold text-slate-400 tracking-[0.15em] uppercase mb-2"
               >
-                New Password
+                {forgotCopy.newPassword}
               </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -122,13 +146,13 @@ export default function ResetPasswordForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all"
-                  placeholder="At least 8 characters"
+                  placeholder={forgotCopy.passwordPlaceholder}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-[#1C3A34] transition-colors"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? common.hidePassword : common.showPassword}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -140,7 +164,7 @@ export default function ResetPasswordForm() {
                 htmlFor="confirm-password"
                 className="block text-[10px] font-bold text-slate-400 tracking-[0.15em] uppercase mb-2"
               >
-                Confirm Password
+                {forgotCopy.confirmPassword}
               </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -153,13 +177,13 @@ export default function ResetPasswordForm() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all"
-                  placeholder="Re-enter your password"
+                  placeholder={forgotCopy.confirmPasswordPlaceholder}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-[#1C3A34] transition-colors"
-                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  aria-label={showConfirmPassword ? common.hidePassword : common.showPassword}
                 >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -178,10 +202,10 @@ export default function ResetPasswordForm() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Updating password…
+                  {forgotCopy.updatingPassword}
                 </>
               ) : (
-                "Reset Password"
+                forgotCopy.resetPassword
               )}
             </button>
           </form>
@@ -189,8 +213,8 @@ export default function ResetPasswordForm() {
       </div>
 
       <p className="mt-6 text-center text-sm text-slate-500">
-        <Link href={ADMIN_SIGN_IN_PATH} className="font-semibold text-[#1C3A34] hover:text-[#C9B87A] transition-colors">
-          ← Back to sign in
+        <Link href={signInPath} className="font-semibold text-[#1C3A34] hover:text-[#C9B87A] transition-colors">
+          ← {common.backToSignIn}
         </Link>
       </p>
     </AuthShell>

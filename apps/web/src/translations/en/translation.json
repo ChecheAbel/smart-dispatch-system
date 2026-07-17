@@ -169,6 +169,297 @@
         "resetFailedTitle": "Could not reset password",
         "resendFailedTitle": "Could not resend code"
       }
+    },
+    "resetPassword": {
+      "invalidLinkTitle": "Invalid Link",
+      "invalidInvitationTitle": "Invalid Invitation",
+      "invalidLinkDescription": "This password reset link is missing or malformed.",
+      "requestNewInvitation": "Please request a new password reset invitation from the sign-in page.",
+      "requestNewInvitationCta": "Request new invitation →",
+      "mobileTitle": "Set New Password",
+      "desktopEyebrow": "— Reset Password —",
+      "desktopTitlePrefix": "Create a",
+      "desktopTitleHighlight": "New Password",
+      "desktopDescription": "Use the invitation link from your email to set a new administrator password.",
+      "formEyebrow": "— Invitation Accepted —",
+      "formTitle": "Set Your Password",
+      "formDescription": "Choose a strong password for your administrator account.",
+      "passwordUpdated": "Password updated",
+      "redirecting": "Redirecting you to sign in…",
+      "loading": "Loading…"
+    }
+  },
+  "customerAuth": {
+    "common": {
+      "copyright": "Ethiopian Investment Holdings",
+      "email": "Email",
+      "mobile": "Mobile",
+      "password": "Password",
+      "emailAddress": "Email Address",
+      "mobileNumber": "Mobile Number",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "mobilePlaceholder": "912345678 or 712345678",
+      "emailPlaceholder": "you@company.com",
+      "backToHome": "Back to home",
+      "tryAgain": "Please try again.",
+      "backToSignIn": "Back to sign in"
+    },
+    "signIn": {
+      "mobileTitle": "Customer Sign In",
+      "desktopEyebrow": "— Customer Portal —",
+      "desktopTitlePrefix": "Book with",
+      "desktopTitleHighlight": "Smart Dispatch",
+      "desktopDescription": "Sign in to request vehicles, track bookings, and manage your organization profile.",
+      "formEyebrow": "— Sign In —",
+      "formTitle": "Welcome back",
+      "formDescription": "Enter your credentials to access your Smart Dispatch account.",
+      "signInMethod": "Sign in method",
+      "rememberMe": "Remember me",
+      "submit": "Sign In",
+      "submitting": "Signing in…",
+      "checkingSession": "Checking your session…",
+      "loadingForm": "Loading sign in form...",
+      "noAccount": "Don't have an account?",
+      "registerNow": "Register now",
+      "rejectionReason": "Reason for rejection",
+      "errors": {
+        "accessDeniedTitle": "Access denied",
+        "accessDeniedDescription": "This sign-in page is for customer accounts. Use the administrator portal if you manage the platform.",
+        "signInFailedTitle": "Could not sign in",
+        "signInFailedDescription": "Sign in failed. Please try again."
+      },
+      "forgotPassword": "Forgot password?"
+    },
+    "register": {
+      "mobileTitle": "User Registration",
+      "desktopEyebrow": "— User Onboarding —",
+      "desktopTitlePrefix": "Join",
+      "desktopTitleHighlight": "Smart Dispatch",
+      "descriptions": {
+        "default": "Create your Smart Dispatch account in a few simple steps.",
+        "individual": "Create a personal account for individual vehicle requests.",
+        "business": "Register your organization to request vehicles for business use.",
+        "government": "Register your government agency to request official transport services.",
+        "success": "Sign up for Smart Dispatch and access the platform once your account is approved."
+      },
+      "pageTitle": "Create your account",
+      "pageIntros": {
+        "accountType": "Start by choosing the account type that best fits how you'll use Smart Dispatch.",
+        "basicInfo": "Tell us about yourself and set up your login credentials.",
+        "organization": "Provide the required organization details to complete your application."
+      },
+      "stepOf": "Step {current} of {total}",
+      "accountTypeLabel": "Account type",
+      "steps": {
+        "accountType": {
+          "title": "Account type",
+          "description": "Choose who will be requesting vehicles on this platform."
+        },
+        "basicInfo": {
+          "title": "Basic information",
+          "description": "Enter your personal details and create your login credentials."
+        },
+        "businessDetails": {
+          "title": "Business details",
+          "description": "Organization information used for billing and account verification."
+        },
+        "governmentDetails": {
+          "title": "Government details",
+          "description": "Official agency information required for government transport requests."
+        }
+      },
+      "segments": {
+        "individual": {
+          "title": "Individual",
+          "description": "Personal trips and individual bookings (B2P)."
+        },
+        "business": {
+          "title": "Business",
+          "description": "Company, NGO, or fleet account (B2B)."
+        },
+        "government": {
+          "title": "Government",
+          "description": "Ministry, agency, or public body (B2G)."
+        }
+      },
+      "yourProgress": "Your progress",
+      "whyRegister": "Why register?",
+      "whyRegisterItems": [
+        "Request vehicles for personal, business, or official use.",
+        "Secure accounts verified by platform administrators.",
+        "Manage bookings and transport requests in one place."
+      ],
+      "whatHappensNext": "What happens next",
+      "nextSteps": [
+        "An administrator reviews your application.",
+        "You receive confirmation once your account is approved.",
+        "Sign in and start requesting vehicles on the platform."
+      ],
+      "applicationReceived": "Application received",
+      "registrationSubmitted": "Registration submitted",
+      "back": "Back",
+      "continue": "Continue",
+      "createAccount": "Create Account",
+      "creatingAccount": "Creating account…",
+      "optional": "(optional)",
+      "selectEntityType": "Select entity type",
+      "fields": {
+        "firstName": "First name",
+        "middleName": "Middle name",
+        "lastName": "Last name",
+        "email": "Email address",
+        "mobile": "Mobile number",
+        "password": "Password",
+        "confirmPassword": "Confirm password",
+        "organizationName": "Organization name",
+        "agencyName": "Agency / ministry name",
+        "jobTitle": "Job title",
+        "entityType": "Entity type",
+        "registrationNumber": "Registration number",
+        "organizationAddress": "Organization address",
+        "taxId": "Tax ID / TIN",
+        "officialReference": "Official reference / procurement code",
+        "billingContactName": "Billing contact name",
+        "billingContactEmail": "Billing contact email"
+      },
+      "placeholders": {
+        "firstName": "First name",
+        "middleName": "Middle name",
+        "lastName": "Last name",
+        "email": "you@example.com",
+        "password": "At least 8 characters",
+        "confirmPassword": "Re-enter password",
+        "organizationName": "Organization name",
+        "jobTitle": "Fleet manager",
+        "registrationNumber": "Business registration no.",
+        "organizationAddress": "Street, city, region",
+        "taxId": "Tax identification number",
+        "officialReference": "Reference or procurement code",
+        "billingContactName": "Finance officer",
+        "billingContactEmail": "billing@agency.gov.et"
+      },
+      "entityTypes": {
+        "Ministry": "Ministry",
+        "Agency": "Agency",
+        "Public enterprise": "Public enterprise",
+        "Municipality": "Municipality",
+        "Regional office": "Regional office",
+        "Other": "Other"
+      },
+      "errors": {
+        "selectAccountType": "Please select an account type to continue.",
+        "firstNameRequired": "First name is required.",
+        "lastNameRequired": "Last name is required.",
+        "emailRequired": "Email is required.",
+        "emailInvalid": "Enter a valid email address.",
+        "mobileRequired": "Mobile number is required.",
+        "mobileInvalid": "Enter a valid 9-digit number starting with 9 (Ethio Telecom) or 7 (Safaricom).",
+        "passwordRequired": "Password is required.",
+        "passwordTooShort": "Password must be at least 8 characters.",
+        "confirmPasswordRequired": "Please confirm your password.",
+        "passwordMismatch": "Passwords do not match.",
+        "organizationNameRequired": "Organization name is required.",
+        "governmentOrgNameRequired": "Government organization name is required.",
+        "jobTitleRequired": "Job title is required.",
+        "organizationAddressRequired": "Organization address is required.",
+        "taxIdRequired": "Tax ID / TIN is required.",
+        "registrationNumberRequired": "Business registration number is required.",
+        "entityTypeRequired": "Government entity type is required.",
+        "officialReferenceRequired": "Official reference / procurement code is required.",
+        "billingContactNameRequired": "Billing contact name is required.",
+        "billingContactEmailRequired": "Billing contact email is required.",
+        "billingContactEmailInvalid": "Enter a valid billing contact email.",
+        "createFailedTitle": "Could not create account",
+        "createFailedDescription": "Registration failed. Please try again."
+      }
+    },
+    "forgotPassword": {
+      "mobileTitle": "Password Reset",
+      "desktopEyebrow": "— Account Recovery —",
+      "desktopTitlePrefix": "Reset via",
+      "desktopTitleHighlight": "Email or SMS",
+      "desktopDescriptions": {
+        "emailRequest": "Enter your email and we'll send a secure link to reset your password.",
+        "mobileRequest": "Enter your mobile number and we'll send a verification code by SMS.",
+        "verifyOtp": "Enter the 6-digit verification code sent to your phone.",
+        "setPassword": "Choose a new password for your account."
+      },
+      "desktopSubtitles": {
+        "emailRequest": "We'll email you a link to create a new password.",
+        "mobileRequest": "We'll text you a verification code to reset your password.",
+        "verifyOtp": "Check your SMS messages for the verification code.",
+        "setPassword": "Your code was verified. Create a strong new password."
+      },
+      "formEyebrow": "— Forgot Password —",
+      "formTitles": {
+        "requestReset": "Request Reset",
+        "verifyCode": "Verify Code",
+        "setPassword": "Set New Password"
+      },
+      "resetMethod": "Reset method",
+      "sendResetLink": "Send Reset Link",
+      "sendVerificationCode": "Send Verification Code",
+      "sendingResetLink": "Sending reset link…",
+      "sendingCode": "Sending code…",
+      "emailSentTitle": "Check your email",
+      "emailSentDescription": "If an account exists for {email}, you'll receive a password reset link shortly. The link expires in 1 hour.",
+      "emailSentHint": "Didn't receive it? Check your spam folder or try again.",
+      "sendAnotherLink": "Send another link",
+      "verificationSuccess": "Verification successful. Set your new password below.",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "resetPassword": "Reset Password",
+      "updatingPassword": "Updating password…",
+      "enterCodeSentTo": "Enter the code sent to {mobile}",
+      "expiresIn": "Expires in",
+      "codeExpired": "Code expired",
+      "verificationCode": "Verification Code",
+      "otpExpiredHint": "Request a new code once the resend timer finishes, or use a different number.",
+      "verifyCode": "Verify Code",
+      "verifyingCode": "Verifying code…",
+      "resendCode": "Resend code",
+      "resendIn": "Resend in {time}",
+      "sending": "Sending…",
+      "useDifferentNumber": "Use a different number",
+      "errors": {
+        "invalidMobileTitle": "Invalid mobile number",
+        "invalidMobileDescription": "Enter a valid 9-digit mobile number starting with 9 or 7.",
+        "sendLinkFailedTitle": "Could not send reset link",
+        "sendCodeFailedTitle": "Could not send verification code",
+        "incompleteCodeTitle": "Incomplete code",
+        "incompleteCodeDescription": "Enter the 6-digit verification code.",
+        "codeExpiredTitle": "Code expired",
+        "codeExpiredDescription": "This verification code has expired. Request a new code.",
+        "verifyFailedTitle": "Could not verify code",
+        "verifyFailedDescription": "Invalid verification code.",
+        "passwordTooShortTitle": "Password too short",
+        "passwordTooShortDescription": "Password must be at least 8 characters.",
+        "passwordMismatchTitle": "Passwords do not match",
+        "passwordMismatchDescription": "Make sure both password fields match.",
+        "resetFailedTitle": "Could not reset password",
+        "resendFailedTitle": "Could not resend code"
+      }
+    },
+    "resetPassword": {
+      "invalidLinkTitle": "Invalid Link",
+      "invalidInvitationTitle": "Invalid Invitation",
+      "invalidLinkDescription": "This password reset link is missing or malformed.",
+      "requestNewInvitation": "Please request a new password reset invitation from the sign-in page.",
+      "requestNewInvitationCta": "Request new invitation →",
+      "mobileTitle": "Set New Password",
+      "desktopEyebrow": "— Reset Password —",
+      "desktopTitlePrefix": "Create a",
+      "desktopTitleHighlight": "New Password",
+      "desktopDescription": "Use the invitation link from your email to set a new password.",
+      "formEyebrow": "— Invitation Accepted —",
+      "formTitle": "Set Your Password",
+      "formDescription": "Choose a strong password for your account.",
+      "passwordUpdated": "Password updated",
+      "redirecting": "Redirecting you to sign in…",
+      "loading": "Loading…"
     }
   },
   "customerDashboard": {

@@ -93,7 +93,7 @@
       "submit": "ግባ",
       "submitting": "በመግባት ላይ…",
       "checkingSession": "የእርስዎን ክፍለ-ጊዜ በመፈተሽ ላይ…",
-      "emailPlaceholder": "",
+      "emailPlaceholder": "you@example.com",
       "errors": {
         "accessDeniedTitle": "መዳረሻ ተከልክሏል",
         "accessDeniedDescription": "ይህ መለያ የአስተዳዳሪ መዳረሻ የለውም።",
@@ -169,6 +169,297 @@
         "resetFailedTitle": "የይለፍ ቃል መቀየር አልተሳካም",
         "resendFailedTitle": "ኮድ እንደገና መላክ አልተሳካም"
       }
+    },
+    "resetPassword": {
+      "invalidLinkTitle": "ልክ ያልሆነ አገናኝ",
+      "invalidInvitationTitle": "ልክ ያልሆነ ግብዣ",
+      "invalidLinkDescription": "ይህ የይለፍ ቃል መልሶ ማስተካከያ አገናኝ ጠፍቷል ወይም ትክክል አይደለም።",
+      "requestNewInvitation": "እባክዎ ከመግቢያ ገጹ አዲስ የይለፍ ቃል መልሶ ማስተካከያ ግብዣ ይጠይቁ።",
+      "requestNewInvitationCta": "አዲስ ግብዣ ይጠይቁ →",
+      "mobileTitle": "አዲስ የይለፍ ቃል አስቀምጥ",
+      "desktopEyebrow": "— የይለፍ ቃል መቀየር —",
+      "desktopTitlePrefix": "ይፍጠሩ",
+      "desktopTitleHighlight": "አዲስ የይለፍ ቃል",
+      "desktopDescription": "አዲስ የአስተዳዳሪ የይለፍ ቃል ለማስቀመጥ ከኢሜይልዎ የመጣውን አገናኝ ይጠቀሙ።",
+      "formEyebrow": "— ግብዣ ተቀባይነት አግኝቷል —",
+      "formTitle": "የይለፍ ቃልዎን ያስቀምጡ",
+      "formDescription": "ለአስተዳዳሪ መለያዎ ጠንካራ የይለፍ ቃል ይምረጡ።",
+      "passwordUpdated": "የይለፍ ቃል ተዘምኗል",
+      "redirecting": "ወደ መግቢያ በመምራት ላይ…",
+      "loading": "በመጫን ላይ…"
+    }
+  },
+  "customerAuth": {
+    "common": {
+      "copyright": "ኢትዮጵያ ኢንቨስትመንት ሆልዲንግስ",
+      "email": "ኢሜይል",
+      "mobile": "ሞባይል",
+      "password": "የይለፍ ቃል",
+      "emailAddress": "የኢሜይል አድራሻ",
+      "mobileNumber": "የሞባይል ቁጥር",
+      "showPassword": "የይለፍ ቃል አሳይ",
+      "hidePassword": "የይለፍ ቃል ደብቅ",
+      "mobilePlaceholder": "912345678 ወይም 712345678",
+      "emailPlaceholder": "you@example.com",
+      "backToHome": "ወደ መነሻ ተመለስ",
+      "tryAgain": "እባክዎ እንደገና ይሞክሩ።",
+      "backToSignIn": "ወደ መግቢያ ተመለስ"
+    },
+    "signIn": {
+      "mobileTitle": "የደንበኛ መግቢያ",
+      "desktopEyebrow": "— የደንበኛ መግቢያ —",
+      "desktopTitlePrefix": "በ",
+      "desktopTitleHighlight": "ስማርት ዲስፓች ያስያዙ",
+      "desktopDescription": "ተሽከርካሪዎችን ለመጠየቅ፣ ቦታ ማስያዝ ለመከታተል እና የድርጅትዎን መገለጫ ለማስተዳደር ይግቡ።",
+      "formEyebrow": "— መግቢያ —",
+      "formTitle": "እንኳን ደህና መጡ",
+      "formDescription": "የስማርት ዲስፓች መለያዎን ለመድረስ የመግቢያ መረጃዎን ያስገቡ።",
+      "signInMethod": "የመግቢያ መንገድ",
+      "rememberMe": "አስታውሰኝ",
+      "submit": "ግባ",
+      "submitting": "በመግባት ላይ…",
+      "checkingSession": "የእርስዎን ክፍለ-ጊዜ በመፈተሽ ላይ…",
+      "loadingForm": "የመግቢያ ቅጽ በመጫን ላይ...",
+      "noAccount": "መለያ የለዎትም?",
+      "registerNow": "አሁን ይመዝገቡ",
+      "rejectionReason": "የውድቅ ምክንያት",
+      "errors": {
+        "accessDeniedTitle": "መዳረሻ ተከልክሏል",
+        "accessDeniedDescription": "ይህ የመግቢያ ገጽ ለደንበኛ መለያዎች ነው። መድረኩን የሚያስተዳድሩ ከሆነ የአስተዳዳሪ መግቢያን ይጠቀሙ።",
+        "signInFailedTitle": "መግባት አልተሳካም",
+        "signInFailedDescription": "መግባት አልተሳካም። እባክዎ እንደገና ይሞክሩ።"
+      },
+      "forgotPassword": "የይለፍ ቃል ረሱ?"
+    },
+    "register": {
+      "mobileTitle": "የተጠቃሚ ምዝገባ",
+      "desktopEyebrow": "— የተጠቃሚ መመዝገብ —",
+      "desktopTitlePrefix": "ይቀላቀሉ",
+      "desktopTitleHighlight": "ስማርት ዲስፓች",
+      "descriptions": {
+        "default": "የስማርት ዲስፓች መለያዎን በጥቂት ቀላል ደረጃዎች ይፍጠሩ።",
+        "individual": "ለግል የተሽከርካሪ ጥያቄዎች የግል መለያ ይፍጠሩ።",
+        "business": "ለንግድ አገልግሎት ተሽከርካሪዎችን ለመጠየቅ ድርጅትዎን ይመዝገቡ።",
+        "government": "ለይፋዊ የመጓጓዣ አገልግሎት የመንግስት ኤጀንሲዎን ይመዝገቡ።",
+        "success": "ለስማርት ዲስፓች ይመዝገቡ፣ መለያዎ ከጸደቀ በኋላ መድረኩን ይድረሱ።"
+      },
+      "pageTitle": "መለያዎን ይፍጠሩ",
+      "pageIntros": {
+        "accountType": "ስማርት ዲስፓችን እንዴት እንደሚጠቀሙ ከሚገልጽ የመለያ አይነት ጀምረው ይምረጡ።",
+        "basicInfo": "ስለ እርስዎ ይንገሩን እና የመግቢያ መረጃዎን ያዘጋጁ።",
+        "organization": "ማመልከቻዎን ለማጠናቀቅ የሚያስፈልጉትን የድርጅት ዝርዝሮች ያቅርቡ።"
+      },
+      "stepOf": "ደረጃ {current} ከ {total}",
+      "accountTypeLabel": "የመለያ አይነት",
+      "steps": {
+        "accountType": {
+          "title": "የመለያ አይነት",
+          "description": "በዚህ መድረክ ላይ ተሽከርካሪዎችን ማን እንደሚጠይቅ ይምረጡ።"
+        },
+        "basicInfo": {
+          "title": "መሰረታዊ መረጃ",
+          "description": "የግል ዝርዝሮችዎን ያስገቡ እና የመግቢያ መረጃ ይፍጠሩ።"
+        },
+        "businessDetails": {
+          "title": "የንግድ ዝርዝሮች",
+          "description": "ለክፍያ እና ለመለያ ማረጋገጫ የሚያገለግል የድርጅት መረጃ።"
+        },
+        "governmentDetails": {
+          "title": "የመንግስት ዝርዝሮች",
+          "description": "ለመንግስት የመጓጓዣ ጥያቄዎች የሚያስፈልግ ይፋዊ የኤጀንሲ መረጃ።"
+        }
+      },
+      "segments": {
+        "individual": {
+          "title": "ግለሰብ",
+          "description": "የግል ጉዞዎች እና የግል ቦታ ማስያዝ (B2P)።"
+        },
+        "business": {
+          "title": "ንግድ",
+          "description": "ኩባንያ፣ መንግስታዊ ያልሆነ ድርጅት ወይም የተሽከርካሪ መለያ (B2B)።"
+        },
+        "government": {
+          "title": "መንግስት",
+          "description": "ሚኒስቴር፣ ኤጀንሲ ወይም የህዝብ አካል (B2G)።"
+        }
+      },
+      "yourProgress": "የእርስዎ ሂደት",
+      "whyRegister": "ለምን ይመዝገቡ?",
+      "whyRegisterItems": [
+        "ለግል፣ ለንግድ ወይም ለይፋዊ አገልግሎት ተሽከርካሪዎችን ይጠይቁ።",
+        "በመድረክ አስተዳዳሪዎች የሚረጋገጡ ደህንነቱ የተጠበቁ መለያዎች።",
+        "ቦታ ማስያዝ እና የመጓጓዣ ጥያቄዎችን በአንድ ቦታ ያስተዳድሩ።"
+      ],
+      "whatHappensNext": "ቀጥሎ ምን ይከሰታል",
+      "nextSteps": [
+        "አስተዳዳሪ ማመልከቻዎን ይመረምራል።",
+        "መለያዎ ከጸደቀ በኋላ ማረጋገጫ ይደርስዎታል።",
+        "ይግቡ እና በመድረኩ ላይ ተሽከርካሪዎችን መጠየቅ ይጀምሩ።"
+      ],
+      "applicationReceived": "ማመልከቻ ተቀብሏል",
+      "registrationSubmitted": "ምዝገባ ተልኳል",
+      "back": "ተመለስ",
+      "continue": "ቀጥል",
+      "createAccount": "መለያ ፍጠር",
+      "creatingAccount": "መለያ በመፍጠር ላይ…",
+      "optional": "(አማራጭ)",
+      "selectEntityType": "የአካል አይነት ይምረጡ",
+      "fields": {
+        "firstName": "የመጀመሪያ ስም",
+        "middleName": "የአባት ስም",
+        "lastName": "የአያት ስም",
+        "email": "የኢሜይል አድራሻ",
+        "mobile": "የሞባይል ቁጥር",
+        "password": "የይለፍ ቃል",
+        "confirmPassword": "የይለፍ ቃል ያረጋግጡ",
+        "organizationName": "የድርጅት ስም",
+        "agencyName": "የኤጀንሲ / ሚኒስቴር ስም",
+        "jobTitle": "የስራ መደብ",
+        "entityType": "የአካል አይነት",
+        "registrationNumber": "የምዝገባ ቁጥር",
+        "organizationAddress": "የድርጅት አድራሻ",
+        "taxId": "የግብር መለያ / ቲን",
+        "officialReference": "ይፋዊ ማጣቀሻ / የግዥ ኮድ",
+        "billingContactName": "የክፍያ ተጠሪ ስም",
+        "billingContactEmail": "የክፍያ ተጠሪ ኢሜይል"
+      },
+      "placeholders": {
+        "firstName": "የመጀመሪያ ስም",
+        "middleName": "የአባት ስም",
+        "lastName": "የአያት ስም",
+        "email": "you@example.com",
+        "password": "ቢያንስ 8 ቁምፊዎች",
+        "confirmPassword": "የይለፍ ቃል እንደገና ያስገቡ",
+        "organizationName": "የድርጅት ስም",
+        "jobTitle": "የተሽከርካሪ አስተዳዳሪ",
+        "registrationNumber": "የንግድ ምዝገባ ቁጥር",
+        "organizationAddress": "መንገድ፣ ከተማ፣ ክልል",
+        "taxId": "የግብር መለያ ቁጥር",
+        "officialReference": "ማጣቀሻ ወይም የግዥ ኮድ",
+        "billingContactName": "የፋይናንስ ባለሙያ",
+        "billingContactEmail": "billing@agency.gov.et"
+      },
+      "entityTypes": {
+        "Ministry": "ሚኒስቴር",
+        "Agency": "ኤጀንሲ",
+        "Public enterprise": "የህዝብ ድርጅት",
+        "Municipality": "ማዘጋጃ ቤት",
+        "Regional office": "የክልል ቢሮ",
+        "Other": "ሌላ"
+      },
+      "errors": {
+        "selectAccountType": "ለመቀጠል እባክዎ የመለያ አይነት ይምረጡ።",
+        "firstNameRequired": "የመጀመሪያ ስም ያስፈልጋል።",
+        "lastNameRequired": "የአያት ስም ያስፈልጋል።",
+        "emailRequired": "ኢሜይል ያስፈልጋል።",
+        "emailInvalid": "ትክክለኛ የኢሜይል አድራሻ ያስገቡ።",
+        "mobileRequired": "የሞባይል ቁጥር ያስፈልጋል።",
+        "mobileInvalid": "በ9 (ኢትዮ ቴሌኮም) ወይም በ7 (ሳፋሪኮም) የሚጀምር ትክክለኛ 9-አሃዝ ቁጥር ያስገቡ።",
+        "passwordRequired": "የይለፍ ቃል ያስፈልጋል።",
+        "passwordTooShort": "የይለፍ ቃል ቢያንስ 8 ቁምፊዎች መሆን አለበት።",
+        "confirmPasswordRequired": "እባክዎ የይለፍ ቃልዎን ያረጋግጡ።",
+        "passwordMismatch": "የይለፍ ቃሎች አይዛመዱም።",
+        "organizationNameRequired": "የድርጅት ስም ያስፈልጋል።",
+        "governmentOrgNameRequired": "የመንግስት ድርጅት ስም ያስፈልጋል።",
+        "jobTitleRequired": "የስራ መደብ ያስፈልጋል።",
+        "organizationAddressRequired": "የድርጅት አድራሻ ያስፈልጋል።",
+        "taxIdRequired": "የግብር መለያ / ቲን ያስፈልጋል።",
+        "registrationNumberRequired": "የንግድ ምዝገባ ቁጥር ያስፈልጋል።",
+        "entityTypeRequired": "የመንግስት አካል አይነት ያስፈልጋል።",
+        "officialReferenceRequired": "ይፋዊ ማጣቀሻ / የግዥ ኮድ ያስፈልጋል።",
+        "billingContactNameRequired": "የክፍያ ተጠሪ ስም ያስፈልጋል።",
+        "billingContactEmailRequired": "የክፍያ ተጠሪ ኢሜይል ያስፈልጋል።",
+        "billingContactEmailInvalid": "ትክክለኛ የክፍያ ተጠሪ ኢሜይል ያስገቡ።",
+        "createFailedTitle": "መለያ መፍጠር አልተሳካም",
+        "createFailedDescription": "ምዝገባ አልተሳካም። እባክዎ እንደገና ይሞክሩ።"
+      }
+    },
+    "forgotPassword": {
+      "mobileTitle": "የይለፍ ቃል መልሶ ማስተካከል",
+      "desktopEyebrow": "— የመለያ መልሶ መገኘት —",
+      "desktopTitlePrefix": "በ",
+      "desktopTitleHighlight": "ኢሜይል ወይም ቁጥር መልዕክት",
+      "desktopDescriptions": {
+        "emailRequest": "ኢሜይልዎን ያስገቡ እና የይለፍ ቃልዎን ለመቀየር ደህንነቱ የተጠበቀ አገናኝ እንልክልዎታለን።",
+        "mobileRequest": "የሞባይል ቁጥርዎን ያስገቡ እና በኤስኤምኤስ የማረጋገጫ ኮድ እንልክልዎታለን።",
+        "verifyOtp": "ወደ ስልክዎ የተላከውን 6-አሃዝ የማረጋገጫ ኮድ ያስገቡ።",
+        "setPassword": "ለመለያዎ አዲስ የይለፍ ቃል ይምረጡ።"
+      },
+      "desktopSubtitles": {
+        "emailRequest": "አዲስ የይለፍ ቃል ለመፍጠር አገናኝ በኢሜይል እንልክልዎታለን።",
+        "mobileRequest": "የይለፍ ቃልዎን ለመቀየር የማረጋገጫ ኮድ በመልእክት እንልክልዎታለን።",
+        "verifyOtp": "የማረጋገጫ ኮዱን በኤስኤምኤስ መልእክቶችዎ ውስጥ ይፈትሹ።",
+        "setPassword": "ኮድዎ ተረጋግጧል። ጠንካራ አዲስ የይለፍ ቃል ይፍጠሩ።"
+      },
+      "formEyebrow": "— የይለፍ ቃል ረሳሁ —",
+      "formTitles": {
+        "requestReset": "የይለፍ ቃል መልሶ ማስተካከል",
+        "verifyCode": "ኮድ አረጋግጥ",
+        "setPassword": "አዲስ የይለፍ ቃል አስቀምጥ"
+      },
+      "resetMethod": "የመልሶ ማስተካከያ መንገድ",
+      "sendResetLink": "የመልሶ ማስተካከያ አገናኝ ላክ",
+      "sendVerificationCode": "የማረጋገጫ ኮድ ላክ",
+      "sendingResetLink": "አገናኝ በመላክ ላይ…",
+      "sendingCode": "ኮድ በመላክ ላይ…",
+      "emailSentTitle": "ኢሜይልዎን ይፈትሹ",
+      "emailSentDescription": "ለ {email} መለያ ካለ፣ በቅርቡ የይለፍ ቃል መልሶ ማስተካከያ አገናኝ ይደርስዎታል። አገናኙ በ1 ሰዓት ውስጥ ያበቃል።",
+      "emailSentHint": "አልደረሰዎትም? የስፓም አቃፊዎን ይፈትሹ ወይም እንደገና ይሞክሩ።",
+      "sendAnotherLink": "ሌላ አገናኝ ላክ",
+      "verificationSuccess": "ማረጋገጫ ተሳክቷል። ከዚህ በታች አዲስ የይለፍ ቃልዎን ያስቀምጡ።",
+      "newPassword": "አዲስ የይለፍ ቃል",
+      "confirmPassword": "የይለፍ ቃል ያረጋግጡ",
+      "passwordPlaceholder": "ቢያንስ 8 ቁምፊዎች",
+      "confirmPasswordPlaceholder": "የይለፍ ቃልዎን እንደገና ያስገቡ",
+      "resetPassword": "የይለፍ ቃል ቀይር",
+      "updatingPassword": "የይለፍ ቃል በማዘመን ላይ…",
+      "enterCodeSentTo": "ወደ {mobile} የተላከውን ኮድ ያስገቡ",
+      "expiresIn": "የሚያበቃው በ",
+      "codeExpired": "ኮድ አልቋል",
+      "verificationCode": "የማረጋገጫ ኮድ",
+      "otpExpiredHint": "የእንደገና መላክ ጊዜ ካለቀ በኋላ አዲስ ኮድ ይጠይቁ፣ ወይም ሌላ ቁጥር ይጠቀሙ።",
+      "verifyCode": "ኮድ አረጋግጥ",
+      "verifyingCode": "ኮድ በማረጋገጥ ላይ…",
+      "resendCode": "ኮድ እንደገና ላክ",
+      "resendIn": "እንደገና ይላኩ በ {time}",
+      "sending": "በመላክ ላይ…",
+      "useDifferentNumber": "ሌላ ቁጥር ተጠቀም",
+      "errors": {
+        "invalidMobileTitle": "ልክ ያልሆነ የሞባይል ቁጥር",
+        "invalidMobileDescription": "በ9 ወይም በ7 የሚጀምር ትክክለኛ 9-አሃዝ የሞባይል ቁጥር ያስገቡ።",
+        "sendLinkFailedTitle": "አገናኝ መላክ አልተሳካም",
+        "sendCodeFailedTitle": "የማረጋገጫ ኮድ መላክ አልተሳካም",
+        "incompleteCodeTitle": "ያልተሟላ ኮድ",
+        "incompleteCodeDescription": "6-አሃዝ የማረጋገጫ ኮድ ያስገቡ።",
+        "codeExpiredTitle": "ኮድ አልቋል",
+        "codeExpiredDescription": "ይህ የማረጋገጫ ኮድ ጊዜው አልቋል። አዲስ ኮድ ይጠይቁ።",
+        "verifyFailedTitle": "ኮድ ማረጋገጥ አልተሳካም",
+        "verifyFailedDescription": "ልክ ያልሆነ የማረጋገጫ ኮድ።",
+        "passwordTooShortTitle": "የይለፍ ቃል በጣም አጭር ነው",
+        "passwordTooShortDescription": "የይለፍ ቃል ቢያንስ 8 ቁምፊዎች መሆን አለበት።",
+        "passwordMismatchTitle": "የይለፍ ቃሎች አይዛመዱም",
+        "passwordMismatchDescription": "ሁለቱም የይለፍ ቃል መስኮች እንደሚዛመዱ ያረጋግጡ።",
+        "resetFailedTitle": "የይለፍ ቃል መቀየር አልተሳካም",
+        "resendFailedTitle": "ኮድ እንደገና መላክ አልተሳካም"
+      }
+    },
+    "resetPassword": {
+      "invalidLinkTitle": "ልክ ያልሆነ አገናኝ",
+      "invalidInvitationTitle": "ልክ ያልሆነ ግብዣ",
+      "invalidLinkDescription": "ይህ የይለፍ ቃል መልሶ ማስተካከያ አገናኝ ጠፍቷል ወይም ትክክል አይደለም።",
+      "requestNewInvitation": "እባክዎ ከመግቢያ ገጹ አዲስ የይለፍ ቃል መልሶ ማስተካከያ ግብዣ ይጠይቁ።",
+      "requestNewInvitationCta": "አዲስ ግብዣ ይጠይቁ →",
+      "mobileTitle": "አዲስ የይለፍ ቃል አስቀምጥ",
+      "desktopEyebrow": "— የይለፍ ቃል መቀየር —",
+      "desktopTitlePrefix": "ይፍጠሩ",
+      "desktopTitleHighlight": "አዲስ የይለፍ ቃል",
+      "desktopDescription": "አዲስ የይለፍ ቃል ለማስቀመጥ ከኢሜይልዎ የመጣውን አገናኝ ይጠቀሙ።",
+      "formEyebrow": "— ግብዣ ተቀባይነት አግኝቷል —",
+      "formTitle": "የይለፍ ቃልዎን ያስቀምጡ",
+      "formDescription": "ለመለያዎ ጠንካራ የይለፍ ቃል ይምረጡ።",
+      "passwordUpdated": "የይለፍ ቃል ተዘምኗል",
+      "redirecting": "ወደ መግቢያ በመምራት ላይ…",
+      "loading": "በመጫን ላይ…"
     }
   },
   "customerDashboard": {
@@ -4306,7 +4597,7 @@
       "message": "እንዴት እንድንረዳዎ?",
       "namePlaceholder": "አበበ ከበደ",
       "companyPlaceholder": "የተሽከርካሪ ኩባንያዎ",
-      "emailPlaceholder": "",
+      "emailPlaceholder": "you@company.com",
       "messagePlaceholder": "የተሽከርካሪ ብዛት፣ አጠቃቀምዎ ወይም ስለ ቦታ ማስያዝ፣ መላኪያ እና ክፍያ ጥያቄዎችዎን ይግለጹ…",
       "submit": "መልዕክት ላክ"
     },
