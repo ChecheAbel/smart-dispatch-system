@@ -1,6 +1,15 @@
 {
   "common": {
     "selectLanguage": "Select language",
+    "notFound": {
+      "eyebrow": "Page not found",
+      "code": "404",
+      "title": "This page is off the route",
+      "description": "The link may be broken, or the page may have been moved. Head back home or book a vehicle to continue.",
+      "goHome": "Back to home",
+      "bookNow": "Book a vehicle",
+      "signIn": "Sign in"
+    },
     "deleteModal": {
       "eyebrow": "Confirm deletion",
       "title": "Delete {name}?",

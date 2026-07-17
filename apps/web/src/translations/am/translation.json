@@ -1,6 +1,15 @@
 {
   "common": {
     "selectLanguage": "ቋንቋ ይምረጡ",
+    "notFound": {
+      "eyebrow": "ገጹ አልተገኘም",
+      "code": "404",
+      "title": "ይህ ገጽ ከመንገድ ውጭ ነው",
+      "description": "አገናኙ ተሰብሮ ሊሆን ይችላል፣ ወይም ገጹ ተዛውሯል። ወደ መነሻ ይመለሱ ወይም ተሽከርካሪ በማስያዝ ይቀጥሉ።",
+      "goHome": "ወደ መነሻ ተመለስ",
+      "bookNow": "ተሽከርካሪ አስይዝ",
+      "signIn": "ግባ"
+    },
     "deleteModal": {
       "eyebrow": "መሰረዝ አረጋግጥ",
       "title": "{name} ይሰረዝ?",
