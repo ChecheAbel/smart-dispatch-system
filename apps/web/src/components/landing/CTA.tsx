@@ -1,14 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { useLandingMessages } from "@/hooks/use-landing-messages";
 
 export default function CTA() {
+  const copy = useLandingMessages();
+
   return (
     <section className="relative py-24 sm:py-32 lg:py-40 bg-[#1C3A34] overflow-hidden">
-      {/* Grid decoration */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(201,184,122,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(201,184,122,0.05)_1px,transparent_1px)] bg-[size:80px_80px] opacity-30" />
       
-      {/* Glow orb */}
       <motion.div 
         animate={{
           scale: [1, 1.2, 1],
@@ -27,21 +28,21 @@ export default function CTA() {
         >
           <p className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#C9B87A]/20 bg-[#C9B87A]/5 backdrop-blur-md mb-6">
             <span className="h-2 w-2 rounded-full bg-[#C9B87A] animate-pulse" />
-            <span className="text-[#C9B87A] font-bold text-[10px] sm:text-xs tracking-[0.25em] uppercase">Ready to Move?</span>
+            <span className="text-[#C9B87A] font-bold text-[10px] sm:text-xs tracking-[0.25em] uppercase">{copy.cta.eyebrow}</span>
           </p>
           
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.1] mb-6 sm:mb-8 px-2 drop-shadow-2xl">
-            Upgrade to Ethiopia's Premium{" "}
+            {copy.cta.titlePrefix}{" "}
             <br className="hidden sm:block" />
             <span className="relative inline-block mt-2">
               <span className="bg-gradient-to-r from-[#C9B87A] via-[#FFF2C2] to-[#C9B87A] bg-clip-text text-transparent bg-[length:200%_auto] animate-pulse">
-                Dispatch Platform
+                {copy.cta.titleHighlight}
               </span>
             </span>
           </h2>
           
           <p className="text-white/60 text-base sm:text-xl max-w-2xl mx-auto leading-relaxed mb-10 sm:mb-12 px-2 font-light">
-            Run bookings, corporate dispatches, fleet compliance, and ETB invoicing from one purpose-built system.
+            {copy.cta.subtitle}
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center max-w-md sm:max-w-none mx-auto">
@@ -53,7 +54,7 @@ export default function CTA() {
             >
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out rounded-full" />
               <span className="relative z-10 flex items-center justify-center gap-2 text-lg">
-                Book now
+                {copy.cta.bookNow}
               </span>
             </motion.a>
             <motion.a
@@ -62,7 +63,7 @@ export default function CTA() {
               href="#features"
               className="w-full sm:w-auto border border-white/20 hover:border-[#C9B87A]/50 text-white font-semibold text-[15px] px-10 py-4 sm:py-5 rounded-full tracking-wide transition-all duration-300 hover:bg-white/5 backdrop-blur-md text-center text-lg"
             >
-              Explore Features
+              {copy.cta.exploreFeatures}
             </motion.a>
           </div>
         </motion.div>

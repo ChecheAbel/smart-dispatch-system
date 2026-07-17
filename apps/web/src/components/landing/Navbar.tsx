@@ -1,21 +1,28 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import BrandLogo from "@/components/landing/BrandLogo";
 import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
+import { useLandingMessages } from "@/hooks/use-landing-messages";
 import { motion, AnimatePresence } from "framer-motion";
 
-const NAV_LINKS = [
-  { label: "How it Works", href: "#process" },
-  { label: "Features", href: "#features" },
-  { label: "Benefits", href: "#benefits" },
-  { label: "Contact", href: "#contact" },
-] as const;
+const NAV_HREFS = [
+  { key: "howItWorks" as const, href: "#process" },
+  { key: "features" as const, href: "#features" },
+  { key: "benefits" as const, href: "#benefits" },
+  { key: "contact" as const, href: "#contact" },
+];
 
 export default function Navbar() {
+  const copy = useLandingMessages();
+  const navLinks = useMemo(
+    () => NAV_HREFS.map((link) => ({ ...link, label: copy.nav[link.key] })),
+    [copy.nav],
+  );
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeSection, setActiveSection] = useState("");
@@ -31,7 +38,7 @@ export default function Navbar() {
     const handleScroll = () => {
       const scrollPosition = window.scrollY + 120;
 
-      const activeLink = NAV_LINKS.find((link) => {
+      const activeLink = navLinks.find((link) => {
         const section = document.getElementById(link.href.slice(1));
         if (!section) return false;
 
@@ -51,7 +58,7 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [navLinks]);
 
   useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -85,17 +92,15 @@ export default function Navbar() {
               : "max-w-7xl px-4 sm:px-6 h-[72px] bg-transparent border-transparent"
           )}
         >
-          {/* Logo */}
           <a href="/" className="flex items-center group shrink-0 min-w-0 z-10">
             <BrandLogo priority className="group-hover:opacity-80 transition-opacity drop-shadow-md" />
           </a>
 
-          {/* Desktop nav — centered pill */}
           <nav
-            aria-label="Main navigation"
+            aria-label={copy.nav.mainNav}
             className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-white/[0.03] p-1.5 backdrop-blur-md"
           >
-            {NAV_LINKS.map((link) => {
+            {navLinks.map((link) => {
               const id = link.href.slice(1);
               const isActive = activeSection === id;
 
@@ -120,23 +125,21 @@ export default function Navbar() {
             })}
           </nav>
 
-          {/* Desktop actions */}
           <div className="hidden lg:flex items-center gap-3 shrink-0 z-10">
             <LanguageSwitcher variant="dark" />
             <Link
               href="/book"
               className="inline-flex items-center gap-2 bg-[#C9B87A] hover:bg-[#E3D18F] text-[#1C3A34] font-bold text-[13px] px-6 py-2.5 rounded-full tracking-wide transition-all duration-300 hover:shadow-[0_0_20px_-5px_rgba(201,184,122,0.5)] hover:-translate-y-0.5"
             >
-              Book now
+              {copy.nav.bookNow}
             </Link>
           </div>
 
-          {/* Mobile toggle */}
           <button
             type="button"
             onClick={() => setMobileMenuOpen((open) => !open)}
             className="lg:hidden inline-flex items-center justify-center h-10 w-10 rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/20 backdrop-blur-md transition-all active:scale-95"
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-label={mobileMenuOpen ? copy.nav.closeMenu : copy.nav.openMenu}
             aria-expanded={mobileMenuOpen}
           >
             <AnimatePresence mode="wait">
@@ -154,7 +157,6 @@ export default function Navbar() {
         </div>
       </motion.header>
 
-      {/* Mobile menu overlay */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
@@ -165,8 +167,8 @@ export default function Navbar() {
             aria-hidden={false}
           >
             <div className="absolute top-[90px] left-4 right-4 bg-[#1C3A34]/80 border border-white/20 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-2xl">
-              <nav className="px-4 py-6 space-y-2" aria-label="Mobile navigation">
-                {NAV_LINKS.map((link, i) => {
+              <nav className="px-4 py-6 space-y-2" aria-label={copy.nav.mobileNav}>
+                {navLinks.map((link, i) => {
                   const id = link.href.slice(1);
                   const isActive = activeSection === id;
 
@@ -209,7 +211,7 @@ export default function Navbar() {
                     onClick={closeMobileMenu}
                     className="flex items-center justify-center w-full bg-gradient-to-r from-[#C9B87A] to-[#A4945A] text-[#1C3A34] font-bold text-base py-4 rounded-2xl shadow-lg active:scale-[0.98] transition-transform"
                   >
-                    Book now
+                    {copy.nav.bookNow}
                   </Link>
                 </motion.div>
               </div>

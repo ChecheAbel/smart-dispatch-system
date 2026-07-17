@@ -1,0 +1,139 @@
+{
+  "nav": {
+    "howItWorks": "How it Works",
+    "features": "Features",
+    "benefits": "Benefits",
+    "contact": "Contact",
+    "bookNow": "Book now",
+    "mainNav": "Main navigation",
+    "mobileNav": "Mobile navigation",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "hero": {
+    "titlePrefix": "Ethiopia's Premier",
+    "titleHighlight": "Corporate Dispatch",
+    "titleSuffix": "& Fleet Platform",
+    "subtitle": "A localized, enterprise-grade platform for corporate contracts, booking dispatches, driver shifts, and ETB invoicing, built specifically for Ethiopian transport agencies.",
+    "seeHowItWorks": "See How It Works",
+    "exploreFeatures": "Explore Features"
+  },
+  "process": {
+    "eyebrow": "Seamless Experience",
+    "title": "How It Works",
+    "subtitle": "We've removed the complexity from fleet operations. Our intuitive three-step process ensures a smooth ride from booking to billing.",
+    "steps": [
+      {
+        "title": "Book & Request",
+        "description": "Corporate employees or clients easily request rides via a seamless portal. No complicated tech—just enter the destination and go."
+      },
+      {
+        "title": "Smart Assign",
+        "description": "Our system instantly locates the nearest available and compliant vehicle, minimizing wait times and maximizing fleet efficiency."
+      },
+      {
+        "title": "Track & Bill",
+        "description": "Monitor the trip in real-time. Once completed, the system automatically generates an accurate ETB invoice for corporate billing."
+      }
+    ]
+  },
+  "features": {
+    "eyebrow": "Platform Capabilities",
+    "title": "Everything You Need to Operate",
+    "subtitle": "One complete platform covering the full mobility lifecycle, from the first booking to the final invoice.",
+    "items": [
+      {
+        "title": "Booking",
+        "desc": "Capture ride and delivery requests, manage availability, and confirm trips with instant scheduling rules.",
+        "tag": "Operations"
+      },
+      {
+        "title": "Live Dispatch",
+        "desc": "Assign the right vehicle and driver in real time with live map visibility, route optimization, and granular status tracking.",
+        "tag": "Core"
+      },
+      {
+        "title": "Fleet Compliance",
+        "desc": "Monitor vehicle inspections, insurance renewal deadlines, and regional permits with automated compliance alerts.",
+        "tag": "Fleet"
+      },
+      {
+        "title": "Driver Management",
+        "desc": "Onboard drivers, track performance and availability, manage shifts, and enforce local safety standards.",
+        "tag": "Workforce"
+      },
+      {
+        "title": "ETB Corporate Billing",
+        "desc": "Manage custom corporate agreements, calculate region-based pricing, and track account balances in Birr.",
+        "tag": "Finance"
+      },
+      {
+        "title": "Automated Invoices",
+        "desc": "Generate, send, and reconcile localized PDF invoices automatically, tied to completed corporate ride logs.",
+        "tag": "Finance"
+      }
+    ]
+  },
+  "benefits": {
+    "eyebrow": "Why Choose Us",
+    "title": "The Smart Advantage",
+    "subtitle": "We focus on what matters to your business: localization, security, and profitability.",
+    "items": [
+      {
+        "title": "100% Localized for Ethiopia",
+        "description": "Built specifically for the Ethiopian market. Automatically generate ETB corporate invoices, manage local compliance, and operate without friction."
+      },
+      {
+        "title": "Enterprise-Grade Security",
+        "description": "Designed for large transport agencies. We guarantee data privacy, SLA-backed uptime, and secure role-based access for your entire organization."
+      },
+      {
+        "title": "Data-Driven Insights",
+        "description": "Make smarter decisions. Track fuel costs, driver performance, and fleet utilization in real-time to drastically reduce operational waste."
+      }
+    ]
+  },
+  "cta": {
+    "eyebrow": "Ready to Move?",
+    "titlePrefix": "Upgrade to Ethiopia's Premium",
+    "titleHighlight": "Dispatch Platform",
+    "subtitle": "Run bookings, corporate dispatches, fleet compliance, and ETB invoicing from one purpose-built system.",
+    "bookNow": "Book now",
+    "exploreFeatures": "Explore Features"
+  },
+  "contact": {
+    "eyebrow": "Get in Touch",
+    "title": "Talk to Our Team",
+    "subtitle": "Interested in Smart Dispatch? Reach out for a demo, pricing, or to learn how the platform can power your mobility operation.",
+    "fullName": "Full Name",
+    "company": "Company / Fleet",
+    "email": "Work Email",
+    "message": "How can we help?",
+    "namePlaceholder": "Abebe Kebede",
+    "companyPlaceholder": "Your mobility company",
+    "emailPlaceholder": "you@company.com",
+    "messagePlaceholder": "Tell us about your fleet size, use case, or questions about booking, dispatch, billing…",
+    "submit": "Send Message"
+  },
+  "footer": {
+    "brandDescription": "An all-in-one platform for booking, dispatch, fleet and driver management, billing, and invoicing. Built for modern mobility.",
+    "platform": "Platform",
+    "financeConsole": "Finance & Console",
+    "company": "Company",
+    "links": {
+      "booking": "Booking",
+      "dispatch": "Dispatch",
+      "fleetManagement": "Fleet Management",
+      "driverManagement": "Driver Management",
+      "billing": "Billing",
+      "invoicing": "Invoicing",
+      "howItWorks": "How it Works",
+      "bookNow": "Book now",
+      "whyChooseUs": "Why Choose Us",
+      "aboutEih": "About EIH",
+      "contactEih": "Contact EIH"
+    },
+    "copyright": "© {year} Ethiopian Investment Holdings. Smart Dispatch System. All rights reserved.",
+    "developedBy": "Designed and developed by"
+  }
+}

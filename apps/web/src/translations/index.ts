@@ -35,6 +35,7 @@ import type {
   AdminProfileMessages,
   AdminDeadlineSettingsMessages,
   AdminAuthMessages,
+  LandingMessages,
   Translations,
 } from "./types";
 
@@ -77,6 +78,7 @@ export type {
   AdminProfileMessages,
   AdminDeadlineSettingsMessages,
   AdminAuthMessages,
+  LandingMessages,
   Translations,
 };
 export { formatMessage } from "./format";
@@ -241,4 +243,8 @@ export function getAdminDeadlineSettingsMessages(
 
 export function getAdminAuthMessages(locale: SupportedLocale): AdminAuthMessages {
   return getTranslations(locale).adminAuth;
+}
+
+export function getLandingMessages(locale: SupportedLocale): LandingMessages {
+  return getTranslations(locale).landing;
 }

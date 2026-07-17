@@ -1,0 +1,280 @@
+{
+  "en": {
+    "nav": {
+      "howItWorks": "How it Works",
+      "features": "Features",
+      "benefits": "Benefits",
+      "contact": "Contact",
+      "bookNow": "Book now",
+      "mainNav": "Main navigation",
+      "mobileNav": "Mobile navigation",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu"
+    },
+    "hero": {
+      "titlePrefix": "Ethiopia's Premier",
+      "titleHighlight": "Corporate Dispatch",
+      "titleSuffix": "& Fleet Platform",
+      "subtitle": "A localized, enterprise-grade platform for corporate contracts, booking dispatches, driver shifts, and ETB invoicing, built specifically for Ethiopian transport agencies.",
+      "seeHowItWorks": "See How It Works",
+      "exploreFeatures": "Explore Features"
+    },
+    "process": {
+      "eyebrow": "Seamless Experience",
+      "title": "How It Works",
+      "subtitle": "We've removed the complexity from fleet operations. Our intuitive three-step process ensures a smooth ride from booking to billing.",
+      "steps": [
+        {
+          "title": "Book & Request",
+          "description": "Corporate employees or clients easily request rides via a seamless portal. No complicated tech—just enter the destination and go."
+        },
+        {
+          "title": "Smart Assign",
+          "description": "Our system instantly locates the nearest available and compliant vehicle, minimizing wait times and maximizing fleet efficiency."
+        },
+        {
+          "title": "Track & Bill",
+          "description": "Monitor the trip in real-time. Once completed, the system automatically generates an accurate ETB invoice for corporate billing."
+        }
+      ]
+    },
+    "features": {
+      "eyebrow": "Platform Capabilities",
+      "title": "Everything You Need to Operate",
+      "subtitle": "One complete platform covering the full mobility lifecycle, from the first booking to the final invoice.",
+      "items": [
+        {
+          "title": "Booking",
+          "desc": "Capture ride and delivery requests, manage availability, and confirm trips with instant scheduling rules.",
+          "tag": "Operations"
+        },
+        {
+          "title": "Live Dispatch",
+          "desc": "Assign the right vehicle and driver in real time with live map visibility, route optimization, and granular status tracking.",
+          "tag": "Core"
+        },
+        {
+          "title": "Fleet Compliance",
+          "desc": "Monitor vehicle inspections, insurance renewal deadlines, and regional permits with automated compliance alerts.",
+          "tag": "Fleet"
+        },
+        {
+          "title": "Driver Management",
+          "desc": "Onboard drivers, track performance and availability, manage shifts, and enforce local safety standards.",
+          "tag": "Workforce"
+        },
+        {
+          "title": "ETB Corporate Billing",
+          "desc": "Manage custom corporate agreements, calculate region-based pricing, and track account balances in Birr.",
+          "tag": "Finance"
+        },
+        {
+          "title": "Automated Invoices",
+          "desc": "Generate, send, and reconcile localized PDF invoices automatically, tied to completed corporate ride logs.",
+          "tag": "Finance"
+        }
+      ]
+    },
+    "benefits": {
+      "eyebrow": "Why Choose Us",
+      "title": "The Smart Advantage",
+      "subtitle": "We focus on what matters to your business: localization, security, and profitability.",
+      "items": [
+        {
+          "title": "100% Localized for Ethiopia",
+          "description": "Built specifically for the Ethiopian market. Automatically generate ETB corporate invoices, manage local compliance, and operate without friction."
+        },
+        {
+          "title": "Enterprise-Grade Security",
+          "description": "Designed for large transport agencies. We guarantee data privacy, SLA-backed uptime, and secure role-based access for your entire organization."
+        },
+        {
+          "title": "Data-Driven Insights",
+          "description": "Make smarter decisions. Track fuel costs, driver performance, and fleet utilization in real-time to drastically reduce operational waste."
+        }
+      ]
+    },
+    "cta": {
+      "eyebrow": "Ready to Move?",
+      "titlePrefix": "Upgrade to Ethiopia's Premium",
+      "titleHighlight": "Dispatch Platform",
+      "subtitle": "Run bookings, corporate dispatches, fleet compliance, and ETB invoicing from one purpose-built system.",
+      "bookNow": "Book now",
+      "exploreFeatures": "Explore Features"
+    },
+    "contact": {
+      "eyebrow": "Get in Touch",
+      "title": "Talk to Our Team",
+      "subtitle": "Interested in Smart Dispatch? Reach out for a demo, pricing, or to learn how the platform can power your mobility operation.",
+      "fullName": "Full Name",
+      "company": "Company / Fleet",
+      "email": "Work Email",
+      "message": "How can we help?",
+      "namePlaceholder": "Abebe Kebede",
+      "companyPlaceholder": "Your mobility company",
+      "emailPlaceholder": "you@company.com",
+      "messagePlaceholder": "Tell us about your fleet size, use case, or questions about booking, dispatch, billing…",
+      "submit": "Send Message"
+    },
+    "footer": {
+      "brandDescription": "An all-in-one platform for booking, dispatch, fleet and driver management, billing, and invoicing. Built for modern mobility.",
+      "platform": "Platform",
+      "financeConsole": "Finance & Console",
+      "company": "Company",
+      "links": {
+        "booking": "Booking",
+        "dispatch": "Dispatch",
+        "fleetManagement": "Fleet Management",
+        "driverManagement": "Driver Management",
+        "billing": "Billing",
+        "invoicing": "Invoicing",
+        "howItWorks": "How it Works",
+        "bookNow": "Book now",
+        "whyChooseUs": "Why Choose Us",
+        "aboutEih": "About EIH",
+        "contactEih": "Contact EIH"
+      },
+      "copyright": "© {year} Ethiopian Investment Holdings. Smart Dispatch System. All rights reserved.",
+      "developedBy": "Designed and developed by"
+    }
+  },
+  "am": {
+    "nav": {
+      "howItWorks": "እንዴት እንደሚሰራ",
+      "features": "ባህሪያት",
+      "benefits": "ጥቅሞች",
+      "contact": "ያግኙን",
+      "bookNow": "አሁን ያስይዙ",
+      "mainNav": "ዋና አሰሳ",
+      "mobileNav": "የሞባይል አሰሳ",
+      "openMenu": "ሜኑ ክፈት",
+      "closeMenu": "ሜኑ ዝጋ"
+    },
+    "hero": {
+      "titlePrefix": "የኢትዮጵያ ቀዳሚ",
+      "titleHighlight": "የኮርፖሬት መላኪያ",
+      "titleSuffix": "እና የተሽከርካሪ መድረክ",
+      "subtitle": "ለኮርፖሬት ውሎች፣ የቦoking መላኪያ፣ የሹፌር ፈረቃዎች እና በብር የሚከፈል መድረቅ የተሰራ የድርጅት ደረጃ መድረክ። ለኢትዮጵያ የተሽከርካሪ አገልግሎት ድርጅቶች በተለይ ተዘጋጅቷል።",
+      "seeHowItWorks": "እንዴት እንደሚሰራ ይመልከቱ",
+      "exploreFeatures": "ባህሪያትን ይመልከቱ"
+    },
+    "process": {
+      "eyebrow": "ቀላል ተሞክሮ",
+      "title": "እንዴት እንደሚሰራ",
+      "subtitle": "ከተሽከርካሪ ክዋኔ ውስብናን አስወግደናል። ቀላል የሶስት ደረጃ ሂደታችን ከቦoking እስከ ክፍያ ድረስ ለስላሳ ጉዞ ያረጋግጣል።",
+      "steps": [
+        {
+          "title": "ያስይዙ እና ጠይቁ",
+          "description": "የኮርፖሬት ሰራተኞች ወይም ደንበኞች በቀላል መግቢያ ጉዞ ሊጠይቁ ይችላሉ። � сложная ቴክኖሎጂ አያስፈልግም—መድረሻዎን ያስገቡ እና ይጀምሩ።"
+        },
+        {
+          "title": "ብልህ መመደብ",
+          "description": "ስርዓታችን በፍጥነት ቀላቢ እና ተገቢ ተሽከርካሪ ያገኛል፣ የመጠበቂያ ጊዜን ይቀንሳል እና የተሽከርካሪ ጥቅምን ይጨምራል።"
+        },
+        {
+          "title": "ይከታተሉ እና ይክፈሉ",
+          "description": "ጉዞውን በቀጥታ ይከታተሉ። ከተጠናቀቀ በኋላ ስርዓቱ ለኮርፖሬት ክፍያ ትክክለኛ የብር መድረቅ በራስ-ሰር ይፈጥራል።"
+        }
+      ]
+    },
+    "features": {
+      "eyebrow": "የመድረክ ችሎታ",
+      "title": "ለመሥራት የሚያስፈልጉት ሁሉ",
+      "subtitle": "ከመጀመሪያው ቦoking እስከ የመጨረሻው መድረቅ ድረስ የሙባility ሙሉ ዑደትን የሚሸፍን አንድ ሙሉ መድረክ።",
+      "items": [
+        {
+          "title": "ቦoking",
+          "desc": "የጉዞ እና የማድረሻ ጥያቄዎችን ይቀበሉ፣ supply ይנהלו እና ጉዞዎችን በፈጣን የመርሃ-ግብር правила ያረጋግጡ።",
+          "tag": "ክዋኔ"
+        },
+        {
+          "title": "ቀጥታ መላኪያ",
+          "desc": "በቀጥታ የ地圖 እይታ፣ የመንገድ ማሻሻያ እና ዝርዝር የሁኔታ መከታተል ጋር ትክክለኛ ተሽከርካሪ እና ሹፌር ይመድቡ።",
+          "tag": "ዋና"
+        },
+        {
+          "title": "የተሽከርካሪ ተገዢነት",
+          "desc": "የተሽከርካሪ ፍተሻዎች፣ የኢንሹራንስ መዝጊያ ጊዜ እና የክልል ፈቃዶችን በራስ-ሰር የተገዢነት ማስጠንቀቂያዎች ይከታተሉ።",
+          "tag": "ተሽከርካሪ"
+        },
+        {
+          "title": "የሹፌር አስተዳደር",
+          "desc": "ሹፌሮችን ይመዝግቡ፣表现 እና supply ይከታተሉ፣ ፈረቃዎችን ያስተዳድሩ እና የአካባቢ ጥበቃ መመዘኛዎችን ይ enforced ያድርጉ።",
+          "tag": "ሰራተ force"
+        },
+        {
+          "title": "የኮርፖሬት ክፍያ በብር",
+          "desc": "ብጁ የኮርፖሬት ስምምነቶችን ያስተዳድሩ፣ በክልል የተመሠረተ ዋጋ ያስሉ እና የሂሳብ ሚዛን በብር ይከታተሉ።",
+          "tag": "ፋይናንስ"
+        },
+        {
+          "title": "ራስ-ሰር መድረቆች",
+          "desc": "ከተጠናቀቁ የኮርፖሬት ጉዞ ምዝገባዎች ጋር የተያያዙ የ地方化 PDF መድረቆችን በራስ-ሰር ይፍጠሩ፣ ይላኩ እና ያ reconcil ያድርጉ።",
+          "tag": "ፋይናንስ"
+        }
+      ]
+    },
+    "benefits": {
+      "eyebrow": "ለምን እኛን ይመርጡ",
+      "title": "የስማርት ጥቅም",
+      "subtitle": "ለንግድዎ በጣም ጠቃሚ የሆኑትን እና聚焦 እናል።地方化፣ ጥበቃ እና ትርፋማነት።",
+      "items": [
+        {
+          "title": "100% ለኢትዮጵያ የተ prepared",
+          "description": "ለኢትዮጵያ ገበያ በተለይ ተሰርቷል። የኮርፖሬት መድረቆችን በብር በራስ-ሰር ይፍጠሩ፣ የአካባቢ ተገዢነትን ያስተዳድሩ እና ያለ ግድግዳ ይሥሩ።"
+        },
+        {
+          "title": "የድርጅት ደረጃ ጥበቃ",
+          "description": "ለትላልቅ የተሽከርካሪ ድርጅቶች ተዘጋጅቷል። የመረጃ ግላዊነት፣ SLA የተረጋገጠ uptime እና ደህንነቱ የተጠበቀ ሚና-ባህሪ መዳረሻ እንረጋግጣለን።"
+        },
+        {
+          "title": "በመረጃ የተ driven ማየት",
+          "description": "ብልህ решения ይውሰዱ። የነዳጥ ወጪ፣ የሹፌር表现 እና የተሽከርካሪ ጥቅምን በቀጥታ ይከታተሉ እና የክዋኔ ብክነትን በከፍተኛ ደረጃ ይቀንሱ።"
+        }
+      ]
+    },
+    "cta": {
+      "eyebrow": "ለመንቀሳቀስ ዝግጁ?",
+      "titlePrefix": "ወደ የኢትዮጵያ ፕሪሚየም",
+      "titleHighlight": "መላኪያ መድረክ",
+      "subtitle": "ቦoking፣ ኮርፖሬት መላኪያ፣ የተሽከርካሪ ተገዢነት እና በብር ክፍያን ከአንድ ስርዓት ይנהלו።",
+      "bookNow": "አሁን ያስይዙ",
+      "exploreFeatures": "ባህሪያትን ይመልከቱ"
+    },
+    "contact": {
+      "eyebrow": "ያግኙን",
+      "title": "مع فريقنا ተነጋግሩ",
+      "subtitle": "ስማርት ዲስፓች интерес አለዎት? ለ演示፣ ዋጋ ወይም መድረኩ የተ mobilidade ክዋኔዎን እንዴት እንደሚያጎልብ ለመረዳት ያግኙን።",
+      "fullName": "ሙሉ ስም",
+      "company": "ኩባንያ / ተሽከርካሪ",
+      "email": "የስራ ኢሜይል",
+      "message": "እንዴት እንድንረዳዎ?",
+      "namePlaceholder": "አበበ ከበደ",
+      "companyPlaceholder": "የተሽከርካሪ ኩባንያዎ",
+      "emailPlaceholder": "",
+      "messagePlaceholder": "የተሽከርካሪ ብዛት፣ አጠቃቀምዎ ወይም ስለ ቦoking፣ መላኪያ እና ክፍያ � سوالاتዎን ይግለጹ…",
+      "submit": "መልዕክት ላክ"
+    },
+    "footer": {
+      "brandDescription": "ለቦoking፣ መላኪያ፣ የተሽከርካሪ እና የሹፌር አስተዳደር፣ ክፍያ እና መድረቅ የሚያገለግል አንድ ሙሉ መድረክ። ለዘመናዊ mobility ተሰርቷል።",
+      "platform": "መድረክ",
+      "financeConsole": "ፋይናንስ እና ኮንሶል",
+      "company": "ኩባንያ",
+      "links": {
+        "booking": "ቦoking",
+        "dispatch": "መላኪያ",
+        "fleetManagement": "የተሽከርካሪ አስተዳደር",
+        "driverManagement": "የሹፌር አስተዳደር",
+        "billing": "ክፍያ",
+        "invoicing": "መድረቅ",
+        "howItWorks": "እንዴት እንደሚሰራ",
+        "bookNow": "አሁን ያስይዙ",
+        "whyChooseUs": "ለምን እኛን",
+        "aboutEih": "ስለ ኢትዮጵያ ኢንቨስትመንት",
+        "contactEih": "ኢትዮጵያ ኢንቨስትመንትን ያግኙ"
+      },
+      "copyright": "© {year} ኢትዮጵያ ኢንቨስትመንት ሆልዲንግስ። ስማርት ዲስፓች ሲስተም። ሁሉም መብቶች የተጠበቁ ናቸው።",
+      "developedBy": "በ"
+    }
+  }
+}
