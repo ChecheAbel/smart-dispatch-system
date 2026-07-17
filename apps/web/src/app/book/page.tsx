@@ -49,8 +49,8 @@ import { LOCALE_OPTIONS, type SupportedLocale } from "@/lib/locale";
 
 const COPY = {
   en: {
-    title: "Public Vehicle Catalog",
-    subtitle: "Explore available corporate vehicles and submit your request",
+    title: "Book a Vehicle",
+    subtitle: "Browse available vehicles and submit your request",
     searchPlaceholder: "Search by make, model, or plate number...",
     allTypes: "All Types",
     allClasses: "All Classes",
@@ -71,18 +71,18 @@ const COPY = {
     signIn: "Sign In",
     statusAvailable: "Available Now",
     statusBusy: "In Service — Available:",
-    loadingCatalog: "Loading premium fleet catalog...",
+    loadingCatalog: "Loading available vehicles...",
     noVehiclesTitle: "No vehicles found",
     noVehiclesSearch: "No vehicles match “{query}”. Try a different make, model, or plate number.",
     noVehiclesFiltered: "No vehicles match your current filters. Adjust type, class, or availability and try again.",
-    noVehiclesEmpty: "There are no vehicles in the catalog right now. Please check back later.",
+    noVehiclesEmpty: "There are no vehicles available right now. Please check back later.",
     clearFilters: "Clear",
     showingCount: "{count} vehicles",
     showingCountOne: "1 vehicle",
   },
   am: {
-    title: "የሕዝብ ተሽከርካሪዎች ካታሎግ",
-    subtitle: "ያሉትን የድርጅት ተሽከርካሪዎች ይመልከቱ እና የጉዞ ጥያቄዎን ያስገቡ",
+    title: "ተሽከርካሪ ይዘዙ",
+    subtitle: "ያሉትን ተሽከርካሪዎች ይመልከቱ እና የጉዞ ጥያቄዎን ያስገቡ",
     searchPlaceholder: "በብራንድ፣ በሞዴል ወይም በሰሌዳ ቁጥር ይፈልጉ...",
     allTypes: "ሁሉም ዓይነቶች",
     allClasses: "ሁሉም ክፍሎች",

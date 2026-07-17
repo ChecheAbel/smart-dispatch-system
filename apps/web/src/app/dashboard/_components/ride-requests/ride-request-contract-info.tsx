@@ -6,7 +6,12 @@ type BillingIntervalLabels = Record<ContractBillingInterval, string>;
 
 export function formatRideRequestContractLabel(
   contract: Pick<RideRequestContractSummary, "reference_number" | "title">,
+  compact = false,
 ) {
+  if (compact) {
+    return contract.reference_number;
+  }
+
   return `${contract.reference_number} · ${contract.title}`;
 }
 
@@ -15,6 +20,7 @@ type RideRequestContractBadgeProps = {
   billingIntervalLabels: BillingIntervalLabels;
   className?: string;
   showBillingInterval?: boolean;
+  compact?: boolean;
 };
 
 export function RideRequestContractBadge({
@@ -22,14 +28,23 @@ export function RideRequestContractBadge({
   billingIntervalLabels,
   className,
   showBillingInterval = true,
+  compact = false,
 }: RideRequestContractBadgeProps) {
+  const fullLabel = formatRideRequestContractLabel(contract);
+
   return (
-    <div className={cn("flex min-w-0 flex-wrap items-center gap-1.5", className)}>
+    <div
+      className={cn("flex min-w-0 flex-wrap items-center gap-1.5", className)}
+      title={compact ? fullLabel : undefined}
+    >
       <Badge
         variant="outline"
-        className="max-w-full border-[#C9B87A]/40 bg-[#C9B87A]/10 text-[11px] font-semibold text-[#6f5f2f]"
+        className={cn(
+          "max-w-full border-[#C9B87A]/40 bg-[#C9B87A]/10 text-[11px] font-semibold text-[#6f5f2f]",
+          compact && "font-mono",
+        )}
       >
-        <span className="truncate">{formatRideRequestContractLabel(contract)}</span>
+        <span className="truncate">{formatRideRequestContractLabel(contract, compact)}</span>
       </Badge>
       {showBillingInterval ? (
         <Badge variant="outline" className="text-[11px] text-slate-600">

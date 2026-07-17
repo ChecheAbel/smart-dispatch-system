@@ -182,15 +182,6 @@ export function RideRequestHistoryPage() {
           </span>
         ),
       },
-      {
-        id: "passengers",
-        header: historyCopy.passengersColumn,
-        cell: (row) => (
-          <span className="text-sm text-slate-600">
-            {formatMessage(requestCopy.passengersCount, { count: row.passenger_count })}
-          </span>
-        ),
-      },
     ],
     [contractCopy.billingIntervals, historyCopy, locale, requestCopy],
   );

@@ -181,12 +181,13 @@ export function AdminRideRequestsPage() {
       {
         id: "contract",
         header: copy.columns.contract,
-        cellClassName: "min-w-[10rem]",
+        cellClassName: "max-w-[8.5rem]",
         cell: (request) =>
           request.contract ? (
             <RideRequestContractBadge
               contract={request.contract}
               billingIntervalLabels={contractCopy.billingIntervals}
+              compact
             />
           ) : (
             <span className="text-sm text-slate-400">{copy.columns.oneTimeBilling}</span>
@@ -201,13 +202,6 @@ export function AdminRideRequestsPage() {
             ? formatScheduledAt(request.scheduled_at, locale) +
               (request.scheduled_return_at ? ` - ${formatScheduledAt(request.scheduled_return_at, locale)}` : "")
             : "—",
-      },
-      {
-        id: "passengers",
-        header: copy.columns.passengers,
-        cellClassName: "text-slate-500",
-        cell: (request) =>
-          formatMessage(requestCopy.passengersCount, { count: request.passenger_count }),
       },
       {
         id: "assignment",
