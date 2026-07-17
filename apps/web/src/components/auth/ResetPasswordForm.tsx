@@ -15,6 +15,7 @@ import {
   USER_FORGOT_PASSWORD_PATH,
   USER_SIGN_IN_PATH,
 } from "@/lib/auth-paths";
+import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { getAdminAuthMessages, getCustomerAuthMessages } from "@/translations";
 
 type ResetPasswordFormProps = {
@@ -40,20 +41,24 @@ export default function ResetPasswordForm({ audience = "admin" }: ResetPasswordF
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError("");
 
     if (password.length < 8) {
-      setError(forgotCopy.errors.passwordTooShortDescription);
+      showErrorToast({
+        title: forgotCopy.errors.passwordTooShortTitle,
+        description: forgotCopy.errors.passwordTooShortDescription,
+      });
       return;
     }
 
     if (password !== confirmPassword) {
-      setError(forgotCopy.errors.passwordMismatchDescription);
+      showErrorToast({
+        title: forgotCopy.errors.passwordMismatchTitle,
+        description: forgotCopy.errors.passwordMismatchDescription,
+      });
       return;
     }
 
@@ -62,9 +67,16 @@ export default function ResetPasswordForm({ audience = "admin" }: ResetPasswordF
     try {
       await resetPassword({ channel: "email", token, password });
       setSuccess(true);
+      showSuccessToast({
+        title: copy.passwordUpdated,
+        description: copy.redirecting,
+      });
       setTimeout(() => router.push(signInPath), 2500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : forgotCopy.errors.resetFailedTitle);
+      showErrorToast({
+        title: forgotCopy.errors.resetFailedTitle,
+        description: err instanceof Error ? err.message : common.tryAgain,
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -189,10 +201,6 @@ export default function ResetPasswordForm({ audience = "admin" }: ResetPasswordF
                 </button>
               </div>
             </div>
-
-            {error && (
-              <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3">{error}</p>
-            )}
 
             <button
               type="submit"

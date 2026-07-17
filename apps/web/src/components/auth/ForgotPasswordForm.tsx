@@ -19,7 +19,7 @@ import {
   isValidEthiopianMobileLocal,
   sanitizeEthiopianMobileInput,
 } from "@/lib/ethiopian-mobile";
-import { showErrorToast } from "@/lib/toast";
+import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import {
   formatMessage,
   getAdminAuthMessages,
@@ -124,12 +124,22 @@ export default function ForgotPasswordForm({ audience = "admin" }: ForgotPasswor
       if (isEmailReset) {
         await requestPasswordReset({ channel: "email", email, portal });
         setEmailSent(true);
+        showSuccessToast({
+          title: copy.emailSentTitle,
+          description: formatMessage(copy.emailSentDescription, { email }),
+        });
       } else {
         const formatted = formatEthiopianMobileNumber(mobile);
         setMobileNumberFormatted(formatted);
         await requestPasswordReset({ channel: "mobile", mobile_number: formatted, portal });
         setMobileStep("verify_otp");
         startOtpTimers();
+        showSuccessToast({
+          title: copy.sendVerificationCode,
+          description: formatMessage(copy.enterCodeSentTo, {
+            mobile: `${ETHIOPIA_MOBILE_COUNTRY_CODE} ${mobile}`,
+          }),
+        });
       }
     } catch (err) {
       showErrorToast({
@@ -199,6 +209,10 @@ export default function ForgotPasswordForm({ audience = "admin" }: ForgotPasswor
 
     try {
       await resetPassword({ channel: "email", token: resetToken, password });
+      showSuccessToast({
+        title: copy.resetPassword,
+        description: common.backToSignIn,
+      });
       router.push(signInPath);
     } catch (err) {
       showErrorToast({
@@ -223,6 +237,12 @@ export default function ForgotPasswordForm({ audience = "admin" }: ForgotPasswor
       setConfirmPassword("");
       setMobileStep("verify_otp");
       startOtpTimers();
+      showSuccessToast({
+        title: copy.resendCode,
+        description: formatMessage(copy.enterCodeSentTo, {
+          mobile: mobileNumberFormatted || `${ETHIOPIA_MOBILE_COUNTRY_CODE} ${mobile}`,
+        }),
+      });
     } catch (err) {
       showErrorToast({
         title: copy.errors.resendFailedTitle,
@@ -329,10 +349,6 @@ export default function ForgotPasswordForm({ audience = "admin" }: ForgotPasswor
           </div>
         ) : showMobileSetPassword ? (
           <form className="space-y-5" onSubmit={handlePasswordSubmit}>
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 text-sm text-emerald-800">
-              {copy.verificationSuccess}
-            </div>
-
             <div>
               <label
                 htmlFor="reset-password"

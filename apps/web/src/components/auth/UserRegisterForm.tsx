@@ -35,7 +35,7 @@ import {
   sanitizeEthiopianMobileInput,
 } from "@/lib/ethiopian-mobile";
 import { GOVERNMENT_ENTITY_TYPES, REQUESTER_SEGMENT_OPTIONS } from "@/lib/requester-segments";
-import { showErrorToast } from "@/lib/toast";
+import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { isValidEmail } from "@/lib/validation";
 import { cn } from "@/lib/utils";
 import { formatMessage, getCustomerAuthMessages, type CustomerAuthMessages } from "@/translations";
@@ -94,6 +94,10 @@ const emptyForm: FormState = {
   billingContactName: "",
   billingContactEmail: "",
 };
+
+function firstFieldError(errors: FieldErrors): string | undefined {
+  return Object.values(errors).find((message): message is string => Boolean(message));
+}
 
 function segmentIcon(segment: RequesterSegment) {
   switch (segment) {
@@ -534,6 +538,8 @@ export default function UserRegisterForm() {
       const errors = validateAccountTypeStep(selectedSegment, copy.errors);
       if (Object.keys(errors).length > 0) {
         setFieldErrors(errors);
+        const message = firstFieldError(errors);
+        if (message) showErrorToast({ title: message });
         return;
       }
 
@@ -562,6 +568,8 @@ export default function UserRegisterForm() {
     const errors = validateCurrentStep();
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
+      const message = firstFieldError(errors);
+      if (message) showErrorToast({ title: message });
       return;
     }
 
@@ -581,6 +589,8 @@ export default function UserRegisterForm() {
     const errors = validateForm(form, copy.errors);
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
+      const message = firstFieldError(errors);
+      if (message) showErrorToast({ title: message });
       return;
     }
 
@@ -605,6 +615,10 @@ export default function UserRegisterForm() {
         official_reference: form.officialReference.trim() || null,
         billing_contact_name: form.billingContactName.trim() || null,
         billing_contact_email: form.billingContactEmail.trim() || null,
+      });
+      showSuccessToast({
+        title: copy.registrationSubmitted,
+        description: result.message,
       });
       setSuccessMessage(result.message);
     } catch (error) {
