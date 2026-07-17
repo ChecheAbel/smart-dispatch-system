@@ -476,6 +476,8 @@ export interface Vehicle {
   inspection_notes: string | null;
   registration_expires_at: string | null;
   open_maintenance_count?: number;
+  /** Operational availability for booking: active fleet status and not on a confirmed/in-progress ride. */
+  is_available_now?: boolean;
   created_at: string;
   updated_at: string;
 }

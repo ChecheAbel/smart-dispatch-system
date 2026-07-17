@@ -72,7 +72,11 @@ function dateToIsoDate(value: Date | null) {
 
 export function toPublicVehicle(
   vehicle: DbVehicle,
-  options?: { locale?: string; openMaintenanceCount?: number },
+  options?: {
+    locale?: string;
+    openMaintenanceCount?: number;
+    isAvailableNow?: boolean;
+  },
 ): Vehicle {
   const vehicleType = toPublicVehicleType(vehicle.vehicleType, { locale: options?.locale });
   const vehicleClass = toPublicVehicleClass(vehicle.vehicleClass, { locale: options?.locale });
@@ -122,6 +126,8 @@ export function toPublicVehicle(
     registration_expires_at: dateToIsoDate(vehicle.registrationExpiresAt),
     open_maintenance_count:
       options?.openMaintenanceCount ?? vehicle._count?.maintenanceLogs ?? undefined,
+    is_available_now:
+      options?.isAvailableNow ?? (vehicle.status === "active"),
     created_at: vehicle.createdAt.toISOString(),
     updated_at: vehicle.updatedAt.toISOString(),
   };

@@ -1,20 +1,34 @@
-import type { VehicleStatus } from "@smart-dispatch/types";
+import type { Vehicle, VehicleStatus } from "@smart-dispatch/types";
 
-/** Placeholder availability for non-active vehicles shown in the book catalog. */
+/** Placeholder availability for non-available vehicles shown in the book catalog. */
 const BUSY_AVAILABLE_HOUR = 8;
 const BUSY_AVAILABLE_MINUTE = 30;
 
-export function isVehicleAvailableNow(status: VehicleStatus) {
-  return status === "active";
+type VehicleAvailabilitySource = Pick<Vehicle, "status"> &
+  Partial<Pick<Vehicle, "is_available_now">>;
+
+export function isVehicleAvailableNow(vehicle: VehicleAvailabilitySource | VehicleStatus) {
+  if (typeof vehicle === "string") {
+    return vehicle === "active";
+  }
+
+  if (typeof vehicle.is_available_now === "boolean") {
+    return vehicle.is_available_now;
+  }
+
+  return vehicle.status === "active";
 }
 
 /**
  * Earliest datetime a vehicle can be booked.
- * Active vehicles: now. In-service vehicles: next calendar day at 08:30
+ * Available vehicles: now. Busy / in-service vehicles: next calendar day at 08:30
  * (matches the catalog "In Service - Available:" label).
  */
-export function getVehicleAvailableFrom(status: VehicleStatus, now = new Date()) {
-  if (isVehicleAvailableNow(status)) {
+export function getVehicleAvailableFrom(
+  vehicle: VehicleAvailabilitySource | VehicleStatus,
+  now = new Date(),
+) {
+  if (isVehicleAvailableNow(vehicle)) {
     return new Date(now);
   }
 
@@ -26,7 +40,7 @@ export function getVehicleAvailableFrom(status: VehicleStatus, now = new Date())
 
 /** Latest (strictest) available-from among selected vehicles — booking must be on/after this. */
 export function getEarliestBookableAt(
-  vehicles: Array<{ status: VehicleStatus }>,
+  vehicles: VehicleAvailabilitySource[],
   now = new Date(),
 ) {
   if (vehicles.length === 0) {
@@ -35,7 +49,7 @@ export function getEarliestBookableAt(
 
   let latest = new Date(now);
   for (const vehicle of vehicles) {
-    const availableFrom = getVehicleAvailableFrom(vehicle.status, now);
+    const availableFrom = getVehicleAvailableFrom(vehicle, now);
     if (availableFrom.getTime() > latest.getTime()) {
       latest = availableFrom;
     }

@@ -200,8 +200,8 @@ function PublicVehiclesPageContent() {
       const matchClass = selectedClass === "all-classes-placeholder" || v.vehicle_class_id === selectedClass;
       const matchAvailability =
         availabilityFilter === "all" ||
-        (availabilityFilter === "available" && isVehicleAvailableNow(v.status)) ||
-        (availabilityFilter === "busy" && !isVehicleAvailableNow(v.status));
+        (availabilityFilter === "available" && isVehicleAvailableNow(v)) ||
+        (availabilityFilter === "busy" && !isVehicleAvailableNow(v));
 
       return matchSearch && matchType && matchClass && matchAvailability;
     });
@@ -512,9 +512,9 @@ function PublicVehiclesPageContent() {
                 className="grid grid-cols-1 gap-5 sm:gap-6 md:grid-cols-2 xl:grid-cols-3"
               >
                 {filteredVehicles.map((vehicle) => {
-                  const isAvailable = isVehicleAvailableNow(vehicle.status);
+                  const isAvailable = isVehicleAvailableNow(vehicle);
                   const availableFromLabel = formatVehicleAvailableFrom(
-                    getVehicleAvailableFrom(vehicle.status),
+                    getVehicleAvailableFrom(vehicle),
                     locale,
                   );
                   const isSelected = selectedIds.includes(vehicle.id);

@@ -227,9 +227,9 @@ function VehicleDetailPageContent({ id }: { id: string }) {
     );
   }
 
-  const isAvailable = isVehicleAvailableNow(vehicle.status);
+  const isAvailable = isVehicleAvailableNow(vehicle);
   const availableFromLabel = formatVehicleAvailableFrom(
-    getVehicleAvailableFrom(vehicle.status),
+    getVehicleAvailableFrom(vehicle),
     locale,
   );
   const vehiclePhotos = vehicle.images ?? [];

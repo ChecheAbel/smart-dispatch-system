@@ -498,7 +498,7 @@ function VehicleRequestPageContent() {
     [earliestBookableAt, locale],
   );
   const hasInServiceVehicle = useMemo(
-    () => vehicles.some((vehicle) => !isVehicleAvailableNow(vehicle.status)),
+    () => vehicles.some((vehicle) => !isVehicleAvailableNow(vehicle)),
     [vehicles],
   );
   const vehicleAvailabilityKey = useMemo(
@@ -877,8 +877,8 @@ function VehicleRequestPageContent() {
 
         <div className="max-h-[540px] space-y-4 overflow-y-auto pr-1">
           {vehicles.map((v) => {
-            const available = isVehicleAvailableNow(v.status);
-            const availableFrom = getVehicleAvailableFrom(v.status);
+            const available = isVehicleAvailableNow(v);
+            const availableFrom = getVehicleAvailableFrom(v);
             const meta = [
               v.vehicle_type?.name,
               v.vehicle_class?.name,

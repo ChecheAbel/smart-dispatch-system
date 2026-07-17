@@ -384,6 +384,22 @@ export async function findActiveRideRequestForVehicle(vehicleId: string, exceptR
   });
 }
 
+/** Vehicle IDs currently on a confirmed or in-progress ride. */
+export async function listBusyAssignedVehicleIds() {
+  const rows = await prisma.rideRequest.findMany({
+    where: {
+      assignedVehicleId: { not: null },
+      status: { in: ["confirmed", "in_progress"] },
+    },
+    select: { assignedVehicleId: true },
+    distinct: ["assignedVehicleId"],
+  });
+
+  return rows
+    .map((row) => row.assignedVehicleId)
+    .filter((id): id is string => Boolean(id));
+}
+
 export async function listAssignableVehiclesForRideRequest(
   rideRequest: {
     id: string;

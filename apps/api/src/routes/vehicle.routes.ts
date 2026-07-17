@@ -50,7 +50,7 @@ import { VehicleFuelLogSource, VehicleHistoryEventType, VehicleStatus } from "..
 import { resolveMaintenanceWorkTypeId } from "../models/maintenance-work-type.model";
 import { findVehicleTypeById, listVehicleTypes } from "../models/vehicle-type.model";
 import { findVehicleClassById, listVehicleClasses } from "../models/vehicle-class.model";
-import { findVehicleLocationByVehicleId } from "../models/vehicle-location.model";
+import { listBusyAssignedVehicleIds } from "../models/ride-request.model";
 import { toPublicVehicleLocationSnapshot } from "../mappers/vehicle-location.mapper";
 import { toPublicVehicleType } from "../mappers/vehicle-type.mapper";
 import { toPublicVehicleClass } from "../mappers/vehicle-class.mapper";
@@ -66,12 +66,21 @@ const router = Router();
 router.get("/public", async (req: Request, res: Response) => {
   try {
     const locale = parseLocale(req.query, req.headers["accept-language"]);
-    const vehicles = await listVehicles({});
-    const types = await listVehicleTypes({});
-    const classes = await listVehicleClasses({});
+    const [vehicles, types, classes, busyVehicleIds] = await Promise.all([
+      listVehicles({}, { take: 1000 }),
+      listVehicleTypes({}),
+      listVehicleClasses({}),
+      listBusyAssignedVehicleIds(),
+    ]);
+    const busyVehicleIdSet = new Set(busyVehicleIds);
 
     return sendSuccess(res, {
-      vehicles: vehicles.map((v) => toPublicVehicle(v, { locale })),
+      vehicles: vehicles.map((v) =>
+        toPublicVehicle(v, {
+          locale,
+          isAvailableNow: v.status === "active" && !busyVehicleIdSet.has(v.id),
+        }),
+      ),
       types: types.map((t) => toPublicVehicleType(t, { locale })),
       classes: classes.map((c) => toPublicVehicleClass(c, { locale })),
     });
