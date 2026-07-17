@@ -212,8 +212,8 @@ function formatCurrency(value: number, locale: SupportedLocale) {
   }).format(value);
 }
 
-function formatMoney(value: number, locale: SupportedLocale) {
-  return `${formatCurrency(value, locale)} ETB`;
+function formatMoney(value: number, locale: SupportedLocale, currencyCode: string) {
+  return `${formatCurrency(value, locale)} ${currencyCode}`;
 }
 
 function hasTrendData(points: Array<{ count?: number; total_cost?: number; paid_amount?: number; issued_amount?: number }>) {
@@ -685,7 +685,7 @@ export function AdminDashboardCharts({
                 icon={Fuel}
                 title={charts.fuelSpendTitle}
                 description={periodLabel}
-                highlight={formatMoney(fuelSpendTotal, locale)}
+                highlight={formatMoney(fuelSpendTotal, locale, charts.currencyCode)}
                 highlightLabel={charts.fuelCostLabel}
                 loading={loading}
                 empty={!loading && fuelSpendTotal <= 0}
@@ -720,7 +720,9 @@ export function AdminDashboardCharts({
                         content={
                           <DashboardChartTooltip
                             labelFormatter={(value) => formatShortDate(value, locale)}
-                            valueFormatter={(value) => formatMoney(value, locale)}
+                            valueFormatter={(value) =>
+                              formatMoney(value, locale, charts.currencyCode)
+                            }
                           />
                         }
                       />
@@ -784,7 +786,7 @@ export function AdminDashboardCharts({
               icon={Wallet}
               title={charts.paymentTrendTitle}
               description={periodLabel}
-              highlight={formatMoney(paidTotal, locale)}
+              highlight={formatMoney(paidTotal, locale, charts.currencyCode)}
               highlightLabel={charts.paidLabel}
               loading={loading}
               empty={!loading && payments ? !hasTrendData(payments.trend) : false}
@@ -795,7 +797,8 @@ export function AdminDashboardCharts({
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <DashboardChartLegend items={paymentTrendLegend} />
                     <span className="text-[11px] font-semibold tabular-nums text-slate-500">
-                      {charts.outstandingLabel}: {formatMoney(outstandingTotal, locale)}
+                      {charts.outstandingLabel}:{" "}
+                      {formatMoney(outstandingTotal, locale, charts.currencyCode)}
                     </span>
                   </div>
                 ) : undefined
@@ -829,7 +832,9 @@ export function AdminDashboardCharts({
                       content={
                         <DashboardChartTooltip
                           labelFormatter={(value) => formatShortDate(value, locale)}
-                          valueFormatter={(value) => formatMoney(value, locale)}
+                          valueFormatter={(value) =>
+                            formatMoney(value, locale, charts.currencyCode)
+                          }
                         />
                       }
                     />

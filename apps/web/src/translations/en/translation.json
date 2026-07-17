@@ -968,6 +968,7 @@
       "attentionLabel": "Attention",
       "paidLabel": "Paid",
       "outstandingLabel": "Outstanding",
+      "currencyCode": "ETB",
       "rideTrendTitle": "Ride requests over time",
       "rideStatusTitle": "Requests by status",
       "rideStatusDescription": "Current pipeline distribution",
