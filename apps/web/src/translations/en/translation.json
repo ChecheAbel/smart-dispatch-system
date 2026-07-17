@@ -867,7 +867,7 @@
     "eyebrow": "Overview",
     "title": "Dashboard",
     "welcome": "Welcome back, {name}",
-    "description": "Headline counts for your platform, plus reporting charts for dispatch, fleet, compliance, and growth.",
+    "description": "Headline counts for your platform, plus reporting charts for dispatch, fleet, payments, and growth.",
     "core": {
       "title": "Platform overview",
       "description": "Headline counts for people, fleet, and geography"
@@ -916,12 +916,17 @@
       "fleetEyebrow": "Fleet",
       "fleetTitle": "Fleet reporting",
       "fleetDescription": "Vehicle availability, compliance exposure, and fuel spend",
+      "paymentsEyebrow": "Billing",
+      "paymentsTitle": "Payments reporting",
+      "paymentsDescription": "Invoice pipeline and paid revenue over time",
       "registrationsEyebrow": "Growth",
       "registrationsTitle": "Customer growth",
       "registrationsDescription": "Self-service registration activity over time",
       "totalLabel": "Total",
       "vehiclesLabel": "Vehicles",
       "attentionLabel": "Attention",
+      "paidLabel": "Paid",
+      "outstandingLabel": "Outstanding",
       "rideTrendTitle": "Ride requests over time",
       "rideStatusTitle": "Requests by status",
       "rideStatusDescription": "Current pipeline distribution",
@@ -933,6 +938,11 @@
       "complianceTitle": "Compliance snapshot",
       "complianceDescription": "{count} vehicles need attention",
       "fuelSpendTitle": "Fuel spend over time",
+      "paymentTrendTitle": "Payments over time",
+      "paymentStatusTitle": "Invoices by status",
+      "paymentStatusDescription": "Current billing pipeline distribution",
+      "paidAmountLabel": "Paid",
+      "issuedAmountLabel": "Issued",
       "registrationTrendTitle": "New registrations",
       "periodLabel": "Last {days} days",
       "requestsLabel": "Requests",
@@ -954,6 +964,12 @@
         "active": "Active",
         "maintenance": "Maintenance",
         "retired": "Retired"
+      },
+      "invoiceStatuses": {
+        "draft": "Draft",
+        "issued": "Issued",
+        "paid": "Paid",
+        "void": "Void"
       },
       "complianceStatuses": {
         "expired": "Expired",

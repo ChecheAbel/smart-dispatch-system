@@ -3,6 +3,7 @@
 import { useId, useMemo, type ReactNode } from "react";
 import type {
   AdminDashboardAnalytics,
+  InvoiceStatus,
   RideRequestStatus,
   VehicleComplianceStatus,
   VehicleStatus,
@@ -12,10 +13,12 @@ import {
   CalendarDays,
   Fuel,
   MapPinned,
+  Receipt,
   ShieldAlert,
   TrendingUp,
   Truck,
   UserPlus,
+  Wallet,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -25,8 +28,6 @@ import {
   BarChart,
   CartesianGrid,
   Cell,
-  ComposedChart,
-  Line,
   Pie,
   PieChart,
   LabelList,
@@ -69,6 +70,13 @@ const VEHICLE_STATUS_COLORS: Record<VehicleStatus, string> = {
   retired: "#94a3b8",
 };
 
+const INVOICE_STATUS_COLORS: Record<InvoiceStatus, string> = {
+  draft: "#94a3b8",
+  issued: "#C9B87A",
+  paid: "#1C3A34",
+  void: "#cbd5e1",
+};
+
 const REGION_BAR_COLORS = [
   "#1C3A34",
   "#2F5E54",
@@ -87,6 +95,7 @@ type AdminDashboardChartsProps = {
   canReadRideRequests: boolean;
   canReadVehicles: boolean;
   canViewCompliance: boolean;
+  canReadInvoices: boolean;
   canViewRegistrations: boolean;
 };
 
@@ -203,8 +212,15 @@ function formatCurrency(value: number, locale: SupportedLocale) {
   }).format(value);
 }
 
-function hasTrendData(points: Array<{ count?: number; total_cost?: number }>) {
-  return points.some((point) => (point.count ?? point.total_cost ?? 0) > 0);
+function formatMoney(value: number, locale: SupportedLocale) {
+  return `${formatCurrency(value, locale)} ETB`;
+}
+
+function hasTrendData(points: Array<{ count?: number; total_cost?: number; paid_amount?: number; issued_amount?: number }>) {
+  return points.some(
+    (point) =>
+      Number(point.count ?? point.total_cost ?? point.paid_amount ?? point.issued_amount ?? 0) > 0,
+  );
 }
 
 function sumCounts(points: Array<{ count: number }>) {
@@ -246,13 +262,13 @@ export function AdminDashboardCharts({
   canReadRideRequests,
   canReadVehicles,
   canViewCompliance,
+  canReadInvoices,
   canViewRegistrations,
 }: AdminDashboardChartsProps) {
   const copy = getAdminDashboardMessages(locale);
   const charts = copy.charts;
   const rideTrendGradientId = useId().replace(/:/g, "");
-  const fuelBarGradientId = useId().replace(/:/g, "");
-  const registrationLineGradientId = useId().replace(/:/g, "");
+  const paymentPaidColor = dashboardChartTheme.brand;
 
   const rideStatuses = useMemo(
     () =>
@@ -272,6 +288,16 @@ export function AdminDashboardCharts({
         count: analytics?.fleet?.by_status[status] ?? 0,
       })),
     [analytics?.fleet?.by_status, charts.vehicleStatuses],
+  );
+
+  const invoiceStatuses = useMemo(
+    () =>
+      (Object.keys(INVOICE_STATUS_COLORS) as InvoiceStatus[]).map((status) => ({
+        status,
+        label: charts.invoiceStatuses[status],
+        count: analytics?.payments?.by_status[status] ?? 0,
+      })),
+    [analytics?.payments?.by_status, charts.invoiceStatuses],
   );
 
   const complianceChartData = useMemo(() => {
@@ -295,10 +321,13 @@ export function AdminDashboardCharts({
   const rideTrendTotal = analytics?.ride_requests ? sumCounts(analytics.ride_requests.trend) : 0;
   const rideStatusTotal = sumCounts(rideStatuses);
   const fleetStatusTotal = sumCounts(fleetStatuses);
+  const invoiceStatusTotal = sumCounts(invoiceStatuses);
   const registrationTotal = analytics?.registrations ? sumCounts(analytics.registrations.trend) : 0;
   const fuelSpendTotal = analytics?.fuel
-    ? analytics.fuel.trend.reduce((total, point) => total + point.total_cost, 0)
+    ? analytics.fuel.trend.reduce((total, point) => total + Number(point.total_cost ?? 0), 0)
     : 0;
+  const paidTotal = analytics?.payments?.paid_total ?? 0;
+  const outstandingTotal = analytics?.payments?.outstanding_total ?? 0;
 
   const regionChartRows = analytics?.ride_requests
     ? getRegionChartRows(analytics.ride_requests.by_region, charts.unassignedRegion)
@@ -325,9 +354,23 @@ export function AdminDashboardCharts({
     })),
   );
 
+  const invoiceStatusLegend = toLegendItems(
+    invoiceStatuses.map((item) => ({
+      key: item.status,
+      label: item.label,
+      color: INVOICE_STATUS_COLORS[item.status],
+      value: item.count,
+    })),
+  );
+
   const complianceLegend: DashboardChartLegendItem[] = [
     { key: "insurance", label: charts.insuranceLabel, color: dashboardChartTheme.brand },
     { key: "inspection", label: charts.inspectionLabel, color: dashboardChartTheme.gold },
+  ];
+
+  const paymentTrendLegend: DashboardChartLegendItem[] = [
+    { key: "paid", label: charts.paidAmountLabel, color: dashboardChartTheme.brand },
+    { key: "issued", label: charts.issuedAmountLabel, color: dashboardChartTheme.gold },
   ];
 
   const showRideRequests = (loading && canReadRideRequests) || Boolean(analytics?.ride_requests);
@@ -338,12 +381,14 @@ export function AdminDashboardCharts({
     (loading && (canReadVehicles || canViewCompliance)) ||
     Boolean(analytics?.fleet?.compliance);
   const showFuel = (loading && canReadVehicles) || Boolean(analytics?.fuel);
+  const showPayments = (loading && canReadInvoices) || Boolean(analytics?.payments);
   const showRegistrations =
     (loading && canViewRegistrations) || Boolean(analytics?.registrations);
 
   const rideRequests = analytics?.ride_requests;
   const fleet = analytics?.fleet;
   const fuel = analytics?.fuel;
+  const payments = analytics?.payments;
   const registrations = analytics?.registrations;
 
   return (
@@ -640,30 +685,16 @@ export function AdminDashboardCharts({
                 icon={Fuel}
                 title={charts.fuelSpendTitle}
                 description={periodLabel}
-                highlight={formatCurrency(fuelSpendTotal, locale)}
+                highlight={formatMoney(fuelSpendTotal, locale)}
                 highlightLabel={charts.fuelCostLabel}
                 loading={loading}
-                empty={!loading && fuel ? !hasTrendData(fuel.trend) : false}
+                empty={!loading && fuelSpendTotal <= 0}
                 emptyLabel={charts.empty}
                 className="xl:col-span-12"
               >
-                {!loading && fuel ? (
+                {!loading && fuel && fuelSpendTotal > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={fuel.trend} margin={dashboardChartMargins} barCategoryGap="26%">
-                      <defs>
-                        <linearGradient id={fuelBarGradientId} x1="0" y1="0" x2="0" y2="1">
-                          <stop
-                            offset="0%"
-                            stopColor={dashboardChartTheme.brandMid}
-                            stopOpacity={0.95}
-                          />
-                          <stop
-                            offset="100%"
-                            stopColor={dashboardChartTheme.brand}
-                            stopOpacity={0.45}
-                          />
-                        </linearGradient>
-                      </defs>
+                    <BarChart data={fuel.trend} margin={dashboardChartMargins} barCategoryGap="18%">
                       <CartesianGrid {...dashboardChartGrid} />
                       <XAxis
                         dataKey="date"
@@ -678,8 +709,10 @@ export function AdminDashboardCharts({
                         tickLine={false}
                         axisLine={false}
                         tick={dashboardChartAxisTick}
-                        width={44}
+                        width={56}
                         tickFormatter={(value) => formatCurrency(Number(value), locale)}
+                        allowDecimals={false}
+                        domain={[0, (dataMax: number) => Math.max(dataMax, 1)]}
                       />
                       <Tooltip
                         wrapperStyle={dashboardChartTooltipWrapperStyle}
@@ -687,26 +720,139 @@ export function AdminDashboardCharts({
                         content={
                           <DashboardChartTooltip
                             labelFormatter={(value) => formatShortDate(value, locale)}
-                            valueFormatter={(value, name) =>
-                              name === charts.fuelCostLabel
-                                ? formatCurrency(value, locale)
-                                : String(value)
-                            }
+                            valueFormatter={(value) => formatMoney(value, locale)}
                           />
                         }
                       />
                       <Bar
                         dataKey="total_cost"
                         name={charts.fuelCostLabel}
-                        fill={`url(#${fuelBarGradientId})`}
-                        radius={[8, 8, 0, 0]}
-                        maxBarSize={40}
+                        fill={dashboardChartTheme.brand}
+                        radius={[6, 6, 0, 0]}
+                        maxBarSize={36}
+                        minPointSize={4}
                       />
                     </BarChart>
                   </ResponsiveContainer>
                 ) : null}
               </DashboardChartCard>
             ) : null}
+          </div>
+        </ChartSection>
+      ) : null}
+
+      {showPayments ? (
+        <ChartSection
+          icon={Wallet}
+          eyebrow={charts.paymentsEyebrow}
+          title={charts.paymentsTitle}
+          description={charts.paymentsDescription}
+          periodLabel={periodLabel}
+        >
+          <div className="grid gap-5 xl:grid-cols-12">
+            <DashboardChartCard
+              icon={Receipt}
+              title={charts.paymentStatusTitle}
+              description={charts.paymentStatusDescription}
+              highlight={invoiceStatusTotal}
+              highlightLabel={charts.totalLabel}
+              loading={loading}
+              empty={!loading && invoiceStatusTotal === 0}
+              emptyLabel={charts.empty}
+              className="xl:col-span-4"
+              footer={
+                !loading ? (
+                  <DashboardChartLegend items={invoiceStatusLegend} variant="rows" />
+                ) : undefined
+              }
+            >
+              {!loading ? (
+                <DashboardDonutChart
+                  slices={invoiceStatuses.map((item) => ({
+                    key: item.status,
+                    label: item.label,
+                    count: item.count,
+                    color: INVOICE_STATUS_COLORS[item.status],
+                  }))}
+                  total={invoiceStatusTotal}
+                  centerLabel={charts.totalLabel}
+                />
+              ) : null}
+            </DashboardChartCard>
+
+            <DashboardChartCard
+              icon={Wallet}
+              title={charts.paymentTrendTitle}
+              description={periodLabel}
+              highlight={formatMoney(paidTotal, locale)}
+              highlightLabel={charts.paidLabel}
+              loading={loading}
+              empty={!loading && payments ? !hasTrendData(payments.trend) : false}
+              emptyLabel={charts.empty}
+              className="xl:col-span-8"
+              footer={
+                !loading ? (
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <DashboardChartLegend items={paymentTrendLegend} />
+                    <span className="text-[11px] font-semibold tabular-nums text-slate-500">
+                      {charts.outstandingLabel}: {formatMoney(outstandingTotal, locale)}
+                    </span>
+                  </div>
+                ) : undefined
+              }
+            >
+              {!loading && payments ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={payments.trend} margin={dashboardChartMargins} barGap={6}>
+                    <CartesianGrid {...dashboardChartGrid} />
+                    <XAxis
+                      dataKey="date"
+                      tickLine={false}
+                      axisLine={false}
+                      tick={dashboardChartAxisTick}
+                      tickFormatter={(value) => formatShortDate(String(value), locale)}
+                      interval="preserveStartEnd"
+                      dy={8}
+                    />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      tick={dashboardChartAxisTick}
+                      width={56}
+                      tickFormatter={(value) => formatCurrency(Number(value), locale)}
+                      allowDecimals={false}
+                      domain={[0, (dataMax: number) => Math.max(dataMax, 1)]}
+                    />
+                    <Tooltip
+                      wrapperStyle={dashboardChartTooltipWrapperStyle}
+                      cursor={{ fill: "rgba(28, 58, 52, 0.04)" }}
+                      content={
+                        <DashboardChartTooltip
+                          labelFormatter={(value) => formatShortDate(value, locale)}
+                          valueFormatter={(value) => formatMoney(value, locale)}
+                        />
+                      }
+                    />
+                    <Bar
+                      dataKey="paid_amount"
+                      name={charts.paidAmountLabel}
+                      fill={paymentPaidColor}
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={28}
+                      minPointSize={4}
+                    />
+                    <Bar
+                      dataKey="issued_amount"
+                      name={charts.issuedAmountLabel}
+                      fill={dashboardChartTheme.gold}
+                      radius={[6, 6, 0, 0]}
+                      maxBarSize={28}
+                      minPointSize={4}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : null}
+            </DashboardChartCard>
           </div>
         </ChartSection>
       ) : null}
@@ -726,18 +872,16 @@ export function AdminDashboardCharts({
             highlight={registrationTotal}
             highlightLabel={charts.totalLabel}
             loading={loading}
-            empty={!loading && registrations ? !hasTrendData(registrations.trend) : false}
+            empty={!loading && registrationTotal <= 0}
             emptyLabel={charts.empty}
           >
-            {!loading && registrations ? (
+            {!loading && registrations && registrationTotal > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={registrations.trend} margin={dashboardChartMargins}>
-                  <defs>
-                    <linearGradient id={registrationLineGradientId} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={dashboardChartTheme.gold} stopOpacity={0.28} />
-                      <stop offset="100%" stopColor={dashboardChartTheme.gold} stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
+                <BarChart
+                  data={registrations.trend}
+                  margin={dashboardChartMargins}
+                  barCategoryGap="18%"
+                >
                   <CartesianGrid {...dashboardChartGrid} />
                   <XAxis
                     dataKey="date"
@@ -754,14 +898,11 @@ export function AdminDashboardCharts({
                     axisLine={false}
                     tick={dashboardChartAxisTick}
                     width={32}
+                    domain={[0, (dataMax: number) => Math.max(dataMax, 1)]}
                   />
                   <Tooltip
                     wrapperStyle={dashboardChartTooltipWrapperStyle}
-                    cursor={{
-                      stroke: dashboardChartTheme.gold,
-                      strokeWidth: 1,
-                      strokeDasharray: "4 4",
-                    }}
+                    cursor={{ fill: "rgba(28, 58, 52, 0.04)" }}
                     content={
                       <DashboardChartTooltip
                         labelFormatter={(value) => formatShortDate(value, locale)}
@@ -769,29 +910,15 @@ export function AdminDashboardCharts({
                       />
                     }
                   />
-                  <Area
-                    type="monotone"
-                    dataKey="count"
-                    stroke="none"
-                    fill={`url(#${registrationLineGradientId})`}
-                    legendType="none"
-                    tooltipType="none"
-                  />
-                  <Line
-                    type="monotone"
+                  <Bar
                     dataKey="count"
                     name={charts.registrationsLabel}
-                    stroke={dashboardChartTheme.gold}
-                    strokeWidth={2.5}
-                    dot={false}
-                    activeDot={{
-                      r: 5,
-                      fill: dashboardChartTheme.gold,
-                      stroke: "#fff",
-                      strokeWidth: 2,
-                    }}
+                    fill={dashboardChartTheme.gold}
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={36}
+                    minPointSize={6}
                   />
-                </ComposedChart>
+                </BarChart>
               </ResponsiveContainer>
             ) : null}
           </DashboardChartCard>

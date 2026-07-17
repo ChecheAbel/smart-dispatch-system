@@ -767,6 +767,12 @@ export type AdminDashboardFuelDaily = {
   total_liters: number;
 };
 
+export type AdminDashboardPaymentDaily = {
+  date: string;
+  paid_amount: number;
+  issued_amount: number;
+};
+
 export type AdminDashboardCompliancePoint = {
   status: VehicleComplianceStatus;
   count: number;
@@ -793,6 +799,12 @@ export type AdminDashboardAnalytics = {
   } | null;
   fuel: {
     trend: AdminDashboardFuelDaily[];
+  } | null;
+  payments: {
+    by_status: Record<InvoiceStatus, number>;
+    trend: AdminDashboardPaymentDaily[];
+    paid_total: number;
+    outstanding_total: number;
   } | null;
   registrations: {
     trend: AdminDashboardDailyCount[];

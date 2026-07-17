@@ -867,7 +867,7 @@
     "eyebrow": "አጠቃላይ እይታ",
     "title": "ዳሽቦርድ",
     "welcome": "እንኳን ደህና መጡ፣ {name}",
-    "description": "ለመድረክዎ የራስ መሪ ቁጥሮች፣ ከዚያም ለዲስፓች፣ መኪና ብዛት፣ ተገዢነት እና እድገት የሪፖርት ግራፎች።",
+    "description": "ለመድረክዎ የራስ መሪ ቁጥሮች፣ ከዚያም ለዲስፓች፣ መኪና ብዛት፣ ክፍያ እና እድገት የሪፖርት ግራፎች።",
     "core": {
       "title": "የመድረክ ማጠቃለያ",
       "description": "ለሰዎች፣ መኪና ብዛት እና ጂኦግራፊ የራስ መሪ ቁጥሮች"
@@ -916,12 +916,17 @@
       "fleetEyebrow": "መኪና ብዛት",
       "fleetTitle": "የመኪና ብዛት ሪፖርት",
       "fleetDescription": "የተሽከርካሪ ተገኝነት፣ ተገዢነት እና የነዳጅ ወጪ",
+      "paymentsEyebrow": "ክፍያ",
+      "paymentsTitle": "የክፍያ ሪፖርት",
+      "paymentsDescription": "የደረሰኝ ሂደት እና የተከፈለ ገቢ በጊዜ",
       "registrationsEyebrow": "እድገት",
       "registrationsTitle": "የደንበኛ እድገት",
       "registrationsDescription": "በጊዜ ላይ የራስ-ሰር ምዝገባ እንቅስቃሴ",
       "totalLabel": "ጠቅላላ",
       "vehiclesLabel": "ተሽከርካሪዎች",
       "attentionLabel": "ትኩረት",
+      "paidLabel": "ተከፍሏል",
+      "outstandingLabel": "ያልተከፈለ",
       "rideTrendTitle": "የጉዞ ጥያቄዎች በጊዜ",
       "rideStatusTitle": "ጥያቄዎች በሁኔታ",
       "rideStatusDescription": "የአሁኑ የሂደት ክፍፍል",
@@ -933,6 +938,11 @@
       "complianceTitle": "የተገዢነት ማጠቃለያ",
       "complianceDescription": "{count} ተሽከርካሪዎች ትኩረት ይፈልጋሉ",
       "fuelSpendTitle": "የነዳጅ ወጪ በጊዜ",
+      "paymentTrendTitle": "ክፍያዎች በጊዜ",
+      "paymentStatusTitle": "ደረሰኞች በሁኔታ",
+      "paymentStatusDescription": "የአሁኑ የክፍያ ሂደት ክፍፍል",
+      "paidAmountLabel": "ተከፍሏል",
+      "issuedAmountLabel": "ተሰጥቷል",
       "registrationTrendTitle": "አዲስ ምዝገባዎች",
       "periodLabel": "ያለፉት {days} ቀናት",
       "requestsLabel": "ጥያቄዎች",
@@ -954,6 +964,12 @@
         "active": "ንቁ",
         "maintenance": "ጥገና",
         "retired": "ከአገልግሎት ውጭ"
+      },
+      "invoiceStatuses": {
+        "draft": "ረቂቅ",
+        "issued": "ተሰጥቷል",
+        "paid": "ተከፍሏል",
+        "void": "ተሰርዟል"
       },
       "complianceStatuses": {
         "expired": "ጊዜው አልፏል",

@@ -1,5 +1,6 @@
 import type {
   AdminDashboardAnalytics,
+  InvoiceStatus,
   RideRequestStatus,
   VehicleComplianceStatus,
   VehicleStatus,
@@ -27,6 +28,8 @@ const COMPLIANCE_STATUSES: VehicleComplianceStatus[] = [
   "ok",
   "not_set",
 ];
+
+const INVOICE_STATUSES: InvoiceStatus[] = ["draft", "issued", "paid", "void"];
 
 function startOfUtcDay(date: Date) {
   return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
@@ -80,6 +83,7 @@ export type AdminDashboardAnalyticsOptions = {
   includeFleet?: boolean;
   includeCompliance?: boolean;
   includeFuel?: boolean;
+  includePayments?: boolean;
   includeRegistrations?: boolean;
 };
 
@@ -94,6 +98,8 @@ export async function getAdminDashboardAnalytics(
   const rideTrend = Object.fromEntries(buckets.map((date) => [date, 0]));
   const fuelCostTrend = Object.fromEntries(buckets.map((date) => [date, 0]));
   const fuelLitersTrend = Object.fromEntries(buckets.map((date) => [date, 0]));
+  const paymentPaidTrend = Object.fromEntries(buckets.map((date) => [date, 0]));
+  const paymentIssuedTrend = Object.fromEntries(buckets.map((date) => [date, 0]));
   const registrationTrend = Object.fromEntries(buckets.map((date) => [date, 0]));
 
   const response: AdminDashboardAnalytics = {
@@ -101,6 +107,7 @@ export async function getAdminDashboardAnalytics(
     ride_requests: null,
     fleet: null,
     fuel: null,
+    payments: null,
     registrations: null,
   };
 
@@ -222,6 +229,72 @@ export async function getAdminDashboardAnalytics(
         total_cost: Number(fuelCostTrend[date]?.toFixed(2) ?? 0),
         total_liters: Number(fuelLitersTrend[date]?.toFixed(2) ?? 0),
       })),
+    };
+  }
+
+  if (options.includePayments) {
+    const [statusGroups, invoices] = await Promise.all([
+      prisma.invoice.groupBy({
+        by: ["status"],
+        _count: { _all: true },
+      }),
+      prisma.invoice.findMany({
+        where: {
+          OR: [
+            { paidAt: { gte: since } },
+            { issuedAt: { gte: since } },
+          ],
+        },
+        select: {
+          status: true,
+          totalAmount: true,
+          paidAt: true,
+          issuedAt: true,
+        },
+      }),
+    ]);
+
+    const byStatus = emptyStatusCounts(INVOICE_STATUSES);
+    for (const group of statusGroups) {
+      byStatus[group.status] = group._count._all;
+    }
+
+    let paidTotal = 0;
+
+    for (const invoice of invoices) {
+      const amount = Number(invoice.totalAmount);
+
+      if (invoice.paidAt) {
+        const paidDay = toDayKey(invoice.paidAt);
+        if (paidDay in paymentPaidTrend) {
+          paymentPaidTrend[paidDay] += amount;
+          paidTotal += amount;
+        }
+      }
+
+      if (invoice.issuedAt) {
+        const issuedDay = toDayKey(invoice.issuedAt);
+        if (issuedDay in paymentIssuedTrend) {
+          paymentIssuedTrend[issuedDay] += amount;
+        }
+      }
+    }
+
+    const outstanding = await prisma.invoice.aggregate({
+      where: { status: "issued" },
+      _sum: { totalAmount: true },
+    });
+    const outstandingTotal = Number(outstanding._sum.totalAmount ?? 0);
+
+    response.payments = {
+      by_status: byStatus,
+      trend: buckets.map((date) => ({
+        date,
+        paid_amount: Number(paymentPaidTrend[date]?.toFixed(2) ?? 0),
+        issued_amount: Number(paymentIssuedTrend[date]?.toFixed(2) ?? 0),
+      })),
+      paid_total: Number(paidTotal.toFixed(2)),
+      outstanding_total: Number(outstandingTotal.toFixed(2)),
     };
   }
 

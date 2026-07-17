@@ -87,6 +87,7 @@ export function AdminDashboard() {
   const canViewRegistrations = hasPermission(PERMISSIONS.user_registrations.read);
   const canReadRoles = hasPermission(PERMISSIONS.roles.read);
   const canReadFarePlans = hasPermission(PERMISSIONS.fare_plans.read);
+  const canReadInvoices = hasPermission(PERMISSIONS.invoices.read);
   const canReadNotifications = hasPermission(PERMISSIONS.notifications.read);
   const canReadAuditLogs = hasPermission(PERMISSIONS.audit_logs.read);
 
@@ -198,7 +199,7 @@ export function AdminDashboard() {
   }, [locale]);
 
   const hasReportingAccess =
-    canReadRideRequests || canReadVehicles || canViewRegistrations;
+    canReadRideRequests || canReadVehicles || canViewRegistrations || canReadInvoices;
 
   return (
     <div className="space-y-8">
@@ -230,6 +231,7 @@ export function AdminDashboard() {
           canReadRideRequests={canReadRideRequests}
           canReadVehicles={canReadVehicles}
           canViewCompliance={canViewCompliance}
+          canReadInvoices={canReadInvoices}
           canViewRegistrations={canViewRegistrations}
         />
       ) : (

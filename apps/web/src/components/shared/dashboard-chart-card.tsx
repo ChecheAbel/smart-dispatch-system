@@ -82,7 +82,7 @@ export function DashboardChartCard({
           </div>
         ) : (
           <div className="flex flex-1 flex-col gap-4">
-            <div className={cn("min-h-72 w-full min-w-0 flex-1", contentClassName)}>{children}</div>
+            <div className={cn("h-72 w-full min-w-0", contentClassName)}>{children}</div>
             {footer ? <div className="border-t border-slate-100 pt-3">{footer}</div> : null}
           </div>
         )}

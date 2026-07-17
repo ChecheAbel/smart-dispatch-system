@@ -40,18 +40,21 @@ router.get("/analytics", async (req: AuthenticatedRequest, res: Response) => {
       canReadVehicles,
       canReadCompliance,
       canReadRegistrations,
+      canReadInvoices,
     ] = await Promise.all([
       userHasPermission(userId, "ride_requests.read"),
       userHasPermission(userId, "vehicles.read"),
       userHasPermission(userId, "compliance.read"),
       userHasPermission(userId, "user_registrations.read"),
+      userHasPermission(userId, "invoices.read"),
     ]);
 
     if (
       !canReadRideRequests &&
       !canReadVehicles &&
       !canReadCompliance &&
-      !canReadRegistrations
+      !canReadRegistrations &&
+      !canReadInvoices
     ) {
       return sendError(res, "You do not have access to dashboard reporting.", 403);
     }
@@ -63,6 +66,7 @@ router.get("/analytics", async (req: AuthenticatedRequest, res: Response) => {
       includeFleet: canReadVehicles,
       includeCompliance: canReadCompliance || canReadVehicles,
       includeFuel: canReadVehicles,
+      includePayments: canReadInvoices,
       includeRegistrations: canReadRegistrations,
     });
 
