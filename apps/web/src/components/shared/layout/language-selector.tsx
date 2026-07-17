@@ -13,8 +13,13 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
-export function LanguageSelector() {
+export function LanguageSelector({
+  triggerClassName,
+}: {
+  triggerClassName?: string;
+} = {}) {
   const { locale, setLocale } = useLocale();
 
   return (
@@ -24,7 +29,7 @@ export function LanguageSelector() {
           <Button
             variant="ghost"
             size="icon"
-            className={adminHeaderIconButtonClass}
+            className={cn(adminHeaderIconButtonClass, triggerClassName)}
             aria-label="Select language"
           />
         }
