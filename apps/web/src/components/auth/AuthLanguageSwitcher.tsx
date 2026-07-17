@@ -1,0 +1,66 @@
+"use client";
+
+import { Languages } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useLocale } from "@/components/shared/providers/locale-context";
+import { LOCALE_OPTIONS, type SupportedLocale } from "@/lib/locale";
+import { getAdminAuthMessages } from "@/translations";
+import { cn } from "@/lib/utils";
+
+type AuthLanguageSwitcherProps = {
+  className?: string;
+};
+
+export function AuthLanguageSwitcher({ className }: AuthLanguageSwitcherProps) {
+  const { locale, setLocale } = useLocale();
+  const copy = getAdminAuthMessages(locale);
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            className={cn(
+              "h-9 w-9 rounded-xl border border-slate-200 bg-white text-[#1C3A34] shadow-none transition-all hover:border-[#1C3A34]/20 hover:bg-slate-50",
+              className,
+            )}
+            aria-label={copy.common.selectLanguage}
+          />
+        }
+      >
+        <Languages className="h-[18px] w-[18px] text-[#C9B87A]" strokeWidth={1.75} />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="min-w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl"
+      >
+        <DropdownMenuGroup>
+          <DropdownMenuRadioGroup
+            value={locale}
+            onValueChange={(value) => setLocale(value as SupportedLocale)}
+          >
+            {LOCALE_OPTIONS.map((option) => (
+              <DropdownMenuRadioItem
+                key={option.value}
+                value={option.value}
+                className="cursor-pointer rounded-lg px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-100"
+              >
+                {option.nativeLabel}
+              </DropdownMenuRadioItem>
+            ))}
+          </DropdownMenuRadioGroup>
+        </DropdownMenuGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}

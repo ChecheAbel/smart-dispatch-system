@@ -1,6 +1,6 @@
 import type { RideRequestStatus } from "@smart-dispatch/types";
 import { toPublicRideRequest } from "../mappers/ride-request.mapper";
-import { broadcastDriverUpcomingTripEvent } from "../websocket/driver-upcoming-trips.socket";
+import { broadcastRealtimeTripEvent } from "../websocket/realtime.socket";
 
 const UPCOMING_STATUSES = new Set<RideRequestStatus>(["confirmed", "in_progress"]);
 
@@ -31,8 +31,8 @@ export function syncDriverUpcomingTripsAfterChange(params: {
   const isUpcoming = params.after ? isDriverUpcomingTrip(params.after) : false;
 
   if (beforeDriverId && wasUpcoming && (!isUpcoming || beforeDriverId !== afterDriverId)) {
-    broadcastDriverUpcomingTripEvent(beforeDriverId, {
-      type: "trip_removed",
+    broadcastRealtimeTripEvent(beforeDriverId, {
+      type: "removed",
       data: { id: rideRequestId },
     });
   }
@@ -41,8 +41,8 @@ export function syncDriverUpcomingTripsAfterChange(params: {
     return;
   }
 
-  broadcastDriverUpcomingTripEvent(afterDriverId, {
-    type: wasUpcoming && beforeDriverId === afterDriverId ? "trip_updated" : "trip_added",
+  broadcastRealtimeTripEvent(afterDriverId, {
+    type: wasUpcoming && beforeDriverId === afterDriverId ? "updated" : "added",
     data: params.after,
   });
 }

@@ -28,7 +28,8 @@ import { registerCustomerBillingRoutes } from "./routes/customer-billing.routes"
 import { registerRideRequestRoutes } from "./routes/ride-request.routes";
 import { registerAdminRideRequestRoutes } from "./routes/admin-ride-request.routes";
 import { registerAdminDashboardRoutes } from "./routes/dashboard.routes";
-import { registerDriverUpcomingTripsSocket } from "./websocket/driver-upcoming-trips.socket";
+import { initSocketIo } from "./websocket/socket-io";
+import { registerRealtimeSocket } from "./websocket/realtime.socket";
 import { startInvoiceAutomationScheduler } from "./services/scheduler.service";
 import { requestLogger } from "./middleware/request-logger";
 import { ensureDriverLicenseUploadDir, getDriverLicenseUploadDir } from "./utils/driver-license-upload";
@@ -73,7 +74,8 @@ registerRideRequestRoutes(app);
 registerAdminRideRequestRoutes(app);
 registerSystemSettingsRoutes(app);
 registerAdminDashboardRoutes(app);
-registerDriverUpcomingTripsSocket(server);
+initSocketIo(server);
+registerRealtimeSocket();
 
 app.get("/api/health", (_req, res) => {
   sendSuccess(res, { status: "ok" }, { message: "Smart Dispatch System API is running" });

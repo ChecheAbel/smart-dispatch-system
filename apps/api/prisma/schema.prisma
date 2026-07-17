@@ -151,6 +151,7 @@ model User {
   createdContracts       Contract[]            @relation("ContractCreatedBy")
   contractEnrollments    ContractEnrollment[]  @relation("ContractEnrollmentRequester")
   invoices               Invoice[]             @relation("InvoiceRequester")
+  vehicleLocationSnapshots VehicleLocationSnapshot[] @relation("VehicleLocationDriver")
 
   @@index([email])
   @@index([mobileNumber])
@@ -220,6 +221,7 @@ enum NotificationModule {
   insurance
   inspection
   invoices
+  password_reset
 
   @@map("notification_module")
 }
@@ -229,6 +231,7 @@ enum NotificationTemplateRecipient {
   driver
   applicant
   fleet_manager
+  account_holder
 
   @@map("notification_template_recipient")
 }
@@ -435,6 +438,7 @@ model Vehicle {
   maintenanceLogs          VehicleMaintenanceLog[]
   fuelLogs                 VehicleFuelLog[]
   historyEvents            VehicleHistoryEvent[]
+  locationSnapshot         VehicleLocationSnapshot?
 
   @@index([vehicleTypeId])
   @@index([vehicleClassId])
@@ -444,6 +448,24 @@ model Vehicle {
   @@index([inspectionExpiresAt])
   @@index([registrationExpiresAt])
   @@map("vehicles")
+}
+
+model VehicleLocationSnapshot {
+  vehicleId    String   @id @map("vehicle_id") @db.Uuid
+  driverUserId String?  @map("driver_user_id") @db.Uuid
+  latitude     Decimal  @db.Decimal(10, 7)
+  longitude    Decimal  @db.Decimal(10, 7)
+  heading      Decimal? @db.Decimal(6, 2)
+  speedKmh     Decimal? @map("speed_kmh") @db.Decimal(6, 2)
+  accuracyM    Decimal? @map("accuracy_m") @db.Decimal(8, 2)
+  recordedAt   DateTime @map("recorded_at") @db.Timestamptz
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  vehicle      Vehicle  @relation(fields: [vehicleId], references: [id], onDelete: Cascade)
+  driver       User?    @relation("VehicleLocationDriver", fields: [driverUserId], references: [id], onDelete: SetNull)
+
+  @@index([driverUserId])
+  @@index([recordedAt])
+  @@map("vehicle_location_snapshots")
 }
 
 enum VehicleMaintenanceStatus {

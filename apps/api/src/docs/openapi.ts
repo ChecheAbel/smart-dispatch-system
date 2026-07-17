@@ -468,17 +468,24 @@ export const openApiSpec = {
         tags: ["Auth"],
         summary: "Request password reset",
         description:
-          "Sends a password reset invitation if an active account exists. Always returns a generic success message.",
+          "Sends a password reset link by email or a 6-digit OTP by SMS if an active account exists. Provide either `email` or `mobile_number`, not both. Always returns a generic success message.",
         requestBody: {
           required: true,
           content: {
             "application/json": {
               schema: {
                 type: "object",
-                required: ["email"],
                 properties: {
                   email: { type: "string", format: "email" },
+                  mobile_number: {
+                    type: "string",
+                    description: "Ethiopian mobile number in local or +251 format.",
+                  },
                 },
+                oneOf: [
+                  { required: ["email"] },
+                  { required: ["mobile_number"] },
+                ],
               },
             },
           },
@@ -503,22 +510,82 @@ export const openApiSpec = {
         },
       },
     },
-    "/api/auth/reset-password": {
+    "/api/auth/verify-reset-otp": {
       post: {
         tags: ["Auth"],
-        summary: "Reset password",
-        description: "Sets a new password using a valid reset invitation token.",
+        summary: "Verify password reset OTP",
+        description:
+          "Validates a mobile SMS verification code from `POST /api/auth/forgot-password` and returns a short-lived reset token for `POST /api/auth/reset-password`.",
         requestBody: {
           required: true,
           content: {
             "application/json": {
               schema: {
                 type: "object",
-                required: ["token", "password"],
+                required: ["mobile_number", "otp"],
                 properties: {
-                  token: { type: "string" },
+                  mobile_number: { type: "string" },
+                  otp: { type: "string", pattern: "^\\d{6}$" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": {
+            description: "OTP accepted",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "object",
+                  properties: {
+                    success: { type: "boolean", enum: [true] },
+                    data: {
+                      type: "object",
+                      properties: {
+                        reset_token: { type: "string" },
+                        message: { type: "string" },
+                      },
+                    },
+                    message: { type: "string" },
+                  },
+                },
+              },
+            },
+          },
+          "400": { $ref: "#/components/responses/BadRequest" },
+        },
+      },
+    },
+    "/api/auth/reset-password": {
+      post: {
+        tags: ["Auth"],
+        summary: "Reset password",
+        description:
+          "Sets a new password using either a valid email reset token or a mobile OTP from `POST /api/auth/forgot-password`.",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  token: { type: "string", description: "Email reset link token." },
+                  mobile_number: {
+                    type: "string",
+                    description: "Mobile number used to request the OTP.",
+                  },
+                  otp: {
+                    type: "string",
+                    pattern: "^\\d{6}$",
+                    description: "6-digit SMS verification code.",
+                  },
                   password: { type: "string", format: "password", minLength: 8 },
                 },
+                oneOf: [
+                  { required: ["token", "password"] },
+                  { required: ["mobile_number", "otp", "password"] },
+                ],
               },
             },
           },

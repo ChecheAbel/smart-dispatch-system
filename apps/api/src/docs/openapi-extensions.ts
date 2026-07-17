@@ -36,6 +36,11 @@ export const extensionTags = [
       "Ride request review, dispatch, status management, and driver trip views.",
   },
   {
+    name: "Realtime",
+    description:
+      "Unified Socket.IO namespace `/api/ws` for live driver trips, vehicle location, and future realtime events.",
+  },
+  {
     name: "Contracts",
     description:
       "Customer commercial agreements linked to fare plans and ride requests (admin only)",
@@ -371,6 +376,138 @@ export const extensionSchemas = {
       year: { type: "integer", nullable: true },
       status: { type: "string", enum: ["active", "maintenance", "retired"] },
       notes: { type: "string", nullable: true },
+    },
+  },
+  VehicleLocationSnapshot: {
+    type: "object",
+    description:
+      "Latest known GPS position for a vehicle. One row per vehicle is stored and updated in place (not a history trail).",
+    properties: {
+      vehicle_id: { type: "string", format: "uuid" },
+      driver_user_id: { type: "string", format: "uuid", nullable: true },
+      latitude: { type: "number", format: "double", example: 9.0234 },
+      longitude: { type: "number", format: "double", example: 38.7504 },
+      heading: { type: "number", format: "double", nullable: true, example: 180 },
+      speed_kmh: { type: "number", format: "double", nullable: true, example: 32.5 },
+      accuracy_m: { type: "number", format: "double", nullable: true, example: 10 },
+      recorded_at: { type: "string", format: "date-time" },
+      updated_at: { type: "string", format: "date-time" },
+    },
+  },
+  VehicleLocationUpdateInput: {
+    type: "object",
+    required: ["latitude", "longitude"],
+    description: "Payload for Socket.IO event `location.publish`.",
+    properties: {
+      latitude: { type: "number", format: "double", minimum: -90, maximum: 90, example: 9.0234 },
+      longitude: { type: "number", format: "double", minimum: -180, maximum: 180, example: 38.7504 },
+      heading: { type: "number", format: "double", nullable: true, minimum: 0, maximum: 360, example: 180 },
+      speed_kmh: { type: "number", format: "double", nullable: true, minimum: 0, example: 32.5 },
+      accuracy_m: { type: "number", format: "double", nullable: true, minimum: 0, example: 10 },
+      recorded_at: {
+        type: "string",
+        format: "date-time",
+        nullable: true,
+        description: "Device capture time. Defaults to server time when omitted.",
+      },
+    },
+  },
+  RealtimeEntityRef: {
+    type: "object",
+    required: ["entity_type", "entity_id"],
+    description: "Generic entity reference for subscribe/unsubscribe events.",
+    properties: {
+      entity_type: { type: "string", enum: ["vehicle"], example: "vehicle" },
+      entity_id: { type: "string", format: "uuid" },
+    },
+  },
+  RealtimeSessionReady: {
+    type: "object",
+    properties: {
+      user_id: { type: "string", format: "uuid" },
+      assigned_entity: {
+        allOf: [{ $ref: "#/components/schemas/RealtimeEntityRef" }],
+        nullable: true,
+      },
+      capabilities: {
+        type: "object",
+        properties: {
+          location_publish: { type: "boolean" },
+          location_subscribe: { type: "boolean" },
+          trips: { type: "boolean" },
+        },
+      },
+    },
+  },
+  RealtimeTripSocketEvents: {
+    type: "object",
+    description:
+      "Upcoming trip events on `/api/ws` for drivers with permission `driver.upcoming`.",
+    properties: {
+      client_emit: {
+        type: "object",
+        description: "Events the driver client sends",
+        properties: {
+          "trips.refresh": {
+            type: "string",
+            enum: ["trips.refresh"],
+            description: "Request a fresh upcoming trip list. Server responds with `trips.snapshot`.",
+          },
+        },
+      },
+      server_push: {
+        type: "object",
+        description: "Events the server sends to the driver",
+        properties: {
+          "trips.snapshot": {
+            type: "array",
+            description: "Full upcoming trip list. Sent automatically on connect and after `trips.refresh`.",
+            items: { $ref: "#/components/schemas/DriverRideRequest" },
+          },
+          "trips.added": {
+            allOf: [{ $ref: "#/components/schemas/DriverRideRequest" }],
+            description: "A trip entered the driver's upcoming list.",
+          },
+          "trips.updated": {
+            allOf: [{ $ref: "#/components/schemas/DriverRideRequest" }],
+            description: "An assigned upcoming trip changed.",
+          },
+          "trips.removed": {
+            type: "object",
+            description: "A trip left the upcoming list.",
+            properties: {
+              id: { type: "string", format: "uuid" },
+            },
+          },
+        },
+      },
+    },
+  },
+  RealtimeLocationSocketEvents: {
+    type: "object",
+    description:
+      "Vehicle location events on `/api/ws`. Drivers publish with `driver.location`; fleet viewers subscribe with `vehicles.read`.",
+    properties: {
+      client_emit: {
+        type: "object",
+        properties: {
+          "location.publish": { $ref: "#/components/schemas/VehicleLocationUpdateInput" },
+          "location.subscribe": { $ref: "#/components/schemas/RealtimeEntityRef" },
+          "location.unsubscribe": { $ref: "#/components/schemas/RealtimeEntityRef" },
+        },
+      },
+      server_push: {
+        type: "object",
+        properties: {
+          "location.snapshot": {
+            allOf: [{ $ref: "#/components/schemas/VehicleLocationSnapshot" }],
+            nullable: true,
+          },
+          "location.changed": { $ref: "#/components/schemas/VehicleLocationSnapshot" },
+          "location.subscribed": { $ref: "#/components/schemas/RealtimeEntityRef" },
+          "location.unsubscribed": { $ref: "#/components/schemas/RealtimeEntityRef" },
+        },
+      },
     },
   },
   VehicleMaintenanceLog: {
@@ -894,6 +1031,18 @@ export const extensionSchemas = {
       },
       created_at: { type: "string", format: "date-time" },
       updated_at: { type: "string", format: "date-time" },
+    },
+  },
+  DriverRideRequestStatusActionInput: {
+    type: "object",
+    required: ["action"],
+    properties: {
+      action: {
+        type: "string",
+        enum: ["start", "complete"],
+        description:
+          "`start` moves a confirmed trip to `in_progress`. `complete` moves an in-progress trip to `completed`.",
+      },
     },
   },
   RideRequestStatus: {
@@ -1770,6 +1919,109 @@ export const extensionPaths = {
         "401": unauthorized,
         "403": forbidden,
         "404": notFound,
+      },
+    },
+  },
+  "/api/vehicles/{id}/location": {
+    get: {
+      tags: ["Vehicles"],
+      summary: "Get vehicle location snapshot",
+      description:
+        "Returns the latest saved GPS position for a vehicle. Requires `vehicles.read`.\n\n" +
+        "Use this once on page load. For live updates, connect to Socket.IO namespace `/api/ws` and emit `location.subscribe` (see that entry).\n\n" +
+        "Returns `location: null` when no position has been published yet.",
+      security,
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+        },
+      ],
+      responses: {
+        "200": {
+          description: "Latest vehicle location snapshot",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      location: {
+                        allOf: [{ $ref: "#/components/schemas/VehicleLocationSnapshot" }],
+                        nullable: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+  },
+  "/api/ws": {
+    get: {
+      tags: ["Realtime"],
+      summary: "Unified realtime channel (Socket.IO)",
+      description:
+        "Single Socket.IO namespace for all live features. Connect once, then use **event names** — not separate HTTP endpoints.\n\n" +
+        "**Namespace:** `/api/ws`\n\n" +
+        "- URL: `http://{host}` with namespace `/api/ws`\n" +
+        '- Auth: `auth: { token: "{access_token}" }` on connect, or `Authorization: Bearer {access_token}` header\n' +
+        "- On connect, server emits `session.ready` with capabilities (`RealtimeSessionReady`)\n\n" +
+        "---\n\n" +
+        "## Trip events (`driver.upcoming`)\n\n" +
+        "See schema: **`RealtimeTripSocketEvents`**\n\n" +
+        "**Client emit**\n" +
+        "- `trips.refresh` — request a fresh list\n\n" +
+        "**Server push**\n" +
+        "- `trips.snapshot` — full upcoming trip list (`DriverRideRequest[]`). Sent automatically on connect and after `trips.refresh`\n" +
+        "- `trips.added` — new upcoming trip\n" +
+        "- `trips.updated` — trip changed\n" +
+        "- `trips.removed` — `{ id }` trip left the list\n\n" +
+        "REST alternative for paginated fetch: `GET /api/ride-requests/driver/upcoming`\n\n" +
+        "---\n\n" +
+        "## Location events\n\n" +
+        "See schema: **`RealtimeLocationSocketEvents`**\n\n" +
+        "**Client emit (driver)**\n" +
+        "- `location.publish` — payload: `VehicleLocationUpdateInput`\n\n" +
+        "**Client emit (fleet viewer)**\n" +
+        "- `location.subscribe` / `location.unsubscribe` — payload: `RealtimeEntityRef`\n\n" +
+        "**Server push**\n" +
+        "- `location.snapshot`, `location.changed`, `location.subscribed`, `location.unsubscribed`\n\n" +
+        "REST snapshot on page load: `GET /api/vehicles/{id}/location`\n\n" +
+        "---\n\n" +
+        "## Session events\n\n" +
+        "- `session.ready`, `session.ping`, `session.pong`, `session.error`",
+      security,
+      responses: {
+        "200": {
+          description: "Socket.IO event catalog (not an HTTP GET endpoint)",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  namespace: { type: "string", example: "/api/ws" },
+                  session: { $ref: "#/components/schemas/RealtimeSessionReady" },
+                  trips: { $ref: "#/components/schemas/RealtimeTripSocketEvents" },
+                  location: { $ref: "#/components/schemas/RealtimeLocationSocketEvents" },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
       },
     },
   },
@@ -2867,7 +3119,8 @@ export const extensionPaths = {
       tags: ["Vehicles"],
       summary: "Get vehicle assigned to driver",
       description:
-        "Returns the fleet vehicle whose `assigned_driver_user_id` matches the authenticated user. Used by the driver app to show their primary vehicle.",
+        "Returns the fleet vehicle whose `assigned_driver_user_id` matches the authenticated user. Used by the driver app to show their primary vehicle.\n\n" +
+        "For live GPS and trips, connect once to Socket.IO namespace `/api/ws` (see that entry).",
       security,
       responses: {
         "200": {
@@ -2984,6 +3237,68 @@ export const extensionPaths = {
       },
     },
   },
+  "/api/ride-requests/driver/{id}/status": {
+    post: {
+      tags: ["Admin Ride Requests"],
+      summary: "Update driver trip status",
+      description:
+        "Driver workflow for assigned trips. Requires `driver.trip`.\n\n" +
+        "| Action | From status | To status | Notes |\n" +
+        "|--------|-------------|-----------|-------|\n" +
+        "| `start` | `confirmed` | `in_progress` | Fails if scheduled pickup is still in the future |\n" +
+        "| `complete` | `in_progress` | `completed` | — |\n\n" +
+        "On success, notification templates for trip started/completed are queued when configured, and connected driver clients receive updated trip lists via **`/api/ws`** (`trips.updated` / `trips.removed`; see **Realtime** tag).",
+      security,
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: { type: "string", format: "uuid" },
+          description: "Ride request ID assigned to the authenticated driver.",
+        },
+        { $ref: "#/components/parameters/Locale" },
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              $ref: "#/components/schemas/DriverRideRequestStatusActionInput",
+            },
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: "Updated trip for the driver",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      ride_request: {
+                        $ref: "#/components/schemas/DriverRideRequest",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+        "409": { $ref: "#/components/responses/Conflict" },
+      },
+    },
+  },
   "/api/admin/system-settings/deadline": {
     get: {
       tags: ["System Settings"],
@@ -3090,21 +3405,18 @@ export const extensionPaths = {
       summary: "Driver upcoming trips",
       description:
         "Lists rides where the authenticated user is the assigned driver. Only trips with upcoming driver statuses are returned. `pending` is never included because that status is admin review only.\n\n" +
-        "**Socket.IO (real-time):** connect to namespace `/api/ride-requests/driver/upcoming` for live upcoming-trip updates.\n\n" +
-        "- URL: `http://{host}` with namespace `/api/ride-requests/driver/upcoming`\n" +
-        '- Auth: `auth: { token: "{access_token}" }` on connect, or `Authorization: Bearer {access_token}` header\n' +
+        "## Realtime upcoming trips (Socket.IO)\n\n" +
+        "Connect to **`/api/ws`** (see **Realtime** tag) and use trip events from schema **`RealtimeTripSocketEvents`**:\n\n" +
+        "| Direction | Event | Payload |\n" +
+        "|-----------|-------|---------|\n" +
+        "| Client → server | `trips.refresh` | none |\n" +
+        "| Server → client | `trips.snapshot` | `DriverRideRequest[]` |\n" +
+        "| Server → client | `trips.added` | `DriverRideRequest` |\n" +
+        "| Server → client | `trips.updated` | `DriverRideRequest` |\n" +
+        "| Server → client | `trips.removed` | `{ id }` |\n\n" +
+        "`trips.snapshot` is sent automatically on connect when the driver has `driver.upcoming`.\n\n" +
         "- Permission: `driver.upcoming`\n" +
-        "- Localized fields include a `translations` array with all languages (`en`, `am`, ...).\n\n" +
-        "Server events:\n" +
-        "- `snapshot`: full upcoming trip list sent on connect\n" +
-        "- `trip_added`: trip entered the driver's upcoming list\n" +
-        "- `trip_updated`: assigned upcoming trip changed\n" +
-        "- `trip_removed`: trip left the upcoming list\n" +
-        "- `pong`: heartbeat response\n" +
-        "- `error`: connection or message error\n\n" +
-        "Client events:\n" +
-        "- `ping`\n" +
-        "- `refresh` reload snapshot",
+        "- Localized fields include a `translations` array with all languages (`en`, `am`, ...).",
       security,
       parameters: [
         { $ref: "#/components/parameters/Page" },

@@ -8,7 +8,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { login, resumeAdminSession } from "@/lib/auth-api";
 import { ADMIN_DASHBOARD_PATH, ADMIN_FORGOT_PASSWORD_PATH } from "@/lib/auth-paths";
-import { clearAuthSession, saveAuthSession } from "@/lib/auth-session";
+import { clearAuthSession, saveAuthSession, getAdminSignInPrefs, saveAdminSignInPrefs, clearAdminSignInPrefs } from "@/lib/auth-session";
+import {
+  ETHIOPIA_MOBILE_COUNTRY_CODE,
+  ETHIOPIAN_MOBILE_PLACEHOLDER,
+  formatEthiopianMobileNumber,
+  parseStoredEthiopianMobile,
+  sanitizeEthiopianMobileInput,
+} from "@/lib/ethiopian-mobile";
 import { showErrorToast } from "@/lib/toast";
 
 type LoginMethod = "email" | "mobile";
@@ -22,6 +29,21 @@ export default function AdminSignInForm() {
   const [remember, setRemember] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingSession, setIsCheckingSession] = useState(true);
+  const [hasLoadedPrefs, setHasLoadedPrefs] = useState(false);
+
+  useEffect(() => {
+    const prefs = getAdminSignInPrefs();
+    if (prefs) {
+      setRemember(true);
+      setLoginMethod(prefs.login_method);
+      setUsername(
+        prefs.login_method === "mobile"
+          ? parseStoredEthiopianMobile(prefs.username)
+          : prefs.username,
+      );
+    }
+    setHasLoadedPrefs(true);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,7 +84,9 @@ export default function AdminSignInForm() {
     setIsSubmitting(true);
 
     try {
-      const session = await login(username.trim(), password);
+      const loginUsername =
+        loginMethod === "email" ? username.trim() : formatEthiopianMobileNumber(username);
+      const session = await login(loginUsername, password);
 
       if (!session.user.roles.includes("admin")) {
         clearAuthSession();
@@ -74,6 +98,17 @@ export default function AdminSignInForm() {
       }
 
       saveAuthSession(session, remember);
+
+      if (remember) {
+        saveAdminSignInPrefs({
+          login_method: loginMethod,
+          username:
+            loginMethod === "email" ? username.trim() : sanitizeEthiopianMobileInput(username),
+        });
+      } else {
+        clearAdminSignInPrefs();
+      }
+
       router.push(ADMIN_DASHBOARD_PATH);
     } catch (err) {
       const message =
@@ -87,7 +122,7 @@ export default function AdminSignInForm() {
     }
   }
 
-  if (isCheckingSession) {
+  if (isCheckingSession || !hasLoadedPrefs) {
     return (
       <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-xl">
         <div className="flex items-center gap-3 text-sm text-slate-500">
@@ -156,25 +191,47 @@ export default function AdminSignInForm() {
             >
               {isEmailLogin ? "Email Address" : "Mobile Number"}
             </label>
-            <div className="relative">
-              {isEmailLogin ? (
+            {isEmailLogin ? (
+              <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-              ) : (
-                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
-              )}
-              <input
-                id="username"
-                type={isEmailLogin ? "email" : "tel"}
-                inputMode={isEmailLogin ? "email" : "tel"}
-                autoComplete={isEmailLogin ? "email" : "tel"}
-                required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                disabled={isSubmitting}
-                className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all disabled:opacity-70"
-                placeholder={isEmailLogin ? "admin@company.com" : "0911234567"}
-              />
-            </div>
+                <input
+                  id="username"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  required
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  disabled={isSubmitting}
+                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all disabled:opacity-70"
+                  placeholder="admin@company.com"
+                />
+              </div>
+            ) : (
+              <div className="flex overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm focus-within:border-[#1C3A34] focus-within:ring-2 focus-within:ring-[#1C3A34]/20 disabled:opacity-70">
+                <div className="flex shrink-0 items-center gap-2 border-r border-slate-200 bg-white px-3 text-sm text-slate-700">
+                  <span aria-hidden className="text-base leading-none">
+                    🇪🇹
+                  </span>
+                  <span className="font-semibold tabular-nums">{ETHIOPIA_MOBILE_COUNTRY_CODE}</span>
+                </div>
+                <div className="relative min-w-0 flex-1">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                  <input
+                    id="username"
+                    type="tel"
+                    inputMode="numeric"
+                    autoComplete="tel-national"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(sanitizeEthiopianMobileInput(e.target.value))}
+                    disabled={isSubmitting}
+                    className="w-full border-0 bg-transparent py-3.5 pl-10 pr-4 text-sm text-slate-800 outline-none disabled:opacity-70"
+                    placeholder={ETHIOPIAN_MOBILE_PLACEHOLDER}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <div>
@@ -213,7 +270,13 @@ export default function AdminSignInForm() {
               <Checkbox
                 id="remember"
                 checked={remember}
-                onCheckedChange={(checked) => setRemember(checked === true)}
+                onCheckedChange={(checked) => {
+                  const next = checked === true;
+                  setRemember(next);
+                  if (!next) {
+                    clearAdminSignInPrefs();
+                  }
+                }}
                 disabled={isSubmitting}
                 className="data-checked:border-[#1C3A34] data-checked:bg-[#1C3A34] data-checked:text-white"
               />

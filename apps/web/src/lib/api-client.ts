@@ -27,6 +27,7 @@ function isAuthRequest(url?: string) {
     url.includes("/api/auth/register-driver") ||
     url.includes("/api/auth/register-user") ||
     url.includes("/api/auth/forgot-password") ||
+    url.includes("/api/auth/verify-reset-otp") ||
     url.includes("/api/auth/reset-password")
   );
 }

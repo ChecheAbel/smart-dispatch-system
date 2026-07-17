@@ -21,34 +21,8 @@ import {
   adminIconBoxClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
-import dynamic from "next/dynamic";
-
-const LazyVehicleLiveMap = dynamic(
-  () =>
-    import("@/components/book/vehicle-live-map").then(
-      (mod) => mod.VehicleLiveMap,
-    ),
-  { ssr: false },
-);
-
-function getVehicleMockLocation(vehicleId: string) {
-  const locations = [
-    { latitude: 9.0234, longitude: 38.7504, name: "Bole Airport VIP Terminal" },
-    { latitude: 9.0105, longitude: 38.7612, name: "Kazanchis Diplomatic Quarter" },
-    { latitude: 9.0302, longitude: 38.7421, name: "Piazza Government Offices" },
-    { latitude: 8.9942, longitude: 38.7305, name: "Sarbet Corporate Hub" },
-    { latitude: 9.0187, longitude: 38.7523, name: "Meskel Square Fleet Depot" },
-    { latitude: 9.0289, longitude: 38.7891, name: "CMC Executive Residence Block" },
-    { latitude: 9.0112, longitude: 38.7812, name: "Megenagna Transit Gateway" },
-  ];
-
-  let hash = 0;
-  for (let i = 0; i < vehicleId.length; i++) {
-    hash = vehicleId.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const index = Math.abs(hash) % locations.length;
-  return locations[index];
-}
+import { VehicleDetailScheduleTab } from "./vehicle-detail-schedule-tab";
+import { VehicleDetailTrackingTab } from "./vehicle-detail-tracking-tab";
 import {
   canReadVehicle,
   canWriteCompliance as userCanWriteCompliance,
@@ -72,7 +46,6 @@ import { VehicleDetailFuelTab } from "./vehicle-detail-fuel-tab";
 import { VehicleDetailHistoryTab } from "./vehicle-detail-history-tab";
 import { VehicleDetailMaintenanceTab } from "./vehicle-detail-maintenance-tab";
 import { VehicleDetailOverviewTab } from "./vehicle-detail-overview-tab";
-import { VehicleDetailScheduleTab } from "./vehicle-detail-schedule-tab";
 import {
   type DetailTab,
   expiryToneClass,
@@ -514,33 +487,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
         />
       ) : null}
 
-      {tab === "tracking" ? (
-        <section className={cn(adminCardClass, "space-y-4 rounded-2xl p-4 sm:space-y-5 sm:p-5 lg:p-6 text-left")}>
-          <div className="flex items-center gap-3">
-            <div className={adminIconBoxClass}>
-              <MapPin className="size-4 text-[#8f7d45] animate-bounce" />
-            </div>
-            <div>
-              <h2 className={cn("text-base", adminHeadingClass)}>Live Location Tracking</h2>
-              <p className="text-sm text-slate-500">
-                Real-time tracking of vehicle's current position and transit status.
-              </p>
-            </div>
-          </div>
-
-          {(() => {
-            const mockLoc = getVehicleMockLocation(vehicle.id);
-            return (
-              <LazyVehicleLiveMap
-                latitude={mockLoc.latitude}
-                longitude={mockLoc.longitude}
-                popupText={`${vehicle.make} ${vehicle.model} (${vehicle.plate_number})`}
-                height={380}
-              />
-            );
-          })()}
-        </section>
-      ) : null}
+      {tab === "tracking" ? <VehicleDetailTrackingTab vehicle={vehicle} /> : null}
 
       {tab === "maintenance" ? (
         <VehicleDetailMaintenanceTab

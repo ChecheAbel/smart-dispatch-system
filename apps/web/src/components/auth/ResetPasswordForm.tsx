@@ -38,7 +38,7 @@ export default function ResetPasswordForm() {
     setIsSubmitting(true);
 
     try {
-      await resetPassword(token, password);
+      await resetPassword({ channel: "email", token, password });
       setSuccess(true);
       setTimeout(() => router.push(ADMIN_SIGN_IN_PATH), 2500);
     } catch (err) {

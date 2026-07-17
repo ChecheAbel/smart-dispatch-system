@@ -168,13 +168,41 @@ export async function resumeUserSession(): Promise<AuthMeResponse | null> {
   return null;
 }
 
-export async function requestPasswordReset(email: string) {
-  const { data } = await apiClient.post("/api/auth/forgot-password", { email });
+export type RequestPasswordResetInput =
+  | { channel: "email"; email: string }
+  | { channel: "mobile"; mobile_number: string };
+
+export async function requestPasswordReset(input: RequestPasswordResetInput) {
+  const body =
+    input.channel === "email"
+      ? { email: input.email }
+      : { mobile_number: input.mobile_number };
+  const { data } = await apiClient.post("/api/auth/forgot-password", body);
   return unwrapApiResponse<{ message: string }>(data);
 }
 
-export async function resetPassword(token: string, password: string) {
-  const { data } = await apiClient.post("/api/auth/reset-password", { token, password });
+export async function verifyPasswordResetOtp(mobile_number: string, otp: string) {
+  const { data } = await apiClient.post("/api/auth/verify-reset-otp", {
+    mobile_number,
+    otp,
+  });
+  return unwrapApiResponse<{ reset_token: string; message: string }>(data);
+}
+
+export type ResetPasswordInput =
+  | { channel: "email"; token: string; password: string }
+  | { channel: "mobile"; mobile_number: string; otp: string; password: string };
+
+export async function resetPassword(input: ResetPasswordInput) {
+  const body =
+    input.channel === "email"
+      ? { token: input.token, password: input.password }
+      : {
+          mobile_number: input.mobile_number,
+          otp: input.otp,
+          password: input.password,
+        };
+  const { data } = await apiClient.post("/api/auth/reset-password", body);
   return unwrapApiResponse<{ message: string }>(data);
 }
 

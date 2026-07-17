@@ -18,6 +18,7 @@ export const MODULE_EVENTS: Record<NotificationModule, string[]> = {
   insurance: ["due_soon", "expired"],
   inspection: ["due_soon", "expired"],
   invoices: ["generated", "due_soon", "overdue"],
+  password_reset: ["email_requested", "sms_requested"],
 };
 
 export const EVENT_GROUPS: Record<
@@ -33,6 +34,7 @@ export const EVENT_GROUPS: Record<
   insurance: [{ id: "compliance", events: ["due_soon", "expired"] }],
   inspection: [{ id: "compliance", events: ["due_soon", "expired"] }],
   invoices: [{ id: "billing", events: ["generated", "due_soon", "overdue"] }],
+  password_reset: [{ id: "recovery", events: ["email_requested", "sms_requested"] }],
 };
 
 const DRIVER_EVENTS = new Set(["assigned", "started", "completed"]);
@@ -52,6 +54,10 @@ export function shouldShowTemplate(
 
   if (module === "invoices") {
     return recipient === "requester";
+  }
+
+  if (module === "password_reset") {
+    return recipient === "account_holder";
   }
 
   if (recipient === "driver") {

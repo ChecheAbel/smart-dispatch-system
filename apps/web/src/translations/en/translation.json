@@ -1692,6 +1692,10 @@
         "invoices": {
           "title": "Invoices & billing",
           "description": "Available for invoice generated, due-soon, and overdue templates."
+        },
+        "passwordReset": {
+          "title": "Password reset",
+          "description": "Available for forgot-password email link and SMS verification code templates."
         }
       },
       "items": {
@@ -1759,6 +1763,15 @@
           "days_overdue": "Days since payment was due",
           "payment_terms_days": "Contract payment terms in days",
           "reference": "Invoice reference number"
+        },
+        "passwordReset": {
+          "user_name": "Account holder full name",
+          "user_email": "Account holder email address",
+          "user_mobile": "Account holder mobile number",
+          "reset_link": "Password reset link (email flow)",
+          "reset_code": "6-digit verification code (SMS flow)",
+          "expires_minutes": "Minutes until the link or code expires",
+          "reference": "Short account reference code"
         }
       }
     },
@@ -1832,6 +1845,9 @@
       },
       "invoices": {
         "billing": "Invoice billing"
+      },
+      "password_reset": {
+        "recovery": "Password recovery"
       }
     },
     "channels": {
@@ -1842,7 +1858,8 @@
       "requester": "Customer",
       "driver": "Driver",
       "applicant": "Applicant",
-      "fleet_manager": "Fleet manager"
+      "fleet_manager": "Fleet manager",
+      "account_holder": "Account holder"
     },
     "modules": {
       "rideRequests": {
@@ -1864,6 +1881,10 @@
       "invoices": {
         "title": "Invoices & billing",
         "description": "Messages sent when invoices are generated, due soon, or overdue."
+      },
+      "passwordReset": {
+        "title": "Password reset",
+        "description": "Messages sent when a user requests a password reset by email or SMS."
       }
     },
     "events": {
@@ -1944,6 +1965,16 @@
           "title": "Payment overdue",
           "description": "Sent when an issued invoice has passed its due date."
         }
+      },
+      "password_reset": {
+        "email_requested": {
+          "title": "Reset link requested",
+          "description": "Sent by email when a user requests a password reset link."
+        },
+        "sms_requested": {
+          "title": "Verification code requested",
+          "description": "Sent by SMS when a user requests a password reset verification code."
+        }
       }
     },
     "errors": {
@@ -2016,13 +2047,15 @@
       "user_registrations": "User registrations",
       "insurance": "Insurance compliance",
       "inspection": "Inspection compliance",
-      "invoices": "Invoices & billing"
+      "invoices": "Invoices & billing",
+      "password_reset": "Password reset"
     },
     "recipientLabels": {
       "requester": "Customer",
       "driver": "Driver",
       "applicant": "Applicant",
-      "fleet_manager": "Fleet manager"
+      "fleet_manager": "Fleet manager",
+      "account_holder": "Account holder"
     },
     "channelLabels": {
       "email": "Email",

@@ -15,6 +15,8 @@ export type VehicleLiveMapProps = {
   longitude: number;
   popupText: string;
   height?: number;
+  showMarker?: boolean;
+  lastUpdatedAt?: string | null;
 };
 
 export function VehicleLiveMap({
@@ -22,11 +24,14 @@ export function VehicleLiveMap({
   longitude,
   popupText,
   height = 380,
+  showMarker = true,
+  lastUpdatedAt = null,
 }: VehicleLiveMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
   const [mapReady, setMapReady] = useState(false);
+  const [displayCoords, setDisplayCoords] = useState({ latitude, longitude });
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) {
@@ -46,14 +51,7 @@ export function VehicleLiveMap({
       maxZoom: 19,
     }).addTo(map);
 
-    const marker = L.marker([latitude, longitude], {
-      icon: markerIcon,
-    }).addTo(map);
-
-    marker.bindPopup(`<strong style="color: #1C3A34;">${popupText}</strong>`).openPopup();
-
     mapRef.current = map;
-    markerRef.current = marker;
     setMapReady(true);
 
     const resizeTimer = setTimeout(() => {
@@ -67,7 +65,34 @@ export function VehicleLiveMap({
       markerRef.current = null;
       setMapReady(false);
     };
-  }, [latitude, longitude, popupText]);
+  }, [latitude, longitude]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) {
+      return;
+    }
+
+    if (!showMarker) {
+      markerRef.current?.remove();
+      markerRef.current = null;
+      return;
+    }
+
+    if (!markerRef.current) {
+      const marker = L.marker([latitude, longitude], {
+        icon: markerIcon,
+      }).addTo(map);
+
+      marker.bindPopup(`<strong style="color: #1C3A34;">${popupText}</strong>`);
+      markerRef.current = marker;
+    } else {
+      markerRef.current.setLatLng([latitude, longitude]);
+      markerRef.current.setPopupContent(`<strong style="color: #1C3A34;">${popupText}</strong>`);
+    }
+
+    setDisplayCoords({ latitude, longitude });
+  }, [latitude, longitude, popupText, showMarker]);
 
   function handleZoomIn() {
     mapRef.current?.zoomIn();
@@ -79,16 +104,14 @@ export function VehicleLiveMap({
 
   function handleRecenter() {
     if (mapRef.current) {
-      mapRef.current.setView([latitude, longitude], 14, { animate: true });
+      mapRef.current.setView([displayCoords.latitude, displayCoords.longitude], 14, { animate: true });
     }
   }
 
   return (
     <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-[#e8eef0] shadow-sm" style={{ height: `${height}px` }}>
-      {/* Map Element */}
       <div ref={containerRef} className="absolute inset-0 z-0" />
 
-      {/* Floating Controls (Top Right) */}
       {mapReady && (
         <div className="absolute right-3 top-3 z-20 flex flex-col gap-1.5">
           <Button
@@ -124,13 +147,19 @@ export function VehicleLiveMap({
         </div>
       )}
 
-      {/* Floating Coordinates Pill (Bottom Left) */}
-      {mapReady && (
+      {mapReady && showMarker ? (
         <div className="absolute left-3 bottom-3 z-20 rounded-lg bg-[#1C3A34]/90 px-3 py-1.5 text-xs text-white shadow-md backdrop-blur flex items-center gap-1.5">
           <MapPin className="size-3.5 text-[#C9B87A] animate-pulse" />
-          <span className="font-mono">{latitude.toFixed(6)}, {longitude.toFixed(6)}</span>
+          <span className="font-mono">
+            {displayCoords.latitude.toFixed(6)}, {displayCoords.longitude.toFixed(6)}
+          </span>
+          {lastUpdatedAt ? (
+            <span className="text-white/70">
+              · {new Date(lastUpdatedAt).toLocaleTimeString(undefined, { timeStyle: "short" })}
+            </span>
+          ) : null}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   CarFront,
   ClipboardList,
+  KeyRound,
   Receipt,
   ShieldCheck,
   UserRoundCheck,
@@ -15,7 +16,8 @@ export type NotificationModuleCopyKey =
   | "userRegistrations"
   | "insurance"
   | "inspection"
-  | "invoices";
+  | "invoices"
+  | "passwordReset";
 
 export type NotificationModuleDefinition = {
   id: NotificationModule;
@@ -55,6 +57,12 @@ export const NOTIFICATION_MODULE_DEFINITIONS: NotificationModuleDefinition[] = [
     category: "accounts",
     copyKey: "invoices",
     icon: Receipt,
+  },
+  {
+    id: "password_reset",
+    category: "accounts",
+    copyKey: "passwordReset",
+    icon: KeyRound,
   },
 ];
 

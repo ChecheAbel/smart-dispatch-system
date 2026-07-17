@@ -1692,6 +1692,10 @@
         "invoices": {
           "title": "ደረሰኞች እና ክፍያ",
           "description": "ለደረሰኝ መፍጠር፣ የመክፈያ ጊዜ ሲቃረብ እና ጊዜው ሲያልፍ አብነቶች ይገኛሉ።"
+        },
+        "passwordReset": {
+          "title": "የይለፍ ቃል እንደገና ማตከል",
+          "description": "ለኢሜይል የማስተካከያ ሊንክ እና ለኤስኤምኤስ የማረጋገጫ ኮድ አብነቶች ይገኛሉ።"
         }
       },
       "items": {
@@ -1759,6 +1763,15 @@
           "days_overdue": "ከመክፈያ በኋላ የቀሩ ቀናት",
           "payment_terms_days": "የክፍያ ውሎች በቀናት",
           "reference": "የደረሰኝ ማጣቀሻ"
+        },
+        "passwordReset": {
+          "user_name": "የመለያ ባለቤት ሙሉ ስም",
+          "user_email": "የመለያ ባለቤት ኢሜይል",
+          "user_mobile": "የመለያ ባለቤት ሞባይል ቁጥር",
+          "reset_link": "የይለፍ ቃል ማስተካከያ ሊንክ (ኢሜይል)",
+          "reset_code": "6-አሃዝ የማረጋገጫ ኮድ (ኤስኤምኤስ)",
+          "expires_minutes": "ለሊንክ ወይም ኮድ የተሰጠ ጊዜ በደቂባ",
+          "reference": "አጭር የመለያ ማጣቀሻ ኮድ"
         }
       }
     },
@@ -1832,6 +1845,9 @@
       },
       "invoices": {
         "billing": "የደረሰኝ ክፍያ"
+      },
+      "password_reset": {
+        "recovery": "የይለፍ ቃል እንደገና ማตከል"
       }
     },
     "channels": {
@@ -1842,7 +1858,8 @@
       "requester": "ደንበኛ",
       "driver": "አሽከርካሪ",
       "applicant": "አመልካች",
-      "fleet_manager": "የመኪና ቡድን አስተዳዳሪ"
+      "fleet_manager": "የመኪና ቡድን አስተዳዳሪ",
+      "account_holder": "የመለያ ባለቤት"
     },
     "modules": {
       "rideRequests": {
@@ -1864,6 +1881,10 @@
       "invoices": {
         "title": "ደረሰኞች እና ክፍያ",
         "description": "ደረሰኝ ሲፈጠር፣ የመክፈያ ጊዜ ሲቃረብ ወይም ጊዜው ሲያልፍ የሚላኩ መልዕክቶች።"
+      },
+      "passwordReset": {
+        "title": "የይለፍ ቃል እንደገና ማตከል",
+        "description": "ተጠቃሚ በኢሜይል ወይም በኤስኤምኤስ የይለፍ ቃል ማስተካከያ ሲጠይቅ የሚላኩ መልዕክቶች።"
       }
     },
     "events": {
@@ -1944,6 +1965,16 @@
           "title": "መክፈያ ጊዜው አልፏል",
           "description": "የወጣ ደረሰኝ የመክፈያ ጊዜው ሲያልፍ ይላካል።"
         }
+      },
+      "password_reset": {
+        "email_requested": {
+          "title": "የማስተካከያ ሊንክ ተጠይቋል",
+          "description": "ተጠቃሚ የይለፍ ቃል ማስተካከያ ሊንክ ሲጠይቅ በኢሜይል ይላካል።"
+        },
+        "sms_requested": {
+          "title": "የማረጋገጫ ኮድ ተጠይቋል",
+          "description": "ተጠቃሚ የይለፍ ቃል ማስተካከያ ኮድ ሲጠይቅ በኤስኤምኤስ ይላካል።"
+        }
       }
     },
     "errors": {
@@ -2016,13 +2047,15 @@
       "user_registrations": "የተጠቃሚ ምዝገባዎች",
       "insurance": "የኢንሹራንስ ተገዢነት",
       "inspection": "የፍተሻ ተገዢነት",
-      "invoices": "ደረሰኞች እና ክፍያ"
+      "invoices": "ደረሰኞች እና ክፍያ",
+      "password_reset": "የይለፍ ቃል እንደገና ማตከል"
     },
     "recipientLabels": {
       "requester": "ደንበኛ",
       "driver": "አሽከርካሪ",
       "applicant": "አመልካች",
-      "fleet_manager": "የመኪና ቡድን አስተዳዳሪ"
+      "fleet_manager": "የመኪና ቡድን አስተዳዳሪ",
+      "account_holder": "የመለያ ባለቤት"
     },
     "channelLabels": {
       "email": "ኢሜይል",

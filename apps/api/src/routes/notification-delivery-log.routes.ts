@@ -27,6 +27,8 @@ const MODULES = new Set<NotificationModule>([
   "user_registrations",
   "insurance",
   "inspection",
+  "invoices",
+  "password_reset",
 ]);
 const CHANNELS = new Set<NotificationChannel>(["email", "sms"]);
 

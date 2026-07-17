@@ -50,6 +50,8 @@ import { VehicleFuelLogSource, VehicleHistoryEventType, VehicleStatus } from "..
 import { resolveMaintenanceWorkTypeId } from "../models/maintenance-work-type.model";
 import { findVehicleTypeById, listVehicleTypes } from "../models/vehicle-type.model";
 import { findVehicleClassById, listVehicleClasses } from "../models/vehicle-class.model";
+import { findVehicleLocationByVehicleId } from "../models/vehicle-location.model";
+import { toPublicVehicleLocationSnapshot } from "../mappers/vehicle-location.mapper";
 import { toPublicVehicleType } from "../mappers/vehicle-type.mapper";
 import { toPublicVehicleClass } from "../mappers/vehicle-class.mapper";
 import { isVehicleTypeClassAllowed } from "../models/vehicle-type-class.model";
@@ -290,6 +292,23 @@ router.get("/:id", requirePermission("vehicles.read", "compliance.read"), async 
 
     return sendSuccess(res, {
       vehicle: toPublicVehicle(vehicle, { locale, openMaintenanceCount }),
+    });
+  } catch (error) {
+    return handleRouteError(res, error);
+  }
+});
+
+router.get("/:id/location", requirePermission("vehicles.read"), async (req: Request, res: Response) => {
+  try {
+    const vehicle = await findVehicleById(req.params.id);
+    if (!vehicle) {
+      return sendError(res, "Vehicle not found.", 404);
+    }
+
+    const snapshot = await findVehicleLocationByVehicleId(vehicle.id);
+
+    return sendSuccess(res, {
+      location: snapshot ? toPublicVehicleLocationSnapshot(snapshot) : null,
     });
   } catch (error) {
     return handleRouteError(res, error);

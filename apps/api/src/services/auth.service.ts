@@ -24,10 +24,12 @@ import {
   isValidEmail,
   normalizeEthiopianMobileNumber,
 } from "../utils/validation";
+import { queuePasswordResetNotifications } from "./notification-dispatch.service";
 
 const ACCESS_TOKEN_TTL_SECONDS = 60;
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000;
+const PASSWORD_RESET_OTP_TTL_MS = 10 * 60 * 1000;
 
 function getJwtSecret() {
   const secret = process.env.JWT_SECRET;
@@ -43,6 +45,10 @@ function hashToken(token: string) {
 
 function generateOpaqueToken() {
   return crypto.randomBytes(48).toString("hex");
+}
+
+function generateNumericOtp() {
+  return crypto.randomInt(0, 1_000_000).toString().padStart(6, "0");
 }
 
 function isAccountUsable(user: DbUser) {
@@ -194,31 +200,79 @@ export async function logout(refreshToken: string) {
   return { message: "Logged out successfully." };
 }
 
-export async function requestPasswordReset(email: string) {
-  if (!isValidEmail(email)) {
+export async function requestPasswordReset(input: {
+  email?: string;
+  mobileNumber?: string;
+}) {
+  const email = typeof input.email === "string" ? input.email.trim().toLowerCase() : "";
+  const rawMobile =
+    typeof input.mobileNumber === "string" ? input.mobileNumber.trim() : "";
+  const mobileNumber = rawMobile ? normalizeEthiopianMobileNumber(rawMobile) : undefined;
+  const hasEmail = Boolean(email);
+  const hasMobile = Boolean(rawMobile);
+
+  if (!hasEmail && !hasMobile) {
+    throw new AuthError("Email or mobile number is required.", 400);
+  }
+
+  if (hasEmail && hasMobile) {
+    throw new AuthError("Provide either email or mobile number, not both.", 400);
+  }
+
+  if (hasEmail && !isValidEmail(email)) {
     throw new AuthError("A valid email address is required.", 400);
   }
 
-  const user = await findUserByEmail(email);
-  if (user && isAccountUsable(user)) {
-    const resetToken = generateOpaqueToken();
-    await revokeUserTokensByType(user.id, "password_reset");
-    await createToken(
-      user.id,
-      hashToken(resetToken),
-      "password_reset",
-      new Date(Date.now() + PASSWORD_RESET_TTL_MS),
-    );
+  if (hasMobile && !mobileNumber) {
+    throw new AuthError("A valid mobile number is required.", 400);
+  }
 
-    const appUrl = process.env.APP_URL ?? "http://localhost:3000";
-    const resetLink = `${appUrl}/U@RQ$f/reset-password?token=${resetToken}`;
-    console.log(`[Password Reset Invitation] ${user.email}`);
-    console.log(`[Password Reset Link] ${resetLink}`);
+  const user = hasEmail
+    ? await findUserByEmail(email)
+    : await findUserByMobileNumber(mobileNumber!);
+
+  if (user && isAccountUsable(user)) {
+    await revokeUserTokensByType(user.id, "password_reset");
+
+    if (hasEmail) {
+      const resetToken = generateOpaqueToken();
+      await createToken(
+        user.id,
+        hashToken(resetToken),
+        "password_reset",
+        new Date(Date.now() + PASSWORD_RESET_TTL_MS),
+      );
+
+      const appUrl = process.env.APP_URL ?? "http://localhost:3000";
+      const resetLink = `${appUrl}/U@RQ$f/reset-password?token=${resetToken}`;
+
+      queuePasswordResetNotifications("email_requested", user.id, {
+        resetLink,
+        expiresMinutes: PASSWORD_RESET_TTL_MS / 60_000,
+      });
+      console.log(`[Password Reset Invitation] ${user.email}`);
+      console.log(`[Password Reset Link] ${resetLink}`);
+    } else {
+      const otp = generateNumericOtp();
+      await createToken(
+        user.id,
+        hashToken(otp),
+        "password_reset",
+        new Date(Date.now() + PASSWORD_RESET_OTP_TTL_MS),
+      );
+
+      queuePasswordResetNotifications("sms_requested", user.id, {
+        resetCode: otp,
+        expiresMinutes: PASSWORD_RESET_OTP_TTL_MS / 60_000,
+      });
+      console.log(`[Password Reset OTP] ${mobileNumber}: ${otp}`);
+    }
   }
 
   return {
-    message:
-      "If an administrator account exists for this email, a password reset invitation has been sent.",
+    message: hasEmail
+      ? "If an administrator account exists for this email, a password reset invitation has been sent."
+      : "If an administrator account exists for this mobile number, a password reset code has been sent via SMS.",
   };
 }
 
@@ -242,6 +296,68 @@ export async function resetPasswordWithToken(token: string, password: string) {
   await revokeUserTokensByType(tokenRecord.userId, "refresh");
 
   return { message: "Your password has been reset. You can now sign in." };
+}
+
+function findPasswordResetOtpRecord(mobileNumberInput: string, otp: string) {
+  const mobileNumber = normalizeEthiopianMobileNumber(mobileNumberInput);
+  if (!mobileNumber) {
+    throw new AuthError("A valid mobile number is required.", 400);
+  }
+
+  const normalizedOtp = otp.trim();
+  if (!/^\d{6}$/.test(normalizedOtp)) {
+    throw new AuthError("A valid 6-digit verification code is required.", 400);
+  }
+
+  return { mobileNumber, normalizedOtp };
+}
+
+async function resolvePasswordResetOtpRecord(mobileNumberInput: string, otp: string) {
+  const { mobileNumber, normalizedOtp } = findPasswordResetOtpRecord(mobileNumberInput, otp);
+
+  const user = await findUserByMobileNumber(mobileNumber);
+  if (!user || !isAccountUsable(user)) {
+    throw new AuthError("This verification code is invalid or has expired.", 400);
+  }
+
+  const tokenRecord = await findValidTokenByHash(hashToken(normalizedOtp), "password_reset");
+  if (!tokenRecord || tokenRecord.userId !== user.id) {
+    throw new AuthError("This verification code is invalid or has expired.", 400);
+  }
+
+  return { user, tokenRecord };
+}
+
+export async function verifyPasswordResetOtp(mobileNumberInput: string, otp: string) {
+  const { user, tokenRecord } = await resolvePasswordResetOtpRecord(mobileNumberInput, otp);
+
+  await revokeToken(tokenRecord.id);
+
+  const resetToken = generateOpaqueToken();
+  await createToken(
+    user.id,
+    hashToken(resetToken),
+    "password_reset",
+    new Date(Date.now() + PASSWORD_RESET_TTL_MS),
+  );
+
+  return {
+    reset_token: resetToken,
+    message: "Verification code accepted. You can now set a new password.",
+  };
+}
+
+export async function resetPasswordWithMobileOtp(
+  mobileNumberInput: string,
+  otp: string,
+  password: string,
+) {
+  if (!password || password.length < 8) {
+    throw new AuthError("Password must be at least 8 characters.", 400);
+  }
+
+  const { reset_token: resetToken } = await verifyPasswordResetOtp(mobileNumberInput, otp);
+  return resetPasswordWithToken(resetToken, password);
 }
 
 export async function registerDriverApplication(input: {

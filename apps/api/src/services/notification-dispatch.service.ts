@@ -2,6 +2,7 @@ import type {
   InvoiceNotificationEvent,
   NotificationModule,
   NotificationTemplateRecipient,
+  PasswordResetNotificationEvent,
   RideRequestNotificationEvent,
   UserRegistrationNotificationEvent,
 } from "@smart-dispatch/types";
@@ -130,6 +131,18 @@ function buildInvoiceSampleContext(): TemplateContext {
   };
 }
 
+function buildPasswordResetSampleContext(): TemplateContext {
+  return {
+    user_name: "Jane Doe",
+    user_email: "jane@example.com",
+    user_mobile: "+251911234567",
+    reset_link: "https://example.com/U@RQ$f/reset-password?token=sample-token",
+    reset_code: "123456",
+    expires_minutes: "10",
+    reference: "A1B2C3D4",
+  };
+}
+
 function buildSampleContextForModule(module: NotificationModule): TemplateContext {
   switch (module) {
     case "user_registrations":
@@ -140,6 +153,8 @@ function buildSampleContextForModule(module: NotificationModule): TemplateContex
       return buildInspectionSampleContext();
     case "invoices":
       return buildInvoiceSampleContext();
+    case "password_reset":
+      return buildPasswordResetSampleContext();
     default:
       return buildRideRequestSampleContext();
   }
@@ -229,6 +244,25 @@ function buildUserRegistrationContext(
   };
 }
 
+function buildPasswordResetContext(
+  user: NonNullable<Awaited<ReturnType<typeof findUserByIdWithRoles>>>,
+  input: {
+    resetLink?: string;
+    resetCode?: string;
+    expiresMinutes: number;
+  },
+): TemplateContext {
+  return {
+    user_name: formatPersonName(user),
+    user_email: user.email,
+    user_mobile: user.mobileNumber ?? "—",
+    reset_link: input.resetLink ?? "—",
+    reset_code: input.resetCode ?? "—",
+    expires_minutes: String(input.expiresMinutes),
+    reference: user.id.slice(0, 8).toUpperCase(),
+  };
+}
+
 function buildInvoiceContext(
   invoice: NonNullable<Awaited<ReturnType<typeof findInvoiceById>>>,
 ): TemplateContext {
@@ -276,6 +310,13 @@ function resolveUserRegistrationContact(
   return channel === "email" ? user.email?.trim() || null : user.mobileNumber?.trim() || null;
 }
 
+function resolvePasswordResetContact(
+  user: NonNullable<Awaited<ReturnType<typeof findUserByIdWithRoles>>>,
+  channel: "email" | "sms",
+) {
+  return resolveUserRegistrationContact(user, channel);
+}
+
 function resolveInvoiceContact(
   invoice: NonNullable<Awaited<ReturnType<typeof findInvoiceById>>>,
   recipient: NotificationTemplateRecipient,
@@ -305,6 +346,8 @@ function moduleToEntityType(module: NotificationModule) {
       return "vehicle";
     case "invoices":
       return "invoice";
+    case "password_reset":
+      return "user";
   }
 }
 
@@ -469,6 +512,27 @@ export async function sendUserRegistrationNotifications(
   );
 }
 
+export async function sendPasswordResetNotifications(
+  event: PasswordResetNotificationEvent,
+  userId: string,
+  input: {
+    resetLink?: string;
+    resetCode?: string;
+    expiresMinutes: number;
+  },
+) {
+  const user = await findUserByIdWithRoles(userId);
+  if (!user) {
+    return;
+  }
+
+  const context = buildPasswordResetContext(user, input);
+
+  await dispatchTemplates("password_reset", event, userId, context, (template) =>
+    resolvePasswordResetContact(user, template.channel),
+  );
+}
+
 export async function sendInvoiceNotifications(
   event: InvoiceNotificationEvent,
   invoiceId: string,
@@ -498,6 +562,18 @@ export function queueUserRegistrationNotifications(
   options: { rejectionReason?: string | null } = {},
 ) {
   void sendUserRegistrationNotifications(event, userId, options);
+}
+
+export function queuePasswordResetNotifications(
+  event: PasswordResetNotificationEvent,
+  userId: string,
+  input: {
+    resetLink?: string;
+    resetCode?: string;
+    expiresMinutes: number;
+  },
+) {
+  void sendPasswordResetNotifications(event, userId, input);
 }
 
 export function queueInvoiceNotifications(

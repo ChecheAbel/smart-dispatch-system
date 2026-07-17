@@ -146,7 +146,8 @@ export type NotificationModule =
   | "user_registrations"
   | "insurance"
   | "inspection"
-  | "invoices";
+  | "invoices"
+  | "password_reset";
 
 export type RideRequestNotificationEvent =
   | "created"
@@ -163,11 +164,14 @@ export type ComplianceNotificationEvent = "due_soon" | "expired";
 
 export type InvoiceNotificationEvent = "generated" | "due_soon" | "overdue";
 
+export type PasswordResetNotificationEvent = "email_requested" | "sms_requested";
+
 export type NotificationTemplateRecipient =
   | "requester"
   | "driver"
   | "applicant"
-  | "fleet_manager";
+  | "fleet_manager"
+  | "account_holder";
 
 export interface NotificationTemplate {
   id: string;
@@ -252,6 +256,16 @@ export const INVOICE_NOTIFICATION_PLACEHOLDERS = [
   "reference",
 ] as const;
 
+export const PASSWORD_RESET_NOTIFICATION_PLACEHOLDERS = [
+  "user_name",
+  "user_email",
+  "user_mobile",
+  "reset_link",
+  "reset_code",
+  "expires_minutes",
+  "reference",
+] as const;
+
 export type RideRequestNotificationPlaceholder =
   (typeof RIDE_REQUEST_NOTIFICATION_PLACEHOLDERS)[number];
 
@@ -267,6 +281,9 @@ export type InspectionNotificationPlaceholder =
 export type InvoiceNotificationPlaceholder =
   (typeof INVOICE_NOTIFICATION_PLACEHOLDERS)[number];
 
+export type PasswordResetNotificationPlaceholder =
+  (typeof PASSWORD_RESET_NOTIFICATION_PLACEHOLDERS)[number];
+
 export const NOTIFICATION_TEMPLATE_PLACEHOLDERS: Record<
   NotificationModule,
   readonly string[]
@@ -276,6 +293,7 @@ export const NOTIFICATION_TEMPLATE_PLACEHOLDERS: Record<
   insurance: INSURANCE_NOTIFICATION_PLACEHOLDERS,
   inspection: INSPECTION_NOTIFICATION_PLACEHOLDERS,
   invoices: INVOICE_NOTIFICATION_PLACEHOLDERS,
+  password_reset: PASSWORD_RESET_NOTIFICATION_PLACEHOLDERS,
 };
 
 /** @deprecated Use NotificationTemplate */
@@ -460,6 +478,65 @@ export interface Vehicle {
   open_maintenance_count?: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface VehicleLocationSnapshot {
+  vehicle_id: string;
+  driver_user_id: string | null;
+  latitude: number;
+  longitude: number;
+  heading: number | null;
+  speed_kmh: number | null;
+  accuracy_m: number | null;
+  recorded_at: string;
+  updated_at: string;
+}
+
+export const REALTIME_NAMESPACE = "/api/ws";
+
+export const RealtimeEvents = {
+  SessionReady: "session.ready",
+  SessionPing: "session.ping",
+  SessionPong: "session.pong",
+  SessionError: "session.error",
+  LocationPublish: "location.publish",
+  LocationChanged: "location.changed",
+  LocationSnapshot: "location.snapshot",
+  LocationSubscribe: "location.subscribe",
+  LocationUnsubscribe: "location.unsubscribe",
+  LocationSubscribed: "location.subscribed",
+  LocationUnsubscribed: "location.unsubscribed",
+  TripsRefresh: "trips.refresh",
+  TripsSnapshot: "trips.snapshot",
+  TripsAdded: "trips.added",
+  TripsUpdated: "trips.updated",
+  TripsRemoved: "trips.removed",
+} as const;
+
+export type RealtimeEntityType = "vehicle";
+
+export interface RealtimeEntityRef {
+  entity_type: RealtimeEntityType;
+  entity_id: string;
+}
+
+export interface RealtimeSessionReady {
+  user_id: string;
+  assigned_entity: RealtimeEntityRef | null;
+  capabilities: {
+    location_publish: boolean;
+    location_subscribe: boolean;
+    trips: boolean;
+  };
+}
+
+export interface RealtimeLocationPublishInput {
+  latitude: number;
+  longitude: number;
+  heading?: number | null;
+  speed_kmh?: number | null;
+  accuracy_m?: number | null;
+  recorded_at?: string;
 }
 
 export interface VehicleMaintenanceLog {

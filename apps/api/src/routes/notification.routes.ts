@@ -39,6 +39,8 @@ const MODULES = new Set<NotificationModule>([
   "user_registrations",
   "insurance",
   "inspection",
+  "invoices",
+  "password_reset",
 ]);
 
 function parseChannel(value: string): NotificationChannel | null {

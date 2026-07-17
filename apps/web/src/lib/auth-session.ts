@@ -110,3 +110,45 @@ export function clearAuthSession() {
   clearStorage(window.sessionStorage);
   clearStorage(window.localStorage);
 }
+
+const ADMIN_SIGN_IN_PREFS_KEY = "sds_admin_sign_in_prefs";
+
+export type AdminSignInPrefs = {
+  login_method: "email" | "mobile";
+  username: string;
+};
+
+export function getAdminSignInPrefs(): AdminSignInPrefs | null {
+  if (typeof window === "undefined") return null;
+
+  const raw = window.localStorage.getItem(ADMIN_SIGN_IN_PREFS_KEY);
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<AdminSignInPrefs>;
+    if (
+      (parsed.login_method !== "email" && parsed.login_method !== "mobile") ||
+      typeof parsed.username !== "string" ||
+      !parsed.username.trim()
+    ) {
+      return null;
+    }
+
+    return {
+      login_method: parsed.login_method,
+      username: parsed.username.trim(),
+    };
+  } catch {
+    return null;
+  }
+}
+
+export function saveAdminSignInPrefs(prefs: AdminSignInPrefs) {
+  if (typeof window === "undefined") return;
+  window.localStorage.setItem(ADMIN_SIGN_IN_PREFS_KEY, JSON.stringify(prefs));
+}
+
+export function clearAdminSignInPrefs() {
+  if (typeof window === "undefined") return;
+  window.localStorage.removeItem(ADMIN_SIGN_IN_PREFS_KEY);
+}

@@ -11,6 +11,8 @@ import {
   registerUserApplication,
   requestPasswordReset,
   resetPasswordWithToken,
+  resetPasswordWithMobileOtp,
+  verifyPasswordResetOtp,
   updateMyProfile,
 } from "../services/auth.service";
 import { recordAuditLog } from "../services/audit-log.service";
@@ -272,8 +274,22 @@ export function registerAuthRoutes(app: Express) {
 
   app.post("/api/auth/forgot-password", async (req: Request, res: Response) => {
     try {
-      const email = typeof req.body?.email === "string" ? req.body.email : "";
-      const result = await requestPasswordReset(email);
+      const email = typeof req.body?.email === "string" ? req.body.email : undefined;
+      const mobileNumber =
+        typeof req.body?.mobile_number === "string" ? req.body.mobile_number : undefined;
+      const result = await requestPasswordReset({ email, mobileNumber });
+      return sendSuccess(res, result, { message: result.message });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  });
+
+  app.post("/api/auth/verify-reset-otp", async (req: Request, res: Response) => {
+    try {
+      const mobileNumber =
+        typeof req.body?.mobile_number === "string" ? req.body.mobile_number : "";
+      const otp = typeof req.body?.otp === "string" ? req.body.otp : "";
+      const result = await verifyPasswordResetOtp(mobileNumber, otp);
       return sendSuccess(res, result, { message: result.message });
     } catch (error) {
       return handleRouteError(res, error);
@@ -283,8 +299,16 @@ export function registerAuthRoutes(app: Express) {
   app.post("/api/auth/reset-password", async (req: Request, res: Response) => {
     try {
       const token = typeof req.body?.token === "string" ? req.body.token : "";
+      const mobileNumber =
+        typeof req.body?.mobile_number === "string" ? req.body.mobile_number : "";
+      const otp = typeof req.body?.otp === "string" ? req.body.otp : "";
       const password = typeof req.body?.password === "string" ? req.body.password : "";
-      const result = await resetPasswordWithToken(token, password);
+
+      const result =
+        mobileNumber || otp
+          ? await resetPasswordWithMobileOtp(mobileNumber, otp, password)
+          : await resetPasswordWithToken(token, password);
+
       return sendSuccess(res, result, { message: result.message });
     } catch (error) {
       return handleRouteError(res, error);

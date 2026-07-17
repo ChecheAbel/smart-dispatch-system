@@ -343,12 +343,31 @@ const INVOICE_RULES: NotificationTemplateSeed[] = [
   },
 ];
 
+const PASSWORD_RESET_RULES: NotificationTemplateSeed[] = [
+  {
+    module: "password_reset",
+    event: "email_requested",
+    channel: "email",
+    recipient: "account_holder",
+    subject: "Password reset request",
+    body: "Hello {user_name}, use this link to reset your Smart Dispatch password: {reset_link}. This link expires in {expires_minutes} minutes.",
+  },
+  {
+    module: "password_reset",
+    event: "sms_requested",
+    channel: "sms",
+    recipient: "account_holder",
+    body: "Smart Dispatch: your password reset code is {reset_code}. It expires in {expires_minutes} minutes.",
+  },
+];
+
 const DEFAULT_TEMPLATES = [
   ...RIDE_REQUEST_RULES,
   ...USER_REGISTRATION_RULES,
   ...INSURANCE_RULES,
   ...INSPECTION_RULES,
   ...INVOICE_RULES,
+  ...PASSWORD_RESET_RULES,
 ];
 
 export async function ensureNotificationTemplates() {
