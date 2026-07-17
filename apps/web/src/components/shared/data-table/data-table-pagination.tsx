@@ -6,6 +6,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import type { PaginationMeta } from "@smart-dispatch/types";
+import { useLocale } from "@/components/shared/providers";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,6 +21,7 @@ import {
   adminPaginationButtonClass,
   adminPaginationIconButtonClass,
 } from "@/lib/admin-theme";
+import { formatMessage, getTranslations } from "@/translations";
 import { cn } from "@/lib/utils";
 
 type DataTablePaginationProps = {
@@ -77,6 +79,8 @@ export function DataTablePagination({
   onPageSizeChange,
   onPageChange,
 }: DataTablePaginationProps) {
+  const { locale } = useLocale();
+  const copy = getTranslations(locale).common.dataTable;
   const totalPages = Math.max(pagination.total_pages, 1);
   const visiblePages = getVisiblePageNumbers(pagination.page, totalPages);
 
@@ -85,13 +89,17 @@ export function DataTablePagination({
       <div className="flex flex-wrap items-center gap-x-4 gap-y-3 text-sm text-slate-500">
         <span>
           {pagination.total === 0
-            ? "No results"
-            : `Showing ${pageRange.start}-${pageRange.end} of ${pagination.total}`}
+            ? copy.noResults
+            : formatMessage(copy.showing, {
+                start: pageRange.start,
+                end: pageRange.end,
+                total: pagination.total,
+              })}
         </span>
 
         <div className="flex items-center gap-2">
           <span className="text-slate-400">·</span>
-          <span>Rows per page</span>
+          <span>{copy.rowsPerPage}</span>
           <DropdownMenu>
             <DropdownMenuTrigger
               disabled={loading}
@@ -110,7 +118,7 @@ export function DataTablePagination({
             <DropdownMenuContent align="start" className="min-w-36 p-1.5">
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="text-xs text-slate-500">
-                  Rows per page
+                  {copy.rowsPerPage}
                 </DropdownMenuLabel>
                 <DropdownMenuRadioGroup
                   value={String(pageSize)}
@@ -122,7 +130,7 @@ export function DataTablePagination({
                       value={String(option)}
                       className="rounded-md px-2 py-1.5"
                     >
-                      {option} rows
+                      {formatMessage(copy.rowsOption, { count: option })}
                     </DropdownMenuRadioItem>
                   ))}
                 </DropdownMenuRadioGroup>
@@ -140,10 +148,10 @@ export function DataTablePagination({
           disabled={!pagination.has_prev || loading}
           onClick={() => onPageChange(Math.max(1, pagination.page - 1))}
           className={adminPaginationButtonClass}
-          aria-label="Previous page"
+          aria-label={copy.previousPage}
         >
           <ChevronLeft className="size-4" />
-          Previous
+          {copy.previous}
         </Button>
 
         <div className="mx-0.5 flex items-center gap-1">
@@ -180,7 +188,7 @@ export function DataTablePagination({
                     item === pagination.page &&
                       "border-[#1C3A34] bg-[#1C3A34] text-white hover:bg-[#162e29] hover:text-white",
                   )}
-                  aria-label={`Page ${item}`}
+                  aria-label={formatMessage(copy.page, { page: item })}
                   aria-current={item === pagination.page ? "page" : undefined}
                 >
                   {item}
@@ -197,9 +205,9 @@ export function DataTablePagination({
           disabled={!pagination.has_next || loading}
           onClick={() => onPageChange(pagination.page + 1)}
           className={adminPaginationButtonClass}
-          aria-label="Next page"
+          aria-label={copy.nextPage}
         >
-          Next
+          {copy.next}
           <ChevronRight className="size-4" />
         </Button>
       </div>

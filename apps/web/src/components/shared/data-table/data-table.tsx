@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Search } from "lucide-react";
 import type { ApiPaginatedResponse, PaginationMeta } from "@smart-dispatch/types";
 import { DataTablePagination } from "@/components/shared/data-table/data-table-pagination";
+import { useLocale } from "@/components/shared/providers";
 import {
   Card,
   CardContent,
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatMessage, getTranslations } from "@/translations";
 import { cn } from "@/lib/utils";
 
 export type DataTableColumn<T> = {
@@ -93,8 +95,8 @@ export function DataTable<T>({
   description,
   eyebrow,
   titleClassName,
-  searchPlaceholder = "Search...",
-  itemLabel = "item",
+  searchPlaceholder,
+  itemLabel,
   columns,
   fetchData,
   getRowKey,
@@ -115,6 +117,11 @@ export function DataTable<T>({
   filterBar,
   className,
 }: DataTableProps<T>) {
+  const { locale } = useLocale();
+  const tableCopy = getTranslations(locale).common.dataTable;
+  const resolvedSearchPlaceholder = searchPlaceholder ?? tableCopy.searchPlaceholder;
+  const resolvedItemLabel = itemLabel ?? (locale === "am" ? "ንጥል" : "item");
+
   const [rows, setRows] = useState<T[]>([]);
   const [pagination, setPagination] = useState<PaginationMeta | null>(null);
   const [page, setPage] = useState(1);
@@ -152,11 +159,11 @@ export function DataTable<T>({
     } catch (err) {
       setRows([]);
       setPagination(null);
-      setError(err instanceof Error ? err.message : "Failed to load data.");
+      setError(err instanceof Error ? err.message : tableCopy.loadFailed);
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, fetchData, page, pageSize, ...refreshDeps]);
+  }, [debouncedSearch, fetchData, page, pageSize, tableCopy.loadFailed, ...refreshDeps]);
 
   useEffect(() => {
     void loadRows();
@@ -167,10 +174,12 @@ export function DataTable<T>({
     setPage(1);
   }
 
-  const pluralLabel = `${itemLabel}s`;
   const totalLabel = pagination
-    ? `${pagination.total} ${pagination.total === 1 ? itemLabel : pluralLabel} total`
-    : `Loading ${pluralLabel}`;
+    ? formatMessage(tableCopy.totalCount, {
+        count: pagination.total,
+        item: resolvedItemLabel,
+      })
+    : formatMessage(tableCopy.loadingItems, { item: resolvedItemLabel });
 
   const pageRange = pagination ? getPageRange(pagination) : null;
 
@@ -190,7 +199,7 @@ export function DataTable<T>({
               <Input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder={searchPlaceholder}
+                placeholder={resolvedSearchPlaceholder}
                 className={searchInputClassName}
               />
             </div>

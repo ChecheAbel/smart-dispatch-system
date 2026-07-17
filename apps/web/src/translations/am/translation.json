@@ -13,6 +13,21 @@
       "dashboard": "ዳሽቦርድ",
       "signOut": "ውጣ"
     },
+    "dataTable": {
+      "noResults": "ምንም ውጤት የለም",
+      "showing": "{start}-{end} ከ {total} እየታየ ነው",
+      "rowsPerPage": "በገጽ ረድፎች",
+      "rowsOption": "{count} ረድፎች",
+      "previous": "ቀዳሚ",
+      "next": "ቀጣይ",
+      "previousPage": "ቀዳሚ ገጽ",
+      "nextPage": "ቀጣይ ገጽ",
+      "page": "ገጽ {page}",
+      "totalCount": "ጠቅላላ {count} {item}",
+      "loadingItems": "{item} በመጫን ላይ...",
+      "searchPlaceholder": "ፈልግ...",
+      "loadFailed": "ውሂብ መጫን አልተሳካም።"
+    },
     "deleteModal": {
       "eyebrow": "መሰረዝ አረጋግጥ",
       "title": "{name} ይሰረዝ?",

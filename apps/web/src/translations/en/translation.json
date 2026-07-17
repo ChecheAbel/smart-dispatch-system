@@ -13,6 +13,21 @@
       "dashboard": "Dashboard",
       "signOut": "Sign out"
     },
+    "dataTable": {
+      "noResults": "No results",
+      "showing": "Showing {start}-{end} of {total}",
+      "rowsPerPage": "Rows per page",
+      "rowsOption": "{count} rows",
+      "previous": "Previous",
+      "next": "Next",
+      "previousPage": "Previous page",
+      "nextPage": "Next page",
+      "page": "Page {page}",
+      "totalCount": "{count} {item} total",
+      "loadingItems": "Loading {item}...",
+      "searchPlaceholder": "Search...",
+      "loadFailed": "Failed to load data."
+    },
     "deleteModal": {
       "eyebrow": "Confirm deletion",
       "title": "Delete {name}?",
