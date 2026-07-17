@@ -1,11 +1,11 @@
 import type { Vehicle, VehicleStatus } from "@smart-dispatch/types";
 
-/** Placeholder availability for non-available vehicles shown in the book catalog. */
+/** Fallback when a busy vehicle has no scheduled return/start time. */
 const BUSY_AVAILABLE_HOUR = 8;
 const BUSY_AVAILABLE_MINUTE = 30;
 
 type VehicleAvailabilitySource = Pick<Vehicle, "status"> &
-  Partial<Pick<Vehicle, "is_available_now">>;
+  Partial<Pick<Vehicle, "is_available_now" | "available_from">>;
 
 export function isVehicleAvailableNow(vehicle: VehicleAvailabilitySource | VehicleStatus) {
   if (typeof vehicle === "string") {
@@ -21,8 +21,8 @@ export function isVehicleAvailableNow(vehicle: VehicleAvailabilitySource | Vehic
 
 /**
  * Earliest datetime a vehicle can be booked.
- * Available vehicles: now. Busy / in-service vehicles: next calendar day at 08:30
- * (matches the catalog "In Service - Available:" label).
+ * Available vehicles: now.
+ * Busy vehicles: active ride `scheduled_return_at` (or `scheduled_at`), else next day 08:30.
  */
 export function getVehicleAvailableFrom(
   vehicle: VehicleAvailabilitySource | VehicleStatus,
@@ -30,6 +30,13 @@ export function getVehicleAvailableFrom(
 ) {
   if (isVehicleAvailableNow(vehicle)) {
     return new Date(now);
+  }
+
+  if (typeof vehicle !== "string" && vehicle.available_from) {
+    const fromAssignment = new Date(vehicle.available_from);
+    if (!Number.isNaN(fromAssignment.getTime())) {
+      return fromAssignment;
+    }
   }
 
   const available = new Date(now);

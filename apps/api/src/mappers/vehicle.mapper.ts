@@ -76,10 +76,12 @@ export function toPublicVehicle(
     locale?: string;
     openMaintenanceCount?: number;
     isAvailableNow?: boolean;
+    availableFrom?: string | null;
   },
 ): Vehicle {
   const vehicleType = toPublicVehicleType(vehicle.vehicleType, { locale: options?.locale });
   const vehicleClass = toPublicVehicleClass(vehicle.vehicleClass, { locale: options?.locale });
+  const isAvailableNow = options?.isAvailableNow ?? vehicle.status === "active";
 
   return {
     id: vehicle.id,
@@ -126,8 +128,8 @@ export function toPublicVehicle(
     registration_expires_at: dateToIsoDate(vehicle.registrationExpiresAt),
     open_maintenance_count:
       options?.openMaintenanceCount ?? vehicle._count?.maintenanceLogs ?? undefined,
-    is_available_now:
-      options?.isAvailableNow ?? (vehicle.status === "active"),
+    is_available_now: isAvailableNow,
+    available_from: isAvailableNow ? null : (options?.availableFrom ?? null),
     created_at: vehicle.createdAt.toISOString(),
     updated_at: vehicle.updatedAt.toISOString(),
   };

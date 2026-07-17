@@ -478,6 +478,8 @@ export interface Vehicle {
   open_maintenance_count?: number;
   /** Operational availability for booking: active fleet status and not on a confirmed/in-progress ride. */
   is_available_now?: boolean;
+  /** ISO datetime when a busy vehicle is expected to become bookable again (from active ride end/return). */
+  available_from?: string | null;
   created_at: string;
   updated_at: string;
 }

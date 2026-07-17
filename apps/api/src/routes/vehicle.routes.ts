@@ -50,7 +50,7 @@ import { VehicleFuelLogSource, VehicleHistoryEventType, VehicleStatus } from "..
 import { resolveMaintenanceWorkTypeId } from "../models/maintenance-work-type.model";
 import { findVehicleTypeById, listVehicleTypes } from "../models/vehicle-type.model";
 import { findVehicleClassById, listVehicleClasses } from "../models/vehicle-class.model";
-import { listBusyAssignedVehicleIds } from "../models/ride-request.model";
+import { listVehicleOperationalBusyState } from "../models/ride-request.model";
 import { toPublicVehicleLocationSnapshot } from "../mappers/vehicle-location.mapper";
 import { toPublicVehicleType } from "../mappers/vehicle-type.mapper";
 import { toPublicVehicleClass } from "../mappers/vehicle-class.mapper";
@@ -66,21 +66,23 @@ const router = Router();
 router.get("/public", async (req: Request, res: Response) => {
   try {
     const locale = parseLocale(req.query, req.headers["accept-language"]);
-    const [vehicles, types, classes, busyVehicleIds] = await Promise.all([
+    const [vehicles, types, classes, busyState] = await Promise.all([
       listVehicles({}, { take: 1000 }),
       listVehicleTypes({}),
       listVehicleClasses({}),
-      listBusyAssignedVehicleIds(),
+      listVehicleOperationalBusyState(),
     ]);
-    const busyVehicleIdSet = new Set(busyVehicleIds);
 
     return sendSuccess(res, {
-      vehicles: vehicles.map((v) =>
-        toPublicVehicle(v, {
+      vehicles: vehicles.map((v) => {
+        const isBusy = busyState.has(v.id);
+        const availableFrom = busyState.get(v.id) ?? null;
+        return toPublicVehicle(v, {
           locale,
-          isAvailableNow: v.status === "active" && !busyVehicleIdSet.has(v.id),
-        }),
-      ),
+          isAvailableNow: v.status === "active" && !isBusy,
+          availableFrom: availableFrom ? availableFrom.toISOString() : null,
+        });
+      }),
       types: types.map((t) => toPublicVehicleType(t, { locale })),
       classes: classes.map((c) => toPublicVehicleClass(c, { locale })),
     });

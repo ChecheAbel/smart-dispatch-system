@@ -384,20 +384,41 @@ export async function findActiveRideRequestForVehicle(vehicleId: string, exceptR
   });
 }
 
-/** Vehicle IDs currently on a confirmed or in-progress ride. */
-export async function listBusyAssignedVehicleIds() {
+/** Vehicle IDs currently on a confirmed or in-progress ride, with expected free-at time. */
+export async function listVehicleOperationalBusyState() {
   const rows = await prisma.rideRequest.findMany({
     where: {
       assignedVehicleId: { not: null },
       status: { in: ["confirmed", "in_progress"] },
     },
-    select: { assignedVehicleId: true },
-    distinct: ["assignedVehicleId"],
+    select: {
+      assignedVehicleId: true,
+      scheduledAt: true,
+      scheduledReturnAt: true,
+    },
+    orderBy: [{ scheduledReturnAt: "desc" }, { scheduledAt: "desc" }],
   });
 
-  return rows
-    .map((row) => row.assignedVehicleId)
-    .filter((id): id is string => Boolean(id));
+  const byVehicle = new Map<string, Date | null>();
+
+  for (const row of rows) {
+    if (!row.assignedVehicleId) continue;
+
+    const availableFrom = row.scheduledReturnAt ?? row.scheduledAt ?? null;
+    const existing = byVehicle.get(row.assignedVehicleId);
+
+    if (!byVehicle.has(row.assignedVehicleId)) {
+      byVehicle.set(row.assignedVehicleId, availableFrom);
+      continue;
+    }
+
+    // Keep the latest free-at when a vehicle somehow has multiple active assignments.
+    if (availableFrom && (!existing || availableFrom.getTime() > existing.getTime())) {
+      byVehicle.set(row.assignedVehicleId, availableFrom);
+    }
+  }
+
+  return byVehicle;
 }
 
 export async function listAssignableVehiclesForRideRequest(
