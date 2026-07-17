@@ -26,7 +26,10 @@ import {
   dashboardChartMargins,
   dashboardChartTheme,
 } from "@/components/shared/dashboard-chart-theme";
-import { DashboardChartTooltip } from "@/components/shared/dashboard-chart-tooltip";
+import {
+  DashboardChartTooltip,
+  dashboardChartTooltipWrapperStyle,
+} from "@/components/shared/dashboard-chart-tooltip";
 import { adminHeadingClass } from "@/lib/admin-theme";
 import { formatMessage, getCustomerDashboardMessages } from "@/translations";
 import { fetchRideRequests } from "@/lib/ride-request-api";
@@ -79,7 +82,10 @@ function DashboardDonutChart({
               <Cell key={slice.key} fill={slice.color} />
             ))}
           </Pie>
-          <Tooltip content={<DashboardChartTooltip valueFormatter={(value) => String(value)} />} />
+          <Tooltip
+            wrapperStyle={dashboardChartTooltipWrapperStyle}
+            content={<DashboardChartTooltip valueFormatter={(value) => String(value)} />}
+          />
         </PieChart>
       </ResponsiveContainer>
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
@@ -322,6 +328,7 @@ export function UserDashboardPage() {
                       width={32}
                     />
                     <Tooltip
+                      wrapperStyle={dashboardChartTooltipWrapperStyle}
                       cursor={{ stroke: dashboardChartTheme.accent, strokeWidth: 1, strokeDasharray: "4 4" }}
                       content={
                         <DashboardChartTooltip
@@ -425,6 +432,7 @@ export function UserDashboardPage() {
                       tickFormatter={(value) => `${formatCurrency(Number(value), locale)}`}
                     />
                     <Tooltip
+                      wrapperStyle={dashboardChartTooltipWrapperStyle}
                       cursor={{ fill: "rgba(28, 58, 52, 0.04)" }}
                       content={
                         <DashboardChartTooltip

@@ -8,6 +8,17 @@ import type {
   VehicleStatus,
 } from "@smart-dispatch/types";
 import {
+  Activity,
+  CalendarDays,
+  Fuel,
+  MapPinned,
+  ShieldAlert,
+  TrendingUp,
+  Truck,
+  UserPlus,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+import {
   Area,
   AreaChart,
   Bar,
@@ -35,23 +46,26 @@ import {
   dashboardChartMargins,
   dashboardChartTheme,
 } from "@/components/shared/dashboard-chart-theme";
-import { DashboardChartTooltip } from "@/components/shared/dashboard-chart-tooltip";
+import {
+  DashboardChartTooltip,
+  dashboardChartTooltipWrapperStyle,
+} from "@/components/shared/dashboard-chart-tooltip";
 import { adminEyebrowClass, adminHeadingClass } from "@/lib/admin-theme";
 import type { SupportedLocale } from "@/lib/locale";
 import { formatMessage, getAdminDashboardMessages } from "@/translations";
 import { cn } from "@/lib/utils";
 
 const STATUS_COLORS: Record<RideRequestStatus, string> = {
-  pending: "#d97706",
-  confirmed: "#2563eb",
+  pending: "#C9B87A",
+  confirmed: "#4C8578",
   in_progress: "#1C3A34",
-  completed: "#64748b",
-  cancelled: "#dc2626",
+  completed: "#8FB5A8",
+  cancelled: "#94a3b8",
 };
 
 const VEHICLE_STATUS_COLORS: Record<VehicleStatus, string> = {
   active: "#1C3A34",
-  maintenance: "#d97706",
+  maintenance: "#C9B87A",
   retired: "#94a3b8",
 };
 
@@ -62,7 +76,7 @@ const REGION_BAR_COLORS = [
   "#6BA08F",
   "#8FB5A8",
   "#A8C4BB",
-  "#C2D9D2",
+  "#C9B87A",
   "#64748b",
 ];
 
@@ -95,31 +109,37 @@ function DashboardDonutChart({
   const visibleSlices = slices.filter((slice) => slice.count > 0);
 
   return (
-    <div className="relative h-full min-h-[220px] w-full">
+    <div className="relative h-full min-h-[240px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart margin={{ top: 16, right: 16, bottom: 16, left: 16 }}>
+        <PieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
           <Pie
             data={visibleSlices}
             dataKey="count"
             nameKey="label"
             cx="50%"
             cy="50%"
-            innerRadius="44%"
-            outerRadius="62%"
-            paddingAngle={2}
+            innerRadius="58%"
+            outerRadius="78%"
+            paddingAngle={3}
+            cornerRadius={4}
             stroke="#fff"
-            strokeWidth={2}
+            strokeWidth={3}
           >
             {visibleSlices.map((slice) => (
               <Cell key={slice.key} fill={slice.color} />
             ))}
           </Pie>
-          <Tooltip content={<DashboardChartTooltip valueFormatter={(value) => String(value)} />} />
+          <Tooltip
+            wrapperStyle={dashboardChartTooltipWrapperStyle}
+            content={<DashboardChartTooltip valueFormatter={(value) => String(value)} />}
+          />
         </PieChart>
       </ResponsiveContainer>
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-extrabold tabular-nums text-[#1C3A34]">{total}</span>
-        <span className="mt-0.5 text-[10px] font-semibold tracking-wide text-slate-400 uppercase">
+        <span className="text-3xl font-extrabold tabular-nums tracking-tight text-[#1C3A34]">
+          {total}
+        </span>
+        <span className="mt-1 text-[10px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
           {centerLabel}
         </span>
       </div>
@@ -131,19 +151,38 @@ function ChartSection({
   eyebrow,
   title,
   description,
+  periodLabel,
+  icon: Icon,
   children,
 }: {
   eyebrow: string;
   title: string;
   description: string;
+  periodLabel?: string;
+  icon: LucideIcon;
   children: ReactNode;
 }) {
   return (
-    <section className="space-y-4">
-      <div className="space-y-1">
-        <p className={adminEyebrowClass}>{eyebrow}</p>
-        <h3 className={cn("text-lg font-bold tracking-tight", adminHeadingClass)}>{title}</h3>
-        <p className="text-sm text-slate-500">{description}</p>
+    <section className="space-y-5">
+      <div className="flex flex-col gap-4 border-b border-slate-200/70 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex min-w-0 items-start gap-3.5">
+          <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#1C3A34] text-white shadow-sm">
+            <Icon className="size-4" strokeWidth={2.25} />
+          </span>
+          <div className="min-w-0 space-y-1">
+            <p className={adminEyebrowClass}>{eyebrow}</p>
+            <h3 className={cn("text-xl font-extrabold tracking-tight", adminHeadingClass)}>
+              {title}
+            </h3>
+            <p className="max-w-2xl text-sm leading-relaxed text-slate-500">{description}</p>
+          </div>
+        </div>
+        {periodLabel ? (
+          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[#C9B87A]/35 bg-[#C9B87A]/10 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-[#8f7d45]">
+            <CalendarDays className="size-3.5" />
+            {periodLabel}
+          </span>
+        ) : null}
       </div>
       <div>{children}</div>
     </section>
@@ -191,7 +230,7 @@ function getRegionChartRows(
 
 function getAxisWidth(labels: string[]) {
   const longest = labels.reduce((max, label) => Math.max(max, label.length), 0);
-  return Math.min(240, Math.max(112, longest * 7.5));
+  return Math.min(220, Math.max(100, longest * 7.2));
 }
 
 function toLegendItems(
@@ -266,7 +305,7 @@ export function AdminDashboardCharts({
     : [];
 
   const regionAxisWidth = getAxisWidth(regionChartRows.map((row) => row.label));
-  const regionChartHeight = Math.max(256, regionChartRows.length * 48);
+  const regionChartHeight = Math.max(280, regionChartRows.length * 44);
 
   const rideStatusLegend = toLegendItems(
     rideStatuses.map((item) => ({
@@ -288,7 +327,7 @@ export function AdminDashboardCharts({
 
   const complianceLegend: DashboardChartLegendItem[] = [
     { key: "insurance", label: charts.insuranceLabel, color: dashboardChartTheme.brand },
-    { key: "inspection", label: charts.inspectionLabel, color: dashboardChartTheme.accent },
+    { key: "inspection", label: charts.inspectionLabel, color: dashboardChartTheme.gold },
   ];
 
   const showRideRequests = (loading && canReadRideRequests) || Boolean(analytics?.ride_requests);
@@ -308,15 +347,18 @@ export function AdminDashboardCharts({
   const registrations = analytics?.registrations;
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-12">
       {showRideRequests ? (
         <ChartSection
+          icon={Activity}
           eyebrow={charts.operationsEyebrow}
           title={charts.operationsTitle}
           description={charts.operationsDescription}
+          periodLabel={periodLabel}
         >
-          <div className="grid gap-4 xl:grid-cols-12">
+          <div className="grid gap-5 xl:grid-cols-12">
             <DashboardChartCard
+              icon={TrendingUp}
               title={charts.rideTrendTitle}
               description={periodLabel}
               highlight={rideTrendTotal}
@@ -327,55 +369,66 @@ export function AdminDashboardCharts({
               className="xl:col-span-8"
             >
               {!loading && rideRequests ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={rideRequests.trend} margin={dashboardChartMargins}>
-                  <defs>
-                    <linearGradient id={rideTrendGradientId} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={dashboardChartTheme.brand} stopOpacity={0.32} />
-                      <stop offset="100%" stopColor={dashboardChartTheme.brand} stopOpacity={0.02} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid {...dashboardChartGrid} />
-                  <XAxis
-                    dataKey="date"
-                    tickLine={false}
-                    axisLine={false}
-                    tick={dashboardChartAxisTick}
-                    tickFormatter={(value) => formatShortDate(String(value), locale)}
-                    interval="preserveStartEnd"
-                    dy={8}
-                  />
-                  <YAxis
-                    allowDecimals={false}
-                    tickLine={false}
-                    axisLine={false}
-                    tick={dashboardChartAxisTick}
-                    width={32}
-                  />
-                  <Tooltip
-                    cursor={{ stroke: dashboardChartTheme.accent, strokeWidth: 1, strokeDasharray: "4 4" }}
-                    content={
-                      <DashboardChartTooltip
-                        labelFormatter={(value) => formatShortDate(value, locale)}
-                        valueFormatter={(value) => String(value)}
-                      />
-                    }
-                  />
-                  <Area
-                    type="monotone"
-                    dataKey="count"
-                    name={charts.requestsLabel}
-                    stroke={dashboardChartTheme.brand}
-                    fill={`url(#${rideTrendGradientId})`}
-                    strokeWidth={2.5}
-                    activeDot={{ r: 5, fill: dashboardChartTheme.brand, stroke: "#fff", strokeWidth: 2 }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={rideRequests.trend} margin={dashboardChartMargins}>
+                    <defs>
+                      <linearGradient id={rideTrendGradientId} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={dashboardChartTheme.brand} stopOpacity={0.28} />
+                        <stop offset="100%" stopColor={dashboardChartTheme.brand} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid {...dashboardChartGrid} />
+                    <XAxis
+                      dataKey="date"
+                      tickLine={false}
+                      axisLine={false}
+                      tick={dashboardChartAxisTick}
+                      tickFormatter={(value) => formatShortDate(String(value), locale)}
+                      interval="preserveStartEnd"
+                      dy={8}
+                    />
+                    <YAxis
+                      allowDecimals={false}
+                      tickLine={false}
+                      axisLine={false}
+                      tick={dashboardChartAxisTick}
+                      width={32}
+                    />
+                    <Tooltip
+                      wrapperStyle={dashboardChartTooltipWrapperStyle}
+                      cursor={{
+                        stroke: dashboardChartTheme.gold,
+                        strokeWidth: 1,
+                        strokeDasharray: "4 4",
+                      }}
+                      content={
+                        <DashboardChartTooltip
+                          labelFormatter={(value) => formatShortDate(value, locale)}
+                          valueFormatter={(value) => String(value)}
+                        />
+                      }
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="count"
+                      name={charts.requestsLabel}
+                      stroke={dashboardChartTheme.brand}
+                      fill={`url(#${rideTrendGradientId})`}
+                      strokeWidth={2.5}
+                      activeDot={{
+                        r: 5,
+                        fill: dashboardChartTheme.brand,
+                        stroke: "#fff",
+                        strokeWidth: 2,
+                      }}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               ) : null}
             </DashboardChartCard>
 
             <DashboardChartCard
+              icon={Activity}
               title={charts.rideStatusTitle}
               description={charts.rideStatusDescription}
               highlight={rideStatusTotal}
@@ -384,23 +437,28 @@ export function AdminDashboardCharts({
               empty={!loading && rideStatusTotal === 0}
               emptyLabel={charts.empty}
               className="xl:col-span-4"
-              footer={!loading ? <DashboardChartLegend items={rideStatusLegend} /> : undefined}
+              footer={
+                !loading ? (
+                  <DashboardChartLegend items={rideStatusLegend} variant="rows" />
+                ) : undefined
+              }
             >
               {!loading ? (
-              <DashboardDonutChart
-                slices={rideStatuses.map((item) => ({
-                  key: item.status,
-                  label: item.label,
-                  count: item.count,
-                  color: STATUS_COLORS[item.status],
-                }))}
-                total={rideStatusTotal}
-                centerLabel={charts.totalLabel}
-              />
+                <DashboardDonutChart
+                  slices={rideStatuses.map((item) => ({
+                    key: item.status,
+                    label: item.label,
+                    count: item.count,
+                    color: STATUS_COLORS[item.status],
+                  }))}
+                  total={rideStatusTotal}
+                  centerLabel={charts.totalLabel}
+                />
               ) : null}
             </DashboardChartCard>
 
             <DashboardChartCard
+              icon={MapPinned}
               title={charts.rideRegionTitle}
               description={charts.rideRegionDescription}
               highlight={regionChartRows.reduce((total, row) => total + row.count, 0)}
@@ -409,60 +467,61 @@ export function AdminDashboardCharts({
               empty={!loading && regionChartRows.length === 0}
               emptyLabel={charts.empty}
               className="xl:col-span-12"
-              contentClassName="!h-auto"
+              contentClassName="!h-auto !min-h-0"
             >
               {!loading && rideRequests ? (
-              <div style={{ height: regionChartHeight }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={regionChartRows}
-                    layout="vertical"
-                    margin={{ top: 4, right: 48, left: 8, bottom: 4 }}
-                    barCategoryGap="20%"
-                  >
-                    <CartesianGrid {...dashboardChartGrid} horizontal={false} />
-                    <XAxis
-                      type="number"
-                      allowDecimals={false}
-                      tickLine={false}
-                      axisLine={false}
-                      tick={dashboardChartAxisTick}
-                    />
-                    <YAxis
-                      type="category"
-                      dataKey="label"
-                      width={regionAxisWidth}
-                      tickLine={false}
-                      axisLine={false}
-                      tick={{ fontSize: 12, fill: dashboardChartTheme.brand, fontWeight: 600 }}
-                    />
-                    <Tooltip
-                      cursor={{ fill: "rgba(28, 58, 52, 0.04)" }}
-                      content={
-                        <DashboardChartTooltip
-                          labelFormatter={(value) => String(value)}
-                          valueFormatter={(value) => String(value)}
-                        />
-                      }
-                    />
-                    <Bar dataKey="count" name={charts.requestsLabel} radius={[0, 6, 6, 0]}>
-                      {regionChartRows.map((entry, index) => (
-                        <Cell
-                          key={entry.region_id ?? entry.label}
-                          fill={REGION_BAR_COLORS[index % REGION_BAR_COLORS.length]}
-                        />
-                      ))}
-                      <LabelList
-                        dataKey="count"
-                        position="right"
-                        fill={dashboardChartTheme.muted}
-                        fontSize={11}
-                        fontWeight={700}
+                <div style={{ height: regionChartHeight }}>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={regionChartRows}
+                      layout="vertical"
+                      margin={{ top: 4, right: 48, left: 4, bottom: 4 }}
+                      barCategoryGap="24%"
+                    >
+                      <CartesianGrid {...dashboardChartGrid} horizontal={false} />
+                      <XAxis
+                        type="number"
+                        allowDecimals={false}
+                        tickLine={false}
+                        axisLine={false}
+                        tick={dashboardChartAxisTick}
                       />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+                      <YAxis
+                        type="category"
+                        dataKey="label"
+                        width={regionAxisWidth}
+                        tickLine={false}
+                        axisLine={false}
+                        tick={{ fontSize: 12, fill: dashboardChartTheme.brand, fontWeight: 600 }}
+                      />
+                      <Tooltip
+                        wrapperStyle={dashboardChartTooltipWrapperStyle}
+                        cursor={{ fill: "rgba(28, 58, 52, 0.04)" }}
+                        content={
+                          <DashboardChartTooltip
+                            labelFormatter={(value) => String(value)}
+                            valueFormatter={(value) => String(value)}
+                          />
+                        }
+                      />
+                      <Bar dataKey="count" name={charts.requestsLabel} radius={[0, 8, 8, 0]}>
+                        {regionChartRows.map((entry, index) => (
+                          <Cell
+                            key={entry.region_id ?? entry.label}
+                            fill={REGION_BAR_COLORS[index % REGION_BAR_COLORS.length]}
+                          />
+                        ))}
+                        <LabelList
+                          dataKey="count"
+                          position="right"
+                          fill={dashboardChartTheme.muted}
+                          fontSize={11}
+                          fontWeight={700}
+                        />
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               ) : null}
             </DashboardChartCard>
           </div>
@@ -471,13 +530,16 @@ export function AdminDashboardCharts({
 
       {showFleetSection ? (
         <ChartSection
+          icon={Truck}
           eyebrow={charts.fleetEyebrow}
           title={charts.fleetTitle}
           description={charts.fleetDescription}
+          periodLabel={periodLabel}
         >
-          <div className="grid gap-4 xl:grid-cols-12">
+          <div className="grid gap-5 xl:grid-cols-12">
             {showFleetStatus ? (
               <DashboardChartCard
+                icon={Truck}
                 title={charts.fleetStatusTitle}
                 description={charts.fleetStatusDescription}
                 highlight={fleetStatusTotal}
@@ -486,25 +548,30 @@ export function AdminDashboardCharts({
                 empty={!loading && fleetStatusTotal === 0}
                 emptyLabel={charts.empty}
                 className="xl:col-span-4"
-                footer={!loading ? <DashboardChartLegend items={fleetStatusLegend} /> : undefined}
+                footer={
+                  !loading ? (
+                    <DashboardChartLegend items={fleetStatusLegend} variant="rows" />
+                  ) : undefined
+                }
               >
                 {!loading ? (
-                <DashboardDonutChart
-                  slices={fleetStatuses.map((item) => ({
-                    key: item.status,
-                    label: item.label,
-                    count: item.count,
-                    color: VEHICLE_STATUS_COLORS[item.status],
-                  }))}
-                  total={fleetStatusTotal}
-                  centerLabel={charts.vehiclesLabel}
-                />
+                  <DashboardDonutChart
+                    slices={fleetStatuses.map((item) => ({
+                      key: item.status,
+                      label: item.label,
+                      count: item.count,
+                      color: VEHICLE_STATUS_COLORS[item.status],
+                    }))}
+                    total={fleetStatusTotal}
+                    centerLabel={charts.vehiclesLabel}
+                  />
                 ) : null}
               </DashboardChartCard>
             ) : null}
 
             {showCompliance ? (
               <DashboardChartCard
+                icon={ShieldAlert}
                 title={charts.complianceTitle}
                 description={formatMessage(charts.complianceDescription, {
                   count: String(fleet?.compliance?.vehicles_needing_attention ?? 0),
@@ -524,51 +591,53 @@ export function AdminDashboardCharts({
                 footer={!loading ? <DashboardChartLegend items={complianceLegend} /> : undefined}
               >
                 {!loading && fleet?.compliance ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={complianceChartData} margin={dashboardChartMargins} barGap={6}>
-                    <CartesianGrid {...dashboardChartGrid} />
-                    <XAxis
-                      dataKey="label"
-                      tickLine={false}
-                      axisLine={false}
-                      tick={dashboardChartAxisTick}
-                      dy={8}
-                    />
-                    <YAxis
-                      allowDecimals={false}
-                      tickLine={false}
-                      axisLine={false}
-                      tick={dashboardChartAxisTick}
-                      width={32}
-                    />
-                    <Tooltip
-                      cursor={{ fill: "rgba(28, 58, 52, 0.04)" }}
-                      content={
-                        <DashboardChartTooltip valueFormatter={(value) => String(value)} />
-                      }
-                    />
-                    <Bar
-                      dataKey="insurance"
-                      name={charts.insuranceLabel}
-                      fill={dashboardChartTheme.brand}
-                      radius={[6, 6, 0, 0]}
-                      maxBarSize={28}
-                    />
-                    <Bar
-                      dataKey="inspection"
-                      name={charts.inspectionLabel}
-                      fill={dashboardChartTheme.accent}
-                      radius={[6, 6, 0, 0]}
-                      maxBarSize={28}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={complianceChartData} margin={dashboardChartMargins} barGap={8}>
+                      <CartesianGrid {...dashboardChartGrid} />
+                      <XAxis
+                        dataKey="label"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={dashboardChartAxisTick}
+                        dy={8}
+                      />
+                      <YAxis
+                        allowDecimals={false}
+                        tickLine={false}
+                        axisLine={false}
+                        tick={dashboardChartAxisTick}
+                        width={32}
+                      />
+                      <Tooltip
+                        wrapperStyle={dashboardChartTooltipWrapperStyle}
+                        cursor={{ fill: "rgba(28, 58, 52, 0.04)" }}
+                        content={
+                          <DashboardChartTooltip valueFormatter={(value) => String(value)} />
+                        }
+                      />
+                      <Bar
+                        dataKey="insurance"
+                        name={charts.insuranceLabel}
+                        fill={dashboardChartTheme.brand}
+                        radius={[8, 8, 0, 0]}
+                        maxBarSize={32}
+                      />
+                      <Bar
+                        dataKey="inspection"
+                        name={charts.inspectionLabel}
+                        fill={dashboardChartTheme.gold}
+                        radius={[8, 8, 0, 0]}
+                        maxBarSize={32}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
                 ) : null}
               </DashboardChartCard>
             ) : null}
 
             {showFuel ? (
               <DashboardChartCard
+                icon={Fuel}
                 title={charts.fuelSpendTitle}
                 description={periodLabel}
                 highlight={formatCurrency(fuelSpendTotal, locale)}
@@ -579,53 +648,62 @@ export function AdminDashboardCharts({
                 className="xl:col-span-12"
               >
                 {!loading && fuel ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={fuel.trend} margin={dashboardChartMargins} barCategoryGap="28%">
-                    <defs>
-                      <linearGradient id={fuelBarGradientId} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={dashboardChartTheme.brandMid} stopOpacity={0.95} />
-                        <stop offset="100%" stopColor={dashboardChartTheme.brand} stopOpacity={0.55} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid {...dashboardChartGrid} />
-                    <XAxis
-                      dataKey="date"
-                      tickLine={false}
-                      axisLine={false}
-                      tick={dashboardChartAxisTick}
-                      tickFormatter={(value) => formatShortDate(String(value), locale)}
-                      interval="preserveStartEnd"
-                      dy={8}
-                    />
-                    <YAxis
-                      tickLine={false}
-                      axisLine={false}
-                      tick={dashboardChartAxisTick}
-                      width={44}
-                      tickFormatter={(value) => formatCurrency(Number(value), locale)}
-                    />
-                    <Tooltip
-                      cursor={{ fill: "rgba(28, 58, 52, 0.04)" }}
-                      content={
-                        <DashboardChartTooltip
-                          labelFormatter={(value) => formatShortDate(value, locale)}
-                          valueFormatter={(value, name) =>
-                            name === charts.fuelCostLabel
-                              ? formatCurrency(value, locale)
-                              : String(value)
-                          }
-                        />
-                      }
-                    />
-                    <Bar
-                      dataKey="total_cost"
-                      name={charts.fuelCostLabel}
-                      fill={`url(#${fuelBarGradientId})`}
-                      radius={[6, 6, 0, 0]}
-                      maxBarSize={36}
-                    />
-                  </BarChart>
-                </ResponsiveContainer>
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={fuel.trend} margin={dashboardChartMargins} barCategoryGap="26%">
+                      <defs>
+                        <linearGradient id={fuelBarGradientId} x1="0" y1="0" x2="0" y2="1">
+                          <stop
+                            offset="0%"
+                            stopColor={dashboardChartTheme.brandMid}
+                            stopOpacity={0.95}
+                          />
+                          <stop
+                            offset="100%"
+                            stopColor={dashboardChartTheme.brand}
+                            stopOpacity={0.45}
+                          />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid {...dashboardChartGrid} />
+                      <XAxis
+                        dataKey="date"
+                        tickLine={false}
+                        axisLine={false}
+                        tick={dashboardChartAxisTick}
+                        tickFormatter={(value) => formatShortDate(String(value), locale)}
+                        interval="preserveStartEnd"
+                        dy={8}
+                      />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        tick={dashboardChartAxisTick}
+                        width={44}
+                        tickFormatter={(value) => formatCurrency(Number(value), locale)}
+                      />
+                      <Tooltip
+                        wrapperStyle={dashboardChartTooltipWrapperStyle}
+                        cursor={{ fill: "rgba(28, 58, 52, 0.04)" }}
+                        content={
+                          <DashboardChartTooltip
+                            labelFormatter={(value) => formatShortDate(value, locale)}
+                            valueFormatter={(value, name) =>
+                              name === charts.fuelCostLabel
+                                ? formatCurrency(value, locale)
+                                : String(value)
+                            }
+                          />
+                        }
+                      />
+                      <Bar
+                        dataKey="total_cost"
+                        name={charts.fuelCostLabel}
+                        fill={`url(#${fuelBarGradientId})`}
+                        radius={[8, 8, 0, 0]}
+                        maxBarSize={40}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
                 ) : null}
               </DashboardChartCard>
             ) : null}
@@ -635,11 +713,14 @@ export function AdminDashboardCharts({
 
       {showRegistrations ? (
         <ChartSection
+          icon={UserPlus}
           eyebrow={charts.registrationsEyebrow}
           title={charts.registrationsTitle}
           description={charts.registrationsDescription}
+          periodLabel={periodLabel}
         >
           <DashboardChartCard
+            icon={UserPlus}
             title={charts.registrationTrendTitle}
             description={periodLabel}
             highlight={registrationTotal}
@@ -653,7 +734,7 @@ export function AdminDashboardCharts({
                 <ComposedChart data={registrations.trend} margin={dashboardChartMargins}>
                   <defs>
                     <linearGradient id={registrationLineGradientId} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={dashboardChartTheme.gold} stopOpacity={0.22} />
+                      <stop offset="0%" stopColor={dashboardChartTheme.gold} stopOpacity={0.28} />
                       <stop offset="100%" stopColor={dashboardChartTheme.gold} stopOpacity={0} />
                     </linearGradient>
                   </defs>
@@ -675,7 +756,12 @@ export function AdminDashboardCharts({
                     width={32}
                   />
                   <Tooltip
-                    cursor={{ stroke: dashboardChartTheme.gold, strokeWidth: 1, strokeDasharray: "4 4" }}
+                    wrapperStyle={dashboardChartTooltipWrapperStyle}
+                    cursor={{
+                      stroke: dashboardChartTheme.gold,
+                      strokeWidth: 1,
+                      strokeDasharray: "4 4",
+                    }}
                     content={
                       <DashboardChartTooltip
                         labelFormatter={(value) => formatShortDate(value, locale)}
@@ -698,7 +784,12 @@ export function AdminDashboardCharts({
                     stroke={dashboardChartTheme.gold}
                     strokeWidth={2.5}
                     dot={false}
-                    activeDot={{ r: 5, fill: dashboardChartTheme.gold, stroke: "#fff", strokeWidth: 2 }}
+                    activeDot={{
+                      r: 5,
+                      fill: dashboardChartTheme.gold,
+                      stroke: "#fff",
+                      strokeWidth: 2,
+                    }}
                   />
                 </ComposedChart>
               </ResponsiveContainer>
