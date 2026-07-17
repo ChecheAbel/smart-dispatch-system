@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ClipboardList, Eye, MoreHorizontal, Pencil, ShieldCheck } from "lucide-react";
 import type { Vehicle, VehicleComplianceStatus } from "@smart-dispatch/types";
 import { useAuth, useLocale } from "@/components/shared/providers";
@@ -39,6 +39,7 @@ import {
 } from "@/lib/vehicle-compliance";
 import { formatMessage, getAdminComplianceMessages } from "@/translations";
 import { UpdateComplianceSheet } from "./update-compliance-sheet";
+import { ComplianceStats } from "./compliance-stats";
 
 type ComplianceListType = "insurance" | "inspection";
 
@@ -103,6 +104,7 @@ function ComplianceRowActions({
 
 export function ComplianceListPage({ type }: ComplianceListPageProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { locale } = useLocale();
   const { hasPermission } = useAuth();
@@ -137,8 +139,27 @@ export function ComplianceListPage({ type }: ComplianceListPageProps) {
     const nextStatus = searchParams.get("status");
     if (nextStatus && COMPLIANCE_STATUSES.includes(nextStatus as VehicleComplianceStatus)) {
       setStatusFilter(nextStatus);
+    } else if (!nextStatus) {
+      setStatusFilter("all");
     }
   }, [searchParams]);
+
+  const handleStatusFilterChange = useCallback(
+    (value: string) => {
+      const next = value || "all";
+      setStatusFilter(next);
+
+      const params = new URLSearchParams(searchParams.toString());
+      if (next === "all") {
+        params.delete("status");
+      } else {
+        params.set("status", next);
+      }
+      const query = params.toString();
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams],
+  );
 
   const openVehicle = useCallback(
     (vehicle: Vehicle) => {
@@ -272,7 +293,15 @@ export function ComplianceListPage({ type }: ComplianceListPageProps) {
   }
 
   return (
-    <>
+    <div className="space-y-6">
+      <ComplianceStats
+        type={type}
+        locale={locale}
+        refreshKey={tableRefreshKey}
+        activeStatus={statusFilter}
+        onStatusSelect={handleStatusFilterChange}
+      />
+
       <DataTable
         key={`${locale}-${type}`}
         eyebrow={<Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>}
@@ -303,7 +332,7 @@ export function ComplianceListPage({ type }: ComplianceListPageProps) {
               })),
             ]}
             value={statusFilter}
-            onValueChange={(value) => setStatusFilter(value ?? "all")}
+            onValueChange={(value) => handleStatusFilterChange(value ?? "all")}
           >
             <SelectTrigger
               id="compliance-status-filter"
@@ -333,6 +362,6 @@ export function ComplianceListPage({ type }: ComplianceListPageProps) {
         vehicle={selectedVehicle}
         onSuccess={handleSheetSuccess}
       />
-    </>
+    </div>
   );
 }
