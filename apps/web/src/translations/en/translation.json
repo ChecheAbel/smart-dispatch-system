@@ -493,6 +493,14 @@
     "comingSoonCharts": {
       "sectionTitle": "Activity insights",
       "sectionDescription": "Charts and trends for your booking history will appear here.",
+      "activityEyebrow": "Activity",
+      "activityTitle": "Booking activity",
+      "activityDescription": "Your request volume and status over the last 30 days",
+      "billingEyebrow": "Billing",
+      "billingTitle": "Trip types & spending",
+      "billingDescription": "Vehicle preferences and invoice totals over time",
+      "periodLabel": "Last 30 days",
+      "totalLabel": "Total",
       "bookingsTrendTitle": "Booking trend",
       "bookingsTrendDescription": "Your booking volume over the last 30 days",
       "spendingTrendTitle": "Spending trend",
@@ -500,7 +508,13 @@
       "tripTypesTitle": "Trip types",
       "tripTypesDescription": "Breakdown of your most requested vehicle classes",
       "requestStatusTitle": "Request status",
-      "requestStatusDescription": "Pending, confirmed, and completed requests"
+      "requestStatusDescription": "Pending, confirmed, and completed requests",
+      "requestsLabel": "Requests",
+      "tripsLabel": "Trips",
+      "spentLabel": "Total spent",
+      "costLabel": "Cost",
+      "emptyBookings": "No bookings found",
+      "emptySpending": "No spending recorded"
     }
   },
   "customerRequests": {

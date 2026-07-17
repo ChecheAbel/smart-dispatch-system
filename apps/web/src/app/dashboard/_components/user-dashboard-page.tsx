@@ -1,7 +1,17 @@
 "use client";
 
-import { useId, useState, useEffect, useMemo } from "react";
-import { CalendarCheck, Car, ClipboardList, UserRound } from "lucide-react";
+import { useId, useState, useEffect, useMemo, type ReactNode } from "react";
+import {
+  Activity,
+  CalendarCheck,
+  CalendarDays,
+  Car,
+  ClipboardList,
+  TrendingUp,
+  UserRound,
+  Wallet,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import {
   Area,
   AreaChart,
@@ -19,7 +29,10 @@ import {
 import { useAuth, useLocale } from "@/components/shared/providers";
 import { StatCard } from "@/components/shared/stat-card";
 import { DashboardChartCard } from "@/components/shared/dashboard-chart-card";
-import { DashboardChartLegend } from "@/components/shared/dashboard-chart-legend";
+import {
+  DashboardChartLegend,
+  type DashboardChartLegendItem,
+} from "@/components/shared/dashboard-chart-legend";
 import {
   dashboardChartAxisTick,
   dashboardChartGrid,
@@ -30,11 +43,12 @@ import {
   DashboardChartTooltip,
   dashboardChartTooltipWrapperStyle,
 } from "@/components/shared/dashboard-chart-tooltip";
-import { adminHeadingClass } from "@/lib/admin-theme";
+import { adminEyebrowClass, adminHeadingClass } from "@/lib/admin-theme";
 import { formatMessage, getCustomerDashboardMessages } from "@/translations";
 import { fetchRideRequests } from "@/lib/ride-request-api";
 import { fetchMyInvoices } from "@/lib/customer-billing-api";
 import type { RideRequest, CustomerInvoice, RideRequestStatus } from "@smart-dispatch/types";
+import { cn } from "@/lib/utils";
 
 type DonutSlice = {
   key: string;
@@ -44,11 +58,11 @@ type DonutSlice = {
 };
 
 const STATUS_COLORS: Record<RideRequestStatus, string> = {
-  pending: "#d97706",
-  confirmed: "#2563eb",
+  pending: "#C9B87A",
+  confirmed: "#4C8578",
   in_progress: "#1C3A34",
-  completed: "#10b981",
-  cancelled: "#dc2626",
+  completed: "#8FB5A8",
+  cancelled: "#94a3b8",
 };
 
 function DashboardDonutChart({
@@ -63,20 +77,21 @@ function DashboardDonutChart({
   const visibleSlices = slices.filter((slice) => slice.count > 0);
 
   return (
-    <div className="relative h-full min-h-[220px] w-full">
+    <div className="relative h-full min-h-[240px] w-full">
       <ResponsiveContainer width="100%" height="100%">
-        <PieChart margin={{ top: 16, right: 16, bottom: 16, left: 16 }}>
+        <PieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
           <Pie
             data={visibleSlices}
             dataKey="count"
             nameKey="label"
             cx="50%"
             cy="50%"
-            innerRadius="44%"
-            outerRadius="62%"
-            paddingAngle={2}
+            innerRadius="58%"
+            outerRadius="78%"
+            paddingAngle={3}
+            cornerRadius={4}
             stroke="#fff"
-            strokeWidth={2}
+            strokeWidth={3}
           >
             {visibleSlices.map((slice) => (
               <Cell key={slice.key} fill={slice.color} />
@@ -89,12 +104,56 @@ function DashboardDonutChart({
         </PieChart>
       </ResponsiveContainer>
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-2xl font-extrabold tabular-nums text-[#1C3A34]">{total}</span>
-        <span className="mt-0.5 text-[10px] font-semibold tracking-wide text-slate-400 uppercase">
+        <span className="text-3xl font-extrabold tabular-nums tracking-tight text-[#1C3A34]">
+          {total}
+        </span>
+        <span className="mt-1 text-[10px] font-semibold tracking-[0.16em] text-slate-400 uppercase">
           {centerLabel}
         </span>
       </div>
     </div>
+  );
+}
+
+function ChartSection({
+  eyebrow,
+  title,
+  description,
+  periodLabel,
+  icon: Icon,
+  children,
+}: {
+  eyebrow: string;
+  title: string;
+  description: string;
+  periodLabel?: string;
+  icon: LucideIcon;
+  children: ReactNode;
+}) {
+  return (
+    <section className="space-y-5">
+      <div className="flex flex-col gap-4 border-b border-slate-200/70 pb-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="flex min-w-0 items-start gap-3.5">
+          <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#1C3A34] text-white shadow-sm">
+            <Icon className="size-4" strokeWidth={2.25} />
+          </span>
+          <div className="min-w-0 space-y-1">
+            <p className={adminEyebrowClass}>{eyebrow}</p>
+            <h3 className={cn("text-xl font-extrabold tracking-tight", adminHeadingClass)}>
+              {title}
+            </h3>
+            <p className="max-w-2xl text-sm leading-relaxed text-slate-500">{description}</p>
+          </div>
+        </div>
+        {periodLabel ? (
+          <span className="inline-flex w-fit items-center gap-2 rounded-full border border-[#C9B87A]/35 bg-[#C9B87A]/10 px-3 py-1.5 text-[11px] font-semibold tracking-wide text-[#8f7d45]">
+            <CalendarDays className="size-3.5" />
+            {periodLabel}
+          </span>
+        ) : null}
+      </div>
+      <div>{children}</div>
+    </section>
   );
 }
 
@@ -112,12 +171,26 @@ function formatCurrency(value: number, locale: string) {
   }).format(value);
 }
 
+function formatMoney(value: number, locale: string) {
+  return `${formatCurrency(value, locale)} ETB`;
+}
+
+function buildLast30Days() {
+  const days: string[] = [];
+  const now = new Date();
+  for (let i = 29; i >= 0; i -= 1) {
+    const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+    days.push(d.toISOString().slice(0, 10));
+  }
+  return days;
+}
+
 export function UserDashboardPage() {
   const { user, hasPermission } = useAuth();
   const { locale } = useLocale();
   const copy = getCustomerDashboardMessages(locale);
+  const charts = copy.comingSoonCharts;
   const rideTrendGradientId = useId().replace(/:/g, "");
-  const spendingBarGradientId = useId().replace(/:/g, "");
 
   const canReadRequests = hasPermission("customer_requests.read");
   const canReadInvoices = hasPermission("customer_invoices.read");
@@ -154,33 +227,19 @@ export function UserDashboardPage() {
   const displayName =
     [user.first_name, user.last_name].filter(Boolean).join(" ").trim() || user.email;
 
-  // Stats
   const totalBookings = requests.length;
   const activeRequests = requests.filter((r) => r.status === "pending").length;
   const tripsInProgress = requests.filter((r) => r.status === "in_progress").length;
 
-  // Chart datasets
   const bookingTrend = useMemo(() => {
-    const days = [];
-    const now = new Date();
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      days.push(d.toISOString().slice(0, 10));
-    }
-    return days.map((dateStr) => {
+    return buildLast30Days().map((dateStr) => {
       const count = requests.filter((r) => r.created_at.slice(0, 10) === dateStr).length;
       return { date: dateStr, count };
     });
   }, [requests]);
 
   const spendingTrend = useMemo(() => {
-    const days = [];
-    const now = new Date();
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      days.push(d.toISOString().slice(0, 10));
-    }
-    return days.map((dateStr) => {
+    return buildLast30Days().map((dateStr) => {
       const total_cost = invoices
         .filter((inv) => inv.issued_at?.slice(0, 10) === dateStr)
         .reduce((sum, inv) => sum + (inv.total_amount || 0), 0);
@@ -189,7 +248,13 @@ export function UserDashboardPage() {
   }, [invoices]);
 
   const requestStatuses = useMemo(() => {
-    const statuses: RideRequestStatus[] = ["pending", "confirmed", "in_progress", "completed", "cancelled"];
+    const statuses: RideRequestStatus[] = [
+      "pending",
+      "confirmed",
+      "in_progress",
+      "completed",
+      "cancelled",
+    ];
     const labels: Record<RideRequestStatus, string> = {
       pending: locale === "am" ? "በመጠባበቅ ላይ" : "Pending",
       confirmed: locale === "am" ? "የተረጋገጠ" : "Confirmed",
@@ -212,10 +277,13 @@ export function UserDashboardPage() {
   const tripTypes = useMemo(() => {
     const counts: Record<string, number> = {};
     requests.forEach((r) => {
-      const name = r.vehicle_class?.name || r.vehicle_type?.name || (locale === "am" ? "መደበኛ" : "Standard");
+      const name =
+        r.vehicle_class?.name ||
+        r.vehicle_type?.name ||
+        (locale === "am" ? "መደበኛ" : "Standard");
       counts[name] = (counts[name] || 0) + 1;
     });
-    const colors = ["#1C3A34", "#2F5E54", "#4C8578", "#6BA08F", "#8FB5A8", "#C2D9D2", "#64748b"];
+    const colors = ["#1C3A34", "#2F5E54", "#4C8578", "#6BA08F", "#8FB5A8", "#C9B87A", "#64748b"];
     return Object.keys(counts).map((name, index) => ({
       key: name,
       label: name,
@@ -224,7 +292,7 @@ export function UserDashboardPage() {
     }));
   }, [requests, locale]);
 
-  const requestStatusLegend = useMemo(
+  const requestStatusLegend: DashboardChartLegendItem[] = useMemo(
     () =>
       requestStatuses
         .filter((item) => item.count > 0)
@@ -232,16 +300,18 @@ export function UserDashboardPage() {
           key: item.status,
           label: item.label,
           color: item.color,
+          value: item.count,
         })),
     [requestStatuses],
   );
 
-  const tripTypesLegend = useMemo(
+  const tripTypesLegend: DashboardChartLegendItem[] = useMemo(
     () =>
       tripTypes.map((item) => ({
         key: item.key,
         label: item.label,
         color: item.color,
+        value: item.count,
       })),
     [tripTypes],
   );
@@ -288,26 +358,33 @@ export function UserDashboardPage() {
         />
       </div>
 
-      <div className="space-y-10">
-        <section className="space-y-4">
-          <div className="grid gap-4 lg:grid-cols-12">
+      <div className="space-y-12">
+        <ChartSection
+          icon={Activity}
+          eyebrow={charts.activityEyebrow}
+          title={charts.activityTitle}
+          description={charts.activityDescription}
+          periodLabel={charts.periodLabel}
+        >
+          <div className="grid gap-5 xl:grid-cols-12">
             <DashboardChartCard
-              title={copy.comingSoonCharts.bookingsTrendTitle}
-              description={copy.comingSoonCharts.bookingsTrendDescription}
+              icon={TrendingUp}
+              title={charts.bookingsTrendTitle}
+              description={charts.bookingsTrendDescription}
               highlight={totalBookings}
-              highlightLabel={locale === "am" ? "አጠቃላይ" : "Total"}
+              highlightLabel={charts.totalLabel}
               loading={loading}
               empty={!loading && totalBookings === 0}
-              emptyLabel={locale === "am" ? "የጉዞ መረጃ የለም" : "No bookings found"}
-              className="lg:col-span-8"
+              emptyLabel={charts.emptyBookings}
+              className="xl:col-span-8"
             >
-              {!loading ? (
+              {!loading && totalBookings > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={bookingTrend} margin={dashboardChartMargins}>
                     <defs>
                       <linearGradient id={rideTrendGradientId} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={dashboardChartTheme.brand} stopOpacity={0.32} />
-                        <stop offset="100%" stopColor={dashboardChartTheme.brand} stopOpacity={0.02} />
+                        <stop offset="0%" stopColor={dashboardChartTheme.brand} stopOpacity={0.28} />
+                        <stop offset="100%" stopColor={dashboardChartTheme.brand} stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid {...dashboardChartGrid} />
@@ -326,10 +403,15 @@ export function UserDashboardPage() {
                       axisLine={false}
                       tick={dashboardChartAxisTick}
                       width={32}
+                      domain={[0, (dataMax: number) => Math.max(dataMax, 1)]}
                     />
                     <Tooltip
                       wrapperStyle={dashboardChartTooltipWrapperStyle}
-                      cursor={{ stroke: dashboardChartTheme.accent, strokeWidth: 1, strokeDasharray: "4 4" }}
+                      cursor={{
+                        stroke: dashboardChartTheme.gold,
+                        strokeWidth: 1,
+                        strokeDasharray: "4 4",
+                      }}
                       content={
                         <DashboardChartTooltip
                           labelFormatter={(value) => formatShortDate(value, locale)}
@@ -340,11 +422,16 @@ export function UserDashboardPage() {
                     <Area
                       type="monotone"
                       dataKey="count"
-                      name={locale === "am" ? "ጥያቄዎች" : "Requests"}
+                      name={charts.requestsLabel}
                       stroke={dashboardChartTheme.brand}
                       fill={`url(#${rideTrendGradientId})`}
                       strokeWidth={2.5}
-                      activeDot={{ r: 5, fill: dashboardChartTheme.brand, stroke: "#fff", strokeWidth: 2 }}
+                      activeDot={{
+                        r: 5,
+                        fill: dashboardChartTheme.brand,
+                        stroke: "#fff",
+                        strokeWidth: 2,
+                      }}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -352,68 +439,79 @@ export function UserDashboardPage() {
             </DashboardChartCard>
 
             <DashboardChartCard
-              title={copy.comingSoonCharts.requestStatusTitle}
-              description={copy.comingSoonCharts.requestStatusDescription}
+              icon={ClipboardList}
+              title={charts.requestStatusTitle}
+              description={charts.requestStatusDescription}
               highlight={totalBookings}
-              highlightLabel={locale === "am" ? "አጠቃላይ" : "Total"}
+              highlightLabel={charts.totalLabel}
               loading={loading}
               empty={!loading && totalBookings === 0}
-              emptyLabel={locale === "am" ? "የጉዞ መረጃ የለም" : "No bookings found"}
-              className="lg:col-span-4"
-              footer={!loading && requestStatusLegend.length > 0 ? <DashboardChartLegend items={requestStatusLegend} /> : undefined}
+              emptyLabel={charts.emptyBookings}
+              className="xl:col-span-4"
+              footer={
+                !loading && requestStatusLegend.length > 0 ? (
+                  <DashboardChartLegend items={requestStatusLegend} variant="rows" />
+                ) : undefined
+              }
             >
-              {!loading ? (
+              {!loading && totalBookings > 0 ? (
                 <DashboardDonutChart
                   slices={requestStatuses}
                   total={totalBookings}
-                  centerLabel={locale === "am" ? "ጥያቄዎች" : "Requests"}
+                  centerLabel={charts.requestsLabel}
                 />
               ) : null}
             </DashboardChartCard>
           </div>
-        </section>
+        </ChartSection>
 
-        <section className="space-y-4">
-          <div className="grid gap-4 lg:grid-cols-12">
+        <ChartSection
+          icon={Wallet}
+          eyebrow={charts.billingEyebrow}
+          title={charts.billingTitle}
+          description={charts.billingDescription}
+          periodLabel={charts.periodLabel}
+        >
+          <div className="grid gap-5 xl:grid-cols-12">
             <DashboardChartCard
-              title={copy.comingSoonCharts.tripTypesTitle}
-              description={copy.comingSoonCharts.tripTypesDescription}
+              icon={Car}
+              title={charts.tripTypesTitle}
+              description={charts.tripTypesDescription}
               highlight={totalBookings}
-              highlightLabel={locale === "am" ? "አጠቃላይ" : "Total"}
+              highlightLabel={charts.totalLabel}
               loading={loading}
               empty={!loading && totalBookings === 0}
-              emptyLabel={locale === "am" ? "የጉዞ መረጃ የለም" : "No bookings found"}
-              className="lg:col-span-4"
-              footer={!loading && tripTypesLegend.length > 0 ? <DashboardChartLegend items={tripTypesLegend} /> : undefined}
+              emptyLabel={charts.emptyBookings}
+              className="xl:col-span-4"
+              footer={
+                !loading && tripTypesLegend.length > 0 ? (
+                  <DashboardChartLegend items={tripTypesLegend} variant="rows" />
+                ) : undefined
+              }
             >
-              {!loading ? (
+              {!loading && totalBookings > 0 ? (
                 <DashboardDonutChart
                   slices={tripTypes}
                   total={totalBookings}
-                  centerLabel={locale === "am" ? "ጉዞዎች" : "Trips"}
+                  centerLabel={charts.tripsLabel}
                 />
               ) : null}
             </DashboardChartCard>
 
             <DashboardChartCard
-              title={copy.comingSoonCharts.spendingTrendTitle}
-              description={copy.comingSoonCharts.spendingTrendDescription}
-              highlight={`${formatCurrency(totalSpent, locale)} ETB`}
-              highlightLabel={locale === "am" ? "አጠቃላይ ወጪ" : "Total Spent"}
+              icon={Wallet}
+              title={charts.spendingTrendTitle}
+              description={charts.spendingTrendDescription}
+              highlight={formatMoney(totalSpent, locale)}
+              highlightLabel={charts.spentLabel}
               loading={loading}
               empty={!loading && totalSpent === 0}
-              emptyLabel={locale === "am" ? "የክፍያ መረጃ የለም" : "No spending recorded"}
-              className="lg:col-span-8"
+              emptyLabel={charts.emptySpending}
+              className="xl:col-span-8"
             >
-              {!loading ? (
+              {!loading && totalSpent > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={spendingTrend} margin={dashboardChartMargins} barCategoryGap="28%">
-                    <defs>
-                      <linearGradient id={spendingBarGradientId} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={dashboardChartTheme.brandMid} stopOpacity={0.95} />
-                        <stop offset="100%" stopColor={dashboardChartTheme.brand} stopOpacity={0.55} />
-                      </linearGradient>
-                    </defs>
+                  <BarChart data={spendingTrend} margin={dashboardChartMargins} barCategoryGap="18%">
                     <CartesianGrid {...dashboardChartGrid} />
                     <XAxis
                       dataKey="date"
@@ -428,8 +526,10 @@ export function UserDashboardPage() {
                       tickLine={false}
                       axisLine={false}
                       tick={dashboardChartAxisTick}
-                      width={52}
-                      tickFormatter={(value) => `${formatCurrency(Number(value), locale)}`}
+                      width={56}
+                      tickFormatter={(value) => formatCurrency(Number(value), locale)}
+                      allowDecimals={false}
+                      domain={[0, (dataMax: number) => Math.max(dataMax, 1)]}
                     />
                     <Tooltip
                       wrapperStyle={dashboardChartTooltipWrapperStyle}
@@ -437,23 +537,24 @@ export function UserDashboardPage() {
                       content={
                         <DashboardChartTooltip
                           labelFormatter={(value) => formatShortDate(value, locale)}
-                          valueFormatter={(value) => `${formatCurrency(Number(value), locale)} ETB`}
+                          valueFormatter={(value) => formatMoney(Number(value), locale)}
                         />
                       }
                     />
                     <Bar
                       dataKey="total_cost"
-                      name={locale === "am" ? "ወጪ" : "Cost"}
-                      fill={`url(#${spendingBarGradientId})`}
+                      name={charts.costLabel}
+                      fill={dashboardChartTheme.brand}
                       radius={[6, 6, 0, 0]}
                       maxBarSize={36}
+                      minPointSize={4}
                     />
                   </BarChart>
                 </ResponsiveContainer>
               ) : null}
             </DashboardChartCard>
           </div>
-        </section>
+        </ChartSection>
       </div>
     </div>
   );

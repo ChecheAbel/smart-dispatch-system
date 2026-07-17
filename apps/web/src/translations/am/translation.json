@@ -493,6 +493,14 @@
     "comingSoonCharts": {
       "sectionTitle": "የእንቅስቃሴ ግንዛቤ",
       "sectionDescription": "ለየቦታ ማስያዝ ታሪክዎ የግራፍ እና አዝማሚያዎች እዚህ ይታያሉ።",
+      "activityEyebrow": "እንቅስቃሴ",
+      "activityTitle": "የቦታ ማስያዝ እንቅስቃሴ",
+      "activityDescription": "ባለፉት 30 ቀናት የጥያቄ መጠንዎ እና ሁኔታ",
+      "billingEyebrow": "ክፍያ",
+      "billingTitle": "የጉዞ አይነቶች እና ወጪ",
+      "billingDescription": "የተሽከርካሪ ምርጫዎች እና የደረሰኝ ጠቅላላ በጊዜ",
+      "periodLabel": "ባለፉት 30 ቀናት",
+      "totalLabel": "ጠቅላላ",
       "bookingsTrendTitle": "የቦታ ማስያዝ አዝማሚያ",
       "bookingsTrendDescription": "ባለፉት 30 ቀናት የቦታ ማስያዝ መጠንዎ",
       "spendingTrendTitle": "የወጪ አዝማሚያ",
@@ -500,7 +508,13 @@
       "tripTypesTitle": "የጉዞ አይነቶች",
       "tripTypesDescription": "በጣም ብዙ የሚጠየቁ የተሽከርካሪ ክፍሎች ብድር",
       "requestStatusTitle": "የጥያቄ ሁኔታ",
-      "requestStatusDescription": "በመጠባበቅ ላይ፣ የተረጋገጡ እና የተጠናቀቁ ጥያቄዎች"
+      "requestStatusDescription": "በመጠባበቅ ላይ፣ የተረጋገጡ እና የተጠናቀቁ ጥያቄዎች",
+      "requestsLabel": "ጥያቄዎች",
+      "tripsLabel": "ጉዞዎች",
+      "spentLabel": "ጠቅላላ ወጪ",
+      "costLabel": "ወጪ",
+      "emptyBookings": "የጉዞ መረጃ የለም",
+      "emptySpending": "የክፍያ መረጃ የለም"
     }
   },
   "customerRequests": {
