@@ -1,5 +1,6 @@
 {
   "common": {
+    "selectLanguage": "Select language",
     "deleteModal": {
       "eyebrow": "Confirm deletion",
       "title": "Delete {name}?",
@@ -58,6 +59,116 @@
       "dashboard": "Dashboard",
       "profile": "Profile",
       "portal": "Customer Portal"
+    }
+  },
+  "adminAuth": {
+    "common": {
+      "selectLanguage": "Select language",
+      "backToHome": "Back to home",
+      "backToSignIn": "Back to sign in",
+      "email": "Email",
+      "mobile": "Mobile",
+      "password": "Password",
+      "emailAddress": "Email Address",
+      "mobileNumber": "Mobile Number",
+      "administratorEmail": "Administrator Email",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "tryAgain": "Please try again.",
+      "copyright": "Ethiopian Investment Holdings",
+      "mobilePlaceholder": "912345678 or 712345678"
+    },
+    "signIn": {
+      "mobileTitle": "Administrator Sign In",
+      "desktopEyebrow": "— Administrator Portal —",
+      "desktopTitlePrefix": "Smart Dispatch",
+      "desktopTitleHighlight": "Control Center",
+      "desktopDescription": "Secure access for platform administrators to manage bookings, dispatch, fleet operations, and billing.",
+      "formEyebrow": "— Sign In —",
+      "formTitle": "Administrator Access",
+      "formDescription": "Enter your credentials to access the Smart Dispatch admin console.",
+      "signInMethod": "Sign in method",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "submit": "Sign In",
+      "submitting": "Signing in…",
+      "checkingSession": "Checking your session…",
+      "emailPlaceholder": "admin@company.com",
+      "errors": {
+        "accessDeniedTitle": "Access denied",
+        "accessDeniedDescription": "This account does not have administrator access.",
+        "signInFailedTitle": "Could not sign in",
+        "signInFailedDescription": "Sign in failed. Please try again."
+      }
+    },
+    "forgotPassword": {
+      "mobileTitle": "Password Reset",
+      "desktopEyebrow": "— Account Recovery —",
+      "desktopTitlePrefix": "Reset via",
+      "desktopTitleHighlight": "Email or SMS",
+      "desktopDescriptions": {
+        "emailRequest": "Enter your administrator email and we'll send a secure link to reset your password.",
+        "mobileRequest": "Enter your mobile number and we'll send a verification code by SMS.",
+        "verifyOtp": "Enter the 6-digit verification code sent to your phone.",
+        "setPassword": "Choose a new password for your administrator account."
+      },
+      "desktopSubtitles": {
+        "emailRequest": "We'll email you a link to create a new password.",
+        "mobileRequest": "We'll text you a verification code to reset your password.",
+        "verifyOtp": "Check your SMS messages for the verification code.",
+        "setPassword": "Your code was verified. Create a strong new password."
+      },
+      "formEyebrow": "— Forgot Password —",
+      "formTitles": {
+        "requestReset": "Request Reset",
+        "verifyCode": "Verify Code",
+        "setPassword": "Set New Password"
+      },
+      "resetMethod": "Reset method",
+      "sendResetLink": "Send Reset Link",
+      "sendVerificationCode": "Send Verification Code",
+      "sendingResetLink": "Sending reset link…",
+      "sendingCode": "Sending code…",
+      "emailSentTitle": "Check your email",
+      "emailSentDescription": "If an administrator account exists for {email}, you'll receive a password reset link shortly. The link expires in 1 hour.",
+      "emailSentHint": "Didn't receive it? Check your spam folder or try again.",
+      "sendAnotherLink": "Send another link",
+      "verificationSuccess": "Verification successful. Set your new password below.",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "confirmPasswordPlaceholder": "Re-enter your password",
+      "resetPassword": "Reset Password",
+      "updatingPassword": "Updating password…",
+      "enterCodeSentTo": "Enter the code sent to {mobile}",
+      "expiresIn": "Expires in",
+      "codeExpired": "Code expired",
+      "verificationCode": "Verification Code",
+      "otpExpiredHint": "Request a new code once the resend timer finishes, or use a different number.",
+      "verifyCode": "Verify Code",
+      "verifyingCode": "Verifying code…",
+      "resendCode": "Resend code",
+      "resendIn": "Resend in {time}",
+      "sending": "Sending…",
+      "useDifferentNumber": "Use a different number",
+      "errors": {
+        "invalidMobileTitle": "Invalid mobile number",
+        "invalidMobileDescription": "Enter a valid 9-digit mobile number starting with 9 or 7.",
+        "sendLinkFailedTitle": "Could not send reset link",
+        "sendCodeFailedTitle": "Could not send verification code",
+        "incompleteCodeTitle": "Incomplete code",
+        "incompleteCodeDescription": "Enter the 6-digit verification code.",
+        "codeExpiredTitle": "Code expired",
+        "codeExpiredDescription": "This verification code has expired. Request a new code.",
+        "verifyFailedTitle": "Could not verify code",
+        "verifyFailedDescription": "Invalid verification code.",
+        "passwordTooShortTitle": "Password too short",
+        "passwordTooShortDescription": "Password must be at least 8 characters.",
+        "passwordMismatchTitle": "Passwords do not match",
+        "passwordMismatchDescription": "Make sure both password fields match.",
+        "resetFailedTitle": "Could not reset password",
+        "resendFailedTitle": "Could not resend code"
+      }
     }
   },
   "customerDashboard": {
@@ -1476,9 +1587,18 @@
       "goToDashboard": "Go to dashboard"
     },
     "providers": [
-      { "value": "smtp", "label": "SMTP" },
-      { "value": "sendgrid", "label": "SendGrid" },
-      { "value": "mailgun", "label": "Mailgun" }
+      {
+        "value": "smtp",
+        "label": "SMTP"
+      },
+      {
+        "value": "sendgrid",
+        "label": "SendGrid"
+      },
+      {
+        "value": "mailgun",
+        "label": "Mailgun"
+      }
     ],
     "providerDescriptions": {
       "smtp": "Deliver email through a standard SMTP server.",
@@ -2927,20 +3047,20 @@
         "4": "Bus",
         "5": "Motorcycle"
       },
-    "sections": {
-      "plate": "Plate registration",
+      "sections": {
+        "plate": "Plate registration",
         "plateDescription": "Ethiopian license plate format: region, category code, and serial number.",
         "platePreviewEmpty": "AA-1-31209",
         "classification": "Classification",
         "classificationDescription": "Vehicle category, service class, and operational status.",
         "assignment": "Default driver",
         "assignmentDescription": "Optional during registration. Required before this vehicle can be used in ride dispatch.",
-      "details": "Vehicle details",
-      "detailsDescription": "Identification, manufacturer information, optional fleet notes, and vehicle images."
-    },
-    "vehicleImages": "Vehicle photos",
-    "vehicleImagesEmpty": "No photos uploaded yet.",
-    "vehicleType": "Vehicle type",
+        "details": "Vehicle details",
+        "detailsDescription": "Identification, manufacturer information, optional fleet notes, and vehicle images."
+      },
+      "vehicleImages": "Vehicle photos",
+      "vehicleImagesEmpty": "No photos uploaded yet.",
+      "vehicleType": "Vehicle type",
       "vehicleTypePlaceholder": "Select type",
       "vehicleClass": "Vehicle class",
       "vehicleClassPlaceholder": "Select class",
@@ -2957,12 +3077,12 @@
       "year": "Year",
       "yearPlaceholder": "2024",
       "status": "Status",
-  "notes": "Notes",
-  "notesPlaceholder": "Optional notes",
-  "images": "Vehicle images",
-  "imagesHint": "Upload one or more JPG, PNG, or WEBP images.",
-  "imagesSelected": "{count} image(s) selected",
-  "optional": "(optional)",
+      "notes": "Notes",
+      "notesPlaceholder": "Optional notes",
+      "images": "Vehicle images",
+      "imagesHint": "Upload one or more JPG, PNG, or WEBP images.",
+      "imagesSelected": "{count} image(s) selected",
+      "optional": "(optional)",
       "cancel": "Cancel",
       "create": "Create vehicle",
       "creating": "Creating...",

@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import {
+  DEFAULT_LOCALE,
   getLocaleLabel,
   getStoredLocale,
   normalizeLocale,
@@ -18,7 +19,12 @@ type LocaleContextValue = {
 const LocaleContext = createContext<LocaleContextValue | null>(null);
 
 export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<SupportedLocale>(() => getStoredLocale());
+  const [locale, setLocaleState] = useState<SupportedLocale>(DEFAULT_LOCALE);
+
+  useEffect(() => {
+    const storedLocale = getStoredLocale();
+    setLocaleState((current) => (current === storedLocale ? current : storedLocale));
+  }, []);
 
   useEffect(() => {
     document.documentElement.lang = locale;

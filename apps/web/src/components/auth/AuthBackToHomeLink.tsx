@@ -1,6 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { useLocale } from "@/components/shared/providers/locale-context";
 import { USER_HOME_PATH } from "@/lib/auth-paths";
+import { getAdminAuthMessages } from "@/translations";
 import { cn } from "@/lib/utils";
 
 type AuthBackToHomeLinkProps = {
@@ -8,6 +12,9 @@ type AuthBackToHomeLinkProps = {
 };
 
 export function AuthBackToHomeLink({ className }: AuthBackToHomeLinkProps) {
+  const { locale } = useLocale();
+  const copy = getAdminAuthMessages(locale);
+
   return (
     <Link
       href={USER_HOME_PATH}
@@ -17,7 +24,7 @@ export function AuthBackToHomeLink({ className }: AuthBackToHomeLinkProps) {
       )}
     >
       <ArrowLeft className="h-4 w-4" />
-      Back to home
+      {copy.common.backToHome}
     </Link>
   );
 }

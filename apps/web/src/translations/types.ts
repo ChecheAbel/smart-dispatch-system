@@ -35,3 +35,4 @@ export type CustomerRequestHistoryMessages = Translations["customerRequestHistor
 export type CustomerContractsMessages = Translations["customerContracts"];
 export type CustomerInvoicesMessages = Translations["customerInvoices"];
 export type AdminProfileMessages = Translations["adminProfile"];
+export type AdminAuthMessages = Translations["adminAuth"];

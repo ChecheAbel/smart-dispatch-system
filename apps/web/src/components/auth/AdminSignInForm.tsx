@@ -11,17 +11,21 @@ import { ADMIN_DASHBOARD_PATH, ADMIN_FORGOT_PASSWORD_PATH } from "@/lib/auth-pat
 import { clearAuthSession, saveAuthSession, getAdminSignInPrefs, saveAdminSignInPrefs, clearAdminSignInPrefs } from "@/lib/auth-session";
 import {
   ETHIOPIA_MOBILE_COUNTRY_CODE,
-  ETHIOPIAN_MOBILE_PLACEHOLDER,
   formatEthiopianMobileNumber,
   parseStoredEthiopianMobile,
   sanitizeEthiopianMobileInput,
 } from "@/lib/ethiopian-mobile";
 import { showErrorToast } from "@/lib/toast";
+import { useLocale } from "@/components/shared/providers/locale-context";
+import { getAdminAuthMessages } from "@/translations";
 
 type LoginMethod = "email" | "mobile";
 
 export default function AdminSignInForm() {
   const router = useRouter();
+  const { locale } = useLocale();
+  const copy = getAdminAuthMessages(locale).signIn;
+  const common = getAdminAuthMessages(locale).common;
   const [loginMethod, setLoginMethod] = useState<LoginMethod>("email");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -91,8 +95,8 @@ export default function AdminSignInForm() {
       if (!session.user.roles.includes("admin")) {
         clearAuthSession();
         showErrorToast({
-          title: "Access denied",
-          description: "This account does not have administrator access.",
+          title: copy.errors.accessDeniedTitle,
+          description: copy.errors.accessDeniedDescription,
         });
         return;
       }
@@ -112,9 +116,9 @@ export default function AdminSignInForm() {
       router.push(ADMIN_DASHBOARD_PATH);
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Sign in failed. Please try again.";
+        err instanceof Error ? err.message : copy.errors.signInFailedDescription;
       showErrorToast({
-        title: "Could not sign in",
+        title: copy.errors.signInFailedTitle,
         description: message,
       });
     } finally {
@@ -127,7 +131,7 @@ export default function AdminSignInForm() {
       <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-xl">
         <div className="flex items-center gap-3 text-sm text-slate-500">
           <Loader2 className="h-5 w-5 animate-spin text-[#1C3A34]" />
-          Checking your session…
+          {copy.checkingSession}
         </div>
       </div>
     );
@@ -138,11 +142,9 @@ export default function AdminSignInForm() {
   return (
     <>
       <div className="hidden lg:block mb-8">
-        <p className="text-[#C9B87A] font-bold text-xs tracking-[0.25em] uppercase mb-3">— Sign In —</p>
-        <h2 className="text-3xl font-extrabold text-[#1C3A34] tracking-tight">Administrator Access</h2>
-        <p className="mt-2 text-slate-500 text-sm leading-relaxed">
-          Enter your credentials to access the Smart Dispatch admin console.
-        </p>
+        <p className="text-[#C9B87A] font-bold text-xs tracking-[0.25em] uppercase mb-3">{copy.formEyebrow}</p>
+        <h2 className="text-3xl font-extrabold text-[#1C3A34] tracking-tight">{copy.formTitle}</h2>
+        <p className="mt-2 text-slate-500 text-sm leading-relaxed">{copy.formDescription}</p>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 sm:p-8">
@@ -150,7 +152,7 @@ export default function AdminSignInForm() {
           <div
             className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1"
             role="tablist"
-            aria-label="Sign in method"
+            aria-label={copy.signInMethod}
           >
             <button
               type="button"
@@ -165,7 +167,7 @@ export default function AdminSignInForm() {
               }`}
             >
               <Mail className="h-4 w-4" />
-              Email
+              {common.email}
             </button>
             <button
               type="button"
@@ -180,7 +182,7 @@ export default function AdminSignInForm() {
               }`}
             >
               <Phone className="h-4 w-4" />
-              Mobile
+              {common.mobile}
             </button>
           </div>
 
@@ -189,7 +191,7 @@ export default function AdminSignInForm() {
               htmlFor="username"
               className="block text-[10px] font-bold text-slate-400 tracking-[0.15em] uppercase mb-2"
             >
-              {isEmailLogin ? "Email Address" : "Mobile Number"}
+              {isEmailLogin ? common.emailAddress : common.mobileNumber}
             </label>
             {isEmailLogin ? (
               <div className="relative">
@@ -204,7 +206,7 @@ export default function AdminSignInForm() {
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={isSubmitting}
                   className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all disabled:opacity-70"
-                  placeholder="admin@company.com"
+                  placeholder={copy.emailPlaceholder || undefined}
                 />
               </div>
             ) : (
@@ -227,7 +229,7 @@ export default function AdminSignInForm() {
                     onChange={(e) => setUsername(sanitizeEthiopianMobileInput(e.target.value))}
                     disabled={isSubmitting}
                     className="w-full border-0 bg-transparent py-3.5 pl-10 pr-4 text-sm text-slate-800 outline-none disabled:opacity-70"
-                    placeholder={ETHIOPIAN_MOBILE_PLACEHOLDER}
+                    placeholder={common.mobilePlaceholder}
                   />
                 </div>
               </div>
@@ -239,7 +241,7 @@ export default function AdminSignInForm() {
               htmlFor="password"
               className="block text-[10px] font-bold text-slate-400 tracking-[0.15em] uppercase mb-2"
             >
-              Password
+              {common.password}
             </label>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -258,7 +260,7 @@ export default function AdminSignInForm() {
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-[#1C3A34] transition-colors"
-                aria-label={showPassword ? "Hide password" : "Show password"}
+                aria-label={showPassword ? common.hidePassword : common.showPassword}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -281,14 +283,14 @@ export default function AdminSignInForm() {
                 className="data-checked:border-[#1C3A34] data-checked:bg-[#1C3A34] data-checked:text-white"
               />
               <Label htmlFor="remember" className="text-sm text-slate-500 font-normal cursor-pointer">
-                Remember me
+                {copy.rememberMe}
               </Label>
             </div>
             <Link
               href={ADMIN_FORGOT_PASSWORD_PATH}
               className="text-sm font-semibold text-[#1C3A34] hover:text-[#C9B87A] transition-colors shrink-0"
             >
-              Forgot password?
+              {copy.forgotPassword}
             </Link>
           </div>
 
@@ -300,11 +302,11 @@ export default function AdminSignInForm() {
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Signing in…
-              </>
-            ) : (
-              "Sign In"
-            )}
+                  {copy.submitting}
+                </>
+              ) : (
+                copy.submit
+              )}
           </button>
         </form>
       </div>

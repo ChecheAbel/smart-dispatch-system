@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import BrandLogo from "@/components/landing/BrandLogo";
+import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
 import { motion, AnimatePresence } from "framer-motion";
 
 const NAV_LINKS = [
@@ -120,7 +121,8 @@ export default function Navbar() {
           </nav>
 
           {/* Desktop actions */}
-          <div className="hidden lg:flex items-center gap-4 shrink-0 z-10">
+          <div className="hidden lg:flex items-center gap-3 shrink-0 z-10">
+            <LanguageSwitcher variant="dark" />
             <Link
               href="/book"
               className="inline-flex items-center gap-2 bg-[#C9B87A] hover:bg-[#E3D18F] text-[#1C3A34] font-bold text-[13px] px-6 py-2.5 rounded-full tracking-wide transition-all duration-300 hover:shadow-[0_0_20px_-5px_rgba(201,184,122,0.5)] hover:-translate-y-0.5"
@@ -192,7 +194,15 @@ export default function Navbar() {
                 })}
               </nav>
 
-              <div className="px-4 pb-6 pt-2 space-y-2">
+              <div className="px-4 pb-6 pt-2 space-y-3">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.35 }}
+                  className="flex justify-center"
+                >
+                  <LanguageSwitcher variant="dark" />
+                </motion.div>
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
                   <Link
                     href="/book"

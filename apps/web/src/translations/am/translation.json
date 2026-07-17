@@ -1,5 +1,6 @@
 {
   "common": {
+    "selectLanguage": "ቋንቋ ይምረጡ",
     "deleteModal": {
       "eyebrow": "መሰረዝ አረጋግጥ",
       "title": "{name} ይሰረዝ?",
@@ -58,6 +59,116 @@
       "dashboard": "ዳሽቦርድ",
       "profile": "መገለጫ",
       "portal": "የደንበኛ መግቢያ"
+    }
+  },
+  "adminAuth": {
+    "common": {
+      "selectLanguage": "ቋንቋ ይምረጡ",
+      "backToHome": "ወደ መነሻ ተመለስ",
+      "backToSignIn": "ወደ መግቢያ ተመለስ",
+      "email": "ኢሜይል",
+      "mobile": "ሞባይል",
+      "password": "የይለፍ ቃል",
+      "emailAddress": "የኢሜይል አድራሻ",
+      "mobileNumber": "የሞባይል ቁጥር",
+      "administratorEmail": "የአስተዳዳሪ ኢሜይል",
+      "showPassword": "የይለፍ ቃል አሳይ",
+      "hidePassword": "የይለፍ ቃል ደብቅ",
+      "tryAgain": "እባክዎ እንደገና ይሞክሩ።",
+      "copyright": "ኢትዮጵያ ኢንቨስትመንት ሆልዲንግስ",
+      "mobilePlaceholder": "912345678 ወይም 712345678"
+    },
+    "signIn": {
+      "mobileTitle": "የአስተዳዳሪ መግቢያ",
+      "desktopEyebrow": "— የአስተዳዳሪ መግቢያ —",
+      "desktopTitlePrefix": "ስማርት ዲስፓች",
+      "desktopTitleHighlight": "የቁጥጥር ማዕከል",
+      "desktopDescription": "ቦታ ማስያዝ፣ መላኪያ፣ የተሽከርካሪ ክዋኔ እና ክፍያ ለመመራት ለድረ-ገጽ አስተዳዳሪዎች ደህንነቱ የተጠበቀ መዳረሻ።",
+      "formEyebrow": "— መግቢያ —",
+      "formTitle": "የአስተዳዳሪ መዳረሻ",
+      "formDescription": "የስማርት ዲስፓች አስተዳዳሪ ኮንሶል ለመድረስ የመግቢያ መረጃዎን ያስገቡ።",
+      "signInMethod": "የመግቢያ መንገድ",
+      "rememberMe": "አስታውሰኝ",
+      "forgotPassword": "የይለፍ ቃል ረሱ?",
+      "submit": "ግባ",
+      "submitting": "በመግባት ላይ…",
+      "checkingSession": "የእርስዎን ክፍለ-ጊዜ በመፈተሽ ላይ…",
+      "emailPlaceholder": "",
+      "errors": {
+        "accessDeniedTitle": "መዳረሻ ተከልክሏል",
+        "accessDeniedDescription": "ይህ መለያ የአስተዳዳሪ መዳረሻ የለውም።",
+        "signInFailedTitle": "መግባት አልተሳካም",
+        "signInFailedDescription": "መግባት አልተሳካም። እባክዎ እንደገና ይሞክሩ።"
+      }
+    },
+    "forgotPassword": {
+      "mobileTitle": "የይለፍ ቃል መልሶ ማስተካከል",
+      "desktopEyebrow": "— የመለያ መልሶ መገኘት —",
+      "desktopTitlePrefix": "በ",
+      "desktopTitleHighlight": "ኢሜይል ወይም ቁጥር መልዕክት",
+      "desktopDescriptions": {
+        "emailRequest": "የአስተዳዳሪ ኢሜይልዎን ያስገቡ እና የይለፍ ቃልዎን ለመቀየር ደህንነቱ የተጠበቀ ሊንክ እንልክልዎታለን።",
+        "mobileRequest": "የሞባይል ቁጥርዎን ያስገቡ እና በቁጥር መልዕክት የማረጋገጫ ኮድ እንልክልዎታለን።",
+        "verifyOtp": "ወደ ስልክዎ የተላከውን 6-አሃዝ የማረጋገጫ ኮድ ያስገቡ።",
+        "setPassword": "ለአስተዳዳሪ መለያዎ አዲስ የይለፍ ቃል ይምረጡ።"
+      },
+      "desktopSubtitles": {
+        "emailRequest": "አዲስ የይለፍ ቃል ለመፍጠር ሊንክ በኢሜይል እንልክልዎታለን።",
+        "mobileRequest": "የይለፍ ቃልዎን ለመቀየር የማረጋገጫ ኮድ በቁጥር መልዕክት እንልክልዎታለን።",
+        "verifyOtp": "የማረጋገጫ ኮዱን በቁጥር መልዕክቶችዎ ውስጥ ይፈልጉ።",
+        "setPassword": "ኮድዎ ተረጋግጧል። ጠንካራ አዲስ የይለፍ ቃል ይፍጠሩ።"
+      },
+      "formEyebrow": "— የይለፍ ቃል ረሱ —",
+      "formTitles": {
+        "requestReset": "የይለፍ ቃል መልሶ ማስተካከል",
+        "verifyCode": "ኮድ አረጋግጥ",
+        "setPassword": "አዲስ የይለፍ ቃል ያዘጋጁ"
+      },
+      "resetMethod": "የመልሶ ማስተካከል መንገድ",
+      "sendResetLink": "የይለፍ ቃል ለመቀየር ሊንክ ላክ",
+      "sendVerificationCode": "የማረጋገጫ ኮድ ላክ",
+      "sendingResetLink": "የይለፍ ቃል ለመቀየር ሊንክ በመላክ ላይ…",
+      "sendingCode": "ኮድ በመላክ ላይ…",
+      "emailSentTitle": "ኢሜይልዎን ይመልከቱ",
+      "emailSentDescription": "ለ {email} የአስተዳዳሪ መለያ ካለ፣ በቅርቡ የይለፍ ቃል ለመቀየር ሊንክ ይደርስዎታል። ሊንኩ በ1 ሰዓት ውስጥ ያበቃል።",
+      "emailSentHint": "አልደረሰም? የመጣያ ፎልደርዎን ይመልከቱ ወይም እንደገና ይሞክሩ።",
+      "sendAnotherLink": "ሌላ ሊንክ ላክ",
+      "verificationSuccess": "ማረጋገጫ ተሳክቷል። አዲስ የይለፍ ቃልዎን ከዚህ በታች ያዘጋጁ።",
+      "newPassword": "አዲስ የይለፍ ቃል",
+      "confirmPassword": "የይለፍ ቃል አረጋግጥ",
+      "passwordPlaceholder": "ቢያንስ 8 ቁምፊዎች",
+      "confirmPasswordPlaceholder": "የይለፍ ቃልዎን እንደገና ያስገቡ",
+      "resetPassword": "የይለፍ ቃል ቀይር",
+      "updatingPassword": "የይለፍ ቃል በመቀየር ላይ…",
+      "enterCodeSentTo": "ወደ {mobile} የተላከውን ኮድ ያስገቡ",
+      "expiresIn": "ይበቃል በ",
+      "codeExpired": "ኮድ ጊዜው አልፏል",
+      "verificationCode": "የማረጋገጫ ኮድ",
+      "otpExpiredHint": "የመላክ ጊዜ ሲያልቅ አዲስ ኮድ ይጠይቁ፣ ወይም ሌላ ቁጥር ይጠቀሙ።",
+      "verifyCode": "ኮድ አረጋግጥ",
+      "verifyingCode": "ኮድ በመረጋገጥ ላይ…",
+      "resendCode": "ኮድ እንደገና ላክ",
+      "resendIn": "እንደገና ላክ በ {time}",
+      "sending": "በመላክ ላይ…",
+      "useDifferentNumber": "ሌላ ቁጥር ተጠቀም",
+      "errors": {
+        "invalidMobileTitle": "ልክ ያልሆነ የሞባይል ቁጥር",
+        "invalidMobileDescription": "በ9 ወይም 7 የሚጀምር ትክክለኛ 9-አሃዝ የሞባይል ቁጥር ያስገቡ።",
+        "sendLinkFailedTitle": "የይለፍ ቃል ለመቀየር ሊንክ መላክ አልተሳካም",
+        "sendCodeFailedTitle": "የማረጋገጫ ኮድ መላክ አልተሳካም",
+        "incompleteCodeTitle": "ያልተሟላ ኮድ",
+        "incompleteCodeDescription": "6-አሃዝ የማረጋገጫ ኮድ ያስገቡ።",
+        "codeExpiredTitle": "ኮድ ጊዜው አልፏል",
+        "codeExpiredDescription": "ይህ የማረጋገጫ ኮድ ጊዜው አልፏል። አዲስ ኮድ ይጠይቁ።",
+        "verifyFailedTitle": "ኮድ ማረጋገጥ አልተሳካም",
+        "verifyFailedDescription": "ልክ ያልሆነ የማረጋገጫ ኮድ።",
+        "passwordTooShortTitle": "የይለፍ ቃል በጣም አጭር ነው",
+        "passwordTooShortDescription": "የይለፍ ቃል ቢያንስ 8 ቁምፊዎች መሆን አለበት።",
+        "passwordMismatchTitle": "የይለፍ ቃሎች አይዛመዱም",
+        "passwordMismatchDescription": "ሁለቱም የይለፍ ቃል መስኮች እንደሚዛመዱ ያረጋግጡ።",
+        "resetFailedTitle": "የይለፍ ቃል መቀየር አልተሳካም",
+        "resendFailedTitle": "ኮድ እንደገና መላክ አልተሳካም"
+      }
     }
   },
   "customerDashboard": {
@@ -1476,9 +1587,18 @@
       "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
     },
     "providers": [
-      { "value": "smtp", "label": "SMTP" },
-      { "value": "sendgrid", "label": "SendGrid" },
-      { "value": "mailgun", "label": "Mailgun" }
+      {
+        "value": "smtp",
+        "label": "SMTP"
+      },
+      {
+        "value": "sendgrid",
+        "label": "SendGrid"
+      },
+      {
+        "value": "mailgun",
+        "label": "Mailgun"
+      }
     ],
     "providerDescriptions": {
       "smtp": "ኢሜይል በመደበኛ SMTP አገልጋይ ይላኩ።",
@@ -2935,8 +3055,8 @@
         "classificationDescription": "የተሽከርካሪ አይነት፣ የአገልግሎት ክፍል እና የክወና ሁኔታ።",
         "assignment": "ነባሪ ሹፌር",
         "assignmentDescription": "በምዝገብ ጊዜ አማራጭ ነው። በጉዞ መላኪያ ላይ ከመጠቀም በፊት ያስፈልጋል።",
-      "details": "የተሽከርካሪ ዝርዝሮች",
-      "detailsDescription": "መለያ፣ የአምራች መረጃ፣ አማራጭ የመኪና ብዛት ማስታወሻዎች፣ እና የተሽከርካሪ ምስሎች።"
+        "details": "የተሽከርካሪ ዝርዝሮች",
+        "detailsDescription": "መለያ፣ የአምራች መረጃ፣ አማራጭ የመኪና ብዛት ማስታወሻዎች፣ እና የተሽከርካሪ ምስሎች።"
       },
       "vehicleImages": "የተሽከርካሪ ፎቶዎች",
       "vehicleImagesEmpty": "እስካሁን ፎቶ አልተጫነም።",
@@ -2957,12 +3077,12 @@
       "year": "ዓመት",
       "yearPlaceholder": "2024",
       "status": "ሁኔታ",
-    "notes": "ማስታወሻዎች",
-    "notesPlaceholder": "አማራጭ ማስታወሻዎች",
-    "images": "የተሽከርካሪ ምስሎች",
-    "imagesHint": "አንድ ወይም ከዚያ በላይ JPG፣ PNG ወይም WEBP ምስሎች ይስቀሉ።",
-    "imagesSelected": "{count} ምስል(ዎች) ተመርጠዋል",
-    "optional": "(አማራጭ)",
+      "notes": "ማስታወሻዎች",
+      "notesPlaceholder": "አማራጭ ማስታወሻዎች",
+      "images": "የተሽከርካሪ ምስሎች",
+      "imagesHint": "አንድ ወይም ከዚያ በላይ JPG፣ PNG ወይም WEBP ምስሎች ይስቀሉ።",
+      "imagesSelected": "{count} ምስል(ዎች) ተመርጠዋል",
+      "optional": "(አማራጭ)",
       "cancel": "ሰርዝ",
       "create": "ተሽከርካሪ ፍጠር",
       "creating": "በመፍጠር ላይ...",

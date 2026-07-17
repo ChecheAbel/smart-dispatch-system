@@ -13,6 +13,7 @@ type AuthShellProps = {
   headerActions?: ReactNode;
   contentClassName?: string;
   contentAlign?: "center" | "start";
+  footerCopyright?: string;
 };
 
 export default function AuthShell({
@@ -26,6 +27,7 @@ export default function AuthShell({
   headerActions,
   contentClassName = "max-w-md",
   contentAlign = "center",
+  footerCopyright = "Ethiopian Investment Holdings",
 }: AuthShellProps) {
   return (
     <div className="min-h-[100dvh] flex flex-col lg:flex-row">
@@ -50,7 +52,7 @@ export default function AuthShell({
         </div>
 
         <p className="relative z-10 text-white/25 text-xs">
-          &copy; {new Date().getFullYear()} Ethiopian Investment Holdings
+          &copy; {new Date().getFullYear()} {footerCopyright}
         </p>
       </div>
 

@@ -5,17 +5,19 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, Clock, Eye, EyeOff, Loader2, Lock, Mail, Phone, RotateCcw } from "lucide-react";
 import AuthShell from "@/components/auth/AuthShell";
+import { AuthLanguageSwitcher } from "@/components/auth/AuthLanguageSwitcher";
 import { formatCountdown, OtpCodeInput } from "@/components/auth/OtpCodeInput";
+import { useLocale } from "@/components/shared/providers/locale-context";
 import { requestPasswordReset, resetPassword, verifyPasswordResetOtp } from "@/lib/auth-api";
 import { ADMIN_SIGN_IN_PATH } from "@/lib/auth-paths";
 import {
   ETHIOPIA_MOBILE_COUNTRY_CODE,
-  ETHIOPIAN_MOBILE_PLACEHOLDER,
   formatEthiopianMobileNumber,
   isValidEthiopianMobileLocal,
   sanitizeEthiopianMobileInput,
 } from "@/lib/ethiopian-mobile";
 import { showErrorToast } from "@/lib/toast";
+import { formatMessage, getAdminAuthMessages } from "@/translations";
 import { cn } from "@/lib/utils";
 
 type ResetMethod = "email" | "mobile";
@@ -26,6 +28,10 @@ const OTP_RESEND_COOLDOWN_SECONDS = 60;
 
 export default function ForgotPasswordForm() {
   const router = useRouter();
+  const { locale } = useLocale();
+  const authCopy = getAdminAuthMessages(locale);
+  const copy = authCopy.forgotPassword;
+  const common = authCopy.common;
   const [resetMethod, setResetMethod] = useState<ResetMethod>("email");
   const [mobileStep, setMobileStep] = useState<MobileStep>("request");
   const [email, setEmail] = useState("");
@@ -90,8 +96,8 @@ export default function ForgotPasswordForm() {
 
     if (!isEmailReset && !isValidEthiopianMobileLocal(mobile)) {
       showErrorToast({
-        title: "Invalid mobile number",
-        description: "Enter a valid 9-digit mobile number starting with 9 or 7.",
+        title: copy.errors.invalidMobileTitle,
+        description: copy.errors.invalidMobileDescription,
       });
       return;
     }
@@ -111,8 +117,8 @@ export default function ForgotPasswordForm() {
       }
     } catch (err) {
       showErrorToast({
-        title: isEmailReset ? "Could not send reset link" : "Could not send verification code",
-        description: err instanceof Error ? err.message : "Please try again.",
+        title: isEmailReset ? copy.errors.sendLinkFailedTitle : copy.errors.sendCodeFailedTitle,
+        description: err instanceof Error ? err.message : common.tryAgain,
       });
     } finally {
       setIsSubmitting(false);
@@ -124,16 +130,16 @@ export default function ForgotPasswordForm() {
 
     if (!/^\d{6}$/.test(otp)) {
       showErrorToast({
-        title: "Incomplete code",
-        description: "Enter the 6-digit verification code.",
+        title: copy.errors.incompleteCodeTitle,
+        description: copy.errors.incompleteCodeDescription,
       });
       return;
     }
 
     if (otpExpiresIn <= 0) {
       showErrorToast({
-        title: "Code expired",
-        description: "This verification code has expired. Request a new code.",
+        title: copy.errors.codeExpiredTitle,
+        description: copy.errors.codeExpiredDescription,
       });
       return;
     }
@@ -146,8 +152,8 @@ export default function ForgotPasswordForm() {
       setMobileStep("set_password");
     } catch (err) {
       showErrorToast({
-        title: "Could not verify code",
-        description: err instanceof Error ? err.message : "Invalid verification code.",
+        title: copy.errors.verifyFailedTitle,
+        description: err instanceof Error ? err.message : copy.errors.verifyFailedDescription,
       });
     } finally {
       setIsSubmitting(false);
@@ -159,16 +165,16 @@ export default function ForgotPasswordForm() {
 
     if (password.length < 8) {
       showErrorToast({
-        title: "Password too short",
-        description: "Password must be at least 8 characters.",
+        title: copy.errors.passwordTooShortTitle,
+        description: copy.errors.passwordTooShortDescription,
       });
       return;
     }
 
     if (password !== confirmPassword) {
       showErrorToast({
-        title: "Passwords do not match",
-        description: "Make sure both password fields match.",
+        title: copy.errors.passwordMismatchTitle,
+        description: copy.errors.passwordMismatchDescription,
       });
       return;
     }
@@ -180,8 +186,8 @@ export default function ForgotPasswordForm() {
       router.push(ADMIN_SIGN_IN_PATH);
     } catch (err) {
       showErrorToast({
-        title: "Could not reset password",
-        description: err instanceof Error ? err.message : "Please try again.",
+        title: copy.errors.resetFailedTitle,
+        description: err instanceof Error ? err.message : common.tryAgain,
       });
     } finally {
       setIsSubmitting(false);
@@ -203,8 +209,8 @@ export default function ForgotPasswordForm() {
       startOtpTimers();
     } catch (err) {
       showErrorToast({
-        title: "Could not resend code",
-        description: err instanceof Error ? err.message : "Please try again.",
+        title: copy.errors.resendFailedTitle,
+        description: err instanceof Error ? err.message : common.tryAgain,
       });
     } finally {
       setIsResending(false);
@@ -231,43 +237,47 @@ export default function ForgotPasswordForm() {
   const otpExpired = showMobileVerifyOtp && otpExpiresIn <= 0;
 
   const desktopTitle = showMobileSetPassword
-    ? "Set New Password"
+    ? copy.formTitles.setPassword
     : showMobileVerifyOtp
-      ? "Verify Code"
-      : "Request Reset";
+      ? copy.formTitles.verifyCode
+      : copy.formTitles.requestReset;
 
   const desktopDescription = isEmailReset
-    ? "Enter your administrator email and we'll send a secure link to reset your password."
+    ? copy.desktopDescriptions.emailRequest
     : showMobileSetPassword
-      ? "Choose a new password for your administrator account."
+      ? copy.desktopDescriptions.setPassword
       : showMobileVerifyOtp
-        ? "Enter the 6-digit verification code sent to your phone."
-        : "Enter your mobile number and we'll send a verification code by SMS.";
+        ? copy.desktopDescriptions.verifyOtp
+        : copy.desktopDescriptions.mobileRequest;
 
   const desktopSubtitle = isEmailReset
-    ? "We'll email you a link to create a new password."
+    ? copy.desktopSubtitles.emailRequest
     : showMobileSetPassword
-      ? "Your code was verified. Create a strong new password."
+      ? copy.desktopSubtitles.setPassword
       : showMobileVerifyOtp
-        ? "Check your SMS messages for the verification code."
-        : "We'll text you a verification code to reset your password.";
+        ? copy.desktopSubtitles.verifyOtp
+        : copy.desktopSubtitles.mobileRequest;
+
+  const formattedMobileDisplay = `${ETHIOPIA_MOBILE_COUNTRY_CODE} ${mobile}`;
 
   return (
     <AuthShell
-      mobileTitle="Password Reset"
-      desktopEyebrow="— Account Recovery —"
+      mobileTitle={copy.mobileTitle}
+      desktopEyebrow={copy.desktopEyebrow}
       desktopTitle={
         <>
-          Reset via{" "}
+          {copy.desktopTitlePrefix}{" "}
           <span className="bg-gradient-to-r from-[#C9B87A] via-[#e8d69a] to-[#C9B87A] bg-clip-text text-transparent">
-            Email or SMS
+            {copy.desktopTitleHighlight}
           </span>
         </>
       }
       desktopDescription={desktopDescription}
+      footerCopyright={common.copyright}
+      headerActions={<AuthLanguageSwitcher />}
     >
       <div className="hidden lg:block mb-8">
-        <p className="text-[#C9B87A] font-bold text-xs tracking-[0.25em] uppercase mb-3">— Forgot Password —</p>
+        <p className="text-[#C9B87A] font-bold text-xs tracking-[0.25em] uppercase mb-3">{copy.formEyebrow}</p>
         <h2 className="text-3xl font-extrabold text-[#1C3A34] tracking-tight">{desktopTitle}</h2>
         <p className="mt-2 text-slate-500 text-sm leading-relaxed">{desktopSubtitle}</p>
       </div>
@@ -278,25 +288,23 @@ export default function ForgotPasswordForm() {
             <div className="mx-auto h-14 w-14 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center">
               <CheckCircle2 className="h-7 w-7 text-emerald-600" />
             </div>
-            <h3 className="text-lg font-bold text-[#1C3A34]">Check your email</h3>
+            <h3 className="text-lg font-bold text-[#1C3A34]">{copy.emailSentTitle}</h3>
             <p className="text-sm text-slate-500 leading-relaxed">
-              If an administrator account exists for{" "}
-              <span className="font-semibold text-slate-700">{email}</span>, you&apos;ll receive a password reset link
-              shortly. The link expires in 1 hour.
+              {formatMessage(copy.emailSentDescription, { email })}
             </p>
-            <p className="text-xs text-slate-400">Didn&apos;t receive it? Check your spam folder or try again.</p>
+            <p className="text-xs text-slate-400">{copy.emailSentHint}</p>
             <button
               type="button"
               onClick={handleStartOver}
               className="text-sm font-semibold text-[#1C3A34] hover:text-[#C9B87A] transition-colors"
             >
-              Send another link
+              {copy.sendAnotherLink}
             </button>
           </div>
         ) : showMobileSetPassword ? (
           <form className="space-y-5" onSubmit={handlePasswordSubmit}>
             <div className="rounded-xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 text-sm text-emerald-800">
-              Verification successful. Set your new password below.
+              {copy.verificationSuccess}
             </div>
 
             <div>
@@ -304,7 +312,7 @@ export default function ForgotPasswordForm() {
                 htmlFor="reset-password"
                 className="block text-[10px] font-bold text-slate-400 tracking-[0.15em] uppercase mb-2"
               >
-                New Password
+                {copy.newPassword}
               </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -317,13 +325,13 @@ export default function ForgotPasswordForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all"
-                  placeholder="At least 8 characters"
+                  placeholder={copy.passwordPlaceholder}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-[#1C3A34] transition-colors"
-                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? common.hidePassword : common.showPassword}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -335,7 +343,7 @@ export default function ForgotPasswordForm() {
                 htmlFor="reset-confirm-password"
                 className="block text-[10px] font-bold text-slate-400 tracking-[0.15em] uppercase mb-2"
               >
-                Confirm Password
+                {copy.confirmPassword}
               </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -348,13 +356,13 @@ export default function ForgotPasswordForm() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all"
-                  placeholder="Re-enter your password"
+                  placeholder={copy.confirmPasswordPlaceholder}
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword((v) => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-[#1C3A34] transition-colors"
-                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                  aria-label={showConfirmPassword ? common.hidePassword : common.showPassword}
                 >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -369,10 +377,10 @@ export default function ForgotPasswordForm() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Updating password…
+                  {copy.updatingPassword}
                 </>
               ) : (
-                "Reset Password"
+                copy.resetPassword
               )}
             </button>
           </form>
@@ -380,10 +388,7 @@ export default function ForgotPasswordForm() {
           <form className="space-y-6" onSubmit={handleOtpSubmit}>
             <div className="space-y-4 text-center">
               <p className="text-sm leading-relaxed text-slate-500">
-                Enter the code sent to{" "}
-                <span className="font-semibold tabular-nums text-[#1C3A34]">
-                  {ETHIOPIA_MOBILE_COUNTRY_CODE} {mobile}
-                </span>
+                {formatMessage(copy.enterCodeSentTo, { mobile: formattedMobileDisplay })}
               </p>
 
               <div className="mx-auto inline-flex items-center gap-2 rounded-xl bg-[#1C3A34]/[0.03] px-3 py-1.5">
@@ -402,7 +407,7 @@ export default function ForgotPasswordForm() {
                 </div>
                 <div className="min-w-0 text-left">
                   <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-slate-400">
-                    {otpExpired ? "Code expired" : "Expires in"}
+                    {otpExpired ? copy.codeExpired : copy.expiresIn}
                   </p>
                   <p
                     className={cn(
@@ -418,7 +423,7 @@ export default function ForgotPasswordForm() {
 
             <div>
               <label className="mb-3 block text-center text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
-                Verification Code
+                {copy.verificationCode}
               </label>
               <OtpCodeInput
                 idPrefix="reset-otp"
@@ -430,7 +435,7 @@ export default function ForgotPasswordForm() {
 
             {otpExpired ? (
               <p className="text-center text-xs leading-relaxed text-slate-400">
-                Request a new code once the resend timer finishes, or use a different number.
+                {copy.otpExpiredHint}
               </p>
             ) : null}
 
@@ -442,10 +447,10 @@ export default function ForgotPasswordForm() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Verifying code…
+                  {copy.verifyingCode}
                 </>
               ) : (
-                "Verify Code"
+                copy.verifyCode
               )}
             </button>
 
@@ -458,10 +463,10 @@ export default function ForgotPasswordForm() {
               >
                 <RotateCcw className={cn("h-3.5 w-3.5 shrink-0", isResending && "animate-spin")} aria-hidden />
                 {isResending
-                  ? "Sending…"
+                  ? copy.sending
                   : resendCooldownIn > 0
-                    ? `Resend in ${formatCountdown(resendCooldownIn)}`
-                    : "Resend code"}
+                    ? formatMessage(copy.resendIn, { time: formatCountdown(resendCooldownIn) })
+                    : copy.resendCode}
               </button>
 
               <button
@@ -470,7 +475,7 @@ export default function ForgotPasswordForm() {
                 className="flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 shadow-sm transition-all hover:border-[#1C3A34]/20 hover:text-[#1C3A34] hover:shadow"
               >
                 <Phone className="h-3.5 w-3.5" aria-hidden />
-                Use a different number
+                {copy.useDifferentNumber}
               </button>
             </div>
           </form>
@@ -479,7 +484,7 @@ export default function ForgotPasswordForm() {
             <div
               className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1"
               role="tablist"
-              aria-label="Reset method"
+              aria-label={copy.resetMethod}
             >
               <button
                 type="button"
@@ -494,7 +499,7 @@ export default function ForgotPasswordForm() {
                 }`}
               >
                 <Mail className="h-4 w-4" />
-                Email
+                {common.email}
               </button>
               <button
                 type="button"
@@ -509,7 +514,7 @@ export default function ForgotPasswordForm() {
                 }`}
               >
                 <Phone className="h-4 w-4" />
-                Mobile
+                {common.mobile}
               </button>
             </div>
 
@@ -518,7 +523,7 @@ export default function ForgotPasswordForm() {
                 htmlFor="reset-identifier"
                 className="block text-[10px] font-bold text-slate-400 tracking-[0.15em] uppercase mb-2"
               >
-                {isEmailReset ? "Administrator Email" : "Mobile Number"}
+                {isEmailReset ? common.administratorEmail : common.mobileNumber}
               </label>
               {isEmailReset ? (
                 <div className="relative">
@@ -532,7 +537,7 @@ export default function ForgotPasswordForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all"
-                    placeholder="admin@company.com"
+                    placeholder={authCopy.signIn.emailPlaceholder || undefined}
                   />
                 </div>
               ) : (
@@ -554,7 +559,7 @@ export default function ForgotPasswordForm() {
                       value={mobile}
                       onChange={(e) => setMobile(sanitizeEthiopianMobileInput(e.target.value))}
                       className="w-full border-0 bg-transparent py-3.5 pl-10 pr-4 text-sm text-slate-800 outline-none"
-                      placeholder={ETHIOPIAN_MOBILE_PLACEHOLDER}
+                      placeholder={common.mobilePlaceholder}
                     />
                   </div>
                 </div>
@@ -569,12 +574,12 @@ export default function ForgotPasswordForm() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  {isEmailReset ? "Sending reset link…" : "Sending code…"}
+                  {isEmailReset ? copy.sendingResetLink : copy.sendingCode}
                 </>
               ) : isEmailReset ? (
-                "Send Reset Link"
+                copy.sendResetLink
               ) : (
-                "Send Verification Code"
+                copy.sendVerificationCode
               )}
             </button>
           </form>
@@ -583,7 +588,7 @@ export default function ForgotPasswordForm() {
 
       <p className="mt-6 text-center text-sm text-slate-500">
         <Link href={ADMIN_SIGN_IN_PATH} className="font-semibold text-[#1C3A34] hover:text-[#C9B87A] transition-colors">
-          ← Back to sign in
+          ← {common.backToSignIn}
         </Link>
       </p>
     </AuthShell>
