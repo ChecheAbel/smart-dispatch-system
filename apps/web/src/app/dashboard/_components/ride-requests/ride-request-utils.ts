@@ -282,7 +282,7 @@ export function formatHumanDurationMinutes(
   labels: HumanDurationLabels,
 ): string {
   if (totalMinutes == null || !Number.isFinite(totalMinutes)) {
-    return "—";
+    return "";
   }
 
   const minutes = Math.round(Math.max(0, totalMinutes));

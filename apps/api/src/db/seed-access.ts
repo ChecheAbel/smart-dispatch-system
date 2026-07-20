@@ -593,6 +593,7 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "customer_billing.contract_enrollments.get", method: "GET", path: "/api/me/contract-enrollments/:id", description: "Get contract enrollment for current customer", permissionSlug: "customer_contracts.read" },
   { slug: "customer_billing.invoices.list", method: "GET", path: "/api/me/invoices", description: "List invoices for current customer", permissionSlug: "customer_invoices.read" },
   { slug: "customer_billing.invoices.get", method: "GET", path: "/api/me/invoices/:id", description: "Get invoice for current customer", permissionSlug: "customer_invoices.read" },
+  { slug: "customer_billing.payment_options", method: "GET", path: "/api/me/billing/payment-options", description: "Get customer payment method configuration", permissionSlug: "customer_invoices.read" },
   { slug: "ride_requests.driver_vehicle", method: "GET", path: "/api/ride-requests/driver/vehicle", description: "Get vehicle assigned to driver", permissionSlug: "driver.vehicle" },
   { slug: "ride_requests.driver_trip", method: "GET", path: "/api/ride-requests/driver/:id", description: "Get trip details for an assigned driver ride", permissionSlug: "driver.trip" },
   { slug: "ride_requests.driver_trip_status", method: "POST", path: "/api/ride-requests/driver/:id/status", description: "Change status of assigned driver ride (start/complete)", permissionSlug: "driver.trip" },

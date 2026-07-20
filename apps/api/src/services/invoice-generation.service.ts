@@ -231,6 +231,16 @@ export async function markInvoicePaid(invoiceId: string) {
   return updateInvoiceStatus(invoice.id, "paid", { paidAt: new Date() });
 }
 
+export async function markInvoicePaidForRequester(invoiceId: string, requesterUserId: string) {
+  const { findInvoiceForRequester } = await import("../models/invoice.model");
+  const invoice = await findInvoiceForRequester(invoiceId, requesterUserId);
+  if (!invoice) {
+    throw new Error("INVOICE_NOT_FOUND");
+  }
+
+  return markInvoicePaid(invoiceId);
+}
+
 export async function voidInvoice(invoiceId: string) {
   const { findInvoiceById, updateInvoiceStatus } = await import("../models/invoice.model");
   const invoice = await findInvoiceById(invoiceId);

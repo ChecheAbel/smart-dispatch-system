@@ -22,6 +22,9 @@ import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
 import { getOptionalString } from "../utils/validation";
 import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
+import { getCustomerPaymentOptions } from "../config/customer-payment-options";
+import { markInvoicePaidForRequester } from "../services/invoice-generation.service";
+import type { CustomerPaymentMethodId } from "@smart-dispatch/types";
 
 const router = Router();
 
@@ -147,6 +150,80 @@ router.get(
         invoice: toCustomerInvoice(invoice, { locale }),
       });
     } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.get(
+  "/billing/payment-options",
+  requirePermission("customer_invoices.read"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      if (!req.user?.id) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      return sendSuccess(res, {
+        payment_options: getCustomerPaymentOptions(),
+      });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+function parsePaymentMethod(value: unknown): CustomerPaymentMethodId | null {
+  if (value === "telebirr" || value === "cbe_birr") {
+    return value;
+  }
+  return null;
+}
+
+function mapCustomerPaymentError(error: unknown) {
+  if (!(error instanceof Error)) return null;
+
+  switch (error.message) {
+    case "INVOICE_NOT_FOUND":
+      return { message: "Invoice not found.", status: 404 };
+    case "INVOICE_NOT_ISSUED":
+      return { message: "Only outstanding invoices can be marked as paid.", status: 409 };
+    default:
+      return null;
+  }
+}
+
+router.post(
+  "/invoices/:id/confirm-payment",
+  requirePermission("customer_invoices.read"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const locale = getRequestLocale(req);
+      const userId = req.user?.id;
+      if (!userId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      const paymentMethod = parsePaymentMethod(req.body?.payment_method);
+      if (req.body?.payment_method !== undefined && !paymentMethod) {
+        return sendError(res, "Invalid payment method.", 400);
+      }
+
+      await markInvoicePaidForRequester(req.params.id, userId);
+
+      const invoice = await findInvoiceForRequester(req.params.id, userId);
+      if (!invoice) {
+        return sendError(res, "Invoice not found.", 404);
+      }
+
+      return sendSuccess(res, {
+        invoice: toCustomerInvoice(invoice, { locale }),
+      });
+    } catch (error) {
+      const mapped = mapCustomerPaymentError(error);
+      if (mapped) {
+        return sendError(res, mapped.message, mapped.status);
+      }
       return handleRouteError(res, error);
     }
   },

@@ -33,6 +33,7 @@ import {
   buildInvoiceTripDetailsLabels,
   InvoiceLineItemTripDetails,
 } from "@/components/billing/invoice-line-item-trip-details";
+import { InvoicePaymentSection } from "@/components/billing/invoice-payment-section";
 import { USER_DASHBOARD_PATH, USER_MY_INVOICES_PATH } from "@/lib/auth-paths";
 
 const STATUS_BADGE_CLASS: Record<CustomerVisibleInvoiceStatus, string> = {
@@ -42,10 +43,10 @@ const STATUS_BADGE_CLASS: Record<CustomerVisibleInvoiceStatus, string> = {
 };
 
 function formatDate(value: string | null, locale: string) {
-  if (!value) return "—";
+  if (!value) return "";
   const dateOnly = value.includes("T") ? value.slice(0, 10) : value;
   const parsed = new Date(`${dateOnly}T12:00:00.000Z`);
-  if (Number.isNaN(parsed.getTime())) return "—";
+  if (Number.isNaN(parsed.getTime())) return "";
   return parsed.toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" });
 }
 
@@ -141,7 +142,7 @@ export function CustomerInvoiceDetailPage() {
       ? customerContractsCopy.paymentTermsPerTrip
       : invoice.payment_terms_days
         ? formatMessage(copy.detail.paymentTermsValue, { days: invoice.payment_terms_days })
-        : "—";
+        : "";
 
   const billingPeriod = formatContractTermRange(
     { starts_at: invoice.period_start, ends_at: invoice.period_end },
@@ -248,6 +249,12 @@ export function CustomerInvoiceDetailPage() {
           />
         </div>
       </section>
+
+      <InvoicePaymentSection
+        invoice={invoice}
+        locale={locale}
+        onInvoiceUpdated={(updated) => setInvoice(updated)}
+      />
 
       {invoice.notes ? (
         <section className={cn(adminCardClass, "space-y-3 p-5")}>

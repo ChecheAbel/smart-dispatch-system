@@ -1188,3 +1188,23 @@ export type ApiResponse<T> =
   | ApiSuccessResponse<T>
   | ApiPaginatedResponse<T>
   | ApiErrorResponse;
+
+export type CustomerPaymentMethodId = "telebirr" | "cbe_birr";
+
+export interface CustomerTelebirrPaymentConfig {
+  enabled: boolean;
+  merchant_name: string | null;
+  short_code: string | null;
+  ussd: string | null;
+}
+
+export interface CustomerCbePaymentConfig {
+  enabled: boolean;
+  account_name: string | null;
+  account_number: string | null;
+}
+
+export interface CustomerPaymentOptions {
+  telebirr: CustomerTelebirrPaymentConfig;
+  cbe_birr: CustomerCbePaymentConfig;
+}

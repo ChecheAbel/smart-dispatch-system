@@ -43,7 +43,7 @@ type InvoiceLineItemTripDetailsProps = {
 };
 
 function formatTripMetricDistance(km: number | null) {
-  if (km == null) return "—";
+  if (km == null) return "";
   return `${km.toFixed(1)} km`;
 }
 
@@ -71,7 +71,7 @@ export function InvoiceLineItemTripDetails({
       label: labels.scheduled,
       value: trip.scheduled_at
         ? formatScheduledAt(trip.scheduled_at, locale)
-        : "—",
+        : "",
     },
     ...(trip.scheduled_return_at
       ? [
@@ -87,13 +87,13 @@ export function InvoiceLineItemTripDetails({
       key: "started",
       icon: Route,
       label: labels.started,
-      value: trip.started_at ? formatScheduledAt(trip.started_at, locale) : "—",
+      value: trip.started_at ? formatScheduledAt(trip.started_at, locale) : "",
     },
     {
       key: "completed",
       icon: CalendarClock,
       label: labels.completed,
-      value: trip.completed_at ? formatScheduledAt(trip.completed_at, locale) : "—",
+      value: trip.completed_at ? formatScheduledAt(trip.completed_at, locale) : "",
     },
     {
       key: "passengers",
