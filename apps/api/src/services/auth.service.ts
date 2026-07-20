@@ -203,7 +203,6 @@ export async function logout(refreshToken: string) {
 export async function requestPasswordReset(input: {
   email?: string;
   mobileNumber?: string;
-  portal?: "admin" | "customer";
 }) {
   const email = typeof input.email === "string" ? input.email.trim().toLowerCase() : "";
   const rawMobile =
@@ -211,7 +210,6 @@ export async function requestPasswordReset(input: {
   const mobileNumber = rawMobile ? normalizeEthiopianMobileNumber(rawMobile) : undefined;
   const hasEmail = Boolean(email);
   const hasMobile = Boolean(rawMobile);
-  const portal = input.portal === "customer" ? "customer" : "admin";
 
   if (!hasEmail && !hasMobile) {
     throw new AuthError("Email or mobile number is required.", 400);
@@ -245,9 +243,12 @@ export async function requestPasswordReset(input: {
         new Date(Date.now() + PASSWORD_RESET_TTL_MS),
       );
 
+      const roles = await findRolesByUserId(user.id);
+      const useAdminPortal = roles.some(
+        (role) => role.slug === "admin" || role.slug === "dispatcher",
+      );
       const appUrl = process.env.APP_URL ?? "http://localhost:3000";
-      const resetPath =
-        portal === "customer" ? "/reset-password" : "/U@RQ$f/reset-password";
+      const resetPath = useAdminPortal ? "/U@RQ$f/reset-password" : "/reset-password";
       const resetLink = `${appUrl}${resetPath}?token=${resetToken}`;
 
       queuePasswordResetNotifications("email_requested", user.id, {

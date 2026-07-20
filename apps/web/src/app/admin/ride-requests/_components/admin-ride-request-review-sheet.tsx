@@ -245,6 +245,16 @@ export function AdminRideRequestReviewSheet({
         emptyTitle={loadError ? copy.toast.loadFailed : copy.review.loadEmpty}
         showCustomerPolicy={false}
         showCustomerActions={false}
+        driverRatingVariant="admin"
+        driverRatingLabels={{
+          section: copy.review.driverRating.section,
+          scoreCaption: copy.review.driverRating.scoreCaption,
+          commentLabel: copy.review.driverRating.commentLabel,
+          noComment: copy.review.driverRating.noComment,
+          ratedOn: copy.review.driverRating.ratedOn,
+          pendingTitle: copy.review.driverRating.pendingTitle,
+          pendingDescription: copy.review.driverRating.pendingDescription,
+        }}
         requester={request?.requester}
         requesterLabels={{
           section: copy.review.requesterSection,

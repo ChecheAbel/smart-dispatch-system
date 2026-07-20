@@ -468,7 +468,14 @@ export const openApiSpec = {
         tags: ["Auth"],
         summary: "Request password reset",
         description:
-          "Sends a password reset link by email or a 6-digit OTP by SMS if an active account exists. Provide either `email` or `mobile_number`, not both. Always returns a generic success message.",
+          "Starts a password reset for an active account.\n\n" +
+          "- **Email:** provide `email` to receive a reset link.\n" +
+          "- **Mobile OTP:** provide `mobile_number` to receive a 6-digit SMS code.\n\n" +
+          "Provide either `email` or `mobile_number`, not both. Always returns a generic success message " +
+          "(does not reveal whether the account exists).\n\n" +
+          "**Mobile OTP next steps:**\n" +
+          "1. Optional: `POST /api/auth/verify-reset-otp` → exchange OTP for `reset_token`, then `POST /api/auth/reset-password` with `{ token, password }`.\n" +
+          "2. Or reset directly: `POST /api/auth/reset-password` with `{ mobile_number, otp, password }`.",
         requestBody: {
           required: true,
           content: {
@@ -476,10 +483,17 @@ export const openApiSpec = {
               schema: {
                 type: "object",
                 properties: {
-                  email: { type: "string", format: "email" },
+                  email: {
+                    type: "string",
+                    format: "email",
+                    description: "Account email. Sends a password reset link.",
+                    example: "you@company.com",
+                  },
                   mobile_number: {
                     type: "string",
-                    description: "Ethiopian mobile number in local or +251 format.",
+                    description:
+                      "Ethiopian mobile number in local (09…) or international (+251…) format. Sends a 6-digit SMS OTP.",
+                    example: "+251911223344",
                   },
                 },
                 oneOf: [
@@ -487,12 +501,26 @@ export const openApiSpec = {
                   { required: ["mobile_number"] },
                 ],
               },
+              examples: {
+                email: {
+                  summary: "Email reset link",
+                  value: {
+                    email: "you@company.com",
+                  },
+                },
+                mobileOtp: {
+                  summary: "Mobile SMS OTP",
+                  value: {
+                    mobile_number: "+251911223344",
+                  },
+                },
+              },
             },
           },
         },
         responses: {
           "200": {
-            description: "Invitation processed",
+            description: "Reset request accepted (generic message)",
             content: {
               "application/json": {
                 schema: {
@@ -501,6 +529,32 @@ export const openApiSpec = {
                     success: { type: "boolean", enum: [true] },
                     data: { $ref: "#/components/schemas/MessageResponse" },
                     message: { type: "string" },
+                  },
+                },
+                examples: {
+                  email: {
+                    summary: "Email channel",
+                    value: {
+                      success: true,
+                      data: {
+                        message:
+                          "If an account exists for this email, a password reset invitation has been sent.",
+                      },
+                      message:
+                        "If an account exists for this email, a password reset invitation has been sent.",
+                    },
+                  },
+                  mobile: {
+                    summary: "Mobile OTP channel",
+                    value: {
+                      success: true,
+                      data: {
+                        message:
+                          "If an account exists for this mobile number, a password reset code has been sent via SMS.",
+                      },
+                      message:
+                        "If an account exists for this mobile number, a password reset code has been sent via SMS.",
+                    },
                   },
                 },
               },
@@ -515,7 +569,10 @@ export const openApiSpec = {
         tags: ["Auth"],
         summary: "Verify password reset OTP",
         description:
-          "Validates a mobile SMS verification code from `POST /api/auth/forgot-password` and returns a short-lived reset token for `POST /api/auth/reset-password`.",
+          "Validates the 6-digit SMS code from `POST /api/auth/forgot-password` and returns a short-lived " +
+          "`reset_token` for `POST /api/auth/reset-password` as `{ token, password }`.\n\n" +
+          "Optional step: you may skip this and call `POST /api/auth/reset-password` with " +
+          "`{ mobile_number, otp, password }` instead.",
         requestBody: {
           required: true,
           content: {
@@ -524,16 +581,29 @@ export const openApiSpec = {
                 type: "object",
                 required: ["mobile_number", "otp"],
                 properties: {
-                  mobile_number: { type: "string" },
-                  otp: { type: "string", pattern: "^\\d{6}$" },
+                  mobile_number: {
+                    type: "string",
+                    description: "Same mobile number used in forgot-password.",
+                    example: "+251911223344",
+                  },
+                  otp: {
+                    type: "string",
+                    pattern: "^\\d{6}$",
+                    description: "6-digit SMS verification code.",
+                    example: "482913",
+                  },
                 },
+              },
+              example: {
+                mobile_number: "+251911223344",
+                otp: "482913",
               },
             },
           },
         },
         responses: {
           "200": {
-            description: "OTP accepted",
+            description: "OTP accepted; use reset_token with reset-password",
             content: {
               "application/json": {
                 schema: {
@@ -542,13 +612,26 @@ export const openApiSpec = {
                     success: { type: "boolean", enum: [true] },
                     data: {
                       type: "object",
+                      required: ["reset_token", "message"],
                       properties: {
-                        reset_token: { type: "string" },
+                        reset_token: {
+                          type: "string",
+                          description:
+                            "Pass as `token` to `POST /api/auth/reset-password` with the new password.",
+                        },
                         message: { type: "string" },
                       },
                     },
                     message: { type: "string" },
                   },
+                },
+                example: {
+                  success: true,
+                  data: {
+                    reset_token: "opaque-reset-token",
+                    message: "Verification code accepted. You can now set a new password.",
+                  },
+                  message: "Verification code accepted. You can now set a new password.",
                 },
               },
             },
@@ -562,7 +645,12 @@ export const openApiSpec = {
         tags: ["Auth"],
         summary: "Reset password",
         description:
-          "Sets a new password using either a valid email reset token or a mobile OTP from `POST /api/auth/forgot-password`.",
+          "Sets a new password. Use one of these payloads:\n\n" +
+          "1. **Email / verified OTP token:** `{ token, password }` — `token` from the email reset link, " +
+          "or `reset_token` from `POST /api/auth/verify-reset-otp`.\n" +
+          "2. **Direct mobile OTP:** `{ mobile_number, otp, password }` — same OTP from SMS after " +
+          "`POST /api/auth/forgot-password` (no verify step required).\n\n" +
+          "Password must be at least 8 characters.",
         requestBody: {
           required: true,
           content: {
@@ -570,29 +658,59 @@ export const openApiSpec = {
               schema: {
                 type: "object",
                 properties: {
-                  token: { type: "string", description: "Email reset link token." },
+                  token: {
+                    type: "string",
+                    description:
+                      "Email reset-link token, or `reset_token` from verify-reset-otp.",
+                    example: "opaque-reset-token",
+                  },
                   mobile_number: {
                     type: "string",
-                    description: "Mobile number used to request the OTP.",
+                    description: "Mobile number used to request the OTP (direct OTP reset).",
+                    example: "+251911223344",
                   },
                   otp: {
                     type: "string",
                     pattern: "^\\d{6}$",
-                    description: "6-digit SMS verification code.",
+                    description: "6-digit SMS verification code (direct OTP reset).",
+                    example: "482913",
                   },
-                  password: { type: "string", format: "password", minLength: 8 },
+                  password: {
+                    type: "string",
+                    format: "password",
+                    minLength: 8,
+                    description: "New password (minimum 8 characters).",
+                    example: "NewSecurePass1",
+                  },
                 },
                 oneOf: [
                   { required: ["token", "password"] },
                   { required: ["mobile_number", "otp", "password"] },
                 ],
               },
+              examples: {
+                emailOrVerifiedToken: {
+                  summary: "Email link or verify-reset-otp token",
+                  value: {
+                    token: "opaque-reset-token",
+                    password: "NewSecurePass1",
+                  },
+                },
+                mobileOtp: {
+                  summary: "Direct reset with mobile OTP",
+                  value: {
+                    mobile_number: "+251911223344",
+                    otp: "482913",
+                    password: "NewSecurePass1",
+                  },
+                },
+              },
             },
           },
         },
         responses: {
           "200": {
-            description: "Password reset",
+            description: "Password reset successfully",
             content: {
               "application/json": {
                 schema: {
@@ -602,6 +720,13 @@ export const openApiSpec = {
                     data: { $ref: "#/components/schemas/MessageResponse" },
                     message: { type: "string" },
                   },
+                },
+                example: {
+                  success: true,
+                  data: {
+                    message: "Your password has been reset. You can now sign in.",
+                  },
+                  message: "Your password has been reset. You can now sign in.",
                 },
               },
             },

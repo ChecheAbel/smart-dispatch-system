@@ -46,7 +46,6 @@ export default function ForgotPasswordForm({ audience = "admin" }: ForgotPasswor
   const copy = authCopy.forgotPassword;
   const common = authCopy.common;
   const signInPath = audience === "customer" ? USER_SIGN_IN_PATH : ADMIN_SIGN_IN_PATH;
-  const portal = audience;
   const [resetMethod, setResetMethod] = useState<ResetMethod>("email");
   const [mobileStep, setMobileStep] = useState<MobileStep>("request");
   const [email, setEmail] = useState("");
@@ -103,7 +102,6 @@ export default function ForgotPasswordForm({ audience = "admin" }: ForgotPasswor
     await requestPasswordReset({
       channel: "mobile",
       mobile_number: mobileNumberFormatted,
-      portal,
     });
   }
 
@@ -122,7 +120,7 @@ export default function ForgotPasswordForm({ audience = "admin" }: ForgotPasswor
 
     try {
       if (isEmailReset) {
-        await requestPasswordReset({ channel: "email", email, portal });
+        await requestPasswordReset({ channel: "email", email });
         setEmailSent(true);
         showSuccessToast({
           title: copy.emailSentTitle,
@@ -131,7 +129,7 @@ export default function ForgotPasswordForm({ audience = "admin" }: ForgotPasswor
       } else {
         const formatted = formatEthiopianMobileNumber(mobile);
         setMobileNumberFormatted(formatted);
-        await requestPasswordReset({ channel: "mobile", mobile_number: formatted, portal });
+        await requestPasswordReset({ channel: "mobile", mobile_number: formatted });
         setMobileStep("verify_otp");
         startOtpTimers();
         showSuccessToast({

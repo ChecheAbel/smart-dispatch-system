@@ -112,4 +112,15 @@ export async function cancelRideRequest(id: string, locale?: string) {
   return unwrapApiResponse<{ ride_request: RideRequest }>(data).ride_request;
 }
 
+export async function rateRideRequestDriver(
+  id: string,
+  input: { rating: number; comment?: string | null },
+  locale?: string,
+) {
+  const { data } = await apiClient.post(`/api/ride-requests/${id}/rating`, input, {
+    params: { locale },
+  });
+  return unwrapApiResponse<{ ride_request: RideRequest }>(data).ride_request;
+}
+
 export type { ApiPaginatedResponse };

@@ -145,6 +145,8 @@ model User {
   assignedVehicle   Vehicle?   @relation("VehicleAssignedDriver")
   rideRequests      RideRequest[]
   assignedDispatchRideRequests RideRequest[] @relation("RideRequestAssignedDriver")
+  driverRatingsGiven  RideRequestDriverRating[] @relation("RideRequestRatingRequester")
+  driverRatingsReceived RideRequestDriverRating[] @relation("RideRequestRatingDriver")
   vehicleMaintenanceLogs VehicleMaintenanceLog[] @relation("VehicleMaintenanceCreatedBy")
   vehicleFuelLogs        VehicleFuelLog[]        @relation("VehicleFuelCreatedBy")
   vehicleHistoryEvents   VehicleHistoryEvent[] @relation("VehicleHistoryActor")
@@ -848,6 +850,7 @@ model RideRequest {
   contract         Contract?         @relation(fields: [contractId], references: [id], onDelete: SetNull)
   assignedVehicle  Vehicle?          @relation("RideRequestAssignedVehicle", fields: [assignedVehicleId], references: [id], onDelete: SetNull)
   assignedDriver   User?             @relation("RideRequestAssignedDriver", fields: [assignedDriverUserId], references: [id], onDelete: SetNull)
+  driverRating     RideRequestDriverRating?
 
   @@index([requesterUserId])
   @@index([vehicleClassId])
@@ -859,4 +862,22 @@ model RideRequest {
   @@index([dropoffLocationId])
   @@index([createdAt(sort: Desc)])
   @@map("ride_requests")
+}
+
+model RideRequestDriverRating {
+  id              String   @id @default(uuid()) @db.Uuid
+  rideRequestId   String   @unique @map("ride_request_id") @db.Uuid
+  requesterUserId String   @map("requester_user_id") @db.Uuid
+  driverUserId    String   @map("driver_user_id") @db.Uuid
+  rating          Int
+  comment         String?  @db.VarChar(500)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  rideRequest     RideRequest @relation(fields: [rideRequestId], references: [id], onDelete: Cascade)
+  requester       User        @relation("RideRequestRatingRequester", fields: [requesterUserId], references: [id], onDelete: Cascade)
+  driver          User        @relation("RideRequestRatingDriver", fields: [driverUserId], references: [id], onDelete: Cascade)
+
+  @@index([requesterUserId])
+  @@index([driverUserId])
+  @@map("ride_request_driver_ratings")
 }

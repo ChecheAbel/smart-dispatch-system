@@ -93,16 +93,41 @@ function formatBookingWindow(booking: AdminRideRequest, locale: string) {
 }
 
 function statusBadgeClass(status: string) {
-  if (status === "completed" || status === "confirmed") {
+  if (status === "completed") {
     return "border-emerald-200 bg-emerald-50 text-emerald-800";
+  }
+  if (status === "confirmed") {
+    return "border-[#1C3A34]/20 bg-[#1C3A34]/10 text-[#1C3A34]";
   }
   if (status === "in_progress") {
     return "border-blue-200 bg-blue-50 text-blue-800";
+  }
+  if (status === "pending") {
+    return "border-amber-200 bg-amber-50 text-amber-800";
   }
   if (status === "cancelled" || status === "rejected") {
     return "border-rose-200 bg-rose-50 text-rose-700";
   }
   return "border-slate-200 bg-slate-50 text-slate-600";
+}
+
+function calendarChipClass(status: string) {
+  if (status === "in_progress") {
+    return "bg-blue-500 text-white";
+  }
+  if (status === "pending") {
+    return "bg-amber-400 text-amber-950";
+  }
+  if (status === "confirmed") {
+    return "bg-[#1C3A34] text-white";
+  }
+  if (status === "completed") {
+    return "bg-emerald-500 text-white";
+  }
+  if (status === "cancelled" || status === "rejected") {
+    return "bg-rose-400 text-white";
+  }
+  return "bg-slate-400 text-white";
 }
 
 function formatStatusLabel(status: string) {
@@ -481,15 +506,11 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
                           return (
                             <span
                               key={booking.id}
+                              title={`${requesterName(booking)} · ${formatStatusLabel(booking.status)}${multiDay ? " · Multi-day" : ""}`}
                               className={cn(
                                 "truncate rounded px-1 py-0.5 text-[10px] font-semibold leading-tight",
-                                multiDay
-                                  ? "bg-[#C9B87A]/25 text-[#1C3A34]"
-                                  : booking.status === "in_progress"
-                                    ? "bg-blue-100 text-blue-800"
-                                    : booking.status === "completed"
-                                      ? "bg-emerald-100 text-emerald-800"
-                                      : "bg-[#1C3A34]/10 text-[#1C3A34]",
+                                calendarChipClass(booking.status),
+                                multiDay && "ring-1 ring-inset ring-[#C9B87A]",
                               )}
                             >
                               {requesterName(booking)}
@@ -508,13 +529,29 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
               })}
             </div>
 
-            <div className="flex flex-wrap items-center gap-4 px-4 py-3 text-[11px] font-medium text-slate-500 sm:px-5">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3 text-[11px] font-medium text-slate-500 sm:px-5">
               <span className="inline-flex items-center gap-1.5">
-                <span className="size-2.5 rounded-sm bg-[#1C3A34]/25" />
-                Single-day
+                <span className="size-2.5 rounded-sm bg-amber-400" />
+                Pending
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="size-2.5 rounded-sm bg-[#C9B87A]" />
+                <span className="size-2.5 rounded-sm bg-[#1C3A34]" />
+                Confirmed
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-2.5 rounded-sm bg-blue-500" />
+                In Progress
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-2.5 rounded-sm bg-emerald-500" />
+                Completed
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-2.5 rounded-sm bg-rose-400" />
+                Cancelled
+              </span>
+              <span className="inline-flex items-center gap-1.5">
+                <span className="size-2.5 rounded-sm bg-slate-300 ring-1 ring-[#C9B87A]" />
                 Multi-day
               </span>
               <span className="inline-flex items-center gap-1.5">

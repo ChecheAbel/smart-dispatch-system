@@ -693,6 +693,7 @@
     "actions": "ድርጊቶች",
     "view": "ዝርዝር ይመልከቱ",
     "edit": "ያርትዑ",
+    "rateDriver": "አሽከርካሪን ደረጃ ይስጡ",
     "cancel": "ጥያቄ ይሰርዙ",
     "cancelTitle": "የጉዞ ጥያቄ ይሰረዝ?",
     "cancelDescription": "ጥያቄው እንደተሰረዘ ይመዘገባል። በማንኛውም ጊዜ አዲስ ጥያቄ ማስገባት ይችላሉ።",
@@ -751,6 +752,26 @@
     "detailAssignedDriverMobile": "የአሽከርካሪ ሞባይል",
     "detailTripStartedAt": "ጉዞ የተጀመረበት",
     "detailTripCompletedAt": "ጉዞ የተጠናቀቀበት",
+    "rating": {
+      "section": "የአሽከርካሪ ደረጃ",
+      "title": "አሽከርካሪዎን ደረጃ ይስጡ",
+      "description": "ጉዞው እንዴት እንደሄደ ያጋሩ። ግብረመልስዎ ዲስፓች አገልግሎትን ለማሻሻል ይረዳል።",
+      "scoreLabel": "ደረጃዎ",
+      "hint": "ከ1 እስከ 5 ኮከቦች ይምረጡ።",
+      "selected": "{count} ከ5 ኮከቦች",
+      "starLabel": "{count} ኮከቦች",
+      "commentLabel": "አስተያየት",
+      "commentPlaceholder": "ስለ ጊዜ አጠባበቅ፣ ደህንነት ወይም አገልግሎት አማራጭ ማስታወሻ…",
+      "optional": "አማራጭ",
+      "submit": "ደረጃ አስገባ",
+      "submitting": "በማስገባት ላይ…",
+      "cancel": "ሰርዝ",
+      "required": "እባክዎ የኮከብ ደረጃ ይምረጡ።",
+      "unknownDriver": "የተመደበ አሽከርካሪ",
+      "yourRating": "የእርስዎ ደረጃ",
+      "ratedOn": "በ{date} ተሰጥቷል",
+      "noComment": "አስተያየት አልተሰጠም።"
+    },
     "detailMapLoading": "ካርታ በመጫን ላይ…",
     "detailMapEmpty": "ለዚህ ጥያቄ የካርታ መጋጠሚያዎች የሉም።",
     "detailMapRecenter": "መስመር አስተካክል",
@@ -772,11 +793,13 @@
     "errors": {
       "loadFailed": "የጉዞ ጥያቄዎችን መጫን አልተሳካም።",
       "updateFailed": "የጉዞ ጥያቄ ማዘመን አልተሳካም።",
-      "cancelFailed": "የጉዞ ጥያቄ መሰረዝ አልተሳካም።"
+      "cancelFailed": "የጉዞ ጥያቄ መሰረዝ አልተሳካም።",
+      "rateFailed": "የአሽከርካሪ ደረጃ ማስገባት አልተሳካም።"
     },
     "toast": {
       "updated": "የጉዞ ጥያቄ በተሳካ ሁኔታ ተዘምኗል።",
-      "cancelled": "የጉዞ ጥያቄ ተሰርዟል።"
+      "cancelled": "የጉዞ ጥያቄ ተሰርዟል።",
+      "rated": "አሽከርካሪዎን ስለደረጁ እናመሰግናለን።"
     }
   },
   "customerContracts": {
@@ -1603,7 +1626,16 @@
       "startingTrip": "በመጀመር ላይ…",
       "completeTrip": "ጉዞ አጠናቅቅ",
       "completingTrip": "በማጠናቀቅ ላይ…",
-      "startTripScheduleBlocked": "ጉዞው ከታቀደው የመውሰድ ጊዜ ({time}) በኋላ ሊጀመር ይችላል።"
+      "startTripScheduleBlocked": "ጉዞው ከታቀደው የመውሰድ ጊዜ ({time}) በኋላ ሊጀመር ይችላል።",
+      "driverRating": {
+        "section": "የአሽከርካሪ ደረጃ",
+        "scoreCaption": "የደንበኛ ደረጃ",
+        "commentLabel": "የደንበኛ አስተያየት",
+        "noComment": "አስተያየት አልተሰጠም።",
+        "ratedOn": "በ{date} ተላከ",
+        "pendingTitle": "ገና ደረጃ የለም",
+        "pendingDescription": "ደንበኛው ለዚህ የተጠናቀቀ ጉዞ የአሽከርካሪ ደረጃ አላስገባም።"
+      }
     },
     "dispatch": {
       "section": "የመላኪያ መመደብ",

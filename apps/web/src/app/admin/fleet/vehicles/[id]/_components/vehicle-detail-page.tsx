@@ -329,7 +329,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
     detail.untitledVehicle;
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-6xl space-y-5 sm:space-y-6">
+    <div className="w-full min-w-0 space-y-5 sm:space-y-6">
       <Button
         render={<Link href="/admin/fleet/vehicles" />}
         nativeButton={false}

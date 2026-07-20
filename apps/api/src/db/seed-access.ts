@@ -588,6 +588,7 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "ride_requests.create", method: "POST", path: "/api/ride-requests", description: "Create ride request", permissionSlug: "customer_requests.write" },
   { slug: "ride_requests.update", method: "PATCH", path: "/api/ride-requests/:id", description: "Update ride request", permissionSlug: "customer_requests.write" },
   { slug: "ride_requests.cancel", method: "POST", path: "/api/ride-requests/:id/cancel", description: "Cancel ride request", permissionSlug: "customer_requests.write" },
+  { slug: "ride_requests.rate_driver", method: "POST", path: "/api/ride-requests/:id/rating", description: "Rate assigned driver after completed trip", permissionSlug: "customer_requests.write" },
   { slug: "customer_billing.contract_enrollments.list", method: "GET", path: "/api/me/contract-enrollments", description: "List contract enrollments for current customer", permissionSlug: "customer_contracts.read" },
   { slug: "customer_billing.contract_enrollments.get", method: "GET", path: "/api/me/contract-enrollments/:id", description: "Get contract enrollment for current customer", permissionSlug: "customer_contracts.read" },
   { slug: "customer_billing.invoices.list", method: "GET", path: "/api/me/invoices", description: "List invoices for current customer", permissionSlug: "customer_invoices.read" },

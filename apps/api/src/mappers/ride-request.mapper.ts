@@ -136,6 +136,13 @@ type DbRideRequest = {
     status: ContractStatus;
     billingInterval: string;
   } | null;
+  driverRating?: {
+    id: string;
+    rating: number;
+    comment: string | null;
+    driverUserId: string;
+    createdAt: Date;
+  } | null;
 };
 
 function decimalToNumber(value: Prisma.Decimal | null) {
@@ -374,6 +381,19 @@ export function toPublicRideRequest(
     completed_at: rideRequest.completedAt?.toISOString() ?? null,
     created_at: rideRequest.createdAt.toISOString(),
     updated_at: rideRequest.updatedAt.toISOString(),
+    driver_rating: rideRequest.driverRating
+      ? {
+          id: rideRequest.driverRating.id,
+          rating: rideRequest.driverRating.rating,
+          comment: rideRequest.driverRating.comment,
+          driver_user_id: rideRequest.driverRating.driverUserId,
+          created_at: rideRequest.driverRating.createdAt.toISOString(),
+        }
+      : null,
+    can_rate_driver:
+      rideRequest.status === "completed" &&
+      Boolean(rideRequest.assignedDriverUserId) &&
+      !rideRequest.driverRating,
     can_edit: canEditRideRequest(rideRequest.status, rideRequest.createdAt),
     can_cancel: canCancelRideRequest(rideRequest.status, rideRequest.createdAt),
     cancel_deadline_at:

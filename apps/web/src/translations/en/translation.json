@@ -693,6 +693,7 @@
     "actions": "Actions",
     "view": "View details",
     "edit": "Edit",
+    "rateDriver": "Rate driver",
     "cancel": "Cancel request",
     "cancelTitle": "Cancel ride request?",
     "cancelDescription": "This will mark the request as cancelled. You can submit a new request anytime.",
@@ -751,6 +752,26 @@
     "detailAssignedDriverMobile": "Driver mobile",
     "detailTripStartedAt": "Trip started",
     "detailTripCompletedAt": "Trip completed",
+    "rating": {
+      "section": "Driver rating",
+      "title": "Rate your driver",
+      "description": "Share how the trip went. Your feedback helps dispatch improve service quality.",
+      "scoreLabel": "Your rating",
+      "hint": "Select 1 to 5 stars.",
+      "selected": "{count} out of 5 stars",
+      "starLabel": "{count} stars",
+      "commentLabel": "Comment",
+      "commentPlaceholder": "Optional notes about punctuality, safety, or service…",
+      "optional": "Optional",
+      "submit": "Submit rating",
+      "submitting": "Submitting…",
+      "cancel": "Cancel",
+      "required": "Please select a star rating.",
+      "unknownDriver": "Assigned driver",
+      "yourRating": "Your rating",
+      "ratedOn": "Rated on {date}",
+      "noComment": "No comment provided."
+    },
     "detailMapLoading": "Loading map...",
     "detailMapEmpty": "No map coordinates available for this request.",
     "detailMapRecenter": "Fit route",
@@ -769,14 +790,16 @@
     "emptyTitle": "No requests found",
     "emptyDescription": "Your ride requests will appear here after you submit them.",
     "emptySearchDescription": "Try a different search term or clear the status filter.",
+    "toast": {
+      "updated": "Ride request updated successfully.",
+      "cancelled": "Ride request cancelled.",
+      "rated": "Thanks for rating your driver."
+    },
     "errors": {
       "loadFailed": "Failed to load ride requests.",
       "updateFailed": "Failed to update ride request.",
-      "cancelFailed": "Failed to cancel ride request."
-    },
-    "toast": {
-      "updated": "Ride request updated successfully.",
-      "cancelled": "Ride request cancelled."
+      "cancelFailed": "Failed to cancel ride request.",
+      "rateFailed": "Failed to submit driver rating."
     }
   },
   "customerContracts": {
@@ -1603,7 +1626,16 @@
       "startingTrip": "Starting...",
       "completeTrip": "Complete trip",
       "completingTrip": "Completing...",
-      "startTripScheduleBlocked": "Trip can start after the scheduled pickup time ({time})."
+      "startTripScheduleBlocked": "Trip can start after the scheduled pickup time ({time}).",
+      "driverRating": {
+        "section": "Driver rating",
+        "scoreCaption": "Customer score",
+        "commentLabel": "Customer comment",
+        "noComment": "No comment provided.",
+        "ratedOn": "Submitted {date}",
+        "pendingTitle": "No rating yet",
+        "pendingDescription": "The customer has not submitted a driver rating for this completed trip."
+      }
     },
     "dispatch": {
       "section": "Dispatch assignment",

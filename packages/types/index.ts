@@ -899,10 +899,20 @@ export interface RideRequest {
   completed_at: string | null;
   created_at: string;
   updated_at: string;
+  driver_rating: RideRequestDriverRating | null;
+  can_rate_driver: boolean;
   can_edit: boolean;
   can_cancel: boolean;
   cancel_deadline_at: string | null;
   edit_deadline_at: string | null;
+}
+
+export interface RideRequestDriverRating {
+  id: string;
+  rating: number;
+  comment: string | null;
+  driver_user_id: string;
+  created_at: string;
 }
 
 export interface RideRequestRequesterSummary {

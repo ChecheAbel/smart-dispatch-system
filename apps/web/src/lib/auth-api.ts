@@ -169,14 +169,14 @@ export async function resumeUserSession(): Promise<AuthMeResponse | null> {
 }
 
 export type RequestPasswordResetInput =
-  | { channel: "email"; email: string; portal?: "admin" | "customer" }
-  | { channel: "mobile"; mobile_number: string; portal?: "admin" | "customer" };
+  | { channel: "email"; email: string }
+  | { channel: "mobile"; mobile_number: string };
 
 export async function requestPasswordReset(input: RequestPasswordResetInput) {
   const body =
     input.channel === "email"
-      ? { email: input.email, portal: input.portal }
-      : { mobile_number: input.mobile_number, portal: input.portal };
+      ? { email: input.email }
+      : { mobile_number: input.mobile_number };
   const { data } = await apiClient.post("/api/auth/forgot-password", body);
   return unwrapApiResponse<{ message: string }>(data);
 }

@@ -18,6 +18,7 @@ import {
   findRideRequestForDriver,
   listRideRequestsForDriver,
   listRideRequestsForUser,
+  rateDriverForRideRequest,
   updateRideRequestForUser,
   updateRideRequestStatusAdmin,
 } from "../models/ride-request.model";
@@ -1201,6 +1202,68 @@ router.post(
       return sendSuccess(res, {
         ride_request: toPublicRideRequest(result, { locale }),
       });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.post(
+  "/:id/rating",
+  requirePermission("customer_requests.write"),
+  auditMutations(),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const locale = getRequestLocale(req);
+      const userId = req.user?.id;
+      const rideRequestId = req.params.id;
+
+      if (!userId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      const rating =
+        typeof req.body?.rating === "number"
+          ? req.body.rating
+          : typeof req.body?.rating === "string"
+            ? Number(req.body.rating)
+            : NaN;
+      const comment =
+        typeof req.body?.comment === "string" ? req.body.comment : null;
+
+      if (!Number.isFinite(rating)) {
+        return sendError(res, "Rating is required.", 400);
+      }
+
+      const result = await rateDriverForRideRequest(rideRequestId, userId, {
+        rating,
+        comment,
+      });
+
+      if (!result) {
+        return sendError(res, "Ride request not found.", 404);
+      }
+
+      if ("error" in result) {
+        return sendError(res, result.error, 409);
+      }
+
+      await recordAuditLog({
+        actorUserId: userId,
+        action: "create",
+        module: "customer_requests",
+        entityType: "ride_request_driver_rating",
+        entityId: result.driverRating?.id ?? result.id,
+        entityLabel: `${result.pickupAddress} → ${result.dropoffAddress}`,
+        summary: `Customer rated driver ${rating}/5`,
+        req,
+      });
+
+      return sendSuccess(
+        res,
+        { ride_request: toPublicRideRequest(result, { locale }) },
+        { status: 201, message: "Driver rating submitted." },
+      );
     } catch (error) {
       return handleRouteError(res, error);
     }

@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import { Eye, MoreHorizontal, Pencil, Route, Trash2 } from "lucide-react";
+import { Eye, MoreHorizontal, Pencil, Route, Star, Trash2 } from "lucide-react";
 import type { RideRequest, RideRequestStatus } from "@smart-dispatch/types";
 import { useLocale, usePermission } from "@/components/shared/providers";
 import {
@@ -43,6 +43,7 @@ import { cn } from "@/lib/utils";
 import { RideRequestStats } from "./ride-request-stats";
 import { RideRequestContractBadge } from "@/app/dashboard/_components/ride-requests/ride-request-contract-info";
 import { EditRideRequestSheet } from "@/app/dashboard/_components/ride-requests/edit-ride-request-sheet";
+import { RateDriverSheet } from "@/app/dashboard/_components/ride-requests/rate-driver-sheet";
 import { RideRequestDetailSheet } from "@/app/dashboard/_components/ride-requests/ride-request-detail-sheet";
 import {
   formatScheduledAt,
@@ -121,6 +122,7 @@ export function RideRequestHistoryPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>(STATUS_FILTER_ALL);
   const [detailRequest, setDetailRequest] = useState<RideRequest | null>(null);
   const [editRequest, setEditRequest] = useState<RideRequest | null>(null);
+  const [rateRequest, setRateRequest] = useState<RideRequest | null>(null);
   const [cancelRequest, setCancelRequest] = useState<RideRequest | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
 
@@ -275,6 +277,12 @@ export function RideRequestHistoryPage() {
                     {historyCopy.edit}
                   </DropdownMenuItem>
                 ) : null}
+                {canWrite && row.can_rate_driver ? (
+                  <DropdownMenuItem onClick={() => setRateRequest(row)}>
+                    <Star className="size-4" />
+                    {historyCopy.rateDriver}
+                  </DropdownMenuItem>
+                ) : null}
               </DropdownMenuGroup>
               {canWrite && row.can_cancel ? (
                 <>
@@ -298,6 +306,14 @@ export function RideRequestHistoryPage() {
         open={Boolean(detailRequest)}
         locale={locale}
         onOpenChange={(open: boolean) => !open && setDetailRequest(null)}
+        onRateDriver={
+          detailRequest?.can_rate_driver
+            ? () => {
+                setRateRequest(detailRequest);
+                setDetailRequest(null);
+              }
+            : undefined
+        }
         requester={detailRequest?.requester ?? undefined}
         requesterLabels={{
           section: historyCopy.detailRequesterSection,
@@ -316,6 +332,14 @@ export function RideRequestHistoryPage() {
         locale={locale}
         onOpenChange={(open: boolean) => !open && setEditRequest(null)}
         onUpdated={() => refresh()}
+      />
+
+      <RateDriverSheet
+        request={rateRequest}
+        open={Boolean(rateRequest)}
+        locale={locale}
+        onOpenChange={(open: boolean) => !open && setRateRequest(null)}
+        onRated={() => refresh()}
       />
 
       <DeleteConfirmModal

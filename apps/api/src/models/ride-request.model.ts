@@ -109,6 +109,7 @@ const rideRequestInclude = {
       billingInterval: true,
     },
   },
+  driverRating: true,
 } as const;
 
 const rideRequestAdminInclude = {
@@ -647,6 +648,50 @@ export async function cancelRideRequestForUser(id: string, requesterUserId: stri
     data: { status: "cancelled" },
     include: rideRequestInclude,
   });
+}
+
+export async function rateDriverForRideRequest(
+  id: string,
+  requesterUserId: string,
+  input: { rating: number; comment?: string | null },
+) {
+  const existing = await findRideRequestForUser(id, requesterUserId);
+  if (!existing) {
+    return null;
+  }
+
+  if (existing.status !== "completed") {
+    return { error: "You can only rate the driver after the trip is completed." as const };
+  }
+
+  if (!existing.assignedDriverUserId) {
+    return { error: "This trip has no assigned driver to rate." as const };
+  }
+
+  if (existing.driverRating) {
+    return { error: "You have already rated the driver for this trip." as const };
+  }
+
+  if (!Number.isInteger(input.rating) || input.rating < 1 || input.rating > 5) {
+    return { error: "Rating must be an integer from 1 to 5." as const };
+  }
+
+  const comment = input.comment?.trim() || null;
+  if (comment && comment.length > 500) {
+    return { error: "Comment must be 500 characters or fewer." as const };
+  }
+
+  await prisma.rideRequestDriverRating.create({
+    data: {
+      rideRequestId: existing.id,
+      requesterUserId,
+      driverUserId: existing.assignedDriverUserId,
+      rating: input.rating,
+      comment,
+    },
+  });
+
+  return findRideRequestForUser(id, requesterUserId);
 }
 
 export async function findVehicleTypeByIdIfActive(id: string) {

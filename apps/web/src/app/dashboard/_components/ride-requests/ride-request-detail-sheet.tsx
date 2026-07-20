@@ -44,6 +44,10 @@ import {
   RideRequestContractSummaryCard,
 } from "./ride-request-contract-info";
 import { RideRequestDispatchAssignmentSection } from "./ride-request-dispatch-assignment";
+import {
+  RideRequestDriverRatingSection,
+  type RideRequestDriverRatingDisplayLabels,
+} from "./ride-request-driver-rating-display";
 
 const LazyRideRequestRouteMap = dynamic(
   () =>
@@ -96,10 +100,13 @@ type RideRequestDetailSheetProps = {
   emptyTitle?: string;
   showCustomerPolicy?: boolean;
   showCustomerActions?: boolean;
+  onRateDriver?: () => void;
   requester?: RideRequestRequesterSummary;
   requesterLabels?: RideRequestRequesterLabels;
   manageActions?: RideRequestManageActions;
   dispatchPanel?: ReactNode;
+  driverRatingVariant?: "customer" | "admin";
+  driverRatingLabels?: RideRequestDriverRatingDisplayLabels;
 };
 
 function DetailSection({
@@ -220,10 +227,13 @@ export function RideRequestDetailSheet({
   emptyTitle,
   showCustomerPolicy = true,
   showCustomerActions = true,
+  onRateDriver,
   requester,
   requesterLabels,
   manageActions,
   dispatchPanel,
+  driverRatingVariant = "customer",
+  driverRatingLabels,
 }: RideRequestDetailSheetProps) {
   const historyCopy = getCustomerRequestHistoryMessages(locale as "en" | "am");
   const requestCopy = getCustomerRequestsMessages(locale as "en" | "am");
@@ -263,6 +273,25 @@ export function RideRequestDetailSheet({
   const shortRequestId = request ? request.id.slice(0, 8).toUpperCase() : "";
   const hasNotes = Boolean(request?.notes?.trim());
   const isSubmitting = Boolean(manageActions?.submitting);
+
+  const driverRatingLabelsResolved: RideRequestDriverRatingDisplayLabels =
+    driverRatingLabels ?? {
+      section: historyCopy.rating.section,
+      noComment: historyCopy.rating.noComment,
+      ratedOn: historyCopy.rating.ratedOn,
+      description: historyCopy.rating.description,
+      rateDriver: historyCopy.rateDriver,
+    };
+
+  const driverRatingSection = request ? (
+    <RideRequestDriverRatingSection
+      request={request}
+      locale={locale}
+      variant={driverRatingVariant}
+      labels={driverRatingLabelsResolved}
+      onRateDriver={onRateDriver}
+    />
+  ) : null;
 
   return (
     <Sheet open={open} onOpenChange={(next) => !isSubmitting && onOpenChange(next)}>
@@ -441,7 +470,11 @@ export function RideRequestDetailSheet({
             />
           ) : null}
 
+          {driverRatingVariant !== "admin" ? driverRatingSection : null}
+
           {dispatchPanel}
+
+          {driverRatingVariant === "admin" ? driverRatingSection : null}
 
           <DetailSection title={historyCopy.detailRouteSection} icon={Route}>
             <div className="space-y-2">
