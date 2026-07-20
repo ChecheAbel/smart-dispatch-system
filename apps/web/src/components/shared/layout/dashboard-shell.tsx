@@ -25,7 +25,7 @@ function ShellLoadingState() {
     <div className="admin-theme flex min-h-svh" style={{ backgroundColor: adminTheme.surface }}>
       <div
         className="hidden border-r border-white/10 p-4 md:block"
-        style={{ width: adminTheme.sidebarWidth, backgroundColor: adminTheme.brand }}
+        style={{ width: adminTheme.sidebarWidth, backgroundColor: "var(--brand-primary)" }}
       >
         <Skeleton className="h-8 w-40 bg-white/15" />
         <div className="mt-8 space-y-3">

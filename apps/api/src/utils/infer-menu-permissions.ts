@@ -56,11 +56,14 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
     return ["notifications.read", "system_settings.read"];
   }
 
-  if (normalizedSlug === "deadline-settings") {
+  if (normalizedSlug === "deadline-settings" || normalizedSlug === "branding-settings") {
     return ["system_settings.read"];
   }
 
-  if (normalizedPath === "/admin/system-settings/deadline") {
+  if (
+    normalizedPath === "/admin/system-settings/deadline" ||
+    normalizedPath === "/admin/system-settings/branding"
+  ) {
     return ["system_settings.read"];
   }
 

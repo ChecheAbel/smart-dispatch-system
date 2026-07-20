@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useLocale } from "@/components/shared/providers";
 import { usePortalShell } from "@/components/shared/providers/portal-shell-context";
-import { adminTheme } from "@/lib/admin-theme";
 import { Separator } from "@/components/ui/separator";
 import { formatMessage } from "@/translations";
 
@@ -28,7 +27,7 @@ export function DashboardFooter() {
           <Link
             href={homePath}
             className="font-medium transition-colors hover:text-[#C9B87A]"
-            style={{ color: adminTheme.brand }}
+            style={{ color: "var(--brand-primary)" }}
           >
             {copy.footer.backToWebsite}
           </Link>

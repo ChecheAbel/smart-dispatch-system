@@ -4694,6 +4694,108 @@
       }
     }
   },
+  "adminBrandingSettings": {
+    "eyebrow": "System settings",
+    "title": "Branding",
+    "description": "Customize company identity, logo, brand colors, and support contacts for white-label deployments.",
+    "loading": "Loading branding settings...",
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to system settings is required to open this page. Ask an administrator to grant the system_settings.read permission for your role.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "sections": {
+      "identity": {
+        "title": "Identity",
+        "description": "Company and product names shown across the product."
+      },
+      "logo": {
+        "title": "Logo",
+        "description": "Upload a logo to replace the default brand mark."
+      },
+      "colors": {
+        "title": "Colors",
+        "description": "Primary and accent colors used in shells and theme tokens."
+      },
+      "support": {
+        "title": "Support",
+        "description": "Contact details operators can show to customers."
+      }
+    },
+    "fields": {
+      "companyName": "Company name",
+      "productName": "Product name",
+      "primaryColor": "Primary color",
+      "accentColor": "Accent color",
+      "supportEmail": "Support email",
+      "supportPhone": "Support phone",
+      "websiteUrl": "Website URL"
+    },
+    "logo": {
+      "uploadButton": "Upload logo",
+      "uploading": "Uploading…",
+      "hint": "JPG, PNG, or WEBP up to 5 MB.",
+      "replace": "Replace logo",
+      "dropHint": "Click to upload a new mark"
+    },
+    "preview": {
+      "title": "Live preview",
+      "description": "Updates as you edit. Save to apply across the product.",
+      "onDark": "Dark shell",
+      "onLight": "Light shell"
+    },
+    "configure": {
+      "description": "Changes apply across landing, auth, and dashboard shells.",
+      "saveButton": "Save changes",
+      "savingButton": "Saving…",
+      "readOnlyHint": "You have view-only access. Ask an administrator to grant write permission."
+    },
+    "toast": {
+      "loadFailed": {
+        "title": "Could not load branding settings",
+        "description": "Please try again or refresh the page."
+      },
+      "updateSuccess": {
+        "title": "Branding updated",
+        "description": "Your brand kit has been saved successfully."
+      },
+      "updateFailed": {
+        "title": "Could not save branding",
+        "description": "Please verify the values and try again."
+      },
+      "invalidValues": {
+        "title": "Missing identity fields",
+        "description": "Company name and product name are required."
+      },
+      "invalidColors": {
+        "title": "Invalid colors",
+        "description": "Use 6-digit hex colors such as #1C3A34."
+      },
+      "invalidEmail": {
+        "title": "Invalid support email",
+        "description": "Enter a valid email address or leave the field blank."
+      },
+      "invalidLogo": {
+        "title": "Unsupported logo file",
+        "description": "Upload a JPG, PNG, or WEBP image."
+      },
+      "logoTooLarge": {
+        "title": "Logo too large",
+        "description": "Brand logo must be 5 MB or smaller."
+      },
+      "logoUploadSuccess": {
+        "title": "Logo uploaded",
+        "description": "The new logo is now active across the product."
+      },
+      "logoUploadFailed": {
+        "title": "Could not upload logo",
+        "description": "Please try again with a valid image file."
+      }
+    }
+  },
   "landing": {
     "nav": {
       "howItWorks": "How it Works",

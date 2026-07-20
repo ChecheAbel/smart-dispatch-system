@@ -49,6 +49,8 @@
 }
 
 :root {
+  --brand-primary: #1c3a34;
+  --brand-accent: #c9b87a;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -186,14 +188,14 @@
 
 /* Admin console — overrides shadcn sidebar tokens (including portaled mobile sheet) */
 .admin-theme {
-  --sidebar: #1c3a34;
+  --sidebar: var(--brand-primary);
   --sidebar-foreground: #ffffff;
-  --sidebar-primary: #c9b87a;
-  --sidebar-primary-foreground: #1c3a34;
-  --sidebar-accent: color-mix(in srgb, #ffffff 12%, #1c3a34);
+  --sidebar-primary: var(--brand-accent);
+  --sidebar-primary-foreground: var(--brand-primary);
+  --sidebar-accent: color-mix(in srgb, #ffffff 12%, var(--brand-primary));
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: color-mix(in srgb, #ffffff 14%, transparent);
-  --sidebar-ring: #c9b87a;
+  --sidebar-ring: var(--brand-accent);
   --sidebar-width: 18.5rem;
 }
 

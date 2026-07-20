@@ -4694,6 +4694,108 @@
       }
     }
   },
+  "adminBrandingSettings": {
+    "eyebrow": "የስርዓት ቅንብሮች",
+    "title": "ብራንድ",
+    "description": "ለነጭ-መለያ ማሰማራት የኩባንያ ማንነት፣ አርማ፣ የብራንድ ቀለሞች እና የድጋፍ መገናኛዎችን ያብጁ።",
+    "loading": "የብራንድ ቅንብሮችን በመጫን ላይ...",
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህንን ገጽ ለመክፈት የስርዓት ቅንብሮችን የማየት መብት ያስፈልጋል። እባክዎ አስተዳዳሪን ለእርስዎ ሚና system_settings.read ፈቃድ እንዲሰጥዎ ይጠይቁ።",
+      "sessionHint": "ፈቃዶች በቅርቡ ከተቀየሩ፣ እባክዎ ክፍለ-ጊዜዎን ለማደስ በመጀመሪያ ዘግተው ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚናዎ ፈቃዶች የሚቆጣጠር ነው።",
+      "goToDashboard": "ወደ ዳሽቦርድ ሂድ"
+    },
+    "sections": {
+      "identity": {
+        "title": "ማንነት",
+        "description": "በምርቱ ላይ የሚታዩ የኩባንያ እና የምርት ስሞች።"
+      },
+      "logo": {
+        "title": "አርማ",
+        "description": "ነባሩን ብራንድ ምልክት ለመተካት አርማ ይጫኑ።"
+      },
+      "colors": {
+        "title": "ቀለሞች",
+        "description": "በሼሎች እና በገጽታ ቶከኖች የሚያገለግሉ ዋና እና አጽንዖት ቀለሞች።"
+      },
+      "support": {
+        "title": "ድጋፍ",
+        "description": "ለደንበኞች ሊታዩ የሚችሉ የመገናኛ ዝርዝሮች።"
+      }
+    },
+    "fields": {
+      "companyName": "የኩባንያ ስም",
+      "productName": "የምርት ስም",
+      "primaryColor": "ዋና ቀለም",
+      "accentColor": "አጽንዖት ቀለም",
+      "supportEmail": "የድጋፍ ኢሜይል",
+      "supportPhone": "የድጋፍ ስልክ",
+      "websiteUrl": "የድረ-ገጽ አድራሻ"
+    },
+    "logo": {
+      "uploadButton": "አርማ ጫን",
+      "uploading": "በመጫን ላይ…",
+      "hint": "JPG፣ PNG ወይም WEBP እስከ 5 ሜባ።",
+      "replace": "አርማ ቀይር",
+      "dropHint": "አዲስ አርማ ለመጫን ጠቅ ያድርጉ"
+    },
+    "preview": {
+      "title": "ቀጥታ ቅድመ-እይታ",
+      "description": "እንደሚያስተካክሉ ይዘምናል። በምርቱ ላይ ለመተግበር ያስቀምጡ።",
+      "onDark": "ጨለማ ሼል",
+      "onLight": "ብርሃን ሼል"
+    },
+    "configure": {
+      "description": "ለውጦቹ በማረፊያ፣ በመግቢያ እና በዳሽቦርድ ሼሎች ላይ ይተገበራሉ።",
+      "saveButton": "ለውጦችን አስቀምጥ",
+      "savingButton": "በማስቀመጥ ላይ…",
+      "readOnlyHint": "የማየት ብቻ መብት አለዎት። ለመጻፍ ፈቃድ እንዲሰጥዎ አስተዳዳሪን ይጠይቁ።"
+    },
+    "toast": {
+      "loadFailed": {
+        "title": "የብራንድ ቅንብሮችን መጫን አልተቻለም",
+        "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+      },
+      "updateSuccess": {
+        "title": "ብራንድ ተዘምኗል",
+        "description": "የብራንድ ኪትዎ በተሳካ ሁኔታ ተቀምጧል።"
+      },
+      "updateFailed": {
+        "title": "ብራንድ ማስቀመጥ አልተቻለም",
+        "description": "እባክዎ እሴቶቹን ያረጋግጡና እንደገና ይሞክሩ።"
+      },
+      "invalidValues": {
+        "title": "የማንነት መስኮች ጠፍተዋል",
+        "description": "የኩባንያ ስም እና የምርት ስም ያስፈልጋሉ።"
+      },
+      "invalidColors": {
+        "title": "ልክ ያልሆኑ ቀለሞች",
+        "description": "እንደ #1C3A34 ያሉ 6-አሃዝ ሄክስ ቀለሞችን ይጠቀሙ።"
+      },
+      "invalidEmail": {
+        "title": "ልክ ያልሆነ የድጋፍ ኢሜይል",
+        "description": "ትክክለኛ ኢሜይል ያስገቡ ወይም መስኩን ባዶ ይተዉት።"
+      },
+      "invalidLogo": {
+        "title": "ያልተደገፈ የአርማ ፋይል",
+        "description": "JPG፣ PNG ወይም WEBP ምስል ይጫኑ።"
+      },
+      "logoTooLarge": {
+        "title": "አርማው በጣም ትልቅ ነው",
+        "description": "የብራንድ አርማ ከ 5 ሜባ መብለጥ የለበትም።"
+      },
+      "logoUploadSuccess": {
+        "title": "አርማ ተጭኗል",
+        "description": "አዲሱ አርማ አሁን በምርቱ ላይ ንቁ ነው።"
+      },
+      "logoUploadFailed": {
+        "title": "አርማ መጫን አልተቻለም",
+        "description": "እባክዎ በትክክለኛ የምስል ፋይል እንደገና ይሞክሩ።"
+      }
+    }
+  },
   "landing": {
     "nav": {
       "howItWorks": "እንዴት እንደሚሰራ",

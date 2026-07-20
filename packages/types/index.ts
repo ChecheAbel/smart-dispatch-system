@@ -1208,3 +1208,14 @@ export interface CustomerPaymentOptions {
   telebirr: CustomerTelebirrPaymentConfig;
   cbe_birr: CustomerCbePaymentConfig;
 }
+
+export interface BrandingSettings {
+  company_name: string;
+  product_name: string;
+  logo_url: string | null;
+  primary_color: string;
+  accent_color: string;
+  support_email: string | null;
+  support_phone: string | null;
+  website_url: string | null;
+}

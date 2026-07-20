@@ -34,6 +34,7 @@ import { startInvoiceAutomationScheduler } from "./services/scheduler.service";
 import { requestLogger } from "./middleware/request-logger";
 import { ensureDriverLicenseUploadDir, getDriverLicenseUploadDir } from "./utils/driver-license-upload";
 import { ensureVehicleUploadDir, getVehicleUploadDir } from "./utils/vehicle-photo-upload";
+import { ensureBrandingUploadDir, getBrandingUploadDir } from "./utils/brand-logo-upload";
 import { loadAppSettings } from "./models/app-setting.model";
 import { sendSuccess } from "./utils/response";
 
@@ -50,6 +51,8 @@ ensureDriverLicenseUploadDir();
 app.use("/uploads/driver-licenses", express.static(getDriverLicenseUploadDir()));
 ensureVehicleUploadDir();
 app.use("/uploads/vehicles", express.static(getVehicleUploadDir()));
+ensureBrandingUploadDir();
+app.use("/uploads/branding", express.static(getBrandingUploadDir()));
 
 registerAuthRoutes(app);
 registerUserRoutes(app);

@@ -34,6 +34,7 @@ import type {
   CustomerInvoicesMessages,
   AdminProfileMessages,
   AdminDeadlineSettingsMessages,
+  AdminBrandingSettingsMessages,
   AdminAuthMessages,
   CustomerAuthMessages,
   LandingMessages,
@@ -78,6 +79,7 @@ export type {
   CustomerInvoicesMessages,
   AdminProfileMessages,
   AdminDeadlineSettingsMessages,
+  AdminBrandingSettingsMessages,
   AdminAuthMessages,
   CustomerAuthMessages,
   LandingMessages,
@@ -241,6 +243,12 @@ export function getAdminDeadlineSettingsMessages(
   locale: SupportedLocale,
 ): AdminDeadlineSettingsMessages {
   return getTranslations(locale).adminDeadlineSettings;
+}
+
+export function getAdminBrandingSettingsMessages(
+  locale: SupportedLocale,
+): AdminBrandingSettingsMessages {
+  return getTranslations(locale).adminBrandingSettings;
 }
 
 export function getAdminAuthMessages(locale: SupportedLocale): AdminAuthMessages {

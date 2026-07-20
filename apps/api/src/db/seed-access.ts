@@ -249,6 +249,17 @@ const DEFAULT_MENUS = [
     ],
   },
   {
+    slug: "branding-settings",
+    path: "/admin/system-settings/branding",
+    icon: "palette",
+    sortOrder: 50,
+    parentSlug: "system-settings",
+    translations: [
+      { locale: "en", label: "Branding" },
+      { locale: "am", label: "ብራንድ" },
+    ],
+  },
+  {
     slug: "fleet",
     path: null,
     icon: "truck",
