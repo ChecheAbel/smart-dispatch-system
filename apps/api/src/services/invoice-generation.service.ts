@@ -11,6 +11,10 @@ import {
   computeTripBillingSnapshot,
   ensureTripBillingSnapshot,
 } from "../services/trip-billing.service";
+import {
+  ensureContractEnrollment,
+  findEnrollmentCoveringTrip,
+} from "../models/contract-enrollment.model";
 
 export type GenerateInvoiceOptions = {
   contractEnrollmentId: string;
@@ -163,6 +167,15 @@ export async function generateInvoiceForTrip(rideRequestId: string, options?: { 
   );
   const periodEnd = periodStart;
 
+  let enrollment =
+    (await findEnrollmentCoveringTrip(contract.id, ride.requesterUserId, completedDay)) ??
+    (await ensureContractEnrollment({
+      contractId: contract.id,
+      requesterUserId: ride.requesterUserId,
+      scheduledAt: ride.scheduledAt,
+      billingInterval: contract.billingInterval as ContractBillingInterval,
+    }));
+
   const paymentTermsDays = contract.paymentTermsDays;
   const issuedAt = options?.issue ? new Date() : null;
   const dueAt =
@@ -173,7 +186,7 @@ export async function generateInvoiceForTrip(rideRequestId: string, options?: { 
   return createInvoice({
     referenceNumber,
     contractId: contract.id,
-    contractEnrollmentId: null,
+    contractEnrollmentId: enrollment.id,
     requesterUserId: ride.requesterUserId,
     periodStart,
     periodEnd,

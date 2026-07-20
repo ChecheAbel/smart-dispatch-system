@@ -122,6 +122,24 @@ export async function listRelevantEnrollmentsForUser(requesterUserId: string) {
   });
 }
 
+const customerEnrollmentInvoiceSelect = {
+  id: true,
+  referenceNumber: true,
+  status: true,
+  totalAmount: true,
+  currency: true,
+  dueAt: true,
+  paidAt: true,
+  issuedAt: true,
+  contractId: true,
+  periodStart: true,
+  periodEnd: true,
+} as const;
+
+type CustomerEnrollmentInvoiceSummary = Prisma.InvoiceGetPayload<{
+  select: typeof customerEnrollmentInvoiceSelect;
+}>;
+
 const customerEnrollmentInclude = {
   contract: {
     select: {
@@ -137,22 +155,74 @@ const customerEnrollmentInclude = {
     where: { status: { not: "draft" as const } },
     orderBy: { createdAt: "desc" as const },
     take: 1,
-    select: {
-      id: true,
-      referenceNumber: true,
-      status: true,
-      totalAmount: true,
-      currency: true,
-      dueAt: true,
-      paidAt: true,
-      issuedAt: true,
-    },
+    select: customerEnrollmentInvoiceSelect,
   },
 } as const;
 
 export type DbCustomerContractEnrollment = Prisma.ContractEnrollmentGetPayload<{
   include: typeof customerEnrollmentInclude;
 }>;
+
+function invoiceOverlapsEnrollment(
+  invoice: Pick<CustomerEnrollmentInvoiceSummary, "contractId" | "periodStart" | "periodEnd">,
+  enrollment: Pick<DbCustomerContractEnrollment, "contractId" | "startsAt" | "endsAt">,
+) {
+  return (
+    invoice.contractId === enrollment.contractId &&
+    invoice.periodStart.getTime() <= enrollment.endsAt.getTime() &&
+    invoice.periodEnd.getTime() >= enrollment.startsAt.getTime()
+  );
+}
+
+function toEnrollmentInvoiceListItem(
+  invoice: CustomerEnrollmentInvoiceSummary,
+): DbCustomerContractEnrollment["invoices"][number] {
+  const { contractId: _contractId, periodStart: _periodStart, periodEnd: _periodEnd, ...summary } =
+    invoice;
+  return summary;
+}
+
+async function attachUnlinkedInvoicesToEnrollments(
+  requesterUserId: string,
+  enrollments: DbCustomerContractEnrollment[],
+) {
+  const needsFallback = enrollments.filter((enrollment) => enrollment.invoices.length === 0);
+  if (needsFallback.length === 0) {
+    return enrollments;
+  }
+
+  const contractIds = [...new Set(needsFallback.map((enrollment) => enrollment.contractId))];
+  const unlinkedInvoices = await prisma.invoice.findMany({
+    where: {
+      requesterUserId,
+      contractId: { in: contractIds },
+      contractEnrollmentId: null,
+      status: { not: "draft" },
+    },
+    orderBy: { createdAt: "desc" },
+    select: customerEnrollmentInvoiceSelect,
+  });
+
+  if (unlinkedInvoices.length === 0) {
+    return enrollments;
+  }
+
+  return enrollments.map((enrollment) => {
+    if (enrollment.invoices.length > 0) {
+      return enrollment;
+    }
+
+    const match = unlinkedInvoices.find((invoice) => invoiceOverlapsEnrollment(invoice, enrollment));
+    if (!match) {
+      return enrollment;
+    }
+
+    return {
+      ...enrollment,
+      invoices: [toEnrollmentInvoiceListItem(match)],
+    };
+  });
+}
 
 export async function listEnrollmentsForRequester(
   requesterUserId: string,
@@ -170,13 +240,16 @@ export async function listEnrollmentsForRequester(
     ];
   }
 
-  return prisma.contractEnrollment.findMany({
-    where,
-    include: customerEnrollmentInclude,
-    skip: pagination.skip,
-    take: pagination.take,
-    orderBy: [{ startsAt: "desc" }, { createdAt: "desc" }],
-  });
+  return attachUnlinkedInvoicesToEnrollments(
+    requesterUserId,
+    await prisma.contractEnrollment.findMany({
+      where,
+      include: customerEnrollmentInclude,
+      skip: pagination.skip,
+      take: pagination.take,
+      orderBy: [{ startsAt: "desc" }, { createdAt: "desc" }],
+    }),
+  );
 }
 
 export async function countEnrollmentsForRequester(requesterUserId: string, search?: string) {
@@ -195,10 +268,17 @@ export async function countEnrollmentsForRequester(requesterUserId: string, sear
 }
 
 export async function findEnrollmentForRequester(id: string, requesterUserId: string) {
-  return prisma.contractEnrollment.findFirst({
+  const enrollment = await prisma.contractEnrollment.findFirst({
     where: { id, requesterUserId },
     include: customerEnrollmentInclude,
   });
+
+  if (!enrollment) {
+    return null;
+  }
+
+  const [withFallback] = await attachUnlinkedInvoicesToEnrollments(requesterUserId, [enrollment]);
+  return withFallback;
 }
 
 export async function listEnrollmentsByContractId(contractId: string) {
