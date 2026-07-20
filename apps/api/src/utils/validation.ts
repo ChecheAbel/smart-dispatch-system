@@ -15,6 +15,10 @@ export function getOptionalString(value: unknown) {
 }
 
 export function getStringArray(value: unknown) {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    return trimmed.length ? [trimmed] : [];
+  }
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
 }

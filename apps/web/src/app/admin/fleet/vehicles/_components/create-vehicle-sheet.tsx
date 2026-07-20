@@ -571,6 +571,12 @@ export function CreateVehicleSheet({
     payload.append("status", form.status);
     payload.append("notes", form.notes.trim());
 
+    if (isEdit) {
+      // Tell the API this request intentionally replaces the image list,
+      // including when the user cleared every photo.
+      payload.append("replace_vehicle_images", "true");
+    }
+
     for (const image of form.images) {
       if (image.kind === "existing") {
         payload.append("vehicle_images_existing", image.value);

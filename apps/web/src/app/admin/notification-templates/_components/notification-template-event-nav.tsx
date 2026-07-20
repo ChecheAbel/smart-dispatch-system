@@ -13,9 +13,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { adminHeadingClass, adminSearchInputClass } from "@/lib/admin-theme";
-import { getAdminNotificationTemplatesMessages } from "@/translations";
+import { formatMessage, getAdminNotificationTemplatesMessages } from "@/translations";
 import { cn } from "@/lib/utils";
-import { formatMessage } from "@/translations";
 import {
   EVENT_GROUPS,
   getEventChannelStats,
@@ -31,13 +30,15 @@ type NotificationTemplateEventNavProps = {
   className?: string;
 };
 
+type EventCopy = { title: string; description: string };
+
 function getEventCopy(
   module: NotificationModule,
   event: string,
   copy: ReturnType<typeof getAdminNotificationTemplatesMessages>,
-) {
-  const events = copy.events[module];
-  return events[event as keyof typeof events];
+): EventCopy {
+  const events = copy.events[module] as Record<string, EventCopy | undefined>;
+  return events[event] ?? { title: event, description: "" };
 }
 
 function getGroupLabel(
@@ -45,7 +46,8 @@ function getGroupLabel(
   groupId: string,
   copy: ReturnType<typeof getAdminNotificationTemplatesMessages>,
 ) {
-  return copy.eventGroups[module][groupId as keyof (typeof copy.eventGroups)[typeof module]];
+  const groups = copy.eventGroups[module] as Record<string, string | undefined>;
+  return groups[groupId] ?? groupId;
 }
 
 export function NotificationTemplateEventNav({
@@ -90,17 +92,8 @@ export function NotificationTemplateEventNav({
       return null;
     }
 
-    const isActiveEvent = stats.enabled > 0;
-
     return (
-      <span
-        className={cn(
-          "shrink-0 rounded-md px-1.5 py-0.5 text-[10px] font-semibold tabular-nums",
-          isActiveEvent
-            ? "bg-emerald-100 text-emerald-700"
-            : "bg-slate-100 text-slate-500",
-        )}
-      >
+      <span className="shrink-0 text-[11px] font-medium tabular-nums text-slate-400">
         {formatMessage(copy.shell.channelsEnabled, {
           enabled: String(stats.enabled),
           total: String(stats.total),
@@ -118,6 +111,12 @@ export function NotificationTemplateEventNav({
 
       <div className="border-b border-slate-200/80 p-3 lg:hidden">
         <Select
+          items={EVENT_GROUPS[module].flatMap((group) =>
+            group.events.map((event) => ({
+              value: event,
+              label: getEventCopy(module, event, copy).title,
+            })),
+          )}
           value={activeEvent}
           onValueChange={(value) => {
             if (value) {
@@ -166,15 +165,17 @@ export function NotificationTemplateEventNav({
             <p className="px-2 py-3 text-xs text-slate-500">{copy.shell.eventSearchEmpty}</p>
           ) : (
             filteredGroups.map((group) => (
-              <div key={group.id} className="space-y-1.5">
-                <p className="px-2 text-[10px] font-bold tracking-[0.14em] text-slate-400 uppercase">
+              <div key={group.id} className="space-y-1">
+                <p className="px-2.5 pb-1 text-[10px] font-semibold tracking-[0.12em] text-slate-400 uppercase">
                   {getGroupLabel(module, group.id, copy)}
                 </p>
 
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   {group.events.map((event) => {
                     const eventCopy = getEventCopy(module, event, copy);
                     const isActive = activeEvent === event;
+                    const enabled =
+                      getEventChannelStats(module, event, templates, formState).enabled > 0;
 
                     return (
                       <button
@@ -183,35 +184,39 @@ export function NotificationTemplateEventNav({
                         onClick={() => onSelectEvent(event)}
                         aria-current={isActive ? "page" : undefined}
                         className={cn(
-                          "flex w-full items-start gap-2 rounded-lg border px-3 py-2.5 text-left transition-all",
-                          "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1C3A34]/15",
+                          "flex w-full items-start gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors",
+                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1C3A34]/20",
                           isActive
-                            ? "border-[#1C3A34]/20 bg-white shadow-sm ring-1 ring-[#1C3A34]/10"
-                            : "border-transparent bg-transparent hover:border-slate-200 hover:bg-white/80",
+                            ? "bg-white shadow-sm ring-1 ring-slate-200/80"
+                            : "hover:bg-white/70",
                         )}
                       >
                         <span
                           className={cn(
                             "mt-1.5 size-1.5 shrink-0 rounded-full",
-                            getEventChannelStats(module, event, templates, formState).enabled > 0
-                              ? "bg-emerald-500"
-                              : "bg-slate-300",
+                            isActive
+                              ? "bg-[#1C3A34]"
+                              : enabled
+                                ? "bg-emerald-500"
+                                : "bg-slate-300",
                           )}
                           aria-hidden
                         />
                         <span className="min-w-0 flex-1">
-                          <span className="flex items-start justify-between gap-2">
+                          <span className="flex items-baseline justify-between gap-2">
                             <span
                               className={cn(
-                                "text-sm font-semibold",
-                                isActive ? "text-[#1C3A34]" : "text-slate-800",
+                                "text-sm",
+                                isActive
+                                  ? "font-semibold text-[#1C3A34]"
+                                  : "font-medium text-slate-700",
                               )}
                             >
                               {eventCopy.title}
                             </span>
                             {renderChannelBadge(event)}
                           </span>
-                          <span className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-slate-500">
+                          <span className="mt-0.5 line-clamp-1 text-xs leading-relaxed text-slate-500">
                             {eventCopy.description}
                           </span>
                         </span>

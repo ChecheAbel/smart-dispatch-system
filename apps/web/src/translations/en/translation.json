@@ -2380,11 +2380,13 @@
       "contextPathLabel": "Current template location",
       "eventPickerTitle": "Trigger event",
       "eventPickerDescription": "Select when the message should be sent, then edit each channel on the right.",
+      "eventSelectedLabel": "Editing",
       "eventSearchPlaceholder": "Search events...",
       "eventSearchEmpty": "No events match your search.",
       "channelsEnabled": "{enabled}/{total} on",
       "placeholdersToggle": "Placeholder reference",
       "summaryEnabled": "{enabled} of {total} channels enabled",
+      "eventSummaryLabel": "Channels for this event",
       "channelsSummaryLabel": "Channels on",
       "channelsSummaryAria": "{enabled} of {total} notification channels enabled",
       "notificationsLinkDescription": "Email & SMS provider settings",
@@ -3437,9 +3439,16 @@
       }
     },
     "assignDriverSheet": {
+      "eyebrow": "Fleet assignment",
       "title": "Assign default driver",
       "description": "Set the driver who normally operates this vehicle. Ride dispatch uses this pairing when assigning trips.",
       "vehicleLabel": "Vehicle",
+      "currentDriver": "Currently assigned",
+      "selectDriver": "Choose driver",
+      "selectedDriver": "Selected driver",
+      "noDriverSelected": "No driver selected",
+      "noDriverSelectedHint": "This vehicle will stay unavailable for dispatch until a driver is assigned.",
+      "loadingDrivers": "Loading drivers…",
       "hint": "Only vehicles with an assigned driver can be selected during ride dispatch. A driver can only be linked to one vehicle at a time.",
       "save": "Save assignment",
       "saving": "Saving...",
@@ -4592,8 +4601,8 @@
   },
   "adminDeadlineSettings": {
     "eyebrow": "System settings",
-    "title": "Deadline hub",
-    "description": "Configure the platform-wide deadline windows used for ride requests, invoices, and compliance alerts.",
+    "title": "Deadlines",
+    "description": "Set how long customers can cancel or edit requests, and when invoices and compliance items should be flagged as due soon.",
     "loading": "Loading deadline settings...",
     "accessDenied": {
       "eyebrow": "Access denied",
@@ -4608,18 +4617,36 @@
       "days": "{value} days",
       "empty": "—"
     },
+    "units": {
+      "minutes": "min",
+      "days": "days"
+    },
+    "sections": {
+      "rideRequests": {
+        "title": "Ride requests",
+        "description": "Grace periods after a customer submits a pending request."
+      },
+      "billing": {
+        "title": "Invoices",
+        "description": "When issued invoices should enter the due-soon window."
+      },
+      "compliance": {
+        "title": "Vehicle compliance",
+        "description": "Lead time before insurance or inspection expiry alerts."
+      }
+    },
     "modules": {
       "ride_request_cancel_grace_minutes": {
         "title": "Ride requests",
         "description": "Control how long customers can cancel a pending ride request.",
-        "helper": "Used by ride request details, cancellation rules, and message templates.",
-        "label": "Cancel deadline"
+        "helper": "Applies to pending requests in the customer dashboard and cancel policies.",
+        "label": "Cancel window"
       },
       "ride_request_edit_grace_minutes": {
         "title": "Ride requests edit grace",
         "description": "Control how long customers can edit a pending ride request after submission.",
-        "helper": "Used by ride request details, edit policies, and forms.",
-        "label": "Edit deadline"
+        "helper": "Applies to pending requests in the customer dashboard and edit forms.",
+        "label": "Edit window"
       },
       "invoice_due_soon_days": {
         "title": "Invoices",
@@ -4630,22 +4657,23 @@
       "insurance_due_soon_days": {
         "title": "Insurance compliance",
         "description": "Set when insurance records should be highlighted as due soon.",
-        "helper": "Used across vehicle compliance views and insurance alert templates.",
-        "label": "Due-soon window"
+        "helper": "Used in vehicle compliance views and insurance alert templates.",
+        "label": "Insurance due-soon"
       },
       "inspection_due_soon_days": {
         "title": "Inspection compliance",
         "description": "Set when inspection records should be highlighted as due soon.",
-        "helper": "Used across vehicle compliance views and inspection alert templates.",
-        "label": "Due-soon window"
+        "helper": "Used in vehicle compliance views and inspection alert templates.",
+        "label": "Inspection due-soon"
       }
     },
     "configure": {
       "title": "Configure module deadlines",
-      "description": "Each setting updates the corresponding reminders, dashboards, and message templates.",
-      "rangeInfo": "Enter a value between {min} and {max} {suffix}.",
-      "saveButton": "Save setting",
-      "savingButton": "Saving..."
+      "description": "Changes apply across reminders, dashboards, and message templates.",
+      "rangeInfo": "Allowed range: {min}–{max} {suffix}",
+      "saveButton": "Save changes",
+      "savingButton": "Saving…",
+      "readOnlyHint": "You have view-only access. Ask an administrator to grant write permission."
     },
     "toast": {
       "loadFailed": {

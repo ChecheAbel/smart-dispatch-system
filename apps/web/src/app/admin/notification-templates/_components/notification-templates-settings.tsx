@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronRight, Mail, MessageSquare, Save } from "lucide-react";
+import { Mail, MessageSquare, Save } from "lucide-react";
 import type {
   NotificationChannel,
   NotificationModule,
@@ -25,7 +25,7 @@ import {
   updateNotificationTemplates,
 } from "@/lib/notification-api";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import { getAdminNotificationTemplatesMessages } from "@/translations";
+import { formatMessage, getAdminNotificationTemplatesMessages } from "@/translations";
 import { cn } from "@/lib/utils";
 import {
   NotificationTemplatePlaceholdersGuide,
@@ -39,6 +39,7 @@ import {
   parseNotificationModule,
 } from "./notification-template-modules";
 import {
+  getEventChannelStats,
   MODULE_EVENTS,
   shouldShowTemplate,
 } from "./notification-template-shared";
@@ -239,8 +240,14 @@ export function NotificationTemplatesSettings({
     return grouped;
   }, [activeEventTemplates]);
 
-  const activeEventCopy =
-    copy.events[activeModule][activeEvent as keyof (typeof copy.events)[typeof activeModule]];
+  const activeEventCopy = (
+    copy.events[activeModule] as Record<string, { title: string; description: string } | undefined>
+  )[activeEvent] ?? { title: activeEvent, description: "" };
+
+  const activeEventStats = useMemo(
+    () => getEventChannelStats(activeModule, activeEvent, templates, formState),
+    [activeEvent, activeModule, formState, templates],
+  );
 
   function updateRoute(module: NotificationModule, event: string) {
     const params = new URLSearchParams(searchParams.toString());
@@ -388,18 +395,29 @@ export function NotificationTemplatesSettings({
 
         <div className="min-w-0 flex flex-col">
             <div className="border-b border-slate-200/80 bg-white px-5 py-4">
-              <nav
-                aria-label={copy.shell.contextPathLabel}
-                className="mb-2 flex flex-wrap items-center gap-1.5 text-xs font-medium text-slate-500"
-              >
-                <span className="text-slate-700">{activeModuleCopy.title}</span>
-                <ChevronRight className="size-3.5 shrink-0 text-slate-400" aria-hidden />
-                <span className="text-slate-700">{activeEventCopy.title}</span>
-              </nav>
-              <h3 className={cn("text-base font-bold", adminHeadingClass)}>
-                {activeEventCopy.title}
-              </h3>
-              <p className="mt-1 text-sm leading-relaxed text-slate-500">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                <div className="min-w-0">
+                  <p className="text-xs text-slate-500">{activeModuleCopy.title}</p>
+                  <h3 className={cn("mt-0.5 text-lg font-bold tracking-tight", adminHeadingClass)}>
+                    {activeEventCopy.title}
+                  </h3>
+                </div>
+                {activeEventStats.total > 0 ? (
+                  <p
+                    className="text-xs font-medium text-slate-500"
+                    aria-label={formatMessage(copy.shell.channelsSummaryAria, {
+                      enabled: String(activeEventStats.enabled),
+                      total: String(activeEventStats.total),
+                    })}
+                  >
+                    {formatMessage(copy.shell.summaryEnabled, {
+                      enabled: String(activeEventStats.enabled),
+                      total: String(activeEventStats.total),
+                    })}
+                  </p>
+                ) : null}
+              </div>
+              <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-slate-500">
                 {activeEventCopy.description}
               </p>
             </div>

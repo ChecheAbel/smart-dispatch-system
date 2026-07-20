@@ -4,9 +4,10 @@ import { useMemo, useState } from "react";
 import { Loader2, Mail, Send, Smartphone } from "lucide-react";
 import type { NotificationTemplate } from "@smart-dispatch/types";
 import { useLocale } from "@/components/shared/providers";
-import { AdminTextField } from "@/components/shared/admin-form-field";
 import { Button } from "@/components/ui/button";
-import { adminHeadingClass } from "@/lib/admin-theme";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { adminHeadingClass, adminInputClass } from "@/lib/admin-theme";
 import { getAdminNotificationTemplatesMessages } from "@/translations";
 import { cn } from "@/lib/utils";
 
@@ -119,41 +120,79 @@ export function NotificationTemplateTestPanel({
           <p className="text-[11px] leading-relaxed text-slate-500">{testCopy.previewNote}</p>
         </div>
 
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-          <AdminTextField
-            id={`template-test-${template.id}`}
-            label={isEmail ? copy.testEmailLabel : copy.testPhoneLabel}
-            hint={isEmail ? testCopy.emailHint : testCopy.phoneHint}
-            error={fieldError ?? undefined}
-            icon={isEmail ? Mail : Smartphone}
-            value={recipientValue}
-            onChange={(event) => {
-              onRecipientChange(event.target.value);
-              if (fieldError) {
-                setFieldError(null);
-              }
-            }}
-            disabled={!canWrite || isSending}
-            placeholder={
-              isEmail ? copy.testEmailPlaceholder : copy.testPhonePlaceholder
-            }
-          />
-
-          <Button
-            type="button"
-            disabled={!canWrite || isSending}
-            onClick={() => void handleSend()}
-            className={cn(
-              "h-10 w-full gap-2 rounded-lg bg-[#1C3A34] px-4 text-sm font-medium text-white hover:bg-[#162e29] lg:w-auto",
-            )}
+        <div className="space-y-2">
+          <Label
+            htmlFor={`template-test-${template.id}`}
+            className={cn("text-sm font-medium text-[#1C3A34]", fieldError && "text-red-700")}
           >
-            {isSending ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              <Send className="size-4" />
-            )}
-            {isSending ? copy.testing : copy.testAction}
-          </Button>
+            {isEmail ? copy.testEmailLabel : copy.testPhoneLabel}
+          </Label>
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="relative min-w-0 flex-1">
+              {isEmail ? (
+                <Mail
+                  className={cn(
+                    "pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2",
+                    fieldError ? "text-red-400" : "text-slate-400",
+                  )}
+                  aria-hidden
+                />
+              ) : (
+                <Smartphone
+                  className={cn(
+                    "pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2",
+                    fieldError ? "text-red-400" : "text-slate-400",
+                  )}
+                  aria-hidden
+                />
+              )}
+              <Input
+                id={`template-test-${template.id}`}
+                value={recipientValue}
+                onChange={(event) => {
+                  onRecipientChange(event.target.value);
+                  if (fieldError) {
+                    setFieldError(null);
+                  }
+                }}
+                disabled={!canWrite || isSending}
+                aria-invalid={Boolean(fieldError)}
+                placeholder={
+                  isEmail ? copy.testEmailPlaceholder : copy.testPhonePlaceholder
+                }
+                className={cn(
+                  adminInputClass,
+                  "pl-10",
+                  fieldError &&
+                    "border-red-300 bg-red-50/60 text-red-900 placeholder:text-red-400 focus-visible:border-red-400 focus-visible:ring-red-200/60",
+                  (!canWrite || isSending) && "bg-slate-50 text-slate-500",
+                )}
+              />
+            </div>
+
+            <Button
+              type="button"
+              disabled={!canWrite || isSending}
+              onClick={() => void handleSend()}
+              className="h-10 w-full shrink-0 gap-2 rounded-lg bg-[#1C3A34] px-4 text-sm font-medium text-white hover:bg-[#162e29] sm:w-auto"
+            >
+              {isSending ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : (
+                <Send className="size-4" />
+              )}
+              {isSending ? copy.testing : copy.testAction}
+            </Button>
+          </div>
+
+          {fieldError ? (
+            <p className="text-xs text-red-600">{fieldError}</p>
+          ) : (
+            <p className="text-xs leading-relaxed text-slate-500">
+              {isEmail ? testCopy.emailHint : testCopy.phoneHint}
+            </p>
+          )}
         </div>
 
         <p className="rounded-lg border border-slate-200/80 bg-white/70 px-3 py-2 text-[11px] leading-relaxed text-slate-500">

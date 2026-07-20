@@ -2,16 +2,17 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  CarFront,
   Clock3,
   FileText,
-  ShieldCheck,
   Loader2,
   Save,
-  TriangleAlert,
+  ShieldCheck,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useAuth, useLocale } from "@/components/shared/providers";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
@@ -38,7 +39,9 @@ type DeadlineFieldKey =
   | "insurance_due_soon_days"
   | "inspection_due_soon_days";
 
-const DEFAULT_VALUES = {
+type DeadlineSectionId = "rideRequests" | "billing" | "compliance";
+
+const DEFAULT_VALUES: Record<DeadlineFieldKey, string> = {
   ride_request_cancel_grace_minutes: "15",
   ride_request_edit_grace_minutes: "15",
   invoice_due_soon_days: "3",
@@ -46,64 +49,92 @@ const DEFAULT_VALUES = {
   inspection_due_soon_days: "30",
 };
 
-const MODULES: Array<{
+const FIELDS: Array<{
   key: DeadlineFieldKey;
-  icon: typeof Clock3;
-  suffixKey: "minutes" | "days";
+  section: DeadlineSectionId;
+  unit: "minutes" | "days";
   min: number;
   max: number;
   placeholder: string;
 }> = [
   {
     key: "ride_request_cancel_grace_minutes",
-    icon: Clock3,
-    suffixKey: "minutes",
+    section: "rideRequests",
+    unit: "minutes",
     min: 1,
     max: 1440,
     placeholder: "15",
   },
   {
     key: "ride_request_edit_grace_minutes",
-    icon: Clock3,
-    suffixKey: "minutes",
+    section: "rideRequests",
+    unit: "minutes",
     min: 1,
     max: 1440,
     placeholder: "15",
   },
   {
     key: "invoice_due_soon_days",
-    icon: FileText,
-    suffixKey: "days",
+    section: "billing",
+    unit: "days",
     min: 1,
     max: 365,
     placeholder: "3",
   },
   {
     key: "insurance_due_soon_days",
-    icon: ShieldCheck,
-    suffixKey: "days",
+    section: "compliance",
+    unit: "days",
     min: 1,
     max: 3650,
     placeholder: "30",
   },
   {
     key: "inspection_due_soon_days",
-    icon: TriangleAlert,
-    suffixKey: "days",
+    section: "compliance",
+    unit: "days",
     min: 1,
     max: 3650,
     placeholder: "30",
   },
 ];
 
+const SECTIONS: Array<{
+  id: DeadlineSectionId;
+  icon: typeof Clock3;
+}> = [
+  { id: "rideRequests", icon: CarFront },
+  { id: "billing", icon: FileText },
+  { id: "compliance", icon: ShieldCheck },
+];
+
 function formatPreview(
   value: string,
-  suffixKey: "minutes" | "days",
+  unit: "minutes" | "days",
   copy: ReturnType<typeof getAdminDeadlineSettingsMessages>,
 ) {
   const parsed = Number(value);
   if (!Number.isFinite(parsed) || parsed <= 0) return copy.previews.empty;
-  return formatMessage(copy.previews[suffixKey], { value: parsed });
+  return formatMessage(copy.previews[unit], { value: parsed });
+}
+
+function DeadlineSettingsSkeleton() {
+  return (
+    <div className={cn(adminCardClass, "overflow-hidden rounded-xl")}>
+      <div className="space-y-6 p-5 sm:p-6">
+        {[0, 1, 2].map((section) => (
+          <div key={section} className="space-y-4">
+            <Skeleton className="h-4 w-36" />
+            <Skeleton className="h-3 w-64" />
+            <div className="space-y-3 border-t border-slate-100 pt-4">
+              <Skeleton className="h-16 w-full rounded-lg" />
+              {section !== 1 ? <Skeleton className="h-16 w-full rounded-lg" /> : null}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export function DeadlineSettingsPage() {
@@ -127,12 +158,8 @@ export function DeadlineSettingsPage() {
       .then((result) => {
         if (!active) return;
         setValues({
-          ride_request_cancel_grace_minutes: String(
-            result.ride_request_cancel_grace_minutes,
-          ),
-          ride_request_edit_grace_minutes: String(
-            result.ride_request_edit_grace_minutes,
-          ),
+          ride_request_cancel_grace_minutes: String(result.ride_request_cancel_grace_minutes),
+          ride_request_edit_grace_minutes: String(result.ride_request_edit_grace_minutes),
           invoice_due_soon_days: String(result.invoice_due_soon_days),
           insurance_due_soon_days: String(result.insurance_due_soon_days),
           inspection_due_soon_days: String(result.inspection_due_soon_days),
@@ -152,38 +179,27 @@ export function DeadlineSettingsPage() {
     return () => {
       active = false;
     };
-  }, [canRead, copy]);
+  }, [canRead, copy.toast.loadFailed.description, copy.toast.loadFailed.title]);
 
   const previews = useMemo(
     () =>
-      MODULES.reduce(
-        (accumulator, module) => {
-          accumulator[module.key] = formatPreview(
-            values[module.key],
-            module.suffixKey,
-            copy,
-          );
-          return accumulator;
-        },
-        {} as Record<DeadlineFieldKey, string>,
-      ),
+      Object.fromEntries(
+        FIELDS.map((field) => [
+          field.key,
+          formatPreview(values[field.key], field.unit, copy),
+        ]),
+      ) as Record<DeadlineFieldKey, string>,
     [values, copy],
   );
 
   async function handleSave() {
     if (!canWrite) return;
 
-    const parsed = MODULES.map((module) => ({
-      key: module.key,
-      value: Number(values[module.key]),
-      min: module.min,
-      max: module.max,
-    }));
+    const invalid = FIELDS.find(({ key, min, max }) => {
+      const value = Number(values[key]);
+      return !Number.isFinite(value) || value < min || value > max;
+    });
 
-    const invalid = parsed.find(
-      ({ value, min, max }) =>
-        !Number.isFinite(value) || value < min || value > max,
-    );
     if (invalid) {
       showErrorToast({
         title: copy.toast.invalidValues.title,
@@ -203,21 +219,13 @@ export function DeadlineSettingsPage() {
           Number(values.ride_request_edit_grace_minutes),
         ),
         invoice_due_soon_days: Math.trunc(Number(values.invoice_due_soon_days)),
-        insurance_due_soon_days: Math.trunc(
-          Number(values.insurance_due_soon_days),
-        ),
-        inspection_due_soon_days: Math.trunc(
-          Number(values.inspection_due_soon_days),
-        ),
+        insurance_due_soon_days: Math.trunc(Number(values.insurance_due_soon_days)),
+        inspection_due_soon_days: Math.trunc(Number(values.inspection_due_soon_days)),
       });
 
       setValues({
-        ride_request_cancel_grace_minutes: String(
-          saved.ride_request_cancel_grace_minutes,
-        ),
-        ride_request_edit_grace_minutes: String(
-          saved.ride_request_edit_grace_minutes,
-        ),
+        ride_request_cancel_grace_minutes: String(saved.ride_request_cancel_grace_minutes),
+        ride_request_edit_grace_minutes: String(saved.ride_request_edit_grace_minutes),
         invoice_due_soon_days: String(saved.invoice_due_soon_days),
         insurance_due_soon_days: String(saved.insurance_due_soon_days),
         inspection_due_soon_days: String(saved.inspection_due_soon_days),
@@ -250,143 +258,127 @@ export function DeadlineSettingsPage() {
             <Clock3 className="size-5" />
           </div>
           <div className="min-w-0">
-            <h1
-              className={cn(
-                "text-2xl font-extrabold tracking-tight",
-                adminHeadingClass,
-              )}
-            >
+            <h1 className={cn("text-2xl font-extrabold tracking-tight", adminHeadingClass)}>
               {copy.title}
             </h1>
-            <p className="mt-1 max-w-3xl text-sm leading-relaxed text-slate-500">
+            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-500">
               {copy.description}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {MODULES.map((module) => {
-          const Icon = module.icon;
-          const moduleCopy = copy.modules[module.key];
-          return (
-            <div
-              key={module.key}
-              className={cn(adminCardClass, "rounded-2xl p-4")}
-            >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <div className="rounded-xl bg-[#1C3A34]/8 p-2 text-[#1C3A34]">
-                    <Icon className="size-4" />
+      {loading ? (
+        <DeadlineSettingsSkeleton />
+      ) : (
+        <div className={cn(adminCardClass, "overflow-hidden rounded-xl")}>
+          <div className="divide-y divide-slate-100">
+            {SECTIONS.map((section) => {
+              const Icon = section.icon;
+              const sectionCopy = copy.sections[section.id];
+              const sectionFields = FIELDS.filter((field) => field.section === section.id);
+
+              return (
+                <section key={section.id} className="px-5 py-5 sm:px-6">
+                  <div className="flex items-start gap-3">
+                    <div className="mt-0.5 rounded-lg bg-[#1C3A34]/6 p-2 text-[#1C3A34]">
+                      <Icon className="size-4" />
+                    </div>
+                    <div className="min-w-0">
+                      <h2 className={cn("text-base font-bold", adminHeadingClass)}>
+                        {sectionCopy.title}
+                      </h2>
+                      <p className="mt-0.5 text-sm text-slate-500">{sectionCopy.description}</p>
+                    </div>
                   </div>
-                  <p className="text-sm font-semibold text-[#1C3A34]">
-                    {moduleCopy.title}
-                  </p>
-                </div>
-                <Badge variant="outline" className="bg-white text-slate-600">
-                  {previews[module.key]}
-                </Badge>
-              </div>
-              <p className="mt-3 text-sm leading-relaxed text-slate-500">
-                {moduleCopy.description}
-              </p>
-            </div>
-          );
-        })}
-      </div>
 
-      <div className={cn(adminCardClass, "space-y-6 rounded-2xl p-5 sm:p-6")}>
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
-          <div>
-            <h2 className={cn("text-base", adminHeadingClass)}>
-              {copy.configure.title}
-            </h2>
-            <p className="text-sm text-slate-500">
-              {copy.configure.description}
-            </p>
-          </div>
-        </div>
+                  <div className="mt-5 space-y-4">
+                    {sectionFields.map((field) => {
+                      const fieldCopy = copy.modules[field.key];
+                      const unitLabel = copy.units[field.unit];
 
-        <div className="grid gap-4 lg:grid-cols-2">
-          {MODULES.map((module) => {
-            const moduleCopy = copy.modules[module.key];
-            const suffixLabel = (module.suffixKey === "minutes"
-              ? formatMessage(copy.previews.minutes, { value: "" })
-              : formatMessage(copy.previews.days, { value: "" })
-            ).trim();
+                      return (
+                        <div
+                          key={field.key}
+                          className="flex flex-col gap-3 rounded-xl border border-slate-200/80 bg-[#f8fafb]/70 px-4 py-4 sm:flex-row sm:items-center sm:justify-between"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                              <p className="text-sm font-semibold text-[#1C3A34]">
+                                {fieldCopy.label}
+                              </p>
+                              <span className="text-xs text-slate-400">·</span>
+                              <p className="text-xs font-medium text-slate-500">
+                                {previews[field.key]}
+                              </p>
+                            </div>
+                            <p className="mt-1 text-sm leading-relaxed text-slate-500">
+                              {fieldCopy.helper}
+                            </p>
+                            <p className="mt-1 text-xs text-slate-400">
+                              {formatMessage(copy.configure.rangeInfo, {
+                                min: field.min,
+                                max: field.max,
+                                suffix: unitLabel,
+                              })}
+                            </p>
+                          </div>
 
-            return (
-              <div
-                key={module.key}
-                className="rounded-2xl border border-slate-200/80 bg-slate-50/50 p-4"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <module.icon className="size-4 text-[#1C3A34]" />
-                    <p className="text-sm font-semibold text-slate-800">
-                      {moduleCopy.title}
-                    </p>
-                  </div>
-                  <span className="text-xs font-medium uppercase tracking-[0.14em] text-slate-400">
-                    Current: {previews[module.key]}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-slate-500">{moduleCopy.helper}</p>
-
-                <div className="mt-4 space-y-2">
-                  <label
-                    className="text-sm font-medium text-slate-700"
-                    htmlFor={module.key}
-                  >
-                    {moduleCopy.label} ({suffixLabel})
-                  </label>
-                  <Input
-                    id={module.key}
-                    type="number"
-                    min={module.min}
-                    max={module.max}
-                    value={values[module.key]}
-                    onChange={(event) =>
-                      setValues((current) => ({
-                        ...current,
-                        [module.key]: event.target.value,
-                      }))
-                    }
-                    disabled={loading || saving || !canWrite}
-                    placeholder={module.placeholder}
-                    className={cn("w-full", adminInputClass)}
-                  />
-                  <p className="text-xs leading-relaxed text-slate-500">
-                    {formatMessage(copy.configure.rangeInfo, {
-                      min: module.min,
-                      max: module.max,
-                      suffix: suffixLabel,
+                          <div className="flex shrink-0 items-center gap-2 sm:w-[11.5rem]">
+                            <Input
+                              id={field.key}
+                              type="number"
+                              min={field.min}
+                              max={field.max}
+                              value={values[field.key]}
+                              onChange={(event) =>
+                                setValues((current) => ({
+                                  ...current,
+                                  [field.key]: event.target.value,
+                                }))
+                              }
+                              disabled={saving || !canWrite}
+                              placeholder={field.placeholder}
+                              className={cn(adminInputClass, "w-full tabular-nums")}
+                              aria-label={fieldCopy.label}
+                            />
+                            <span className="w-14 shrink-0 text-xs font-medium text-slate-500">
+                              {unitLabel}
+                            </span>
+                          </div>
+                        </div>
+                      );
                     })}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {canWrite ? (
-          <div className="flex flex-wrap items-center justify-end gap-3 border-t border-slate-200/80 pt-4">
-            <Button
-              type="button"
-              onClick={handleSave}
-              disabled={saving || loading}
-              className={adminPrimaryButtonClass}
-            >
-              {saving ? (
-                <Loader2 className="mr-2 size-4 animate-spin" />
-              ) : (
-                <Save className="mr-2 size-4" />
-              )}
-              {saving ? copy.configure.savingButton : copy.configure.saveButton}
-            </Button>
+                  </div>
+                </section>
+              );
+            })}
           </div>
-        ) : null}
-      </div>
+
+          {canWrite ? (
+            <div className="sticky bottom-0 flex items-center justify-between gap-3 border-t border-slate-200/80 bg-white/95 px-5 py-3.5 backdrop-blur supports-[backdrop-filter]:bg-white/85 sm:px-6">
+              <p className="hidden text-xs text-slate-500 sm:block">{copy.configure.description}</p>
+              <Button
+                type="button"
+                onClick={() => void handleSave()}
+                disabled={saving}
+                className={cn(adminPrimaryButtonClass, "ml-auto")}
+              >
+                {saving ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <Save className="size-4" />
+                )}
+                {saving ? copy.configure.savingButton : copy.configure.saveButton}
+              </Button>
+            </div>
+          ) : (
+            <div className="border-t border-slate-200/80 px-5 py-3.5 sm:px-6">
+              <p className="text-sm text-slate-500">{copy.configure.readOnlyHint}</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

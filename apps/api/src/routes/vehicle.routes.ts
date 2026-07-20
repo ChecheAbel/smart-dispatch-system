@@ -963,7 +963,14 @@ router.patch("/:id", requirePermission("vehicles.write", "compliance.write"), (r
       const uploadedImages = (req.files ?? [])
         .filter((file): file is Express.Multer.File => Boolean(file))
         .map((file) => buildVehiclePhotoUrl(file.filename));
-      const existingImages = getStringArray(req.body?.vehicle_images_existing);
+      const body = (req.body ?? {}) as Record<string, unknown>;
+      const shouldUpdateImages =
+        parseBoolean(body.replace_vehicle_images) === true ||
+        Object.prototype.hasOwnProperty.call(body, "vehicle_images_existing") ||
+        uploadedImages.length > 0;
+      const images = shouldUpdateImages
+        ? [...getStringArray(body.vehicle_images_existing), ...uploadedImages]
+        : undefined;
 
       if (req.body?.chassis_number !== undefined && !getString(req.body?.chassis_number)) {
         return sendError(res, "Chassis number is required.", 400);
@@ -980,7 +987,7 @@ router.patch("/:id", requirePermission("vehicles.write", "compliance.write"), (r
         year: parseYear(req.body?.year),
         status: parseVehicleStatus(req.body?.status),
         notes: getOptionalString(req.body?.notes),
-        images: [...existingImages, ...uploadedImages],
+        images,
         ...parseComplianceBody(req.body ?? {}),
         actorUserId: req.user?.id,
       });

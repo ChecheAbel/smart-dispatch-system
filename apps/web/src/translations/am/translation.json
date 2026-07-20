@@ -2380,11 +2380,13 @@
       "contextPathLabel": "የአሁኑ አብነት አቀማመጥ",
       "eventPickerTitle": "የማስነሳት ክስተት",
       "eventPickerDescription": "መልዕክቱ መቼ እንደሚላክ ይምረጡ፣ ከዚያ በቀኝ በኩል ያለውን መንገድ ያርትዑ።",
+      "eventSelectedLabel": "በማርትዕ ላይ",
       "eventSearchPlaceholder": "ክስተቶችን ይፈልጉ...",
       "eventSearchEmpty": "ከፍለጋዎ ጋር የሚዛመዱ ክስተቶች የሉም።",
       "channelsEnabled": "{enabled}/{total} ነቅቷል",
       "placeholdersToggle": "የቦታ ማስተካከያ ማጣቀሻ",
       "summaryEnabled": "{enabled} ከ {total} መንገዶች ነቅተዋል",
+      "eventSummaryLabel": "ለዚህ ክስተት መንገዶች",
       "channelsSummaryLabel": "ነቅተው ያሉ መንገዶች",
       "channelsSummaryAria": "{enabled} ከ {total} የማሳወቂያ መንገዶች ነቅተዋል",
       "notificationsLinkDescription": "የኢሜይል እና ኤስኤምኤስ አቅራቢ ቅንብሮች",
@@ -3437,9 +3439,16 @@
       }
     },
     "assignDriverSheet": {
+      "eyebrow": "የመኪና መመደብ",
       "title": "ነባሪ ሹፌር መመደብ",
       "description": "በተለምዶ ይህን ተሽከርካሪ የሚነዳውን ሹፌር ያዘጋጁ። የጉዞ መላኪያ በጉዞ ሲመደብ ይህን ግንኙነት ይጠቀማል።",
       "vehicleLabel": "ተሽከርካሪ",
+      "currentDriver": "አሁን የተመደበ",
+      "selectDriver": "ሹፌር ይምረጡ",
+      "selectedDriver": "የተመረጠ ሹፌር",
+      "noDriverSelected": "ሹፌር አልተመረጠም",
+      "noDriverSelectedHint": "ሹፌር እስከሚመደብ ድረስ ይህ ተሽከርካሪ ለመላኪያ አይገኝም።",
+      "loadingDrivers": "ሹፌሮች በመጫን ላይ…",
       "hint": "በጉዞ መላኪያ ላይ ለመምረጥ የሚችሉት ከሹፌር ጋር የተገናኙ ተሽከርካሪዎች ብቻ ናቸው። አንድ ሹፌር በአንድ ጊዜ ከአንድ ተሽከርካሪ ጋር ብቻ ሊገናኝ ይችላል።",
       "save": "መመደብ አስቀምጥ",
       "saving": "በማስቀመጥ ላይ…",
@@ -4592,8 +4601,8 @@
   },
   "adminDeadlineSettings": {
     "eyebrow": "የስርዓት ቅንብሮች",
-    "title": "የጊዜ ገደብ ማዕከል",
-    "description": "ለውድድር ጥያቄዎች፣ ለክፍያ መጠየቂያዎች እና ለተገዢነት ማንቂያዎች ጥቅም ላይ የሚውሉትን የስርዓት-አቀፍ የጊዜ ገደቦችን እዚህ ያዋቅሩ።",
+    "title": "የጊዜ ገደቦች",
+    "description": "ደንበኞች ጥያቄዎችን ለምን ያህል ጊዜ መሰረዝ ወይም ማስተካከል እንደሚችሉ፣ እንዲሁም ክፍያ መጠየቂያዎች እና ተገዢነት መቼ እንደሚጠቁሙ ያዘጋጁ።",
     "loading": "የጊዜ ገደብ ቅንብሮችን በመጫን ላይ...",
     "accessDenied": {
       "eyebrow": "መዳረሻ ተከልክሏል",
@@ -4608,44 +4617,63 @@
       "days": "{value} ቀናት",
       "empty": "—"
     },
+    "units": {
+      "minutes": "ደቂቃ",
+      "days": "ቀን"
+    },
+    "sections": {
+      "rideRequests": {
+        "title": "የጉዞ ጥያቄዎች",
+        "description": "ደንበኛ ጥያቄ ካስገባ በኋላ ያለው የጊዜ ገደብ።"
+      },
+      "billing": {
+        "title": "የክፍያ መጠየቂያዎች",
+        "description": "የተሰጡ ክፍያ መጠየቂያዎች መቼ ወደ ቅርብ ጊዜ መስኮት እንደሚገቡ።"
+      },
+      "compliance": {
+        "title": "የተሽከርካሪ ተገዢነት",
+        "description": "ከኢንሹራንስ ወይም ምርመራ ማብቂያ በፊት ያለ ማንቂያ ጊዜ።"
+      }
+    },
     "modules": {
       "ride_request_cancel_grace_minutes": {
         "title": "የጉዞ ጥያቄዎች",
         "description": "ደንበኞች በመጠባበቅ ላይ ያለ የጉዞ ጥያቄን ለምን ያህል ጊዜ መሰረዝ እንደሚችሉ ይቆጣጠሩ።",
-        "helper": "በጉዞ ጥያቄ ዝርዝሮች፣ ስረዛ ደንቦች እና የመልዕክት አብነቶች ጥቅም ላይ ይውላል።",
-        "label": "የስረዛ ጊዜ ገደብ"
+        "helper": "በደንበኛ ዳሽቦርድ እና በስረዛ ደንቦች ላይ ይተገበራል።",
+        "label": "የስረዛ ጊዜ"
       },
       "ride_request_edit_grace_minutes": {
         "title": "የጉዞ ጥያቄዎች ማስተካከያ",
         "description": "ደንበኞች የጉዞ ጥያቄ ካስገቡ በኋላ ለምን ያህል ጊዜ ማስተካከል እንደሚችሉ ይቆጣጠሩ።",
-        "helper": "በጉዞ ጥያቄ ዝርዝሮች፣ ማስተካከያ ደንቦች እና ቅጾች ውስጥ ጥቅም ላይ ይውላል።",
-        "label": "የማስተካከያ ጊዜ ገደብ"
+        "helper": "በደንበኛ ዳሽቦርድ እና በማስተካከያ ቅጾች ላይ ይተገበራል።",
+        "label": "የማስተካከያ ጊዜ"
       },
       "invoice_due_soon_days": {
         "title": "የክፍያ መጠየቂያዎች",
         "description": "የክፍያ መጠየቂያ ጊዜው ከማብቃቱ ስንት ቀናት በፊት ወደ 'በቅርቡ የሚከፈል' መስኮት እንደሚገባ ይግለጹ።",
-        "helper": "ለክፍያ መጠየቂያ ማሳሰቢያዎች፣ ለዳሽቦርድ ምልክቶች እና ለክፍያ የስራ ፍሰቶች ጥቅም ላይ ይውላል።",
-        "label": "የቅርብ ጊዜ ገደብ መስኮት"
+        "helper": "ለክፍያ ማሳሰቢያዎች፣ ዳሽቦርድ ምልክቶች እና የክፍያ ፍሰቶች ጥቅም ላይ ይውላል።",
+        "label": "የቅርብ ጊዜ መስኮት"
       },
       "insurance_due_soon_days": {
         "title": "የኢንሹራንስ ተገዢነት",
-        "description": "የኢንሹራንስ መዝገቦች በቅርቡ እንደሚ ጊዜያቸው የሚያበቁ መቼ ጎልተው መታየት እንዳለባቸው ይወስኑ።",
+        "description": "የኢንሹራንስ መዝገቦች በቅርቡ እንደሚያበቁ መቼ ጎልተው መታየት እንዳለባቸው ይወስኑ።",
         "helper": "በተሽከርካሪ ተገዢነት እይታዎች እና በኢንሹራንስ ማንቂያ አብነቶች ውስጥ ጥቅም ላይ ይውላል።",
-        "label": "የቅርብ ጊዜ ገደብ መስኮት"
+        "label": "የኢንሹራንስ ቅርብ ጊዜ"
       },
       "inspection_due_soon_days": {
         "title": "የምርመራ ተገዢነት",
-        "description": "የምርመራ መዝገቦች በቅርቡ እንደሚ ጊዜያቸው የሚያበቁ መቼ ጎልተው መታየት እንዳለባቸው ይወስኑ።",
+        "description": "የምርመራ መዝገቦች በቅርቡ እንደሚያበቁ መቼ ጎልተው መታየት እንዳለባቸው ይወስኑ።",
         "helper": "በተሽከርካሪ ተገዢነት እይታዎች እና በምርመራ ማንቂያ አብነቶች ውስጥ ጥቅም ላይ ይውላል።",
-        "label": "የቅርብ ጊዜ ገደብ መስኮት"
+        "label": "የምርመራ ቅርብ ጊዜ"
       }
     },
     "configure": {
       "title": "የሞጁል የጊዜ ገደቦችን ያዋቅሩ",
-      "description": "እያንዳንዱ ቅንብር ተዛማጅ ማሳሰቢያዎችን፣ ዳሽቦርዶችን እና የመልዕክት አብነቶችን ያዘምናል።",
-      "rangeInfo": "በ {min} እና {max} {suffix} መካከል ያለ እሴት ያስገቡ።",
-      "saveButton": "ቅንብር አስቀምጥ",
-      "savingButton": "በማስቀመጥ ላይ..."
+      "description": "ለውጦቹ ማሳሰቢያዎችን፣ ዳሽቦርዶችን እና የመልዕክት አብነቶችን ያዘምናሉ።",
+      "rangeInfo": "የተፈቀደ ክልል፦ {min}–{max} {suffix}",
+      "saveButton": "ለውጦችን አስቀምጥ",
+      "savingButton": "በማስቀመጥ ላይ…",
+      "readOnlyHint": "የማየት ብቻ ፈቃድ አለዎት። የመጻፍ ፈቃድ ለማግኘት አስተዳዳሪ ያግኙ።"
     },
     "toast": {
       "loadFailed": {
