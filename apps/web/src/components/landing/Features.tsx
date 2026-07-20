@@ -35,8 +35,8 @@ export default function Features() {
   const copy = useLandingMessages();
 
   return (
-    <section id="features" className="bg-[#1C3A34] py-20 sm:py-28 overflow-hidden relative">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(201,184,122,0.1)_0%,_#1C3A34_100%)] pointer-events-none" />
+    <section id="features" className="bg-[var(--brand-primary)] py-20 sm:py-28 overflow-hidden relative">
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(201,184,122,0.1)_0%,_var(--brand-primary)_100%)] pointer-events-none" />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="text-center mb-16 sm:mb-20">
@@ -46,7 +46,7 @@ export default function Features() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6 }}
           >
-            <p className="text-[#C9B87A] font-bold text-[10px] sm:text-xs tracking-[0.25em] uppercase mb-4 drop-shadow-md">
+            <p className="text-[var(--brand-accent)] font-bold text-[10px] sm:text-xs tracking-[0.25em] uppercase mb-4 drop-shadow-md">
               {copy.features.eyebrow}
             </p>
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight px-2 drop-shadow-2xl">
@@ -70,7 +70,7 @@ export default function Features() {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.7, delay: index * 0.1, ease: "easeOut" }}
                 className={cn(
-                  "group relative bg-[#1C3A34]/40 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:border-[#C9B87A]/40 hover:shadow-[0_20px_40px_-15px_rgba(201,184,122,0.2)]",
+                  "group relative bg-[var(--brand-primary)]/40 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:border-[var(--brand-accent)]/40 hover:shadow-[0_20px_40px_-15px_rgba(201,184,122,0.2)]",
                   FEATURE_LAYOUT[index],
                 )}
               >
@@ -78,16 +78,16 @@ export default function Features() {
                 
                 <div className="relative z-10 flex flex-col h-full">
                   <div className="flex items-start justify-between mb-6 sm:mb-8 gap-3">
-                    <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl bg-gradient-to-br from-[#1C3A34] to-[#122622] flex items-center justify-center border border-white/10 group-hover:border-[#C9B87A]/50 transition-colors duration-500 shrink-0 shadow-inner">
-                      <Icon className="h-6 w-6 sm:h-7 sm:w-7 text-white group-hover:text-[#C9B87A] transition-colors duration-500" />
+                    <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl bg-gradient-to-br from-[var(--brand-primary)] to-[#122622] flex items-center justify-center border border-white/10 group-hover:border-[var(--brand-accent)]/50 transition-colors duration-500 shrink-0 shadow-inner">
+                      <Icon className="h-6 w-6 sm:h-7 sm:w-7 text-white group-hover:text-[var(--brand-accent)] transition-colors duration-500" />
                     </div>
-                    <span className="text-[10px] sm:text-xs font-bold border border-white/20 text-white/80 bg-white/5 px-3 py-1.5 rounded-full tracking-wider uppercase shrink-0 backdrop-blur-md group-hover:border-[#C9B87A]/50 group-hover:text-[#C9B87A] transition-colors duration-500">
+                    <span className="text-[10px] sm:text-xs font-bold border border-white/20 text-white/80 bg-white/5 px-3 py-1.5 rounded-full tracking-wider uppercase shrink-0 backdrop-blur-md group-hover:border-[var(--brand-accent)]/50 group-hover:text-[var(--brand-accent)] transition-colors duration-500">
                       {feat.tag}
                     </span>
                   </div>
                   
                   <div className="mt-auto">
-                    <h3 className="font-extrabold text-xl sm:text-2xl text-white mb-3 tracking-tight group-hover:text-[#C9B87A] transition-colors duration-500">{feat.title}</h3>
+                    <h3 className="font-extrabold text-xl sm:text-2xl text-white mb-3 tracking-tight group-hover:text-[var(--brand-accent)] transition-colors duration-500">{feat.title}</h3>
                     <p className="text-white/60 leading-relaxed text-sm sm:text-base font-light">{feat.desc}</p>
                   </div>
                 </div>

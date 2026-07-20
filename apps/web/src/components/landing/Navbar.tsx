@@ -88,7 +88,7 @@ export default function Navbar() {
           className={cn(
             "mx-auto flex items-center justify-between transition-all duration-500",
             scrolled 
-              ? "max-w-5xl px-4 sm:px-6 h-16 rounded-full border border-white/20 bg-[#1C3A34]/60 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] backdrop-blur-xl" 
+              ? "max-w-5xl px-4 sm:px-6 h-16 rounded-full border border-white/20 bg-[var(--brand-primary)]/60 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] backdrop-blur-xl" 
               : "max-w-7xl px-4 sm:px-6 h-[72px] bg-transparent border-transparent"
           )}
         >
@@ -110,13 +110,13 @@ export default function Navbar() {
                   href={link.href}
                   className="relative px-5 py-2 rounded-full text-[13px] font-semibold tracking-wide transition-colors z-10 group"
                 >
-                  <span className={cn("relative z-10", isActive ? "text-[#1C3A34]" : "text-white/70 group-hover:text-white")}>
+                  <span className={cn("relative z-10", isActive ? "text-[var(--brand-primary)]" : "text-white/70 group-hover:text-white")}>
                     {link.label}
                   </span>
                   {isActive && (
                     <motion.div
                       layoutId="nav-pill"
-                      className="absolute inset-0 rounded-full bg-gradient-to-r from-[#C9B87A] to-[#E3D18F] shadow-[0_0_15px_-3px_rgba(201,184,122,0.4)]"
+                      className="absolute inset-0 rounded-full bg-gradient-to-r from-[var(--brand-accent)] to-[#E3D18F] shadow-[0_0_15px_-3px_rgba(201,184,122,0.4)]"
                       transition={{ type: "spring", stiffness: 350, damping: 30 }}
                     />
                   )}
@@ -129,7 +129,7 @@ export default function Navbar() {
             <LanguageSwitcher variant="dark" />
             <Link
               href="/book"
-              className="inline-flex items-center gap-2 bg-[#C9B87A] hover:bg-[#E3D18F] text-[#1C3A34] font-bold text-[13px] px-6 py-2.5 rounded-full tracking-wide transition-all duration-300 hover:shadow-[0_0_20px_-5px_rgba(201,184,122,0.5)] hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 bg-[var(--brand-accent)] hover:bg-[#E3D18F] text-[var(--brand-primary)] font-bold text-[13px] px-6 py-2.5 rounded-full tracking-wide transition-all duration-300 hover:shadow-[0_0_20px_-5px_rgba(201,184,122,0.5)] hover:-translate-y-0.5"
             >
               {copy.nav.bookNow}
             </Link>
@@ -166,7 +166,7 @@ export default function Navbar() {
             className="fixed inset-0 z-[9998] lg:hidden bg-[#0f1f1c]/90 backdrop-blur-xl"
             aria-hidden={false}
           >
-            <div className="absolute top-[90px] left-4 right-4 bg-[#1C3A34]/80 border border-white/20 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-2xl">
+            <div className="absolute top-[90px] left-4 right-4 bg-[var(--brand-primary)]/80 border border-white/20 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-2xl">
               <nav className="px-4 py-6 space-y-2" aria-label={copy.nav.mobileNav}>
                 {navLinks.map((link, i) => {
                   const id = link.href.slice(1);
@@ -183,13 +183,13 @@ export default function Navbar() {
                       className={cn(
                         "flex items-center justify-between px-5 py-4 rounded-2xl text-[15px] font-semibold transition-all active:scale-[0.98]",
                         isActive
-                          ? "bg-gradient-to-r from-[#C9B87A]/20 to-transparent text-[#C9B87A] border border-[#C9B87A]/30 shadow-inner"
+                          ? "bg-gradient-to-r from-[var(--brand-accent)]/20 to-transparent text-[var(--brand-accent)] border border-[var(--brand-accent)]/30 shadow-inner"
                           : "text-white/80 hover:bg-white/10 hover:text-white"
                       )}
                     >
                       {link.label}
                       {isActive && (
-                        <motion.span layoutId="mobile-indicator" className="h-2 w-2 rounded-full bg-[#C9B87A] shadow-[0_0_10px_rgba(201,184,122,0.8)]" />
+                        <motion.span layoutId="mobile-indicator" className="h-2 w-2 rounded-full bg-[var(--brand-accent)] shadow-[0_0_10px_rgba(201,184,122,0.8)]" />
                       )}
                     </motion.a>
                   );
@@ -209,7 +209,7 @@ export default function Navbar() {
                   <Link
                     href="/book"
                     onClick={closeMobileMenu}
-                    className="flex items-center justify-center w-full bg-gradient-to-r from-[#C9B87A] to-[#A4945A] text-[#1C3A34] font-bold text-base py-4 rounded-2xl shadow-lg active:scale-[0.98] transition-transform"
+                    className="flex items-center justify-center w-full bg-gradient-to-r from-[var(--brand-accent)] to-[#A4945A] text-[var(--brand-primary)] font-bold text-base py-4 rounded-2xl shadow-lg active:scale-[0.98] transition-transform"
                   >
                     {copy.nav.bookNow}
                   </Link>

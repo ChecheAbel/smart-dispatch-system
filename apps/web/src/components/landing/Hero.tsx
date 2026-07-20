@@ -17,7 +17,7 @@ export default function Hero() {
             rotate: [0, 90, 0],
           }}
           transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] bg-[radial-gradient(ellipse_at_center,_#C9B87A_0%,_transparent_50%)] rounded-full blur-[120px]"
+          className="absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] bg-[radial-gradient(ellipse_at_center,_var(--brand-accent)_0%,_transparent_50%)] rounded-full blur-[120px]"
         />
         <motion.div
           animate={{
@@ -26,7 +26,7 @@ export default function Hero() {
             rotate: [0, -90, 0],
           }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-[20%] -right-[10%] w-[60vw] h-[60vw] bg-[radial-gradient(ellipse_at_center,_#1C3A34_0%,_transparent_50%)] rounded-full blur-[100px]"
+          className="absolute -bottom-[20%] -right-[10%] w-[60vw] h-[60vw] bg-[radial-gradient(ellipse_at_center,_var(--brand-primary)_0%,_transparent_50%)] rounded-full blur-[100px]"
         />
         
         <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_40%,transparent_100%)] opacity-50" />
@@ -38,8 +38,8 @@ export default function Hero() {
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           className="absolute top-[25%] left-[10%] bg-[#122622]/60 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl flex items-center gap-3"
         >
-          <div className="h-10 w-10 rounded-full bg-[#C9B87A]/20 flex items-center justify-center">
-            <Car className="h-5 w-5 text-[#C9B87A]" />
+          <div className="h-10 w-10 rounded-full bg-[var(--brand-accent)]/20 flex items-center justify-center">
+            <Car className="h-5 w-5 text-[var(--brand-accent)]" />
           </div>
           <div>
             <div className="h-2 w-16 bg-white/20 rounded mb-2" />
@@ -86,14 +86,14 @@ export default function Hero() {
           {copy.hero.titlePrefix}{" "}
           <br className="hidden sm:block" />
           <span className="relative inline-block mt-2 sm:mt-4">
-            <span className="bg-gradient-to-r from-[#C9B87A] via-[#FFF2C2] to-[#C9B87A] bg-clip-text text-transparent bg-[length:200%_auto] animate-pulse">
+            <span className="bg-gradient-to-r from-[var(--brand-accent)] via-[#FFF2C2] to-[var(--brand-accent)] bg-clip-text text-transparent bg-[length:200%_auto] animate-pulse">
               {copy.hero.titleHighlight}
             </span>
             <motion.span 
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ duration: 1, delay: 0.8, ease: "easeInOut" }}
-              className="absolute -bottom-2 lg:-bottom-4 left-0 right-0 h-[3px] lg:h-[4px] bg-gradient-to-r from-transparent via-[#C9B87A] to-transparent origin-left rounded-full" 
+              className="absolute -bottom-2 lg:-bottom-4 left-0 right-0 h-[3px] lg:h-[4px] bg-gradient-to-r from-transparent via-[var(--brand-accent)] to-transparent origin-left rounded-full" 
             />
           </span>
           <br className="hidden sm:block" /> {copy.hero.titleSuffix}
@@ -116,7 +116,7 @@ export default function Hero() {
         >
           <a
             href="#process"
-            className="group relative w-full sm:w-auto bg-gradient-to-b from-[#C9B87A] to-[#A4945A] hover:from-[#d9ca8e] hover:to-[#B6A46A] text-[#1C3A34] font-bold text-[17px] px-10 py-4 sm:py-5 rounded-full tracking-wide transition-all duration-300 hover:shadow-[0_0_40px_-5px_rgba(201,184,122,0.5)] hover:-translate-y-1 text-center overflow-hidden"
+            className="group relative w-full sm:w-auto bg-gradient-to-b from-[var(--brand-accent)] to-[#A4945A] hover:from-[#d9ca8e] hover:to-[#B6A46A] text-[var(--brand-primary)] font-bold text-[17px] px-10 py-4 sm:py-5 rounded-full tracking-wide transition-all duration-300 hover:shadow-[0_0_40px_-5px_rgba(201,184,122,0.5)] hover:-translate-y-1 text-center overflow-hidden"
           >
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out rounded-full" />
             <span className="relative z-10 flex items-center justify-center gap-3">
@@ -128,7 +128,7 @@ export default function Hero() {
           </a>
           <a
             href="#features"
-            className="w-full sm:w-auto border border-white/20 hover:border-[#C9B87A]/50 text-white font-semibold text-[17px] px-10 py-4 sm:py-5 rounded-full tracking-wide transition-all duration-300 hover:bg-white/5 backdrop-blur-md text-center hover:-translate-y-1"
+            className="w-full sm:w-auto border border-white/20 hover:border-[var(--brand-accent)]/50 text-white font-semibold text-[17px] px-10 py-4 sm:py-5 rounded-full tracking-wide transition-all duration-300 hover:bg-white/5 backdrop-blur-md text-center hover:-translate-y-1"
           >
             {copy.hero.exploreFeatures}
           </a>

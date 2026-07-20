@@ -44,6 +44,20 @@ export function applyBrandingCssVariables(branding: Pick<BrandingSettings, "prim
   root.style.setProperty("--brand-accent", branding.accent_color);
 }
 
+export function formatWebsiteLabel(url: string) {
+  try {
+    const parsed = new URL(url.startsWith("http") ? url : `https://${url}`);
+    return parsed.hostname.replace(/^www\./, "");
+  } catch {
+    return url.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  }
+}
+
+export function normalizeWebsiteHref(url: string) {
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `https://${url}`;
+}
+
 export async function fetchPublicBrandingSettings(): Promise<BrandingSettings> {
   const base = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000").replace(/\/$/, "");
 

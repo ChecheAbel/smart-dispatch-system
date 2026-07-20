@@ -33,6 +33,9 @@ export function BrandingProvider({ children }: { children: ReactNode }) {
   const applyBranding = useCallback((next: BrandingSettings) => {
     setBrandingState(next);
     applyBrandingCssVariables(next);
+    if (typeof document !== "undefined" && next.product_name.trim()) {
+      document.title = `${next.product_name.trim()} | Premium Mobility Platform`;
+    }
   }, []);
 
   const refreshBranding = useCallback(async () => {

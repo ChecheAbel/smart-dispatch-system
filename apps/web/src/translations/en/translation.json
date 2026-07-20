@@ -4931,7 +4931,7 @@
         "aboutEih": "About EIH",
         "contactEih": "Contact EIH"
       },
-      "copyright": "© {year} Ethiopian Investment Holdings. Smart Dispatch System. All rights reserved.",
+      "copyright": "© {year} {company}. {product}. All rights reserved.",
       "developedBy": "Designed and developed by"
     }
   }

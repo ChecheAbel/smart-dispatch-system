@@ -12,7 +12,7 @@ export default function Process() {
 
   return (
     <section id="process" className="bg-white py-20 sm:py-28 relative overflow-hidden">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#C9B87A] opacity-[0.05] blur-[150px] rounded-full pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[var(--brand-accent)] opacity-[0.05] blur-[150px] rounded-full pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="text-center mb-16 sm:mb-24">
@@ -22,8 +22,8 @@ export default function Process() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6 }}
           >
-            <p className="text-[#C9B87A] font-bold text-[10px] sm:text-xs tracking-[0.25em] uppercase mb-4 drop-shadow-sm">{copy.process.eyebrow}</p>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1C3A34] tracking-tight px-2 drop-shadow-xl">
+            <p className="text-[var(--brand-accent)] font-bold text-[10px] sm:text-xs tracking-[0.25em] uppercase mb-4 drop-shadow-sm">{copy.process.eyebrow}</p>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[var(--brand-primary)] tracking-tight px-2 drop-shadow-xl">
               {copy.process.title}
             </h2>
             <p className="mt-5 text-slate-500 text-base sm:text-lg lg:text-xl max-w-2xl mx-auto leading-relaxed px-2 font-light">
@@ -53,11 +53,11 @@ export default function Process() {
                     {id}
                   </div>
                   
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#C9B87A]/20 to-[#C9B87A]/5 border border-slate-100 flex items-center justify-center mb-8 shadow-sm group-hover:scale-110 transition-transform duration-300 relative bg-white">
-                    <Icon className="w-8 h-8 text-[#C9B87A]" />
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--brand-accent)]/20 to-[var(--brand-accent)]/5 border border-slate-100 flex items-center justify-center mb-8 shadow-sm group-hover:scale-110 transition-transform duration-300 relative bg-white">
+                    <Icon className="w-8 h-8 text-[var(--brand-accent)]" />
                   </div>
                   
-                  <h3 className="text-2xl font-bold text-[#1C3A34] mb-4 transition-colors">
+                  <h3 className="text-2xl font-bold text-[var(--brand-primary)] mb-4 transition-colors">
                     {step.title}
                   </h3>
                   

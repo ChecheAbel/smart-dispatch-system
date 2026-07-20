@@ -21,8 +21,8 @@ export default function Benefits() {
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6 }}
           >
-            <p className="text-[#C9B87A] font-bold text-[10px] sm:text-xs tracking-[0.25em] uppercase mb-4 drop-shadow-sm">{copy.benefits.eyebrow}</p>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1C3A34] tracking-tight px-2 drop-shadow-xl">
+            <p className="text-[var(--brand-accent)] font-bold text-[10px] sm:text-xs tracking-[0.25em] uppercase mb-4 drop-shadow-sm">{copy.benefits.eyebrow}</p>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[var(--brand-primary)] tracking-tight px-2 drop-shadow-xl">
               {copy.benefits.title}
             </h2>
             <p className="mt-5 text-slate-500 text-base sm:text-lg lg:text-xl max-w-2xl mx-auto leading-relaxed px-2 font-light">
@@ -42,12 +42,12 @@ export default function Benefits() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.7, delay: i * 0.2 }}
-                className="bg-white border border-slate-200 rounded-3xl p-8 hover:shadow-2xl hover:border-[#C9B87A]/30 transition-all duration-300 group shadow-md"
+                className="bg-white border border-slate-200 rounded-3xl p-8 hover:shadow-2xl hover:border-[var(--brand-accent)]/30 transition-all duration-300 group shadow-md"
               >
-                <div className="h-16 w-16 rounded-2xl bg-[#C9B87A]/10 border border-[#C9B87A]/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-[0_0_15px_-3px_rgba(201,184,122,0.3)] relative bg-white">
-                  <Icon className="h-8 w-8 text-[#C9B87A]" strokeWidth={1.5} />
+                <div className="h-16 w-16 rounded-2xl bg-[var(--brand-accent)]/10 border border-[var(--brand-accent)]/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-[0_0_15px_-3px_rgba(201,184,122,0.3)] relative bg-white">
+                  <Icon className="h-8 w-8 text-[var(--brand-accent)]" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-2xl font-bold text-[#1C3A34] mb-4 leading-tight group-hover:text-[#C9B87A] transition-colors">
+                <h3 className="text-2xl font-bold text-[var(--brand-primary)] mb-4 leading-tight group-hover:text-[var(--brand-accent)] transition-colors">
                   {benefit.title}
                 </h3>
                 <p className="text-slate-500 leading-relaxed font-light">
