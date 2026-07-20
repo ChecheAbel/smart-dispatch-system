@@ -1021,12 +1021,28 @@ export interface InvoiceLineItemFarePlanSummary {
   pricing_model: PricingModel;
 }
 
+export interface InvoiceLineItemRideVehicleSummary {
+  plate_number: string;
+  make: string | null;
+  model: string | null;
+}
+
+export interface InvoiceLineItemRideDriverSummary {
+  name: string;
+}
+
 export interface InvoiceLineItemRideSummary {
   id: string;
   pickup_address: string;
   dropoff_address: string;
+  scheduled_at: string | null;
+  scheduled_return_at: string | null;
+  passenger_count: number;
+  started_at: string | null;
   completed_at: string | null;
   status: RideRequestStatus;
+  assigned_driver: InvoiceLineItemRideDriverSummary | null;
+  assigned_vehicle: InvoiceLineItemRideVehicleSummary | null;
 }
 
 export interface InvoiceLineItem {

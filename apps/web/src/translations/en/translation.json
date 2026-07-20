@@ -918,7 +918,29 @@
       "currencyLabel": "Currency",
       "milestoneCurrent": "Current",
       "milestoneOverdue": "Overdue",
-      "noLineItems": "No trip line items on this invoice."
+      "noLineItems": "No trip line items on this invoice.",
+      "tripDetails": {
+        "requestId": "Trip ID",
+        "scheduled": "Scheduled pickup",
+        "scheduledReturn": "Scheduled return",
+        "started": "Trip started",
+        "completed": "Completed",
+        "passengers": "Passengers",
+        "driver": "Driver",
+        "vehicle": "Vehicle",
+        "farePlan": "Fare plan",
+        "pickup": "Pickup",
+        "dropoff": "Dropoff",
+        "unassigned": "Not assigned",
+        "distance": "Distance",
+        "duration": "Duration",
+        "durationUnderOneMinute": "Less than 1 min",
+        "durationOneMinute": "1 min",
+        "durationMinutes": "{count} min",
+        "durationOneHour": "1 hr",
+        "durationHours": "{count} hr",
+        "durationHoursAndMinutes": "{hours} hr {minutes} min"
+      }
     },
     "toast": {
       "loadFailed": {
@@ -4203,7 +4225,29 @@
       "tripAmount": "Amount",
       "distance": "Distance",
       "duration": "Duration",
-      "noLineItems": "No line items"
+      "noLineItems": "No line items",
+      "tripDetails": {
+        "requestId": "Trip ID",
+        "scheduled": "Scheduled pickup",
+        "scheduledReturn": "Scheduled return",
+        "started": "Trip started",
+        "completed": "Completed",
+        "passengers": "Passengers",
+        "driver": "Driver",
+        "vehicle": "Vehicle",
+        "farePlan": "Fare plan",
+        "pickup": "Pickup",
+        "dropoff": "Dropoff",
+        "unassigned": "Not assigned",
+        "distance": "Distance",
+        "duration": "Duration",
+        "durationUnderOneMinute": "Less than 1 min",
+        "durationOneMinute": "1 min",
+        "durationMinutes": "{count} min",
+        "durationOneHour": "1 hr",
+        "durationHours": "{count} hr",
+        "durationHoursAndMinutes": "{hours} hr {minutes} min"
+      }
     },
     "toast": {
       "issueSuccess": {

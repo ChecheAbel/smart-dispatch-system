@@ -50,8 +50,22 @@ function toPublicLineItem(
       id: item.rideRequest.id,
       pickup_address: item.rideRequest.pickupAddress,
       dropoff_address: item.rideRequest.dropoffAddress,
+      scheduled_at: item.rideRequest.scheduledAt?.toISOString() ?? null,
+      scheduled_return_at: item.rideRequest.scheduledReturnAt?.toISOString() ?? null,
+      passenger_count: item.rideRequest.passengerCount,
+      started_at: item.rideRequest.startedAt?.toISOString() ?? null,
       completed_at: item.rideRequest.completedAt?.toISOString() ?? null,
       status: item.rideRequest.status,
+      assigned_driver: item.rideRequest.assignedDriver
+        ? { name: formatPersonName(item.rideRequest.assignedDriver) }
+        : null,
+      assigned_vehicle: item.rideRequest.assignedVehicle
+        ? {
+            plate_number: item.rideRequest.assignedVehicle.plateNumber,
+            make: item.rideRequest.assignedVehicle.make,
+            model: item.rideRequest.assignedVehicle.model,
+          }
+        : null,
     },
     created_at: item.createdAt.toISOString(),
   };

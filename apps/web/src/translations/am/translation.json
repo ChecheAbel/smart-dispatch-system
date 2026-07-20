@@ -918,7 +918,29 @@
       "currencyLabel": "ምንዛሬ",
       "milestoneCurrent": "አሁን",
       "milestoneOverdue": "ጊዜው አልፏል",
-      "noLineItems": "በዚህ ደረሰኝ ላይ የጉዞ ዝርዝሮች የሉም።"
+      "noLineItems": "በዚህ ደረሰኝ ላይ የጉዞ ዝርዝሮች የሉም።",
+      "tripDetails": {
+        "requestId": "የጉዞ መለያ",
+        "scheduled": "የታቀደ መውሰድ",
+        "scheduledReturn": "የመመለስ ጊዜ",
+        "started": "ጉዞ ተጀመረ",
+        "completed": "ተጠናቀቀ",
+        "passengers": "ተሳፋሪዎች",
+        "driver": "አሽከርካሪ",
+        "vehicle": "ተሽከርካሪ",
+        "farePlan": "የክፍያ ዕቅድ",
+        "pickup": "መውሰድ",
+        "dropoff": "መውረድ",
+        "unassigned": "አልተመደበም",
+        "distance": "ርቀት",
+        "duration": "ቆይታ",
+        "durationUnderOneMinute": "ከ1 ደቂቃ ያነሰ",
+        "durationOneMinute": "1 ደቂቃ",
+        "durationMinutes": "{count} ደቂቃ",
+        "durationOneHour": "1 ሰዓት",
+        "durationHours": "{count} ሰዓት",
+        "durationHoursAndMinutes": "{hours} ሰዓት {minutes} ደቂቃ"
+      }
     },
     "toast": {
       "loadFailed": {
@@ -4203,7 +4225,29 @@
       "tripAmount": "መጠን",
       "distance": "ርቀት",
       "duration": "ጊዜ",
-      "noLineItems": "መስመር ንጥሎች የሉም"
+      "noLineItems": "መስመር ንጥሎች የሉም",
+      "tripDetails": {
+        "requestId": "የጉዞ መለያ",
+        "scheduled": "የታቀደ መውሰድ",
+        "scheduledReturn": "የመመለስ ጊዜ",
+        "started": "ጉዞ ተጀመረ",
+        "completed": "ተጠናቀቀ",
+        "passengers": "ተሳፋሪዎች",
+        "driver": "አሽከርካሪ",
+        "vehicle": "ተሽከርካሪ",
+        "farePlan": "የክፍያ ዕቅድ",
+        "pickup": "መውሰድ",
+        "dropoff": "መውረድ",
+        "unassigned": "አልተመደበም",
+        "distance": "ርቀት",
+        "duration": "ቆይታ",
+        "durationUnderOneMinute": "ከ1 ደቂቃ ያነሰ",
+        "durationOneMinute": "1 ደቂቃ",
+        "durationMinutes": "{count} ደቂቃ",
+        "durationOneHour": "1 ሰዓት",
+        "durationHours": "{count} ሰዓት",
+        "durationHoursAndMinutes": "{hours} ሰዓት {minutes} ደቂቃ"
+      }
     },
     "toast": {
       "issueSuccess": {

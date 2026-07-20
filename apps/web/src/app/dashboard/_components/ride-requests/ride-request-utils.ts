@@ -267,6 +267,57 @@ export function formatScheduledAt(value: string | null, locale: string) {
   });
 }
 
+export type HumanDurationLabels = {
+  durationUnderOneMinute: string;
+  durationOneMinute: string;
+  durationMinutes: string;
+  durationOneHour: string;
+  durationHours: string;
+  durationHoursAndMinutes: string;
+};
+
+export function formatHumanDurationMinutes(
+  totalMinutes: number | null | undefined,
+  locale: string,
+  labels: HumanDurationLabels,
+): string {
+  if (totalMinutes == null || !Number.isFinite(totalMinutes)) {
+    return "—";
+  }
+
+  const minutes = Math.round(Math.max(0, totalMinutes));
+  const nf = new Intl.NumberFormat(locale);
+
+  if (minutes < 1) {
+    return labels.durationUnderOneMinute;
+  }
+
+  const hours = Math.floor(minutes / 60);
+  const remainder = minutes % 60;
+
+  if (hours === 0) {
+    if (minutes === 1) {
+      return labels.durationOneMinute;
+    }
+    return formatMessage(labels.durationMinutes, { count: nf.format(minutes) });
+  }
+
+  if (remainder === 0) {
+    if (hours === 1) {
+      return labels.durationOneHour;
+    }
+    return formatMessage(labels.durationHours, { count: nf.format(hours) });
+  }
+
+  const hoursLabel = hours === 1 ? "1" : nf.format(hours);
+  const minutesLabel = remainder === 1 ? "1" : nf.format(remainder);
+
+  return formatMessage(labels.durationHoursAndMinutes, {
+    hours: hoursLabel,
+    minutes: minutesLabel,
+  });
+}
+
 export function formatSubmittedAt(value: string, locale: string) {
   const date = new Date(value);
   if (locale === "am") {

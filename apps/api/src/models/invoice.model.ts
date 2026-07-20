@@ -85,8 +85,26 @@ const invoiceInclude = {
           id: true,
           pickupAddress: true,
           dropoffAddress: true,
+          scheduledAt: true,
+          scheduledReturnAt: true,
+          passengerCount: true,
+          startedAt: true,
           completedAt: true,
           status: true,
+          assignedDriver: {
+            select: {
+              firstName: true,
+              middleName: true,
+              lastName: true,
+            },
+          },
+          assignedVehicle: {
+            select: {
+              plateNumber: true,
+              make: true,
+              model: true,
+            },
+          },
         },
       },
       farePlan: {

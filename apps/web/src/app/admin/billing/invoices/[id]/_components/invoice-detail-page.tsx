@@ -26,9 +26,13 @@ import {
 } from "@/lib/invoice-api";
 import { PERMISSIONS } from "@/lib/permissions";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import { formatMessage, getAdminInvoicesMessages } from "@/translations";
+import { formatMessage, getAdminInvoicesMessages, getCustomerRequestsMessages } from "@/translations";
 import { cn } from "@/lib/utils";
 import { formatContractTermRange } from "@/app/dashboard/_components/ride-requests/ride-request-utils";
+import {
+  buildInvoiceTripDetailsLabels,
+  InvoiceLineItemTripDetails,
+} from "@/components/billing/invoice-line-item-trip-details";
 
 const STATUS_BADGE_CLASS: Record<InvoiceStatus, string> = {
   draft: "border-slate-200 bg-slate-50 text-slate-600",
@@ -162,6 +166,9 @@ export function InvoiceDetailPage() {
     return <p className="text-sm text-slate-500">Invoice not found.</p>;
   }
 
+  const requestCopy = getCustomerRequestsMessages(locale as "en" | "am");
+  const tripDetailLabels = buildInvoiceTripDetailsLabels(copy.detail, requestCopy.status);
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -247,46 +254,28 @@ export function InvoiceDetailPage() {
         {invoice.line_items.length === 0 ? (
           <p className="px-5 py-8 text-sm text-slate-500">{copy.detail.noLineItems}</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="bg-slate-50/80">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    {copy.detail.tripRoute}
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    {copy.detail.distance}
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    {copy.detail.duration}
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
-                    {copy.detail.tripAmount}
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 bg-white">
-                {invoice.line_items.map((item) => (
-                  <tr key={item.id}>
-                    <td className="px-4 py-3 align-top">
-                      <p className="font-medium text-slate-800">{item.description}</p>
-                      <p className="mt-0.5 text-xs text-slate-500">
-                        {item.ride_request.pickup_address} → {item.ride_request.dropoff_address}
-                      </p>
-                    </td>
-                    <td className="px-4 py-3 align-top text-slate-600">
-                      {item.distance_km != null ? `${item.distance_km.toFixed(1)} km` : "—"}
-                    </td>
-                    <td className="px-4 py-3 align-top text-slate-600">
-                      {item.duration_minutes != null ? `${item.duration_minutes} min` : "—"}
-                    </td>
-                    <td className="px-4 py-3 align-top text-right font-medium text-slate-800">
-                      {formatMoney(item.line_total, invoice.currency, locale)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="divide-y divide-slate-100">
+            {invoice.line_items.map((item, index) => (
+              <div key={item.id} className="space-y-4 px-5 py-5">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                      {copy.detail.lineItems} {index + 1}
+                    </p>
+                    <p className="mt-0.5 text-sm font-semibold text-[#1C3A34]">{item.description}</p>
+                  </div>
+                  <p className="text-lg font-bold tabular-nums text-[#1C3A34]">
+                    {formatMoney(item.line_total, invoice.currency, locale)}
+                  </p>
+                </div>
+                <InvoiceLineItemTripDetails
+                  item={item}
+                  locale={locale}
+                  labels={tripDetailLabels}
+                  showBillingMetrics
+                />
+              </div>
+            ))}
           </div>
         )}
       </section>
