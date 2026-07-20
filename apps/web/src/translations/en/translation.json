@@ -2598,6 +2598,8 @@
     },
     "columns": {
       "time": "Time",
+      "notification": "Notification",
+      "sentTo": "Sent to",
       "status": "Status",
       "event": "Event",
       "channel": "Channel",

@@ -2598,6 +2598,8 @@
     },
     "columns": {
       "time": "ሰዓት",
+      "notification": "ማሳወቂያ",
+      "sentTo": "የተላከለት",
       "status": "ሁኔታ",
       "event": "ክስተት",
       "channel": "መንገድ",

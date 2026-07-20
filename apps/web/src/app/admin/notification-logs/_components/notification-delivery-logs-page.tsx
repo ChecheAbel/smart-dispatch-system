@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { format } from "date-fns";
-import { Eye, MoreHorizontal, ScrollText } from "lucide-react";
+import { Eye, ScrollText } from "lucide-react";
 import type {
   NotificationDeliveryLog,
   NotificationDeliveryStatus,
@@ -19,13 +19,6 @@ import { AdminDatePicker } from "@/components/shared/admin-date-picker";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -50,9 +43,14 @@ import {
   getAdminNotificationTemplatesMessages,
 } from "@/translations";
 import { cn } from "@/lib/utils";
+import { formatEthiopianDate, formatEthiopianTime } from "@/lib/ethiopian-calendar";
 
 function formatDateTime(value: string, locale: string) {
-  return new Date(value).toLocaleString(locale, {
+  const date = new Date(value);
+  if (locale === "am") {
+    return `${formatEthiopianDate(date, "am")} (${formatEthiopianTime(date, "am")})`;
+  }
+  return date.toLocaleString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -92,15 +90,15 @@ function getEventTitle(
   log: NotificationDeliveryLog,
   templatesCopy: ReturnType<typeof getAdminNotificationTemplatesMessages>,
 ) {
-  const events = templatesCopy.events[log.module];
-  if (!events) {
-    return log.event;
-  }
+  // Union-indexed event maps share no common keys, so cast for a string lookup.
+  const events = templatesCopy.events[log.module] as
+    | Record<string, { title: string } | undefined>
+    | undefined;
 
-  return events[log.event as keyof typeof events]?.title ?? log.event;
+  return events?.[log.event]?.title ?? log.event;
 }
 
-function formatSummary(log: NotificationDeliveryLog) {
+function formatDeliveryNote(log: NotificationDeliveryLog) {
   if ((log.status === "failed" || log.status === "skipped") && log.error_message) {
     return log.error_message;
   }
@@ -109,7 +107,11 @@ function formatSummary(log: NotificationDeliveryLog) {
     return log.subject;
   }
 
-  return log.body_preview ?? "—";
+  if (log.body_preview) {
+    return log.body_preview;
+  }
+
+  return null;
 }
 
 function DetailField({ label, value }: { label: string; value: string | null | undefined }) {
@@ -120,42 +122,6 @@ function DetailField({ label, value }: { label: string; value: string | null | u
         {value?.trim() ? value : "—"}
       </p>
     </div>
-  );
-}
-
-function DeliveryLogRowActions({
-  log,
-  label,
-  onView,
-}: {
-  log: NotificationDeliveryLog;
-  label: string;
-  onView: (log: NotificationDeliveryLog) => void;
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            className="text-slate-500 hover:bg-[#1C3A34]/6 hover:text-[#1C3A34]"
-            aria-label={label}
-          />
-        }
-      >
-        <MoreHorizontal className="size-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40">
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => onView(log)}>
-            <Eye />
-            {label}
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
   );
 }
 
@@ -218,58 +184,79 @@ export function NotificationDeliveryLogsPage() {
       {
         id: "time",
         header: copy.columns.time,
+        headerClassName: "w-[9.5rem]",
+        cellClassName: "align-top whitespace-nowrap text-slate-500",
         cell: (log) => (
-          <span className="text-sm text-slate-600">{formatDateTime(log.created_at, locale)}</span>
+          <time className="text-xs sm:text-sm" dateTime={log.created_at}>
+            {formatDateTime(log.created_at, locale)}
+          </time>
+        ),
+      },
+      {
+        id: "notification",
+        header: copy.columns.notification,
+        cellClassName: "align-top min-w-[14rem] max-w-xl",
+        cell: (log) => {
+          const note = formatDeliveryNote(log);
+
+          return (
+            <div className="min-w-0 space-y-1">
+              <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                <p className="text-sm font-medium text-slate-900">
+                  {getEventTitle(log, templatesCopy)}
+                </p>
+                {log.is_test ? (
+                  <Badge
+                    variant="outline"
+                    className="border-amber-200 bg-amber-50 px-1.5 py-0 text-[10px] font-semibold text-amber-900"
+                  >
+                    {copy.kindLabels.test}
+                  </Badge>
+                ) : null}
+              </div>
+              <p className="text-xs text-slate-500">
+                {copy.moduleLabels[log.module]}
+                <span className="text-slate-300"> · </span>
+                {copy.channelLabels[log.channel]}
+              </p>
+              {note ? (
+                <p
+                  className={cn(
+                    "line-clamp-1 text-xs",
+                    log.status === "failed"
+                      ? "text-red-700"
+                      : log.status === "skipped"
+                        ? "text-amber-900"
+                        : "text-slate-500",
+                  )}
+                >
+                  {note}
+                </p>
+              ) : null}
+            </div>
+          );
+        },
+      },
+      {
+        id: "sentTo",
+        header: copy.columns.sentTo,
+        cellClassName: "align-top min-w-[10rem] max-w-xs",
+        cell: (log) => (
+          <div className="min-w-0">
+            <p className="text-sm text-slate-800">{copy.recipientLabels[log.recipient]}</p>
+            <p className="truncate text-xs text-slate-500">{log.recipient_contact ?? "—"}</p>
+          </div>
         ),
       },
       {
         id: "status",
         header: copy.columns.status,
+        headerClassName: "w-[6.5rem]",
+        cellClassName: "align-top",
         cell: (log) => (
-          <Badge variant="outline" className={statusBadgeClass(log.status)}>
+          <Badge variant="outline" className={cn("text-xs", statusBadgeClass(log.status))}>
             {copy.statusLabels[log.status]}
           </Badge>
-        ),
-      },
-      {
-        id: "event",
-        header: copy.columns.event,
-        cell: (log) => (
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-slate-900">{getEventTitle(log, templatesCopy)}</p>
-            <p className="text-xs text-slate-500">
-              {copy.moduleLabels[log.module]}
-              {log.is_test ? ` · ${copy.kindLabels.test}` : ""}
-            </p>
-          </div>
-        ),
-      },
-      {
-        id: "channel",
-        header: copy.columns.channel,
-        cell: (log) => (
-          <span className="text-sm text-slate-700">{copy.channelLabels[log.channel]}</span>
-        ),
-      },
-      {
-        id: "recipient",
-        header: copy.columns.recipient,
-        cell: (log) => (
-          <span className="text-sm text-slate-700">{copy.recipientLabels[log.recipient]}</span>
-        ),
-      },
-      {
-        id: "contact",
-        header: copy.columns.contact,
-        cell: (log) => (
-          <span className="text-sm text-slate-600">{log.recipient_contact ?? "—"}</span>
-        ),
-      },
-      {
-        id: "summary",
-        header: copy.columns.summary,
-        cell: (log) => (
-          <span className="line-clamp-2 text-sm text-slate-600">{formatSummary(log)}</span>
         ),
       },
     ],
@@ -299,16 +286,31 @@ export function NotificationDeliveryLogsPage() {
         emptySearchDescription={copy.empty.searchDescription}
         refreshDeps={[refreshKey, statusFilter, moduleFilter, channelFilter, kindFilter, fromDate, toDate]}
         renderRowActions={(log) => (
-          <DeliveryLogRowActions log={log} label={copy.actions.view} onView={openDetail} />
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            className="text-slate-500 hover:bg-[#1C3A34]/6 hover:text-[#1C3A34]"
+            aria-label={copy.actions.view}
+            onClick={() => openDetail(log)}
+          >
+            <Eye className="size-4" />
+          </Button>
         )}
-        actionsColumnHeader={copy.columns.actions}
-        minTableWidth="1100px"
+        actionsColumnHeader=""
+        minTableWidth="720px"
         filterBar={
-          <div className="space-y-3">
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              <div className="space-y-2">
+          <div className="space-y-4">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="min-w-0 space-y-1.5">
                 <Label className={adminFilterLabelClass}>{copy.filters.status}</Label>
                 <Select
+                  items={[
+                    { value: "all", label: copy.filters.statusAll },
+                    { value: "sent", label: copy.statusLabels.sent },
+                    { value: "skipped", label: copy.statusLabels.skipped },
+                    { value: "failed", label: copy.statusLabels.failed },
+                  ]}
                   value={statusFilter}
                   onValueChange={(value) => {
                     if (value) {
@@ -331,9 +333,16 @@ export function NotificationDeliveryLogsPage() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
+              <div className="min-w-0 space-y-1.5">
                 <Label className={adminFilterLabelClass}>{copy.filters.module}</Label>
                 <Select
+                  items={[
+                    { value: "all", label: copy.filters.moduleAll },
+                    { value: "ride_requests", label: copy.moduleLabels.ride_requests },
+                    { value: "user_registrations", label: copy.moduleLabels.user_registrations },
+                    { value: "insurance", label: copy.moduleLabels.insurance },
+                    { value: "inspection", label: copy.moduleLabels.inspection },
+                  ]}
                   value={moduleFilter}
                   onValueChange={(value) => {
                     if (value) {
@@ -359,9 +368,14 @@ export function NotificationDeliveryLogsPage() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
+              <div className="min-w-0 space-y-1.5">
                 <Label className={adminFilterLabelClass}>{copy.filters.channel}</Label>
                 <Select
+                  items={[
+                    { value: "all", label: copy.filters.channelAll },
+                    { value: "email", label: copy.channelLabels.email },
+                    { value: "sms", label: copy.channelLabels.sms },
+                  ]}
                   value={channelFilter}
                   onValueChange={(value) => {
                     if (value) {
@@ -383,9 +397,14 @@ export function NotificationDeliveryLogsPage() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
+              <div className="min-w-0 space-y-1.5">
                 <Label className={adminFilterLabelClass}>{copy.filters.kind}</Label>
                 <Select
+                  items={[
+                    { value: "all", label: copy.filters.kindAll },
+                    { value: "live", label: copy.filters.kindLive },
+                    { value: "test", label: copy.filters.kindTest },
+                  ]}
                   value={kindFilter}
                   onValueChange={(value) => {
                     if (value) {
@@ -408,7 +427,7 @@ export function NotificationDeliveryLogsPage() {
               </div>
             </div>
 
-            <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] md:items-end">
+            <div className="grid gap-3 border-t border-slate-200/80 pt-4 sm:grid-cols-2 lg:grid-cols-[1fr_1fr_auto] lg:items-end">
               <AdminDatePicker
                 id="notification-log-from"
                 label={copy.filters.dateFrom}
@@ -429,7 +448,12 @@ export function NotificationDeliveryLogsPage() {
                   bumpRefresh();
                 }}
               />
-              <Button type="button" variant="outline" onClick={clearDateFilters}>
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full sm:col-span-2 lg:col-span-1 lg:w-auto"
+                onClick={clearDateFilters}
+              >
                 {copy.filters.clearDates}
               </Button>
             </div>
