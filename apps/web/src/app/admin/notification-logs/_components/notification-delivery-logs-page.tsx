@@ -31,7 +31,6 @@ import {
   Sheet,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
@@ -509,11 +508,6 @@ export function NotificationDeliveryLogsPage() {
             </div>
           ) : null}
 
-          <SheetFooter>
-            <Button type="button" variant="outline" onClick={() => setDetailOpen(false)}>
-              {copy.detail.close}
-            </Button>
-          </SheetFooter>
         </SheetContent>
       </Sheet>
     </div>

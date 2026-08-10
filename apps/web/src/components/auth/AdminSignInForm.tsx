@@ -128,7 +128,7 @@ export default function AdminSignInForm() {
 
   if (isCheckingSession || !hasLoadedPrefs) {
     return (
-      <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-xl">
+      <div className="flex min-h-[320px] items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-xl dark:border-[#35403f] dark:bg-[#1b2224] dark:shadow-black/30">
         <div className="flex items-center gap-3 text-sm text-slate-500">
           <Loader2 className="h-5 w-5 animate-spin text-[#1C3A34]" />
           {copy.checkingSession}
@@ -143,11 +143,11 @@ export default function AdminSignInForm() {
     <>
       <div className="hidden lg:block mb-8">
         <p className="text-[#C9B87A] font-bold text-xs tracking-[0.25em] uppercase mb-3">{copy.formEyebrow}</p>
-        <h2 className="text-3xl font-extrabold text-[#1C3A34] tracking-tight">{copy.formTitle}</h2>
+        <h2 className="text-3xl font-extrabold text-[#1C3A34] tracking-tight dark:text-foreground">{copy.formTitle}</h2>
         <p className="mt-2 text-slate-500 text-sm leading-relaxed">{copy.formDescription}</p>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 sm:p-8">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-[#35403f] dark:bg-[#1b2224] dark:shadow-black/30 sm:p-8">
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div
             className="grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1"
@@ -205,12 +205,12 @@ export default function AdminSignInForm() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={isSubmitting}
-                  className="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all disabled:opacity-70"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pr-4 pl-11 text-sm text-slate-800 transition-all focus:border-[#1C3A34] focus:ring-2 focus:ring-[#1C3A34]/20 focus:outline-none disabled:opacity-70 dark:focus:border-[#C9B87A]/65 dark:focus:ring-[#C9B87A]/20"
                   placeholder={copy.emailPlaceholder || undefined}
                 />
               </div>
             ) : (
-              <div className="flex overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm focus-within:border-[#1C3A34] focus-within:ring-2 focus-within:ring-[#1C3A34]/20 disabled:opacity-70">
+              <div className="flex overflow-hidden rounded-xl border border-slate-200 bg-slate-50 shadow-sm focus-within:border-[#1C3A34] focus-within:ring-2 focus-within:ring-[#1C3A34]/20 disabled:opacity-70 dark:focus-within:border-[#C9B87A]/65 dark:focus-within:ring-[#C9B87A]/20">
                 <div className="flex shrink-0 items-center gap-2 border-r border-slate-200 bg-white px-3 text-sm text-slate-700">
                   <span aria-hidden className="text-base leading-none">
                     🇪🇹
@@ -228,7 +228,7 @@ export default function AdminSignInForm() {
                     value={username}
                     onChange={(e) => setUsername(sanitizeEthiopianMobileInput(e.target.value))}
                     disabled={isSubmitting}
-                    className="w-full border-0 bg-transparent py-3.5 pl-10 pr-4 text-sm text-slate-800 outline-none disabled:opacity-70"
+                    className="w-full border-0 bg-transparent py-3.5 pr-4 pl-10 text-sm text-slate-800 outline-none disabled:opacity-70 dark:text-foreground"
                     placeholder={common.mobilePlaceholder}
                   />
                 </div>
@@ -253,13 +253,13 @@ export default function AdminSignInForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isSubmitting}
-                className="w-full pl-11 pr-12 py-3.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all disabled:opacity-70"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3.5 pr-12 pl-11 text-sm text-slate-800 transition-all focus:border-[#1C3A34] focus:ring-2 focus:ring-[#1C3A34]/20 focus:outline-none disabled:opacity-70 dark:focus:border-[#C9B87A]/65 dark:focus:ring-[#C9B87A]/20"
                 placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-[#1C3A34] transition-colors"
+                className="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-slate-400 transition-colors hover:text-[#1C3A34] dark:hover:text-[#C9B87A]"
                 aria-label={showPassword ? common.hidePassword : common.showPassword}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -280,7 +280,7 @@ export default function AdminSignInForm() {
                   }
                 }}
                 disabled={isSubmitting}
-                className="data-checked:border-[#1C3A34] data-checked:bg-[#1C3A34] data-checked:text-white"
+                className="data-checked:border-[#1C3A34] data-checked:bg-[#1C3A34] data-checked:text-white dark:data-checked:border-[#C9B87A] dark:data-checked:bg-[#C9B87A] dark:data-checked:text-[#151a21]"
               />
               <Label htmlFor="remember" className="text-sm text-slate-500 font-normal cursor-pointer">
                 {copy.rememberMe}
@@ -288,7 +288,7 @@ export default function AdminSignInForm() {
             </div>
             <Link
               href={ADMIN_FORGOT_PASSWORD_PATH}
-              className="text-sm font-semibold text-[#1C3A34] hover:text-[#C9B87A] transition-colors shrink-0"
+              className="shrink-0 text-sm font-semibold text-[#1C3A34] transition-colors hover:text-[#C9B87A] dark:text-[#d8c77f] dark:hover:text-[#efe2a9]"
             >
               {copy.forgotPassword}
             </Link>
@@ -297,7 +297,7 @@ export default function AdminSignInForm() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full bg-[#1C3A34] hover:bg-[#162e29] disabled:opacity-70 disabled:cursor-not-allowed text-white font-bold text-[15px] py-4 rounded-xl border-b-[3px] border-[#C9B87A] tracking-wide transition-all duration-200 hover:shadow-xl hover:shadow-[#1C3A34]/10 hover:-translate-y-0.5 mt-2 flex items-center justify-center gap-2"
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border-b-[3px] border-[#C9B87A] bg-[#1C3A34] py-4 text-[15px] font-bold tracking-wide text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#162e29] hover:shadow-xl hover:shadow-[#1C3A34]/10 disabled:cursor-not-allowed disabled:opacity-70"
           >
             {isSubmitting ? (
               <>

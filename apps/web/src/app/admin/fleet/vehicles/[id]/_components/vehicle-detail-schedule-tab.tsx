@@ -94,21 +94,21 @@ function formatBookingWindow(booking: AdminRideRequest, locale: string) {
 
 function statusBadgeClass(status: string) {
   if (status === "completed") {
-    return "border-emerald-200 bg-emerald-50 text-emerald-800";
+    return "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/35 dark:bg-emerald-500/12 dark:text-emerald-300";
   }
   if (status === "confirmed") {
-    return "border-[#1C3A34]/20 bg-[#1C3A34]/10 text-[#1C3A34]";
+    return "border-[#1C3A34]/20 bg-[#1C3A34]/10 text-[#1C3A34] dark:border-[#C9B87A]/45 dark:bg-[#C9B87A]/15 dark:text-[#e1d49d]";
   }
   if (status === "in_progress") {
-    return "border-blue-200 bg-blue-50 text-blue-800";
+    return "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-400/35 dark:bg-blue-500/12 dark:text-blue-300";
   }
   if (status === "pending") {
-    return "border-amber-200 bg-amber-50 text-amber-800";
+    return "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-400/35 dark:bg-amber-400/12 dark:text-amber-300";
   }
   if (status === "cancelled" || status === "rejected") {
-    return "border-rose-200 bg-rose-50 text-rose-700";
+    return "border-rose-200 bg-rose-50 text-rose-700 dark:border-rose-400/35 dark:bg-rose-500/12 dark:text-rose-300";
   }
-  return "border-slate-200 bg-slate-50 text-slate-600";
+  return "border-slate-200 bg-slate-50 text-slate-600 dark:border-white/15 dark:bg-white/[0.06] dark:text-slate-300";
 }
 
 function calendarChipClass(status: string) {
@@ -370,21 +370,21 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
     <div className="space-y-4 text-left font-sans antialiased">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h3 className="text-sm font-extrabold text-[#1C3A34]">Vehicle schedule</h3>
+          <h3 className="text-sm font-extrabold text-[#1C3A34] dark:text-foreground">Vehicle schedule</h3>
           <p className="mt-0.5 text-xs text-slate-500">
             {occupiedDaysInMonth} occupied day{occupiedDaysInMonth === 1 ? "" : "s"} this month
           </p>
         </div>
 
-        <div className="inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1">
+        <div className="inline-flex rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-border dark:bg-[#11161d]">
           <button
             type="button"
             onClick={() => setViewMode("calendar")}
             className={cn(
               "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors",
               viewMode === "calendar"
-                ? "bg-[#1C3A34] text-white"
-                : "text-slate-500 hover:text-[#1C3A34]",
+                ? "bg-[#1C3A34] text-white dark:bg-[#C9B87A] dark:text-[#151a21]"
+                : "text-slate-500 hover:text-[#1C3A34] dark:text-slate-400 dark:hover:text-foreground",
             )}
           >
             <Calendar className="size-3.5" />
@@ -396,8 +396,8 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
             className={cn(
               "inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-colors",
               viewMode === "list"
-                ? "bg-[#1C3A34] text-white"
-                : "text-slate-500 hover:text-[#1C3A34]",
+                ? "bg-[#1C3A34] text-white dark:bg-[#C9B87A] dark:text-[#151a21]"
+                : "text-slate-500 hover:text-[#1C3A34] dark:text-slate-400 dark:hover:text-foreground",
             )}
           >
             <List className="size-3.5" />
@@ -618,32 +618,32 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
       ) : (
         <div className="space-y-4">
           {bookings.length > 0 ? (
-            <div className="relative ml-4 space-y-6 border-l-2 border-[#1C3A34]/15 pl-6">
+            <div className="relative ml-4 space-y-6 border-l-2 border-[#1C3A34]/15 pl-6 dark:border-white/10">
               {bookings.map((booking) => {
                 const formattedDate = formatBookingWindow(booking, locale);
                 const name = requesterName(booking);
 
                 return (
                   <div key={booking.id} className="relative">
-                    <span className="absolute -left-[37px] top-2 z-10 flex size-7 items-center justify-center rounded-full bg-[#1C3A34] text-white shadow-md ring-4 ring-white">
+                    <span className="absolute -left-[37px] top-2 z-10 flex size-7 items-center justify-center rounded-full bg-[#1C3A34] text-white shadow-md ring-4 ring-white dark:bg-[#C9B87A] dark:text-[#151a21] dark:ring-[#11161d]">
                       <User className="size-3.5" />
                     </span>
 
                     <div
                       className={cn(
                         adminCardClass,
-                        "rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:border-slate-300 hover:shadow-md",
+                        "rounded-2xl border border-slate-200 bg-white p-5 shadow-xs transition-all hover:border-slate-300 hover:shadow-md dark:border-border dark:bg-card dark:hover:border-white/20",
                       )}
                     >
-                      <div className="mb-4 flex flex-col justify-between gap-3 border-b border-slate-100 pb-3 sm:flex-row sm:items-start">
+                      <div className="mb-4 flex flex-col justify-between gap-3 border-b border-slate-100 pb-3 sm:flex-row sm:items-start dark:border-border">
                         <div className="flex items-center gap-3">
-                          <Avatar className="size-10 border border-slate-100">
-                            <AvatarFallback className="bg-[#1C3A34] text-xs font-bold text-white">
+                          <Avatar className="size-10 border border-slate-100 dark:border-border">
+                            <AvatarFallback className="bg-[#1C3A34] text-xs font-bold text-white dark:bg-[#C9B87A] dark:text-[#151a21]">
                               {requesterInitials(booking)}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <h3 className="text-sm font-extrabold text-[#1C3A34]">{name}</h3>
+                            <h3 className="text-sm font-extrabold text-[#1C3A34] dark:text-foreground">{name}</h3>
                             <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
                               <Clock className="size-3.5 text-slate-400" />
                               <span className="font-medium">{formattedDate}</span>
@@ -666,13 +666,13 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
                           <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
                             Route
                           </p>
-                          <div className="relative space-y-2 overflow-hidden rounded-xl border border-slate-100 bg-slate-50 p-3">
-                            <div className="absolute bottom-6 left-5 top-6 w-0.5 border-l-2 border-dashed border-slate-300" />
+                          <div className="relative space-y-2 overflow-hidden rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-border dark:bg-[#11161d]">
+                            <div className="absolute bottom-6 left-5 top-6 w-0.5 border-l-2 border-dashed border-slate-300 dark:border-slate-600" />
                             <div className="relative z-10 flex items-center gap-2.5">
                               <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-[9px] font-bold text-emerald-800">
                                 A
                               </span>
-                              <span className="truncate font-semibold text-slate-700">
+                              <span className="truncate font-semibold text-slate-700 dark:text-slate-200">
                                 {booking.pickup_address}
                               </span>
                             </div>
@@ -680,24 +680,24 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
                               <span className="flex size-4 shrink-0 items-center justify-center rounded-full bg-rose-100 text-[9px] font-bold text-rose-800">
                                 B
                               </span>
-                              <span className="truncate font-semibold text-slate-700">
+                              <span className="truncate font-semibold text-slate-700 dark:text-slate-200">
                                 {booking.dropoff_address}
                               </span>
                             </div>
                           </div>
                         </div>
 
-                        <div className="flex flex-col justify-between space-y-2 sm:col-span-5 sm:border-l sm:border-slate-100 sm:pl-4">
+                        <div className="flex flex-col justify-between space-y-2 sm:col-span-5 sm:border-l sm:border-slate-100 sm:pl-4 dark:sm:border-border">
                           <div>
                             <p className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
                               Driver
                             </p>
-                            <p className="mt-2 text-xs font-extrabold text-slate-700">
+                            <p className="mt-2 text-xs font-extrabold text-slate-700 dark:text-slate-200">
                               {booking.assigned_driver?.name || "Unassigned"}
                             </p>
                           </div>
                           {booking.notes ? (
-                            <div className="rounded-xl border border-[#1C3A34]/10 bg-[#1C3A34]/5 p-2.5 text-[11px] italic text-[#1C3A34]/80">
+                            <div className="rounded-xl border border-[#1C3A34]/10 bg-[#1C3A34]/5 p-2.5 text-[11px] italic text-[#1C3A34]/80 dark:border-[#C9B87A]/25 dark:bg-[#C9B87A]/10 dark:text-[#e1d49d]">
                               &ldquo;{booking.notes}&rdquo;
                             </div>
                           ) : null}
@@ -712,13 +712,13 @@ export function VehicleDetailScheduleTab({ vehicle, locale }: VehicleDetailSched
             <div
               className={cn(
                 adminCardClass,
-                "flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center",
+                "flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white p-12 text-center dark:border-border dark:bg-card",
               )}
             >
-              <div className="mb-3 flex size-14 items-center justify-center rounded-full bg-slate-50 ring-1 ring-slate-200">
-                <Calendar className="size-6 text-slate-300" />
+              <div className="mb-3 flex size-14 items-center justify-center rounded-full bg-slate-50 ring-1 ring-slate-200 dark:bg-white/[0.05] dark:ring-border">
+                <Calendar className="size-6 text-slate-300 dark:text-slate-500" />
               </div>
-              <p className="text-sm font-extrabold text-slate-800">No bookings scheduled</p>
+              <p className="text-sm font-extrabold text-slate-800 dark:text-foreground">No bookings scheduled</p>
               <p className="mt-1 max-w-xs text-xs leading-relaxed text-slate-500">
                 There are no ride requests assigned to this vehicle yet.
               </p>

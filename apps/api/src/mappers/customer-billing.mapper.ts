@@ -73,6 +73,7 @@ export function toCustomerInvoice(invoice: DbInvoice, options?: { locale?: strin
     issued_at: publicInvoice.issued_at,
     due_at: publicInvoice.due_at,
     paid_at: publicInvoice.paid_at,
+    payment_method: publicInvoice.payment_method,
     voided_at: publicInvoice.voided_at,
     notes: publicInvoice.notes,
     line_items: publicInvoice.line_items,

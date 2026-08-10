@@ -52,7 +52,7 @@ function MenuRowActions({
             type="button"
             variant="ghost"
             size="icon-sm"
-            className="text-slate-500 hover:bg-[#1C3A34]/6 hover:text-[#1C3A34]"
+            className="text-slate-500 hover:bg-[#1C3A34]/6 hover:text-[#1C3A34] dark:text-slate-400 dark:hover:bg-white/[0.07] dark:hover:text-[#e1d49d]"
             aria-label={formatMessage(labels.menuLabel, { name: menu.label })}
           />
         }
@@ -123,13 +123,13 @@ export function MenusPage() {
       {
         id: "path",
         header: copy.columns.path,
-        cellClassName: "text-slate-500",
+        cellClassName: "text-slate-500 dark:text-muted-foreground",
         cell: (menu: MenuRecord) => menu.path || "—",
       },
       {
         id: "sort_order",
         header: copy.columns.sortOrder,
-        cellClassName: "text-slate-500 tabular-nums",
+        cellClassName: "text-slate-500 tabular-nums dark:text-muted-foreground",
         cell: (menu: MenuRecord) => menu.sort_order,
       },
       {

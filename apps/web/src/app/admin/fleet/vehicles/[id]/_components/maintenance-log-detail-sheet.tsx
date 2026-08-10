@@ -2,10 +2,14 @@
 
 import type { ComponentType } from "react";
 import {
+  AlertTriangle,
   CalendarClock,
   CheckCircle2,
   CircleDollarSign,
+  ClipboardList,
+  Droplets,
   Gauge,
+  ShieldCheck,
   Store,
   UserRound,
   Wrench,
@@ -33,7 +37,6 @@ import {
   formatMaintenanceDate,
   formatMaintenanceDateTime,
   maintenanceStatusClass,
-  maintenanceTypeIcon,
 } from "./vehicle-detail-shared";
 
 type MaintenanceLogDetailSheetProps = {
@@ -44,6 +47,25 @@ type MaintenanceLogDetailSheetProps = {
   canWrite: boolean;
   onComplete?: (log: VehicleMaintenanceLog) => void;
 };
+
+function MaintenanceTypeGlyph({ slug, className }: { slug: string; className?: string }) {
+  switch (slug) {
+    case "scheduled":
+      return <CalendarClock className={className} />;
+    case "repair":
+      return <Wrench className={className} />;
+    case "inspection":
+      return <ShieldCheck className={className} />;
+    case "tire":
+      return <Gauge className={className} />;
+    case "oil":
+      return <Droplets className={className} />;
+    case "accident":
+      return <AlertTriangle className={className} />;
+    default:
+      return <ClipboardList className={className} />;
+  }
+}
 
 function DetailRow({
   label,
@@ -57,13 +79,13 @@ function DetailRow({
   return (
     <div className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
       {Icon ? (
-        <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+        <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500 dark:bg-white/[0.06] dark:text-slate-300">
           <Icon className="size-3.5" />
         </span>
       ) : null}
       <div className="min-w-0 flex-1">
         <p className="text-xs font-medium tracking-wide text-slate-400 uppercase">{label}</p>
-        <p className="mt-1 text-sm font-medium text-slate-800 break-words">{value}</p>
+        <p className="mt-1 text-sm font-medium text-slate-800 break-words dark:text-slate-200">{value}</p>
       </div>
     </div>
   );
@@ -91,7 +113,6 @@ export function MaintenanceLogDetailSheet({
     );
   }
 
-  const TypeIcon = maintenanceTypeIcon(log.work_type.slug);
   const canComplete = canWrite && (log.status === "open" || log.status === "in_progress");
   const notSet = sheetCopy.notSet;
 
@@ -101,41 +122,41 @@ export function MaintenanceLogDetailSheet({
         side="right"
         className="flex w-full flex-col gap-0 overflow-y-auto p-0 data-[side=right]:sm:max-w-lg"
       >
-        <SheetHeader className="border-b border-slate-100 px-6 py-5">
+        <SheetHeader className="border-b border-slate-100 px-6 py-5 dark:border-border">
           <SheetTitle className={adminHeadingClass}>{sheetCopy.title}</SheetTitle>
           <SheetDescription className="leading-relaxed">{sheetCopy.description}</SheetDescription>
         </SheetHeader>
 
         <div className="space-y-4 px-6 py-5">
           <Card className={cn(adminCardClass, "gap-0 overflow-hidden py-0 shadow-none ring-0")}>
-            <div className="flex items-start gap-3 border-b border-slate-100 bg-gradient-to-r from-[#1C3A34]/[0.04] to-transparent px-4 py-4">
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#1C3A34] text-white shadow-sm">
-                <TypeIcon className="size-5" />
+            <div className="flex items-start gap-3 border-b border-slate-100 bg-gradient-to-r from-[#1C3A34]/[0.04] to-transparent px-4 py-4 dark:border-border dark:from-[#C9B87A]/10">
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#1C3A34] text-white shadow-sm dark:bg-[#C9B87A] dark:text-[#151a21]">
+                <MaintenanceTypeGlyph slug={log.work_type.slug} className="size-5" />
               </div>
               <div className="min-w-0 flex-1 space-y-2">
-                <p className="text-lg font-bold tracking-tight text-slate-900">{log.title}</p>
+                <p className="text-lg font-bold tracking-tight text-slate-900 dark:text-foreground">{log.title}</p>
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="outline" className={maintenanceStatusClass(log.status)}>
                     {detail.maintenanceStatuses[log.status]}
                   </Badge>
-                  <Badge variant="outline" className="border-slate-200 bg-white text-slate-600">
+                  <Badge variant="outline" className="border-slate-200 bg-white text-slate-600 dark:border-border dark:bg-white/[0.06] dark:text-slate-300">
                     {log.work_type.name}
                   </Badge>
                 </div>
                 {vehicle ? (
-                  <p className="font-mono text-sm font-semibold text-[#1C3A34]">
+                  <p className="font-mono text-sm font-semibold text-[#1C3A34] dark:text-[#e1d49d]">
                     {vehicle.plate_number}
                   </p>
                 ) : null}
               </div>
             </div>
 
-            <div className="divide-y divide-slate-100 px-4">
+            <div className="divide-y divide-slate-100 px-4 dark:divide-border">
               <section className="py-4">
                 <h3 className="mb-2 text-xs font-semibold tracking-wide text-slate-400 uppercase">
                   {sheetCopy.overview}
                 </h3>
-                <p className="text-sm leading-relaxed text-slate-600">
+                <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">
                   {log.description?.trim() || maintenanceCopy.noDescription}
                 </p>
               </section>
@@ -229,12 +250,12 @@ export function MaintenanceLogDetailSheet({
           </Card>
         </div>
 
-        <SheetFooter className="mt-auto flex-row justify-end gap-2 border-t border-slate-100 bg-white px-6 py-4">
+        <SheetFooter className="mt-auto flex-row justify-end gap-2 border-t border-slate-100 bg-white px-6 py-4 dark:border-border dark:bg-[#171c24]">
           <Button
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
-            className="border-slate-200"
+            className="border-slate-200 dark:border-border dark:bg-[#202630] dark:text-foreground dark:hover:bg-white/[0.07]"
           >
             {sheetCopy.close}
           </Button>
@@ -242,7 +263,7 @@ export function MaintenanceLogDetailSheet({
             <Button
               type="button"
               variant="outline"
-              className="border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"
+              className="border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 dark:border-emerald-400/35 dark:bg-emerald-500/12 dark:text-emerald-300 dark:hover:bg-emerald-500/20"
               onClick={() => {
                 onComplete?.(log);
                 onOpenChange(false);

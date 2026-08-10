@@ -33,7 +33,6 @@ import {
   parseDateInputValue,
   vehicleToComplianceForm,
 } from "@/lib/vehicle-compliance-form";
-import { cn } from "@/lib/utils";
 
 export type { ExpiryTone, ComplianceForm };
 export {
@@ -108,13 +107,13 @@ export function vehicleStatusBadgeClass(status: Vehicle["status"]) {
 export function maintenanceStatusClass(status: VehicleMaintenanceStatus) {
   switch (status) {
     case "open":
-      return "border-sky-200 bg-sky-50 text-sky-800";
+      return "border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-400/35 dark:bg-sky-500/12 dark:text-sky-300";
     case "in_progress":
-      return "border-amber-200 bg-amber-50 text-amber-800";
+      return "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-400/35 dark:bg-amber-400/12 dark:text-amber-300";
     case "completed":
-      return "border-emerald-200 bg-emerald-50 text-emerald-800";
+      return "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-400/35 dark:bg-emerald-500/12 dark:text-emerald-300";
     case "cancelled":
-      return "border-slate-200 bg-slate-50 text-slate-600";
+      return "border-slate-200 bg-slate-50 text-slate-600 dark:border-white/15 dark:bg-white/[0.06] dark:text-slate-300";
   }
 }
 
@@ -168,10 +167,10 @@ export function fuelTypeIcon(type: VehicleFuelType) {
 
 export function fuelEfficiencyClass(value: number | null) {
   if (value === null) {
-    return "border-slate-200 bg-slate-50 text-slate-600";
+    return "border-slate-200 bg-slate-50 text-slate-600 dark:border-white/15 dark:bg-white/[0.06] dark:text-slate-300";
   }
 
-  return "border-emerald-200 bg-emerald-50 text-emerald-800";
+  return "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-400/35 dark:bg-emerald-500/12 dark:text-emerald-300";
 }
 
 export function formatFuelEfficiency(

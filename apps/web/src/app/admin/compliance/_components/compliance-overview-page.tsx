@@ -265,7 +265,7 @@ export function ComplianceOverviewPage() {
   const data = summary ?? emptySummary;
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-8">
+    <div className="w-full max-w-none space-y-8">
       <header className="space-y-2">
         <Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>
         <h1 className={cn("text-2xl font-extrabold tracking-tight sm:text-3xl", adminHeadingClass)}>

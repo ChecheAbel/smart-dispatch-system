@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import type { PaginationMeta } from "@smart-dispatch/types";
 import { useLocale } from "@/components/shared/providers";
 import { Button } from "@/components/ui/button";
@@ -85,8 +81,8 @@ export function DataTablePagination({
   const visiblePages = getVisiblePageNumbers(pagination.page, totalPages);
 
   return (
-    <div className="flex flex-col gap-4 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-3 text-sm text-slate-500">
+    <div className="flex flex-col gap-4 border-t border-slate-100 pt-4 dark:border-border sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-3 text-sm text-slate-500 dark:text-muted-foreground">
         <span>
           {pagination.total === 0
             ? copy.noResults
@@ -98,7 +94,9 @@ export function DataTablePagination({
         </span>
 
         <div className="flex items-center gap-2">
-          <span className="text-slate-400">·</span>
+          <span className="text-slate-400 dark:text-muted-foreground/60">
+            ·
+          </span>
           <span>{copy.rowsPerPage}</span>
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -113,11 +111,11 @@ export function DataTablePagination({
               }
             >
               {pageSize}
-              <ChevronDown className="size-3.5 text-slate-400" />
+              <ChevronDown className="size-3.5 text-slate-400 dark:text-muted-foreground" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="min-w-36 p-1.5">
               <DropdownMenuGroup>
-                <DropdownMenuLabel className="text-xs text-slate-500">
+                <DropdownMenuLabel className="text-xs text-slate-500 dark:text-muted-foreground">
                   {copy.rowsPerPage}
                 </DropdownMenuLabel>
                 <DropdownMenuRadioGroup
@@ -159,7 +157,7 @@ export function DataTablePagination({
             <span
               className={cn(
                 adminPaginationButtonClass,
-                "inline-flex size-9 items-center justify-center border-[#1C3A34] bg-[#1C3A34] font-semibold text-white",
+                "inline-flex size-9 items-center justify-center border-[#1C3A34] bg-[#1C3A34] font-semibold text-white dark:border-[var(--brand-accent)] dark:bg-[var(--brand-accent)] dark:text-[#171a1f]",
               )}
             >
               1
@@ -169,7 +167,7 @@ export function DataTablePagination({
               item === "ellipsis" ? (
                 <span
                   key={`ellipsis-${index}`}
-                  className="inline-flex size-9 items-center justify-center text-sm text-slate-400"
+                  className="inline-flex size-9 items-center justify-center text-sm text-slate-400 dark:text-muted-foreground"
                   aria-hidden
                 >
                   …
@@ -186,7 +184,7 @@ export function DataTablePagination({
                     adminPaginationIconButtonClass,
                     "font-semibold tabular-nums",
                     item === pagination.page &&
-                      "border-[#1C3A34] bg-[#1C3A34] text-white hover:bg-[#162e29] hover:text-white",
+                      "border-[#1C3A34] bg-[#1C3A34] text-white hover:bg-[#162e29] hover:text-white dark:border-[var(--brand-accent)] dark:bg-[var(--brand-accent)] dark:text-[#171a1f] dark:hover:bg-[#d8c98e] dark:hover:text-[#171a1f]",
                   )}
                   aria-label={formatMessage(copy.page, { page: item })}
                   aria-current={item === pagination.page ? "page" : undefined}

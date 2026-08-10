@@ -21,7 +21,14 @@ function ChartPlaceholder({ variant }: { variant: ChartVariant }) {
   if (variant === "donut") {
     return (
       <svg viewBox="0 0 200 120" className="h-full w-full" aria-hidden>
-        <circle cx="100" cy="60" r="38" fill="none" stroke="#e2e8f0" strokeWidth="14" />
+        <circle
+          cx="100"
+          cy="60"
+          r="38"
+          fill="none"
+          stroke="#e2e8f0"
+          strokeWidth="14"
+        />
         <circle
           cx="100"
           cy="60"
@@ -42,7 +49,14 @@ function ChartPlaceholder({ variant }: { variant: ChartVariant }) {
     const bars = [48, 72, 56, 88, 64, 92, 58, 76, 68, 84];
     return (
       <svg viewBox="0 0 200 120" className="h-full w-full" aria-hidden>
-        <line x1="16" y1="100" x2="184" y2="100" stroke="#e2e8f0" strokeWidth="1.5" />
+        <line
+          x1="16"
+          y1="100"
+          x2="184"
+          y2="100"
+          stroke="#e2e8f0"
+          strokeWidth="1.5"
+        />
         {bars.map((height, index) => {
           const x = 20 + index * 17;
           return (
@@ -64,7 +78,14 @@ function ChartPlaceholder({ variant }: { variant: ChartVariant }) {
   if (variant === "area") {
     return (
       <svg viewBox="0 0 200 120" className="h-full w-full" aria-hidden>
-        <line x1="16" y1="100" x2="184" y2="100" stroke="#e2e8f0" strokeWidth="1.5" />
+        <line
+          x1="16"
+          y1="100"
+          x2="184"
+          y2="100"
+          stroke="#e2e8f0"
+          strokeWidth="1.5"
+        />
         <path
           d="M16 88 L40 72 L64 78 L88 52 L112 58 L136 38 L160 44 L184 28 L184 100 L16 100 Z"
           fill="#e2e8f0"
@@ -83,7 +104,14 @@ function ChartPlaceholder({ variant }: { variant: ChartVariant }) {
 
   return (
     <svg viewBox="0 0 200 120" className="h-full w-full" aria-hidden>
-      <line x1="16" y1="100" x2="184" y2="100" stroke="#e2e8f0" strokeWidth="1.5" />
+      <line
+        x1="16"
+        y1="100"
+        x2="184"
+        y2="100"
+        stroke="#e2e8f0"
+        strokeWidth="1.5"
+      />
       <path
         d="M16 82 L40 68 L64 74 L88 48 L112 56 L136 36 L160 42 L184 26"
         fill="none"
@@ -116,16 +144,25 @@ export function ComingSoonChartCard({
   className,
 }: ComingSoonChartCardProps) {
   return (
-    <Card className={cn("border-dashed border-slate-200/80 bg-slate-50/60 shadow-sm", className)}>
+    <Card
+      className={cn(
+        "border-dashed border-slate-200/80 bg-slate-50/60 shadow-sm dark:border-border dark:bg-card",
+        className,
+      )}
+    >
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm font-semibold text-slate-900">{title}</CardTitle>
-        <CardDescription className="text-slate-500">{description}</CardDescription>
+        <CardTitle className="text-sm font-semibold text-slate-900 dark:text-foreground">
+          {title}
+        </CardTitle>
+        <CardDescription className="text-slate-500 dark:text-muted-foreground">
+          {description}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div className="relative h-36 overflow-hidden rounded-lg border border-dashed border-slate-200 bg-white/70 px-3 py-2">
+        <div className="relative h-36 overflow-hidden rounded-lg border border-dashed border-slate-200 bg-white/70 px-3 py-2 dark:border-border dark:bg-muted/45">
           <ChartPlaceholder variant={variant} />
-          <div className="absolute inset-0 flex items-center justify-center bg-white/55 backdrop-blur-[1px]">
-            <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-400">
+          <div className="absolute inset-0 flex items-center justify-center bg-white/55 backdrop-blur-[1px] dark:bg-card/65">
+            <span className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-400 dark:border-border dark:bg-popover dark:text-muted-foreground">
               {comingSoonLabel}
             </span>
           </div>

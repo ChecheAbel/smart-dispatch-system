@@ -184,7 +184,7 @@ export function ContractDetailPage() {
 
   if (loading) {
     return (
-      <div className="mx-auto w-full min-w-0 max-w-6xl space-y-5 sm:space-y-6">
+      <div className="w-full min-w-0 space-y-5 sm:space-y-6">
         <div className="h-9 w-40 animate-pulse rounded-lg bg-slate-100" />
         <div className="h-36 animate-pulse rounded-2xl bg-slate-100" />
         <div className="grid gap-4 lg:grid-cols-2">
@@ -220,7 +220,7 @@ export function ContractDetailPage() {
   }
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-6xl space-y-5 sm:space-y-6">
+    <div className="w-full min-w-0 space-y-5 sm:space-y-6">
       <Button
         variant="ghost"
         size="sm"
@@ -235,12 +235,12 @@ export function ContractDetailPage() {
       <section
         className={cn(
           adminCardClass,
-          "overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white via-white to-[#1C3A34]/[0.04]",
+          "overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white via-white to-[#1C3A34]/[0.04] dark:from-[#202630] dark:via-[#171c24] dark:to-[#1f242d]",
         )}
       >
         <div className="flex flex-col gap-4 p-4 sm:gap-5 sm:p-5 lg:flex-row lg:items-start lg:justify-between lg:p-6">
           <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-            <div className="shrink-0 rounded-2xl bg-[#1C3A34] p-2.5 text-white shadow-sm sm:p-3">
+            <div className="shrink-0 rounded-2xl bg-[#1C3A34] p-2.5 text-white shadow-sm sm:p-3 dark:bg-[#C9B87A] dark:text-[#151a21]">
               <FileText className="size-5 sm:size-6" />
             </div>
             <div className="min-w-0 flex-1 space-y-2">
@@ -381,9 +381,9 @@ export function ContractDetailPage() {
             <p className="mt-1 text-sm text-slate-500">{copy.detail.noEnrollmentsDescription}</p>
           </div>
         ) : (
-          <div className="overflow-x-auto rounded-xl border border-slate-200/80">
-            <table className="min-w-full divide-y divide-slate-200 text-sm">
-              <thead className="bg-slate-50/80">
+          <div className="overflow-x-auto rounded-xl border border-slate-200/80 dark:border-border">
+            <table className="min-w-full divide-y divide-slate-200 text-sm dark:divide-border">
+              <thead className="bg-slate-50/80 dark:bg-[#11161d]">
                 <tr>
                   <th className="w-12 px-4 py-3 text-center text-xs font-semibold uppercase tracking-wide text-slate-500">
                     #
@@ -405,7 +405,7 @@ export function ContractDetailPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 bg-white">
+              <tbody className="divide-y divide-slate-100 bg-white dark:divide-border dark:bg-card">
                 {enrollments.map((enrollment, index) => {
                   const periodStatus = getEnrollmentPeriodStatus(enrollment);
                   const statusLabel =
@@ -416,7 +416,7 @@ export function ContractDetailPage() {
                         : copy.detail.enrollmentStatusEnded;
 
                   return (
-                    <tr key={enrollment.id} className="hover:bg-slate-50/60">
+                    <tr key={enrollment.id} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.035]">
                       <td className="px-4 py-3 text-center text-slate-500 tabular-nums">{index + 1}</td>
                       <td className="px-4 py-3 align-top">
                         <p className="font-medium text-slate-800">{enrollment.requester.name}</p>
@@ -489,7 +489,7 @@ function QuickFact({
   hint?: string;
 }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2.5 sm:px-3.5 sm:py-3">
+    <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2.5 sm:px-3.5 sm:py-3 dark:border-border dark:bg-white/[0.035]">
       <p className="text-[11px] font-medium tracking-wide text-slate-400 uppercase">{label}</p>
       <p className="mt-1 truncate text-sm font-semibold text-slate-800">{value}</p>
       {hint ? <p className="mt-0.5 text-[11px] text-slate-400">{hint}</p> : null}
@@ -507,7 +507,7 @@ function InfoTile({
   mono?: boolean;
 }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3.5 py-3">
+    <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3.5 py-3 dark:border-border dark:bg-white/[0.025]">
       <dt className="text-xs font-medium text-slate-500">{label}</dt>
       <dd className={cn("mt-1 text-sm font-semibold text-slate-800", mono && "font-mono text-xs")}>
         {value}
@@ -528,10 +528,10 @@ function ScopeGroup({
   count: number;
 }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4">
+    <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-border dark:bg-white/[0.025]">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <div className="rounded-lg bg-white p-1.5 text-[#1C3A34] shadow-sm">
+          <div className="rounded-lg bg-white p-1.5 text-[#1C3A34] shadow-sm dark:bg-[#2a303a] dark:text-[#d8c77f]">
             <Icon className="size-4" />
           </div>
           <div>
@@ -552,7 +552,7 @@ function ScopeGroup({
             <Badge
               key={item}
               variant="outline"
-              className="border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700"
+              className="border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-700 dark:border-border dark:bg-[#202630] dark:text-foreground"
             >
               {item}
             </Badge>

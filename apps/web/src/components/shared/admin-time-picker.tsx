@@ -32,9 +32,15 @@ export type TimeValue = {
 };
 
 const MINUTE_INTERVAL = 5;
-const MINUTE_OPTIONS = Array.from({ length: 60 / MINUTE_INTERVAL }, (_, index) => index * MINUTE_INTERVAL);
+const MINUTE_OPTIONS = Array.from(
+  { length: 60 / MINUTE_INTERVAL },
+  (_, index) => index * MINUTE_INTERVAL,
+);
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, index) => index);
-const HOUR12_OPTIONS = Array.from({ length: 12 }, (_, index) => (index + 1) % 12 || 12);
+const HOUR12_OPTIONS = Array.from(
+  { length: 12 },
+  (_, index) => (index + 1) % 12 || 12,
+);
 const PERIOD_OPTIONS = ["AM", "PM"] as const;
 
 type TimePeriod = (typeof PERIOD_OPTIONS)[number];
@@ -96,14 +102,21 @@ function buildTimeValueFrom12Hour(
 }
 
 function isTimeBefore(time: TimeValue, minTime: TimeValue) {
-  return time.hour < minTime.hour || (time.hour === minTime.hour && time.minute < minTime.minute);
+  return (
+    time.hour < minTime.hour ||
+    (time.hour === minTime.hour && time.minute < minTime.minute)
+  );
 }
 
 function isHourDisabled(hour: number, minTime?: TimeValue) {
   return minTime ? hour < minTime.hour : false;
 }
 
-function isMinuteDisabled(minute: number, hour: number | undefined, minTime?: TimeValue) {
+function isMinuteDisabled(
+  minute: number,
+  hour: number | undefined,
+  minTime?: TimeValue,
+) {
   if (!minTime || hour === undefined) {
     return false;
   }
@@ -201,7 +214,11 @@ export function AdminTimePicker({
     }
 
     const nextValue = hour12
-      ? buildTimeValueFrom12Hour(Number(draftHour), Number(draftMinute), draftPeriod as TimePeriod)
+      ? buildTimeValueFrom12Hour(
+          Number(draftHour),
+          Number(draftMinute),
+          draftPeriod as TimePeriod,
+        )
       : buildTimeValue(Number(draftHour), Number(draftMinute));
 
     if (minTime && isTimeBefore(nextValue, minTime)) {
@@ -224,7 +241,11 @@ export function AdminTimePicker({
     }
 
     return hour12
-      ? buildTimeValueFrom12Hour(Number(draftHour), Number(draftMinute), draftPeriod as TimePeriod)
+      ? buildTimeValueFrom12Hour(
+          Number(draftHour),
+          Number(draftMinute),
+          draftPeriod as TimePeriod,
+        )
       : buildTimeValue(Number(draftHour), Number(draftMinute));
   }, [draftHour, draftMinute, draftPeriod, hour12]);
 
@@ -246,28 +267,41 @@ export function AdminTimePicker({
               data-state={open ? "open" : "closed"}
               className={cn(
                 adminDatePickerTriggerClass,
-                value ? "text-[#1C3A34]" : "text-slate-400",
-                error && "border-red-300 bg-red-50/60 text-red-900 focus-visible:border-red-400 focus-visible:ring-red-200/60",
+                value
+                  ? "text-[#1C3A34] dark:text-foreground"
+                  : "text-slate-400 dark:text-muted-foreground",
+                error &&
+                  "border-red-300 bg-red-50/60 text-red-900 focus-visible:border-red-400 focus-visible:ring-red-200/60",
               )}
             />
           }
         >
-          <Clock className="size-4 shrink-0 text-slate-400" />
+          <Clock className="size-4 shrink-0 text-slate-400 dark:text-muted-foreground" />
           <span className="truncate">{displayValue}</span>
         </PopoverTrigger>
-        <PopoverContent className={cn(adminDatePickerPopoverClass, "min-w-72")} align="start">
-          <div className="border-b border-slate-100 bg-[#1C3A34]/4 px-4 py-3">
+        <PopoverContent
+          className={cn(adminDatePickerPopoverClass, "min-w-72")}
+          align="start"
+        >
+          <div className="border-b border-slate-100 bg-[#1C3A34]/4 px-4 py-3 dark:border-border dark:bg-muted/45">
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8f7d45]">
               {label}
             </p>
-            <p className="mt-1 text-sm font-semibold text-[#1C3A34]">
+            <p className="mt-1 text-sm font-semibold text-[#1C3A34] dark:text-foreground">
               {value ? formatTimeDisplay(value, locale, hour12) : placeholder}
             </p>
           </div>
 
-          <div className={cn("grid gap-3 p-4", hour12 ? "sm:grid-cols-3" : "sm:grid-cols-2")}>
+          <div
+            className={cn(
+              "grid gap-3 p-4",
+              hour12 ? "sm:grid-cols-3" : "sm:grid-cols-2",
+            )}
+          >
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-slate-500">{hourLabel}</Label>
+              <Label className="text-xs font-medium text-slate-500 dark:text-muted-foreground">
+                {hourLabel}
+              </Label>
               <Select
                 value={draftHour}
                 onValueChange={(value) => setDraftHour(value ?? "")}
@@ -282,10 +316,7 @@ export function AdminTimePicker({
                       <SelectItem
                         key={hour}
                         value={String(hour)}
-                        disabled={
-                          !hour12 &&
-                          isHourDisabled(hour, minTime)
-                        }
+                        disabled={!hour12 && isHourDisabled(hour, minTime)}
                       >
                         {hour12 ? String(hour) : String(hour).padStart(2, "0")}
                       </SelectItem>
@@ -296,7 +327,9 @@ export function AdminTimePicker({
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-slate-500">{minuteLabel}</Label>
+              <Label className="text-xs font-medium text-slate-500 dark:text-muted-foreground">
+                {minuteLabel}
+              </Label>
               <Select
                 value={draftMinute}
                 onValueChange={(value) => setDraftMinute(value ?? "")}
@@ -310,7 +343,10 @@ export function AdminTimePicker({
                     {MINUTE_OPTIONS.map((minute) => {
                       const draftHour24 = hour12
                         ? draftHour && draftPeriod
-                          ? to24Hour(Number(draftHour), draftPeriod as TimePeriod)
+                          ? to24Hour(
+                              Number(draftHour),
+                              draftPeriod as TimePeriod,
+                            )
                           : undefined
                         : draftHour
                           ? Number(draftHour)
@@ -336,10 +372,14 @@ export function AdminTimePicker({
 
             {hour12 ? (
               <div className="space-y-2">
-                <Label className="text-xs font-medium text-slate-500">{periodLabel}</Label>
+                <Label className="text-xs font-medium text-slate-500 dark:text-muted-foreground">
+                  {periodLabel}
+                </Label>
                 <Select
                   value={draftPeriod}
-                  onValueChange={(value) => setDraftPeriod((value as TimePeriod | null) ?? "")}
+                  onValueChange={(value) =>
+                    setDraftPeriod((value as TimePeriod | null) ?? "")
+                  }
                   disabled={disabled || draftHour === ""}
                 >
                   <SelectTrigger className={cn(adminInputClass, "w-full")}>
@@ -359,12 +399,12 @@ export function AdminTimePicker({
             ) : null}
           </div>
 
-          <div className="flex items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/80 px-3 py-2">
+          <div className="flex items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/80 px-3 py-2 dark:border-border dark:bg-muted/45">
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="h-8 text-slate-500 hover:bg-white hover:text-[#1C3A34]"
+              className="h-8 text-slate-500 hover:bg-white hover:text-[#1C3A34] dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground"
               disabled={!value}
               onClick={handleClear}
             >
@@ -374,7 +414,7 @@ export function AdminTimePicker({
               type="button"
               variant="ghost"
               size="sm"
-              className="h-8 font-medium text-[#1C3A34] hover:bg-[#1C3A34]/8"
+              className="h-8 font-medium text-[#1C3A34] hover:bg-[#1C3A34]/8 dark:text-[var(--brand-accent)] dark:hover:bg-accent"
               disabled={!canApply}
               onClick={applyDraft}
             >
@@ -387,7 +427,10 @@ export function AdminTimePicker({
   );
 }
 
-export function roundUpToMinuteInterval(date: Date, interval = MINUTE_INTERVAL): TimeValue {
+export function roundUpToMinuteInterval(
+  date: Date,
+  interval = MINUTE_INTERVAL,
+): TimeValue {
   const minutes = date.getHours() * 60 + date.getMinutes();
   const roundedMinutes = Math.ceil(minutes / interval) * interval;
   const hour = Math.floor(roundedMinutes / 60) % 24;

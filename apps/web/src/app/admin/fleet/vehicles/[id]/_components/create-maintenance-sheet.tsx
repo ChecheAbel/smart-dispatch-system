@@ -21,6 +21,14 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   adminCardClass,
   adminHeadingClass,
   adminIconBoxClass,
@@ -43,8 +51,6 @@ import { cn } from "@/lib/utils";
 import {
   formatDateInputValue,
   MAINTENANCE_STATUSES,
-  maintenanceStatusClass,
-  maintenanceTypeIcon,
   parseDateInputValue,
   textareaClassName,
 } from "./vehicle-detail-shared";
@@ -96,11 +102,17 @@ export function CreateMaintenanceSheet({
   const [workTypesLoading, setWorkTypesLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (!open) {
+  function handleSheetOpenChange(nextOpen: boolean) {
+    if (!nextOpen) {
       setSubmitting(false);
       setForm(emptyMaintenanceForm());
       setWorkTypes([]);
+    }
+    onOpenChange(nextOpen);
+  }
+
+  useEffect(() => {
+    if (!open) {
       return;
     }
 
@@ -158,7 +170,7 @@ export function CreateMaintenanceSheet({
 
       showSuccessToast(detail.toast.maintenanceCreated);
       onSuccess?.();
-      onOpenChange(false);
+      handleSheetOpenChange(false);
     } catch (error) {
       showErrorToast({
         title: detail.toast.maintenanceFailed.title,
@@ -173,12 +185,12 @@ export function CreateMaintenanceSheet({
   const formId = "create-maintenance-form";
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleSheetOpenChange}>
       <SheetContent
         side="right"
         className="flex w-full flex-col gap-0 overflow-y-auto p-0 data-[side=right]:sm:max-w-lg"
       >
-        <SheetHeader className="border-b border-slate-100 px-6 py-5">
+        <SheetHeader className="border-b border-slate-100 px-6 py-5 dark:border-border">
           <SheetTitle className={adminHeadingClass}>{maintenanceCopy.createTitle}</SheetTitle>
           <SheetDescription className="leading-relaxed">
             {vehicle
@@ -190,15 +202,15 @@ export function CreateMaintenanceSheet({
         <form id={formId} onSubmit={handleSubmit} className="space-y-5 px-6 py-5">
           {vehicle ? (
             <Card className={cn(adminCardClass, "gap-0 overflow-hidden py-0 shadow-none ring-0")}>
-              <div className="flex items-start gap-3 border-b border-slate-100 px-4 py-4">
-                <div className={cn(adminIconBoxClass, "shrink-0 bg-[#1C3A34] text-white")}>
+              <div className="flex items-start gap-3 border-b border-slate-100 px-4 py-4 dark:border-border">
+                <div className={cn(adminIconBoxClass, "shrink-0 bg-[#1C3A34] text-white dark:bg-[#C9B87A] dark:text-[#151a21]")}>
                   <Wrench className="size-4" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-semibold tracking-wide text-slate-400 uppercase">
                     {copy.columns.plate}
                   </p>
-                  <p className="mt-1 font-mono text-lg font-bold tracking-wide text-[#1C3A34]">
+                  <p className="mt-1 font-mono text-lg font-bold tracking-wide text-[#1C3A34] dark:text-foreground">
                     {vehicle.plate_number}
                   </p>
                   <p className="mt-0.5 text-sm text-slate-500">
@@ -211,77 +223,87 @@ export function CreateMaintenanceSheet({
 
               <div className="space-y-5 px-4 py-4">
                 <div className="space-y-3">
-                  <Label className="text-sm font-semibold text-slate-800">
+                  <Label
+                    htmlFor="maintenance-sheet-work-type"
+                    className="text-sm font-semibold text-slate-800 dark:text-foreground"
+                  >
                     {maintenanceCopy.type}
                   </Label>
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                    {workTypesLoading ? (
-                      <p className="col-span-full text-sm text-slate-500">{detail.loading}</p>
-                    ) : workTypes.length === 0 ? (
-                      <p className="col-span-full text-sm text-slate-500">
-                        {maintenanceCopy.emptyHint}
-                      </p>
-                    ) : (
-                      workTypes.map((workType) => {
-                        const Icon = maintenanceTypeIcon(workType.slug);
-                        const selected = form.work_type_id === workType.id;
-                        return (
-                          <button
-                            key={workType.id}
-                            type="button"
-                            disabled={submitting}
-                            onClick={() =>
-                              setForm((current) => ({
-                                ...current,
-                                work_type_id: workType.id,
-                              }))
-                            }
-                            className={cn(
-                              "flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-center transition",
-                              selected
-                                ? "border-[#1C3A34] bg-[#1C3A34] text-white shadow-sm"
-                                : "border-slate-200 bg-white text-slate-600 hover:border-[#1C3A34]/30 hover:bg-[#1C3A34]/[0.03]",
-                            )}
-                          >
-                            <Icon className="size-4 shrink-0" />
-                            <span className="text-[11px] font-medium leading-tight">
-                              {workType.name}
-                            </span>
-                          </button>
-                        );
-                      })
-                    )}
-                  </div>
+                  <Select
+                    items={workTypes.map((workType) => ({
+                      value: workType.id,
+                      label: workType.name,
+                    }))}
+                    value={form.work_type_id || null}
+                    onValueChange={(value) =>
+                      setForm((current) => ({
+                        ...current,
+                        work_type_id: value ?? "",
+                      }))
+                    }
+                    disabled={submitting || workTypesLoading || workTypes.length === 0}
+                  >
+                    <SelectTrigger id="maintenance-sheet-work-type" className="h-10 w-full">
+                      <SelectValue
+                        placeholder={
+                          workTypesLoading
+                            ? detail.loading
+                            : workTypes.length === 0
+                              ? maintenanceCopy.emptyHint
+                              : maintenanceCopy.typePlaceholder
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {workTypes.map((workType) => (
+                          <SelectItem key={workType.id} value={workType.id}>
+                            {workType.name}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-3">
-                  <Label className="text-sm font-semibold text-slate-800">
+                  <Label
+                    htmlFor="maintenance-sheet-status"
+                    className="text-sm font-semibold text-slate-800 dark:text-foreground"
+                  >
                     {maintenanceCopy.status}
                   </Label>
-                  <div className="flex flex-wrap gap-2">
-                    {MAINTENANCE_STATUSES.map((status) => {
-                      const selected = form.status === status;
-                      return (
-                        <button
-                          key={status}
-                          type="button"
-                          disabled={submitting}
-                          onClick={() => setForm((current) => ({ ...current, status }))}
-                          className={cn(
-                            "inline-flex items-center rounded-full border px-3.5 py-1.5 text-xs font-semibold transition",
-                            selected
-                              ? cn(maintenanceStatusClass(status), "ring-1 ring-current/20")
-                              : "border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-700",
-                          )}
-                        >
-                          {detail.maintenanceStatuses[status]}
-                        </button>
-                      );
-                    })}
-                  </div>
+                  <Select
+                    items={MAINTENANCE_STATUSES.map((status) => ({
+                      value: status,
+                      label: detail.maintenanceStatuses[status],
+                    }))}
+                    value={form.status}
+                    onValueChange={(value) => {
+                      if (!value) return;
+                      setForm((current) => ({
+                        ...current,
+                        status: value as VehicleMaintenanceStatus,
+                      }));
+                    }}
+                    disabled={submitting}
+                  >
+                    <SelectTrigger id="maintenance-sheet-status" className="h-10 w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {MAINTENANCE_STATUSES.map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {detail.maintenanceStatuses[status]}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div className="space-y-1.5 rounded-xl border border-slate-100 bg-slate-50/40 p-4">
+                <div className="space-y-1.5 rounded-xl border border-slate-100 bg-slate-50/40 p-4 dark:border-border dark:bg-white/[0.025]">
                   <Label htmlFor="maintenance-sheet-description" className="text-sm font-semibold">
                     {maintenanceCopy.description}
                   </Label>
@@ -301,14 +323,14 @@ export function CreateMaintenanceSheet({
                   />
                 </div>
 
-                <details className="group overflow-hidden rounded-xl border border-slate-200 bg-white open:shadow-sm">
+                <details className="group overflow-hidden rounded-xl border border-slate-200 bg-white open:shadow-sm dark:border-border dark:bg-[#171c24]">
                   <summary className="flex cursor-pointer list-none flex-col items-start gap-2 px-3.5 py-3 marker:content-none sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:px-4 sm:py-3.5 [&::-webkit-details-marker]:hidden">
                     <span className="flex min-w-0 items-start gap-2.5 sm:items-center sm:gap-3">
                       <span className={adminIconBoxClass}>
                         <Store className="size-3.5" />
                       </span>
                       <span>
-                        <span className="block text-sm font-semibold text-slate-800">
+                        <span className="block text-sm font-semibold text-slate-800 dark:text-foreground">
                           {maintenanceCopy.optionalDetails}
                         </span>
                         <span className="mt-0.5 block text-xs text-slate-500">
@@ -319,7 +341,7 @@ export function CreateMaintenanceSheet({
                     <ChevronDown className="size-4 shrink-0 text-slate-400 transition group-open:rotate-180" />
                   </summary>
 
-                  <div className="space-y-4 border-t border-slate-100 px-3.5 py-3.5 sm:px-4 sm:py-4">
+                  <div className="space-y-4 border-t border-slate-100 px-3.5 py-3.5 sm:px-4 sm:py-4 dark:border-border">
                     <div className="space-y-1.5">
                       <Label
                         htmlFor="maintenance-sheet-vendor"
@@ -339,7 +361,7 @@ export function CreateMaintenanceSheet({
                           }))
                         }
                         placeholder={maintenanceCopy.vendorPlaceholder}
-                        className={cn(adminInputClass, "bg-white")}
+                        className={cn(adminInputClass, "bg-white dark:bg-muted/55")}
                       />
                     </div>
 
@@ -366,7 +388,7 @@ export function CreateMaintenanceSheet({
                             }))
                           }
                           placeholder={maintenanceCopy.costPlaceholder}
-                          className={cn(adminInputClass, "bg-white")}
+                          className={cn(adminInputClass, "bg-white dark:bg-muted/55")}
                         />
                       </div>
                       <div className="space-y-1.5">
@@ -390,7 +412,7 @@ export function CreateMaintenanceSheet({
                             }))
                           }
                           placeholder={maintenanceCopy.odometerPlaceholder}
-                          className={cn(adminInputClass, "bg-white")}
+                          className={cn(adminInputClass, "bg-white dark:bg-muted/55")}
                         />
                       </div>
                       <AdminDatePicker
@@ -433,13 +455,13 @@ export function CreateMaintenanceSheet({
           ) : null}
         </form>
 
-        <SheetFooter className="mt-auto flex-row justify-end gap-2 border-t border-slate-100 bg-white px-6 py-4">
+        <SheetFooter className="mt-auto flex-row justify-end gap-2 border-t border-slate-100 bg-white px-6 py-4 dark:border-border dark:bg-[#171c24]">
           <Button
             type="button"
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleSheetOpenChange(false)}
             disabled={submitting}
-            className="border-slate-200"
+            className="border-slate-200 dark:border-border dark:bg-[#202630] dark:text-foreground dark:hover:bg-white/[0.07]"
           >
             {maintenanceCopy.closeForm}
           </Button>

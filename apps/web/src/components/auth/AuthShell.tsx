@@ -37,7 +37,7 @@ export default function AuthShell({
 
   return (
     <div className="min-h-[100dvh] flex flex-col lg:flex-row">
-      <div className="relative hidden lg:flex lg:w-[45%] xl:w-[42%] flex-col justify-between overflow-hidden bg-[var(--brand-primary)] p-10 xl:p-14">
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-[var(--brand-primary)] p-10 dark:bg-[#11161d] lg:flex lg:w-[45%] xl:w-[42%] xl:p-14">
         <div className="absolute inset-0 opacity-[0.07]">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--brand-accent)_0%,_transparent_65%)]" />
         </div>
@@ -64,8 +64,8 @@ export default function AuthShell({
         </p>
       </div>
 
-      <div className="flex-1 flex flex-col min-h-[100dvh] bg-[#f8f7f4] overflow-y-auto">
-        <div className="lg:hidden relative overflow-hidden bg-[var(--brand-primary)] px-4 sm:px-6 py-8 text-center">
+      <div className="flex min-h-[100dvh] flex-1 flex-col overflow-y-auto bg-[#f8f7f4] dark:bg-background">
+        <div className="relative overflow-hidden bg-[var(--brand-primary)] px-4 py-8 text-center dark:bg-[#11161d] sm:px-6 lg:hidden">
           <div className="absolute inset-0 bg-[linear-gradient(to_right,color-mix(in_srgb,var(--brand-accent)_4%,transparent)_1px,transparent_1px),linear-gradient(to_bottom,color-mix(in_srgb,var(--brand-accent)_4%,transparent)_1px,transparent_1px)] bg-[size:40px_40px] opacity-50" />
           <div className="relative z-10 flex flex-col items-center gap-4">
             <BrandLogo priority className="h-9" />

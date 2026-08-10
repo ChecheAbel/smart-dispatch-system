@@ -3232,6 +3232,7 @@
         "openForm": "ጥገና መዝግብ",
         "closeForm": "ሰርዝ",
         "type": "የስራ አይነት",
+        "typePlaceholder": "የስራ አይነት ይምረጡ",
         "status": "ሁኔታ",
         "title": "ርዕስ",
         "titlePlaceholder": "ለምሳሌ የዘይት ለውጥ",
@@ -4277,6 +4278,13 @@
       "issuedAt": "ወጣ",
       "dueAt": "የመክፈያ ቀን",
       "paidAt": "ተከፍሏል",
+      "paymentMethod": "የክፍያ ዘዴ",
+      "paymentMethods": {
+        "telebirr": "ቴሌብር",
+        "cbe_birr": "ሲቢኢ ብር",
+        "manual": "በአስተዳዳሪ እንደተከፈለ ምልክት ተደርጓል",
+        "notRecorded": "አልተመዘገበም"
+      },
       "notes": "ማስታወሻዎች",
       "tripRoute": "መስመር",
       "tripAmount": "መጠን",

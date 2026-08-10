@@ -22,10 +22,16 @@ import { Toaster } from "@/components/ui/sonner";
 
 function ShellLoadingState() {
   return (
-    <div className="admin-theme flex min-h-svh" style={{ backgroundColor: adminTheme.surface }}>
+    <div
+      className="admin-theme flex min-h-svh"
+      style={{ backgroundColor: adminTheme.surface }}
+    >
       <div
         className="hidden border-r border-white/10 p-4 md:block"
-        style={{ width: adminTheme.sidebarWidth, backgroundColor: "var(--brand-primary)" }}
+        style={{
+          width: adminTheme.sidebarWidth,
+          backgroundColor: "var(--sidebar)",
+        }}
       >
         <Skeleton className="h-8 w-40 bg-white/15" />
         <div className="mt-8 space-y-3">
@@ -107,11 +113,15 @@ export function DashboardShell({
           <NavigationProvider portal={portal}>
             <TooltipProvider>
               <SidebarProvider
-                className="admin-theme bg-[#f8fafb]"
-                style={{ "--sidebar-width": adminTheme.sidebarWidth } as CSSProperties}
+                className="admin-theme bg-[#f8fafb] dark:bg-[var(--app-surface)] dark:text-foreground"
+                style={
+                  {
+                    "--sidebar-width": adminTheme.sidebarWidth,
+                  } as CSSProperties
+                }
               >
                 <DashboardSidebar />
-                <SidebarInset className="flex min-h-svh min-w-0 flex-col bg-[#f8fafb]">
+                <SidebarInset className="flex min-h-svh min-w-0 flex-col bg-[#f8fafb] dark:bg-[var(--app-surface)] dark:text-foreground">
                   <DashboardHeader />
                   <main className="min-w-0 flex-1 overflow-auto p-4 sm:p-6">
                     <RouteGuard portal={portal}>{children}</RouteGuard>

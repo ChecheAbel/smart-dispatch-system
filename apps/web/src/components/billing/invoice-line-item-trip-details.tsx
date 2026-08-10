@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarClock, Car, MapPin, Route, UserRound, Users } from "lucide-react";
+import { ArrowRight, CalendarClock, Car, MapPin, Route, UserRound, Users } from "lucide-react";
 import type { InvoiceLineItem, RideRequestStatus } from "@smart-dispatch/types";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -144,11 +144,11 @@ export function InvoiceLineItemTripDetails({
   return (
     <div
       className={cn(
-        "rounded-xl border border-slate-200/80 bg-gradient-to-br from-[#f8fafb] to-white p-4",
+        "rounded-xl border border-slate-200/80 bg-gradient-to-br from-[#f8fafb] to-white p-4 dark:border-border dark:from-[#202630] dark:to-[#171c24]",
         className,
       )}
     >
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/60 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/60 pb-3 dark:border-border">
         <div className="flex flex-wrap items-center gap-2">
           <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
             {labels.requestId}
@@ -161,7 +161,7 @@ export function InvoiceLineItemTripDetails({
         </Badge>
       </div>
 
-      <div className="mt-3 space-y-2">
+      <div className="mt-3 grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center sm:gap-3">
         <div className="flex gap-2.5 text-sm text-slate-700">
           <MapPin className="mt-0.5 size-3.5 shrink-0 text-emerald-700" aria-hidden />
           <div className="min-w-0">
@@ -171,8 +171,16 @@ export function InvoiceLineItemTripDetails({
             <p className="font-medium">{trip.pickup_address}</p>
           </div>
         </div>
-        <div className="ml-1.5 h-3 w-px bg-gradient-to-b from-emerald-700/30 to-[#C9B87A]/70" aria-hidden />
-        <div className="flex gap-2.5 text-sm text-slate-700">
+        <div
+          className="ml-1.5 h-3 w-px bg-gradient-to-b from-emerald-700/30 to-[#C9B87A]/70 sm:hidden"
+          aria-hidden
+        />
+        <div className="hidden items-center sm:flex" aria-hidden>
+          <div className="h-px w-5 bg-gradient-to-r from-emerald-700/40 to-[#C9B87A]/80" />
+          <ArrowRight className="size-4 text-[#C9B87A]" />
+          <div className="h-px w-5 bg-gradient-to-r from-[#C9B87A]/80 to-rose-500/40" />
+        </div>
+        <div className="flex gap-2.5 text-sm text-slate-700 sm:w-fit sm:justify-self-end">
           <MapPin className="mt-0.5 size-3.5 shrink-0 text-rose-500" aria-hidden />
           <div className="min-w-0">
             <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
@@ -189,7 +197,7 @@ export function InvoiceLineItemTripDetails({
           return (
             <div
               key={row.key}
-              className="flex items-start gap-2.5 rounded-lg border border-slate-100 bg-white/80 px-3 py-2.5"
+              className="flex items-start gap-2.5 rounded-lg border border-slate-100 bg-white/80 px-3 py-2.5 dark:border-border dark:bg-white/[0.035]"
             >
               <Icon className="mt-0.5 size-3.5 shrink-0 text-[#C9B87A]" aria-hidden />
               <div className="min-w-0">

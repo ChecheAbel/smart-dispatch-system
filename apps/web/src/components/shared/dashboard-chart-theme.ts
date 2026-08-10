@@ -1,13 +1,13 @@
 export const dashboardChartTheme = {
-  brand: "#1C3A34",
-  brandMid: "#2F5E54",
-  brandSoft: "#4C8578",
-  accent: "#8FB5A8",
-  accentSoft: "#C2D9D2",
+  brand: "var(--dashboard-chart-brand)",
+  brandMid: "var(--dashboard-chart-brand-mid)",
+  brandSoft: "var(--dashboard-chart-brand-soft)",
+  accent: "var(--dashboard-chart-accent)",
+  accentSoft: "var(--dashboard-chart-accent-soft)",
   gold: "#C9B87A",
-  grid: "#eef2f6",
-  axis: "#94a3b8",
-  muted: "#64748b",
+  grid: "var(--dashboard-chart-grid)",
+  axis: "var(--dashboard-chart-axis)",
+  muted: "var(--dashboard-chart-muted)",
 } as const;
 
 export const dashboardChartMargins = {

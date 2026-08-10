@@ -20,7 +20,10 @@ type LanguageSwitcherProps = {
   variant?: "light" | "dark";
 };
 
-export function LanguageSwitcher({ className, variant = "light" }: LanguageSwitcherProps) {
+export function LanguageSwitcher({
+  className,
+  variant = "light",
+}: LanguageSwitcherProps) {
   const { locale, setLocale } = useLocale();
   const copy = getTranslations(locale).common;
   const isDark = variant === "dark";
@@ -36,18 +39,21 @@ export function LanguageSwitcher({ className, variant = "light" }: LanguageSwitc
               "h-9 w-9 rounded-xl border shadow-none transition-all",
               isDark
                 ? "border-white/10 bg-white/5 text-white hover:border-white/20 hover:bg-white/10"
-                : "border-slate-200 bg-white text-[#1C3A34] hover:border-[#1C3A34]/20 hover:bg-slate-50",
+                : "border-slate-200 bg-white text-[#1C3A34] hover:border-[#1C3A34]/20 hover:bg-slate-50 dark:border-border dark:bg-muted/55 dark:text-foreground dark:hover:border-[var(--brand-accent)]/40 dark:hover:bg-accent",
               className,
             )}
             aria-label={copy.selectLanguage}
           />
         }
       >
-        <Languages className="h-[18px] w-[18px] text-[#C9B87A]" strokeWidth={1.75} />
+        <Languages
+          className="h-[18px] w-[18px] text-[#C9B87A]"
+          strokeWidth={1.75}
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"
-        className="min-w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl"
+        className="min-w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-border dark:bg-popover dark:shadow-black/30"
       >
         <DropdownMenuGroup>
           <DropdownMenuRadioGroup
@@ -58,7 +64,7 @@ export function LanguageSwitcher({ className, variant = "light" }: LanguageSwitc
               <DropdownMenuRadioItem
                 key={option.value}
                 value={option.value}
-                className="cursor-pointer rounded-lg px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-100"
+                className="cursor-pointer rounded-lg px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-foreground dark:hover:bg-accent"
               >
                 {option.nativeLabel}
               </DropdownMenuRadioItem>

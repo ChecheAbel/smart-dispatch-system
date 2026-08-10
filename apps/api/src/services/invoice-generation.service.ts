@@ -1,4 +1,8 @@
-import type { ContractBillingInterval } from "@smart-dispatch/types";
+import type {
+  ContractBillingInterval,
+  CustomerPaymentMethodId,
+  InvoicePaymentMethod,
+} from "@smart-dispatch/types";
 import {
   createInvoice,
   findContractEnrollmentById,
@@ -230,7 +234,10 @@ export async function issueInvoice(invoiceId: string) {
   return updateInvoiceStatus(invoice.id, "issued", { issuedAt, dueAt });
 }
 
-export async function markInvoicePaid(invoiceId: string) {
+export async function markInvoicePaid(
+  invoiceId: string,
+  paymentMethod: InvoicePaymentMethod = "manual",
+) {
   const { findInvoiceById, updateInvoiceStatus } = await import("../models/invoice.model");
   const invoice = await findInvoiceById(invoiceId);
   if (!invoice) {
@@ -241,17 +248,24 @@ export async function markInvoicePaid(invoiceId: string) {
     throw new Error("INVOICE_NOT_ISSUED");
   }
 
-  return updateInvoiceStatus(invoice.id, "paid", { paidAt: new Date() });
+  return updateInvoiceStatus(invoice.id, "paid", {
+    paidAt: new Date(),
+    paymentMethod,
+  });
 }
 
-export async function markInvoicePaidForRequester(invoiceId: string, requesterUserId: string) {
+export async function markInvoicePaidForRequester(
+  invoiceId: string,
+  requesterUserId: string,
+  paymentMethod: CustomerPaymentMethodId,
+) {
   const { findInvoiceForRequester } = await import("../models/invoice.model");
   const invoice = await findInvoiceForRequester(invoiceId, requesterUserId);
   if (!invoice) {
     throw new Error("INVOICE_NOT_FOUND");
   }
 
-  return markInvoicePaid(invoiceId);
+  return markInvoicePaid(invoiceId, paymentMethod);
 }
 
 export async function voidInvoice(invoiceId: string) {

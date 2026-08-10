@@ -16,3 +16,12 @@
 .coordinate-map-picker .leaflet-control-attribution a {
   color: #1c3a34;
 }
+
+.dark .coordinate-map-picker .leaflet-control-attribution {
+  background: rgba(25, 31, 39, 0.94);
+  color: #9da7b3;
+}
+
+.dark .coordinate-map-picker .leaflet-control-attribution a {
+  color: #c9b87a;
+}

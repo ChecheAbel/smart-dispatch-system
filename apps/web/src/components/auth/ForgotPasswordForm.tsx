@@ -7,6 +7,7 @@ import { CheckCircle2, Clock, Eye, EyeOff, Loader2, Lock, Mail, Phone, RotateCcw
 import AuthShell from "@/components/auth/AuthShell";
 import { AuthLanguageSwitcher } from "@/components/auth/AuthLanguageSwitcher";
 import { formatCountdown, OtpCodeInput } from "@/components/auth/OtpCodeInput";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { useLocale } from "@/components/shared/providers/locale-context";
 import { requestPasswordReset, resetPassword, verifyPasswordResetOtp } from "@/lib/auth-api";
 import {
@@ -45,6 +46,7 @@ export default function ForgotPasswordForm({ audience = "admin" }: ForgotPasswor
     audience === "customer" ? getCustomerAuthMessages(locale) : getAdminAuthMessages(locale);
   const copy = authCopy.forgotPassword;
   const common = authCopy.common;
+  const isAdminAudience = audience === "admin";
   const signInPath = audience === "customer" ? USER_SIGN_IN_PATH : ADMIN_SIGN_IN_PATH;
   const [resetMethod, setResetMethod] = useState<ResetMethod>("email");
   const [mobileStep, setMobileStep] = useState<MobileStep>("request");
@@ -318,15 +320,27 @@ export default function ForgotPasswordForm({ audience = "admin" }: ForgotPasswor
       }
       desktopDescription={desktopDescription}
       footerCopyright={common.copyright}
-      headerActions={<AuthLanguageSwitcher />}
+      headerActions={
+        isAdminAudience ? (
+          <div className="auth-theme-toggle-inline flex items-center gap-2">
+            <ThemeToggle
+              placement="inline"
+              className="!rounded-xl !border !border-slate-200 !bg-white dark:!border-[#35403f] dark:!bg-[#1b2224] dark:hover:!border-[var(--brand-accent)]/40 dark:hover:!bg-[#252d2c]"
+            />
+            <AuthLanguageSwitcher className="dark:!border-[#35403f] dark:!bg-[#1b2224] dark:hover:!border-[var(--brand-accent)]/40 dark:hover:!bg-[#252d2c]" />
+          </div>
+        ) : (
+          <AuthLanguageSwitcher />
+        )
+      }
     >
       <div className="hidden lg:block mb-8">
         <p className="text-[#C9B87A] font-bold text-xs tracking-[0.25em] uppercase mb-3">{copy.formEyebrow}</p>
-        <h2 className="text-3xl font-extrabold text-[#1C3A34] tracking-tight">{desktopTitle}</h2>
+        <h2 className="text-3xl font-extrabold text-[#1C3A34] tracking-tight dark:text-foreground">{desktopTitle}</h2>
         <p className="mt-2 text-slate-500 text-sm leading-relaxed">{desktopSubtitle}</p>
       </div>
 
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xl p-6 sm:p-8">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-[#35403f] dark:bg-[#1b2224] dark:shadow-black/30 sm:p-8">
         {emailSent ? (
           <div className="text-center space-y-4 py-2">
             <div className="mx-auto h-14 w-14 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center">

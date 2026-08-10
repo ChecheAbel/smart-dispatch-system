@@ -94,7 +94,7 @@ export function NotificationTemplateModuleNav({
             >
               <SelectValue placeholder={copy.shell.modulePickerTitle}>
                 <span className="flex min-w-0 items-center gap-2">
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-[#1C3A34]/8 text-[#1C3A34]">
+                  <span className="flex size-6 shrink-0 items-center justify-center rounded-md bg-[#1C3A34]/8 text-[#1C3A34] dark:bg-[#C9B87A]/12 dark:text-[#d8c77f]">
                     <ActiveIcon className="size-3.5" />
                   </span>
                   <span className="truncate font-medium">{activeModuleCopy.title}</span>
@@ -117,7 +117,7 @@ export function NotificationTemplateModuleNav({
                     return (
                       <SelectItem key={definition.id} value={definition.id} multiline>
                         <span className="flex w-full items-start gap-2.5">
-                          <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-[#1C3A34]/8 text-[#1C3A34]">
+                          <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-lg bg-[#1C3A34]/8 text-[#1C3A34] dark:bg-[#C9B87A]/12 dark:text-[#d8c77f]">
                             <Icon className="size-3.5" />
                           </span>
                           <span className="min-w-0 flex-1 pr-1">

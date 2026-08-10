@@ -39,7 +39,9 @@ export function DashboardChartTooltip({
   const uniquePayload = payload.filter((entry, index, list) => {
     const key = `${entry.dataKey ?? entry.name}-${entry.color}`;
     return (
-      list.findIndex((item) => `${item.dataKey ?? item.name}-${item.color}` === key) === index &&
+      list.findIndex(
+        (item) => `${item.dataKey ?? item.name}-${item.color}` === key,
+      ) === index &&
       entry.value !== undefined &&
       entry.value !== null
     );
@@ -59,16 +61,19 @@ export function DashboardChartTooltip({
   return (
     <div
       className={cn(
-        "min-w-[8.5rem] overflow-hidden rounded-lg border border-[#1C3A34]/15 shadow-[0_8px_20px_-6px_rgba(28,58,52,0.28)]",
+        "min-w-[8.5rem] overflow-hidden rounded-lg border border-[#1C3A34]/15 shadow-[0_8px_20px_-6px_rgba(28,58,52,0.28)] dark:border-border dark:shadow-[0_12px_28px_rgba(0,0,0,0.35)]",
         className,
       )}
-      style={{ backgroundColor: "#ffffff", opacity: 1 }}
+      style={{ backgroundColor: "var(--popover)", opacity: 1 }}
     >
       <div className="h-0.5 w-full bg-gradient-to-r from-[#1C3A34] via-[#2F5E54] to-[#C9B87A]" />
 
-      <div className="px-2.5 py-2" style={{ backgroundColor: "#ffffff" }}>
+      <div
+        className="px-2.5 py-2"
+        style={{ backgroundColor: "var(--popover)" }}
+      >
         {formattedLabel ? (
-          <p className="mb-1.5 text-[9px] font-semibold tracking-[0.14em] text-slate-400 uppercase">
+          <p className="mb-1.5 text-[9px] font-semibold tracking-[0.14em] text-slate-400 uppercase dark:text-muted-foreground">
             {formattedLabel}
           </p>
         ) : null}
@@ -90,11 +95,11 @@ export function DashboardChartTooltip({
                     className="size-1.5 shrink-0 rounded-full"
                     style={{ backgroundColor: entry.color ?? "#1C3A34" }}
                   />
-                  <span className="truncate text-[11px] font-medium text-slate-500">
+                  <span className="truncate text-[11px] font-medium text-slate-500 dark:text-muted-foreground">
                     {entry.name}
                   </span>
                 </span>
-                <span className="text-[11px] font-bold tabular-nums tracking-tight text-[#1C3A34]">
+                <span className="text-[11px] font-bold tabular-nums tracking-tight text-[#1C3A34] dark:text-foreground">
                   {displayValue}
                 </span>
               </li>

@@ -7,7 +7,7 @@ import { useLocale } from "@/components/shared/providers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { adminHeadingClass, adminInputClass } from "@/lib/admin-theme";
+import { adminHeadingClass, adminInputClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
 import { getAdminNotificationTemplatesMessages } from "@/translations";
 import { cn } from "@/lib/utils";
 
@@ -83,9 +83,9 @@ export function NotificationTemplateTestPanel({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-[#C9B87A]/30 bg-gradient-to-br from-[#f8fafb] via-white to-[#f8fafb]">
-      <div className="flex items-start gap-3 border-b border-[#C9B87A]/20 px-4 py-3.5">
-        <div className="rounded-lg bg-[#1C3A34] p-2 text-white shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-[#C9B87A]/30 bg-gradient-to-br from-[#f8fafb] via-white to-[#f8fafb] dark:border-[#C9B87A]/35 dark:from-[#202630] dark:via-[#171c24] dark:to-[#1c222b]">
+      <div className="flex items-start gap-3 border-b border-[#C9B87A]/20 px-4 py-3.5 dark:border-border">
+        <div className="rounded-lg bg-[#1C3A34] p-2 text-white shadow-sm dark:bg-[#C9B87A] dark:text-[#151a21]">
           <Send className="size-4" />
         </div>
         <div className="min-w-0 flex-1">
@@ -101,7 +101,7 @@ export function NotificationTemplateTestPanel({
           <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase">
             {testCopy.previewTitle}
           </p>
-          <div className="rounded-lg border border-slate-200/80 bg-white px-3.5 py-3 shadow-sm">
+          <div className="rounded-lg border border-slate-200/80 bg-white px-3.5 py-3 shadow-sm dark:border-border dark:bg-[#11161d]">
             {isEmail ? (
               <p className="text-xs font-semibold text-[#1C3A34]">
                 <span className="font-medium text-slate-500">{copy.subjectLabel}: </span>
@@ -111,7 +111,7 @@ export function NotificationTemplateTestPanel({
             <p
               className={cn(
                 "text-sm leading-relaxed whitespace-pre-wrap text-slate-600",
-                isEmail && "mt-2 border-t border-slate-100 pt-2",
+                isEmail && "mt-2 border-t border-slate-100 pt-2 dark:border-border",
               )}
             >
               {previewBody || copy.bodyPlaceholder}
@@ -123,7 +123,10 @@ export function NotificationTemplateTestPanel({
         <div className="space-y-2">
           <Label
             htmlFor={`template-test-${template.id}`}
-            className={cn("text-sm font-medium text-[#1C3A34]", fieldError && "text-red-700")}
+            className={cn(
+              "text-sm font-medium text-[#1C3A34] dark:text-foreground",
+              fieldError && "text-red-700 dark:text-red-300",
+            )}
           >
             {isEmail ? copy.testEmailLabel : copy.testPhoneLabel}
           </Label>
@@ -165,8 +168,9 @@ export function NotificationTemplateTestPanel({
                   adminInputClass,
                   "pl-10",
                   fieldError &&
-                    "border-red-300 bg-red-50/60 text-red-900 placeholder:text-red-400 focus-visible:border-red-400 focus-visible:ring-red-200/60",
-                  (!canWrite || isSending) && "bg-slate-50 text-slate-500",
+                    "border-red-300 bg-red-50/60 text-red-900 placeholder:text-red-400 focus-visible:border-red-400 focus-visible:ring-red-200/60 dark:border-red-400/40 dark:bg-red-950/25 dark:text-red-200 dark:placeholder:text-red-300/60",
+                  (!canWrite || isSending) &&
+                    "bg-slate-50 text-slate-500 dark:bg-muted/35 dark:text-muted-foreground",
                 )}
               />
             </div>
@@ -175,7 +179,7 @@ export function NotificationTemplateTestPanel({
               type="button"
               disabled={!canWrite || isSending}
               onClick={() => void handleSend()}
-              className="h-10 w-full shrink-0 gap-2 rounded-lg bg-[#1C3A34] px-4 text-sm font-medium text-white hover:bg-[#162e29] sm:w-auto"
+              className={cn(adminPrimaryButtonClass, "w-full shrink-0 sm:w-auto")}
             >
               {isSending ? (
                 <Loader2 className="size-4 animate-spin" />
@@ -195,7 +199,7 @@ export function NotificationTemplateTestPanel({
           )}
         </div>
 
-        <p className="rounded-lg border border-slate-200/80 bg-white/70 px-3 py-2 text-[11px] leading-relaxed text-slate-500">
+        <p className="rounded-lg border border-slate-200/80 bg-white/70 px-3 py-2 text-[11px] leading-relaxed text-slate-500 dark:border-border dark:bg-white/[0.035]">
           {testCopy.providerNote}
         </p>
       </div>

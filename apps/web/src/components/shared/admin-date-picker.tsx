@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { format, startOfDay } from "date-fns";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import { useLocale } from "@/components/shared/providers";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -72,10 +76,14 @@ function EthiopianMonthCalendar({
   minDate?: Date;
   maxDate?: Date;
 }) {
-  const eth = useMemo(() => gregorianToEthiopian(activeMonthDate), [activeMonthDate]);
+  const eth = useMemo(
+    () => gregorianToEthiopian(activeMonthDate),
+    [activeMonthDate],
+  );
   const today = useMemo(() => startOfDay(new Date()), []);
 
-  const daysInMonth = eth.month === 13 ? ((eth.year + 1) % 4 === 0 ? 6 : 5) : 30;
+  const daysInMonth =
+    eth.month === 13 ? ((eth.year + 1) % 4 === 0 ? 6 : 5) : 30;
   const firstDayIndex = ethiopianToGregorian(eth.year, eth.month, 1).getDay();
 
   const daysGrid = useMemo(() => {
@@ -88,7 +96,9 @@ function EthiopianMonthCalendar({
   const selectedDay = useMemo(() => {
     if (!value) return null;
     const ethSel = gregorianToEthiopian(value);
-    return ethSel.year === eth.year && ethSel.month === eth.month ? ethSel.day : null;
+    return ethSel.year === eth.year && ethSel.month === eth.month
+      ? ethSel.day
+      : null;
   }, [value, eth.year, eth.month]);
 
   function getCellDate(day: number) {
@@ -121,18 +131,18 @@ function EthiopianMonthCalendar({
         <button
           type="button"
           onClick={handlePrevMonth}
-          className="flex size-8 items-center justify-center rounded-lg text-[#1C3A34] transition-colors hover:bg-[#1C3A34]/8"
+          className="flex size-8 items-center justify-center rounded-lg text-[#1C3A34] transition-colors hover:bg-[#1C3A34]/8 dark:text-foreground dark:hover:bg-accent"
           aria-label="Previous month"
         >
           <ChevronLeft className="size-4" />
         </button>
-        <p className="text-sm font-semibold text-[#1C3A34]">
+        <p className="text-sm font-semibold text-[#1C3A34] dark:text-foreground">
           {ETHIOPIAN_MONTHS_AM[eth.month - 1]} {eth.year} ዓ.ም.
         </p>
         <button
           type="button"
           onClick={handleNextMonth}
-          className="flex size-8 items-center justify-center rounded-lg text-[#1C3A34] transition-colors hover:bg-[#1C3A34]/8"
+          className="flex size-8 items-center justify-center rounded-lg text-[#1C3A34] transition-colors hover:bg-[#1C3A34]/8 dark:text-foreground dark:hover:bg-accent"
           aria-label="Next month"
         >
           <ChevronRight className="size-4" />
@@ -143,7 +153,7 @@ function EthiopianMonthCalendar({
         {WEEKDAYS_AM.map((day) => (
           <div
             key={day}
-            className="flex h-8 items-center justify-center text-xs font-semibold text-slate-500"
+            className="flex h-8 items-center justify-center text-xs font-semibold text-slate-500 dark:text-muted-foreground"
           >
             {day}
           </div>
@@ -169,10 +179,16 @@ function EthiopianMonthCalendar({
               onClick={() => onSelect(cellDate)}
               className={cn(
                 "mx-auto flex size-10 items-center justify-center rounded-lg text-sm font-medium transition-colors",
-                disabled && "cursor-not-allowed text-slate-300",
-                !disabled && !isSelected && "text-[#1C3A34] hover:bg-[#1C3A34]/8",
-                isToday && !isSelected && "bg-[#C9B87A]/15 font-semibold text-[#1C3A34]",
-                isSelected && "bg-[#1C3A34] font-semibold text-white hover:bg-[#162e29]",
+                disabled &&
+                  "cursor-not-allowed text-slate-300 dark:text-muted-foreground/45",
+                !disabled &&
+                  !isSelected &&
+                  "text-[#1C3A34] hover:bg-[#1C3A34]/8 dark:text-foreground dark:hover:bg-accent",
+                isToday &&
+                  !isSelected &&
+                  "bg-[#C9B87A]/15 font-semibold text-[#1C3A34] dark:text-[var(--brand-accent)]",
+                isSelected &&
+                  "bg-[#1C3A34] font-semibold text-white hover:bg-[#162e29] dark:bg-[var(--brand-accent)] dark:text-[#14181d] dark:hover:bg-[var(--brand-accent)]/90",
               )}
             >
               {day}
@@ -201,7 +217,9 @@ export function AdminDatePicker({
   const { locale } = useLocale();
   const isEthiopian = locale === "am";
   const [open, setOpen] = useState(false);
-  const [activeMonthDate, setActiveMonthDate] = useState(() => value ?? new Date());
+  const [activeMonthDate, setActiveMonthDate] = useState(
+    () => value ?? new Date(),
+  );
 
   const resolvedClearLabel = clearLabel ?? (isEthiopian ? "አጽዳ" : "Clear");
   const resolvedTodayLabel = todayLabel ?? (isEthiopian ? "ዛሬ" : "Today");
@@ -254,22 +272,27 @@ export function AdminDatePicker({
               data-state={open ? "open" : "closed"}
               className={cn(
                 adminDatePickerTriggerClass,
-                value ? "text-[#1C3A34]" : "text-slate-400",
+                value
+                  ? "text-[#1C3A34] dark:text-foreground"
+                  : "text-slate-400 dark:text-muted-foreground",
                 error &&
                   "border-red-300 bg-red-50/60 text-red-900 focus-visible:border-red-400 focus-visible:ring-red-200/60",
               )}
             />
           }
         >
-          <CalendarIcon className="size-4 shrink-0 text-slate-400" />
+          <CalendarIcon className="size-4 shrink-0 text-slate-400 dark:text-muted-foreground" />
           <span className="truncate">{displayValue ?? placeholder}</span>
         </PopoverTrigger>
-        <PopoverContent className={cn(adminDatePickerPopoverClass, "min-w-80")} align="start">
-          <div className="border-b border-slate-100 bg-[#1C3A34]/4 px-4 py-3">
+        <PopoverContent
+          className={cn(adminDatePickerPopoverClass, "min-w-80")}
+          align="start"
+        >
+          <div className="border-b border-slate-100 bg-[#1C3A34]/4 px-4 py-3 dark:border-border dark:bg-muted/45">
             <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8f7d45]">
               {label}
             </p>
-            <p className="mt-1 text-sm font-semibold text-[#1C3A34]">
+            <p className="mt-1 text-sm font-semibold text-[#1C3A34] dark:text-foreground">
               {detailValue ?? placeholder}
             </p>
           </div>
@@ -299,28 +322,31 @@ export function AdminDatePicker({
                   month_grid: "w-full",
                   weekdays: "mb-1 flex w-full",
                   weekday:
-                    "flex h-8 flex-1 items-center justify-center text-xs font-semibold uppercase tracking-wide text-slate-500",
+                    "flex h-8 flex-1 items-center justify-center text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-muted-foreground",
                   week: "mt-1.5 flex w-full",
-                  caption_label: "text-sm font-semibold text-[#1C3A34]",
-                  today: "rounded-lg bg-[#C9B87A]/15 font-semibold text-[#1C3A34]",
-                  outside: "text-slate-300",
+                  caption_label:
+                    "text-sm font-semibold text-[#1C3A34] dark:text-foreground",
+                  today:
+                    "rounded-lg bg-[#C9B87A]/15 font-semibold text-[#1C3A34] dark:text-[var(--brand-accent)]",
+                  outside: "text-slate-300 dark:text-muted-foreground/45",
                   disabled:
                     "opacity-100 text-slate-400 [&_button]:text-slate-400 [&_button]:opacity-100 [&_button]:disabled:opacity-100 [&_button]:hover:bg-transparent [&_button]:hover:text-slate-400 cursor-not-allowed",
                   button_previous:
-                    "text-[#1C3A34] hover:bg-[#1C3A34]/8 hover:text-[#1C3A34]",
-                  button_next: "text-[#1C3A34] hover:bg-[#1C3A34]/8 hover:text-[#1C3A34]",
+                    "text-[#1C3A34] hover:bg-[#1C3A34]/8 hover:text-[#1C3A34] dark:text-foreground dark:hover:bg-accent dark:hover:text-foreground",
+                  button_next:
+                    "text-[#1C3A34] hover:bg-[#1C3A34]/8 hover:text-[#1C3A34] dark:text-foreground dark:hover:bg-accent dark:hover:text-foreground",
                 }}
                 disabled={(date) => isDateDisabled(date, minDate, maxDate)}
               />
             )}
           </div>
 
-          <div className="flex items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/80 px-3 py-2">
+          <div className="flex items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/80 px-3 py-2 dark:border-border dark:bg-muted/45">
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              className="h-8 text-slate-500 hover:bg-white hover:text-[#1C3A34]"
+              className="h-8 text-slate-500 hover:bg-white hover:text-[#1C3A34] dark:text-muted-foreground dark:hover:bg-accent dark:hover:text-foreground"
               disabled={!value}
               onClick={() => handleSelect(undefined)}
             >
@@ -330,7 +356,7 @@ export function AdminDatePicker({
               type="button"
               variant="ghost"
               size="sm"
-              className="h-8 font-medium text-[#1C3A34] hover:bg-[#1C3A34]/8"
+              className="h-8 font-medium text-[#1C3A34] hover:bg-[#1C3A34]/8 dark:text-[var(--brand-accent)] dark:hover:bg-accent"
               onClick={() => {
                 const today = startOfDay(new Date());
                 if (minDate && today < startOfDay(minDate)) {

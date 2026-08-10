@@ -118,18 +118,21 @@ export function NotificationsPage() {
                 aria-pressed={isActive}
                 className={cn(
                   "group relative flex w-full items-start gap-4 rounded-xl border p-4 text-left transition-all",
-                  "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1C3A34]/15",
+                  "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1C3A34]/15 dark:focus-visible:ring-[#C9B87A]/30",
                   isActive
-                    ? "border-[#1C3A34]/25 bg-[#1C3A34]/[0.04] shadow-sm ring-1 ring-[#1C3A34]/10"
-                    : cn(adminCardClass, "hover:border-[#C9B87A]/40 hover:bg-[#f8fafb]"),
+                    ? "border-[#1C3A34]/25 bg-[#1C3A34]/[0.04] shadow-sm ring-1 ring-[#1C3A34]/10 dark:border-[#C9B87A]/70 dark:bg-[#C9B87A]/10 dark:shadow-[0_0_0_1px_rgba(201,184,122,0.12)] dark:ring-[#C9B87A]/25"
+                    : cn(
+                        adminCardClass,
+                        "hover:border-[#C9B87A]/40 hover:bg-[#f8fafb] dark:hover:border-[#C9B87A]/40 dark:hover:bg-white/[0.035]",
+                      ),
                 )}
               >
                 <div
                   className={cn(
                     "rounded-xl p-3 transition-colors",
                     isActive
-                      ? "bg-[#1C3A34] text-white"
-                      : "bg-[#1C3A34]/8 text-[#1C3A34] group-hover:bg-[#1C3A34]/12",
+                      ? "bg-[#1C3A34] text-white dark:bg-[#C9B87A] dark:text-[#151a21]"
+                      : "bg-[#1C3A34]/8 text-[#1C3A34] group-hover:bg-[#1C3A34]/12 dark:bg-white/[0.045] dark:text-muted-foreground dark:group-hover:bg-[#C9B87A]/10 dark:group-hover:text-[#d8c77f]",
                   )}
                 >
                   <Icon className="size-5" />
@@ -141,7 +144,7 @@ export function NotificationsPage() {
                 </div>
 
                 {isActive ? (
-                  <span className="absolute top-4 right-4 flex size-5 items-center justify-center rounded-full bg-[#1C3A34] text-white">
+                  <span className="absolute top-4 right-4 flex size-5 items-center justify-center rounded-full bg-[#1C3A34] text-white dark:bg-[#C9B87A] dark:text-[#151a21]">
                     <Check className="size-3" aria-hidden />
                   </span>
                 ) : null}
@@ -153,11 +156,11 @@ export function NotificationsPage() {
 
       <section className="space-y-4">
         <div className="flex items-center gap-3">
-          <div className="h-px flex-1 bg-slate-200" />
+          <div className="h-px flex-1 bg-slate-200 dark:bg-border" />
           <span className="text-xs font-semibold tracking-wide text-slate-400 uppercase">
             {activeTab === "email" ? copy.channels.email.title : copy.channels.sms.title}
           </span>
-          <div className="h-px flex-1 bg-slate-200" />
+          <div className="h-px flex-1 bg-slate-200 dark:bg-border" />
         </div>
 
         {activeTab === "email" ? (

@@ -742,6 +742,14 @@ enum InvoiceStatus {
   @@map("invoice_status")
 }
 
+enum InvoicePaymentMethod {
+  telebirr
+  cbe_birr
+  manual
+
+  @@map("invoice_payment_method")
+}
+
 model Invoice {
   id                   String          @id @default(uuid()) @db.Uuid
   referenceNumber      String          @unique @map("reference_number") @db.VarChar(50)
@@ -758,6 +766,7 @@ model Invoice {
   issuedAt             DateTime?       @map("issued_at") @db.Timestamptz
   dueAt                DateTime?       @map("due_at") @db.Timestamptz
   paidAt               DateTime?       @map("paid_at") @db.Timestamptz
+  paymentMethod        InvoicePaymentMethod? @map("payment_method")
   voidedAt             DateTime?       @map("voided_at") @db.Timestamptz
   notes                String?         @db.Text
   createdAt            DateTime        @default(now()) @map("created_at") @db.Timestamptz

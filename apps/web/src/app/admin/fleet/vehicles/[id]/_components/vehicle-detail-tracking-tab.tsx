@@ -102,9 +102,16 @@ export function VehicleDetailTrackingTab({ vehicle }: VehicleDetailTrackingTabPr
       </div>
 
       {error ? (
-        <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-200">
           <WifiOff className="mt-0.5 size-4 shrink-0" />
-          <p>{error}</p>
+          <div>
+            <p className="font-semibold">Live updates are temporarily unavailable</p>
+            <p className="mt-0.5 text-xs leading-relaxed text-amber-800 dark:text-amber-200/75">
+              {hasLocation
+                ? "The last known vehicle location is shown below. We will keep trying to reconnect automatically."
+                : "We could not connect to live tracking right now. We will keep trying automatically."}
+            </p>
+          </div>
         </div>
       ) : null}
 
@@ -126,7 +133,7 @@ export function VehicleDetailTrackingTab({ vehicle }: VehicleDetailTrackingTabPr
 
       {!hasLocation && !loading ? (
         <p className="text-sm text-slate-500">
-          Waiting for the assigned driver to publish a GPS location over the tracking WebSocket.
+          Waiting for the assigned driver to share a GPS location.
         </p>
       ) : null}
     </section>

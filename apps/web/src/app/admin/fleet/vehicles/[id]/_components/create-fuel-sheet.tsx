@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useState, type FormEvent } from "react";
 import { CircleDollarSign, Fuel, Gauge, Plus, Store } from "lucide-react";
 import type { Vehicle, VehicleFuelType } from "@smart-dispatch/types";
 import { AdminDatePicker } from "@/components/shared/admin-date-picker";
@@ -9,6 +9,14 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   adminCardClass,
   adminHeadingClass,
@@ -31,13 +39,12 @@ import { cn } from "@/lib/utils";
 import {
   FUEL_TYPES,
   formatDateInputValue,
-  fuelTypeIcon,
   parseDateInputValue,
   textareaClassName,
 } from "./vehicle-detail-shared";
 
 const fieldErrorClassName =
-  "border-red-300 bg-red-50/60 text-red-900 placeholder:text-red-400 focus-visible:border-red-400 focus-visible:ring-red-200/60";
+  "border-red-300 bg-red-50/60 text-red-900 placeholder:text-red-400 focus-visible:border-red-400 focus-visible:ring-red-200/60 dark:border-red-400/50 dark:bg-red-500/10 dark:text-red-200 dark:placeholder:text-red-300/60";
 
 type FuelFieldErrors = {
   odometer_km?: string;
@@ -93,14 +100,15 @@ export function CreateFuelSheet({
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (!open) {
+  function handleSheetOpenChange(nextOpen: boolean) {
+    if (!nextOpen) {
       setSubmitting(false);
       setForm(emptyFuelForm());
       setFieldErrors({});
       setError(null);
     }
-  }, [open]);
+    onOpenChange(nextOpen);
+  }
 
   function updateForm(updater: (current: FuelFormState) => FuelFormState) {
     setForm((current) => updater(current));
@@ -157,7 +165,7 @@ export function CreateFuelSheet({
 
       showSuccessToast(detail.toast.fuelCreated);
       onSuccess?.();
-      onOpenChange(false);
+      handleSheetOpenChange(false);
     } catch (submitError) {
       setError(
         submitError instanceof Error ? submitError.message : detail.toast.fuelFailed.description,
@@ -170,12 +178,12 @@ export function CreateFuelSheet({
   const formId = "create-fuel-form";
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
+    <Sheet open={open} onOpenChange={handleSheetOpenChange}>
       <SheetContent
         side="right"
         className="flex w-full flex-col gap-0 overflow-y-auto p-0 data-[side=right]:sm:max-w-lg"
       >
-        <SheetHeader className="border-b border-slate-100 px-6 py-5">
+        <SheetHeader className="border-b border-slate-100 px-6 py-5 dark:border-border">
           <SheetTitle className={adminHeadingClass}>{fuelCopy.createTitle}</SheetTitle>
           <SheetDescription className="leading-relaxed">
             {vehicle
@@ -187,15 +195,15 @@ export function CreateFuelSheet({
         <form id={formId} onSubmit={handleSubmit} className="space-y-5 px-6 py-5">
           {vehicle ? (
             <Card className={cn(adminCardClass, "gap-0 overflow-hidden py-0 shadow-none ring-0")}>
-              <div className="flex items-start gap-3 border-b border-slate-100 px-4 py-4">
-                <div className={cn(adminIconBoxClass, "shrink-0 bg-[#1C3A34] text-white")}>
+              <div className="flex items-start gap-3 border-b border-slate-100 px-4 py-4 dark:border-border">
+                <div className={cn(adminIconBoxClass, "shrink-0 bg-[#1C3A34] text-white dark:bg-[#C9B87A] dark:text-[#151a21]")}>
                   <Fuel className="size-4" />
                 </div>
                 <div className="min-w-0">
                   <p className="text-xs font-semibold tracking-wide text-slate-400 uppercase">
                     {copy.columns.plate}
                   </p>
-                  <p className="mt-1 font-mono text-lg font-bold tracking-wide text-[#1C3A34]">
+                  <p className="mt-1 font-mono text-lg font-bold tracking-wide text-[#1C3A34] dark:text-foreground">
                     {vehicle.plate_number}
                   </p>
                 </div>
@@ -236,13 +244,13 @@ export function CreateFuelSheet({
                       placeholder={fuelCopy.odometerPlaceholder}
                       className={cn(
                         adminInputClass,
-                        "bg-white",
+                        "bg-white dark:bg-muted/55",
                         fieldErrors.odometer_km && fieldErrorClassName,
                       )}
                       required
                     />
                     {fieldErrors.odometer_km ? (
-                      <p className="text-xs text-red-600">{fieldErrors.odometer_km}</p>
+                      <p className="text-xs text-red-600 dark:text-red-300">{fieldErrors.odometer_km}</p>
                     ) : null}
                   </div>
                   <div className="space-y-1.5">
@@ -266,53 +274,61 @@ export function CreateFuelSheet({
                       placeholder={fuelCopy.quantityPlaceholder}
                       className={cn(
                         adminInputClass,
-                        "bg-white",
+                        "bg-white dark:bg-muted/55",
                         fieldErrors.quantity_liters && fieldErrorClassName,
                       )}
                       required
                     />
                     {fieldErrors.quantity_liters ? (
-                      <p className="text-xs text-red-600">{fieldErrors.quantity_liters}</p>
+                      <p className="text-xs text-red-600 dark:text-red-300">{fieldErrors.quantity_liters}</p>
                     ) : null}
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <Label className="text-sm font-semibold text-slate-800">{fuelCopy.fuelType}</Label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {FUEL_TYPES.map((fuelType) => {
-                      const Icon = fuelTypeIcon(fuelType);
-                      const selected = form.fuel_type === fuelType;
-                      return (
-                        <button
-                          key={fuelType}
-                          type="button"
-                          disabled={submitting}
-                          onClick={() => updateForm((current) => ({ ...current, fuel_type: fuelType }))}
-                          className={cn(
-                            "flex flex-col items-center gap-1.5 rounded-xl border px-2 py-3 text-center transition",
-                            selected
-                              ? "border-[#1C3A34] bg-[#1C3A34] text-white shadow-sm"
-                              : "border-slate-200 bg-white text-slate-600 hover:border-[#1C3A34]/30 hover:bg-[#1C3A34]/[0.03]",
-                          )}
-                        >
-                          <Icon className="size-4 shrink-0" />
-                          <span className="text-[11px] font-medium leading-tight">
+                  <Label
+                    htmlFor="fuel-sheet-fuel-type"
+                    className="text-sm font-semibold text-slate-800 dark:text-foreground"
+                  >
+                    {fuelCopy.fuelType}
+                  </Label>
+                  <Select
+                    items={FUEL_TYPES.map((fuelType) => ({
+                      value: fuelType,
+                      label: detail.fuelTypes[fuelType],
+                    }))}
+                    value={form.fuel_type}
+                    onValueChange={(value) => {
+                      if (!value) return;
+                      updateForm((current) => ({
+                        ...current,
+                        fuel_type: value as VehicleFuelType,
+                      }));
+                    }}
+                    disabled={submitting}
+                  >
+                    <SelectTrigger id="fuel-sheet-fuel-type" className="h-10 w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {FUEL_TYPES.map((fuelType) => (
+                          <SelectItem key={fuelType} value={fuelType}>
                             {detail.fuelTypes[fuelType]}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div className="space-y-4 rounded-xl border border-slate-100 bg-slate-50/40 p-4">
+                <div className="space-y-4 rounded-xl border border-slate-100 bg-slate-50/40 p-4 dark:border-border dark:bg-white/[0.025]">
                   <div className="flex items-start gap-2.5">
                     <span className={adminIconBoxClass}>
                       <Store className="size-3.5" />
                     </span>
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">{fuelCopy.stationAndCost}</p>
+                      <p className="text-sm font-semibold text-slate-800 dark:text-foreground">{fuelCopy.stationAndCost}</p>
                       <p className="mt-0.5 text-xs text-slate-500">{fuelCopy.stationAndCostHint}</p>
                     </div>
                   </div>
@@ -339,13 +355,13 @@ export function CreateFuelSheet({
                         placeholder={fuelCopy.stationPlaceholder}
                         className={cn(
                           adminInputClass,
-                          "bg-white",
+                          "bg-white dark:bg-muted/55",
                           fieldErrors.station_name && fieldErrorClassName,
                         )}
                         required
                       />
                       {fieldErrors.station_name ? (
-                        <p className="text-xs text-red-600">{fieldErrors.station_name}</p>
+                        <p className="text-xs text-red-600 dark:text-red-300">{fieldErrors.station_name}</p>
                       ) : null}
                     </div>
                     <div className="space-y-1.5">
@@ -372,13 +388,13 @@ export function CreateFuelSheet({
                         placeholder={fuelCopy.costPlaceholder}
                         className={cn(
                           adminInputClass,
-                          "bg-white",
+                          "bg-white dark:bg-muted/55",
                           fieldErrors.total_cost && fieldErrorClassName,
                         )}
                         required
                       />
                       {fieldErrors.total_cost ? (
-                        <p className="text-xs text-red-600">{fieldErrors.total_cost}</p>
+                        <p className="text-xs text-red-600 dark:text-red-300">{fieldErrors.total_cost}</p>
                       ) : null}
                     </div>
                   </div>
@@ -401,12 +417,12 @@ export function CreateFuelSheet({
                         }))
                       }
                       placeholder={fuelCopy.receiptPlaceholder}
-                      className={cn(adminInputClass, "bg-white")}
+                      className={cn(adminInputClass, "bg-white dark:bg-muted/55")}
                     />
                   </div>
                 </div>
 
-                <div className="space-y-1.5 rounded-xl border border-slate-100 bg-slate-50/40 p-4">
+                <div className="space-y-1.5 rounded-xl border border-slate-100 bg-slate-50/40 p-4 dark:border-border dark:bg-white/[0.025]">
                   <Label htmlFor="fuel-sheet-notes" className="text-sm font-semibold">
                     {fuelCopy.notes}
                   </Label>
@@ -427,19 +443,19 @@ export function CreateFuelSheet({
           ) : null}
 
           {error ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-400/35 dark:bg-red-500/10 dark:text-red-300">
               {error}
             </div>
           ) : null}
         </form>
 
-        <SheetFooter className="mt-auto flex-row justify-end gap-2 border-t border-slate-100 bg-white px-6 py-4">
+        <SheetFooter className="mt-auto flex-row justify-end gap-2 border-t border-slate-100 bg-white px-6 py-4 dark:border-border dark:bg-[#171c24]">
           <Button
             type="button"
             variant="outline"
-            onClick={() => onOpenChange(false)}
+            onClick={() => handleSheetOpenChange(false)}
             disabled={submitting}
-            className="border-slate-200"
+            className="border-slate-200 dark:border-border dark:bg-[#202630] dark:text-foreground dark:hover:bg-white/[0.07]"
           >
             {fuelCopy.closeForm}
           </Button>

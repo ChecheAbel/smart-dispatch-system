@@ -19,7 +19,7 @@ export function AuthBackToHomeLink({ className }: AuthBackToHomeLinkProps) {
     <Link
       href={USER_HOME_PATH}
       className={cn(
-        "inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition-colors hover:text-[#1C3A34]",
+        "inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 transition-colors hover:text-[#1C3A34] dark:text-muted-foreground dark:hover:text-[var(--brand-accent)]",
         className,
       )}
     >

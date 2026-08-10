@@ -208,7 +208,7 @@ export function InvoiceDetailPage() {
         </div>
       </div>
 
-      <section className={cn(adminCardClass, "space-y-4 p-5")}>
+      <section className={cn(adminCardClass, "space-y-4 rounded-2xl p-5")}>
         <SectionHeader
           icon={Receipt}
           title={copy.detail.summary}
@@ -240,11 +240,24 @@ export function InvoiceDetailPage() {
           <QuickFact label={copy.detail.total} value={formatMoney(invoice.total_amount, invoice.currency, locale)} />
           <QuickFact label={copy.detail.issuedAt} value={formatDate(invoice.issued_at, locale)} />
           <QuickFact label={copy.detail.dueAt} value={formatDate(invoice.due_at, locale)} />
+          {invoice.status === "paid" ? (
+            <>
+              <QuickFact label={copy.detail.paidAt} value={formatDate(invoice.paid_at, locale)} />
+              <QuickFact
+                label={copy.detail.paymentMethod}
+                value={
+                  invoice.payment_method
+                    ? copy.detail.paymentMethods[invoice.payment_method]
+                    : copy.detail.paymentMethods.notRecorded
+                }
+              />
+            </>
+          ) : null}
         </div>
       </section>
 
-      <section className={cn(adminCardClass, "overflow-hidden")}>
-        <div className="border-b border-slate-100 px-5 py-4">
+      <section className={cn(adminCardClass, "overflow-hidden rounded-2xl")}>
+        <div className="border-b border-slate-100 px-5 py-4 dark:border-border">
           <SectionHeader
             icon={FileText}
             title={copy.detail.lineItems}
@@ -254,7 +267,7 @@ export function InvoiceDetailPage() {
         {invoice.line_items.length === 0 ? (
           <p className="px-5 py-8 text-sm text-slate-500">{copy.detail.noLineItems}</p>
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-100 dark:divide-border">
             {invoice.line_items.map((item, index) => (
               <div key={item.id} className="space-y-4 px-5 py-5">
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -315,7 +328,7 @@ function QuickFact({
   hint?: string;
 }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2.5 sm:px-3.5 sm:py-3">
+    <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2.5 sm:px-3.5 sm:py-3 dark:border-border dark:bg-white/[0.035]">
       <p className="text-[11px] font-medium tracking-wide text-slate-400 uppercase">{label}</p>
       <p className="mt-1 truncate text-sm font-semibold text-slate-800">{value}</p>
       {hint ? <p className="mt-0.5 truncate text-[11px] text-slate-400">{hint}</p> : null}

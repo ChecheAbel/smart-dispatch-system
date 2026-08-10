@@ -17,7 +17,7 @@ import { adminInputClass } from "@/lib/admin-theme";
 import { cn } from "@/lib/utils";
 
 const fieldErrorClassName =
-  "border-red-300 bg-red-50/60 text-red-900 placeholder:text-red-400 focus-visible:border-red-400 focus-visible:ring-red-200/60";
+  "border-red-300 bg-red-50/60 text-red-900 placeholder:text-red-400 focus-visible:border-red-400 focus-visible:ring-red-200/60 dark:border-red-400/40 dark:bg-red-950/25 dark:text-red-200 dark:placeholder:text-red-300/60";
 
 type AdminFieldProps = {
   label: string;
@@ -45,17 +45,28 @@ export function AdminField({
       <div className="flex items-baseline justify-between gap-3">
         <Label
           htmlFor={htmlFor}
-          className={cn("text-sm font-medium text-[#1C3A34]", error && "text-red-700")}
+          className={cn(
+            "text-sm font-medium text-[#1C3A34] dark:text-foreground",
+            error && "text-red-700 dark:text-red-300",
+          )}
         >
           {label}
         </Label>
         {optional ? (
-          <span className="shrink-0 text-xs text-slate-400">{optionalLabel}</span>
+          <span className="shrink-0 text-xs text-slate-400 dark:text-muted-foreground">
+            {optionalLabel}
+          </span>
         ) : null}
       </div>
       {children}
-      {hint && !error ? <p className="text-xs leading-relaxed text-slate-500">{hint}</p> : null}
-      {error ? <p className="text-xs text-red-600">{error}</p> : null}
+      {hint && !error ? (
+        <p className="text-xs leading-relaxed text-slate-500 dark:text-muted-foreground">
+          {hint}
+        </p>
+      ) : null}
+      {error ? (
+        <p className="text-xs text-red-600 dark:text-red-300">{error}</p>
+      ) : null}
     </div>
   );
 }
@@ -112,7 +123,8 @@ export function AdminTextField({
             adminInputClass,
             Icon && "pl-10",
             error && fieldErrorClassName,
-            disabled && "bg-slate-50 text-slate-500",
+            disabled &&
+              "bg-slate-50 text-slate-500 dark:bg-muted/35 dark:text-muted-foreground",
             className,
           )}
           {...props}
@@ -133,7 +145,7 @@ type AdminTextareaFieldProps = Omit<ComponentProps<"textarea">, "id"> & {
 };
 
 const textareaClassName =
-  "flex min-h-[88px] w-full resize-y rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
+  "flex min-h-[88px] w-full resize-y rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:border-border dark:bg-muted/55 dark:text-foreground";
 
 export function AdminTextareaField({
   id,
@@ -164,7 +176,8 @@ export function AdminTextareaField({
         className={cn(
           textareaClassName,
           error && fieldErrorClassName,
-          disabled && "bg-slate-50 text-slate-500",
+          disabled &&
+            "bg-slate-50 text-slate-500 dark:bg-muted/35 dark:text-muted-foreground",
           className,
         )}
         {...props}
@@ -234,7 +247,8 @@ export function AdminPasswordField({
             Icon && "pl-10",
             revealable && "pr-10",
             error && fieldErrorClassName,
-            disabled && "bg-slate-50 text-slate-500",
+            disabled &&
+              "bg-slate-50 text-slate-500 dark:bg-muted/35 dark:text-muted-foreground",
             className,
           )}
           {...props}
@@ -244,10 +258,14 @@ export function AdminPasswordField({
             type="button"
             onClick={() => setVisible((current) => !current)}
             disabled={disabled}
-            className="absolute top-1/2 right-3 -translate-y-1/2 rounded p-0.5 text-slate-400 transition-colors hover:text-[#1C3A34] disabled:opacity-50"
+            className="absolute top-1/2 right-3 -translate-y-1/2 rounded p-0.5 text-slate-400 transition-colors hover:text-[#1C3A34] disabled:opacity-50 dark:text-muted-foreground dark:hover:text-[var(--brand-accent)]"
             aria-label={visible ? hideLabel : showLabel}
           >
-            {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            {visible ? (
+              <EyeOff className="size-4" />
+            ) : (
+              <Eye className="size-4" />
+            )}
           </button>
         ) : null}
       </div>
@@ -307,7 +325,8 @@ export function AdminSelectField({
             adminInputClass,
             "w-full",
             error && fieldErrorClassName,
-            disabled && "bg-slate-50 text-slate-500",
+            disabled &&
+              "bg-slate-50 text-slate-500 dark:bg-muted/35 dark:text-muted-foreground",
           )}
         >
           <SelectValue placeholder={placeholder} />
@@ -344,20 +363,24 @@ export function AdminFormSection({
   return (
     <section
       className={cn(
-        "rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6",
+        "rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6 dark:border-border dark:bg-card dark:shadow-black/15",
         className,
       )}
     >
-      <div className="mb-5 flex items-start gap-3 border-b border-slate-100 pb-4">
+      <div className="mb-5 flex items-start gap-3 border-b border-slate-100 pb-4 dark:border-border">
         {Icon ? (
-          <div className="rounded-lg bg-[#1C3A34]/8 p-2 text-[#1C3A34]">
+          <div className="rounded-lg bg-[#1C3A34]/8 p-2 text-[#1C3A34] dark:bg-accent dark:text-[var(--brand-accent)]">
             <Icon className="size-4" />
           </div>
         ) : null}
         <div className="min-w-0 flex-1 space-y-1">
-          <h2 className="text-sm font-semibold text-[#1C3A34]">{title}</h2>
+          <h2 className="text-sm font-semibold text-[#1C3A34] dark:text-foreground">
+            {title}
+          </h2>
           {description ? (
-            <p className="text-xs leading-relaxed text-slate-500">{description}</p>
+            <p className="text-xs leading-relaxed text-slate-500 dark:text-muted-foreground">
+              {description}
+            </p>
           ) : null}
         </div>
       </div>

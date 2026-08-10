@@ -3,7 +3,7 @@ import type { AuthTokenResponse } from "@smart-dispatch/types";
 import { unwrapApiResponse } from "./api-response";
 import { clearAuthSession, getRefreshToken, updateAuthSession } from "./auth-session";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
 
 let refreshPromise: Promise<AuthTokenResponse | null> | null = null;
 

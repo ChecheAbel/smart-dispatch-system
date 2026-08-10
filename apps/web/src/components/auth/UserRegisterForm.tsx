@@ -25,6 +25,7 @@ import type { RequesterSegment } from "@smart-dispatch/types";
 import AuthShell from "@/components/auth/AuthShell";
 import { AuthBackToHomeLink } from "@/components/auth/AuthBackToHomeLink";
 import { AuthLanguageSwitcher } from "@/components/auth/AuthLanguageSwitcher";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { useLocale } from "@/components/shared/providers/locale-context";
 import { registerUserApplication } from "@/lib/auth-api";
 import {
@@ -43,13 +44,13 @@ import { formatMessage, getCustomerAuthMessages, type CustomerAuthMessages } fro
 type RegisterCopy = CustomerAuthMessages["register"];
 
 const inputClassName =
-  "w-full pl-11 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-slate-800 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all disabled:opacity-70";
+  "w-full pl-11 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-slate-800 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all disabled:opacity-70 dark:border-white/10 dark:!bg-[#11161d] dark:text-[#e8ecf1] dark:placeholder:text-[#7f8996] dark:focus:border-[#C9B87A]/65 dark:focus:ring-[#C9B87A]/20";
 const plainInputClassName =
-  "w-full px-4 py-4 bg-white border border-slate-200 rounded-2xl text-slate-800 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all disabled:opacity-70";
-const labelClassName = "block text-xs font-semibold text-slate-600 mb-2.5";
+  "w-full px-4 py-4 bg-white border border-slate-200 rounded-2xl text-slate-800 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 focus:border-[#1C3A34] transition-all disabled:opacity-70 dark:border-white/10 dark:!bg-[#11161d] dark:text-[#e8ecf1] dark:placeholder:text-[#7f8996] dark:focus:border-[#C9B87A]/65 dark:focus:ring-[#C9B87A]/20";
+const labelClassName = "block text-xs font-semibold text-slate-600 mb-2.5 dark:text-[#c7ced7]";
 const errorInputClassName =
-  "border-red-300 bg-red-50/60 focus:border-red-400 focus:ring-red-200/60";
-const errorLabelClassName = "text-red-700";
+  "border-red-300 bg-red-50/60 focus:border-red-400 focus:ring-red-200/60 dark:border-red-400/40 dark:bg-red-950/25 dark:text-red-200 dark:focus:border-red-400 dark:focus:ring-red-400/20";
+const errorLabelClassName = "text-red-700 dark:text-red-300";
 
 type FormState = {
   segment: RequesterSegment;
@@ -251,15 +252,15 @@ function SegmentBadge({
   const Icon = segmentIcon(segment);
 
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3">
-      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1C3A34] text-white">
+    <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 dark:border-white/10 dark:bg-[#11161d]">
+      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#1C3A34] text-white dark:bg-[#203f38]">
         <Icon className="h-4 w-4" />
       </div>
       <div>
         <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
           {copy.accountTypeLabel}
         </p>
-        <p className="text-sm font-semibold text-[#1C3A34]">{copy.segments[segment].title}</p>
+        <p className="text-sm font-semibold text-[#1C3A34] dark:text-[#e8ecf1]">{copy.segments[segment].title}</p>
       </div>
     </div>
   );
@@ -277,12 +278,12 @@ function StepperHeader({
   const step = steps[currentStep];
 
   return (
-    <div className="mb-8 space-y-4 border-b border-slate-100 pb-6">
+    <div className="mb-8 space-y-4 border-b border-slate-100 pb-6 dark:border-white/10">
       <div className="flex items-center justify-between gap-3">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
           {stepOfLabel}
         </p>
-        <p className="text-sm font-semibold text-[#1C3A34]">{step.title}</p>
+        <p className="text-sm font-semibold text-[#1C3A34] dark:text-[#e8ecf1]">{step.title}</p>
       </div>
 
       <div className="flex gap-2">
@@ -291,7 +292,9 @@ function StepperHeader({
             key={item.id}
             className={cn(
               "h-1.5 flex-1 rounded-full transition-colors",
-              index <= currentStep ? "bg-[#1C3A34]" : "bg-slate-200",
+              index <= currentStep
+                ? "bg-[#1C3A34] dark:bg-[#C9B87A]"
+                : "bg-slate-200 dark:bg-white/10",
             )}
             aria-hidden
           />
@@ -328,19 +331,21 @@ function AccountTypeOptionCard({
       className={cn(
         "flex min-h-[140px] w-full flex-col rounded-2xl border p-5 text-left transition-all",
         selected
-          ? "border-[#1C3A34] bg-[#1C3A34]/[0.04] ring-2 ring-[#1C3A34]/15"
-          : "border-slate-200 bg-slate-50/40 hover:border-slate-300 hover:bg-white",
+          ? "border-[#1C3A34] bg-[#1C3A34]/[0.04] ring-2 ring-[#1C3A34]/15 dark:border-[#C9B87A]/55 dark:bg-[#C9B87A]/[0.055] dark:ring-[#C9B87A]/15"
+          : "border-slate-200 bg-slate-50/40 hover:border-slate-300 hover:bg-white dark:border-white/10 dark:bg-[#11161d] dark:hover:border-[#C9B87A]/30 dark:hover:bg-[#171c24]",
       )}
     >
       <div
         className={cn(
           "mb-4 flex h-10 w-10 items-center justify-center rounded-xl",
-          selected ? "bg-[#1C3A34] text-white" : "bg-white text-slate-400 shadow-sm",
+          selected
+            ? "bg-[#1C3A34] text-white dark:bg-[#203f38] dark:text-[#C9B87A]"
+            : "bg-white text-slate-400 shadow-sm dark:bg-[#1b212a] dark:text-[#8f99a6] dark:shadow-black/20",
         )}
       >
         <Icon className="h-5 w-5" />
       </div>
-      <p className="text-[15px] font-semibold text-slate-900">{title}</p>
+      <p className="text-[15px] font-semibold text-slate-900 dark:text-[#e8ecf1]">{title}</p>
       <p className="mt-2 text-sm leading-relaxed text-slate-500">{description}</p>
     </button>
   );
@@ -471,7 +476,15 @@ function RegistrationShell({
       desktopAside={aside}
       footerCopyright={copyright}
       leadingAction={<AuthBackToHomeLink />}
-      headerActions={<AuthLanguageSwitcher />}
+      headerActions={
+        <div className="auth-theme-toggle-inline flex items-center gap-2">
+          <ThemeToggle
+            placement="inline"
+            className="rounded-xl border border-slate-200/80 bg-white/70 dark:border-white/10 dark:bg-white/[0.035]"
+          />
+          <AuthLanguageSwitcher />
+        </div>
+      }
     >
       {children}
     </AuthShell>
@@ -663,7 +676,7 @@ export default function UserRegisterForm() {
         aside={<RegistrationAside copy={copy} success />}
         contentAlign="center"
       >
-        <div className="w-full rounded-3xl border border-slate-200/80 bg-white p-8 text-center shadow-xl shadow-slate-200/50 sm:p-10 lg:p-12">
+        <div className="w-full rounded-3xl border border-slate-200/80 bg-white p-8 text-center shadow-xl shadow-slate-200/50 dark:border-white/10 dark:bg-[#171c24] dark:shadow-black/30 sm:p-10 lg:p-12">
           <div className="mx-auto mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-[#1C3A34]/[0.05] ring-8 ring-[#1C3A34]/[0.04]">
             <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#1C3A34] text-white shadow-lg shadow-[#1C3A34]/25">
               <CheckCircle2 className="h-9 w-9" strokeWidth={2.25} />
@@ -680,7 +693,7 @@ export default function UserRegisterForm() {
             {successMessage}
           </p>
 
-          <div className="mx-auto mt-8 max-w-md rounded-2xl border border-slate-100 bg-slate-50/70 px-5 py-4 text-left lg:hidden">
+          <div className="mx-auto mt-8 max-w-md rounded-2xl border border-slate-100 bg-slate-50/70 px-5 py-4 text-left dark:border-white/10 dark:bg-[#11161d] lg:hidden">
             <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9B87A]">
               {copy.whatHappensNext}
             </p>
@@ -723,9 +736,9 @@ export default function UserRegisterForm() {
       description={shellDescription}
       aside={<RegistrationAside copy={copy} steps={steps} currentStep={currentStep} />}
     >
-      <div className="rounded-3xl border border-slate-200/80 bg-white shadow-xl shadow-slate-200/50 p-8 sm:p-10 lg:p-12">
-        <div className="mb-8 border-b border-slate-100 pb-8">
-          <h2 className="text-3xl font-extrabold text-[#1C3A34] tracking-tight">{copy.pageTitle}</h2>
+      <div className="rounded-3xl border border-slate-200/80 bg-white p-8 shadow-xl shadow-slate-200/50 dark:border-white/10 dark:bg-[#171c24] dark:shadow-black/30 sm:p-10 lg:p-12">
+        <div className="mb-8 border-b border-slate-100 pb-8 dark:border-white/10">
+          <h2 className="text-3xl font-extrabold text-[#1C3A34] tracking-tight dark:text-[#eef1f5]">{copy.pageTitle}</h2>
           <p className="mt-3 max-w-2xl text-sm sm:text-[15px] leading-relaxed text-slate-500">{pageIntro}</p>
         </div>
 
@@ -884,11 +897,11 @@ export default function UserRegisterForm() {
                   </label>
                   <div
                     className={cn(
-                      "flex overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm focus-within:border-[#1C3A34] focus-within:ring-2 focus-within:ring-[#1C3A34]/20 disabled:opacity-70",
-                      fieldErrors.mobile && "border-red-300 bg-red-50/60 focus-within:border-red-400 focus-within:ring-red-200/60",
+                      "flex overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm focus-within:border-[#1C3A34] focus-within:ring-2 focus-within:ring-[#1C3A34]/20 disabled:opacity-70 dark:border-white/10 dark:!bg-[#11161d] dark:focus-within:border-[#C9B87A]/65 dark:focus-within:ring-[#C9B87A]/20",
+                      fieldErrors.mobile && "border-red-300 bg-red-50/60 focus-within:border-red-400 focus-within:ring-red-200/60 dark:border-red-400/40 dark:bg-red-950/25",
                     )}
                   >
-                    <div className="flex shrink-0 items-center gap-2 border-r border-slate-200 bg-slate-50 px-3 text-sm text-slate-700">
+                    <div className="flex shrink-0 items-center gap-2 border-r border-slate-200 bg-slate-50 px-3 text-sm text-slate-700 dark:border-white/10 dark:bg-[#1b212a] dark:text-[#dfe5eb]">
                       <span aria-hidden className="text-base leading-none">
                         🇪🇹
                       </span>
@@ -907,7 +920,7 @@ export default function UserRegisterForm() {
                         }
                         disabled={isSubmitting}
                         placeholder={ETHIOPIAN_MOBILE_PLACEHOLDER}
-                        className="w-full border-0 bg-transparent py-4 pl-10 pr-4 text-[15px] text-slate-800 outline-none disabled:opacity-70"
+                        className="w-full border-0 bg-transparent py-4 pr-4 pl-10 text-[15px] text-slate-800 outline-none disabled:opacity-70 dark:text-[#e8ecf1] dark:placeholder:text-[#7f8996]"
                       />
                     </div>
                   </div>
@@ -940,7 +953,7 @@ export default function UserRegisterForm() {
                     <button
                       type="button"
                       onClick={() => setShowPassword((open) => !open)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-[#C9B87A]"
                       aria-label={
                         showPassword ? messages.common.hidePassword : messages.common.showPassword
                       }
@@ -979,7 +992,7 @@ export default function UserRegisterForm() {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword((open) => !open)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      className="absolute top-1/2 right-3 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600 dark:hover:text-[#C9B87A]"
                       aria-label={
                         showConfirmPassword
                           ? messages.common.hidePassword
@@ -1247,13 +1260,13 @@ export default function UserRegisterForm() {
             </div>
           ) : null}
 
-          <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-6 dark:border-white/10 sm:flex-row sm:items-center sm:justify-between">
             {currentStep > 0 ? (
               <button
                 type="button"
                 onClick={goToPreviousStep}
                 disabled={isSubmitting}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 px-5 py-4 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-70"
+                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 px-5 py-4 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-70 dark:border-white/10 dark:text-[#dfe5eb] dark:hover:bg-white/[0.05]"
               >
                 <ArrowLeft className="h-4 w-4" />
                 {copy.back}

@@ -316,7 +316,7 @@ export function RideRequestDetailSheet({
         ) : (
           <>
         <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-6 py-6">
-          <div className="rounded-xl border border-slate-200/80 bg-gradient-to-br from-[#f8fafb] to-white p-4">
+          <div className="rounded-xl border border-slate-200/80 bg-gradient-to-br from-[#f8fafb] to-white p-4 dark:from-[#202630] dark:to-[#171c24]">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="flex min-w-0 items-start gap-2.5">
                 <CalendarClock className="mt-0.5 size-4 shrink-0 text-[#C9B87A]" />

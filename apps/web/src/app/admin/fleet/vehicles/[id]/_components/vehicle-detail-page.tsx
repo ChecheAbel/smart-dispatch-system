@@ -4,37 +4,16 @@ import { useCallback, useEffect, useMemo, useState, useTransition } from "react"
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, CalendarClock, ClipboardList, Fuel, History, ShieldCheck, Truck, Wrench, MapPin, Calendar } from "lucide-react";
-import type {
-  Vehicle,
-  VehicleFuelLog,
-  VehicleHistoryEvent,
-  VehicleMaintenanceLog,
-} from "@smart-dispatch/types";
+import type { Vehicle, VehicleFuelLog, VehicleHistoryEvent, VehicleMaintenanceLog } from "@smart-dispatch/types";
 import { useAuth, useLocale } from "@/components/shared/providers";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  adminCardClass,
-  adminEyebrowClass,
-  adminHeadingClass,
-  adminIconBoxClass,
-  adminPrimaryButtonClass,
-} from "@/lib/admin-theme";
+import { adminCardClass, adminEyebrowClass, adminHeadingClass, adminIconBoxClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
 import { VehicleDetailScheduleTab } from "./vehicle-detail-schedule-tab";
 import { VehicleDetailTrackingTab } from "./vehicle-detail-tracking-tab";
-import {
-  canReadVehicle,
-  canWriteCompliance as userCanWriteCompliance,
-  PERMISSIONS,
-} from "@/lib/permissions";
-import {
-  fetchVehicleById,
-  fetchVehicleFuelLogs,
-  fetchVehicleHistory,
-  fetchVehicleMaintenance,
-  updateVehicleMaintenance,
-} from "@/lib/vehicle-api";
+import { canReadVehicle, canWriteCompliance as userCanWriteCompliance, PERMISSIONS } from "@/lib/permissions";
+import { fetchVehicleById, fetchVehicleFuelLogs, fetchVehicleHistory, fetchVehicleMaintenance, updateVehicleMaintenance } from "@/lib/vehicle-api";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { formatMessage, getAdminComplianceMessages, getAdminVehiclesMessages } from "@/translations";
 import { cn } from "@/lib/utils";
@@ -46,13 +25,7 @@ import { VehicleDetailFuelTab } from "./vehicle-detail-fuel-tab";
 import { VehicleDetailHistoryTab } from "./vehicle-detail-history-tab";
 import { VehicleDetailMaintenanceTab } from "./vehicle-detail-maintenance-tab";
 import { VehicleDetailOverviewTab } from "./vehicle-detail-overview-tab";
-import {
-  type DetailTab,
-  expiryToneClass,
-  getExpiryTone,
-  parseTab,
-  vehicleStatusBadgeClass,
-} from "./vehicle-detail-shared";
+import { type DetailTab, expiryToneClass, getExpiryTone, parseTab, vehicleStatusBadgeClass } from "./vehicle-detail-shared";
 
 type ComplianceSheetType = "insurance" | "inspection";
 
@@ -107,53 +80,51 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
   const loadHistory = useCallback(async () => {
     setHistoryLoading(true);
     try {
-      const result = await fetchVehicleHistory(vehicleId, { page: 1, limit: 50 });
+      const result = await fetchVehicleHistory(vehicleId, {
+        page: 1,
+        limit: 50,
+      });
       setHistory(result.data);
     } catch (error) {
       showErrorToast({
         title: detail.toast.loadHistoryFailed.title,
-        description:
-          error instanceof Error ? error.message : detail.toast.loadHistoryFailed.description,
+        description: error instanceof Error ? error.message : detail.toast.loadHistoryFailed.description,
       });
     } finally {
       setHistoryLoading(false);
     }
-  }, [
-    detail.toast.loadHistoryFailed.description,
-    detail.toast.loadHistoryFailed.title,
-    vehicleId,
-  ]);
+  }, [detail.toast.loadHistoryFailed.description, detail.toast.loadHistoryFailed.title, vehicleId]);
 
   const loadMaintenance = useCallback(async () => {
     setMaintenanceLoading(true);
     try {
-      const result = await fetchVehicleMaintenance(vehicleId, { page: 1, limit: 50 });
+      const result = await fetchVehicleMaintenance(vehicleId, {
+        page: 1,
+        limit: 50,
+      });
       setMaintenance(result.data);
     } catch (error) {
       showErrorToast({
         title: detail.toast.loadMaintenanceFailed.title,
-        description:
-          error instanceof Error ? error.message : detail.toast.loadMaintenanceFailed.description,
+        description: error instanceof Error ? error.message : detail.toast.loadMaintenanceFailed.description,
       });
     } finally {
       setMaintenanceLoading(false);
     }
-  }, [
-    detail.toast.loadMaintenanceFailed.description,
-    detail.toast.loadMaintenanceFailed.title,
-    vehicleId,
-  ]);
+  }, [detail.toast.loadMaintenanceFailed.description, detail.toast.loadMaintenanceFailed.title, vehicleId]);
 
   const loadFuel = useCallback(async () => {
     setFuelLoading(true);
     try {
-      const result = await fetchVehicleFuelLogs(vehicleId, { page: 1, limit: 50 });
+      const result = await fetchVehicleFuelLogs(vehicleId, {
+        page: 1,
+        limit: 50,
+      });
       setFuelLogs(result.data);
     } catch (error) {
       showErrorToast({
         title: detail.toast.loadFuelFailed.title,
-        description:
-          error instanceof Error ? error.message : detail.toast.loadFuelFailed.description,
+        description: error instanceof Error ? error.message : detail.toast.loadFuelFailed.description,
       });
     } finally {
       setFuelLoading(false);
@@ -207,18 +178,11 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
   }
 
   async function handleMaintenanceSaved() {
-    await Promise.all([
-      loadVehicle(),
-      loadMaintenance(),
-      tab === "history" ? loadHistory() : Promise.resolve(),
-    ]);
+    await Promise.all([loadVehicle(), loadMaintenance(), tab === "history" ? loadHistory() : Promise.resolve()]);
   }
 
   async function handleFuelSaved() {
-    await Promise.all([
-      loadFuel(),
-      tab === "history" ? loadHistory() : Promise.resolve(),
-    ]);
+    await Promise.all([loadFuel(), tab === "history" ? loadHistory() : Promise.resolve()]);
   }
 
   async function handleCompleteMaintenance(log: VehicleMaintenanceLog) {
@@ -229,25 +193,17 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
         completed_at: new Date().toISOString().slice(0, 10),
       });
       showSuccessToast(detail.toast.maintenanceUpdated);
-      await Promise.all([
-        loadVehicle(),
-        loadMaintenance(),
-        tab === "history" ? loadHistory() : Promise.resolve(),
-      ]);
+      await Promise.all([loadVehicle(), loadMaintenance(), tab === "history" ? loadHistory() : Promise.resolve()]);
     } catch (error) {
       showErrorToast({
         title: detail.toast.maintenanceFailed.title,
-        description:
-          error instanceof Error ? error.message : detail.toast.maintenanceFailed.description,
+        description: error instanceof Error ? error.message : detail.toast.maintenanceFailed.description,
       });
     }
   }
 
   const worstExpiryTone = useMemo(() => {
-    const tones = [
-      getExpiryTone(vehicle?.insurance_expires_at),
-      getExpiryTone(vehicle?.inspection_expires_at),
-    ];
+    const tones = [getExpiryTone(vehicle?.insurance_expires_at), getExpiryTone(vehicle?.inspection_expires_at)];
     if (tones.includes("expired")) return "expired";
     if (tones.includes("dueSoon")) return "dueSoon";
     if (tones.includes("notSet")) return "notSet";
@@ -257,32 +213,47 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
   const tabs = useMemo(
     () =>
       [
-        { id: "overview" as const, label: detail.tabs.overview, icon: ClipboardList },
-        { id: "compliance" as const, label: detail.tabs.compliance, icon: ShieldCheck },
+        {
+          id: "overview" as const,
+          label: detail.tabs.overview,
+          icon: ClipboardList,
+        },
+        {
+          id: "compliance" as const,
+          label: detail.tabs.compliance,
+          icon: ShieldCheck,
+        },
         canViewFleetOps
-          ? { id: "schedule" as const, label: (detail.tabs as any).schedule || "Schedule", icon: Calendar }
+          ? {
+              id: "schedule" as const,
+              label: (detail.tabs as any).schedule || "Schedule",
+              icon: Calendar,
+            }
           : null,
         canViewFleetOps
-          ? { id: "tracking" as const, label: (detail.tabs as any).tracking || "Live Tracking", icon: MapPin }
+          ? {
+              id: "tracking" as const,
+              label: (detail.tabs as any).tracking || "Live Tracking",
+              icon: MapPin,
+            }
           : null,
         canViewFleetOps
-          ? { id: "maintenance" as const, label: detail.tabs.maintenance, icon: Wrench }
+          ? {
+              id: "maintenance" as const,
+              label: detail.tabs.maintenance,
+              icon: Wrench,
+            }
           : null,
+        canViewFleetOps ? { id: "fuel" as const, label: detail.tabs.fuel, icon: Fuel } : null,
         canViewFleetOps
-          ? { id: "fuel" as const, label: detail.tabs.fuel, icon: Fuel }
-          : null,
-        canViewFleetOps
-          ? { id: "history" as const, label: detail.tabs.history, icon: History }
+          ? {
+              id: "history" as const,
+              label: detail.tabs.history,
+              icon: History,
+            }
           : null,
       ].filter((item): item is NonNullable<typeof item> => item !== null),
-    [
-      canViewFleetOps,
-      detail.tabs.compliance,
-      detail.tabs.fuel,
-      detail.tabs.history,
-      detail.tabs.maintenance,
-      detail.tabs.overview,
-    ],
+    [canViewFleetOps, detail.tabs.compliance, detail.tabs.fuel, detail.tabs.history, detail.tabs.maintenance, detail.tabs.overview],
   );
 
   if (!canRead) {
@@ -313,50 +284,32 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
           <p className={cn("text-lg", adminHeadingClass)}>{detail.notFound}</p>
           <p className="text-sm text-slate-500">{detail.backToList}</p>
         </div>
-        <Button
-          render={<Link href="/admin/fleet/vehicles" />}
-          nativeButton={false}
-          className={adminPrimaryButtonClass}
-        >
+        <Button render={<Link href="/admin/fleet/vehicles" />} nativeButton={false} className={adminPrimaryButtonClass}>
           {detail.backToList}
         </Button>
       </div>
     );
   }
 
-  const subtitle =
-    [vehicle.make, vehicle.model, vehicle.year].filter(Boolean).join(" · ") ||
-    detail.untitledVehicle;
+  const subtitle = [vehicle.make, vehicle.model, vehicle.year].filter(Boolean).join(" · ") || detail.untitledVehicle;
 
   return (
     <div className="w-full min-w-0 space-y-5 sm:space-y-6">
-      <Button
-        render={<Link href="/admin/fleet/vehicles" />}
-        nativeButton={false}
-        variant="outline"
-        className="inline-flex h-8 max-w-full items-center gap-2 rounded-full border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 shadow-sm hover:border-[#1C3A34]/20 hover:bg-[#1C3A34]/[0.03] hover:text-[#1C3A34] sm:h-9 sm:px-3.5"
-      >
+      <Button render={<Link href="/admin/fleet/vehicles" />} nativeButton={false} variant="outline" className="inline-flex h-8 max-w-full items-center gap-2 rounded-full border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 shadow-sm hover:border-[#1C3A34]/20 hover:bg-[#1C3A34]/[0.03] hover:text-[#1C3A34] dark:border-border dark:bg-muted/55 dark:text-muted-foreground dark:hover:border-[var(--brand-accent)]/35 dark:hover:bg-accent dark:hover:text-foreground sm:h-9 sm:px-3.5">
         <ArrowLeft className="size-3.5 shrink-0" />
         <span className="truncate">{detail.backToList}</span>
       </Button>
 
-      <section
-        className={cn(
-          adminCardClass,
-          "overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white via-white to-[#1C3A34]/[0.04]",
-        )}
-      >
+      <section className={cn(adminCardClass, "overflow-hidden rounded-2xl border border-slate-200/80 bg-gradient-to-br from-white via-white to-[#1C3A34]/[0.04] dark:from-card dark:via-card dark:to-accent/35")}>
         <div className="flex flex-col gap-4 p-4 sm:gap-5 sm:p-5 lg:flex-row lg:items-start lg:justify-between lg:p-6">
           <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-            <div className="shrink-0 rounded-2xl bg-[#1C3A34] p-2.5 text-white shadow-sm sm:p-3">
+            <div className="shrink-0 rounded-2xl bg-[#1C3A34] p-2.5 text-white shadow-sm dark:bg-accent dark:text-[var(--brand-accent)] sm:p-3">
               <Truck className="size-5 sm:size-6" />
             </div>
             <div className="min-w-0 flex-1 space-y-2">
               <p className={adminEyebrowClass}>{detail.eyebrow}</p>
-              <h1 className={cn("text-2xl tracking-tight break-words sm:text-3xl", adminHeadingClass)}>
-                {vehicle.plate_number}
-              </h1>
-              <p className="text-sm text-slate-500">{subtitle}</p>
+              <h1 className={cn("text-2xl tracking-tight break-words sm:text-3xl", adminHeadingClass)}>{vehicle.plate_number}</h1>
+              <p className="text-sm text-slate-500 dark:text-muted-foreground">{subtitle}</p>
               <div className="flex flex-wrap items-center gap-1.5 pt-1 sm:gap-2">
                 <Badge variant="outline" className={vehicleStatusBadgeClass(vehicle.status)}>
                   {copy.status[vehicle.status]}
@@ -377,170 +330,60 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
           </div>
 
           <div className="grid w-full grid-cols-1 gap-2.5 min-[420px]:grid-cols-2 sm:grid-cols-3 sm:gap-3 lg:w-auto lg:min-w-[22rem]">
-            <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2.5 sm:px-3.5 sm:py-3">
-              <p className="text-[11px] font-medium tracking-wide text-slate-400 uppercase">
-                {copy.columns.type}
-              </p>
-              <p className="mt-1 truncate text-sm font-semibold text-slate-800">
-                {vehicle.vehicle_type?.name || "—"}
-              </p>
+            <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2.5 dark:border-border dark:bg-muted/45 sm:px-3.5 sm:py-3">
+              <p className="text-[11px] font-medium tracking-wide text-slate-400 uppercase">{copy.columns.type}</p>
+              <p className="mt-1 truncate text-sm font-semibold text-slate-800 dark:text-foreground">{vehicle.vehicle_type?.name || "—"}</p>
             </div>
-            <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2.5 sm:px-3.5 sm:py-3">
-              <p className="text-[11px] font-medium tracking-wide text-slate-400 uppercase">
-                {copy.columns.class}
-              </p>
-              <p className="mt-1 truncate text-sm font-semibold text-slate-800">
-                {vehicle.vehicle_class?.name || "—"}
-              </p>
+            <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2.5 dark:border-border dark:bg-muted/45 sm:px-3.5 sm:py-3">
+              <p className="text-[11px] font-medium tracking-wide text-slate-400 uppercase">{copy.columns.class}</p>
+              <p className="mt-1 truncate text-sm font-semibold text-slate-800 dark:text-foreground">{vehicle.vehicle_class?.name || "—"}</p>
             </div>
-            <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2.5 min-[420px]:col-span-2 sm:col-span-1 sm:px-3.5 sm:py-3">
-              <p className="text-[11px] font-medium tracking-wide text-slate-400 uppercase">
-                {copy.columns.driver}
-              </p>
-              <p className="mt-1 truncate text-sm font-semibold text-slate-800">
-                {vehicle.assigned_driver?.name || detail.overview.unassigned}
-              </p>
+            <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2.5 dark:border-border dark:bg-muted/45 min-[420px]:col-span-2 sm:col-span-1 sm:px-3.5 sm:py-3">
+              <p className="text-[11px] font-medium tracking-wide text-slate-400 uppercase">{copy.columns.driver}</p>
+              <p className="mt-1 truncate text-sm font-semibold text-slate-800 dark:text-foreground">{vehicle.assigned_driver?.name || detail.overview.unassigned}</p>
             </div>
           </div>
         </div>
       </section>
 
-      <nav
-        aria-label={detail.eyebrow}
-        className="-mx-4 border-b border-slate-200 px-4 sm:mx-0 sm:px-0"
-      >
+      <nav aria-label={detail.eyebrow} className="-mx-4 border-b border-slate-200 px-4 dark:border-border sm:mx-0 sm:px-0">
         <div className="no-scrollbar -mb-px flex gap-0.5 overflow-x-auto sm:gap-1">
           {tabs.map((item) => {
             const Icon = item.icon;
             const active = tab === item.id;
             const openCount = item.id === "maintenance" ? vehicle.open_maintenance_count : 0;
             return (
-              <button
-                key={item.id}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                onClick={() => changeTab(item.id)}
-                disabled={isPending}
-                className={cn(
-                  "group relative inline-flex shrink-0 snap-start items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors sm:gap-2.5 sm:px-4 sm:py-3",
-                  active
-                    ? "border-[#1C3A34] text-[#1C3A34]"
-                    : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800",
-                )}
-              >
-                <span
-                  className={cn(
-                    "flex size-7 items-center justify-center rounded-lg transition-colors sm:size-8",
-                    active
-                      ? "bg-[#1C3A34] text-white shadow-sm"
-                      : "bg-slate-100 text-slate-500 group-hover:bg-slate-200/80 group-hover:text-slate-700",
-                  )}
-                >
+              <button key={item.id} type="button" role="tab" aria-selected={active} onClick={() => changeTab(item.id)} disabled={isPending} className={cn("group relative inline-flex shrink-0 snap-start items-center gap-2 border-b-2 px-3 py-2.5 text-sm font-medium transition-colors sm:gap-2.5 sm:px-4 sm:py-3", active ? "border-[#1C3A34] text-[#1C3A34] dark:border-[var(--brand-accent)] dark:text-[var(--brand-accent)]" : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-800 dark:text-muted-foreground dark:hover:border-border dark:hover:text-foreground")}>
+                <span className={cn("flex size-7 items-center justify-center rounded-lg transition-colors sm:size-8", active ? "bg-[#1C3A34] text-white shadow-sm dark:bg-[var(--brand-accent)] dark:text-[#171a1f]" : "bg-slate-100 text-slate-500 group-hover:bg-slate-200/80 group-hover:text-slate-700 dark:bg-muted dark:text-muted-foreground dark:group-hover:bg-accent dark:group-hover:text-foreground")}>
                   <Icon className="size-3.5" />
                 </span>
                 <span className="whitespace-nowrap">{item.label}</span>
-                {openCount ? (
-                  <span
-                    className={cn(
-                      "inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none tabular-nums",
-                      active ? "bg-amber-500 text-white" : "bg-amber-100 text-amber-800",
-                    )}
-                  >
-                    {openCount}
-                  </span>
-                ) : null}
+                {openCount ? <span className={cn("inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold leading-none tabular-nums", active ? "bg-amber-500 text-white" : "bg-amber-100 text-amber-800")}>{openCount}</span> : null}
               </button>
             );
           })}
         </div>
       </nav>
 
-      {tab === "overview" ? (
-        <VehicleDetailOverviewTab
-          vehicle={vehicle}
-          copy={copy}
-          locale={locale}
-          canWrite={canWriteCompliance}
-          onNavigateToCompliance={() => changeTab("compliance")}
-          onEditInsurance={() => openComplianceSheet("insurance")}
-          onEditInspection={() => openComplianceSheet("inspection")}
-        />
-      ) : null}
+      {tab === "overview" ? <VehicleDetailOverviewTab vehicle={vehicle} copy={copy} locale={locale} canWrite={canWriteCompliance} onNavigateToCompliance={() => changeTab("compliance")} onEditInsurance={() => openComplianceSheet("insurance")} onEditInspection={() => openComplianceSheet("inspection")} /> : null}
 
-      {tab === "compliance" ? (
-        <VehicleDetailComplianceTab
-          vehicle={vehicle}
-          detail={detail}
-          complianceCopy={complianceCopy}
-          locale={locale}
-          canWrite={canWriteCompliance}
-          onEditInsurance={() => openComplianceSheet("insurance")}
-          onEditInspection={() => openComplianceSheet("inspection")}
-        />
-      ) : null}
+      {tab === "compliance" ? <VehicleDetailComplianceTab vehicle={vehicle} detail={detail} complianceCopy={complianceCopy} locale={locale} canWrite={canWriteCompliance} onEditInsurance={() => openComplianceSheet("insurance")} onEditInspection={() => openComplianceSheet("inspection")} /> : null}
 
-      {tab === "schedule" ? (
-        <VehicleDetailScheduleTab
-          vehicle={vehicle}
-          locale={locale}
-        />
-      ) : null}
+      {tab === "schedule" ? <VehicleDetailScheduleTab vehicle={vehicle} locale={locale} /> : null}
 
       {tab === "tracking" ? <VehicleDetailTrackingTab vehicle={vehicle} /> : null}
 
-      {tab === "maintenance" ? (
-        <VehicleDetailMaintenanceTab
-          vehicle={vehicle}
-          detail={detail}
-          canWrite={canWriteFleet}
-          maintenance={maintenance}
-          maintenanceLoading={maintenanceLoading}
-          onOpenCreateSheet={() => setMaintenanceSheetOpen(true)}
-          onCompleteMaintenance={(log) => void handleCompleteMaintenance(log)}
-        />
-      ) : null}
+      {tab === "maintenance" ? <VehicleDetailMaintenanceTab vehicle={vehicle} detail={detail} canWrite={canWriteFleet} maintenance={maintenance} maintenanceLoading={maintenanceLoading} onOpenCreateSheet={() => setMaintenanceSheetOpen(true)} onCompleteMaintenance={(log) => void handleCompleteMaintenance(log)} /> : null}
 
-      {tab === "fuel" ? (
-        <VehicleDetailFuelTab
-          vehicle={vehicle}
-          detail={detail}
-          canWrite={canWriteFleet}
-          fuelLogs={fuelLogs}
-          fuelLoading={fuelLoading}
-          onOpenCreateSheet={() => setFuelSheetOpen(true)}
-        />
-      ) : null}
+      {tab === "fuel" ? <VehicleDetailFuelTab vehicle={vehicle} detail={detail} canWrite={canWriteFleet} fuelLogs={fuelLogs} fuelLoading={fuelLoading} onOpenCreateSheet={() => setFuelSheetOpen(true)} /> : null}
 
-      {tab === "history" ? (
-        <VehicleDetailHistoryTab
-          detail={detail}
-          history={history}
-          historyLoading={historyLoading}
-        />
-      ) : null}
+      {tab === "history" ? <VehicleDetailHistoryTab detail={detail} history={history} historyLoading={historyLoading} /> : null}
 
-      <UpdateComplianceSheet
-        open={complianceSheetOpen}
-        onOpenChange={setComplianceSheetOpen}
-        type={complianceSheetType}
-        vehicle={vehicle}
-        onSuccess={() => void handleComplianceSaved()}
-      />
+      <UpdateComplianceSheet open={complianceSheetOpen} onOpenChange={setComplianceSheetOpen} type={complianceSheetType} vehicle={vehicle} onSuccess={() => void handleComplianceSaved()} />
 
-      <CreateFuelSheet
-        open={fuelSheetOpen}
-        onOpenChange={setFuelSheetOpen}
-        vehicle={vehicle}
-        onSuccess={() => void handleFuelSaved()}
-      />
+      <CreateFuelSheet open={fuelSheetOpen} onOpenChange={setFuelSheetOpen} vehicle={vehicle} onSuccess={() => void handleFuelSaved()} />
 
-      <CreateMaintenanceSheet
-        open={maintenanceSheetOpen}
-        onOpenChange={setMaintenanceSheetOpen}
-        vehicle={vehicle}
-        onSuccess={() => void handleMaintenanceSaved()}
-      />
+      <CreateMaintenanceSheet open={maintenanceSheetOpen} onOpenChange={setMaintenanceSheetOpen} vehicle={vehicle} onSuccess={() => void handleMaintenanceSaved()} />
     </div>
   );
 }

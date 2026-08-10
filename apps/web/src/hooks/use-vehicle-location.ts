@@ -33,7 +33,6 @@ export function useVehicleLocation(vehicleId: string, enabled = true) {
 
   useEffect(() => {
     if (!enabled || !vehicleId) {
-      setLoading(false);
       return;
     }
 
@@ -64,7 +63,10 @@ export function useVehicleLocation(vehicleId: string, enabled = true) {
         });
 
         socket.on("connect", () => {
-          if (active) setConnected(true);
+          if (active) {
+            setConnected(true);
+            setError(null);
+          }
         });
 
         socket.on(RealtimeEvents.SessionReady, (data: RealtimeSessionReady) => {
@@ -85,21 +87,26 @@ export function useVehicleLocation(vehicleId: string, enabled = true) {
         });
 
         socket.on(RealtimeEvents.SessionError, (message: string) => {
-          if (active) setError(message);
+          if (process.env.NODE_ENV !== "production") {
+            console.error("Live tracking session error:", message);
+          }
+          if (active) setError("Live tracking session unavailable.");
         });
 
         socket.on("connect_error", (connectError) => {
+          if (process.env.NODE_ENV !== "production") {
+            console.error("Live tracking connection error:", connectError);
+          }
           if (active) {
-            setError(connectError.message || "Unable to connect to live tracking.");
+            setError("Unable to connect to live tracking.");
           }
         });
       } catch (connectError) {
+        if (process.env.NODE_ENV !== "production") {
+          console.error("Failed to load vehicle tracking:", connectError);
+        }
         if (active) {
-          setError(
-            connectError instanceof Error
-              ? connectError.message
-              : "Failed to load vehicle location.",
-          );
+          setError("Unable to load live vehicle tracking.");
         }
       } finally {
         if (active) {
@@ -119,7 +126,7 @@ export function useVehicleLocation(vehicleId: string, enabled = true) {
   return {
     location,
     connected,
-    loading,
+    loading: enabled && Boolean(vehicleId) ? loading : false,
     error,
     isLive: isVehicleLocationLive(location?.recorded_at),
   };

@@ -113,6 +113,7 @@ export function toPublicInvoice(invoice: DbInvoice, options?: { locale?: string 
     issued_at: invoice.issuedAt?.toISOString() ?? null,
     due_at: invoice.dueAt?.toISOString() ?? null,
     paid_at: invoice.paidAt?.toISOString() ?? null,
+    payment_method: invoice.paymentMethod,
     voided_at: invoice.voidedAt?.toISOString() ?? null,
     notes: invoice.notes,
     line_items: invoice.lineItems.map((item) => toPublicLineItem(item, options)),

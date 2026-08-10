@@ -16,10 +16,10 @@ export function DashboardFooter() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="mt-auto border-t border-slate-200/80 bg-white">
-      <div className="flex flex-col gap-3 px-4 py-4 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+    <footer className="mt-auto border-t border-slate-200/80 bg-white dark:border-border dark:bg-card">
+      <div className="flex flex-col gap-3 px-4 py-4 text-xs text-slate-500 dark:text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="space-y-1">
-          <p className="font-medium text-[var(--brand-primary)]">
+          <p className="font-medium text-[var(--brand-primary)] dark:text-foreground">
             © {year} {branding.company_name}
           </p>
           <p>{branding.product_name}</p>
@@ -28,13 +28,14 @@ export function DashboardFooter() {
         <div className="flex flex-wrap items-center gap-3">
           <Link
             href={homePath}
-            className="font-medium transition-colors hover:text-[var(--brand-accent)]"
-            style={{ color: "var(--brand-primary)" }}
+            className="font-medium text-[var(--brand-primary)] transition-colors hover:text-[var(--brand-accent)] dark:text-[var(--brand-accent)]"
           >
             {copy.footer.backToWebsite}
           </Link>
           <Separator orientation="vertical" className="hidden h-4 sm:block" />
-          <span>{formatMessage(copy.footer.version, { version: APP_VERSION })}</span>
+          <span>
+            {formatMessage(copy.footer.version, { version: APP_VERSION })}
+          </span>
         </div>
       </div>
     </footer>

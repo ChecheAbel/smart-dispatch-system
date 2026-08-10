@@ -140,7 +140,11 @@ function DashboardDonutChart({
           </Pie>
           <Tooltip
             wrapperStyle={dashboardChartTooltipWrapperStyle}
-            content={<DashboardChartTooltip valueFormatter={(value) => String(value)} />}
+            content={
+              <DashboardChartTooltip
+                valueFormatter={(value) => String(value)}
+              />
+            }
           />
         </PieChart>
       </ResponsiveContainer>
@@ -173,17 +177,24 @@ function ChartSection({
 }) {
   return (
     <section className="space-y-5">
-      <div className="flex flex-col gap-4 border-b border-slate-200/70 pb-5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 border-b border-slate-200/70 pb-5 dark:border-border sm:flex-row sm:items-end sm:justify-between">
         <div className="flex min-w-0 items-start gap-3.5">
-          <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#1C3A34] text-white shadow-sm">
+          <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#1C3A34] text-white shadow-sm dark:bg-accent dark:text-[var(--brand-accent)]">
             <Icon className="size-4" strokeWidth={2.25} />
           </span>
           <div className="min-w-0 space-y-1">
             <p className={adminEyebrowClass}>{eyebrow}</p>
-            <h3 className={cn("text-xl font-extrabold tracking-tight", adminHeadingClass)}>
+            <h3
+              className={cn(
+                "text-xl font-extrabold tracking-tight",
+                adminHeadingClass,
+              )}
+            >
               {title}
             </h3>
-            <p className="max-w-2xl text-sm leading-relaxed text-slate-500">{description}</p>
+            <p className="max-w-2xl text-sm leading-relaxed text-slate-500 dark:text-muted-foreground">
+              {description}
+            </p>
           </div>
         </div>
         {periodLabel ? (
@@ -212,14 +223,31 @@ function formatCurrency(value: number, locale: SupportedLocale) {
   }).format(value);
 }
 
-function formatMoney(value: number, locale: SupportedLocale, currencyCode: string) {
+function formatMoney(
+  value: number,
+  locale: SupportedLocale,
+  currencyCode: string,
+) {
   return `${formatCurrency(value, locale)} ${currencyCode}`;
 }
 
-function hasTrendData(points: Array<{ count?: number; total_cost?: number; paid_amount?: number; issued_amount?: number }>) {
+function hasTrendData(
+  points: Array<{
+    count?: number;
+    total_cost?: number;
+    paid_amount?: number;
+    issued_amount?: number;
+  }>,
+) {
   return points.some(
     (point) =>
-      Number(point.count ?? point.total_cost ?? point.paid_amount ?? point.issued_amount ?? 0) > 0,
+      Number(
+        point.count ??
+          point.total_cost ??
+          point.paid_amount ??
+          point.issued_amount ??
+          0,
+      ) > 0,
   );
 }
 
@@ -235,12 +263,19 @@ type RegionChartRow = {
 };
 
 function getRegionChartRows(
-  entries: Array<{ region_id: string | null; region_name: string; count: number }>,
+  entries: Array<{
+    region_id: string | null;
+    region_name: string;
+    count: number;
+  }>,
   unassignedLabel: string,
 ): RegionChartRow[] {
   return entries.map((entry) => ({
     ...entry,
-    label: entry.region_id && entry.region_name.trim() ? entry.region_name : unassignedLabel,
+    label:
+      entry.region_id && entry.region_name.trim()
+        ? entry.region_name
+        : unassignedLabel,
   }));
 }
 
@@ -304,33 +339,47 @@ export function AdminDashboardCharts({
     const compliance = analytics?.fleet?.compliance;
     if (!compliance) return [];
 
-    return (["expired", "due_soon", "ok", "not_set"] as VehicleComplianceStatus[]).map(
-      (status) => ({
-        status,
-        label: charts.complianceStatuses[status],
-        insurance: compliance.insurance.find((point) => point.status === status)?.count ?? 0,
-        inspection: compliance.inspection.find((point) => point.status === status)?.count ?? 0,
-      }),
-    );
+    return (
+      ["expired", "due_soon", "ok", "not_set"] as VehicleComplianceStatus[]
+    ).map((status) => ({
+      status,
+      label: charts.complianceStatuses[status],
+      insurance:
+        compliance.insurance.find((point) => point.status === status)?.count ??
+        0,
+      inspection:
+        compliance.inspection.find((point) => point.status === status)?.count ??
+        0,
+    }));
   }, [analytics?.fleet?.compliance, charts.complianceStatuses]);
 
   const periodLabel = formatMessage(charts.periodLabel, {
     days: String(analytics?.period_days ?? 30),
   });
 
-  const rideTrendTotal = analytics?.ride_requests ? sumCounts(analytics.ride_requests.trend) : 0;
+  const rideTrendTotal = analytics?.ride_requests
+    ? sumCounts(analytics.ride_requests.trend)
+    : 0;
   const rideStatusTotal = sumCounts(rideStatuses);
   const fleetStatusTotal = sumCounts(fleetStatuses);
   const invoiceStatusTotal = sumCounts(invoiceStatuses);
-  const registrationTotal = analytics?.registrations ? sumCounts(analytics.registrations.trend) : 0;
+  const registrationTotal = analytics?.registrations
+    ? sumCounts(analytics.registrations.trend)
+    : 0;
   const fuelSpendTotal = analytics?.fuel
-    ? analytics.fuel.trend.reduce((total, point) => total + Number(point.total_cost ?? 0), 0)
+    ? analytics.fuel.trend.reduce(
+        (total, point) => total + Number(point.total_cost ?? 0),
+        0,
+      )
     : 0;
   const paidTotal = analytics?.payments?.paid_total ?? 0;
   const outstandingTotal = analytics?.payments?.outstanding_total ?? 0;
 
   const regionChartRows = analytics?.ride_requests
-    ? getRegionChartRows(analytics.ride_requests.by_region, charts.unassignedRegion)
+    ? getRegionChartRows(
+        analytics.ride_requests.by_region,
+        charts.unassignedRegion,
+      )
     : [];
 
   const regionAxisWidth = getAxisWidth(regionChartRows.map((row) => row.label));
@@ -364,24 +413,44 @@ export function AdminDashboardCharts({
   );
 
   const complianceLegend: DashboardChartLegendItem[] = [
-    { key: "insurance", label: charts.insuranceLabel, color: dashboardChartTheme.brand },
-    { key: "inspection", label: charts.inspectionLabel, color: dashboardChartTheme.gold },
+    {
+      key: "insurance",
+      label: charts.insuranceLabel,
+      color: dashboardChartTheme.brand,
+    },
+    {
+      key: "inspection",
+      label: charts.inspectionLabel,
+      color: dashboardChartTheme.gold,
+    },
   ];
 
   const paymentTrendLegend: DashboardChartLegendItem[] = [
-    { key: "paid", label: charts.paidAmountLabel, color: dashboardChartTheme.brand },
-    { key: "issued", label: charts.issuedAmountLabel, color: dashboardChartTheme.gold },
+    {
+      key: "paid",
+      label: charts.paidAmountLabel,
+      color: dashboardChartTheme.brand,
+    },
+    {
+      key: "issued",
+      label: charts.issuedAmountLabel,
+      color: dashboardChartTheme.gold,
+    },
   ];
 
-  const showRideRequests = (loading && canReadRideRequests) || Boolean(analytics?.ride_requests);
+  const showRideRequests =
+    (loading && canReadRideRequests) || Boolean(analytics?.ride_requests);
   const showFleetSection =
-    (loading && canReadVehicles) || Boolean(analytics?.fleet || analytics?.fuel);
-  const showFleetStatus = (loading && canReadVehicles) || Boolean(analytics?.fleet);
+    (loading && canReadVehicles) ||
+    Boolean(analytics?.fleet || analytics?.fuel);
+  const showFleetStatus =
+    (loading && canReadVehicles) || Boolean(analytics?.fleet);
   const showCompliance =
     (loading && (canReadVehicles || canViewCompliance)) ||
     Boolean(analytics?.fleet?.compliance);
   const showFuel = (loading && canReadVehicles) || Boolean(analytics?.fuel);
-  const showPayments = (loading && canReadInvoices) || Boolean(analytics?.payments);
+  const showPayments =
+    (loading && canReadInvoices) || Boolean(analytics?.payments);
   const showRegistrations =
     (loading && canViewRegistrations) || Boolean(analytics?.registrations);
 
@@ -409,17 +478,38 @@ export function AdminDashboardCharts({
               highlight={rideTrendTotal}
               highlightLabel={charts.totalLabel}
               loading={loading}
-              empty={!loading && rideRequests ? !hasTrendData(rideRequests.trend) : false}
+              empty={
+                !loading && rideRequests
+                  ? !hasTrendData(rideRequests.trend)
+                  : false
+              }
               emptyLabel={charts.empty}
               className="xl:col-span-8"
             >
               {!loading && rideRequests ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={rideRequests.trend} margin={dashboardChartMargins}>
+                  <AreaChart
+                    data={rideRequests.trend}
+                    margin={dashboardChartMargins}
+                  >
                     <defs>
-                      <linearGradient id={rideTrendGradientId} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor={dashboardChartTheme.brand} stopOpacity={0.28} />
-                        <stop offset="100%" stopColor={dashboardChartTheme.brand} stopOpacity={0} />
+                      <linearGradient
+                        id={rideTrendGradientId}
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="0%"
+                          stopColor={dashboardChartTheme.brand}
+                          stopOpacity={0.28}
+                        />
+                        <stop
+                          offset="100%"
+                          stopColor={dashboardChartTheme.brand}
+                          stopOpacity={0}
+                        />
                       </linearGradient>
                     </defs>
                     <CartesianGrid {...dashboardChartGrid} />
@@ -428,7 +518,9 @@ export function AdminDashboardCharts({
                       tickLine={false}
                       axisLine={false}
                       tick={dashboardChartAxisTick}
-                      tickFormatter={(value) => formatShortDate(String(value), locale)}
+                      tickFormatter={(value) =>
+                        formatShortDate(String(value), locale)
+                      }
                       interval="preserveStartEnd"
                       dy={8}
                     />
@@ -448,7 +540,9 @@ export function AdminDashboardCharts({
                       }}
                       content={
                         <DashboardChartTooltip
-                          labelFormatter={(value) => formatShortDate(value, locale)}
+                          labelFormatter={(value) =>
+                            formatShortDate(value, locale)
+                          }
                           valueFormatter={(value) => String(value)}
                         />
                       }
@@ -484,7 +578,10 @@ export function AdminDashboardCharts({
               className="xl:col-span-4"
               footer={
                 !loading ? (
-                  <DashboardChartLegend items={rideStatusLegend} variant="rows" />
+                  <DashboardChartLegend
+                    items={rideStatusLegend}
+                    variant="rows"
+                  />
                 ) : undefined
               }
             >
@@ -506,7 +603,10 @@ export function AdminDashboardCharts({
               icon={MapPinned}
               title={charts.rideRegionTitle}
               description={charts.rideRegionDescription}
-              highlight={regionChartRows.reduce((total, row) => total + row.count, 0)}
+              highlight={regionChartRows.reduce(
+                (total, row) => total + row.count,
+                0,
+              )}
               highlightLabel={charts.totalLabel}
               loading={loading}
               empty={!loading && regionChartRows.length === 0}
@@ -523,7 +623,10 @@ export function AdminDashboardCharts({
                       margin={{ top: 4, right: 48, left: 4, bottom: 4 }}
                       barCategoryGap="24%"
                     >
-                      <CartesianGrid {...dashboardChartGrid} horizontal={false} />
+                      <CartesianGrid
+                        {...dashboardChartGrid}
+                        horizontal={false}
+                      />
                       <XAxis
                         type="number"
                         allowDecimals={false}
@@ -537,7 +640,11 @@ export function AdminDashboardCharts({
                         width={regionAxisWidth}
                         tickLine={false}
                         axisLine={false}
-                        tick={{ fontSize: 12, fill: dashboardChartTheme.brand, fontWeight: 600 }}
+                        tick={{
+                          fontSize: 12,
+                          fill: dashboardChartTheme.brand,
+                          fontWeight: 600,
+                        }}
                       />
                       <Tooltip
                         wrapperStyle={dashboardChartTooltipWrapperStyle}
@@ -549,11 +656,19 @@ export function AdminDashboardCharts({
                           />
                         }
                       />
-                      <Bar dataKey="count" name={charts.requestsLabel} radius={[0, 8, 8, 0]}>
+                      <Bar
+                        dataKey="count"
+                        name={charts.requestsLabel}
+                        radius={[0, 8, 8, 0]}
+                      >
                         {regionChartRows.map((entry, index) => (
                           <Cell
                             key={entry.region_id ?? entry.label}
-                            fill={REGION_BAR_COLORS[index % REGION_BAR_COLORS.length]}
+                            fill={
+                              REGION_BAR_COLORS[
+                                index % REGION_BAR_COLORS.length
+                              ]
+                            }
                           />
                         ))}
                         <LabelList
@@ -595,7 +710,10 @@ export function AdminDashboardCharts({
                 className="xl:col-span-4"
                 footer={
                   !loading ? (
-                    <DashboardChartLegend items={fleetStatusLegend} variant="rows" />
+                    <DashboardChartLegend
+                      items={fleetStatusLegend}
+                      variant="rows"
+                    />
                   ) : undefined
                 }
               >
@@ -619,7 +737,9 @@ export function AdminDashboardCharts({
                 icon={ShieldAlert}
                 title={charts.complianceTitle}
                 description={formatMessage(charts.complianceDescription, {
-                  count: String(fleet?.compliance?.vehicles_needing_attention ?? 0),
+                  count: String(
+                    fleet?.compliance?.vehicles_needing_attention ?? 0,
+                  ),
                 })}
                 highlight={fleet?.compliance?.vehicles_needing_attention}
                 highlightLabel={charts.attentionLabel}
@@ -633,11 +753,19 @@ export function AdminDashboardCharts({
                 }
                 emptyLabel={charts.empty}
                 className="xl:col-span-8"
-                footer={!loading ? <DashboardChartLegend items={complianceLegend} /> : undefined}
+                footer={
+                  !loading ? (
+                    <DashboardChartLegend items={complianceLegend} />
+                  ) : undefined
+                }
               >
                 {!loading && fleet?.compliance ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={complianceChartData} margin={dashboardChartMargins} barGap={8}>
+                    <BarChart
+                      data={complianceChartData}
+                      margin={dashboardChartMargins}
+                      barGap={8}
+                    >
                       <CartesianGrid {...dashboardChartGrid} />
                       <XAxis
                         dataKey="label"
@@ -657,7 +785,9 @@ export function AdminDashboardCharts({
                         wrapperStyle={dashboardChartTooltipWrapperStyle}
                         cursor={{ fill: "rgba(28, 58, 52, 0.04)" }}
                         content={
-                          <DashboardChartTooltip valueFormatter={(value) => String(value)} />
+                          <DashboardChartTooltip
+                            valueFormatter={(value) => String(value)}
+                          />
                         }
                       />
                       <Bar
@@ -685,7 +815,11 @@ export function AdminDashboardCharts({
                 icon={Fuel}
                 title={charts.fuelSpendTitle}
                 description={periodLabel}
-                highlight={formatMoney(fuelSpendTotal, locale, charts.currencyCode)}
+                highlight={formatMoney(
+                  fuelSpendTotal,
+                  locale,
+                  charts.currencyCode,
+                )}
                 highlightLabel={charts.fuelCostLabel}
                 loading={loading}
                 empty={!loading && fuelSpendTotal <= 0}
@@ -694,14 +828,20 @@ export function AdminDashboardCharts({
               >
                 {!loading && fuel && fuelSpendTotal > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={fuel.trend} margin={dashboardChartMargins} barCategoryGap="18%">
+                    <BarChart
+                      data={fuel.trend}
+                      margin={dashboardChartMargins}
+                      barCategoryGap="18%"
+                    >
                       <CartesianGrid {...dashboardChartGrid} />
                       <XAxis
                         dataKey="date"
                         tickLine={false}
                         axisLine={false}
                         tick={dashboardChartAxisTick}
-                        tickFormatter={(value) => formatShortDate(String(value), locale)}
+                        tickFormatter={(value) =>
+                          formatShortDate(String(value), locale)
+                        }
                         interval="preserveStartEnd"
                         dy={8}
                       />
@@ -710,7 +850,9 @@ export function AdminDashboardCharts({
                         axisLine={false}
                         tick={dashboardChartAxisTick}
                         width={56}
-                        tickFormatter={(value) => formatCurrency(Number(value), locale)}
+                        tickFormatter={(value) =>
+                          formatCurrency(Number(value), locale)
+                        }
                         allowDecimals={false}
                         domain={[0, (dataMax: number) => Math.max(dataMax, 1)]}
                       />
@@ -719,7 +861,9 @@ export function AdminDashboardCharts({
                         cursor={{ fill: "rgba(28, 58, 52, 0.04)" }}
                         content={
                           <DashboardChartTooltip
-                            labelFormatter={(value) => formatShortDate(value, locale)}
+                            labelFormatter={(value) =>
+                              formatShortDate(value, locale)
+                            }
                             valueFormatter={(value) =>
                               formatMoney(value, locale, charts.currencyCode)
                             }
@@ -764,7 +908,10 @@ export function AdminDashboardCharts({
               className="xl:col-span-4"
               footer={
                 !loading ? (
-                  <DashboardChartLegend items={invoiceStatusLegend} variant="rows" />
+                  <DashboardChartLegend
+                    items={invoiceStatusLegend}
+                    variant="rows"
+                  />
                 ) : undefined
               }
             >
@@ -789,7 +936,9 @@ export function AdminDashboardCharts({
               highlight={formatMoney(paidTotal, locale, charts.currencyCode)}
               highlightLabel={charts.paidLabel}
               loading={loading}
-              empty={!loading && payments ? !hasTrendData(payments.trend) : false}
+              empty={
+                !loading && payments ? !hasTrendData(payments.trend) : false
+              }
               emptyLabel={charts.empty}
               className="xl:col-span-8"
               footer={
@@ -798,7 +947,11 @@ export function AdminDashboardCharts({
                     <DashboardChartLegend items={paymentTrendLegend} />
                     <span className="text-[11px] font-semibold tabular-nums text-slate-500">
                       {charts.outstandingLabel}:{" "}
-                      {formatMoney(outstandingTotal, locale, charts.currencyCode)}
+                      {formatMoney(
+                        outstandingTotal,
+                        locale,
+                        charts.currencyCode,
+                      )}
                     </span>
                   </div>
                 ) : undefined
@@ -806,14 +959,20 @@ export function AdminDashboardCharts({
             >
               {!loading && payments ? (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={payments.trend} margin={dashboardChartMargins} barGap={6}>
+                  <BarChart
+                    data={payments.trend}
+                    margin={dashboardChartMargins}
+                    barGap={6}
+                  >
                     <CartesianGrid {...dashboardChartGrid} />
                     <XAxis
                       dataKey="date"
                       tickLine={false}
                       axisLine={false}
                       tick={dashboardChartAxisTick}
-                      tickFormatter={(value) => formatShortDate(String(value), locale)}
+                      tickFormatter={(value) =>
+                        formatShortDate(String(value), locale)
+                      }
                       interval="preserveStartEnd"
                       dy={8}
                     />
@@ -822,7 +981,9 @@ export function AdminDashboardCharts({
                       axisLine={false}
                       tick={dashboardChartAxisTick}
                       width={56}
-                      tickFormatter={(value) => formatCurrency(Number(value), locale)}
+                      tickFormatter={(value) =>
+                        formatCurrency(Number(value), locale)
+                      }
                       allowDecimals={false}
                       domain={[0, (dataMax: number) => Math.max(dataMax, 1)]}
                     />
@@ -831,7 +992,9 @@ export function AdminDashboardCharts({
                       cursor={{ fill: "rgba(28, 58, 52, 0.04)" }}
                       content={
                         <DashboardChartTooltip
-                          labelFormatter={(value) => formatShortDate(value, locale)}
+                          labelFormatter={(value) =>
+                            formatShortDate(value, locale)
+                          }
                           valueFormatter={(value) =>
                             formatMoney(value, locale, charts.currencyCode)
                           }
@@ -893,7 +1056,9 @@ export function AdminDashboardCharts({
                     tickLine={false}
                     axisLine={false}
                     tick={dashboardChartAxisTick}
-                    tickFormatter={(value) => formatShortDate(String(value), locale)}
+                    tickFormatter={(value) =>
+                      formatShortDate(String(value), locale)
+                    }
                     interval="preserveStartEnd"
                     dy={8}
                   />
@@ -910,7 +1075,9 @@ export function AdminDashboardCharts({
                     cursor={{ fill: "rgba(28, 58, 52, 0.04)" }}
                     content={
                       <DashboardChartTooltip
-                        labelFormatter={(value) => formatShortDate(value, locale)}
+                        labelFormatter={(value) =>
+                          formatShortDate(value, locale)
+                        }
                         valueFormatter={(value) => String(value)}
                       />
                     }

@@ -110,7 +110,13 @@ export function CoordinateMapPicker({
     }).addTo(map);
 
     map.on("click", (event) => {
-      attachMarker(map, markerRef, event.latlng, onChangeRef.current, skipExternalSyncRef);
+      attachMarker(
+        map,
+        markerRef,
+        event.latlng,
+        onChangeRef.current,
+        skipExternalSyncRef,
+      );
       skipExternalSyncRef.current = true;
       onChangeRef.current(event.latlng.lat, event.latlng.lng);
     });
@@ -146,9 +152,13 @@ export function CoordinateMapPicker({
       const target = hasCoordinates
         ? L.latLng(latitude!, longitude!)
         : L.latLng(defaultCenter.latitude, defaultCenter.longitude);
-      map.setView(target, hasCoordinates ? Math.max(map.getZoom(), 15) : defaultZoom, {
-        animate: false,
-      });
+      map.setView(
+        target,
+        hasCoordinates ? Math.max(map.getZoom(), 15) : defaultZoom,
+        {
+          animate: false,
+        },
+      );
     }, 200);
 
     return () => {
@@ -169,7 +179,13 @@ export function CoordinateMapPicker({
         if (markerRef.current) {
           markerRef.current.setLatLng(latLng);
         } else {
-          attachMarker(map, markerRef, latLng, onChangeRef.current, skipExternalSyncRef);
+          attachMarker(
+            map,
+            markerRef,
+            latLng,
+            onChangeRef.current,
+            skipExternalSyncRef,
+          );
         }
       }
       return;
@@ -184,7 +200,13 @@ export function CoordinateMapPicker({
     }
 
     const latLng = L.latLng(latitude!, longitude!);
-    attachMarker(map, markerRef, latLng, onChangeRef.current, skipExternalSyncRef);
+    attachMarker(
+      map,
+      markerRef,
+      latLng,
+      onChangeRef.current,
+      skipExternalSyncRef,
+    );
 
     if (!visible) {
       return;
@@ -212,31 +234,46 @@ export function CoordinateMapPicker({
     }
 
     if (hasCoordinates) {
-      map.setView([latitude!, longitude!], Math.max(map.getZoom(), 15), { animate: true });
+      map.setView([latitude!, longitude!], Math.max(map.getZoom(), 15), {
+        animate: true,
+      });
       return;
     }
 
-    map.setView([defaultCenter.latitude, defaultCenter.longitude], defaultZoom, {
-      animate: true,
-    });
+    map.setView(
+      [defaultCenter.latitude, defaultCenter.longitude],
+      defaultZoom,
+      {
+        animate: true,
+      },
+    );
   }
 
   return (
     <div className={cn("coordinate-map-picker space-y-2", className)}>
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-200/60">
-        <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-[#f8fafb]/90 px-4 py-3">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-200/60 dark:border-border dark:bg-card dark:ring-border">
+        <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-[#f8fafb]/90 px-4 py-3 dark:border-border dark:bg-muted/45">
           <div className="flex min-w-0 items-center gap-2.5">
-            <div className="rounded-lg bg-[#1C3A34]/8 p-2 text-[#1C3A34]">
+            <div className="rounded-lg bg-[#1C3A34]/8 p-2 text-[#1C3A34] dark:bg-accent dark:text-[var(--brand-accent)]">
               <MapPin className="size-4" />
             </div>
             <div className="min-w-0">
-              <p className={cn("truncate text-sm font-semibold", adminHeadingClass)}>{title}</p>
+              <p
+                className={cn(
+                  "truncate text-sm font-semibold",
+                  adminHeadingClass,
+                )}
+              >
+                {title}
+              </p>
               {hasCoordinates ? (
                 <p className="truncate font-mono text-xs text-[#8f7d45]">
                   {formatCoordinatePair(latitude!, longitude!)}
                 </p>
               ) : (
-                <p className="truncate text-xs text-slate-500">{emptyLabel}</p>
+                <p className="truncate text-xs text-slate-500 dark:text-muted-foreground">
+                  {emptyLabel}
+                </p>
               )}
             </div>
           </div>
@@ -247,7 +284,7 @@ export function CoordinateMapPicker({
             size="sm"
             onClick={handleRecenter}
             disabled={!mapReady}
-            className="shrink-0 border-slate-200 bg-white text-[#1C3A34] hover:bg-[#f8fafb]"
+            className="shrink-0 border-slate-200 bg-white text-[#1C3A34] hover:bg-[#f8fafb] dark:border-border dark:bg-muted/55 dark:text-foreground dark:hover:bg-accent"
           >
             <Crosshair className="size-3.5" />
             {recenterLabel}
@@ -255,17 +292,23 @@ export function CoordinateMapPicker({
         </div>
 
         <div className="relative bg-[#e8eef0]" style={{ height }}>
-          <div ref={containerRef} className="absolute inset-0 z-0" aria-label={hint || title} />
+          <div
+            ref={containerRef}
+            className="absolute inset-0 z-0"
+            aria-label={hint || title}
+          />
 
           {!mapReady ? (
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#e8eef0] text-sm text-slate-500">
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#e8eef0] text-sm text-slate-500 dark:bg-muted dark:text-muted-foreground">
               {loadingLabel}
             </div>
           ) : null}
 
           {!hasCoordinates && mapReady ? (
             <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-[#1C3A34]/55 to-transparent px-4 pb-4 pt-10">
-              <p className="text-center text-sm font-medium text-white">{emptyLabel}</p>
+              <p className="text-center text-sm font-medium text-white">
+                {emptyLabel}
+              </p>
             </div>
           ) : null}
 
@@ -276,7 +319,7 @@ export function CoordinateMapPicker({
               size="icon-sm"
               onClick={handleZoomIn}
               disabled={!mapReady}
-              className="size-9 border-slate-200 bg-white/95 text-[#1C3A34] shadow-sm backdrop-blur hover:bg-white"
+              className="size-9 border-slate-200 bg-white/95 text-[#1C3A34] shadow-sm backdrop-blur hover:bg-white dark:border-border dark:bg-popover/95 dark:text-foreground dark:hover:bg-accent"
               aria-label="Zoom in"
             >
               <Plus className="size-4" />
@@ -287,7 +330,7 @@ export function CoordinateMapPicker({
               size="icon-sm"
               onClick={handleZoomOut}
               disabled={!mapReady}
-              className="size-9 border-slate-200 bg-white/95 text-[#1C3A34] shadow-sm backdrop-blur hover:bg-white"
+              className="size-9 border-slate-200 bg-white/95 text-[#1C3A34] shadow-sm backdrop-blur hover:bg-white dark:border-border dark:bg-popover/95 dark:text-foreground dark:hover:bg-accent"
               aria-label="Zoom out"
             >
               <Minus className="size-4" />
@@ -296,7 +339,11 @@ export function CoordinateMapPicker({
         </div>
       </div>
 
-      {hint ? <p className="text-xs leading-relaxed text-slate-500">{hint}</p> : null}
+      {hint ? (
+        <p className="text-xs leading-relaxed text-slate-500 dark:text-muted-foreground">
+          {hint}
+        </p>
+      ) : null}
     </div>
   );
 }

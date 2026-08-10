@@ -103,13 +103,13 @@ export function NotificationTemplateEventNav({
   }
 
   return (
-    <div className={cn("flex min-w-0 flex-col bg-[#f8fafb]/80", className)}>
-      <div className="space-y-1 border-b border-slate-200/80 px-4 py-4">
+    <div className={cn("flex min-w-0 flex-col bg-[#f8fafb]/80 dark:bg-[#11161d]", className)}>
+      <div className="space-y-1 border-b border-slate-200/80 px-4 py-4 dark:border-border">
         <h2 className={cn("text-sm font-bold", adminHeadingClass)}>{copy.shell.eventPickerTitle}</h2>
         <p className="text-xs leading-relaxed text-slate-500">{copy.shell.eventPickerDescription}</p>
       </div>
 
-      <div className="border-b border-slate-200/80 p-3 lg:hidden">
+      <div className="border-b border-slate-200/80 p-3 dark:border-border lg:hidden">
         <Select
           items={EVENT_GROUPS[module].flatMap((group) =>
             group.events.map((event) => ({
@@ -124,7 +124,7 @@ export function NotificationTemplateEventNav({
             }
           }}
         >
-          <SelectTrigger className="h-10 w-full rounded-lg border-slate-200 bg-white shadow-sm">
+          <SelectTrigger className="h-10 w-full rounded-lg border-slate-200 bg-white shadow-sm dark:border-border dark:bg-card">
             <SelectValue placeholder={copy.shell.eventPickerTitle} />
           </SelectTrigger>
           <SelectContent>
@@ -144,7 +144,7 @@ export function NotificationTemplateEventNav({
 
       <div className="hidden min-h-0 flex-1 flex-col lg:flex">
         {showSearch ? (
-          <div className="border-b border-slate-200/80 p-3">
+          <div className="border-b border-slate-200/80 p-3 dark:border-border">
             <div className="relative">
               <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-slate-400" />
               <Input
@@ -185,17 +185,17 @@ export function NotificationTemplateEventNav({
                         aria-current={isActive ? "page" : undefined}
                         className={cn(
                           "flex w-full items-start gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors",
-                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1C3A34]/20",
+                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1C3A34]/20 dark:focus-visible:ring-[#C9B87A]/30",
                           isActive
-                            ? "bg-white shadow-sm ring-1 ring-slate-200/80"
-                            : "hover:bg-white/70",
+                            ? "bg-white shadow-sm ring-1 ring-slate-200/80 dark:bg-[#C9B87A]/10 dark:shadow-[0_0_0_1px_rgba(201,184,122,0.12)] dark:ring-[#C9B87A]/55"
+                            : "hover:bg-white/70 dark:hover:bg-white/[0.045]",
                         )}
                       >
                         <span
                           className={cn(
                             "mt-1.5 size-1.5 shrink-0 rounded-full",
                             isActive
-                              ? "bg-[#1C3A34]"
+                              ? "bg-[#1C3A34] dark:bg-[#C9B87A]"
                               : enabled
                                 ? "bg-emerald-500"
                                 : "bg-slate-300",
@@ -208,7 +208,7 @@ export function NotificationTemplateEventNav({
                               className={cn(
                                 "text-sm",
                                 isActive
-                                  ? "font-semibold text-[#1C3A34]"
+                                  ? "font-semibold text-[#1C3A34] dark:text-foreground"
                                   : "font-medium text-slate-700",
                               )}
                             >

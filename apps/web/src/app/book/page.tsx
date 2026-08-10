@@ -26,6 +26,7 @@ import {
   isVehicleAvailableNow,
 } from "@/lib/vehicle-availability";
 import { LocaleProvider, useLocale } from "@/components/shared/providers";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -227,13 +228,15 @@ function PublicVehiclesPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 antialiased flex flex-col font-sans">
+    <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased dark:bg-[#0d1117] dark:text-[#e8ecf1]">
       
       {/* Premium Glass Header */}
       <header
         className={cn(
           "fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500",
-          scrolled ? "bg-[#1C3A34]/90 backdrop-blur-xl shadow-lg h-16" : "bg-transparent h-20"
+          scrolled
+            ? "h-16 bg-[#1C3A34]/90 shadow-lg backdrop-blur-xl dark:bg-[#0d1117]/95 dark:shadow-black/25"
+            : "h-20 bg-transparent"
         )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between gap-4">
@@ -242,6 +245,10 @@ function PublicVehiclesPageContent() {
           </Link>
           
           <div className="flex items-center gap-4">
+            <ThemeToggle
+              placement="inline"
+              className="auth-theme-toggle-inline h-9 w-9 border border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-[#C9B87A] dark:text-white"
+            />
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
@@ -255,11 +262,11 @@ function PublicVehiclesPageContent() {
               >
                 <Languages className="h-[18px] w-[18px] text-[#C9B87A]" strokeWidth={1.75} />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-40 p-1.5 bg-white border border-slate-200 shadow-xl rounded-xl z-[10000]">
+              <DropdownMenuContent align="end" className="z-[10000] min-w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-white/10 dark:bg-[#171c24] dark:text-[#e8ecf1] dark:shadow-black/35">
                 <DropdownMenuGroup>
                   <DropdownMenuRadioGroup value={locale} onValueChange={(value) => setLocale(value as SupportedLocale)}>
                     {LOCALE_OPTIONS.map((option) => (
-                      <DropdownMenuRadioItem key={option.value} value={option.value} className="rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors">
+                      <DropdownMenuRadioItem key={option.value} value={option.value} className="cursor-pointer rounded-lg px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-[#dfe5eb] dark:hover:bg-white/[0.06]">
                         {option.nativeLabel}
                       </DropdownMenuRadioItem>
                     ))}
@@ -286,7 +293,7 @@ function PublicVehiclesPageContent() {
                     </AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 p-1.5 bg-white border border-slate-200 shadow-xl rounded-xl z-[10000]">
+                <DropdownMenuContent align="end" className="z-[10000] w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-white/10 dark:bg-[#171c24] dark:text-[#e8ecf1] dark:shadow-black/35">
                   <DropdownMenuGroup>
                     <DropdownMenuLabel className="px-2 py-2 font-normal">
                       <p className="truncate text-sm font-semibold text-[#1C3A34]">
@@ -295,14 +302,14 @@ function PublicVehiclesPageContent() {
                       <p className="truncate text-xs text-slate-500">{user.email}</p>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="rounded-md px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors" render={<Link href={user.roles.includes("admin") || user.roles.includes("super_admin") ? "/admin" : "/dashboard"} />}>
+                    <DropdownMenuItem className="cursor-pointer rounded-md px-2 py-1.5 text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-[#dfe5eb] dark:hover:bg-white/[0.06]" render={<Link href={user.roles.includes("admin") || user.roles.includes("super_admin") ? "/admin" : "/dashboard"} />}>
                       <LayoutDashboard className="h-4 w-4 mr-2 text-[#C9B87A]" />
                       Console Dashboard
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
                   <DropdownMenuSeparator />
                   <DropdownMenuGroup>
-                    <DropdownMenuItem onClick={handleSignOut} className="rounded-md px-2 py-1.5 text-sm text-red-600 hover:bg-red-50 cursor-pointer transition-colors">
+                    <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer rounded-md px-2 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10">
                       <LogOut className="h-4 w-4 mr-2" />
                       Sign Out
                     </DropdownMenuItem>
@@ -315,7 +322,7 @@ function PublicVehiclesPageContent() {
       </header>
 
       {/* Animated Hero Section */}
-      <section className="relative w-full flex items-center justify-center overflow-hidden bg-[#1C3A34] pt-32 pb-32 sm:pb-40 -mt-px">
+      <section className="relative -mt-px flex w-full items-center justify-center overflow-hidden bg-[#1C3A34] pt-32 pb-32 dark:bg-[#0d1117] sm:pb-40">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
             animate={{ scale: [1, 1.2, 1], opacity: [0.1, 0.15, 0.1], rotate: [0, 90, 0] }}
@@ -325,7 +332,7 @@ function PublicVehiclesPageContent() {
           <motion.div
             animate={{ scale: [1, 1.3, 1], opacity: [0.05, 0.1, 0.05], rotate: [0, -90, 0] }}
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            className="absolute -bottom-[20%] -right-[10%] w-[60vw] h-[60vw] bg-[radial-gradient(ellipse_at_center,_#1C3A34_0%,_transparent_50%)] rounded-full blur-[100px]"
+            className="absolute -bottom-[20%] -right-[10%] h-[60vw] w-[60vw] rounded-full bg-[radial-gradient(ellipse_at_center,_#1C3A34_0%,_transparent_50%)] blur-[100px] dark:opacity-40"
           />
           <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_40%,transparent_100%)] opacity-50" />
         </div>
@@ -356,7 +363,7 @@ function PublicVehiclesPageContent() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.15 }}
-          className="rounded-2xl border border-slate-200/80 bg-white p-2 shadow-[0_12px_40px_-16px_rgba(28,58,52,0.35)]"
+          className="rounded-2xl border border-slate-200/80 bg-white p-2 shadow-[0_12px_40px_-16px_rgba(28,58,52,0.35)] dark:border-white/10 dark:bg-[#171c24] dark:shadow-[0_18px_50px_-20px_rgba(0,0,0,0.8)]"
         >
           <div className="grid grid-cols-1 gap-2 lg:grid-cols-[minmax(0,1.4fr)_repeat(3,minmax(0,0.85fr))]">
             <div className="relative min-w-0">
@@ -366,13 +373,13 @@ function PublicVehiclesPageContent() {
                 placeholder={copy.searchPlaceholder}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="h-11 w-full rounded-xl border-0 bg-transparent pl-10 pr-10 text-sm font-medium text-[#1C3A34] outline-none placeholder:text-slate-400 focus:bg-slate-50/80 lg:h-12"
+                className="h-11 w-full rounded-xl border-0 bg-transparent pr-10 pl-10 text-sm font-medium text-[#1C3A34] outline-none placeholder:text-slate-400 focus:bg-slate-50/80 dark:text-[#eef1f5] dark:placeholder:text-[#7f8996] dark:focus:bg-white/[0.045] lg:h-12"
               />
               {search ? (
                 <button
                   type="button"
                   onClick={() => setSearch("")}
-                  className="absolute right-2.5 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-[#1C3A34]"
+                  className="absolute top-1/2 right-2.5 flex size-7 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-[#1C3A34] dark:hover:bg-white/[0.06] dark:hover:text-[#C9B87A]"
                   aria-label={copy.clearFilters}
                 >
                   <X className="size-3.5" strokeWidth={2.5} />
@@ -381,14 +388,14 @@ function PublicVehiclesPageContent() {
             </div>
 
             <Select key={`type-select-${types.length}`} value={selectedType} onValueChange={setSelectedType}>
-              <SelectTrigger className="h-11 w-full rounded-xl border-0 bg-slate-50 px-3.5 text-sm font-medium text-[#1C3A34] shadow-none hover:bg-slate-100/80 focus-visible:ring-2 focus-visible:ring-[#1C3A34]/15 lg:h-12">
+              <SelectTrigger className="h-11 w-full rounded-xl border-0 bg-slate-50 px-3.5 text-sm font-medium text-[#1C3A34] shadow-none hover:bg-slate-100/80 focus-visible:ring-2 focus-visible:ring-[#1C3A34]/15 dark:bg-[#11161d] dark:text-[#e8ecf1] dark:hover:bg-[#202731] dark:focus-visible:ring-[#C9B87A]/25 lg:h-12">
                 <span className="truncate">
                   {selectedType === "all-types-placeholder"
                     ? copy.allTypes
                     : types.find((t) => t.id === selectedType)?.name || copy.allTypes}
                 </span>
               </SelectTrigger>
-              <SelectContent className="z-[10000] rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
+              <SelectContent className="z-[10000] rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-white/10 dark:bg-[#1b212a] dark:text-[#e8ecf1] dark:shadow-black/35">
                 <SelectItem value="all-types-placeholder" className="rounded-md">
                   {copy.allTypes}
                 </SelectItem>
@@ -401,14 +408,14 @@ function PublicVehiclesPageContent() {
             </Select>
 
             <Select key={`class-select-${classes.length}`} value={selectedClass} onValueChange={setSelectedClass}>
-              <SelectTrigger className="h-11 w-full rounded-xl border-0 bg-slate-50 px-3.5 text-sm font-medium text-[#1C3A34] shadow-none hover:bg-slate-100/80 focus-visible:ring-2 focus-visible:ring-[#1C3A34]/15 lg:h-12">
+              <SelectTrigger className="h-11 w-full rounded-xl border-0 bg-slate-50 px-3.5 text-sm font-medium text-[#1C3A34] shadow-none hover:bg-slate-100/80 focus-visible:ring-2 focus-visible:ring-[#1C3A34]/15 dark:bg-[#11161d] dark:text-[#e8ecf1] dark:hover:bg-[#202731] dark:focus-visible:ring-[#C9B87A]/25 lg:h-12">
                 <span className="truncate">
                   {selectedClass === "all-classes-placeholder"
                     ? copy.allClasses
                     : classes.find((c) => c.id === selectedClass)?.name || copy.allClasses}
                 </span>
               </SelectTrigger>
-              <SelectContent className="z-[10000] rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
+              <SelectContent className="z-[10000] rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-white/10 dark:bg-[#1b212a] dark:text-[#e8ecf1] dark:shadow-black/35">
                 <SelectItem value="all-classes-placeholder" className="rounded-md">
                   {copy.allClasses}
                 </SelectItem>
@@ -424,7 +431,7 @@ function PublicVehiclesPageContent() {
               value={availabilityFilter}
               onValueChange={(val) => setAvailabilityFilter(val as "all" | "available" | "busy")}
             >
-              <SelectTrigger className="h-11 w-full rounded-xl border-0 bg-slate-50 px-3.5 text-sm font-medium text-[#1C3A34] shadow-none hover:bg-slate-100/80 focus-visible:ring-2 focus-visible:ring-[#1C3A34]/15 lg:h-12">
+              <SelectTrigger className="h-11 w-full rounded-xl border-0 bg-slate-50 px-3.5 text-sm font-medium text-[#1C3A34] shadow-none hover:bg-slate-100/80 focus-visible:ring-2 focus-visible:ring-[#1C3A34]/15 dark:bg-[#11161d] dark:text-[#e8ecf1] dark:hover:bg-[#202731] dark:focus-visible:ring-[#C9B87A]/25 lg:h-12">
                 <span className="truncate">
                   {availabilityFilter === "all"
                     ? copy.allAvailability
@@ -433,7 +440,7 @@ function PublicVehiclesPageContent() {
                       : copy.inService}
                 </span>
               </SelectTrigger>
-              <SelectContent className="z-[10000] rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
+              <SelectContent className="z-[10000] rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-white/10 dark:bg-[#1b212a] dark:text-[#e8ecf1] dark:shadow-black/35">
                 <SelectItem value="all" className="rounded-md">
                   {copy.allAvailability}
                 </SelectItem>
@@ -462,7 +469,7 @@ function PublicVehiclesPageContent() {
               <button
                 type="button"
                 onClick={clearAllFilters}
-                className="inline-flex items-center gap-1.5 text-sm font-bold text-[#1C3A34] transition-colors hover:text-[#254b43]"
+                className="inline-flex items-center gap-1.5 text-sm font-bold text-[#1C3A34] transition-colors hover:text-[#254b43] dark:text-[#d8c77f] dark:hover:text-[#efe2a9]"
               >
                 <X className="size-3.5" strokeWidth={2.5} />
                 {copy.clearFilters}
@@ -473,7 +480,7 @@ function PublicVehiclesPageContent() {
 
         {loading ? (
           <div className="flex flex-col items-center justify-center gap-5 py-32">
-            <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#1C3A34]/10 border-t-[#C9B87A]" />
+            <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#1C3A34]/10 border-t-[#C9B87A] dark:border-white/10 dark:border-t-[#C9B87A]" />
             <p className="text-sm font-medium tracking-wide text-slate-400">{copy.loadingCatalog}</p>
           </div>
         ) : (
@@ -483,10 +490,10 @@ function PublicVehiclesPageContent() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                className="w-full rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm sm:p-16"
+                className="w-full rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm dark:border-white/10 dark:bg-[#171c24] dark:shadow-black/25 sm:p-16"
               >
-                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-100 bg-slate-50">
-                  <Search className="h-7 w-7 text-[#1C3A34]/35" strokeWidth={1.75} />
+                <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 dark:border-white/10 dark:bg-[#11161d]">
+                  <Search className="h-7 w-7 text-[#1C3A34]/35 dark:text-[#C9B87A]/55" strokeWidth={1.75} />
                 </div>
                 <h3 className="text-lg font-extrabold tracking-tight text-[#1C3A34]">
                   {copy.noVehiclesTitle}
@@ -535,13 +542,13 @@ function PublicVehiclesPageContent() {
                       variants={cardVariant}
                       key={vehicle.id}
                       className={cn(
-                        "group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white transition-colors",
+                        "group relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white transition-colors dark:bg-[#171c24]",
                         isSelected
-                          ? "border-[#C9B87A] bg-[#1C3A34]/[0.02]"
-                          : "border-slate-200 hover:border-[#1C3A34]/25",
+                          ? "border-[#C9B87A] bg-[#1C3A34]/[0.02] dark:bg-[#C9B87A]/[0.055]"
+                          : "border-slate-200 hover:border-[#1C3A34]/25 dark:border-white/10 dark:hover:border-[#C9B87A]/35",
                       )}
                     >
-                      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
+                      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100 dark:bg-[#11161d]">
                         <VehiclePhotoMedia
                           imageUrl={
                             vehicle.images?.[0]
@@ -588,7 +595,7 @@ function PublicVehiclesPageContent() {
                         <div className="min-w-0 space-y-1.5">
                           <Link
                             href={`/book/${vehicle.id}`}
-                            className="block truncate text-lg font-extrabold tracking-tight text-[#1C3A34] transition-colors hover:text-[#254b43]"
+                            className="block truncate text-lg font-extrabold tracking-tight text-[#1C3A34] transition-colors hover:text-[#254b43] dark:text-[#eef1f5] dark:hover:text-[#d8c77f]"
                           >
                             {vehicle.make} {vehicle.model}
                           </Link>
@@ -604,15 +611,15 @@ function PublicVehiclesPageContent() {
                           ) : null}
                         </div>
 
-                        <div className="mt-auto flex items-center gap-2 border-t border-slate-100 pt-4">
+                        <div className="mt-auto flex items-center gap-2 border-t border-slate-100 pt-4 dark:border-white/10">
                           <button
                             type="button"
                             onClick={() => toggleSelect(vehicle.id)}
                             className={cn(
                               "inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition-colors",
                               isSelected
-                                ? "border border-slate-200 bg-white text-slate-600 hover:border-red-200 hover:text-red-600"
-                                : "bg-[#1C3A34] text-white hover:bg-[#254b43]",
+                                ? "border border-slate-200 bg-white text-slate-600 hover:border-red-200 hover:text-red-600 dark:border-[#C9B87A]/35 dark:bg-[#222831] dark:text-[#d8c77f] dark:hover:border-red-400/40 dark:hover:text-red-300"
+                                : "bg-[#1C3A34] text-white hover:bg-[#254b43] dark:bg-[#203f38] dark:hover:bg-[#295148]",
                             )}
                           >
                             {isSelected ? (
@@ -626,7 +633,7 @@ function PublicVehiclesPageContent() {
                           </button>
                           <Link
                             href={`/book/${vehicle.id}`}
-                            className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3.5 py-3 text-sm font-bold text-[#1C3A34] transition-colors hover:border-[#1C3A34]/30 hover:bg-slate-50"
+                            className="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3.5 py-3 text-sm font-bold text-[#1C3A34] transition-colors hover:border-[#1C3A34]/30 hover:bg-slate-50 dark:border-white/10 dark:text-[#d8c77f] dark:hover:border-[#C9B87A]/35 dark:hover:bg-white/[0.05]"
                             aria-label={copy.viewDetails}
                           >
                             <ChevronRight className="size-4" />
@@ -652,7 +659,7 @@ function PublicVehiclesPageContent() {
             transition={{ duration: 0.25 }}
             className="fixed bottom-5 left-1/2 z-[100] w-[min(92%,36rem)] -translate-x-1/2 sm:bottom-8"
           >
-            <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-[#1C3A34] px-4 py-3 text-white shadow-xl sm:px-5">
+            <div className="flex items-center gap-3 rounded-2xl border border-white/15 bg-[#1C3A34] px-4 py-3 text-white shadow-xl dark:border-[#C9B87A]/25 dark:bg-[#171c24] dark:shadow-black/45 sm:px-5">
               <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#C9B87A] text-[#1C3A34]">
                 <ShoppingBag className="size-4" />
               </div>

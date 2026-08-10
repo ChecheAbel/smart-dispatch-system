@@ -37,17 +37,20 @@ export function NotificationTemplatePlaceholdersGuide({
     <Collapsible
       open={open}
       onOpenChange={setOpen}
-      className={cn("rounded-xl border border-slate-200/80 bg-[#f8fafb]", className)}
+      className={cn(
+        "rounded-xl border border-slate-200/80 bg-[#f8fafb] dark:border-border dark:bg-[#11161d]",
+        className,
+      )}
     >
       <CollapsibleTrigger
         className={cn(
           "flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left",
-          "rounded-xl transition-colors hover:bg-white/70",
-          "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1C3A34]/15",
+          "rounded-xl transition-colors hover:bg-white/70 dark:hover:bg-white/[0.04]",
+          "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1C3A34]/15 dark:focus-visible:ring-[#C9B87A]/30",
         )}
       >
         <div className="flex min-w-0 items-center gap-3">
-          <div className="rounded-lg bg-[#1C3A34]/8 p-2 text-[#1C3A34]">
+          <div className="rounded-lg bg-[#1C3A34]/8 p-2 text-[#1C3A34] dark:bg-[#C9B87A]/12 dark:text-[#d8c77f]">
             <Braces className="size-4" />
           </div>
           <div className="min-w-0">
@@ -65,7 +68,7 @@ export function NotificationTemplatePlaceholdersGuide({
         />
       </CollapsibleTrigger>
 
-      <CollapsibleContent className="space-y-5 border-t border-slate-200/80 px-4 py-4">
+      <CollapsibleContent className="space-y-5 border-t border-slate-200/80 px-4 py-4 dark:border-border">
         {modules.map((moduleKey) => {
           const copyKey = getModuleDefinition(moduleKey).copyKey;
           const placeholderCopy = copy.placeholders.items[copyKey];
@@ -87,7 +90,7 @@ export function NotificationTemplatePlaceholdersGuide({
                 {NOTIFICATION_TEMPLATE_PLACEHOLDERS[moduleKey].map((key) => (
                   <div
                     key={key}
-                    className="rounded-lg border border-slate-200 bg-white px-2.5 py-2"
+                    className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 dark:border-border dark:bg-[#202630]"
                     title={placeholderCopy[key as keyof typeof placeholderCopy]}
                   >
                     <code className="text-[11px] font-semibold text-[#1C3A34]">{`{${key}}`}</code>

@@ -91,14 +91,14 @@ function ScopeCheckboxGroup({
 }) {
   return (
     <div className="space-y-3">
-      <Label className="text-sm font-semibold text-slate-800">
+      <Label className="text-sm font-semibold text-slate-800 dark:text-foreground">
         {label}
         {required ? <span className="text-red-600"> *</span> : null}
       </Label>
       <div
         className={cn(
-          "max-h-52 space-y-2 overflow-y-auto rounded-xl border bg-slate-50/60 p-3",
-          error ? "border-red-300" : "border-slate-200",
+          "max-h-52 space-y-2 overflow-y-auto rounded-xl border bg-slate-50/60 p-3 dark:bg-[#11161d]",
+          error ? "border-red-300 dark:border-red-400/40" : "border-slate-200 dark:border-border",
         )}
       >
         {items.length === 0 ? (
@@ -110,7 +110,7 @@ function ScopeCheckboxGroup({
               <label
                 key={item.id}
                 className={cn(
-                  "flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 hover:bg-white",
+                  "flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 hover:bg-white dark:hover:bg-white/[0.06]",
                   disabled && "cursor-not-allowed opacity-60",
                 )}
               >
@@ -125,7 +125,7 @@ function ScopeCheckboxGroup({
                     );
                   }}
                 />
-                <span className="text-sm text-slate-700">{item.label}</span>
+                <span className="text-sm text-slate-700 dark:text-foreground">{item.label}</span>
               </label>
             );
           })

@@ -374,7 +374,7 @@ export function NotificationTemplatesSettings({
 
   return (
     <section className={cn("overflow-hidden rounded-xl border", adminCardClass)}>
-      <div className="border-b border-slate-200/80 bg-[#f8fafb]/80 px-4 py-4 sm:px-5">
+      <div className="border-b border-slate-200/80 bg-[#f8fafb]/80 px-4 py-4 dark:border-border dark:bg-[#11161d] sm:px-5">
         <NotificationTemplateModuleNav
           activeModule={activeModule}
           templates={templates}
@@ -390,11 +390,11 @@ export function NotificationTemplatesSettings({
           templates={templates}
           formState={formState}
           onSelectEvent={selectEvent}
-          className="lg:border-r lg:border-slate-200/80"
+          className="lg:border-r lg:border-slate-200/80 dark:lg:border-border"
         />
 
         <div className="min-w-0 flex flex-col">
-            <div className="border-b border-slate-200/80 bg-white px-5 py-4">
+            <div className="border-b border-slate-200/80 bg-white px-5 py-4 dark:border-border dark:bg-card">
               <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
                 <div className="min-w-0">
                   <p className="text-xs text-slate-500">{activeModuleCopy.title}</p>
@@ -445,9 +445,9 @@ export function NotificationTemplatesSettings({
                 return (
                   <div
                     key={recipient}
-                    className="overflow-hidden rounded-xl border border-slate-200/80 bg-white"
+                    className="overflow-hidden rounded-xl border border-slate-200/80 bg-white dark:border-border dark:bg-card"
                   >
-                    <div className="flex flex-col gap-3 border-b border-slate-200/80 bg-[#f8fafb]/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-col gap-3 border-b border-slate-200/80 bg-[#f8fafb]/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:border-border dark:bg-[#11161d]">
                       <div>
                         <p className="text-sm font-bold text-slate-900">
                           {getRecipientLabel(recipient, copy)}
@@ -457,7 +457,7 @@ export function NotificationTemplatesSettings({
 
                       <div className="flex items-center gap-3">
                         {hasEmail && hasSms ? (
-                          <div className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5">
+                          <div className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 dark:border-border dark:bg-[#11161d]">
                             {(["email", "sms"] as const).map((channel) => {
                               const Icon = channel === "email" ? Mail : MessageSquare;
                               const isActive = activeChannel === channel;
@@ -470,8 +470,8 @@ export function NotificationTemplatesSettings({
                                   className={cn(
                                     "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors",
                                     isActive
-                                      ? "bg-[#1C3A34] text-white"
-                                      : "text-slate-600 hover:bg-slate-50",
+                                      ? "bg-[#1C3A34] text-white shadow-sm dark:bg-[#C9B87A] dark:text-[#151a21] dark:shadow-[0_0_0_1px_rgba(201,184,122,0.18)]"
+                                      : "text-slate-600 hover:bg-slate-50 dark:text-muted-foreground dark:hover:bg-white/[0.06] dark:hover:text-foreground",
                                   )}
                                 >
                                   <Icon className="size-3.5" />
@@ -481,7 +481,7 @@ export function NotificationTemplatesSettings({
                             })}
                           </div>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600">
+                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 dark:border-[#C9B87A]/55 dark:bg-[#C9B87A]/10 dark:text-[#d8c77f]">
                             {activeChannel === "email" ? (
                               <Mail className="size-3.5" />
                             ) : (
@@ -556,7 +556,7 @@ export function NotificationTemplatesSettings({
             </div>
 
             {canWrite ? (
-              <div className="sticky bottom-0 z-10 mt-auto border-t border-slate-200/80 bg-white/95 px-5 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+              <div className="sticky bottom-0 z-10 mt-auto border-t border-slate-200/80 bg-white/95 px-5 py-3 backdrop-blur supports-[backdrop-filter]:bg-white/80 dark:border-border dark:bg-[#171c24]/95 dark:supports-[backdrop-filter]:bg-[#171c24]/85">
                 <div className="flex justify-end">
                   <Button
                     type="button"

@@ -116,7 +116,7 @@ export function RideRequestDriverRatingDisplay({
         className={cn(
           "overflow-hidden rounded-2xl border border-slate-200/80",
           variant === "admin"
-            ? "bg-gradient-to-br from-[#f8fafb] via-white to-[#C9B87A]/5"
+            ? "bg-gradient-to-br from-[#f8fafb] via-white to-[#C9B87A]/5 dark:from-[#202630] dark:via-[#171c24] dark:to-[#C9B87A]/10"
             : "bg-white",
         )}
       >

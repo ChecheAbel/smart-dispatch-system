@@ -989,6 +989,7 @@ export interface ContractEnrollment {
 }
 
 export type InvoiceStatus = "draft" | "issued" | "paid" | "void";
+export type InvoicePaymentMethod = "telebirr" | "cbe_birr" | "manual";
 
 export interface InvoiceContractSummary {
   id: string;
@@ -1080,6 +1081,7 @@ export interface Invoice {
   issued_at: string | null;
   due_at: string | null;
   paid_at: string | null;
+  payment_method: InvoicePaymentMethod | null;
   voided_at: string | null;
   notes: string | null;
   line_items: InvoiceLineItem[];
@@ -1127,6 +1129,7 @@ export interface CustomerInvoice {
   issued_at: string | null;
   due_at: string | null;
   paid_at: string | null;
+  payment_method: InvoicePaymentMethod | null;
   voided_at: string | null;
   notes: string | null;
   line_items: InvoiceLineItem[];

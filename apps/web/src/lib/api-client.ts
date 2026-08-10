@@ -1,11 +1,11 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
 import type { ApiErrorResponse } from "@smart-dispatch/types";
-import { ADMIN_SIGN_IN_PATH } from "./auth-paths";
+import { ADMIN_SIGN_IN_PATH, USER_SIGN_IN_PATH } from "./auth-paths";
 import { performTokenRefresh } from "./auth-token-refresh";
 import { clearAuthSession, getAccessToken } from "./auth-session";
 import { getStoredLocale } from "./locale";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "/";
 
 export const apiClient = axios.create({
   baseURL: API_URL,
@@ -38,6 +38,12 @@ function redirectToSignInIfNeeded() {
   const path = window.location.pathname;
   if (path.startsWith("/admin") || path === ADMIN_SIGN_IN_PATH) {
     window.location.assign(ADMIN_SIGN_IN_PATH);
+    return;
+  }
+
+  if (path.startsWith("/dashboard") || path.startsWith("/book/request")) {
+    const returnPath = `${path}${window.location.search}`;
+    window.location.assign(`${USER_SIGN_IN_PATH}?redirect=${encodeURIComponent(returnPath)}`);
   }
 }
 

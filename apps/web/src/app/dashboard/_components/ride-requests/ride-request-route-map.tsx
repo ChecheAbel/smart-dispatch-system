@@ -505,19 +505,19 @@ export function RideRequestRouteMap({
       ) : null}
 
       <div
-        className="ride-request-route-map__canvas relative overflow-hidden rounded-xl border border-slate-200/80 bg-[#e8eef0]"
+        className="ride-request-route-map__canvas relative overflow-hidden rounded-xl border border-slate-200/80 bg-[#e8eef0] dark:bg-[#11161d]"
         style={{ height }}
       >
         <div ref={containerRef} className="absolute inset-0 z-0" aria-label="Ride route map" />
 
         {!mapReady ? (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#e8eef0] text-sm text-slate-500">
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#e8eef0] text-sm text-slate-500 dark:bg-[#11161d]">
             {loadingLabel}
           </div>
         ) : null}
 
         {!hasPoints && mapReady ? (
-          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-[#e8eef0]/90 px-6 text-center text-sm text-slate-500">
+          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center bg-[#e8eef0]/90 px-6 text-center text-sm text-slate-500 dark:bg-[#11161d]/90">
             {emptyLabel}
           </div>
         ) : null}

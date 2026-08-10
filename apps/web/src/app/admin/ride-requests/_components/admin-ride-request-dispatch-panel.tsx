@@ -133,7 +133,7 @@ export function AdminRideRequestDispatchPanel({
 
       <div className="overflow-hidden rounded-xl border border-slate-200/80 bg-white">
         {request.assigned_vehicle ? (
-          <div className="border-b border-[#1C3A34]/10 bg-gradient-to-r from-[#1C3A34]/6 to-[#C9B87A]/10 px-4 py-4">
+          <div className="border-b border-[#1C3A34]/10 bg-gradient-to-r from-[#1C3A34]/6 to-[#C9B87A]/10 px-4 py-4 dark:border-white/10 dark:from-white/[0.035] dark:to-[#C9B87A]/10">
             <div className="mb-3 flex items-center justify-between gap-2">
               <Badge className="border-[#1C3A34]/15 bg-[#1C3A34]/10 text-[11px] font-semibold uppercase tracking-wide text-[#1C3A34]">
                 {copy.dispatch.currentlyAssigned}
@@ -250,15 +250,15 @@ export function AdminRideRequestDispatchPanel({
                       className={cn(
                         "flex w-full items-start gap-3 rounded-lg border p-3 text-left transition",
                         isSelected
-                          ? "border-[#1C3A34] bg-[#1C3A34]/5 ring-1 ring-[#1C3A34]/15"
-                          : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50",
+                          ? "border-[#1C3A34] bg-[#1C3A34]/5 ring-1 ring-[#1C3A34]/15 dark:border-[#C9B87A]/65 dark:bg-[#C9B87A]/10 dark:ring-[#C9B87A]/20"
+                          : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50 dark:hover:border-slate-500 dark:hover:bg-white/[0.04]",
                       )}
                     >
                       <div
                         className={cn(
                           "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border",
                           isSelected
-                            ? "border-[#1C3A34] bg-[#1C3A34] text-white"
+                            ? "border-[#1C3A34] bg-[#1C3A34] text-white dark:border-[#C9B87A] dark:bg-[#C9B87A] dark:text-[#151a21]"
                             : "border-slate-300 bg-white",
                         )}
                       >

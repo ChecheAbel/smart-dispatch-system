@@ -32,20 +32,27 @@ export function DashboardChartLegend({
               : null;
 
           return (
-            <li key={item.key} className="flex items-center justify-between gap-3 text-sm">
-              <span className="flex min-w-0 items-center gap-2.5 text-slate-600">
+            <li
+              key={item.key}
+              className="flex items-center justify-between gap-3 text-sm"
+            >
+              <span className="flex min-w-0 items-center gap-2.5 text-slate-600 dark:text-muted-foreground">
                 <span
-                  className="size-2.5 shrink-0 rounded-full ring-2 ring-white"
+                  className="size-2.5 shrink-0 rounded-full ring-2 ring-white dark:ring-card"
                   style={{ backgroundColor: item.color }}
                 />
                 <span className="truncate font-medium">{item.label}</span>
               </span>
               <span className="flex shrink-0 items-baseline gap-2 tabular-nums">
                 {item.value !== undefined ? (
-                  <span className="font-bold text-[#1C3A34]">{item.value}</span>
+                  <span className="font-bold text-[#1C3A34] dark:text-foreground">
+                    {item.value}
+                  </span>
                 ) : null}
                 {share !== null ? (
-                  <span className="text-[11px] font-semibold text-slate-400">{share}%</span>
+                  <span className="text-[11px] font-semibold text-slate-400 dark:text-muted-foreground">
+                    {share}%
+                  </span>
                 ) : null}
               </span>
             </li>
@@ -60,12 +67,19 @@ export function DashboardChartLegend({
       {items.map((item) => (
         <div
           key={item.key}
-          className="inline-flex items-center gap-2 rounded-lg border border-slate-200/70 bg-slate-50/70 px-2.5 py-1.5"
+          className="inline-flex items-center gap-2 rounded-lg border border-slate-200/70 bg-slate-50/70 px-2.5 py-1.5 dark:border-border dark:bg-muted/55"
         >
-          <span className="size-2 shrink-0 rounded-full" style={{ backgroundColor: item.color }} />
-          <span className="text-[11px] font-medium text-slate-600">{item.label}</span>
+          <span
+            className="size-2 shrink-0 rounded-full"
+            style={{ backgroundColor: item.color }}
+          />
+          <span className="text-[11px] font-medium text-slate-600 dark:text-muted-foreground">
+            {item.label}
+          </span>
           {item.value !== undefined ? (
-            <span className="text-[11px] font-bold tabular-nums text-slate-900">{item.value}</span>
+            <span className="text-[11px] font-bold tabular-nums text-slate-900 dark:text-foreground">
+              {item.value}
+            </span>
           ) : null}
         </div>
       ))}

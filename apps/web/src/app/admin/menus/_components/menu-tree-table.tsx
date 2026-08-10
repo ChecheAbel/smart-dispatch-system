@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createElement, useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Search } from "lucide-react";
 import type { Menu } from "@smart-dispatch/types";
 import {
@@ -49,7 +49,7 @@ type MenuTreeTableProps = {
 };
 
 const searchInputClassName =
-  "h-10 rounded-lg border-slate-200 bg-white py-2 pl-10 pr-3.5 text-sm shadow-sm";
+  "h-10 rounded-lg border-slate-200 bg-white py-2 pl-10 pr-3.5 text-sm shadow-sm dark:border-border dark:bg-muted/55 dark:text-foreground";
 
 function TableSkeleton() {
   return (
@@ -62,7 +62,6 @@ function TableSkeleton() {
 }
 
 function MenuLabelCell({ menu, depth }: { menu: Menu; depth: number }) {
-  const Icon = getMenuIcon(menu.icon);
   const isGroup = !menu.path && Boolean(menu.children?.length);
 
   return (
@@ -78,13 +77,15 @@ function MenuLabelCell({ menu, depth }: { menu: Menu; depth: number }) {
       <div
         className={cn(
           "flex size-8 shrink-0 items-center justify-center rounded-lg",
-          isGroup ? "bg-[#1C3A34]/8 text-[#1C3A34]" : "bg-slate-100 text-slate-600",
+          isGroup
+            ? "bg-[#1C3A34]/8 text-[#1C3A34] dark:bg-[#C9B87A]/12 dark:text-[#e1d49d]"
+            : "bg-slate-100 text-slate-600 dark:bg-white/[0.06] dark:text-slate-300",
         )}
       >
-        <Icon className="size-4" />
+        {createElement(getMenuIcon(menu.icon), { className: "size-4" })}
       </div>
       <div className="min-w-0">
-        <p className="truncate text-slate-700">{menu.label}</p>
+        <p className="truncate text-slate-700 dark:text-slate-200">{menu.label}</p>
         {isGroup ? (
           <p className="truncate text-xs text-slate-400">Group</p>
         ) : null}
@@ -117,6 +118,7 @@ export function MenuTreeTable({
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const refreshToken = useMemo(() => JSON.stringify(refreshDeps), [refreshDeps]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -139,11 +141,15 @@ export function MenuTreeTable({
     } finally {
       setLoading(false);
     }
-  }, [locale, ...refreshDeps]);
+  }, [locale]);
 
   useEffect(() => {
-    void loadMenus();
-  }, [loadMenus]);
+    const timer = window.setTimeout(() => {
+      void loadMenus();
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [loadMenus, refreshToken]);
 
   const menuTree = useMemo(() => buildMenuTree(menus), [menus]);
   const filteredTree = useMemo(
@@ -156,7 +162,7 @@ export function MenuTreeTable({
   const totalLabel = `${menus.length} ${menus.length === 1 ? itemLabel : pluralLabel} total`;
 
   return (
-    <Card className="border-slate-200/80 bg-white shadow-sm">
+    <Card className="border-slate-200/80 bg-white shadow-sm dark:border-border dark:bg-card">
       <CardHeader className="gap-4">
         {eyebrow}
 
@@ -211,9 +217,9 @@ export function MenuTreeTable({
         ) : null}
 
         {!loading && !error && rows.length > 0 ? (
-          <div className="overflow-x-auto rounded-lg border border-slate-200">
+          <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-border">
             <table className="w-full text-left text-sm" style={{ minWidth: "880px" }}>
-              <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-border dark:bg-[#11161d] dark:text-muted-foreground">
                 <tr>
                   <th className="min-w-[240px] px-4 py-3">{labelHeader}</th>
                   {columns.map((column) => (
@@ -226,9 +232,12 @@ export function MenuTreeTable({
                   ) : null}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 bg-white">
+              <tbody className="divide-y divide-slate-100 bg-white dark:divide-border dark:bg-card">
                 {rows.map(({ menu, depth }: MenuTreeRow) => (
-                  <tr key={menu.id} className="hover:bg-slate-50/80">
+                  <tr
+                    key={menu.id}
+                    className="transition-colors hover:bg-slate-50/80 dark:hover:bg-white/[0.045]"
+                  >
                     <td className="px-4 py-3">
                       <MenuLabelCell menu={menu} depth={depth} />
                     </td>

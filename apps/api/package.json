@@ -15,9 +15,6 @@
     "db:restore-admin": "tsx prisma/restore-admin.ts",
     "postinstall": "prisma generate"
   },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
-  },
   "dependencies": {
     "@prisma/client": "^6.19.0",
     "@scalar/express-api-reference": "^0.10.8",

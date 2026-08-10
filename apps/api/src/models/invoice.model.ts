@@ -1,4 +1,4 @@
-import type { InvoiceStatus } from "@smart-dispatch/types";
+import type { InvoicePaymentMethod, InvoiceStatus } from "@smart-dispatch/types";
 import { Prisma } from "../generated/prisma";
 import { prisma } from "../db/prisma";
 import { getUtcToday } from "./contract.model";
@@ -322,6 +322,7 @@ export async function updateInvoiceStatus(
     issuedAt?: Date | null;
     dueAt?: Date | null;
     paidAt?: Date | null;
+    paymentMethod?: InvoicePaymentMethod | null;
     voidedAt?: Date | null;
   },
 ) {
@@ -332,6 +333,7 @@ export async function updateInvoiceStatus(
       issuedAt: timestamps?.issuedAt,
       dueAt: timestamps?.dueAt,
       paidAt: timestamps?.paidAt,
+      paymentMethod: timestamps?.paymentMethod,
       voidedAt: timestamps?.voidedAt,
     },
     include: invoiceInclude,

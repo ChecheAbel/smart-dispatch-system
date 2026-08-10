@@ -3,8 +3,12 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut, UserRound } from "lucide-react";
-import { getUserInitials, useAuth } from "@/components/shared/providers/auth-context";
+import {
+  getUserInitials,
+  useAuth,
+} from "@/components/shared/providers/auth-context";
 import { LanguageSelector } from "@/components/shared/layout/language-selector";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { useLocale, useNavigation } from "@/components/shared/providers";
 import { usePortalShell } from "@/components/shared/providers/portal-shell-context";
 import {
@@ -33,12 +37,13 @@ export function DashboardHeader() {
   const { locale } = useLocale();
   const { user, signOut } = useAuth();
   const { getPageTitle } = useNavigation();
-  const { getHeaderEyebrow, getProfileLabel, getSignOutLabel, profilePath } = usePortalShell();
+  const { getHeaderEyebrow, getProfileLabel, getSignOutLabel, profilePath } =
+    usePortalShell();
   const pageTitle = getPageTitle(pathname);
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-3 border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur supports-backdrop-filter:bg-white/90 sm:px-6">
-      <SidebarTrigger className="-ml-1 text-[#1C3A34] hover:bg-[#1C3A34]/8" />
+    <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-3 border-b border-slate-200/80 bg-white/95 px-4 backdrop-blur supports-backdrop-filter:bg-white/90 dark:border-border dark:bg-card/95 dark:supports-backdrop-filter:bg-card/90 sm:px-6">
+      <SidebarTrigger className="-ml-1 text-[#1C3A34] hover:bg-[#1C3A34]/8 dark:text-foreground dark:hover:bg-accent" />
 
       <Separator orientation="vertical" className="hidden h-5 sm:block" />
 
@@ -49,6 +54,7 @@ export function DashboardHeader() {
 
       <div className={adminHeaderActionsClass}>
         <LanguageSelector />
+        <ThemeToggle placement="inline" />
 
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -74,19 +80,28 @@ export function DashboardHeader() {
           <DropdownMenuContent align="end" className="w-56 p-1.5">
             <DropdownMenuGroup>
               <DropdownMenuLabel className="px-2 py-2 font-normal">
-                <p className="truncate text-sm font-semibold text-[#1C3A34]">
+                <p className="truncate text-sm font-semibold text-[#1C3A34] dark:text-foreground">
                   {user.first_name} {user.last_name}
                 </p>
-                <p className="truncate text-xs text-slate-500">{user.email}</p>
+                <p className="truncate text-xs text-slate-500 dark:text-muted-foreground">
+                  {user.email}
+                </p>
               </DropdownMenuLabel>
-              <DropdownMenuItem className="rounded-md" render={<Link href={profilePath} />}>
+              <DropdownMenuItem
+                className="rounded-md"
+                render={<Link href={profilePath} />}
+              >
                 <UserRound />
                 {getProfileLabel(locale)}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem variant="destructive" onClick={signOut} className="rounded-md">
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={signOut}
+                className="rounded-md"
+              >
                 <LogOut />
                 {getSignOutLabel(locale)}
               </DropdownMenuItem>

@@ -3232,6 +3232,7 @@
         "openForm": "Log maintenance",
         "closeForm": "Cancel",
         "type": "Work type",
+        "typePlaceholder": "Select a work type",
         "status": "Status",
         "title": "Title",
         "titlePlaceholder": "e.g. Oil change and filter replacement",
@@ -4277,6 +4278,13 @@
       "issuedAt": "Issued",
       "dueAt": "Due date",
       "paidAt": "Paid",
+      "paymentMethod": "Payment method",
+      "paymentMethods": {
+        "telebirr": "Telebirr",
+        "cbe_birr": "CBE Birr",
+        "manual": "Marked paid by an administrator",
+        "notRecorded": "Not recorded"
+      },
       "notes": "Notes",
       "tripRoute": "Route",
       "tripAmount": "Amount",

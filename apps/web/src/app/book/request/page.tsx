@@ -57,6 +57,7 @@ import {
   toScheduleTimeValue,
 } from "@/lib/vehicle-availability";
 import { LocaleProvider, useLocale } from "@/components/shared/providers";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
@@ -325,15 +326,15 @@ function LocationModeSwitch({
   onSelectCustom: () => void;
 }) {
   return (
-    <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50/90 p-0.5" role="group">
+    <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50/90 p-0.5 dark:border-white/10 dark:bg-[#11161d]" role="group">
       <button
         type="button"
         onClick={onSelectSaved}
         className={cn(
           "rounded-md px-3 py-1.5 text-xs font-semibold transition-all",
           !useCustom
-            ? "bg-white text-[#1C3A34] shadow-sm"
-            : "text-slate-500 hover:text-slate-700",
+            ? "bg-white text-[#1C3A34] shadow-sm dark:bg-[#252c35] dark:text-[#e8ecf1]"
+            : "text-slate-500 hover:text-slate-700 dark:text-[#8f99a6] dark:hover:text-[#d8c77f]",
         )}
       >
         {savedLabel}
@@ -344,8 +345,8 @@ function LocationModeSwitch({
         className={cn(
           "rounded-md px-3 py-1.5 text-xs font-semibold transition-all",
           useCustom
-            ? "bg-white text-[#1C3A34] shadow-sm"
-            : "text-slate-500 hover:text-slate-700",
+            ? "bg-white text-[#1C3A34] shadow-sm dark:bg-[#252c35] dark:text-[#e8ecf1]"
+            : "text-slate-500 hover:text-slate-700 dark:text-[#8f99a6] dark:hover:text-[#d8c77f]",
         )}
       >
         {customLabel}
@@ -735,12 +736,16 @@ function VehicleRequestPageContent() {
       : copy.vehiclesReadyMany.replace("{count}", String(vehicles.length));
 
   const pageHeader = (
-    <header className="relative z-40 border-b border-[#C9B87A]/10 bg-[#1C3A34] text-white">
+    <header className="relative z-40 border-b border-[#C9B87A]/10 bg-[#1C3A34] text-white dark:border-white/10 dark:bg-[#0d1117]">
       <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link href="/" className="group flex shrink-0 items-center">
           <BrandLogo priority className="transition-opacity group-hover:opacity-90" />
         </Link>
         <div className="flex items-center gap-4">
+          <ThemeToggle
+            placement="inline"
+            className="auth-theme-toggle-inline h-9 w-9 rounded-xl border border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-[#C9B87A] dark:text-white"
+          />
           <DropdownMenu>
             <DropdownMenuTrigger
               render={
@@ -754,7 +759,7 @@ function VehicleRequestPageContent() {
             >
               <Languages className="h-[18px] w-[18px] text-[#C9B87A]" strokeWidth={1.75} />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="z-[10000] min-w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
+            <DropdownMenuContent align="end" className="z-[10000] min-w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-white/10 dark:bg-[#171c24] dark:text-[#e8ecf1] dark:shadow-black/35">
               <DropdownMenuGroup>
                 <DropdownMenuRadioGroup
                   value={locale}
@@ -764,7 +769,7 @@ function VehicleRequestPageContent() {
                     <DropdownMenuRadioItem
                       key={option.value}
                       value={option.value}
-                      className="cursor-pointer rounded-lg px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-100"
+                      className="cursor-pointer rounded-lg px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-[#dfe5eb] dark:hover:bg-white/[0.06]"
                     >
                       {option.nativeLabel}
                     </DropdownMenuRadioItem>
@@ -797,7 +802,7 @@ function VehicleRequestPageContent() {
                   </AvatarFallback>
                 </Avatar>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="z-[10000] w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
+              <DropdownMenuContent align="end" className="z-[10000] w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-white/10 dark:bg-[#171c24] dark:text-[#e8ecf1] dark:shadow-black/35">
                 <DropdownMenuGroup>
                   <DropdownMenuLabel className="px-2 py-2 font-normal">
                     <p className="truncate text-sm font-semibold text-[#1C3A34]">
@@ -807,7 +812,7 @@ function VehicleRequestPageContent() {
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
-                    className="cursor-pointer rounded-md px-2 py-1.5 text-sm text-slate-700 transition-colors hover:bg-slate-100"
+                    className="cursor-pointer rounded-md px-2 py-1.5 text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-[#dfe5eb] dark:hover:bg-white/[0.06]"
                     render={
                       <Link href={user.roles.includes("admin") || user.roles.includes("super_admin") ? "/admin" : "/dashboard"} />
                     }
@@ -820,7 +825,7 @@ function VehicleRequestPageContent() {
                 <DropdownMenuGroup>
                   <DropdownMenuItem
                     onClick={handleSignOut}
-                    className="cursor-pointer rounded-md px-2 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50"
+                    className="cursor-pointer rounded-md px-2 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     Sign Out
@@ -838,7 +843,7 @@ function VehicleRequestPageContent() {
   const isSuccessOutcome = outcome === "success";
 
   const selectedVehiclesPanel = (
-    <aside className="flex w-full flex-col justify-between bg-[#1C3A34] p-6 text-white sm:p-8 lg:w-5/12 lg:p-10 xl:p-12">
+    <aside className="flex w-full flex-col justify-between bg-[#1C3A34] p-6 text-white dark:border-white/10 dark:bg-[#0d1117] sm:p-8 lg:w-5/12 lg:border-r lg:p-10 xl:p-12">
       <div>
         {!isOutcomeView ? (
           <Link
@@ -891,7 +896,7 @@ function VehicleRequestPageContent() {
             return (
               <div
                 key={v.id}
-                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition-colors hover:bg-white/[0.08]"
+                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition-colors hover:bg-white/[0.08] dark:bg-[#171c24] dark:hover:bg-[#1b212a]"
               >
                 <div className="relative h-36 w-full bg-white/5">
                   <VehiclePhotoMedia
@@ -960,10 +965,10 @@ function VehicleRequestPageContent() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased">
+      <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased dark:bg-[#0d1117] dark:text-[#e8ecf1]">
         {pageHeader}
         <div className="flex flex-1 flex-col items-center justify-center gap-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#1C3A34]/10 border-t-[#C9B87A]" />
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#1C3A34]/10 border-t-[#C9B87A] dark:border-white/10 dark:border-t-[#C9B87A]" />
           <p className="text-sm font-medium text-slate-400">{copy.preparingForm}</p>
         </div>
       </div>
@@ -972,11 +977,11 @@ function VehicleRequestPageContent() {
 
   if (vehicles.length === 0) {
     return (
-      <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased">
+      <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased dark:bg-[#0d1117] dark:text-[#e8ecf1]">
         {pageHeader}
         <div className="flex flex-1 flex-col items-center justify-center px-6 text-center">
-          <div className="mb-5 flex size-16 items-center justify-center rounded-2xl border border-slate-100 bg-white">
-            <Car className="size-7 text-[#1C3A34]/35" strokeWidth={1.75} />
+          <div className="mb-5 flex size-16 items-center justify-center rounded-2xl border border-slate-100 bg-white dark:border-white/10 dark:bg-[#171c24]">
+            <Car className="size-7 text-[#1C3A34]/35 dark:text-[#C9B87A]/55" strokeWidth={1.75} />
           </div>
           <h2 className="text-xl font-extrabold tracking-tight text-[#1C3A34]">{copy.noVehiclesTitle}</h2>
           <p className="mt-2 max-w-sm text-sm text-slate-500">{copy.noVehiclesBody}</p>
@@ -992,17 +997,17 @@ function VehicleRequestPageContent() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased">
+    <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased dark:bg-[#0d1117] dark:text-[#e8ecf1]">
       {pageHeader}
 
       {outcome ? (
         <div className="flex min-h-[calc(100vh-72px)] flex-1 flex-col lg:flex-row">
           {selectedVehiclesPanel}
 
-          <section className="flex w-full flex-1 flex-col bg-slate-50/80 px-6 py-8 sm:px-8 lg:w-7/12 lg:min-h-[calc(100vh-72px)] lg:px-10 lg:py-10 xl:px-12">
+          <section className="flex w-full flex-1 flex-col bg-slate-50/80 px-6 py-8 dark:bg-[#0d1117] sm:px-8 lg:min-h-[calc(100vh-72px)] lg:w-7/12 lg:px-10 lg:py-10 xl:px-12">
             <div className="flex min-h-0 w-full flex-1 flex-col gap-6">
               <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8">
-                <div className="flex h-full flex-col justify-center rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
+                <div className="flex h-full flex-col justify-center rounded-2xl border border-slate-200 bg-white p-6 dark:border-white/10 dark:bg-[#171c24] sm:p-8">
                   <div
                     className={cn(
                       "flex size-14 items-center justify-center rounded-2xl",
@@ -1070,7 +1075,7 @@ function VehicleRequestPageContent() {
                     ).map((step, index) => (
                       <li
                         key={step.title}
-                        className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4"
+                        className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-4 dark:border-white/10 dark:bg-[#171c24]"
                       >
                         <span
                           className={cn(
@@ -1094,7 +1099,7 @@ function VehicleRequestPageContent() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-3 border-t border-slate-200 pt-5 sm:flex-row">
+              <div className="flex flex-col gap-3 border-t border-slate-200 pt-5 dark:border-white/10 sm:flex-row">
                 {outcome === "success" ? (
                   <>
                     <Link
@@ -1107,7 +1112,7 @@ function VehicleRequestPageContent() {
                     <button
                       type="button"
                       onClick={resetForm}
-                      className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-[#1C3A34] transition-colors hover:bg-slate-50"
+                      className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-[#1C3A34] transition-colors hover:bg-slate-50 dark:border-white/10 dark:bg-[#171c24] dark:text-[#d8c77f] dark:hover:bg-[#1b212a]"
                     >
                       {copy.backToCatalog}
                     </button>
@@ -1125,7 +1130,7 @@ function VehicleRequestPageContent() {
                     <button
                       type="button"
                       onClick={resetForm}
-                      className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-[#1C3A34] transition-colors hover:bg-slate-50"
+                      className="inline-flex flex-1 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-[#1C3A34] transition-colors hover:bg-slate-50 dark:border-white/10 dark:bg-[#171c24] dark:text-[#d8c77f] dark:hover:bg-[#1b212a]"
                     >
                       {copy.backToCatalog}
                     </button>
@@ -1139,7 +1144,7 @@ function VehicleRequestPageContent() {
         <div className="flex min-h-[calc(100vh-72px)] flex-1 flex-col lg:flex-row">
           {selectedVehiclesPanel}
 
-          <section className="flex w-full flex-1 flex-col bg-slate-50/80 px-6 py-8 sm:px-8 lg:w-7/12 lg:px-10 lg:py-10 xl:px-12">
+          <section className="flex w-full flex-1 flex-col bg-slate-50/80 px-6 py-8 dark:bg-[#0d1117] sm:px-8 lg:w-7/12 lg:px-10 lg:py-10 xl:px-12">
             <div className="flex w-full flex-1 flex-col space-y-6">
               <div>
                 <h2 className="text-2xl font-extrabold tracking-tight text-[#1C3A34] sm:text-3xl">
@@ -1152,9 +1157,9 @@ function VehicleRequestPageContent() {
 
               {!user ? (
                 <div className="flex flex-1 items-center justify-center">
-                  <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm sm:p-8">
-                    <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-[#1C3A34]/8">
-                      <Lock className="size-5 text-[#1C3A34]" strokeWidth={1.75} />
+                  <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm dark:border-white/10 dark:bg-[#171c24] dark:shadow-black/25 sm:p-8">
+                    <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-xl bg-[#1C3A34]/8 dark:bg-[#C9B87A]/10">
+                      <Lock className="size-5 text-[#1C3A34] dark:text-[#C9B87A]" strokeWidth={1.75} />
                     </div>
                     <h3 className="text-lg font-extrabold tracking-tight text-[#1C3A34]">
                       {copy.signInPrompt}
@@ -1185,7 +1190,7 @@ function VehicleRequestPageContent() {
                     <button
                       type="button"
                       onClick={() => setRequestType("single")}
-                      className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 text-left transition-colors hover:border-[#1C3A34]/45 sm:p-6"
+                      className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 text-left transition-colors hover:border-[#1C3A34]/45 dark:border-white/10 dark:bg-[#171c24] dark:hover:border-[#C9B87A]/30 sm:p-6"
                     >
                       <div className="flex size-11 items-center justify-center rounded-xl bg-[#1C3A34]/8">
                         <Zap className="size-5 text-[#1C3A34]" strokeWidth={1.75} />
@@ -1203,7 +1208,7 @@ function VehicleRequestPageContent() {
                     <button
                       type="button"
                       onClick={() => setRequestType("contract")}
-                      className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 text-left transition-colors hover:border-[#C9B87A]/80 sm:p-6"
+                      className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-5 text-left transition-colors hover:border-[#C9B87A]/80 dark:border-white/10 dark:bg-[#171c24] dark:hover:border-[#C9B87A]/40 sm:p-6"
                     >
                       <div className="flex size-11 items-center justify-center rounded-xl bg-[#C9B87A]/15">
                         <Repeat2 className="size-5 text-[#C9B87A]" strokeWidth={1.75} />
@@ -1221,7 +1226,7 @@ function VehicleRequestPageContent() {
                 </div>
               ) : (
                 <form onSubmit={handleBookingSubmit} className="mx-auto w-full max-w-2xl space-y-6">
-                  <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-[#171c24]">
                     <div className="flex items-center gap-2.5">
                       {requestType === "single" ? (
                         <Zap className="size-4 text-[#1C3A34]" strokeWidth={1.75} />
@@ -1610,7 +1615,7 @@ function VehicleRequestPageContent() {
                 </AdminFormSection>
 
 
-                  <div className="border-t border-slate-200 pt-6">
+                  <div className="border-t border-slate-200 pt-6 dark:border-white/10">
                     <button
                       type="submit"
                       disabled={isSubmitting}
@@ -1632,8 +1637,8 @@ function VehicleRequestPageContent() {
 export default function VehicleRequestPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#1C3A34]/10 border-t-[#C9B87A]" />
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-[#0d1117]">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#1C3A34]/10 border-t-[#C9B87A] dark:border-white/10 dark:border-t-[#C9B87A]" />
       </div>
     }>
       <LocaleProvider>

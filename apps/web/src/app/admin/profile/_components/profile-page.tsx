@@ -31,7 +31,6 @@ import {
   adminHeadingClass,
   adminInputClass,
   adminPrimaryButtonClass,
-  adminTheme,
 } from "@/lib/admin-theme";
 import { changeMyPassword, updateMyProfile } from "@/lib/profile-api";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
@@ -57,7 +56,7 @@ type PasswordFieldErrors = Partial<Record<keyof PasswordFormState, string>>;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const fieldErrorClassName =
-  "border-red-300 bg-red-50/60 text-red-900 placeholder:text-red-400 focus-visible:border-red-400 focus-visible:ring-red-200/60";
+  "border-red-300 bg-red-50/60 text-red-900 placeholder:text-red-400 focus-visible:border-red-400 focus-visible:ring-red-200/60 dark:border-red-400/40 dark:bg-red-950/25 dark:text-red-200 dark:placeholder:text-red-300/60";
 
 const emptyPasswordForm: PasswordFormState = {
   currentPassword: "",
@@ -117,9 +116,9 @@ function ProfileCard({
 }) {
   return (
     <section className={cn("overflow-hidden rounded-2xl border", adminCardClass, className)}>
-      <div className="border-b border-slate-100 bg-[#f8fafb]/60 px-5 py-4 sm:px-6">
+      <div className="border-b border-slate-100 bg-[#f8fafb]/60 px-5 py-4 dark:border-border dark:bg-[#11161d] sm:px-6">
         <div className="flex items-start gap-3">
-          <div className="rounded-xl bg-[#1C3A34]/8 p-2.5 text-[#1C3A34]">
+          <div className="rounded-xl bg-[#1C3A34]/8 p-2.5 text-[#1C3A34] dark:bg-[#C9B87A]/12 dark:text-[#d8c77f]">
             <Icon className="size-4" aria-hidden />
           </div>
           <div className="min-w-0 space-y-0.5">
@@ -149,9 +148,9 @@ function ProfileHero({
   const displayName = formatUserName(user) || user.email;
 
   return (
-    <section className="relative overflow-hidden rounded-2xl border border-[#1C3A34]/10 bg-white shadow-sm">
+    <section className="relative overflow-hidden rounded-2xl border border-[#1C3A34]/10 bg-white shadow-sm dark:border-border dark:bg-card">
       <div
-        className="absolute inset-0 bg-linear-to-br from-[#1C3A34]/8 via-white to-[#C9B87A]/12"
+        className="absolute inset-0 bg-linear-to-br from-[#1C3A34]/8 via-white to-[#C9B87A]/12 dark:from-[#202630] dark:via-[#171c24] dark:to-[#C9B87A]/10"
         aria-hidden
       />
       <div
@@ -164,11 +163,8 @@ function ProfileHero({
       />
 
       <div className="relative flex flex-col gap-6 p-6 sm:flex-row sm:items-center sm:p-8">
-        <Avatar className="size-20 ring-4 ring-white shadow-md">
-          <AvatarFallback
-            className="text-xl font-bold text-white"
-            style={{ backgroundColor: adminTheme.brand }}
-          >
+        <Avatar className="size-20 ring-4 ring-white shadow-md dark:ring-[#C9B87A]/35">
+          <AvatarFallback className="bg-[var(--brand-primary)] text-xl font-bold text-white dark:bg-[var(--brand-accent)] dark:text-[#151a21]">
             {getUserInitials(user)}
           </AvatarFallback>
         </Avatar>
@@ -430,7 +426,7 @@ export function ProfilePage() {
             <Button
               type="button"
               variant="outline"
-              className="h-10 rounded-lg border-slate-200 bg-white px-4 text-sm text-slate-700 hover:bg-[#f8fafb]"
+              className="h-10 rounded-lg border-slate-200 bg-white px-4 text-sm text-slate-700 hover:bg-[#f8fafb] dark:border-border dark:bg-muted/55 dark:text-foreground dark:hover:bg-accent"
               disabled={savingProfile || !hasProfileChanges}
               onClick={resetProfileForm}
             >
@@ -453,7 +449,7 @@ export function ProfilePage() {
         icon={Shield}
       >
         <dl className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="rounded-xl border border-slate-200/80 bg-[#f8fafb]/80 p-4">
+          <div className="rounded-xl border border-slate-200/80 bg-[#f8fafb]/80 p-4 dark:border-border dark:bg-white/[0.025]">
             <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
               {copy.account.roles}
             </dt>
@@ -470,7 +466,7 @@ export function ProfilePage() {
             </dd>
           </div>
 
-          <div className="rounded-xl border border-slate-200/80 bg-[#f8fafb]/80 p-4">
+          <div className="rounded-xl border border-slate-200/80 bg-[#f8fafb]/80 p-4 dark:border-border dark:bg-white/[0.025]">
             <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
               {copy.account.statusLabel}
             </dt>
@@ -481,7 +477,7 @@ export function ProfilePage() {
             </dd>
           </div>
 
-          <div className="rounded-xl border border-slate-200/80 bg-[#f8fafb]/80 p-4">
+          <div className="rounded-xl border border-slate-200/80 bg-[#f8fafb]/80 p-4 dark:border-border dark:bg-white/[0.025]">
             <dt className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
               {copy.account.activationLabel}
             </dt>
@@ -493,9 +489,11 @@ export function ProfilePage() {
           </div>
         </dl>
 
-        <div className="mt-5 flex items-start gap-3 rounded-xl border border-[#C9B87A]/25 bg-[#C9B87A]/8 px-4 py-3">
-          <Lock className="mt-0.5 size-4 shrink-0 text-[#8f7d45]" aria-hidden />
-          <p className="text-xs leading-relaxed text-[#6b5c32]">{copy.account.adminNote}</p>
+        <div className="mt-5 flex items-start gap-3 rounded-xl border border-[#C9B87A]/25 bg-[#C9B87A]/8 px-4 py-3 dark:border-[#C9B87A]/35 dark:bg-[#C9B87A]/10">
+          <Lock className="mt-0.5 size-4 shrink-0 text-[#8f7d45] dark:text-[#d8c77f]" aria-hidden />
+          <p className="text-xs leading-relaxed text-[#6b5c32] dark:text-[#e0d39e]">
+            {copy.account.adminNote}
+          </p>
         </div>
       </ProfileCard>
 
@@ -588,16 +586,17 @@ function ProfileFormFields({
       >
         <div
           className={cn(
-            "flex overflow-hidden rounded-lg border bg-white shadow-xs focus-within:border-[#1C3A34]/30 focus-within:ring-2 focus-within:ring-[#1C3A34]/10",
+            "flex overflow-hidden rounded-lg border bg-white shadow-xs focus-within:border-[#1C3A34]/30 focus-within:ring-2 focus-within:ring-[#1C3A34]/10 dark:bg-muted/55 dark:focus-within:border-[#C9B87A]/55 dark:focus-within:ring-[#C9B87A]/20",
             profileErrors.mobile
-              ? "border-red-300 ring-2 ring-red-200/60"
-              : "border-slate-200",
+              ? "border-red-300 ring-2 ring-red-200/60 dark:border-red-400/40 dark:ring-red-400/20"
+              : "border-slate-200 dark:border-border",
           )}
         >
           <div
             className={cn(
-              "flex shrink-0 items-center gap-1.5 border-r border-slate-200 bg-slate-50 px-3 text-sm text-slate-600",
-              profileErrors.mobile && "border-red-200 bg-red-50/60 text-red-700",
+              "flex shrink-0 items-center gap-1.5 border-r border-slate-200 bg-slate-50 px-3 text-sm text-slate-600 dark:border-border dark:bg-[#202630] dark:text-muted-foreground",
+              profileErrors.mobile &&
+                "border-red-200 bg-red-50/60 text-red-700 dark:border-red-400/40 dark:bg-red-950/25 dark:text-red-300",
             )}
           >
             <Phone className="size-3.5 shrink-0 opacity-70" aria-hidden />

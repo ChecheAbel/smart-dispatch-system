@@ -2,7 +2,10 @@
 
 import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { Search } from "lucide-react";
-import type { ApiPaginatedResponse, PaginationMeta } from "@smart-dispatch/types";
+import type {
+  ApiPaginatedResponse,
+  PaginationMeta,
+} from "@smart-dispatch/types";
 import { DataTablePagination } from "@/components/shared/data-table/data-table-pagination";
 import { useLocale } from "@/components/shared/providers";
 import {
@@ -68,7 +71,7 @@ type DataTableProps<T> = {
 const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50];
 
 const searchInputClassName =
-  "h-10 rounded-lg border-slate-200 bg-white py-2 pl-10 pr-3.5 text-sm shadow-sm";
+  "h-10 rounded-lg border-slate-200 bg-white py-2 pl-10 pr-3.5 text-sm shadow-sm dark:border-border dark:bg-muted/55 dark:text-foreground";
 
 function TableSkeleton({ rows = 5 }: { rows?: number }) {
   return (
@@ -119,7 +122,8 @@ export function DataTable<T>({
 }: DataTableProps<T>) {
   const { locale } = useLocale();
   const tableCopy = getTranslations(locale).common.dataTable;
-  const resolvedSearchPlaceholder = searchPlaceholder ?? tableCopy.searchPlaceholder;
+  const resolvedSearchPlaceholder =
+    searchPlaceholder ?? tableCopy.searchPlaceholder;
   const resolvedItemLabel = itemLabel ?? (locale === "am" ? "ንጥል" : "item");
 
   const [rows, setRows] = useState<T[]>([]);
@@ -153,7 +157,10 @@ export function DataTable<T>({
       setRows(result.data);
       setPagination(result.pagination);
 
-      if (result.pagination.total_pages > 0 && page > result.pagination.total_pages) {
+      if (
+        result.pagination.total_pages > 0 &&
+        page > result.pagination.total_pages
+      ) {
         setPage(result.pagination.total_pages);
       }
     } catch (err) {
@@ -163,7 +170,14 @@ export function DataTable<T>({
     } finally {
       setLoading(false);
     }
-  }, [debouncedSearch, fetchData, page, pageSize, tableCopy.loadFailed, ...refreshDeps]);
+  }, [
+    debouncedSearch,
+    fetchData,
+    page,
+    pageSize,
+    tableCopy.loadFailed,
+    ...refreshDeps,
+  ]);
 
   useEffect(() => {
     void loadRows();
@@ -184,18 +198,29 @@ export function DataTable<T>({
   const pageRange = pagination ? getPageRange(pagination) : null;
 
   return (
-    <Card className={cn("min-w-0 w-full max-w-full border-slate-200/80 bg-white shadow-sm", className)}>
+    <Card
+      className={cn(
+        "min-w-0 w-full max-w-full border-slate-200/80 bg-white shadow-sm dark:border-border dark:bg-card",
+        className,
+      )}
+    >
       <CardHeader className="gap-4">
         {eyebrow}
 
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <CardTitle className={cn("font-bold text-slate-900", titleClassName, "shrink-0")}>
+          <CardTitle
+            className={cn(
+              "font-bold text-slate-900 dark:text-foreground",
+              titleClassName,
+              "shrink-0",
+            )}
+          >
             {title}
           </CardTitle>
 
           <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center lg:w-auto lg:justify-end">
             <div className="relative w-full sm:min-w-[240px] sm:max-w-md">
-              <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400" />
+              <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-slate-400 dark:text-muted-foreground" />
               <Input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
@@ -205,17 +230,21 @@ export function DataTable<T>({
             </div>
 
             {toolbarActions ? (
-              <div className="flex shrink-0 items-center justify-end gap-2">{toolbarActions}</div>
+              <div className="flex shrink-0 items-center justify-end gap-2">
+                {toolbarActions}
+              </div>
             ) : null}
           </div>
         </div>
 
-        <CardDescription className="max-w-2xl text-sm text-slate-500">
+        <CardDescription className="max-w-2xl text-sm text-slate-500 dark:text-muted-foreground">
           {description ?? totalLabel}
         </CardDescription>
 
         {filterBar ? (
-          <div className="rounded-lg border border-slate-200 bg-slate-50/80 p-4 sm:p-5">{filterBar}</div>
+          <div className="rounded-lg border border-slate-200 bg-slate-50/80 p-4 dark:border-border dark:bg-muted/40 sm:p-5">
+            {filterBar}
+          </div>
         ) : null}
       </CardHeader>
 
@@ -229,56 +258,82 @@ export function DataTable<T>({
         ) : null}
 
         {!loading && !error && rows.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-200 bg-slate-50 px-6 py-12 text-center">
+          <div className="flex flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-slate-200 bg-slate-50 px-6 py-12 text-center dark:border-border dark:bg-muted/35">
             {EmptyIcon ? (
-              <div className="rounded-xl bg-slate-900/8 p-3 text-slate-900">
+              <div className="rounded-xl bg-slate-900/8 p-3 text-slate-900 dark:bg-accent dark:text-[var(--brand-accent)]">
                 <EmptyIcon className="size-5" />
               </div>
             ) : null}
-            <p className="text-sm font-semibold text-slate-900">{emptyTitle}</p>
-            <p className="max-w-sm text-sm text-slate-500">
+            <p className="text-sm font-semibold text-slate-900 dark:text-foreground">
+              {emptyTitle}
+            </p>
+            <p className="max-w-sm text-sm text-slate-500 dark:text-muted-foreground">
               {debouncedSearch ? emptySearchDescription : emptyDescription}
             </p>
           </div>
         ) : null}
 
         {!loading && !error && rows.length > 0 ? (
-          <div className="w-full min-w-0 max-w-full overflow-x-auto rounded-lg border border-slate-200">
-            <table className="w-full text-left text-sm" style={{ minWidth: minTableWidth }}>
-              <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <div className="w-full min-w-0 max-w-full overflow-x-auto rounded-lg border border-slate-200 dark:border-border">
+            <table
+              className="w-full text-left text-sm"
+              style={{ minWidth: minTableWidth }}
+            >
+              <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-border dark:bg-muted/65 dark:text-muted-foreground">
                 <tr>
                   {showIndexColumn ? (
-                    <th className="w-12 px-4 py-3 text-center">{indexColumnHeader}</th>
+                    <th className="w-12 px-4 py-3 text-center">
+                      {indexColumnHeader}
+                    </th>
                   ) : null}
                   {columns.map((column) => (
-                    <th key={column.id} className={cn("px-4 py-3", column.headerClassName)}>
+                    <th
+                      key={column.id}
+                      className={cn("px-4 py-3", column.headerClassName)}
+                    >
                       {column.header}
                     </th>
                   ))}
                   {renderRowActions ? (
-                    <th className="w-20 px-4 py-3 text-right">{actionsColumnHeader}</th>
+                    <th className="w-20 px-4 py-3 text-right">
+                      {actionsColumnHeader}
+                    </th>
                   ) : null}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 bg-white">
+              <tbody className="divide-y divide-slate-100 bg-white dark:divide-border dark:bg-card">
                 {rows.map((row, rowIndex) => {
                   const index = pagination
                     ? (pagination.page - 1) * pagination.limit + rowIndex + 1
                     : rowIndex + 1;
-                  const rowContext: DataTableRowContext<T> = { row, index, rowIndex };
+                  const rowContext: DataTableRowContext<T> = {
+                    row,
+                    index,
+                    rowIndex,
+                  };
 
                   return (
-                    <tr key={getRowKey(row)} className="hover:bg-slate-50/80">
+                    <tr
+                      key={getRowKey(row)}
+                      className="transition-colors hover:bg-slate-50/80 dark:hover:bg-accent/55"
+                    >
                       {showIndexColumn ? (
-                        <td className="px-4 py-3 text-center text-slate-500 tabular-nums">{index}</td>
+                        <td className="px-4 py-3 text-center text-slate-500 tabular-nums dark:text-muted-foreground">
+                          {index}
+                        </td>
                       ) : null}
                       {columns.map((column) => (
-                        <td key={column.id} className={cn("px-4 py-3", column.cellClassName)}>
+                        <td
+                          key={column.id}
+                          className={cn("px-4 py-3", column.cellClassName)}
+                        >
                           {column.cell(row, rowContext)}
                         </td>
                       ))}
                       {renderRowActions ? (
-                        <td className="px-4 py-3 text-right">{renderRowActions(row, rowContext)}</td>
+                        <td className="px-4 py-3 text-right">
+                          {renderRowActions(row, rowContext)}
+                        </td>
                       ) : null}
                     </tr>
                   );

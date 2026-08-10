@@ -205,11 +205,11 @@ router.post(
       }
 
       const paymentMethod = parsePaymentMethod(req.body?.payment_method);
-      if (req.body?.payment_method !== undefined && !paymentMethod) {
+      if (!paymentMethod) {
         return sendError(res, "Invalid payment method.", 400);
       }
 
-      await markInvoicePaidForRequester(req.params.id, userId);
+      await markInvoicePaidForRequester(req.params.id, userId, paymentMethod);
 
       const invoice = await findInvoiceForRequester(req.params.id, userId);
       if (!invoice) {

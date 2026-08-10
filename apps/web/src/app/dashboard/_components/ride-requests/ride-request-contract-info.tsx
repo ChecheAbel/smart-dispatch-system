@@ -40,14 +40,17 @@ export function RideRequestContractBadge({
       <Badge
         variant="outline"
         className={cn(
-          "max-w-full border-[#C9B87A]/40 bg-[#C9B87A]/10 text-[11px] font-semibold text-[#6f5f2f]",
+          "max-w-full border-[#C9B87A]/40 bg-[#C9B87A]/10 text-[11px] font-semibold text-[#6f5f2f] dark:border-[#C9B87A]/55 dark:bg-[#C9B87A]/15 dark:text-[#e1d49d]",
           compact && "font-mono",
         )}
       >
         <span className="truncate">{formatRideRequestContractLabel(contract, compact)}</span>
       </Badge>
       {showBillingInterval ? (
-        <Badge variant="outline" className="text-[11px] text-slate-600">
+        <Badge
+          variant="outline"
+          className="text-[11px] text-slate-600 dark:border-white/12 dark:bg-white/[0.04] dark:text-slate-300"
+        >
           {billingIntervalLabels[contract.billing_interval]}
         </Badge>
       ) : null}
