@@ -15,6 +15,7 @@ export type { BookingPolicyTranslationInput };
 export type CreateBookingPolicyInput = {
   translations: BookingPolicyTranslationInput[];
   minAdvanceBookingHours?: number;
+  maxAdvanceBookingHours?: number;
   freeCancellationHours?: number;
   lateCancellationType?: LateCancellationType;
   lateCancellationFee?: number | null;
@@ -25,6 +26,7 @@ export type CreateBookingPolicyInput = {
 export type UpdateBookingPolicyInput = {
   translations?: BookingPolicyTranslationInput[];
   minAdvanceBookingHours?: number;
+  maxAdvanceBookingHours?: number;
   freeCancellationHours?: number;
   lateCancellationType?: LateCancellationType;
   lateCancellationFee?: number | null;
@@ -163,6 +165,7 @@ export async function createBookingPolicy(input: CreateBookingPolicyInput) {
       slug,
       translations: toJsonTranslations(translationsMap),
       minAdvanceBookingHours: normalizeHours(input.minAdvanceBookingHours),
+      maxAdvanceBookingHours: normalizeHours(input.maxAdvanceBookingHours, 720),
       freeCancellationHours: normalizeHours(input.freeCancellationHours),
       lateCancellationType: input.lateCancellationType ?? LateCancellationType.none,
       lateCancellationFee: toOptionalDecimal(input.lateCancellationFee ?? null),
@@ -207,6 +210,10 @@ export async function updateBookingPolicy(id: string, input: UpdateBookingPolicy
         input.minAdvanceBookingHours === undefined
           ? undefined
           : normalizeHours(input.minAdvanceBookingHours),
+      maxAdvanceBookingHours:
+        input.maxAdvanceBookingHours === undefined
+          ? undefined
+          : normalizeHours(input.maxAdvanceBookingHours),
       freeCancellationHours:
         input.freeCancellationHours === undefined
           ? undefined

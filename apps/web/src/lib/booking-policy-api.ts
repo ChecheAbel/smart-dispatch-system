@@ -17,6 +17,7 @@ export type FetchBookingPoliciesParams = {
 export type CreateBookingPolicyInput = {
   translations: BookingPolicyTranslation[];
   min_advance_booking_hours?: number;
+  max_advance_booking_hours?: number;
   free_cancellation_hours?: number;
   late_cancellation_type?: LateCancellationType;
   late_cancellation_fee?: number | null;

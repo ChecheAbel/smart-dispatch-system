@@ -16,11 +16,13 @@ import { DEFAULT_LOCALE, normalizeLocale } from "../utils/locale";
 import { toPublicRegion } from "./region.mapper";
 import { pickLocationName } from "./location.mapper";
 import {
-  canCancelRideRequest,
   canEditRideRequest,
-  getRideRequestCancelDeadline,
   getRideRequestEditDeadline,
 } from "../services/ride-request-policy.service";
+import {
+  canCancelRideRequestWithPolicy,
+  getEffectiveCancelDeadline,
+} from "../services/booking-policy-enforcement.service";
 import {
   canAdminAssignRideRequest,
   canAdminCompleteRideRequest,
@@ -135,6 +137,17 @@ type DbRideRequest = {
     title: string;
     status: ContractStatus;
     billingInterval: string;
+    farePlanId?: string | null;
+    bookingPolicy?: {
+      id: string;
+      isActive: boolean;
+      minAdvanceBookingHours: number;
+      maxAdvanceBookingHours: number;
+      freeCancellationHours: number;
+      lateCancellationType: "none" | "charge_fee" | "bill_as_trip";
+      lateCancellationFee: Prisma.Decimal | null;
+      currency: string;
+    } | null;
   } | null;
   driverRating?: {
     id: string;
@@ -395,11 +408,18 @@ export function toPublicRideRequest(
       Boolean(rideRequest.assignedDriverUserId) &&
       !rideRequest.driverRating,
     can_edit: canEditRideRequest(rideRequest.status, rideRequest.createdAt),
-    can_cancel: canCancelRideRequest(rideRequest.status, rideRequest.createdAt),
-    cancel_deadline_at:
-      rideRequest.status === "pending"
-        ? getRideRequestCancelDeadline(rideRequest.createdAt).toISOString()
-        : null,
+    can_cancel: canCancelRideRequestWithPolicy({
+      status: rideRequest.status,
+      createdAt: rideRequest.createdAt,
+      scheduledAt: rideRequest.scheduledAt,
+      policy: rideRequest.contract?.bookingPolicy,
+    }),
+    cancel_deadline_at: getEffectiveCancelDeadline({
+      status: rideRequest.status,
+      createdAt: rideRequest.createdAt,
+      scheduledAt: rideRequest.scheduledAt,
+      policy: rideRequest.contract?.bookingPolicy,
+    })?.toISOString() ?? null,
     edit_deadline_at:
       rideRequest.status === "pending"
         ? getRideRequestEditDeadline(rideRequest.createdAt).toISOString()

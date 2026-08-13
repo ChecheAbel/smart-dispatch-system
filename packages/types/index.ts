@@ -1036,6 +1036,7 @@ export interface BookingPolicy {
   description: string | null;
   locale: string;
   min_advance_booking_hours: number;
+  max_advance_booking_hours: number;
   free_cancellation_hours: number;
   late_cancellation_type: LateCancellationType;
   late_cancellation_fee: number | null;
@@ -1051,6 +1052,7 @@ export interface ContractBookingPolicySummary {
   slug: string;
   name: string;
   min_advance_booking_hours: number;
+  max_advance_booking_hours: number;
   free_cancellation_hours: number;
   late_cancellation_type: LateCancellationType;
   late_cancellation_fee: number | null;

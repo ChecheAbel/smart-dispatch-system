@@ -4,12 +4,13 @@ import { prisma } from "../db/prisma";
 import { ensureContractEnrollment } from "./contract-enrollment.model";
 import { findActiveContractById } from "./contract.model";
 import { findVehicleById } from "./vehicle.model";
-import { ensureTripBillingSnapshot } from "../services/trip-billing.service";
-import { tryAutoInvoiceCompletedTrip } from "../services/invoice-automation.service";
 import {
-  canCancelRideRequest,
-  canEditRideRequest,
-} from "../services/ride-request-policy.service";
+  computeTripBillingSnapshot,
+  ensureTripBillingSnapshot,
+} from "../services/trip-billing.service";
+import { tryAutoInvoiceCompletedTrip } from "../services/invoice-automation.service";
+import { canEditRideRequest } from "../services/ride-request-policy.service";
+import { evaluateRideRequestCancellation } from "../services/booking-policy-enforcement.service";
 
 export type CreateRideRequestInput = {
   requesterUserId: string;
@@ -107,6 +108,19 @@ const rideRequestInclude = {
       title: true,
       status: true,
       billingInterval: true,
+      farePlanId: true,
+      bookingPolicy: {
+        select: {
+          id: true,
+          isActive: true,
+          minAdvanceBookingHours: true,
+          maxAdvanceBookingHours: true,
+          freeCancellationHours: true,
+          lateCancellationType: true,
+          lateCancellationFee: true,
+          currency: true,
+        },
+      },
     },
   },
   driverRating: true,
@@ -641,13 +655,58 @@ export async function cancelRideRequestForUser(id: string, requesterUserId: stri
     return null;
   }
 
-  if (!canCancelRideRequest(existing.status, existing.createdAt)) {
-    return { error: "This ride request can no longer be cancelled." as const };
+  const evaluation = evaluateRideRequestCancellation({
+    status: existing.status,
+    createdAt: existing.createdAt,
+    scheduledAt: existing.scheduledAt,
+    policy: existing.contract?.bookingPolicy,
+  });
+
+  if (!evaluation.allowed) {
+    return {
+      error: evaluation.reason ?? "This ride request can no longer be cancelled.",
+    };
+  }
+
+  const updateData: Prisma.RideRequestUncheckedUpdateInput = {
+    status: "cancelled",
+  };
+
+  if (evaluation.isLateCancellation) {
+    if (
+      evaluation.lateCancellationType === "charge_fee" &&
+      evaluation.lateCancellationFee != null
+    ) {
+      updateData.billableAmount = new Prisma.Decimal(evaluation.lateCancellationFee);
+      updateData.billableCurrency = evaluation.lateCancellationCurrency ?? "ETB";
+      const feeNote = `Late cancellation fee applied: ${evaluation.lateCancellationFee} ${evaluation.lateCancellationCurrency ?? "ETB"}.`;
+      updateData.notes = existing.notes ? `${existing.notes}\n${feeNote}` : feeNote;
+    }
+
+    if (evaluation.lateCancellationType === "bill_as_trip" && existing.contractId) {
+      try {
+        const snapshot = await computeTripBillingSnapshot(
+          existing,
+          existing.contract?.farePlanId ?? null,
+        );
+        if (snapshot) {
+          updateData.farePlanId = snapshot.farePlanId;
+          updateData.distanceKm = snapshot.distanceKm;
+          updateData.durationMinutes = snapshot.durationMinutes;
+          updateData.billableAmount = new Prisma.Decimal(snapshot.billableAmount);
+          updateData.billableCurrency = snapshot.billableCurrency;
+          const tripNote = `Late cancellation billed as trip: ${snapshot.billableAmount} ${snapshot.billableCurrency}.`;
+          updateData.notes = existing.notes ? `${existing.notes}\n${tripNote}` : tripNote;
+        }
+      } catch {
+        // Fare plan may be missing; still allow cancel without billing snapshot.
+      }
+    }
   }
 
   return prisma.rideRequest.update({
     where: { id },
-    data: { status: "cancelled" },
+    data: updateData,
     include: rideRequestInclude,
   });
 }

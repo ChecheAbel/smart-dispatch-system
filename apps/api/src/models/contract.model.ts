@@ -52,6 +52,7 @@ const contractInclude = {
       slug: true,
       translations: true,
       minAdvanceBookingHours: true,
+      maxAdvanceBookingHours: true,
       freeCancellationHours: true,
       lateCancellationType: true,
       lateCancellationFee: true,

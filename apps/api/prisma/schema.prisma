@@ -713,6 +713,7 @@ model BookingPolicy {
   slug                   String                @unique @db.VarChar(50)
   translations           Json                  @db.JsonB
   minAdvanceBookingHours Int                   @default(0) @map("min_advance_booking_hours")
+  maxAdvanceBookingHours Int                   @default(720) @map("max_advance_booking_hours")
   freeCancellationHours  Int                   @default(0) @map("free_cancellation_hours")
   lateCancellationType   LateCancellationType  @default(none) @map("late_cancellation_type")
   lateCancellationFee    Decimal?              @map("late_cancellation_fee") @db.Decimal(12, 2)

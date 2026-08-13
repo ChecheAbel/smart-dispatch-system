@@ -18,7 +18,6 @@ import { PORTAL_SHELL_CONFIG } from "@/lib/portal-shell-config";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Toaster } from "@/components/ui/sonner";
 
 function ShellLoadingState() {
   return (
@@ -129,7 +128,6 @@ export function DashboardShell({
                   <DashboardFooter />
                 </SidebarInset>
               </SidebarProvider>
-              <Toaster />
             </TooltipProvider>
           </NavigationProvider>
         </PortalShellProvider>

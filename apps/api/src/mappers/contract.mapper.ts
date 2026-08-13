@@ -63,6 +63,7 @@ export function toPublicContract(contract: DbContract, options?: { locale?: stri
           slug: contract.bookingPolicy.slug,
           name: pickBookingPolicyName(contract.bookingPolicy.translations, locale),
           min_advance_booking_hours: contract.bookingPolicy.minAdvanceBookingHours,
+          max_advance_booking_hours: contract.bookingPolicy.maxAdvanceBookingHours,
           free_cancellation_hours: contract.bookingPolicy.freeCancellationHours,
           late_cancellation_type: contract.bookingPolicy.lateCancellationType,
           late_cancellation_fee: contract.bookingPolicy.lateCancellationFee

@@ -4,6 +4,7 @@ import { auditMutations } from "../middleware/audit-mutation";
 import { authenticate, type AuthenticatedRequest } from "../middleware/authenticate";
 import { requirePermission } from "../middleware/require-permission";
 import { toPublicRideRequest } from "../mappers/ride-request.mapper";
+import { assertAdvanceBookingWindow } from "../services/booking-policy-enforcement.service";
 import { toPublicRegion } from "../mappers/region.mapper";
 import { toRideRequestLocationOption } from "../mappers/location.mapper";
 import { toPublicVehicleClass } from "../mappers/vehicle-class.mapper";
@@ -1065,6 +1066,14 @@ router.post(
         );
       }
 
+      const advanceError = assertAdvanceBookingWindow(
+        parsed.data.scheduledAt,
+        resolvedContract?.bookingPolicy,
+      );
+      if (advanceError) {
+        return sendError(res, advanceError, 400);
+      }
+
       const shouldGenerateContract = !resolvedContractId;
       const serviceDate =
         parsed.data.scheduledAt?.toISOString().split("T")[0] ??
@@ -1136,6 +1145,19 @@ router.patch(
       const referenceError = await validateRideRequestReferences(parsed.data);
       if (referenceError) {
         return sendError(res, referenceError, 400);
+      }
+
+      const existingRequest = await findRideRequestForUser(rideRequestId, userId);
+      if (!existingRequest) {
+        return sendError(res, "Ride request not found.", 404);
+      }
+
+      const advanceError = assertAdvanceBookingWindow(
+        parsed.data.scheduledAt,
+        existingRequest.contract?.bookingPolicy,
+      );
+      if (advanceError) {
+        return sendError(res, advanceError, 400);
       }
 
       const result = await updateRideRequestForUser(rideRequestId, userId, {

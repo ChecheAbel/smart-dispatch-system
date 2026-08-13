@@ -128,6 +128,7 @@ router.post("/", requirePermission("booking_policies.write"), async (req: Reques
   try {
     const translations = getRoleTranslations(req.body?.translations);
     const minAdvanceBookingHours = parseHours(req.body?.min_advance_booking_hours);
+    const maxAdvanceBookingHours = parseHours(req.body?.max_advance_booking_hours);
     const freeCancellationHours = parseHours(req.body?.free_cancellation_hours);
     const lateCancellationType = parseLateCancellationType(req.body?.late_cancellation_type);
     const lateCancellationFee = parseMoney(req.body?.late_cancellation_fee);
@@ -155,6 +156,13 @@ router.post("/", requirePermission("booking_policies.write"), async (req: Reques
     }
 
     if (
+      req.body?.max_advance_booking_hours !== undefined &&
+      maxAdvanceBookingHours === undefined
+    ) {
+      return sendError(res, "Maximum advance booking hours must be a non-negative number.", 400);
+    }
+
+    if (
       req.body?.free_cancellation_hours !== undefined &&
       freeCancellationHours === undefined
     ) {
@@ -175,6 +183,16 @@ router.post("/", requirePermission("booking_policies.write"), async (req: Reques
       return sendError(res, "Late cancellation fee must be a non-negative number.", 400);
     }
 
+    const resolvedMin = minAdvanceBookingHours ?? 0;
+    const resolvedMax = maxAdvanceBookingHours ?? 720;
+    if (resolvedMax < resolvedMin) {
+      return sendError(
+        res,
+        "Maximum advance booking hours must be greater than or equal to the minimum.",
+        400,
+      );
+    }
+
     const resolvedLateType = lateCancellationType ?? LateCancellationType.none;
     if (resolvedLateType === "charge_fee" && (lateCancellationFee ?? null) === null) {
       return sendError(res, "Late cancellation fee is required when charging a fee.", 400);
@@ -183,6 +201,7 @@ router.post("/", requirePermission("booking_policies.write"), async (req: Reques
     const policy = await createBookingPolicy({
       translations,
       minAdvanceBookingHours,
+      maxAdvanceBookingHours,
       freeCancellationHours,
       lateCancellationType: resolvedLateType,
       lateCancellationFee:
@@ -216,6 +235,7 @@ router.patch("/:id", requirePermission("booking_policies.write"), async (req: Re
 
     const translations = getRoleTranslations(req.body?.translations);
     const minAdvanceBookingHours = parseHours(req.body?.min_advance_booking_hours);
+    const maxAdvanceBookingHours = parseHours(req.body?.max_advance_booking_hours);
     const freeCancellationHours = parseHours(req.body?.free_cancellation_hours);
     const lateCancellationType = parseLateCancellationType(req.body?.late_cancellation_type);
     const lateCancellationFee = parseMoney(req.body?.late_cancellation_fee);
@@ -228,6 +248,13 @@ router.patch("/:id", requirePermission("booking_policies.write"), async (req: Re
       minAdvanceBookingHours === undefined
     ) {
       return sendError(res, "Minimum advance booking hours must be a non-negative number.", 400);
+    }
+
+    if (
+      req.body?.max_advance_booking_hours !== undefined &&
+      maxAdvanceBookingHours === undefined
+    ) {
+      return sendError(res, "Maximum advance booking hours must be a non-negative number.", 400);
     }
 
     if (
@@ -251,6 +278,18 @@ router.patch("/:id", requirePermission("booking_policies.write"), async (req: Re
       return sendError(res, "Late cancellation fee must be a non-negative number.", 400);
     }
 
+    const resolvedMin =
+      minAdvanceBookingHours ?? existing.minAdvanceBookingHours;
+    const resolvedMax =
+      maxAdvanceBookingHours ?? existing.maxAdvanceBookingHours;
+    if (resolvedMax < resolvedMin) {
+      return sendError(
+        res,
+        "Maximum advance booking hours must be greater than or equal to the minimum.",
+        400,
+      );
+    }
+
     const resolvedLateType =
       lateCancellationType ?? existing.lateCancellationType;
     const resolvedFee =
@@ -269,6 +308,7 @@ router.patch("/:id", requirePermission("booking_policies.write"), async (req: Re
     const policy = await updateBookingPolicy(req.params.id, {
       translations: translations.length ? translations : undefined,
       minAdvanceBookingHours,
+      maxAdvanceBookingHours,
       freeCancellationHours,
       lateCancellationType,
       lateCancellationFee:

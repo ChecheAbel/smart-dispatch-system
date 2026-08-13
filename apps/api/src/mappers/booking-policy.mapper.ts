@@ -15,6 +15,7 @@ type DbBookingPolicy = {
   id: string;
   slug: string;
   minAdvanceBookingHours: number;
+  maxAdvanceBookingHours: number;
   freeCancellationHours: number;
   lateCancellationType: LateCancellationType;
   lateCancellationFee: Prisma.Decimal | null;
@@ -61,6 +62,7 @@ export function toPublicBookingPolicy(
     description: translation.description,
     locale,
     min_advance_booking_hours: policy.minAdvanceBookingHours,
+    max_advance_booking_hours: policy.maxAdvanceBookingHours,
     free_cancellation_hours: policy.freeCancellationHours,
     late_cancellation_type: policy.lateCancellationType,
     late_cancellation_fee: decimalToNumber(policy.lateCancellationFee),
@@ -89,6 +91,7 @@ export function toPublicBookingPolicySummary(
     slug: publicPolicy.slug,
     name: publicPolicy.name,
     min_advance_booking_hours: publicPolicy.min_advance_booking_hours,
+    max_advance_booking_hours: publicPolicy.max_advance_booking_hours,
     free_cancellation_hours: publicPolicy.free_cancellation_hours,
     late_cancellation_type: publicPolicy.late_cancellation_type,
     late_cancellation_fee: publicPolicy.late_cancellation_fee,

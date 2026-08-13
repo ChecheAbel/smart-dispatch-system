@@ -45,6 +45,7 @@ const DEFAULT_POLICY_TRANSLATIONS = [
 
 type BookingPolicyFormState = {
   minAdvanceBookingHours: string;
+  maxAdvanceBookingHours: string;
   freeCancellationHours: string;
   lateCancellationType: LateCancellationType;
   lateCancellationFee: string;
@@ -55,6 +56,7 @@ type FieldErrors = Partial<Record<keyof BookingPolicyFormState, string>>;
 
 const emptyForm: BookingPolicyFormState = {
   minAdvanceBookingHours: "24",
+  maxAdvanceBookingHours: "720",
   freeCancellationHours: "24",
   lateCancellationType: "none",
   lateCancellationFee: "",
@@ -136,6 +138,7 @@ export function BookingPoliciesPage() {
           setPolicyId(policy.id);
           setForm({
             minAdvanceBookingHours: String(policy.min_advance_booking_hours),
+            maxAdvanceBookingHours: String(policy.max_advance_booking_hours),
             freeCancellationHours: String(policy.free_cancellation_hours),
             lateCancellationType: policy.late_cancellation_type,
             lateCancellationFee:
@@ -195,6 +198,17 @@ export function BookingPoliciesPage() {
       nextErrors.minAdvanceBookingHours = formCopy.errors.hoursInvalid;
     }
 
+    const maxAdvance = form.maxAdvanceBookingHours.trim();
+    if (!maxAdvance || !Number.isFinite(Number(maxAdvance)) || Number(maxAdvance) < 0) {
+      nextErrors.maxAdvanceBookingHours = formCopy.errors.hoursInvalid;
+    } else if (
+      minAdvance &&
+      Number.isFinite(Number(minAdvance)) &&
+      Number(maxAdvance) < Number(minAdvance)
+    ) {
+      nextErrors.maxAdvanceBookingHours = formCopy.errors.maxLessThanMin;
+    }
+
     const freeCancel = form.freeCancellationHours.trim();
     if (!freeCancel || !Number.isFinite(Number(freeCancel)) || Number(freeCancel) < 0) {
       nextErrors.freeCancellationHours = formCopy.errors.hoursInvalid;
@@ -215,6 +229,7 @@ export function BookingPoliciesPage() {
     const payload = {
       translations: DEFAULT_POLICY_TRANSLATIONS,
       min_advance_booking_hours: Number(minAdvance),
+      max_advance_booking_hours: Number(maxAdvance),
       free_cancellation_hours: Number(freeCancel),
       late_cancellation_type: form.lateCancellationType,
       late_cancellation_fee:
@@ -235,6 +250,7 @@ export function BookingPoliciesPage() {
       setPolicyId(policy.id);
       setForm({
         minAdvanceBookingHours: String(policy.min_advance_booking_hours),
+        maxAdvanceBookingHours: String(policy.max_advance_booking_hours),
         freeCancellationHours: String(policy.free_cancellation_hours),
         lateCancellationType: policy.late_cancellation_type,
         lateCancellationFee:
@@ -316,12 +332,42 @@ export function BookingPoliciesPage() {
                     disabled={formDisabled}
                     className={cn(
                       fieldClassName,
+                      "w-full",
                       fieldErrors.minAdvanceBookingHours && fieldErrorClassName,
                     )}
                   />
                   <p className="text-xs text-slate-500">{formCopy.minAdvanceBookingHoursHint}</p>
                   {fieldErrors.minAdvanceBookingHours ? (
                     <p className="text-xs text-red-600">{fieldErrors.minAdvanceBookingHours}</p>
+                  ) : null}
+                </div>
+
+                <div className="space-y-2">
+                  <Label
+                    htmlFor="booking-policy-max-advance"
+                    className={fieldErrors.maxAdvanceBookingHours ? "text-red-700" : undefined}
+                  >
+                    {formCopy.maxAdvanceBookingHours}
+                  </Label>
+                  <Input
+                    id="booking-policy-max-advance"
+                    type="number"
+                    min={0}
+                    value={form.maxAdvanceBookingHours}
+                    onChange={(event) =>
+                      updateField("maxAdvanceBookingHours", event.target.value)
+                    }
+                    placeholder={formCopy.maxHoursPlaceholder}
+                    disabled={formDisabled}
+                    className={cn(
+                      fieldClassName,
+                      "w-full",
+                      fieldErrors.maxAdvanceBookingHours && fieldErrorClassName,
+                    )}
+                  />
+                  <p className="text-xs text-slate-500">{formCopy.maxAdvanceBookingHoursHint}</p>
+                  {fieldErrors.maxAdvanceBookingHours ? (
+                    <p className="text-xs text-red-600">{fieldErrors.maxAdvanceBookingHours}</p>
                   ) : null}
                 </div>
 
@@ -344,6 +390,7 @@ export function BookingPoliciesPage() {
                     disabled={formDisabled}
                     className={cn(
                       fieldClassName,
+                      "w-full",
                       fieldErrors.freeCancellationHours && fieldErrorClassName,
                     )}
                   />
@@ -352,96 +399,108 @@ export function BookingPoliciesPage() {
                     <p className="text-xs text-red-600">{fieldErrors.freeCancellationHours}</p>
                   ) : null}
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="booking-policy-late-type">{formCopy.lateCancellationType}</Label>
-                <Select
-                  items={lateCancellationItems}
-                  value={form.lateCancellationType}
-                  onValueChange={(value) =>
-                    updateField("lateCancellationType", (value ?? "none") as LateCancellationType)
-                  }
-                  disabled={formDisabled}
-                >
-                  <SelectTrigger
-                    id="booking-policy-late-type"
-                    className={cn(fieldClassName, "w-full")}
+                <div className="space-y-2">
+                  <Label htmlFor="booking-policy-late-type">{formCopy.lateCancellationType}</Label>
+                  <Select
+                    items={lateCancellationItems}
+                    value={form.lateCancellationType}
+                    onValueChange={(value) =>
+                      updateField(
+                        "lateCancellationType",
+                        (value ?? "none") as LateCancellationType,
+                      )
+                    }
+                    disabled={formDisabled}
                   >
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent alignItemWithTrigger={false} align="start" className="w-(--anchor-width)">
-                    <SelectGroup>
-                      {lateCancellationItems.map((item) => (
-                        <SelectItem key={item.value} value={item.value}>
-                          {item.label}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-slate-500">
-                  {copy.lateCancellationTypeHelp[form.lateCancellationType]}
-                </p>
-              </div>
-
-              {showFeeField ? (
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <Label
-                      htmlFor="booking-policy-late-fee"
-                      className={fieldErrors.lateCancellationFee ? "text-red-700" : undefined}
+                    <SelectTrigger
+                      id="booking-policy-late-type"
+                      className={cn(fieldClassName, "w-full")}
                     >
-                      {formCopy.lateCancellationFee}
-                    </Label>
-                    <Input
-                      id="booking-policy-late-fee"
-                      type="number"
-                      min={0}
-                      step="0.01"
-                      value={form.lateCancellationFee}
-                      onChange={(event) =>
-                        updateField("lateCancellationFee", event.target.value)
-                      }
-                      placeholder={formCopy.feePlaceholder}
-                      disabled={formDisabled}
-                      className={cn(
-                        fieldClassName,
-                        fieldErrors.lateCancellationFee && fieldErrorClassName,
-                      )}
-                    />
-                    {fieldErrors.lateCancellationFee ? (
-                      <p className="text-xs text-red-600">{fieldErrors.lateCancellationFee}</p>
-                    ) : null}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="booking-policy-currency">{formCopy.currency}</Label>
-                    <Select
-                      items={currencyItems}
-                      value={form.currency}
-                      onValueChange={(value) => updateField("currency", value ?? "ETB")}
-                      disabled={formDisabled}
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent
+                      alignItemWithTrigger={false}
+                      align="start"
+                      className="w-(--anchor-width)"
                     >
-                      <SelectTrigger
-                        id="booking-policy-currency"
-                        className={cn(fieldClassName, "w-full")}
-                      >
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent alignItemWithTrigger={false} align="start" className="w-(--anchor-width)">
-                        <SelectGroup>
-                          {currencyItems.map((item) => (
-                            <SelectItem key={item.value} value={item.value}>
-                              {item.label}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                  </div>
+                      <SelectGroup>
+                        {lateCancellationItems.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-slate-500">
+                    {copy.lateCancellationTypeHelp[form.lateCancellationType]}
+                  </p>
                 </div>
-              ) : null}
+
+                {showFeeField ? (
+                  <>
+                    <div className="space-y-2">
+                      <Label
+                        htmlFor="booking-policy-late-fee"
+                        className={fieldErrors.lateCancellationFee ? "text-red-700" : undefined}
+                      >
+                        {formCopy.lateCancellationFee}
+                      </Label>
+                      <Input
+                        id="booking-policy-late-fee"
+                        type="number"
+                        min={0}
+                        step="0.01"
+                        value={form.lateCancellationFee}
+                        onChange={(event) =>
+                          updateField("lateCancellationFee", event.target.value)
+                        }
+                        placeholder={formCopy.feePlaceholder}
+                        disabled={formDisabled}
+                        className={cn(
+                          fieldClassName,
+                          "w-full",
+                          fieldErrors.lateCancellationFee && fieldErrorClassName,
+                        )}
+                      />
+                      {fieldErrors.lateCancellationFee ? (
+                        <p className="text-xs text-red-600">{fieldErrors.lateCancellationFee}</p>
+                      ) : null}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="booking-policy-currency">{formCopy.currency}</Label>
+                      <Select
+                        items={currencyItems}
+                        value={form.currency}
+                        onValueChange={(value) => updateField("currency", value ?? "ETB")}
+                        disabled={formDisabled}
+                      >
+                        <SelectTrigger
+                          id="booking-policy-currency"
+                          className={cn(fieldClassName, "w-full")}
+                        >
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent
+                          alignItemWithTrigger={false}
+                          align="start"
+                          className="w-(--anchor-width)"
+                        >
+                          <SelectGroup>
+                            {currencyItems.map((item) => (
+                              <SelectItem key={item.value} value={item.value}>
+                                {item.label}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </>
+                ) : null}
+              </div>
             </div>
 
             {error ? (
