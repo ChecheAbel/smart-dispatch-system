@@ -23,8 +23,11 @@ export type RideRequestFieldErrors = Partial<
     | "pickupCoordinates"
     | "dropoffCoordinates"
     | "scheduledAt"
+    | "scheduledReturnAt"
     | "pickupSavedLocation"
     | "dropoffSavedLocation"
+    | "passengerName"
+    | "passengerMobile"
     | "billing",
     string
   >
@@ -474,4 +477,61 @@ export function buildDropoffLocationItems(
         : location.name,
     value: location.id,
   }));
+}
+
+export function getPassengerContactDetails(notes: string | null | undefined) {
+  const value = notes?.trim();
+  if (!value) {
+    return { passengerName: "", mobileNumber: "" };
+  }
+
+  const normalized = value.replace(/\s+·\s+Mobile:/i, "\nMobile:");
+  const passengerName = normalized.match(/^Passenger:\s*(.+)$/im)?.[1]?.trim() || "";
+  const mobileNumber = normalized.match(/^Mobile:\s*(.+)$/im)?.[1]?.trim() || "";
+
+  return { passengerName, mobileNumber };
+}
+
+export function getAdditionalInformation(notes: string | null | undefined) {
+  const value = notes?.trim();
+  if (!value) {
+    return "";
+  }
+
+  const additionalInformation = value.match(/(?:^|\n)Additional information:\s*([\s\S]+)$/i);
+  if (additionalInformation) {
+    return additionalInformation[1]?.trim() || "";
+  }
+
+  const containsBookingContactMetadata =
+    /^Passenger:\s*/i.test(value) && /(?:^|\n|\s·\s)Mobile:\s*/i.test(value);
+
+  if (containsBookingContactMetadata) {
+    return "";
+  }
+
+  return value;
+}
+
+export function buildRideRequestNotes(input: {
+  passengerName?: string;
+  mobileNumber?: string;
+  additionalInformation?: string;
+  fallbackNotes?: string | null;
+}) {
+  const passengerName = input.passengerName?.trim() || "";
+  const mobileNumber = input.mobileNumber?.trim() || "";
+  const additionalInformation = input.additionalInformation?.trim() || "";
+
+  if (!passengerName && !mobileNumber && !additionalInformation) {
+    return input.fallbackNotes?.trim() || null;
+  }
+
+  return [
+    passengerName ? `Passenger: ${passengerName}` : null,
+    mobileNumber ? `Mobile: ${mobileNumber}` : null,
+    additionalInformation ? `Additional information: ${additionalInformation}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
 }

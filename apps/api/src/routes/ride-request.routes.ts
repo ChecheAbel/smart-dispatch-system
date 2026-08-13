@@ -1175,6 +1175,7 @@ router.patch(
         dropoffLatitude: parsed.data.dropoffLatitude,
         dropoffLongitude: parsed.data.dropoffLongitude,
         scheduledAt: parsed.data.scheduledAt,
+        scheduledReturnAt: parsed.data.scheduledReturnAt,
         passengerCount: parsed.data.passengerCount,
         notes: parsed.data.notes,
       });

@@ -38,6 +38,8 @@ import {
   formatCoordinates,
   formatScheduledAt,
   formatSubmittedAt,
+  getAdditionalInformation,
+  getPassengerContactDetails,
   statusBadgeClass,
 } from "./ride-request-utils";
 import {
@@ -220,36 +222,6 @@ function formatRequesterName(requester: RideRequestRequesterSummary) {
   return [requester.first_name, requester.middle_name, requester.last_name].filter(Boolean).join(" ");
 }
 
-function getPassengerContactDetails(notes: string | null | undefined) {
-  const value = notes?.trim();
-  if (!value) {
-    return null;
-  }
-
-  const normalized = value.replace(/\s+·\s+Mobile:/i, "\nMobile:");
-  const passengerName = normalized.match(/^Passenger:\s*(.+)$/im)?.[1]?.trim() || null;
-  const mobileNumber = normalized.match(/^Mobile:\s*(.+)$/im)?.[1]?.trim() || null;
-
-  return passengerName || mobileNumber ? { passengerName, mobileNumber } : null;
-}
-
-function getAdditionalInformation(notes: string | null | undefined) {
-  const value = notes?.trim();
-  if (!value) {
-    return null;
-  }
-
-  const additionalInformation = value.match(/(?:^|\n)Additional information:\s*([\s\S]+)$/i);
-  if (additionalInformation) {
-    return additionalInformation[1]?.trim() || null;
-  }
-
-  const containsBookingContactMetadata =
-    /^Passenger:\s*/i.test(value) && /(?:^|\n|\s·\s)Mobile:\s*/i.test(value);
-
-  return containsBookingContactMetadata ? null : value;
-}
-
 export function RideRequestDetailSheet({
   request,
   open,
@@ -305,8 +277,12 @@ export function RideRequestDetailSheet({
     : "";
 
   const shortRequestId = request ? request.id.slice(0, 8).toUpperCase() : "";
-  const passengerContact = getPassengerContactDetails(request?.notes);
-  const additionalInformation = getAdditionalInformation(request?.notes);
+  const passengerContactRaw = getPassengerContactDetails(request?.notes);
+  const passengerContact =
+    passengerContactRaw.passengerName || passengerContactRaw.mobileNumber
+      ? passengerContactRaw
+      : null;
+  const additionalInformation = getAdditionalInformation(request?.notes) || null;
   const isSubmitting = Boolean(manageActions?.submitting);
 
   const driverRatingLabelsResolved: RideRequestDriverRatingDisplayLabels =
