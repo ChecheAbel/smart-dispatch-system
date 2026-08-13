@@ -471,6 +471,7 @@ export function ProfilePage() {
               label={copy.profile.firstName}
               value={profileForm.firstName}
               onChange={(event) => updateProfileField("firstName", event.target.value)}
+              placeholder={copy.profile.firstNamePlaceholder}
               error={profileErrors.firstName}
               disabled={savingProfile}
             />
@@ -479,6 +480,7 @@ export function ProfilePage() {
               label={copy.profile.lastName}
               value={profileForm.lastName}
               onChange={(event) => updateProfileField("lastName", event.target.value)}
+              placeholder={copy.profile.lastNamePlaceholder}
               error={profileErrors.lastName}
               disabled={savingProfile}
             />
@@ -489,6 +491,7 @@ export function ProfilePage() {
               optionalLabel={copy.profile.optional}
               value={profileForm.middleName}
               onChange={(event) => updateProfileField("middleName", event.target.value)}
+              placeholder={copy.profile.middleNamePlaceholder}
               disabled={savingProfile}
             />
             <AdminTextField
@@ -497,6 +500,7 @@ export function ProfilePage() {
               type="email"
               value={profileForm.email}
               onChange={(event) => updateProfileField("email", event.target.value)}
+              placeholder={copy.profile.emailPlaceholder}
               error={profileErrors.email}
               disabled={savingProfile}
             />
@@ -526,6 +530,7 @@ export function ProfilePage() {
                   onChange={(event) =>
                     updateProfileField("mobile", sanitizeEthiopianMobileInput(event.target.value))
                   }
+                  placeholder={copy.profile.mobilePlaceholder}
                   disabled={savingProfile}
                   className={cn(
                     "rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0",
@@ -575,6 +580,7 @@ export function ProfilePage() {
                     onChange={(event) =>
                       updateRequesterField("organizationName", event.target.value)
                     }
+                    placeholder={requesterCopy.organizationNamePlaceholder}
                     error={requesterErrors.organizationName}
                     disabled={savingRequester}
                     containerClassName="sm:col-span-2"
@@ -584,6 +590,7 @@ export function ProfilePage() {
                     label={requesterCopy.jobTitle}
                     value={requesterForm.jobTitle}
                     onChange={(event) => updateRequesterField("jobTitle", event.target.value)}
+                    placeholder={requesterCopy.jobTitlePlaceholder}
                     error={requesterErrors.jobTitle}
                     disabled={savingRequester}
                   />
@@ -595,6 +602,7 @@ export function ProfilePage() {
                       onChange={(event) =>
                         updateRequesterField("governmentEntityType", event.target.value)
                       }
+                      placeholder={requesterCopy.governmentEntityTypePlaceholder}
                       error={requesterErrors.governmentEntityType}
                       disabled={savingRequester}
                     />
@@ -604,6 +612,7 @@ export function ProfilePage() {
                       label={requesterCopy.taxId}
                       value={requesterForm.taxId}
                       onChange={(event) => updateRequesterField("taxId", event.target.value)}
+                      placeholder={requesterCopy.taxIdPlaceholder}
                       error={requesterErrors.taxId}
                       disabled={savingRequester}
                     />
@@ -615,6 +624,7 @@ export function ProfilePage() {
                     onChange={(event) =>
                       updateRequesterField("organizationAddress", event.target.value)
                     }
+                    placeholder={requesterCopy.organizationAddressPlaceholder}
                     error={requesterErrors.organizationAddress}
                     disabled={savingRequester}
                     containerClassName="sm:col-span-2"
@@ -627,6 +637,7 @@ export function ProfilePage() {
                       onChange={(event) =>
                         updateRequesterField("registrationNumber", event.target.value)
                       }
+                      placeholder={requesterCopy.registrationNumberPlaceholder}
                       error={requesterErrors.registrationNumber}
                       disabled={savingRequester}
                     />
@@ -638,6 +649,7 @@ export function ProfilePage() {
                       onChange={(event) =>
                         updateRequesterField("officialReference", event.target.value)
                       }
+                      placeholder={requesterCopy.officialReferencePlaceholder}
                       error={requesterErrors.officialReference}
                       disabled={savingRequester}
                     />
@@ -651,6 +663,7 @@ export function ProfilePage() {
                     onChange={(event) =>
                       updateRequesterField("billingContactName", event.target.value)
                     }
+                    placeholder={requesterCopy.billingContactNamePlaceholder}
                     error={requesterErrors.billingContactName}
                     disabled={savingRequester}
                   />
@@ -664,6 +677,7 @@ export function ProfilePage() {
                     onChange={(event) =>
                       updateRequesterField("billingContactEmail", event.target.value)
                     }
+                    placeholder={requesterCopy.billingContactEmailPlaceholder}
                     error={requesterErrors.billingContactEmail}
                     disabled={savingRequester}
                   />
@@ -724,6 +738,7 @@ export function ProfilePage() {
               label={copy.password.current}
               value={passwordForm.currentPassword}
               onChange={(event) => updatePasswordField("currentPassword", event.target.value)}
+              placeholder={copy.password.currentPlaceholder}
               error={passwordErrors.currentPassword}
               disabled={savingPassword}
               autoComplete="current-password"
@@ -734,6 +749,7 @@ export function ProfilePage() {
                 label={copy.password.new}
                 value={passwordForm.newPassword}
                 onChange={(event) => updatePasswordField("newPassword", event.target.value)}
+                placeholder={copy.password.newPlaceholder}
                 error={passwordErrors.newPassword}
                 disabled={savingPassword}
                 autoComplete="new-password"
@@ -743,6 +759,7 @@ export function ProfilePage() {
                 label={copy.password.confirm}
                 value={passwordForm.confirmPassword}
                 onChange={(event) => updatePasswordField("confirmPassword", event.target.value)}
+                placeholder={copy.password.confirmPlaceholder}
                 error={passwordErrors.confirmPassword}
                 disabled={savingPassword}
                 autoComplete="new-password"
