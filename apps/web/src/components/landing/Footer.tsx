@@ -44,7 +44,7 @@ export default function Footer() {
   ] as const;
 
   return (
-    <footer className="bg-[var(--brand-primary)] text-white/60 pt-20 sm:pt-28 pb-6 sm:pb-8 relative overflow-hidden border-t border-white/5">
+    <footer className="relative overflow-hidden border-t border-white/5 bg-[var(--brand-primary)] pt-20 pb-6 text-white/60 sm:pt-28 sm:pb-8 dark:border-white/10 dark:bg-[#0d1117]">
       <div className="absolute -bottom-1/2 left-1/2 -translate-x-1/2 w-full h-[500px] bg-[radial-gradient(ellipse_at_top,_color-mix(in_srgb,var(--brand-accent)_5%,transparent)_0%,_transparent_70%)] rounded-full pointer-events-none blur-3xl" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">

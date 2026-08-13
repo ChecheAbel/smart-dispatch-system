@@ -36,7 +36,7 @@ export default function Hero() {
         <motion.div
           animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[25%] left-[10%] bg-[#122622]/60 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl flex items-center gap-3"
+          className="absolute top-[25%] left-[10%] flex items-center gap-3 rounded-2xl border border-white/10 bg-[#122622]/60 p-4 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#171c24]/80"
         >
           <div className="h-10 w-10 rounded-full bg-[var(--brand-accent)]/20 flex items-center justify-center">
             <Car className="h-5 w-5 text-[var(--brand-accent)]" />
@@ -50,7 +50,7 @@ export default function Hero() {
         <motion.div
           animate={{ y: [0, 20, 0], rotate: [0, -5, 0] }}
           transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute top-[40%] right-[10%] bg-[#122622]/60 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl flex items-center gap-3"
+          className="absolute top-[40%] right-[10%] flex items-center gap-3 rounded-2xl border border-white/10 bg-[#122622]/60 p-4 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#171c24]/80"
         >
           <div className="h-10 w-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
             <Activity className="h-5 w-5 text-emerald-400" />
@@ -64,7 +64,7 @@ export default function Hero() {
         <motion.div
           animate={{ y: [0, -15, 0] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute bottom-[25%] left-[15%] bg-[#122622]/60 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl flex items-center gap-3"
+          className="absolute bottom-[25%] left-[15%] flex items-center gap-3 rounded-2xl border border-white/10 bg-[#122622]/60 p-4 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#171c24]/80"
         >
           <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center">
             <MapPin className="h-5 w-5 text-blue-400" />

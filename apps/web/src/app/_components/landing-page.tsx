@@ -14,9 +14,9 @@ import { LocaleProvider } from "@/components/shared/providers/locale-context";
 export function LandingPage() {
   return (
     <LocaleProvider>
-      <div className="min-h-screen bg-[var(--brand-primary)] text-white antialiased">
+      <div className="min-h-screen bg-[var(--brand-primary)] text-white antialiased dark:bg-[#0d1117] dark:text-[#e8ecf1]">
         <Navbar />
-        <div className="bg-[var(--brand-primary)] animate-landing-page-in">
+        <div className="animate-landing-page-in bg-[var(--brand-primary)] dark:bg-[#0d1117]">
           <Hero />
         </div>
         <Reveal>

@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import BrandLogo from "@/components/landing/BrandLogo";
 import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { useLandingMessages } from "@/hooks/use-landing-messages";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -88,7 +89,7 @@ export default function Navbar() {
           className={cn(
             "mx-auto flex items-center justify-between transition-all duration-500",
             scrolled 
-              ? "max-w-5xl px-4 sm:px-6 h-16 rounded-full border border-white/20 bg-[var(--brand-primary)]/60 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] backdrop-blur-xl" 
+              ? "max-w-5xl px-4 sm:px-6 h-16 rounded-full border border-white/20 bg-[var(--brand-primary)]/60 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] backdrop-blur-xl dark:border-white/10 dark:bg-[#0d1117]/85 dark:shadow-black/40" 
               : "max-w-7xl px-4 sm:px-6 h-[72px] bg-transparent border-transparent"
           )}
         >
@@ -98,7 +99,7 @@ export default function Navbar() {
 
           <nav
             aria-label={copy.nav.mainNav}
-            className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-white/[0.03] p-1.5 backdrop-blur-md"
+            className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2 rounded-full border border-white/10 bg-white/[0.03] p-1.5 backdrop-blur-md dark:bg-white/[0.04]"
           >
             {navLinks.map((link) => {
               const id = link.href.slice(1);
@@ -126,6 +127,10 @@ export default function Navbar() {
           </nav>
 
           <div className="hidden lg:flex items-center gap-3 shrink-0 z-10">
+            <ThemeToggle
+              placement="inline"
+              className="auth-theme-toggle-inline h-9 w-9 border border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-[#C9B87A] dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:hover:text-[#C9B87A]"
+            />
             <LanguageSwitcher variant="dark" />
             <Link
               href="/book"
@@ -163,10 +168,10 @@ export default function Navbar() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[9998] lg:hidden bg-[#0f1f1c]/90 backdrop-blur-xl"
+            className="fixed inset-0 z-[9998] lg:hidden bg-[#0f1f1c]/90 backdrop-blur-xl dark:bg-[#0d1117]/92"
             aria-hidden={false}
           >
-            <div className="absolute top-[90px] left-4 right-4 bg-[var(--brand-primary)]/80 border border-white/20 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-2xl">
+            <div className="absolute top-[90px] left-4 right-4 bg-[var(--brand-primary)]/80 border border-white/20 rounded-3xl shadow-2xl overflow-hidden backdrop-blur-2xl dark:border-white/10 dark:bg-[#171c24]/95">
               <nav className="px-4 py-6 space-y-2" aria-label={copy.nav.mobileNav}>
                 {navLinks.map((link, i) => {
                   const id = link.href.slice(1);
@@ -201,8 +206,12 @@ export default function Navbar() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.35 }}
-                  className="flex justify-center"
+                  className="flex items-center justify-center gap-3"
                 >
+                  <ThemeToggle
+                    placement="inline"
+                    className="auth-theme-toggle-inline h-9 w-9 border border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-[#C9B87A] dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:hover:text-[#C9B87A]"
+                  />
                   <LanguageSwitcher variant="dark" />
                 </motion.div>
                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>

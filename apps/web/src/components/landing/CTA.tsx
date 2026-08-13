@@ -7,7 +7,7 @@ export default function CTA() {
   const copy = useLandingMessages();
 
   return (
-    <section className="relative py-24 sm:py-32 lg:py-40 bg-[var(--brand-primary)] overflow-hidden">
+    <section className="relative overflow-hidden bg-[var(--brand-primary)] py-24 sm:py-32 lg:py-40 dark:bg-[#0d1117]">
       <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(201,184,122,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(201,184,122,0.05)_1px,transparent_1px)] bg-[size:80px_80px] opacity-30" />
       
       <motion.div 

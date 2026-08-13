@@ -10,28 +10,28 @@ export default function Benefits() {
   const copy = useLandingMessages();
 
   return (
-    <section id="benefits" className="bg-slate-50 py-20 sm:py-32 relative overflow-hidden">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(28,58,52,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(28,58,52,0.03)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_20%,transparent_100%)] opacity-50 pointer-events-none" />
+    <section id="benefits" className="relative overflow-hidden bg-slate-50 py-20 sm:py-32 dark:bg-[#11161d]">
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(28,58,52,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(28,58,52,0.03)_1px,transparent_1px)] bg-[size:64px_64px] opacity-50 [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_20%,transparent_100%)] dark:bg-[linear-gradient(to_right,rgba(201,184,122,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(201,184,122,0.06)_1px,transparent_1px)]" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-        <div className="text-center mb-16 sm:mb-24">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="mb-16 text-center sm:mb-24">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6 }}
           >
-            <p className="text-[var(--brand-accent)] font-bold text-[10px] sm:text-xs tracking-[0.25em] uppercase mb-4 drop-shadow-sm">{copy.benefits.eyebrow}</p>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[var(--brand-primary)] tracking-tight px-2 drop-shadow-xl">
+            <p className="mb-4 text-[10px] font-bold tracking-[0.25em] text-[var(--brand-accent)] uppercase drop-shadow-sm sm:text-xs">{copy.benefits.eyebrow}</p>
+            <h2 className="px-2 text-3xl font-extrabold tracking-tight text-[var(--brand-primary)] drop-shadow-xl sm:text-4xl lg:text-5xl dark:text-[#eef1f5]">
               {copy.benefits.title}
             </h2>
-            <p className="mt-5 text-slate-500 text-base sm:text-lg lg:text-xl max-w-2xl mx-auto leading-relaxed px-2 font-light">
+            <p className="mx-auto mt-5 max-w-2xl px-2 text-base leading-relaxed font-light text-slate-500 sm:text-lg lg:text-xl dark:text-[#8f99a6]">
               {copy.benefits.subtitle}
             </p>
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-10">
+        <div className="grid grid-cols-1 gap-6 sm:gap-10 md:grid-cols-3">
           {copy.benefits.items.map((benefit, i) => {
             const Icon = BENEFIT_ICONS[i];
 
@@ -42,15 +42,15 @@ export default function Benefits() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.7, delay: i * 0.2 }}
-                className="bg-white border border-slate-200 rounded-3xl p-8 hover:shadow-2xl hover:border-[var(--brand-accent)]/30 transition-all duration-300 group shadow-md"
+                className="group rounded-3xl border border-slate-200 bg-white p-8 shadow-md transition-all duration-300 hover:border-[var(--brand-accent)]/30 hover:shadow-2xl dark:border-white/10 dark:bg-[#171c24] dark:shadow-black/25 dark:hover:border-[#C9B87A]/30"
               >
-                <div className="h-16 w-16 rounded-2xl bg-[var(--brand-accent)]/10 border border-[var(--brand-accent)]/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-[0_0_15px_-3px_rgba(201,184,122,0.3)] relative bg-white">
+                <div className="relative mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-[var(--brand-accent)]/20 bg-[var(--brand-accent)]/10 bg-white shadow-[0_0_15px_-3px_rgba(201,184,122,0.3)] transition-transform duration-300 group-hover:scale-110 dark:border-[#C9B87A]/25 dark:bg-[#11161d]">
                   <Icon className="h-8 w-8 text-[var(--brand-accent)]" strokeWidth={1.5} />
                 </div>
-                <h3 className="text-2xl font-bold text-[var(--brand-primary)] mb-4 leading-tight group-hover:text-[var(--brand-accent)] transition-colors">
+                <h3 className="mb-4 text-2xl leading-tight font-bold text-[var(--brand-primary)] transition-colors group-hover:text-[var(--brand-accent)] dark:text-[#eef1f5]">
                   {benefit.title}
                 </h3>
-                <p className="text-slate-500 leading-relaxed font-light">
+                <p className="leading-relaxed font-light text-slate-500 dark:text-[#8f99a6]">
                   {benefit.description}
                 </p>
               </motion.div>

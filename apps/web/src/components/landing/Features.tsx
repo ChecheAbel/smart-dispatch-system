@@ -35,30 +35,30 @@ export default function Features() {
   const copy = useLandingMessages();
 
   return (
-    <section id="features" className="bg-[var(--brand-primary)] py-20 sm:py-28 overflow-hidden relative">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(201,184,122,0.1)_0%,_var(--brand-primary)_100%)] pointer-events-none" />
+    <section id="features" className="relative overflow-hidden bg-[var(--brand-primary)] py-20 sm:py-28 dark:bg-[#0d1117]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(201,184,122,0.1)_0%,_var(--brand-primary)_100%)] dark:bg-[radial-gradient(ellipse_at_top,_rgba(201,184,122,0.12)_0%,_#0d1117_100%)]" />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-        <div className="text-center mb-16 sm:mb-20">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="mb-16 text-center sm:mb-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-100px" }}
             transition={{ duration: 0.6 }}
           >
-            <p className="text-[var(--brand-accent)] font-bold text-[10px] sm:text-xs tracking-[0.25em] uppercase mb-4 drop-shadow-md">
+            <p className="mb-4 text-[10px] font-bold tracking-[0.25em] text-[var(--brand-accent)] uppercase drop-shadow-md sm:text-xs">
               {copy.features.eyebrow}
             </p>
-            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight px-2 drop-shadow-2xl">
+            <h2 className="px-2 text-3xl font-extrabold tracking-tight text-white drop-shadow-2xl sm:text-4xl lg:text-5xl dark:text-[#eef1f5]">
               {copy.features.title}
             </h2>
-            <p className="mt-5 text-white/60 text-base sm:text-lg lg:text-xl max-w-2xl mx-auto leading-relaxed px-2 font-light">
+            <p className="mx-auto mt-5 max-w-2xl px-2 text-base leading-relaxed font-light text-white/60 sm:text-lg lg:text-xl dark:text-[#8f99a6]">
               {copy.features.subtitle}
             </p>
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {copy.features.items.map((feat, index) => {
             const Icon = FEATURE_ICONS[index];
 
@@ -70,7 +70,7 @@ export default function Features() {
                 viewport={{ once: true, margin: "-100px" }}
                 transition={{ duration: 0.7, delay: index * 0.1, ease: "easeOut" }}
                 className={cn(
-                  "group relative bg-[var(--brand-primary)]/40 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-white/10 shadow-2xl overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:border-[var(--brand-accent)]/40 hover:shadow-[0_20px_40px_-15px_rgba(201,184,122,0.2)]",
+                  "group relative overflow-hidden rounded-3xl border border-white/10 bg-[var(--brand-primary)]/40 p-6 shadow-2xl backdrop-blur-md transition-all duration-500 hover:-translate-y-1 hover:border-[var(--brand-accent)]/40 hover:shadow-[0_20px_40px_-15px_rgba(201,184,122,0.2)] sm:p-8 dark:border-white/10 dark:bg-[#171c24]/80 dark:shadow-black/30",
                   FEATURE_LAYOUT[index],
                 )}
               >
