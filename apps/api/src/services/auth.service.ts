@@ -16,10 +16,13 @@ import { findPermissionsByUserId } from "../models/permission.model";
 import { toPublicPermission } from "../mappers/permission.mapper";
 import { toPublicDriverProfile } from "../mappers/driver.mapper";
 import { toPublicRequesterProfile } from "../mappers/requester-profile.mapper";
-import { findRequesterProfileByUserId } from "../models/requester-profile.model";
-import { createRequesterProfile } from "../models/requester-profile.model";
+import { findRequesterProfileByUserId, createRequesterProfile, updateRequesterProfile } from "../models/requester-profile.model";
 import { prisma } from "../db/prisma";
 import type { RequesterProfileInput } from "../utils/requester-profile";
+import {
+  RequesterProfileValidationError,
+  validateRequesterProfileInput,
+} from "../utils/requester-profile";
 import {
   isValidEmail,
   normalizeEthiopianMobileNumber,
@@ -568,6 +571,7 @@ export async function updateMyProfile(
     middleName?: string | null;
     lastName: string;
     mobileNumber: string;
+    requesterProfile?: Omit<RequesterProfileInput, "segment"> | null;
   },
 ) {
   const email = input.email.trim().toLowerCase();
@@ -596,6 +600,27 @@ export async function updateMyProfile(
   const existingMobile = await findUserByMobileNumber(mobileNumber);
   if (existingMobile && existingMobile.id !== userId) {
     throw new AuthError("This mobile number is already registered.", 409);
+  }
+
+  const existingRequesterProfile = await findRequesterProfileByUserId(userId);
+
+  if (input.requesterProfile !== undefined && input.requesterProfile !== null) {
+    if (!existingRequesterProfile) {
+      throw new AuthError("Requester profile not found for this account.", 404);
+    }
+
+    try {
+      const validated = validateRequesterProfileInput({
+        segment: existingRequesterProfile.segment,
+        ...input.requesterProfile,
+      });
+      await updateRequesterProfile(userId, validated);
+    } catch (error) {
+      if (error instanceof RequesterProfileValidationError) {
+        throw new AuthError(error.message, 400);
+      }
+      throw error;
+    }
   }
 
   await updateUser(userId, {

@@ -1256,10 +1256,10 @@
   "adminProfile": {
     "eyebrow": "መለያ",
     "title": "መገለጫ",
-    "description": "የግል መረጃዎን እና የመግቢያ የይለፍ ቃልዎን ያዘምኑ።",
+    "description": "የመለያ ዝርዝሮችዎ።",
     "profile": {
-      "title": "የግል መረጃ",
-      "description": "በአስተዳዳሪ ኮንሶል ውስጥ የሚያገለግሉት ስም፣ ኢሜይል እና የሞባይል ቁጥር።",
+      "title": "ግል",
+      "description": "ስም፣ ኢሜይል እና ሞባይል።",
       "email": "ኢሜይል",
       "emailPlaceholder": "you@example.com",
       "firstName": "የመጀመሪያ ስም",
@@ -1268,28 +1268,28 @@
       "middleNamePlaceholder": "አማራጭ",
       "lastName": "የአያት ስም",
       "lastNamePlaceholder": "ከበደ",
-      "mobile": "የሞባይል ቁጥር",
-      "mobilePlaceholder": "912345678 ወይም 712345678",
-      "mobileHelp": "Ethio Telecom (9…) ወይም Safaricom (7…)። 9 አሃዞችን ያለመጀመሪያው 0 ያስገቡ።",
+      "mobile": "ሞባይል",
+      "mobilePlaceholder": "912345678",
+      "mobileHelp": "9 አሃዞች፣ በ 9 ወይም 7 ይጀምሩ።",
       "optional": "(አማራጭ)",
-      "save": "መገለጫ አስቀምጥ",
+      "save": "አስቀምጥ",
       "saving": "በመቀመጥ ላይ...",
-      "discard": "ለውጦችን ተው",
+      "discard": "ተው",
       "errors": {
         "emailRequired": "ኢሜይል ያስፈልጋል።",
         "emailInvalid": "ትክክለኛ ኢሜይል ያስገቡ።",
         "firstNameRequired": "የመጀመሪያ ስም ያስፈልጋል።",
         "lastNameRequired": "የአያት ስም ያስፈልጋል።",
-        "mobileRequired": "የሞባይል ቁጥር ያስፈልጋል።",
-        "mobileInvalid": "በ 9 (Ethio Telecom) ወይም 7 (Safaricom) የሚبدأ ትክክለኛ 9-አሃዝ ቁጥር ያስገቡ።"
+        "mobileRequired": "ሞባይል ያስፈልጋል።",
+        "mobileInvalid": "ትክክለኛ 9-አሃዝ የሞባይል ቁጥር ያስገቡ።"
       }
     },
     "account": {
-      "title": "የመለያ መዳረሻ",
-      "description": "ሚናዎች እና የመለያ ሁኔታ በአስተዳዳሪዎ ይተዳደራሉ።",
+      "title": "መለያ",
+      "description": "ሚናዎች እና ሁኔታ።",
       "roles": "ሚናዎች",
-      "noRoles": "ምንም ሚና አልተመደበም",
-      "statusLabel": "የመለያ ሁኔታ",
+      "noRoles": "ምንም ሚና የለም",
+      "statusLabel": "ሁኔታ",
       "activationLabel": "ማግበር",
       "status": {
         "active": "ንቁ",
@@ -1300,44 +1300,94 @@
         "pending": "በመጠባበቅ ላይ",
         "activated": "ተግባራዊ"
       },
-      "adminNote": "ሚናዎች እና የመለያ ሁኔታ በአስተዳዳሪ ብቻ ሊቀየሩ ይችላሉ።"
+      "adminNote": "ሚናዎችን እና ሁኔታን አስተዳዳሪ ብቻ ይቀይራል።"
+    },
+    "requester": {
+      "title": "ድርጅት",
+      "description": "የድርጅት ዝርዝሮች።",
+      "individualTitle": "ግለሰብ",
+      "individualDescription": "እንደ ግለሰብ ተመዝግበዋል።",
+      "businessTitle": "ንግድ",
+      "businessDescription": "የኩባንያ ዝርዝሮች።",
+      "governmentTitle": "መንግስት",
+      "governmentDescription": "የመንግስት አካል ዝርዝሮች።",
+      "segmentLabel": "አይነት",
+      "segmentLockedHint": "አይነት እዚህ ሊቀየር አይችልም።",
+      "segments": {
+        "individual": "ግለሰብ",
+        "business": "ንግድ",
+        "government": "መንግስት"
+      },
+      "organizationName": "ድርጅት",
+      "organizationNamePlaceholder": "የድርጅት ስም",
+      "jobTitle": "የስራ መደብ",
+      "jobTitlePlaceholder": "የስራ መደብ",
+      "organizationAddress": "አድራሻ",
+      "organizationAddressPlaceholder": "አድራሻ",
+      "taxId": "የግብር መለያ",
+      "taxIdPlaceholder": "ቲን",
+      "registrationNumber": "የምዝገባ ቁ.",
+      "registrationNumberPlaceholder": "የምዝገባ ቁጥር",
+      "governmentEntityType": "የአካል አይነት",
+      "governmentEntityTypePlaceholder": "ሚኒስቴር፣ ኤጀንሲ…",
+      "officialReference": "ማጣቀሻ",
+      "officialReferencePlaceholder": "ኦፊሴላዊ ማጣቀሻ",
+      "billingContactName": "የክፍያ ተገናኝ",
+      "billingContactNamePlaceholder": "ስም",
+      "billingContactEmail": "የክፍያ ኢሜይል",
+      "billingContactEmailPlaceholder": "billing@example.com",
+      "save": "አስቀምጥ",
+      "saving": "በመቀመጥ ላይ...",
+      "discard": "ተው",
+      "errors": {
+        "organizationNameRequired": "ድርጅት ያስፈልጋል።",
+        "jobTitleRequired": "የስራ መደብ ያስፈልጋል።",
+        "organizationAddressRequired": "አድራሻ ያስፈልጋል።",
+        "taxIdRequired": "የግብር መለያ ያስፈልጋል።",
+        "registrationNumberRequired": "የምዝገባ ቁጥር ያስፈልጋል።",
+        "governmentEntityTypeRequired": "የአካል አይነት ያስፈልጋል።",
+        "officialReferenceRequired": "ማጣቀሻ ያስፈልጋል።",
+        "billingContactNameRequired": "የክፍያ ተገናኝ ያስፈልጋል።",
+        "billingContactEmailRequired": "የክፍያ ኢሜይል ያስፈልጋል።",
+        "billingContactEmailInvalid": "ትክክለኛ ኢሜይል ያስገቡ።"
+      }
     },
     "password": {
-      "title": "የይለፍ ቃል ቀይር",
-      "description": "ቢያንስ 8 ቁምፊዎች ያለው ጠንካራ የይለፍ ቃል ይጠቀሙ።",
+      "title": "የይለፍ ቃል",
+      "description": "የይለፍ ቃልዎን ይቀይሩ።",
       "current": "የአሁኑ የይለፍ ቃል",
-      "currentPlaceholder": "የአሁኑ የይለፍ ቃልዎን ያስገቡ",
+      "currentPlaceholder": "የአሁኑ የይለፍ ቃል",
       "new": "አዲስ የይለፍ ቃል",
       "newPlaceholder": "ቢያንስ 8 ቁምፊዎች",
       "newHint": "ቢያንስ 8 ቁምፊዎች።",
-      "confirm": "አዲስ የይለፍ ቃል አረጋግጥ",
-      "confirmPlaceholder": "አዲስ የይለፍ ቃልዎን እንደገና ያስገቡ",
+      "confirm": "የይለፍ ቃል አረጋግጥ",
+      "confirmPlaceholder": "የይለፍ ቃል አረጋግጥ",
       "update": "የይለፍ ቃል አዘምን",
       "updating": "በመዘመን ላይ...",
       "errors": {
         "currentRequired": "የአሁኑ የይለፍ ቃል ያስፈልጋል።",
         "newRequired": "አዲስ የይለፍ ቃል ያስፈልጋል።",
         "newMinLength": "የይለፍ ቃል ቢያንስ 8 ቁምፊዎች መሆን አለበት።",
-        "confirmRequired": "አዲስ የይለፍ ቃልዎን ያረጋግጡ።",
+        "confirmRequired": "የይለፍ ቃልዎን ያረጋግጡ።",
         "confirmMismatch": "የይለፍ ቃሎች አይዛመዱም።"
       }
     },
     "toast": {
       "profileUpdated": {
-        "title": "መገለጫ ተዘምኗል",
-        "description": "የመገለጫ መረጃዎ ተቀምጧል።"
+        "title": "ተቀምጧል",
+        "description": "መገለጫዎ ተዘምኗል።"
       },
       "profileUpdateFailed": {
-        "title": "መገለጫ መዘመን አልተሳካም",
-        "description": "ቅጹን ይመልከቱ እና እንደገና ይሞክሩ።"
+        "title": "ማስቀመጥ አልተሳካም",
+        "description": "እንደገና ይሞክሩ።"
       },
       "passwordUpdated": {
         "title": "የይለፍ ቃል ተዘምኗል",
-        "description": "የይለፍ ቃልዎ በተሳካ ሁኔታ ተቀይሯል።"
+        "description": "የይለፍ ቃልዎ ተቀይሯል።"
       },
       "passwordUpdateFailed": {
         "title": "የይለፍ ቃል መዘመን አልተሳካም",
-        "description": "የአሁኑ የይለፍ ቃልዎን ይመልከቱ እና እንደገና ይሞክሩ።"
+        "description": "እንደገና ይሞክሩ።"
       }
     }
   },

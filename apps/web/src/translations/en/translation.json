@@ -1256,10 +1256,10 @@
   "adminProfile": {
     "eyebrow": "Account",
     "title": "Profile",
-    "description": "Update your personal details and sign-in password.",
+    "description": "Your account details.",
     "profile": {
-      "title": "Personal details",
-      "description": "Your name, email, and mobile number used across the admin console.",
+      "title": "Personal",
+      "description": "Name, email, and mobile.",
       "email": "Email",
       "emailPlaceholder": "you@example.com",
       "firstName": "First name",
@@ -1268,28 +1268,28 @@
       "middleNamePlaceholder": "Optional",
       "lastName": "Last name",
       "lastNamePlaceholder": "Kebede",
-      "mobile": "Mobile number",
-      "mobilePlaceholder": "912345678 or 712345678",
-      "mobileHelp": "Ethio Telecom (9…) or Safaricom (7…). Enter 9 digits without the leading zero.",
+      "mobile": "Mobile",
+      "mobilePlaceholder": "912345678",
+      "mobileHelp": "9 digits, starting with 9 or 7.",
       "optional": "(optional)",
-      "save": "Save profile",
+      "save": "Save",
       "saving": "Saving...",
-      "discard": "Discard changes",
+      "discard": "Discard",
       "errors": {
         "emailRequired": "Email is required.",
-        "emailInvalid": "Enter a valid email address.",
+        "emailInvalid": "Enter a valid email.",
         "firstNameRequired": "First name is required.",
         "lastNameRequired": "Last name is required.",
-        "mobileRequired": "Mobile number is required.",
-        "mobileInvalid": "Enter a valid 9-digit number starting with 9 (Ethio Telecom) or 7 (Safaricom)."
+        "mobileRequired": "Mobile is required.",
+        "mobileInvalid": "Enter a valid 9-digit mobile number."
       }
     },
     "account": {
-      "title": "Account access",
-      "description": "Roles and account status are managed by your administrator.",
+      "title": "Account",
+      "description": "Roles and status.",
       "roles": "Roles",
-      "noRoles": "No roles assigned",
-      "statusLabel": "Account status",
+      "noRoles": "No roles",
+      "statusLabel": "Status",
       "activationLabel": "Activation",
       "status": {
         "active": "Active",
@@ -1300,44 +1300,94 @@
         "pending": "Pending",
         "activated": "Activated"
       },
-      "adminNote": "Roles and account status can only be changed by an administrator."
+      "adminNote": "Only an admin can change roles and status."
+    },
+    "requester": {
+      "title": "Organization",
+      "description": "Organization details.",
+      "individualTitle": "Individual",
+      "individualDescription": "Registered as an individual.",
+      "businessTitle": "Business",
+      "businessDescription": "Company details.",
+      "governmentTitle": "Government",
+      "governmentDescription": "Government entity details.",
+      "segmentLabel": "Type",
+      "segmentLockedHint": "Type can’t be changed here.",
+      "segments": {
+        "individual": "Individual",
+        "business": "Business",
+        "government": "Government"
+      },
+      "organizationName": "Organization",
+      "organizationNamePlaceholder": "Organization name",
+      "jobTitle": "Job title",
+      "jobTitlePlaceholder": "Job title",
+      "organizationAddress": "Address",
+      "organizationAddressPlaceholder": "Address",
+      "taxId": "Tax ID",
+      "taxIdPlaceholder": "TIN",
+      "registrationNumber": "Registration no.",
+      "registrationNumberPlaceholder": "Registration number",
+      "governmentEntityType": "Entity type",
+      "governmentEntityTypePlaceholder": "Ministry, agency…",
+      "officialReference": "Reference",
+      "officialReferencePlaceholder": "Official reference",
+      "billingContactName": "Billing contact",
+      "billingContactNamePlaceholder": "Contact name",
+      "billingContactEmail": "Billing email",
+      "billingContactEmailPlaceholder": "billing@example.com",
+      "save": "Save",
+      "saving": "Saving...",
+      "discard": "Discard",
+      "errors": {
+        "organizationNameRequired": "Organization is required.",
+        "jobTitleRequired": "Job title is required.",
+        "organizationAddressRequired": "Address is required.",
+        "taxIdRequired": "Tax ID is required.",
+        "registrationNumberRequired": "Registration number is required.",
+        "governmentEntityTypeRequired": "Entity type is required.",
+        "officialReferenceRequired": "Reference is required.",
+        "billingContactNameRequired": "Billing contact is required.",
+        "billingContactEmailRequired": "Billing email is required.",
+        "billingContactEmailInvalid": "Enter a valid email."
+      }
     },
     "password": {
-      "title": "Change password",
-      "description": "Use a strong password with at least 8 characters.",
+      "title": "Password",
+      "description": "Change your password.",
       "current": "Current password",
-      "currentPlaceholder": "Enter your current password",
+      "currentPlaceholder": "Current password",
       "new": "New password",
       "newPlaceholder": "At least 8 characters",
       "newHint": "At least 8 characters.",
-      "confirm": "Confirm new password",
-      "confirmPlaceholder": "Re-enter your new password",
+      "confirm": "Confirm password",
+      "confirmPlaceholder": "Confirm password",
       "update": "Update password",
       "updating": "Updating...",
       "errors": {
         "currentRequired": "Current password is required.",
         "newRequired": "New password is required.",
         "newMinLength": "Password must be at least 8 characters.",
-        "confirmRequired": "Please confirm your new password.",
+        "confirmRequired": "Confirm your password.",
         "confirmMismatch": "Passwords do not match."
       }
     },
     "toast": {
       "profileUpdated": {
-        "title": "Profile updated",
-        "description": "Your profile details have been saved."
+        "title": "Saved",
+        "description": "Your profile was updated."
       },
       "profileUpdateFailed": {
-        "title": "Could not update profile",
-        "description": "Please check the form and try again."
+        "title": "Could not save",
+        "description": "Please try again."
       },
       "passwordUpdated": {
         "title": "Password updated",
-        "description": "Your password has been changed successfully."
+        "description": "Your password was changed."
       },
       "passwordUpdateFailed": {
         "title": "Could not update password",
-        "description": "Please check your current password and try again."
+        "description": "Please try again."
       }
     }
   },

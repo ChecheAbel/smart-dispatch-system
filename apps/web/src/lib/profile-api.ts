@@ -8,6 +8,17 @@ export type UpdateMyProfileInput = {
   middle_name?: string | null;
   last_name: string;
   mobile_number: string;
+  requester_profile?: {
+    organization_name?: string | null;
+    job_title?: string | null;
+    organization_address?: string | null;
+    tax_id?: string | null;
+    registration_number?: string | null;
+    government_entity_type?: string | null;
+    official_reference?: string | null;
+    billing_contact_name?: string | null;
+    billing_contact_email?: string | null;
+  };
 };
 
 export async function updateMyProfile(input: UpdateMyProfileInput) {

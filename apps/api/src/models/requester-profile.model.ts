@@ -23,3 +23,15 @@ export async function findRequesterProfileByUserId(userId: string) {
     where: { userId },
   });
 }
+
+export async function updateRequesterProfile(
+  userId: string,
+  input: RequesterProfileInput,
+  tx?: Prisma.TransactionClient,
+) {
+  const client = tx ?? prisma;
+  return client.requesterProfile.update({
+    where: { userId },
+    data: toRequesterProfileCreateData(input),
+  });
+}

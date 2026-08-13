@@ -239,12 +239,32 @@ export function registerAuthRoutes(app: Express) {
         return sendError(res, "Unauthorized.", 401);
       }
 
+      const requesterProfileBody =
+        req.body?.requester_profile && typeof req.body.requester_profile === "object"
+          ? (req.body.requester_profile as Record<string, unknown>)
+          : null;
+
       const result = await updateMyProfile(userId, {
         email: getString(req.body?.email),
         firstName: getString(req.body?.first_name),
         middleName: getOptionalString(req.body?.middle_name),
         lastName: getString(req.body?.last_name),
         mobileNumber: getString(req.body?.mobile_number),
+        requesterProfile: requesterProfileBody
+          ? {
+              organizationName: getOptionalString(requesterProfileBody.organization_name),
+              jobTitle: getOptionalString(requesterProfileBody.job_title),
+              organizationAddress: getOptionalString(requesterProfileBody.organization_address),
+              taxId: getOptionalString(requesterProfileBody.tax_id),
+              registrationNumber: getOptionalString(requesterProfileBody.registration_number),
+              governmentEntityType: getOptionalString(
+                requesterProfileBody.government_entity_type,
+              ),
+              officialReference: getOptionalString(requesterProfileBody.official_reference),
+              billingContactName: getOptionalString(requesterProfileBody.billing_contact_name),
+              billingContactEmail: getOptionalString(requesterProfileBody.billing_contact_email),
+            }
+          : undefined,
       });
 
       return sendSuccess(res, result);
