@@ -28,6 +28,9 @@ import {
   Zap,
   ArrowRight,
   Edit3,
+  ChevronDown,
+  Loader2,
+  Route,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getStoredUser, clearAuthSession } from "@/lib/auth-session";
@@ -59,6 +62,11 @@ import {
 import { LocaleProvider, useLocale } from "@/components/shared/providers";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import {
@@ -91,6 +99,31 @@ const LazyCoordinateMapPicker = dynamic<CoordinateMapPickerProps>(
   { ssr: false },
 );
 
+const LazyRideRequestRouteMap = dynamic(
+  () =>
+    import("@/app/dashboard/_components/ride-requests/ride-request-route-map").then(
+      (mod) => mod.RideRequestRouteMap,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-[320px] items-center justify-center rounded-xl border border-slate-200/80 bg-[#e8eef0] dark:border-white/10 dark:bg-[#11161d]">
+        <div className="flex max-w-sm items-start gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm dark:border-white/10 dark:bg-[#171c24]">
+          <Loader2 className="mt-0.5 size-5 shrink-0 animate-spin text-[#C9B87A]" />
+          <div>
+            <p className="text-sm font-bold text-[#1C3A34] dark:text-[#eef1f5]">
+              Loading route map...
+            </p>
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-[#8f99a6]">
+              Preparing path, distance, and drive time
+            </p>
+          </div>
+        </div>
+      </div>
+    ),
+  },
+);
+
 
 type CoordinateState = { latitude?: number; longitude?: number };
 
@@ -112,6 +145,10 @@ const COPY = {
     scheduleDetailsDescContract: "Set the contract service window with a start and end date & time.",
     passengerName: "Passenger Full Name",
     passengerNamePlaceholder: "e.g. John Doe",
+    passengerCount: "Expected Passengers",
+    passengerCountPlaceholder: "e.g. 2",
+    passengerCountHint: "How many people will travel on this trip?",
+    passengerCountInvalid: "Enter a whole number between 1 and {max}.",
     mobileNumber: "Contact Mobile Number",
     mobileNumberPlaceholder: "e.g. +251 911...",
     additionalInformation: "Additional Information",
@@ -171,7 +208,7 @@ const COPY = {
     vehiclesSubmittedPlural: "{count} vehicles submitted",
     signIn: "Sign In",
     statusAvailable: "Available Now",
-    statusBusy: "In Service - Available:",
+    statusBusy: "Booked — Available:",
     selectedVehicles: "Selected Vehicles",
     vehiclesReadyOne: "1 vehicle selected",
     vehiclesReadyMany: "{count} vehicles selected",
@@ -206,6 +243,20 @@ const COPY = {
     changeType: "Change",
     selectedType: "Request Type",
     contactPhoneHint: "We’ll contact you on this number about your request status.",
+    routePreviewTitle: "Route preview",
+    routePreviewDesc: "See the driving path, distance, and estimated drive time.",
+    routePreviewHint: "Select both pickup and drop-off to preview the route.",
+    routePreviewEmpty: "Add map pins for pickup and drop-off to preview this trip.",
+    routePreviewLoading: "Loading route map...",
+    routePreviewCalculating: "Calculating route, distance, and drive time...",
+    routePreviewRecenter: "Fit route",
+    routePreviewDistance: "Distance",
+    routePreviewDuration: "Est. drive time",
+    routePreviewStraightLine: "Straight-line",
+    routePreviewDistanceUnitKm: "km",
+    routePreviewDistanceUnitM: "m",
+    pickupPointLabel: "Pickup",
+    dropoffPointLabel: "Drop-off",
   },
   am: {
     backToCatalog: "ወደ ካታሎግ ይመለሱ",
@@ -223,6 +274,10 @@ const COPY = {
     scheduleDetailsDescContract: "የውሉን የአገልግሎት ጊዜ በመጀመሪያ እና መጨረሻ ቀንና ሰዓት ይግለጹ።",
     passengerName: "የተሳፋሪ ሙሉ ስም",
     passengerNamePlaceholder: "ምሳሌ፡ ዮሐንስ አበበ",
+    passengerCount: "የሚጠበቁ ተሳፋሪዎች",
+    passengerCountPlaceholder: "ምሳሌ፡ 2",
+    passengerCountHint: "በዚህ ጉዞ ስንት ሰዎች ይጓዛሉ?",
+    passengerCountInvalid: "ከ 1 እስከ {max} ያለ ሙሉ ቁጥር ያስገቡ።",
     mobileNumber: "የመገናኛ ስልክ ቁጥር",
     mobileNumberPlaceholder: "ምሳሌ፡ +251 911...",
     additionalInformation: "ተጨማሪ መረጃ",
@@ -282,7 +337,7 @@ const COPY = {
     vehiclesSubmittedPlural: "{count} ተሽከርካሪዎች ተልከዋል",
     signIn: "ግባ",
     statusAvailable: "አሁን ይገኛል",
-    statusBusy: "ስራ ላይ - የሚገኝበት ጊዜ፡",
+    statusBusy: "ተይዟል — የሚገኝበት ጊዜ፡",
     selectedVehicles: "የተመረጡ ተሽከርካሪዎች",
     vehiclesReadyOne: "1 ተሽከርካሪ ተመርጧል",
     vehiclesReadyMany: "{count} ተሽከርካሪዎች ተመርጠዋል",
@@ -317,6 +372,20 @@ const COPY = {
     changeType: "ቀይር",
     selectedType: "የጥያቄ ዓይነት",
     contactPhoneHint: "ስለ ጥያቄዎ ሁኔታ በዚህ ስልክ ቁጥር እናገኝዎታለን።",
+    routePreviewTitle: "የመንገድ ቅድመ እይታ",
+    routePreviewDesc: "የመንዳት መንገድ፣ ርቀት እና ግምታዊ የመንገድ ጊዜ ይመልከቱ።",
+    routePreviewHint: "መንገዱን ለማየት መነሻ እና መድረሻን ይምረጡ።",
+    routePreviewEmpty: "ይህን ጉዞ ለማየት ለመነሻ እና መድረሻ የካርታ ፒኖችን ያክሉ።",
+    routePreviewLoading: "የመንገድ ካርታ በመጫን ላይ...",
+    routePreviewCalculating: "መንገድ፣ ርቀት እና የመንገድ ጊዜ በማስላት ላይ...",
+    routePreviewRecenter: "መንገድ አስማማ",
+    routePreviewDistance: "ርቀት",
+    routePreviewDuration: "ግምታዊ የመንገድ ጊዜ",
+    routePreviewStraightLine: "ቀጥተኛ መስመር",
+    routePreviewDistanceUnitKm: "ኪ.ሜ",
+    routePreviewDistanceUnitM: "ሜ",
+    pickupPointLabel: "መነሻ",
+    dropoffPointLabel: "መድረሻ",
   },
 };
 
@@ -379,6 +448,8 @@ function VehicleRequestPageContent() {
   // Form states
   const [requestType, setRequestType] = useState<"single" | "contract" | null>(null);
   const [passengerName, setPassengerName] = useState("");
+  const [passengerCount, setPassengerCount] = useState("1");
+  const [passengerCountError, setPassengerCountError] = useState<string | null>(null);
   const [mobileNumber, setMobileNumber] = useState("");
   const [additionalInformation, setAdditionalInformation] = useState("");
   const [regionId, setRegionId] = useState<string>("");
@@ -399,6 +470,8 @@ function VehicleRequestPageContent() {
   const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
   const [returnTime, setReturnTime] = useState<TimeValue | undefined>(undefined);
   const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [routePreviewOpen, setRoutePreviewOpen] = useState(true);
+  const [routeCalculating, setRouteCalculating] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [outcome, setOutcome] = useState<"success" | "error" | null>(null);
@@ -506,6 +579,33 @@ function VehicleRequestPageContent() {
     () => getEarliestBookableAt(vehicles),
     [vehicles],
   );
+  const passengerMax = useMemo(() => {
+    const capacityTotal = vehicles.reduce((sum, vehicle) => {
+      const capacity = vehicle.vehicle_type?.passenger_capacity;
+      return sum + (typeof capacity === "number" && capacity > 0 ? capacity : 0);
+    }, 0);
+    return Math.min(50, capacityTotal > 0 ? capacityTotal : 50);
+  }, [vehicles]);
+  const hasRouteCoordinates = useMemo(
+    () =>
+      isValidCoordinatePair(pickupCoordinates.latitude, pickupCoordinates.longitude) &&
+      isValidCoordinatePair(dropoffCoordinates.latitude, dropoffCoordinates.longitude),
+    [
+      pickupCoordinates.latitude,
+      pickupCoordinates.longitude,
+      dropoffCoordinates.latitude,
+      dropoffCoordinates.longitude,
+    ],
+  );
+
+  useEffect(() => {
+    if (hasRouteCoordinates) {
+      setRoutePreviewOpen(true);
+    } else {
+      setRouteCalculating(false);
+    }
+  }, [hasRouteCoordinates]);
+
   const earliestBookableLabel = useMemo(
     () => formatVehicleAvailableFrom(earliestBookableAt, locale),
     [earliestBookableAt, locale],
@@ -629,6 +729,19 @@ function VehicleRequestPageContent() {
     if (!showCustomPickup && !pickupLocationId) return;
     if (!showCustomDropoff && !dropoffLocationId) return;
 
+    const parsedPassengerCount = Number(passengerCount);
+    if (
+      !Number.isInteger(parsedPassengerCount) ||
+      parsedPassengerCount < 1 ||
+      parsedPassengerCount > passengerMax
+    ) {
+      setPassengerCountError(
+        copy.passengerCountInvalid.replace("{max}", String(passengerMax)),
+      );
+      return;
+    }
+    setPassengerCountError(null);
+
     if (
       !scheduledDate ||
       !scheduledTime ||
@@ -696,7 +809,7 @@ function VehicleRequestPageContent() {
         dropoff_latitude: dropoffCoordinates.latitude ?? null,
         dropoff_longitude: dropoffCoordinates.longitude ?? null,
         region_id: regionId,
-        passenger_count: 1,
+        passenger_count: parsedPassengerCount,
         scheduled_at: scheduledAt.toISOString(),
         scheduled_return_at: scheduledReturnAt?.toISOString() ?? null,
         request_type: requestType,
@@ -765,7 +878,7 @@ function VehicleRequestPageContent() {
         <div className="flex items-center gap-4">
           <ThemeToggle
             placement="inline"
-            className="auth-theme-toggle-inline h-9 w-9 rounded-xl border border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-[#C9B87A] dark:text-white"
+            className="auth-theme-toggle-inline h-9 w-9 rounded-xl border border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-[#C9B87A] dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:hover:text-[#C9B87A]"
           />
           <DropdownMenu>
             <DropdownMenuTrigger
@@ -773,7 +886,7 @@ function VehicleRequestPageContent() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-9 w-9 rounded-xl border border-white/10 bg-white/5 text-white shadow-none transition-all hover:bg-white/10"
+                  className="h-9 w-9 rounded-xl border border-white/10 bg-white/5 text-white shadow-none transition-all hover:bg-white/10 hover:text-white dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:hover:text-white"
                   aria-label="Select language"
                 />
               }
@@ -1008,7 +1121,7 @@ function VehicleRequestPageContent() {
           <p className="mt-2 max-w-sm text-sm text-slate-500">{copy.noVehiclesBody}</p>
           <Link
             href="/book"
-            className="mt-6 inline-flex items-center justify-center rounded-xl bg-[#1C3A34] px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#254b43]"
+            className="mt-6 inline-flex items-center justify-center rounded-xl bg-[#1C3A34] px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#254b43] dark:bg-[#C9B87A] dark:text-[#171a1f] dark:hover:bg-[#d8c98e]"
           >
             {copy.returnToCatalog}
           </Link>
@@ -1125,7 +1238,7 @@ function VehicleRequestPageContent() {
                   <>
                     <Link
                       href="/dashboard/my-requests"
-                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1C3A34] px-5 py-3.5 text-sm font-extrabold text-white transition-colors hover:bg-[#254b43]"
+                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1C3A34] px-5 py-3.5 text-sm font-extrabold text-white transition-colors hover:bg-[#254b43] dark:bg-[#C9B87A] dark:text-[#171a1f] dark:hover:bg-[#d8c98e]"
                     >
                       {copy.viewMyRequests}
                       <ArrowRight className="size-4" />
@@ -1143,7 +1256,7 @@ function VehicleRequestPageContent() {
                     <button
                       type="button"
                       onClick={dismissOutcomeError}
-                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1C3A34] px-5 py-3.5 text-sm font-extrabold text-white transition-colors hover:bg-[#254b43]"
+                      className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#1C3A34] px-5 py-3.5 text-sm font-extrabold text-white transition-colors hover:bg-[#254b43] dark:bg-[#C9B87A] dark:text-[#171a1f] dark:hover:bg-[#d8c98e]"
                     >
                       {copy.tryAgain}
                       <ArrowRight className="size-4" />
@@ -1190,7 +1303,7 @@ function VehicleRequestPageContent() {
                     </p>
                     <Link
                       href={`/sign-in?redirect=${encodeURIComponent(`/book/request?ids=${ids.join(",")}`)}`}
-                      className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[#1C3A34] px-5 py-3.5 text-sm font-bold text-white transition-colors hover:bg-[#254b43]"
+                      className="mt-6 inline-flex w-full items-center justify-center rounded-xl bg-[#1C3A34] px-5 py-3.5 text-sm font-bold text-white transition-colors hover:bg-[#254b43] dark:bg-[#C9B87A] dark:text-[#171a1f] dark:hover:bg-[#d8c98e]"
                     >
                       {copy.signInToBook}
                     </Link>
@@ -1220,7 +1333,7 @@ function VehicleRequestPageContent() {
                         <h4 className="text-base font-extrabold text-[#1C3A34]">{copy.singleTrip}</h4>
                         <p className="text-sm leading-relaxed text-slate-500">{copy.singleTripDesc}</p>
                       </div>
-                      <span className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1C3A34] px-4 py-3 text-sm font-bold text-white">
+                      <span className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#1C3A34] px-4 py-3 text-sm font-bold text-white dark:bg-[#C9B87A] dark:text-[#171a1f]">
                         {copy.selectType}
                         <ArrowRight className="size-4" />
                       </span>
@@ -1285,7 +1398,25 @@ function VehicleRequestPageContent() {
                       required
                     />
 
-                    <div className="space-y-1.5">
+                    <AdminTextField
+                        id="request-passenger-count"
+                        label={copy.passengerCount}
+                        type="number"
+                        min={1}
+                        max={passengerMax}
+                        value={passengerCount}
+                        onChange={(e) => {
+                          setPassengerCount(e.target.value);
+                          if (passengerCountError) setPassengerCountError(null);
+                        }}
+                        placeholder={copy.passengerCountPlaceholder}
+                        hint={copy.passengerCountHint}
+                        error={passengerCountError ?? undefined}
+                        required
+                        disabled={isSubmitting}
+                      />
+
+                    <div className="space-y-1.5 sm:col-span-2">
                       <AdminTextField
                         id="request-mobile-number"
                         label={copy.mobileNumber}
@@ -1514,6 +1645,88 @@ function VehicleRequestPageContent() {
                       )}
                     </div>
 
+                    {/* Route preview */}
+                    {hasRouteCoordinates ? (
+                      <Collapsible
+                        open={routePreviewOpen}
+                        onOpenChange={setRoutePreviewOpen}
+                        className="rounded-2xl border border-slate-200 bg-slate-50/80 dark:border-white/10 dark:bg-[#11161d]"
+                      >
+                        <CollapsibleTrigger
+                          className={cn(
+                            "flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left",
+                            "rounded-2xl transition-colors hover:bg-white/70 dark:hover:bg-white/[0.04]",
+                            "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1C3A34]/15 dark:focus-visible:ring-[#C9B87A]/30",
+                          )}
+                        >
+                          <div className="flex min-w-0 items-center gap-3">
+                            <div className="rounded-xl bg-[#1C3A34]/8 p-2.5 text-[#1C3A34] dark:bg-[#C9B87A]/12 dark:text-[#d8c77f]">
+                              <Route className="size-4" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-[#1C3A34] dark:text-[#eef1f5]">
+                                {copy.routePreviewTitle}
+                              </p>
+                              <p className="text-xs leading-relaxed text-slate-500 dark:text-[#8f99a6]">
+                                {routeCalculating
+                                  ? copy.routePreviewCalculating
+                                  : copy.routePreviewDesc}
+                              </p>
+                            </div>
+                          </div>
+                          {routeCalculating ? (
+                            <Loader2 className="size-4 shrink-0 animate-spin text-[#C9B87A]" />
+                          ) : (
+                            <ChevronDown
+                              className={cn(
+                                "size-4 shrink-0 text-slate-400 transition-transform dark:text-[#8f99a6]",
+                                routePreviewOpen && "rotate-180",
+                              )}
+                            />
+                          )}
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="border-t border-slate-200/80 px-4 py-4 dark:border-white/10">
+                          <LazyRideRequestRouteMap
+                            visible={routePreviewOpen}
+                            locale={locale}
+                            height={320}
+                            pickupLatitude={pickupCoordinates.latitude}
+                            pickupLongitude={pickupCoordinates.longitude}
+                            dropoffLatitude={dropoffCoordinates.latitude}
+                            dropoffLongitude={dropoffCoordinates.longitude}
+                            pickupName={pickup.trim() || copy.pickupPointLabel}
+                            dropoffName={dropoff.trim() || copy.dropoffPointLabel}
+                            pickupTypeLabel={copy.pickupPointLabel}
+                            dropoffTypeLabel={copy.dropoffPointLabel}
+                            loadingLabel={copy.routePreviewLoading}
+                            calculatingLabel={copy.routePreviewCalculating}
+                            emptyLabel={copy.routePreviewEmpty}
+                            recenterLabel={copy.routePreviewRecenter}
+                            distanceLabel={copy.routePreviewDistance}
+                            durationLabel={copy.routePreviewDuration}
+                            straightLineLabel={copy.routePreviewStraightLine}
+                            distanceUnitKm={copy.routePreviewDistanceUnitKm}
+                            distanceUnitM={copy.routePreviewDistanceUnitM}
+                            onRouteLoadingChange={setRouteCalculating}
+                          />
+                        </CollapsibleContent>
+                      </Collapsible>
+                    ) : regionId ? (
+                      <div className="flex items-start gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-3.5 dark:border-white/10 dark:bg-[#11161d]/70">
+                        <div className="rounded-xl bg-[#1C3A34]/8 p-2.5 text-[#1C3A34] dark:bg-[#C9B87A]/12 dark:text-[#d8c77f]">
+                          <Route className="size-4" />
+                        </div>
+                        <div className="min-w-0 pt-0.5">
+                          <p className="text-sm font-bold text-[#1C3A34] dark:text-[#eef1f5]">
+                            {copy.routePreviewTitle}
+                          </p>
+                          <p className="mt-0.5 text-xs leading-relaxed text-slate-500 dark:text-[#8f99a6]">
+                            {copy.routePreviewHint}
+                          </p>
+                        </div>
+                      </div>
+                    ) : null}
+
                   </div>
                 </AdminFormSection>
 
@@ -1655,7 +1868,7 @@ function VehicleRequestPageContent() {
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full rounded-xl bg-[#1C3A34] py-4 text-center text-sm font-extrabold text-white transition-colors hover:bg-[#254b43] disabled:cursor-not-allowed disabled:bg-slate-300"
+                      className="w-full rounded-xl bg-[#1C3A34] py-4 text-center text-sm font-extrabold text-white transition-colors hover:bg-[#254b43] disabled:cursor-not-allowed disabled:bg-slate-300 dark:bg-[#C9B87A] dark:text-[#171a1f] dark:hover:bg-[#d8c98e] dark:disabled:bg-muted dark:disabled:text-muted-foreground"
                     >
                       {isSubmitting ? copy.submitting : copy.submitRequest}
                     </button>

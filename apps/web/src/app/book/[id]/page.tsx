@@ -46,6 +46,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { LOCALE_OPTIONS, type SupportedLocale } from "@/lib/locale";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import dynamic from "next/dynamic";
 
 const LazyVehicleLiveMap = dynamic(
@@ -63,7 +64,7 @@ const COPY = {
     requestThisVehicle: "Request this Vehicle",
     signInToRequest: "Sign In to Request",
     statusAvailable: "Available Now",
-    statusBusy: "In Service - Available:",
+    statusBusy: "Booked — Available:",
     specs: "Specifications",
     year: "Year",
     make: "Brand",
@@ -85,7 +86,7 @@ const COPY = {
     requestThisVehicle: "ተሽከርካሪውን ይጠይቁ",
     signInToRequest: "ለመጠየቅ ይግቡ",
     statusAvailable: "አሁን ይገኛል",
-    statusBusy: "ስራ ላይ - የሚገኝበት ጊዜ፡",
+    statusBusy: "ተይዟል — የሚገኝበት ጊዜ፡",
     specs: "ዝርዝር መግለጫዎች",
     year: "ዓመተ ምህረት",
     make: "ብራንድ",
@@ -189,17 +190,23 @@ function VehicleDetailPageContent({ id }: { id: string }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 text-slate-800 antialiased flex flex-col font-sans">
-        <header className="relative z-40 bg-[#1C3A34] text-white border-b border-[#C9B87A]/10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[72px] flex items-center justify-between">
-            <Link href="/" className="flex items-center shrink-0">
-              <BrandLogo priority className="group-hover:opacity-90 transition-opacity" />
+      <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased dark:bg-[#0d1117] dark:text-[#e8ecf1]">
+        <header className="relative z-40 border-b border-[#C9B87A]/10 bg-[#1C3A34] text-white dark:border-white/10 dark:bg-[#0d1117]">
+          <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+            <Link href="/" className="flex shrink-0 items-center">
+              <BrandLogo priority className="transition-opacity group-hover:opacity-90" />
             </Link>
+            <ThemeToggle
+              placement="inline"
+              className="auth-theme-toggle-inline h-9 w-9 border border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-[#C9B87A] dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:hover:text-[#C9B87A]"
+            />
           </div>
         </header>
-        <div className="flex-1 flex flex-col items-center justify-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#1C3A34]/10 border-t-[#C9B87A]" />
-          <p className="text-slate-400 text-sm font-semibold mt-4">Loading vehicle specifications...</p>
+        <div className="flex flex-1 flex-col items-center justify-center">
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#1C3A34]/10 border-t-[#C9B87A] dark:border-white/10 dark:border-t-[#C9B87A]" />
+          <p className="mt-4 text-sm font-semibold text-slate-400 dark:text-[#8f99a6]">
+            Loading vehicle specifications...
+          </p>
         </div>
       </div>
     );
@@ -207,19 +214,28 @@ function VehicleDetailPageContent({ id }: { id: string }) {
 
   if (!vehicle) {
     return (
-      <div className="min-h-screen bg-slate-50 text-slate-800 antialiased flex flex-col font-sans">
-        <header className="relative z-40 bg-[#1C3A34] text-white border-b border-[#C9B87A]/10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[72px] flex items-center justify-between">
-            <Link href="/" className="flex items-center shrink-0">
-              <BrandLogo priority className="group-hover:opacity-90 transition-opacity" />
+      <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased dark:bg-[#0d1117] dark:text-[#e8ecf1]">
+        <header className="relative z-40 border-b border-[#C9B87A]/10 bg-[#1C3A34] text-white dark:border-white/10 dark:bg-[#0d1117]">
+          <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+            <Link href="/" className="flex shrink-0 items-center">
+              <BrandLogo priority className="transition-opacity group-hover:opacity-90" />
             </Link>
+            <ThemeToggle
+              placement="inline"
+              className="auth-theme-toggle-inline h-9 w-9 border border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-[#C9B87A] dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:hover:text-[#C9B87A]"
+            />
           </div>
         </header>
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <Car className="h-16 w-16 text-slate-300 mb-4" />
-          <h2 className="text-xl font-bold text-[#1C3A34]">Vehicle Not Found</h2>
-          <p className="text-slate-500 text-sm mt-2">The requested vehicle record could not be located in the catalog.</p>
-          <Link href="/book" className="mt-5 bg-[#1C3A34] hover:bg-[#254b43] text-white font-bold text-xs px-5 py-2.5 rounded-xl shadow-md transition-all">
+        <div className="flex flex-1 flex-col items-center justify-center p-6 text-center">
+          <Car className="mb-4 h-16 w-16 text-slate-300 dark:text-[#7f8996]" />
+          <h2 className="text-xl font-bold text-[#1C3A34] dark:text-[#eef1f5]">Vehicle Not Found</h2>
+          <p className="mt-2 text-sm text-slate-500 dark:text-[#8f99a6]">
+            The requested vehicle record could not be located in the catalog.
+          </p>
+          <Link
+            href="/book"
+            className="mt-5 rounded-xl bg-[#1C3A34] px-5 py-2.5 text-xs font-bold text-white shadow-md transition-all hover:bg-[#254b43] dark:bg-[#C9B87A] dark:text-[#171a1f] dark:hover:bg-[#d8c98e]"
+          >
             Return to Catalog
           </Link>
         </div>
@@ -236,29 +252,36 @@ function VehicleDetailPageContent({ id }: { id: string }) {
   const activePhoto = vehiclePhotos[activeImageIndex];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 antialiased flex flex-col font-sans">
+    <div className="flex min-h-screen flex-col bg-slate-50 font-sans text-slate-800 antialiased dark:bg-[#0d1117] dark:text-[#e8ecf1]">
       {/* Header */}
-      <header className="relative z-40 bg-[#1C3A34] text-white border-b border-[#C9B87A]/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-[72px] flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center group shrink-0">
-            <BrandLogo priority className="group-hover:opacity-90 transition-opacity" />
+      <header className="relative z-40 border-b border-[#C9B87A]/10 bg-[#1C3A34] text-white dark:border-white/10 dark:bg-[#0d1117]">
+        <div className="mx-auto flex h-[72px] max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+          <Link href="/" className="group flex shrink-0 items-center">
+            <BrandLogo priority className="transition-opacity group-hover:opacity-90" />
           </Link>
-          
+
           <div className="flex items-center gap-4">
+            <ThemeToggle
+              placement="inline"
+              className="auth-theme-toggle-inline h-9 w-9 border border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-[#C9B87A] dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:hover:text-[#C9B87A]"
+            />
             <DropdownMenu>
               <DropdownMenuTrigger
                 render={
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-xl border bg-white/5 border-white/10 hover:bg-white/10 text-white shadow-none transition-all"
+                    className="h-9 w-9 rounded-xl border border-white/10 bg-white/5 text-white shadow-none transition-all hover:bg-white/10 hover:text-white dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:hover:text-white"
                     aria-label="Select language"
                   />
                 }
               >
                 <Languages className="h-[18px] w-[18px] text-[#C9B87A]" strokeWidth={1.75} />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-40 p-1.5 bg-white border border-slate-200 shadow-xl rounded-xl z-[10000]">
+              <DropdownMenuContent
+                align="end"
+                className="z-[10000] min-w-40 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-white/10 dark:bg-[#171c24] dark:text-[#e8ecf1] dark:shadow-black/35"
+              >
                 <DropdownMenuGroup>
                   <DropdownMenuRadioGroup
                     value={locale}
@@ -268,7 +291,7 @@ function VehicleDetailPageContent({ id }: { id: string }) {
                       <DropdownMenuRadioItem
                         key={option.value}
                         value={option.value}
-                        className="rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
+                        className="cursor-pointer rounded-lg px-3 py-2 text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-[#dfe5eb] dark:hover:bg-white/[0.06]"
                       >
                         {option.nativeLabel}
                       </DropdownMenuRadioItem>
@@ -281,7 +304,7 @@ function VehicleDetailPageContent({ id }: { id: string }) {
             {!user ? (
               <Link
                 href={`/sign-in?redirect=/book/${id}`}
-                className="bg-[#C9B87A] hover:bg-[#d9ca8e] text-[#1C3A34] font-bold text-xs sm:text-sm px-4 sm:px-5 py-2 rounded-full tracking-wide transition-all shadow-md hover:shadow-lg"
+                className="rounded-full bg-[#C9B87A] px-4 py-2 text-xs font-bold tracking-wide text-[#1C3A34] shadow-md transition-all hover:bg-[#d9ca8e] hover:shadow-lg sm:px-5 sm:text-sm"
               >
                 {locale === "am" ? "ግባ" : "Sign In"}
               </Link>
@@ -290,43 +313,52 @@ function VehicleDetailPageContent({ id }: { id: string }) {
                 <DropdownMenuTrigger
                   render={
                     <button
-                      className="rounded-full outline-none focus-visible:ring-2 focus-visible:ring-[#C9B87A] transition-all hover:scale-105"
+                      className="rounded-full outline-none transition-all hover:scale-105 focus-visible:ring-2 focus-visible:ring-[#C9B87A]"
                       aria-label="Account menu"
                     />
                   }
                 >
-                  <Avatar size="sm" className="size-9 ring-2 ring-[#C9B87A]/50 cursor-pointer">
-                    <AvatarFallback className="text-[11px] font-bold text-white bg-[#1C3A34] hover:bg-[#254b43]">
+                  <Avatar size="sm" className="size-9 cursor-pointer ring-2 ring-[#C9B87A]/50">
+                    <AvatarFallback className="bg-[#1C3A34] text-[11px] font-bold text-white hover:bg-[#254b43]">
                       {getUserInitials(user)}
                     </AvatarFallback>
                   </Avatar>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 p-1.5 bg-white border border-slate-200 shadow-xl rounded-xl z-[10000]">
+                <DropdownMenuContent
+                  align="end"
+                  className="z-[10000] w-56 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-white/10 dark:bg-[#171c24] dark:text-[#e8ecf1] dark:shadow-black/35"
+                >
                   <DropdownMenuGroup>
                     <DropdownMenuLabel className="px-2 py-2 font-normal">
-                      <p className="truncate text-sm font-semibold text-[#1C3A34]">
+                      <p className="truncate text-sm font-semibold text-[#1C3A34] dark:text-[#eef1f5]">
                         {user.first_name} {user.last_name}
                       </p>
-                      <p className="truncate text-xs text-slate-500">{user.email}</p>
+                      <p className="truncate text-xs text-slate-500 dark:text-[#8f99a6]">{user.email}</p>
                     </DropdownMenuLabel>
-                    <DropdownMenuSeparator />
+                    <DropdownMenuSeparator className="dark:bg-white/10" />
                     <DropdownMenuItem
-                      className="rounded-md px-2 py-1.5 text-sm text-slate-700 hover:bg-slate-100 cursor-pointer transition-colors"
+                      className="cursor-pointer rounded-md px-2 py-1.5 text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-[#dfe5eb] dark:hover:bg-white/[0.06]"
                       render={
-                        <Link href={user.roles.includes("admin") || user.roles.includes("super_admin") ? "/admin" : "/dashboard"} />
+                        <Link
+                          href={
+                            user.roles.includes("admin") || user.roles.includes("dispatcher")
+                              ? "/admin"
+                              : "/dashboard"
+                          }
+                        />
                       }
                     >
-                      <LayoutDashboard className="h-4 w-4 mr-2" />
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
                       Console Dashboard
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
-                  <DropdownMenuSeparator />
+                  <DropdownMenuSeparator className="dark:bg-white/10" />
                   <DropdownMenuGroup>
                     <DropdownMenuItem
                       onClick={handleSignOut}
-                      className="rounded-md px-2 py-1.5 text-sm text-red-600 hover:bg-red-55 cursor-pointer transition-colors"
+                      className="cursor-pointer rounded-md px-2 py-1.5 text-sm text-red-600 transition-colors hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10"
                     >
-                      <LogOut className="h-4 w-4 mr-2" />
+                      <LogOut className="mr-2 h-4 w-4" />
                       Sign Out
                     </DropdownMenuItem>
                   </DropdownMenuGroup>
@@ -338,42 +370,53 @@ function VehicleDetailPageContent({ id }: { id: string }) {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-[#1C3A34] text-white pt-16 pb-10 sm:pb-12 relative overflow-hidden">
+      <section className="relative overflow-hidden bg-[#1C3A34] pt-16 pb-10 text-white dark:bg-[#0d1117] sm:pb-12">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_#C9B87A_0%,_transparent_65%)] opacity-[0.05]" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 text-left">
-          <Link href="/book" className="inline-flex items-center gap-1 text-white/60 hover:text-white text-xs font-semibold transition-all mb-4">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 text-left sm:px-6">
+          <Link
+            href="/book"
+            className="mb-4 inline-flex items-center gap-1 text-xs font-semibold text-white/60 transition-all hover:text-white"
+          >
             <ArrowLeft className="h-4 w-4" />
             {copy.backToCatalog}
           </Link>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight">
+              <h1 className="text-2xl leading-tight font-extrabold tracking-tight sm:text-3xl lg:text-4xl">
                 {vehicle.make} {vehicle.model}
               </h1>
-              <div className="flex items-center gap-2 mt-2">
-                <span className="font-mono text-xs bg-white/10 border border-white/15 px-2.5 py-0.5 rounded text-white/80 uppercase tracking-widest">
+              <div className="mt-2 flex items-center gap-2">
+                <span className="rounded border border-white/15 bg-white/10 px-2.5 py-0.5 font-mono text-xs tracking-widest text-white/80 uppercase">
                   {vehicle.plate_number}
                 </span>
                 <span className="text-white/30">•</span>
-                <span className="text-xs text-white/60 font-medium">
+                <span className="text-xs font-medium text-white/60">
                   {copy.year}: {vehicle.year}
                 </span>
               </div>
             </div>
-            
-            {/* Availability status badge */}
+
             <div className="self-start sm:self-center">
-              <div className={cn(
-                "inline-flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-xs font-semibold text-xs",
-                isAvailable
-                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                  : "bg-amber-500/10 border-amber-500/30 text-amber-400"
-              )}>
-                <span className={cn("h-2 w-2 rounded-full", isAvailable ? "bg-emerald-400 animate-pulse" : "bg-amber-400")} />
+              <div
+                className={cn(
+                  "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold shadow-xs",
+                  isAvailable
+                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                    : "border-amber-500/30 bg-amber-500/10 text-amber-400",
+                )}
+              >
+                <span
+                  className={cn(
+                    "h-2 w-2 rounded-full",
+                    isAvailable ? "animate-pulse bg-emerald-400" : "bg-amber-400",
+                  )}
+                />
                 {isAvailable ? (
                   <span>{copy.statusAvailable}</span>
                 ) : (
-                  <span>{copy.statusBusy} {availableFromLabel}</span>
+                  <span>
+                    {copy.statusBusy} {availableFromLabel}
+                  </span>
                 )}
               </div>
             </div>
@@ -382,50 +425,54 @@ function VehicleDetailPageContent({ id }: { id: string }) {
       </section>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12 flex-1 w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
-          {/* LEFT COLUMN: Specifications and CTA (width: 4/12) */}
-          <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-[88px]">
-            {/* Specifications Card */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
-              <h2 className="text-sm font-extrabold text-[#1C3A34] uppercase tracking-wider mb-4 border-b border-slate-100 pb-2 flex items-center gap-2">
-                <FileText className="h-4 w-4 text-[#8f7d45]" />
+      <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-12">
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12">
+          <div className="space-y-6 lg:sticky lg:top-[88px] lg:col-span-4">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-[#171c24] dark:shadow-black/25 sm:p-6">
+              <h2 className="mb-4 flex items-center gap-2 border-b border-slate-100 pb-2 text-sm font-extrabold tracking-wider text-[#1C3A34] uppercase dark:border-white/10 dark:text-[#eef1f5]">
+                <FileText className="h-4 w-4 text-[#8f7d45] dark:text-[#C9B87A]" />
                 {copy.specs}
               </h2>
-              
-              <div className="divide-y divide-slate-100">
-                <div className="flex justify-between items-center py-3 text-sm">
-                  <span className="text-slate-400 font-semibold">{copy.make}</span>
-                  <span className="text-[#1C3A34] font-extrabold">{vehicle.make}</span>
+
+              <div className="divide-y divide-slate-100 dark:divide-white/10">
+                <div className="flex items-center justify-between py-3 text-sm">
+                  <span className="font-semibold text-slate-400 dark:text-[#8f99a6]">{copy.make}</span>
+                  <span className="font-extrabold text-[#1C3A34] dark:text-[#eef1f5]">{vehicle.make}</span>
                 </div>
-                <div className="flex justify-between items-center py-3 text-sm">
-                  <span className="text-slate-400 font-semibold">{copy.model}</span>
-                  <span className="text-[#1C3A34] font-extrabold">{vehicle.model}</span>
+                <div className="flex items-center justify-between py-3 text-sm">
+                  <span className="font-semibold text-slate-400 dark:text-[#8f99a6]">{copy.model}</span>
+                  <span className="font-extrabold text-[#1C3A34] dark:text-[#eef1f5]">{vehicle.model}</span>
                 </div>
-                <div className="flex justify-between items-center py-3 text-sm">
-                  <span className="text-slate-400 font-semibold">{copy.year}</span>
-                  <span className="text-[#1C3A34] font-extrabold">{vehicle.year}</span>
+                <div className="flex items-center justify-between py-3 text-sm">
+                  <span className="font-semibold text-slate-400 dark:text-[#8f99a6]">{copy.year}</span>
+                  <span className="font-extrabold text-[#1C3A34] dark:text-[#eef1f5]">{vehicle.year}</span>
                 </div>
-                <div className="flex justify-between items-center py-3 text-sm">
-                  <span className="text-slate-400 font-semibold">{copy.plate}</span>
-                  <span className="text-[#1C3A34] font-mono font-bold text-xs">{vehicle.plate_number}</span>
+                <div className="flex items-center justify-between py-3 text-sm">
+                  <span className="font-semibold text-slate-400 dark:text-[#8f99a6]">{copy.plate}</span>
+                  <span className="font-mono text-xs font-bold text-[#1C3A34] dark:text-[#eef1f5]">
+                    {vehicle.plate_number}
+                  </span>
                 </div>
-                <div className="flex justify-between items-center py-3 text-sm">
-                  <span className="text-slate-400 font-semibold">{copy.class}</span>
-                  <span className="text-[#8f7d45] font-extrabold">{vehicle.vehicle_class?.name}</span>
+                <div className="flex items-center justify-between py-3 text-sm">
+                  <span className="font-semibold text-slate-400 dark:text-[#8f99a6]">{copy.class}</span>
+                  <span className="font-extrabold text-[#8f7d45] dark:text-[#d8c77f]">
+                    {vehicle.vehicle_class?.name}
+                  </span>
                 </div>
-                <div className="flex justify-between items-center py-3 text-sm">
-                  <span className="text-slate-400 font-semibold">{copy.type}</span>
-                  <span className="text-[#1C3A34] font-extrabold">{vehicle.vehicle_type?.name}</span>
+                <div className="flex items-center justify-between py-3 text-sm">
+                  <span className="font-semibold text-slate-400 dark:text-[#8f99a6]">{copy.type}</span>
+                  <span className="font-extrabold text-[#1C3A34] dark:text-[#eef1f5]">
+                    {vehicle.vehicle_type?.name}
+                  </span>
                 </div>
               </div>
 
-              {/* ACTION CTA BUTTON */}
-              <div className="mt-6 pt-5 border-t border-slate-100">
+              <div className="mt-6 border-t border-slate-100 pt-5 dark:border-white/10">
                 <Link
-                  href={user ? `/book/request?ids=${id}` : `/sign-in?redirect=/book/request?ids=${id}`}
-                  className="w-full bg-[#1C3A34] hover:bg-[#254b43] text-white font-extrabold text-sm py-4 px-6 rounded-xl tracking-wide transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 hover:-translate-y-0.5 cursor-pointer text-center"
+                  href={
+                    user ? `/book/request?ids=${id}` : `/sign-in?redirect=/book/request?ids=${id}`
+                  }
+                  className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#1C3A34] px-6 py-4 text-center text-sm font-extrabold tracking-wide text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-[#254b43] hover:shadow-lg dark:bg-[#C9B87A] dark:text-[#171a1f] dark:hover:bg-[#d8c98e]"
                 >
                   <span>{user ? copy.requestThisVehicle : copy.signInToRequest}</span>
                   <ChevronRight className="h-5 w-5" />
@@ -433,16 +480,15 @@ function VehicleDetailPageContent({ id }: { id: string }) {
               </div>
             </div>
 
-            {/* Live Location Map Card */}
             {(() => {
               const mockLoc = getVehicleMockLocation(vehicle.id);
               return (
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 text-left">
-                  <h3 className="text-sm font-extrabold text-[#1C3A34] uppercase tracking-wider mb-2 flex items-center gap-2">
-                    <MapPin className="h-4 w-4 text-[#8f7d45] animate-bounce" />
+                <div className="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm dark:border-white/10 dark:bg-[#171c24] dark:shadow-black/25 sm:p-6">
+                  <h3 className="mb-2 flex items-center gap-2 text-sm font-extrabold tracking-wider text-[#1C3A34] uppercase dark:text-[#eef1f5]">
+                    <MapPin className="h-4 w-4 animate-bounce text-[#8f7d45] dark:text-[#C9B87A]" />
                     {copy.liveLocation}
                   </h3>
-                  <p className="text-xs text-slate-500 mb-4 leading-relaxed">
+                  <p className="mb-4 text-xs leading-relaxed text-slate-500 dark:text-[#8f99a6]">
                     {copy.liveLocationDesc} ({mockLoc.name})
                   </p>
                   <LazyVehicleLiveMap
@@ -455,29 +501,29 @@ function VehicleDetailPageContent({ id }: { id: string }) {
               );
             })()}
 
-            {/* Guaranteed Corporate Service Badge */}
-            <div className="bg-[#1C3A34]/5 border border-[#1C3A34]/10 rounded-2xl p-5 flex gap-4 items-start">
-              <div className="p-2.5 bg-[#1C3A34] text-white rounded-xl shrink-0">
+            <div className="flex items-start gap-4 rounded-2xl border border-[#1C3A34]/10 bg-[#1C3A34]/5 p-5 dark:border-[#C9B87A]/20 dark:bg-[#C9B87A]/[0.06]">
+              <div className="shrink-0 rounded-xl bg-[#1C3A34] p-2.5 text-white dark:bg-[#C9B87A] dark:text-[#151a21]">
                 <ShieldCheck className="h-6 w-6" />
               </div>
               <div>
-                <h4 className="font-extrabold text-[#1C3A34] text-sm">{copy.guaranteedService}</h4>
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed">{copy.guaranteedServiceDesc}</p>
+                <h4 className="text-sm font-extrabold text-[#1C3A34] dark:text-[#eef1f5]">
+                  {copy.guaranteedService}
+                </h4>
+                <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-[#8f99a6]">
+                  {copy.guaranteedServiceDesc}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* RIGHT COLUMN: Media Gallery & Overview (width: 8/12) */}
-          <div className="lg:col-span-8 space-y-6">
-            {/* Photo Gallery Card (Large) */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-4 sm:p-6">
-              <h2 className="text-sm font-extrabold text-[#1C3A34] uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">
+          <div className="space-y-6 lg:col-span-8">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-[#171c24] dark:shadow-black/25 sm:p-6">
+              <h2 className="mb-4 border-b border-slate-100 pb-2 text-sm font-extrabold tracking-wider text-[#1C3A34] uppercase dark:border-white/10 dark:text-[#eef1f5]">
                 {copy.gallery}
               </h2>
-              
-              {/* Primary Image Preview (Stretched & Larger aspect ratio) */}
+
               <div
-                className="aspect-[16/10] sm:aspect-[16/9] w-full rounded-xl overflow-hidden bg-slate-150 border border-slate-200 relative shadow-inner cursor-zoom-in"
+                className="relative aspect-[16/10] w-full cursor-zoom-in overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-inner dark:border-white/10 dark:bg-[#11161d] sm:aspect-[16/9]"
                 onMouseMove={handleMouseMove}
                 onMouseEnter={() => setIsZoomed(true)}
                 onMouseLeave={() => setIsZoomed(false)}
@@ -486,7 +532,7 @@ function VehicleDetailPageContent({ id }: { id: string }) {
                   <img
                     src={getVehiclePhotoUrl(activePhoto) || ""}
                     alt={`${vehicle.make} ${vehicle.model}`}
-                    className="w-full h-full object-cover transition-transform duration-150 ease-out"
+                    className="h-full w-full object-cover transition-transform duration-150 ease-out"
                     style={{
                       transform: isZoomed ? "scale(2.2)" : "scale(1)",
                       transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
@@ -499,20 +545,18 @@ function VehicleDetailPageContent({ id }: { id: string }) {
                   />
                 )}
 
-                {/* Floating specifications tags */}
-                <div className="absolute bottom-4 left-4 flex gap-1.5 z-10">
-                  <span className="text-[10px] font-extrabold bg-[#1C3A34] text-white px-2.5 py-1 rounded-full uppercase shadow-md">
+                <div className="absolute bottom-4 left-4 z-10 flex gap-1.5">
+                  <span className="rounded-full bg-[#1C3A34] px-2.5 py-1 text-[10px] font-extrabold text-white uppercase shadow-md dark:bg-[#C9B87A] dark:text-[#171a1f]">
                     {vehicle.vehicle_class?.name}
                   </span>
-                  <span className="text-[10px] font-extrabold bg-[#C9B87A] text-[#1C3A34] px-2.5 py-1 rounded-full uppercase shadow-md">
+                  <span className="rounded-full bg-[#C9B87A] px-2.5 py-1 text-[10px] font-extrabold text-[#1C3A34] uppercase shadow-md">
                     {vehicle.vehicle_type?.name}
                   </span>
                 </div>
               </div>
 
-              {/* Thumbnails Row */}
               {vehiclePhotos.length > 1 && (
-                <div className="flex gap-2.5 overflow-x-auto mt-4 pb-2">
+                <div className="mt-4 flex gap-2.5 overflow-x-auto pb-2">
                   {vehiclePhotos.map((image, index) => {
                     const thumbUrl = getVehiclePhotoUrl(image);
                     const isActive = index === activeImageIndex;
@@ -521,13 +565,17 @@ function VehicleDetailPageContent({ id }: { id: string }) {
                         key={index}
                         onClick={() => setActiveImageIndex(index)}
                         className={cn(
-                          "relative h-16 w-24 rounded-lg overflow-hidden border transition-all shrink-0 cursor-pointer",
+                          "relative h-16 w-24 shrink-0 cursor-pointer overflow-hidden rounded-lg border transition-all",
                           isActive
                             ? "border-[#C9B87A] ring-2 ring-[#C9B87A]/25"
-                            : "border-slate-200 hover:border-slate-300"
+                            : "border-slate-200 hover:border-slate-300 dark:border-white/10 dark:hover:border-[#C9B87A]/35",
                         )}
                       >
-                        <img src={thumbUrl || ""} alt="Thumbnail" className="w-full h-full object-cover" />
+                        <img
+                          src={thumbUrl || ""}
+                          alt="Thumbnail"
+                          className="h-full w-full object-cover"
+                        />
                         {isActive && <div className="absolute inset-0 bg-[#1C3A34]/5" />}
                       </button>
                     );
@@ -536,15 +584,17 @@ function VehicleDetailPageContent({ id }: { id: string }) {
               )}
             </div>
 
-            {/* Overview / Notes Card */}
             {vehicle.notes && (
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6 text-left">
-                <h3 className="text-sm font-extrabold text-[#1C3A34] uppercase tracking-wider mb-4 border-b border-slate-100 pb-2">{copy.overview}</h3>
-                <p className="text-sm text-slate-650 leading-relaxed whitespace-pre-line bg-slate-50/50 p-4 rounded-xl border border-slate-150">{vehicle.notes}</p>
+              <div className="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm dark:border-white/10 dark:bg-[#171c24] dark:shadow-black/25 sm:p-6">
+                <h3 className="mb-4 border-b border-slate-100 pb-2 text-sm font-extrabold tracking-wider text-[#1C3A34] uppercase dark:border-white/10 dark:text-[#eef1f5]">
+                  {copy.overview}
+                </h3>
+                <p className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 text-sm leading-relaxed whitespace-pre-line text-slate-650 dark:border-white/10 dark:bg-[#11161d] dark:text-[#dfe5eb]">
+                  {vehicle.notes}
+                </p>
               </div>
             )}
           </div>
-          
         </div>
       </main>
     </div>

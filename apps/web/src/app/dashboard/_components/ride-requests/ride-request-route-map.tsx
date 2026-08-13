@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import L from "leaflet";
-import { Crosshair, Clock, Minus, Plus, Route } from "lucide-react";
+import { Crosshair, Clock, Loader2, Minus, Plus, Route } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import {
   DEFAULT_MAP_CENTER,
@@ -51,6 +51,7 @@ type RideRequestRouteMapProps = {
   height?: number;
   className?: string;
   loadingLabel?: string;
+  calculatingLabel?: string;
   recenterLabel?: string;
   emptyLabel?: string;
   distanceLabel?: string;
@@ -58,6 +59,7 @@ type RideRequestRouteMapProps = {
   straightLineLabel?: string;
   distanceUnitKm?: string;
   distanceUnitM?: string;
+  onRouteLoadingChange?: (loading: boolean) => void;
 };
 
 function getRoutePoints(
@@ -167,6 +169,7 @@ export function RideRequestRouteMap({
   height = DEFAULT_MAP_HEIGHT,
   className,
   loadingLabel = "Loading map...",
+  calculatingLabel = "Calculating route, distance, and drive time...",
   recenterLabel = "Fit route",
   emptyLabel = "No map coordinates available for this request.",
   distanceLabel = "Distance",
@@ -174,6 +177,7 @@ export function RideRequestRouteMap({
   straightLineLabel = "Straight-line",
   distanceUnitKm = "km",
   distanceUnitM = "m",
+  onRouteLoadingChange,
 }: RideRequestRouteMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -184,6 +188,10 @@ export function RideRequestRouteMap({
   const [mapReady, setMapReady] = useState(false);
   const [routeLoading, setRouteLoading] = useState(false);
   const [routeStats, setRouteStats] = useState<RouteMapStats | null>(null);
+
+  useEffect(() => {
+    onRouteLoadingChange?.(routeLoading);
+  }, [routeLoading, onRouteLoadingChange]);
 
   const points = getRoutePoints(
     pickupLatitude,
@@ -511,8 +519,13 @@ export function RideRequestRouteMap({
         <div ref={containerRef} className="absolute inset-0 z-0" aria-label="Ride route map" />
 
         {!mapReady ? (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#e8eef0] text-sm text-slate-500 dark:bg-[#11161d]">
-            {loadingLabel}
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-[#e8eef0]/95 px-6 dark:bg-[#11161d]/95">
+            <div className="ride-request-route-map__loading-card" role="status" aria-live="polite">
+              <Loader2 className="size-5 shrink-0 animate-spin text-[#C9B87A]" />
+              <div className="min-w-0">
+                <p className="ride-request-route-map__loading-title">{loadingLabel}</p>
+              </div>
+            </div>
           </div>
         ) : null}
 
@@ -523,8 +536,16 @@ export function RideRequestRouteMap({
         ) : null}
 
         {routeLoading && hasBothPoints && mapReady ? (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-[#1C3A34]/45 to-transparent px-4 pb-3 pt-8 text-center text-xs font-medium text-white">
-            {loadingLabel}
+          <div className="pointer-events-none absolute inset-0 z-20 flex items-end justify-center bg-[#0d1117]/20 p-3 backdrop-blur-[1px] dark:bg-black/30 sm:items-center">
+            <div className="ride-request-route-map__loading-card" role="status" aria-live="polite">
+              <Loader2 className="size-5 shrink-0 animate-spin text-[#C9B87A]" />
+              <div className="min-w-0">
+                <p className="ride-request-route-map__loading-title">{calculatingLabel}</p>
+                <p className="ride-request-route-map__loading-hint">
+                  {distanceLabel} · {durationLabel}
+                </p>
+              </div>
+            </div>
           </div>
         ) : null}
 

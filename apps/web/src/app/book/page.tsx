@@ -57,7 +57,7 @@ const COPY = {
     allClasses: "All Classes",
     allAvailability: "All Availability",
     availableNow: "Available Now",
-    inService: "In Service",
+    inService: "Booked",
     requestBooking: "Request Vehicle",
     selectVehicle: "Select",
     selectedVehicle: "Selected",
@@ -71,7 +71,7 @@ const COPY = {
     requestCart: "Continue",
     signIn: "Sign In",
     statusAvailable: "Available Now",
-    statusBusy: "In Service — Available:",
+    statusBusy: "Booked — Available:",
     loadingCatalog: "Loading available vehicles...",
     noVehiclesTitle: "No vehicles found",
     noVehiclesSearch: "No vehicles match “{query}”. Try a different make, model, or plate number.",
@@ -89,7 +89,7 @@ const COPY = {
     allClasses: "ሁሉም ክፍሎች",
     allAvailability: "ሁሉም ዝግጁነት",
     availableNow: "አሁን የሚገኙ",
-    inService: "በሥራ ላይ ያሉ",
+    inService: "ተይዘዋል",
     requestBooking: "ተሽከርካሪ ይጠይቁ",
     selectVehicle: "ይምረጡ",
     selectedVehicle: "ተመርጧል",
@@ -103,7 +103,7 @@ const COPY = {
     requestCart: "ቀጥል",
     signIn: "ግባ",
     statusAvailable: "አሁን ይገኛል",
-    statusBusy: "ስራ ላይ — የሚገኝበት ጊዜ፡",
+    statusBusy: "ተይዟል — የሚገኝበት ጊዜ፡",
     loadingCatalog: "የተሽከርካሪ ካታሎግ በመጫን ላይ...",
     noVehiclesTitle: "ምንም ተሽከርካሪ አልተገኘም",
     noVehiclesSearch: "“{query}” ጋር የሚዛመድ ተሽከርካሪ የለም። ሌላ ብራንድ፣ ሞዴል ወይም ሰሌዳ ቁጥር ይሞክሩ።",
@@ -247,7 +247,7 @@ function PublicVehiclesPageContent() {
           <div className="flex items-center gap-4">
             <ThemeToggle
               placement="inline"
-              className="auth-theme-toggle-inline h-9 w-9 border border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-[#C9B87A] dark:text-white"
+              className="auth-theme-toggle-inline h-9 w-9 border border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-[#C9B87A] dark:border-white/10 dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:hover:text-[#C9B87A]"
             />
             <DropdownMenu>
               <DropdownMenuTrigger
@@ -255,7 +255,7 @@ function PublicVehiclesPageContent() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-9 w-9 rounded-full border bg-white/5 border-white/10 hover:bg-white/10 text-white shadow-none transition-all hover:scale-105"
+                    className="h-9 w-9 rounded-full border border-white/10 bg-white/5 text-white shadow-none transition-all hover:scale-105 hover:bg-white/10 hover:text-white dark:bg-white/5 dark:text-white dark:hover:bg-white/10 dark:hover:text-white"
                     aria-label="Select language"
                   />
                 }
@@ -505,7 +505,7 @@ function PublicVehiclesPageContent() {
                   <button
                     type="button"
                     onClick={clearAllFilters}
-                    className="mt-6 inline-flex items-center justify-center rounded-xl bg-[#1C3A34] px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#254b43]"
+                    className="mt-6 inline-flex items-center justify-center rounded-xl bg-[#1C3A34] px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#254b43] dark:bg-[#C9B87A] dark:text-[#171a1f] dark:hover:bg-[#d8c98e]"
                   >
                     {copy.clearFilters}
                   </button>
@@ -619,7 +619,7 @@ function PublicVehiclesPageContent() {
                               "inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition-colors",
                               isSelected
                                 ? "border border-slate-200 bg-white text-slate-600 hover:border-red-200 hover:text-red-600 dark:border-[#C9B87A]/35 dark:bg-[#222831] dark:text-[#d8c77f] dark:hover:border-red-400/40 dark:hover:text-red-300"
-                                : "bg-[#1C3A34] text-white hover:bg-[#254b43] dark:bg-[#203f38] dark:hover:bg-[#295148]",
+                                : "bg-[#1C3A34] text-white hover:bg-[#254b43] dark:bg-[#C9B87A] dark:text-[#171a1f] dark:hover:bg-[#d8c98e]",
                             )}
                           >
                             {isSelected ? (
