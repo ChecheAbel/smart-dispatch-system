@@ -1448,6 +1448,7 @@
         "regions": "Regions",
         "locations": "Locations",
         "fare_plans": "Fare plans",
+        "booking_policies": "Booking policies",
         "ride_requests": "Ride requests (admin)",
         "driver": "Driver app"
       },
@@ -4164,6 +4165,89 @@
       }
     }
   },
+  "adminBookingPolicies": {
+    "eyebrow": "Billing",
+    "title": "Booking Policies",
+    "description": "Configure booking rules for advance notice, free cancellation, and late cancellation penalties. These can be linked to contracts.",
+    "readOnlyHint": "You can view this policy, but write access is required to save changes.",
+    "lateCancellationTypes": {
+      "none": "No penalty",
+      "charge_fee": "Charge fee",
+      "bill_as_trip": "Bill as trip"
+    },
+    "lateCancellationTypeHelp": {
+      "none": "Customers can cancel late without a penalty.",
+      "charge_fee": "A fixed fee is charged when cancelling after the free window.",
+      "bill_as_trip": "Late cancellations are billed as a full trip."
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to booking policies is required to open this page.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "form": {
+      "createTitle": "New booking policy",
+      "editTitle": "Edit booking policy",
+      "createDescription": "Create a reusable booking policy with at least an English name.",
+      "editDescription": "Update booking rules and translations.",
+      "name": "Name",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "rulesTitle": "Booking rules",
+      "minAdvanceBookingHours": "Minimum advance booking",
+      "minAdvanceBookingHoursHint": "Hours before pickup when a booking must be made.",
+      "freeCancellationHours": "Free cancellation window",
+      "freeCancellationHoursHint": "Hours before pickup when cancellation is free.",
+      "lateCancellationType": "Late cancellation policy",
+      "lateCancellationFee": "Late cancellation fee",
+      "currency": "Currency",
+      "hoursPlaceholder": "e.g. 24",
+      "feePlaceholder": "e.g. 500",
+      "active": "Active",
+      "optional": "(optional)",
+      "cancel": "Cancel",
+      "create": "Create policy",
+      "creating": "Creating...",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "loading": "Loading policy...",
+      "namePlaceholderEn": "Standard 24h policy",
+      "namePlaceholderAm": "መደበኛ 24 ሰዓት ፖሊሲ",
+      "errors": {
+        "enNameRequired": "English name is required.",
+        "hoursInvalid": "Hours must be a non-negative number.",
+        "feeRequired": "Late cancellation fee is required when charging a fee.",
+        "createFailed": "Failed to create booking policy.",
+        "updateFailed": "Failed to update booking policy.",
+        "loadFailed": "Failed to load booking policy."
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "Policy created",
+        "description": "Booking policy was added successfully."
+      },
+      "updateSuccess": {
+        "title": "Policy updated",
+        "description": "Booking policy was saved successfully."
+      },
+      "deleteSuccess": {
+        "title": "Policy deleted",
+        "description": "Booking policy was removed."
+      },
+      "deleteFailed": {
+        "title": "Delete failed",
+        "description": "Could not delete the policy. It may still be linked to contracts."
+      },
+      "loadFailed": {
+        "title": "Load failed",
+        "description": "Could not load the booking policy."
+      }
+    }
+  },
   "adminContracts": {
     "eyebrow": "Billing",
     "title": "Contracts",
@@ -4260,6 +4344,10 @@
       "farePlan": "Linked fare plan",
       "farePlanDescription": "Optional default pricing applied to trips billed under this contract.",
       "farePlanPlaceholder": "Select a fare plan",
+      "bookingPolicy": "Booking policy",
+      "bookingPolicyDescription": "Optional rules for advance booking and cancellation under this contract.",
+      "bookingPolicyPlaceholder": "Select a booking policy",
+      "noBookingPolicy": "No linked booking policy",
       "notes": "Notes",
       "notesPlaceholder": "Commercial terms, billing notes, or internal remarks",
       "scopeTitle": "Operational scope",
@@ -4296,6 +4384,7 @@
       "paymentTermsValue": "Net {days} days",
       "termFromTripsHint": "Billing periods begin when dispatch accepts a ride request, using the scheduled pickup date when available.",
       "farePlan": "Fare plan",
+      "bookingPolicy": "Booking policy",
       "notes": "Notes",
       "enrollments": "Customer enrollments",
       "enrollmentsDescription": "Billing periods created when dispatch confirms ride requests under this contract.",

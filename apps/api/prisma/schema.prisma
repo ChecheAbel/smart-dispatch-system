@@ -700,12 +700,39 @@ enum ContractBillingInterval {
   @@map("contract_billing_interval")
 }
 
+enum LateCancellationType {
+  none
+  charge_fee
+  bill_as_trip
+
+  @@map("late_cancellation_type")
+}
+
+model BookingPolicy {
+  id                     String                @id @default(uuid()) @db.Uuid
+  slug                   String                @unique @db.VarChar(50)
+  translations           Json                  @db.JsonB
+  minAdvanceBookingHours Int                   @default(0) @map("min_advance_booking_hours")
+  freeCancellationHours  Int                   @default(0) @map("free_cancellation_hours")
+  lateCancellationType   LateCancellationType  @default(none) @map("late_cancellation_type")
+  lateCancellationFee    Decimal?              @map("late_cancellation_fee") @db.Decimal(12, 2)
+  currency               String                @default("ETB") @db.VarChar(3)
+  isActive               Boolean               @default(true) @map("is_active")
+  createdAt              DateTime              @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt              DateTime              @updatedAt @map("updated_at") @db.Timestamptz
+  contracts              Contract[]
+
+  @@index([isActive])
+  @@map("booking_policies")
+}
+
 model Contract {
   id               String                  @id @default(uuid()) @db.Uuid
   referenceNumber  String                  @unique @map("reference_number") @db.VarChar(50)
   title            String                  @db.VarChar(200)
   status           ContractStatus          @default(draft)
   farePlanId       String?                 @map("fare_plan_id") @db.Uuid
+  bookingPolicyId  String?                 @map("booking_policy_id") @db.Uuid
   notes            String?                 @db.Text
   billingInterval  ContractBillingInterval @default(per_trip) @map("billing_interval")
   paymentTermsDays Int?                    @map("payment_terms_days")
@@ -716,12 +743,14 @@ model Contract {
   createdAt        DateTime                @default(now()) @map("created_at") @db.Timestamptz
   updatedAt        DateTime                @updatedAt @map("updated_at") @db.Timestamptz
   farePlan         FarePlan?               @relation(fields: [farePlanId], references: [id], onDelete: SetNull)
+  bookingPolicy    BookingPolicy?          @relation(fields: [bookingPolicyId], references: [id], onDelete: SetNull)
   createdBy        User?                   @relation("ContractCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   rideRequests     RideRequest[]
   enrollments      ContractEnrollment[]
   invoices         Invoice[]
 
   @@index([status])
+  @@index([bookingPolicyId])
   @@map("contracts")
 }
 

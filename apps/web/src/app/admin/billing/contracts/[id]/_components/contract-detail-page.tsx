@@ -359,6 +359,10 @@ export function ContractDetailPage() {
               />
             ) : null}
             <InfoTile
+              label={copy.detail.bookingPolicy}
+              value={contract.booking_policy?.name ?? copy.form.noBookingPolicy}
+            />
+            <InfoTile
               label={copy.columns.created}
               value={formatDate(contract.created_at, locale)}
             />

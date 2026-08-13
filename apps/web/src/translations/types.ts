@@ -25,6 +25,7 @@ export type AdminVehiclesMessages = Translations["adminVehicles"];
 export type AdminRegionsMessages = Translations["adminRegions"];
 export type AdminLocationsMessages = Translations["adminLocations"];
 export type AdminFarePlansMessages = Translations["adminFarePlans"];
+export type AdminBookingPoliciesMessages = Translations["adminBookingPolicies"];
 export type AdminContractsMessages = Translations["adminContracts"];
 export type AdminInvoicesMessages = Translations["adminInvoices"];
 export type AdminShellMessages = Translations["adminShell"];

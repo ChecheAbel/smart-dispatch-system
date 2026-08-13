@@ -12,6 +12,7 @@ const ADMIN_MODULES = [
   "regions",
   "locations",
   "fare_plans",
+  "booking_policies",
   "contracts",
   "invoices",
   "ride_requests",
@@ -117,11 +118,15 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
   }
 
   if (normalizedSlug === "billing") {
-    return ["fare_plans.read", "contracts.read", "invoices.read"];
+    return ["fare_plans.read", "booking_policies.read", "contracts.read", "invoices.read"];
   }
 
   if (normalizedSlug === "fare-plans") {
     return ["fare_plans.read"];
+  }
+
+  if (normalizedSlug === "booking-policies") {
+    return ["booking_policies.read"];
   }
 
   if (normalizedSlug === "contracts") {

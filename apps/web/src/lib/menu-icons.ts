@@ -85,6 +85,7 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   billing: Receipt,
   coins: Coins,
   "fare-plans": Coins,
+  "booking-policies": ClipboardList,
   "file-text": FileText,
   contracts: FileText,
   "receipt-text": ReceiptText,

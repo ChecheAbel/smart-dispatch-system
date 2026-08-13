@@ -27,6 +27,7 @@ import {
 import { listEnrollmentsByContractId } from "../models/contract-enrollment.model";
 import { toPublicContractEnrollments } from "../mappers/contract-enrollment.mapper";
 import { findFarePlanById } from "../models/fare-plan.model";
+import { findBookingPolicyById } from "../models/booking-policy.model";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
 import { getOptionalString, getString } from "../utils/validation";
@@ -152,6 +153,15 @@ async function validateFarePlanId(farePlanId: string | null | undefined) {
   return null;
 }
 
+async function validateBookingPolicyId(bookingPolicyId: string | null | undefined) {
+  if (!bookingPolicyId) return null;
+  const bookingPolicy = await findBookingPolicyById(bookingPolicyId);
+  if (!bookingPolicy) {
+    return "Booking policy not found.";
+  }
+  return null;
+}
+
 router.get(
   "/",
   requirePermission("contracts.read"),
@@ -240,6 +250,12 @@ router.post(
         return sendError(res, farePlanError, 400);
       }
 
+      const bookingPolicyId = parseOptionalId(req.body?.booking_policy_id);
+      const bookingPolicyError = await validateBookingPolicyId(bookingPolicyId);
+      if (bookingPolicyError) {
+        return sendError(res, bookingPolicyError, 400);
+      }
+
       const scope = {
         regionIds: parseUuidArray(req.body?.region_ids) ?? [],
         vehicleTypeIds: parseUuidArray(req.body?.vehicle_type_ids) ?? [],
@@ -282,6 +298,7 @@ router.post(
         title,
         status,
         farePlanId,
+        bookingPolicyId,
         notes: getOptionalString(req.body?.notes),
         billingInterval,
         paymentTermsDays: resolvedPaymentTermsDays,
@@ -321,6 +338,18 @@ router.patch(
         const farePlanError = await validateFarePlanId(farePlanId);
         if (farePlanError) {
           return sendError(res, farePlanError, 400);
+        }
+      }
+
+      const bookingPolicyId =
+        req.body?.booking_policy_id !== undefined
+          ? parseOptionalId(req.body.booking_policy_id)
+          : undefined;
+
+      if (bookingPolicyId !== undefined) {
+        const bookingPolicyError = await validateBookingPolicyId(bookingPolicyId);
+        if (bookingPolicyError) {
+          return sendError(res, bookingPolicyError, 400);
         }
       }
 
@@ -381,6 +410,7 @@ router.patch(
         title: getOptionalString(req.body?.title) || undefined,
         status: parseContractStatus(req.body?.status),
         farePlanId,
+        bookingPolicyId,
         notes:
           req.body?.notes !== undefined
             ? getOptionalString(req.body?.notes)

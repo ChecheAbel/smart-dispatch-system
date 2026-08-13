@@ -1448,6 +1448,7 @@
         "regions": "ክልሎች",
         "locations": "ቦታዎች",
         "fare_plans": "የክፍያ ዕቅዶች",
+        "booking_policies": "የቦታ ማስያዝ ፖሊሲዎች",
         "ride_requests": "የጉዞ ጥያቄዎች (አስተዳዳሪ)",
         "driver": "የሹፌር መተግበሪያ"
       },
@@ -4164,6 +4165,89 @@
       }
     }
   },
+  "adminBookingPolicies": {
+    "eyebrow": "ክፍያ",
+    "title": "የቦታ ማስያዝ ፖሊሲዎች",
+    "description": "ለቅድመ ማስታወሻ፣ ነፃ መሰረዝ እና ዘግይቶ መሰረዝ ቅጣቶች የቦታ ማስያዝ ደንቦችን ያዘጋጁ። እነዚህ ከውሎች ጋር ሊያያዙ ይችላሉ።",
+    "readOnlyHint": "ይህን ፖሊሲ ማየት ይችላሉ፣ ነገር ግን ለውጦችን ለማስቀመጥ የመጻፍ ፈቃድ ያስፈልጋል።",
+    "lateCancellationTypes": {
+      "none": "ቅጣት የለም",
+      "charge_fee": "ክፍያ ይጠይቃል",
+      "bill_as_trip": "እንደ ጉዞ ይከፈላል"
+    },
+    "lateCancellationTypeHelp": {
+      "none": "ደንበኞች ከነፃ ጊዜ በኋላ ዘግይተው ሲሰርዙ ቅጣት አይደርስም።",
+      "charge_fee": "ከነፃ ጊዜ በኋላ ሲሰረዝ ቋሚ ክፍያ ይጠይቃል።",
+      "bill_as_trip": "ዘግይቶ መሰረዝ እንደሙሉ ጉዞ ይከፈላል።"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የቦታ ማስያዝ ፖሊሲዎችን የመመልከት ፈቃድ ያስፈልጋል።",
+      "sessionHint": "ፈቃዶች በቅርብ ጊዜ ከተቀየሩ፣ ክፍለ ጊዜዎን ለማደስ ይውጡና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶች ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
+    "form": {
+      "createTitle": "አዲስ የቦታ ማስያዝ ፖሊሲ",
+      "editTitle": "የቦታ ማስያዝ ፖሊሲ አርትዕ",
+      "createDescription": "ቢያንስ የእንግሊዝኛ ስም ያለው የሚያደግ ፖሊሲ ይፍጠሩ።",
+      "editDescription": "የቦታ ማስያዝ ደንቦችን እና ትርጉሞችን ያዘምኑ።",
+      "name": "ስም",
+      "description": "መግለጫ",
+      "descriptionPlaceholder": "አማራጭ መግለጫ",
+      "rulesTitle": "የቦታ ማስያዝ ደንቦች",
+      "minAdvanceBookingHours": "ዝቅተኛ ቅድመ ማስያዝ",
+      "minAdvanceBookingHoursHint": "ቦታ ከመውሰድ በፊት ቦታ መያዝ የሚፈለግበት ሰዓታት።",
+      "freeCancellationHours": "ነፃ መሰረዝ ጊዜ",
+      "freeCancellationHoursHint": "ቦታ ከመውሰድ በፊት ነፃ መሰረዝ የሚፈቀድበት ሰዓታት።",
+      "lateCancellationType": "ዘግይቶ መሰረዝ ፖሊሲ",
+      "lateCancellationFee": "ዘግይቶ መሰረዝ ክፍያ",
+      "currency": "ምንዛሬ",
+      "hoursPlaceholder": "ለምሳሌ 24",
+      "feePlaceholder": "ለምሳሌ 500",
+      "active": "ንቁ",
+      "optional": "(አማራጭ)",
+      "cancel": "ተወው",
+      "create": "ፖሊሲ ፍጠር",
+      "creating": "በመፍጠር ላይ...",
+      "save": "ለውጦችን አስቀምጥ",
+      "saving": "በመቀመጥ ላይ...",
+      "loading": "ፖሊሲ በመጫን ላይ...",
+      "namePlaceholderEn": "Standard 24h policy",
+      "namePlaceholderAm": "መደበኛ 24 ሰዓት ፖሊሲ",
+      "errors": {
+        "enNameRequired": "የእንግሊዝኛ ስም ያስፈልጋል።",
+        "hoursInvalid": "ሰዓታት ያልተሌክሱ ቁጥር መሆን አለባቸው።",
+        "feeRequired": "ክፍያ ሲጠየቅ የዘግይቶ መሰረዝ ክፍያ ያስፈልጋል።",
+        "createFailed": "የቦታ ማስያዝ ፖሊሲ መፍጠር አልተሳካም።",
+        "updateFailed": "የቦታ ማስያዝ ፖሊሲ ማዘመን አልተሳካም።",
+        "loadFailed": "የቦታ ማስያዝ ፖሊሲ መጫን አልተሳካም።"
+      }
+    },
+    "toast": {
+      "createSuccess": {
+        "title": "ፖሊሲ ተፈጥሯል",
+        "description": "የቦታ ማስያዝ ፖሊሲ በተሳካ ሁኔታ ታክሏል።"
+      },
+      "updateSuccess": {
+        "title": "ፖሊሲ ተዘምኗል",
+        "description": "የቦታ ማስያዝ ፖሊሲ በተሳካ ሁኔታ ተቀምጧል።"
+      },
+      "deleteSuccess": {
+        "title": "ፖሊሲ ተሰርዟል",
+        "description": "የቦታ ማስያዝ ፖሊሲ ተወግዷል።"
+      },
+      "deleteFailed": {
+        "title": "መሰረዝ አልተሳካም",
+        "description": "ፖሊሲውን መሰረዝ አልተቻለም። ለውሎች ሊያያዝ ይችላል።"
+      },
+      "loadFailed": {
+        "title": "መጫን አልተሳካም",
+        "description": "የቦታ ማስያዝ ፖሊሲውን መጫን አልተቻለም።"
+      }
+    }
+  },
   "adminContracts": {
     "eyebrow": "ክፍያ",
     "title": "ውሎች",
@@ -4260,6 +4344,10 @@
       "farePlan": "የተገናኘ የክፍያ ዕቅድ",
       "farePlanDescription": "በዚህ ውል ስር ለሚከፈሉ ጉዞዎች አማራጭ ነባሪ ዋጋ።",
       "farePlanPlaceholder": "የክፍያ ዕቅድ ይምረጡ",
+      "bookingPolicy": "የቦታ ማስያዝ ፖሊሲ",
+      "bookingPolicyDescription": "በዚህ ውል ስር ለቅድመ ማስያዝ እና መሰረዝ ደንቦች አማራጭ።",
+      "bookingPolicyPlaceholder": "የቦታ ማስያዝ ፖሊሲ ይምረጡ",
+      "noBookingPolicy": "የተያያዘ የቦታ ማስያዝ ፖሊሲ የለም",
       "notes": "ማስታወሻዎች",
       "notesPlaceholder": "የንግድ ውሎች፣ የክፍያ ማስታወሻዎች ወይም ውስጣዊ ማስታወሻዎች",
       "scopeTitle": "የክወና ክልል",
@@ -4296,6 +4384,7 @@
       "paymentTermsValue": "ኔት {days} ቀናት",
       "termFromTripsHint": "የክፍያ ጊዜዎች ዲስፓች የጉዞ ጥያቄ ሲቀበል ይጀምራሉ፤ ታሰቢያ ቀን ካለ የመነሻ ቀኑን ይጠቀማሉ።",
       "farePlan": "የክፍያ ዕቅድ",
+      "bookingPolicy": "የቦታ ማስያዝ ፖሊሲ",
       "notes": "ማስታወሻዎች",
       "enrollments": "የደንበኛ ተሳትፎዎች",
       "enrollmentsDescription": "ዲስፓች በዚህ ውል ስር የጉዞ ጥያቄ ሲያረጋግጥ የሚፈጠሩ የክፍያ ጊዜዎች።",

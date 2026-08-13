@@ -2,6 +2,7 @@ import type { Contract, ContractStatus, ContractBillingInterval } from "@smart-d
 import type { DbContract } from "../models/contract.model";
 import { getContractScopeIds } from "../models/contract.model";
 import { parseFarePlanTranslationsMap } from "../types/fare-plan-translations";
+import { parseBookingPolicyTranslationsMap } from "../types/booking-policy-translations";
 import { DEFAULT_LOCALE, normalizeLocale } from "../utils/locale";
 
 function formatPersonName(person: {
@@ -14,6 +15,17 @@ function formatPersonName(person: {
 
 function pickFarePlanName(translations: unknown, locale?: string) {
   const map = parseFarePlanTranslationsMap(translations);
+  const preferred = normalizeLocale(locale ?? DEFAULT_LOCALE);
+  return (
+    map[preferred]?.name ??
+    map[DEFAULT_LOCALE]?.name ??
+    Object.values(map)[0]?.name ??
+    ""
+  );
+}
+
+function pickBookingPolicyName(translations: unknown, locale?: string) {
+  const map = parseBookingPolicyTranslationsMap(translations);
   const preferred = normalizeLocale(locale ?? DEFAULT_LOCALE);
   return (
     map[preferred]?.name ??
@@ -42,6 +54,22 @@ export function toPublicContract(contract: DbContract, options?: { locale?: stri
           currency: contract.farePlan.currency,
           base_fare: Number(contract.farePlan.baseFare),
           is_active: contract.farePlan.isActive,
+        }
+      : null,
+    booking_policy_id: contract.bookingPolicyId,
+    booking_policy: contract.bookingPolicy
+      ? {
+          id: contract.bookingPolicy.id,
+          slug: contract.bookingPolicy.slug,
+          name: pickBookingPolicyName(contract.bookingPolicy.translations, locale),
+          min_advance_booking_hours: contract.bookingPolicy.minAdvanceBookingHours,
+          free_cancellation_hours: contract.bookingPolicy.freeCancellationHours,
+          late_cancellation_type: contract.bookingPolicy.lateCancellationType,
+          late_cancellation_fee: contract.bookingPolicy.lateCancellationFee
+            ? Number(contract.bookingPolicy.lateCancellationFee)
+            : null,
+          currency: contract.bookingPolicy.currency,
+          is_active: contract.bookingPolicy.isActive,
         }
       : null,
     notes: contract.notes,

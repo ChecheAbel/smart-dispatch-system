@@ -6,6 +6,7 @@ export type CreateContractInput = {
   title: string;
   status?: ContractStatus;
   farePlanId?: string | null;
+  bookingPolicyId?: string | null;
   notes?: string | null;
   billingInterval?: ContractBillingInterval;
   paymentTermsDays?: number | null;
@@ -19,6 +20,7 @@ export type UpdateContractInput = {
   title?: string;
   status?: ContractStatus;
   farePlanId?: string | null;
+  bookingPolicyId?: string | null;
   notes?: string | null;
   billingInterval?: ContractBillingInterval;
   paymentTermsDays?: number | null;
@@ -41,6 +43,19 @@ const contractInclude = {
       pricingModel: true,
       currency: true,
       baseFare: true,
+      isActive: true,
+    },
+  },
+  bookingPolicy: {
+    select: {
+      id: true,
+      slug: true,
+      translations: true,
+      minAdvanceBookingHours: true,
+      freeCancellationHours: true,
+      lateCancellationType: true,
+      lateCancellationFee: true,
+      currency: true,
       isActive: true,
     },
   },
@@ -169,6 +184,7 @@ export async function createContract(input: CreateContractInput) {
       title: input.title.trim(),
       status: input.status ?? "draft",
       farePlanId: input.farePlanId ?? null,
+      bookingPolicyId: input.bookingPolicyId ?? null,
       notes: input.notes?.trim() || null,
       billingInterval: input.billingInterval ?? "per_trip",
       paymentTermsDays: input.paymentTermsDays ?? null,
@@ -188,6 +204,7 @@ export async function updateContract(id: string, input: UpdateContractInput) {
       title: input.title?.trim(),
       status: input.status,
       farePlanId: input.farePlanId,
+      bookingPolicyId: input.bookingPolicyId,
       notes: input.notes === undefined ? undefined : input.notes?.trim() || null,
       billingInterval: input.billingInterval,
       paymentTermsDays:

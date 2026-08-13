@@ -1021,6 +1021,43 @@ export interface ContractFarePlanSummary {
   is_active: boolean;
 }
 
+export type LateCancellationType = "none" | "charge_fee" | "bill_as_trip";
+
+export interface BookingPolicyTranslation {
+  locale: string;
+  name: string;
+  description: string | null;
+}
+
+export interface BookingPolicy {
+  id: string;
+  slug: string;
+  name: string;
+  description: string | null;
+  locale: string;
+  min_advance_booking_hours: number;
+  free_cancellation_hours: number;
+  late_cancellation_type: LateCancellationType;
+  late_cancellation_fee: number | null;
+  currency: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  translations?: BookingPolicyTranslation[];
+}
+
+export interface ContractBookingPolicySummary {
+  id: string;
+  slug: string;
+  name: string;
+  min_advance_booking_hours: number;
+  free_cancellation_hours: number;
+  late_cancellation_type: LateCancellationType;
+  late_cancellation_fee: number | null;
+  currency: string;
+  is_active: boolean;
+}
+
 export interface Contract {
   id: string;
   reference_number: string;
@@ -1028,6 +1065,8 @@ export interface Contract {
   status: ContractStatus;
   fare_plan_id: string | null;
   fare_plan: ContractFarePlanSummary | null;
+  booking_policy_id: string | null;
+  booking_policy: ContractBookingPolicySummary | null;
   notes: string | null;
   billing_interval: ContractBillingInterval;
   payment_terms_days: number | null;

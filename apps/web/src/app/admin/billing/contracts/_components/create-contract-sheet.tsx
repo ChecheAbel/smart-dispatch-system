@@ -5,6 +5,7 @@ import { FileText, MapPin, Receipt } from "lucide-react";
 import type {
   ContractBillingInterval,
   ContractStatus,
+  BookingPolicy,
   Region,
   VehicleClass,
   VehicleType,
@@ -34,6 +35,7 @@ import {
   updateContract,
 } from "@/lib/contract-api";
 import { fetchActiveRegions } from "@/lib/region-api";
+import { fetchActiveBookingPolicies } from "@/lib/booking-policy-api";
 import { fetchActiveVehicleClasses } from "@/lib/vehicle-class-api";
 import { fetchActiveVehicleTypes } from "@/lib/vehicle-type-api";
 import { formatMessage, getAdminContractsMessages } from "@/translations";
@@ -54,6 +56,7 @@ type FormState = {
   notes: string;
   billingInterval: ContractBillingInterval | "";
   paymentTermsDays: string;
+  bookingPolicyId: string;
   regionIds: string[];
   vehicleTypeIds: string[];
   vehicleClassIds: string[];
@@ -65,6 +68,7 @@ const emptyForm: FormState = {
   notes: "",
   billingInterval: "",
   paymentTermsDays: "",
+  bookingPolicyId: "",
   regionIds: [],
   vehicleTypeIds: [],
   vehicleClassIds: [],
@@ -169,6 +173,7 @@ export function CreateContractSheet({
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [regions, setRegions] = useState<Region[]>([]);
+  const [bookingPolicies, setBookingPolicies] = useState<BookingPolicy[]>([]);
   const [vehicleTypes, setVehicleTypes] = useState<VehicleType[]>([]);
   const [vehicleClasses, setVehicleClasses] = useState<VehicleClass[]>([]);
 
@@ -183,21 +188,24 @@ export function CreateContractSheet({
 
     async function loadOptions() {
       try {
-        const [regionsResult, vehicleTypesResult, vehicleClassesResult] =
+        const [regionsResult, bookingPoliciesResult, vehicleTypesResult, vehicleClassesResult] =
           await Promise.all([
             fetchActiveRegions(locale),
+            fetchActiveBookingPolicies(locale),
             fetchActiveVehicleTypes(locale),
             fetchActiveVehicleClasses(locale),
           ]);
 
         if (!cancelled) {
           setRegions(regionsResult);
+          setBookingPolicies(bookingPoliciesResult);
           setVehicleTypes(vehicleTypesResult);
           setVehicleClasses(vehicleClassesResult);
         }
       } catch {
         if (!cancelled) {
           setRegions([]);
+          setBookingPolicies([]);
           setVehicleTypes([]);
           setVehicleClasses([]);
         }
@@ -232,6 +240,7 @@ export function CreateContractSheet({
               contract.payment_terms_days != null
                 ? String(contract.payment_terms_days)
                 : "",
+            bookingPolicyId: contract.booking_policy_id ?? "",
             regionIds: contract.region_ids,
             vehicleTypeIds: contract.vehicle_type_ids,
             vehicleClassIds: contract.vehicle_class_ids,
@@ -271,6 +280,15 @@ export function CreateContractSheet({
   const vehicleClassOptions = useMemo(
     () => vehicleClasses.map((item) => ({ id: item.id, label: item.name })),
     [vehicleClasses],
+  );
+
+  const bookingPolicyOptions = useMemo(
+    () =>
+      bookingPolicies.map((policy) => ({
+        value: policy.id,
+        label: policy.name,
+      })),
+    [bookingPolicies],
   );
 
   function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
@@ -322,6 +340,7 @@ export function CreateContractSheet({
       title: form.title.trim(),
       status: form.status,
       notes: form.notes.trim() || null,
+      booking_policy_id: form.bookingPolicyId || null,
       billing_interval: billingInterval,
       payment_terms_days: Number(form.paymentTermsDays),
       region_ids: form.regionIds,
@@ -467,6 +486,19 @@ export function CreateContractSheet({
                 </p>
               ) : null}
             </div>
+
+            <AdminSelectField
+              id="contract-booking-policy"
+              label={copy.form.bookingPolicy}
+              hint={copy.form.bookingPolicyDescription}
+              value={form.bookingPolicyId || null}
+              onValueChange={(value) => updateField("bookingPolicyId", value ?? "")}
+              items={bookingPolicyOptions}
+              placeholder={copy.form.bookingPolicyPlaceholder}
+              optional
+              optionalLabel={copy.form.optional}
+              disabled={formDisabled}
+            />
           </AdminFormSection>
 
           <AdminFormSection

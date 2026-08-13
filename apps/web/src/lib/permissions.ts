@@ -72,6 +72,11 @@ export const PERMISSIONS = {
     write: "fare_plans.write",
     delete: "fare_plans.delete",
   },
+  booking_policies: {
+    read: "booking_policies.read",
+    write: "booking_policies.write",
+    delete: "booking_policies.delete",
+  },
   contracts: {
     read: "contracts.read",
     write: "contracts.write",

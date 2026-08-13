@@ -22,6 +22,7 @@ import type {
   AdminRegionsMessages,
   AdminLocationsMessages,
   AdminFarePlansMessages,
+  AdminBookingPoliciesMessages,
   AdminContractsMessages,
   AdminInvoicesMessages,
   AdminShellMessages,
@@ -67,6 +68,7 @@ export type {
   AdminRegionsMessages,
   AdminLocationsMessages,
   AdminFarePlansMessages,
+  AdminBookingPoliciesMessages,
   AdminContractsMessages,
   AdminInvoicesMessages,
   AdminShellMessages,
@@ -191,6 +193,12 @@ export function getAdminLocationsMessages(locale: SupportedLocale): AdminLocatio
 
 export function getAdminFarePlansMessages(locale: SupportedLocale): AdminFarePlansMessages {
   return getTranslations(locale).adminFarePlans;
+}
+
+export function getAdminBookingPoliciesMessages(
+  locale: SupportedLocale,
+): AdminBookingPoliciesMessages {
+  return getTranslations(locale).adminBookingPolicies;
 }
 
 export function getAdminContractsMessages(locale: SupportedLocale): AdminContractsMessages {
