@@ -73,6 +73,10 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
     return ["vehicle_types.read", "vehicle_classes.read", "maintenance_work_types.read", "vehicles.read"];
   }
 
+  if (normalizedSlug === "fleet-setup") {
+    return ["vehicle_types.read", "vehicle_classes.read", "maintenance_work_types.read"];
+  }
+
   if (normalizedSlug === "vehicle-types") {
     return ["vehicle_types.read"];
   }

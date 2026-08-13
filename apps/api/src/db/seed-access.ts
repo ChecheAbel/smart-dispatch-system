@@ -278,43 +278,10 @@ const DEFAULT_MENUS = [
     ],
   },
   {
-    slug: "vehicle-types",
-    path: "/admin/fleet/vehicle-types",
-    icon: "layers",
-    sortOrder: 10,
-    parentSlug: "fleet",
-    translations: [
-      { locale: "en", label: "Vehicle Types" },
-      { locale: "am", label: "የተሽከርካሪ አይነቶች" },
-    ],
-  },
-  {
-    slug: "vehicle-classes",
-    path: "/admin/fleet/vehicle-classes",
-    icon: "award",
-    sortOrder: 15,
-    parentSlug: "fleet",
-    translations: [
-      { locale: "en", label: "Vehicle Classes" },
-      { locale: "am", label: "የተሽከርካሪ ክፍሎች" },
-    ],
-  },
-  {
-    slug: "maintenance-work-types",
-    path: "/admin/fleet/maintenance-work-types",
-    icon: "wrench",
-    sortOrder: 17,
-    parentSlug: "fleet",
-    translations: [
-      { locale: "en", label: "Maintenance Types" },
-      { locale: "am", label: "የጥገና አይነቶች" },
-    ],
-  },
-  {
     slug: "fleet-vehicles",
     path: "/admin/fleet/vehicles",
     icon: "truck",
-    sortOrder: 20,
+    sortOrder: 10,
     parentSlug: "fleet",
     translations: [
       { locale: "en", label: "Vehicles" },
@@ -325,7 +292,7 @@ const DEFAULT_MENUS = [
     slug: "fleet-maintenance",
     path: "/admin/fleet/maintenance",
     icon: "wrench",
-    sortOrder: 30,
+    sortOrder: 20,
     parentSlug: "fleet",
     translations: [
       { locale: "en", label: "Maintenance" },
@@ -336,11 +303,55 @@ const DEFAULT_MENUS = [
     slug: "fleet-fuel",
     path: "/admin/fleet/fuel",
     icon: "fuel",
-    sortOrder: 40,
+    sortOrder: 30,
     parentSlug: "fleet",
     translations: [
       { locale: "en", label: "Fuel Consumption" },
       { locale: "am", label: "የነዳጅ ፍጆታ" },
+    ],
+  },
+  {
+    slug: "fleet-setup",
+    path: null,
+    icon: "layers",
+    sortOrder: 40,
+    parentSlug: "fleet",
+    translations: [
+      { locale: "en", label: "Setup" },
+      { locale: "am", label: "ማዋቀር" },
+    ],
+  },
+  {
+    slug: "vehicle-types",
+    path: "/admin/fleet/vehicle-types",
+    icon: "layers",
+    sortOrder: 10,
+    parentSlug: "fleet-setup",
+    translations: [
+      { locale: "en", label: "Vehicle Types" },
+      { locale: "am", label: "የተሽከርካሪ አይነቶች" },
+    ],
+  },
+  {
+    slug: "vehicle-classes",
+    path: "/admin/fleet/vehicle-classes",
+    icon: "award",
+    sortOrder: 20,
+    parentSlug: "fleet-setup",
+    translations: [
+      { locale: "en", label: "Vehicle Classes" },
+      { locale: "am", label: "የተሽከርካሪ ክፍሎች" },
+    ],
+  },
+  {
+    slug: "maintenance-work-types",
+    path: "/admin/fleet/maintenance-work-types",
+    icon: "wrench",
+    sortOrder: 30,
+    parentSlug: "fleet-setup",
+    translations: [
+      { locale: "en", label: "Maintenance Types" },
+      { locale: "am", label: "የጥገና አይነቶች" },
     ],
   },
   {
@@ -449,8 +460,8 @@ const DEFAULT_MENUS = [
     sortOrder: 50,
     parentSlug: "dispatch",
     translations: [
-      { locale: "en", label: "Complaint Management" },
-      { locale: "am", label: "የቅሬታ አስተዳደር" },
+      { locale: "en", label: "Complaints" },
+      { locale: "am", label: "ቅሬታዎች" },
     ],
   },
   {

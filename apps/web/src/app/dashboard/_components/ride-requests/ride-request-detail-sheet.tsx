@@ -650,7 +650,7 @@ export function RideRequestDetailSheet({
               <Button
                 type="button"
                 variant="outline"
-                className="border-orange-300 text-orange-800 hover:bg-orange-50 hover:text-orange-900"
+                className="border-orange-200 bg-white text-orange-800 hover:border-orange-300 hover:bg-orange-50 hover:text-orange-900 dark:border-orange-400/30 dark:bg-transparent dark:text-orange-200 dark:hover:bg-orange-400/10"
                 disabled={isSubmitting}
                 onClick={manageActions.onNoShow}
               >

@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import type { AdminRideRequest, RideRequestStatus } from "@smart-dispatch/types";
 import { RideRequestDetailSheet } from "@/app/dashboard/_components/ride-requests/ride-request-detail-sheet";
-import { RejectRegistrationModal } from "@/app/admin/user-registrations/_components/reject-registration-modal";
+import {
+  ConfirmActionModal,
+  RejectRegistrationModal,
+} from "@/app/admin/user-registrations/_components/reject-registration-modal";
 import { AdminRideRequestDispatchPanel } from "./admin-ride-request-dispatch-panel";
-import { formatScheduledAt } from "@/app/dashboard/_components/ride-requests/ride-request-utils";
 import {
   assignAdminRideRequest,
   fetchAdminRideRequest,
@@ -13,7 +15,7 @@ import {
   updateAdminRideRequestStatus,
 } from "@/lib/admin-ride-request-api";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import { getAdminRideRequestsMessages, formatMessage } from "@/translations";
+import { getAdminRideRequestsMessages } from "@/translations";
 import type { SupportedLocale } from "@/lib/locale";
 
 type AdminRideRequestReviewSheetProps = {
@@ -30,7 +32,6 @@ type SubmittingAction =
   | "reject"
   | "assign"
   | "unassign"
-  | "start"
   | "complete"
   | "no_show"
   | null;
@@ -49,6 +50,7 @@ export function AdminRideRequestReviewSheet({
   const [loadError, setLoadError] = useState(false);
   const [submitting, setSubmitting] = useState<SubmittingAction>(null);
   const [rejectOpen, setRejectOpen] = useState(false);
+  const [noShowOpen, setNoShowOpen] = useState(false);
 
   const isDetailLoading =
     open &&
@@ -201,27 +203,6 @@ export function AdminRideRequestReviewSheet({
     }
   }
 
-  async function handleStart() {
-    if (!request) {
-      return;
-    }
-
-    setSubmitting("start");
-
-    try {
-      const updated = await updateAdminRideRequestStatus(request.id, "start", { locale });
-      setRequest(updated);
-      showSuccessToast({ title: copy.toast.started });
-      onSuccess({ status: updated.status });
-    } catch (error) {
-      showErrorToast({
-        title: error instanceof Error ? error.message : copy.toast.startFailed,
-      });
-    } finally {
-      setSubmitting(null);
-    }
-  }
-
   async function handleComplete() {
     if (!request) {
       return;
@@ -259,6 +240,7 @@ export function AdminRideRequestReviewSheet({
       showErrorToast({
         title: error instanceof Error ? error.message : copy.toast.noShowFailed,
       });
+      throw error;
     } finally {
       setSubmitting(null);
     }
@@ -316,42 +298,29 @@ export function AdminRideRequestReviewSheet({
             ? {
                 canConfirm: request.can_admin_confirm,
                 canReject: request.can_admin_reject,
-                canStart: request.can_admin_start || request.start_blocked_by_schedule,
                 canComplete: request.can_admin_complete,
                 canNoShow: request.can_admin_no_show,
                 confirmLabel: copy.review.approve,
                 rejectLabel: copy.review.reject,
                 confirmingLabel: copy.review.approving,
                 rejectingLabel: copy.review.rejecting,
-                startLabel: copy.review.startTrip,
-                startingLabel: copy.review.startingTrip,
                 completeLabel: copy.review.completeTrip,
                 completingLabel: copy.review.completingTrip,
                 noShowLabel: copy.review.markNoShow,
                 markingNoShowLabel: copy.review.markingNoShow,
-                startDisabled: request.start_blocked_by_schedule,
-                startDisabledTitle: request.start_blocked_by_schedule
-                  ? request.scheduled_at
-                    ? formatMessage(copy.review.startTripScheduleBlocked, {
-                        time: formatScheduledAt(request.scheduled_at, locale),
-                      })
-                    : copy.review.startTripScheduleBlocked
-                  : undefined,
                 onConfirm: () => void handleConfirm(),
                 onReject: () => setRejectOpen(true),
-                onStart: () => void handleStart(),
                 onComplete: () => void handleComplete(),
-                onNoShow: () => void handleNoShow(),
+                onNoShow: () => setNoShowOpen(true),
                 submitting:
                   submitting === "confirm" ||
                   submitting === "reject" ||
-                  submitting === "start" ||
                   submitting === "complete" ||
                   submitting === "no_show"
                     ? submitting
                     : null,
                 rejectButtonClassName:
-                  "border-red-600 bg-red-600 text-white hover:border-red-700 hover:bg-red-700 hover:!text-white",
+                  "border-red-200 bg-white text-red-700 hover:border-red-300 hover:bg-red-50 hover:text-red-800 dark:border-red-400/30 dark:bg-transparent dark:text-red-300 dark:hover:bg-red-400/10",
               }
             : undefined
         }
@@ -366,10 +335,23 @@ export function AdminRideRequestReviewSheet({
         reasonPlaceholder={copy.rejectModal.reasonPlaceholder}
         reasonRequired={copy.rejectModal.reasonRequired}
         reasonTooLong={copy.rejectModal.reasonTooLong}
+        helperText={copy.rejectModal.helperText}
         cancelLabel={copy.rejectModal.cancel}
         confirmLabel={copy.rejectModal.confirm}
         rejectingLabel={copy.review.rejecting}
         onConfirm={handleReject}
+      />
+
+      <ConfirmActionModal
+        open={noShowOpen}
+        onOpenChange={(next) => !isBusy && setNoShowOpen(next)}
+        title={copy.noShowModal.title}
+        description={copy.noShowModal.description}
+        cancelLabel={copy.noShowModal.cancel}
+        confirmLabel={copy.noShowModal.confirm}
+        confirmingLabel={copy.review.markingNoShow}
+        tone="warning"
+        onConfirm={handleNoShow}
       />
     </>
   );

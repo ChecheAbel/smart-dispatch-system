@@ -67,6 +67,7 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   truck: Truck,
   fleet: Truck,
   "fleet-vehicles": Truck,
+  "fleet-setup": Layers,
   layers: Layers,
   "vehicle-types": Layers,
   award: Award,

@@ -1857,7 +1857,7 @@
     },
     "dispatch": {
       "section": "Dispatch assignment",
-      "sectionDescription": "Assign an active vehicle with a driver before starting the trip.",
+      "sectionDescription": "Assign an active vehicle with a driver. The assigned driver starts the trip.",
       "vehicle": "Vehicle",
       "driver": "Driver",
       "assignedAt": "Assigned at",
@@ -1891,13 +1891,20 @@
     },
     "rejectModal": {
       "title": "Reject ride request?",
-      "description": "The requester will see this reason on their request details.",
+      "description": "The requester will see this reason on their request details. This cannot be undone from here.",
       "reasonLabel": "Reason for rejection",
       "reasonPlaceholder": "Explain why this ride request cannot be approved...",
       "reasonRequired": "A rejection reason is required.",
       "reasonTooLong": "Rejection reason must be 500 characters or fewer.",
-      "cancel": "Cancel",
+      "helperText": "Visible to the requester",
+      "cancel": "Keep request",
       "confirm": "Reject request"
+    },
+    "noShowModal": {
+      "title": "Mark as no-show?",
+      "description": "Use this when the passenger did not appear. Booking-policy billing may apply, and the trip will be closed as a no-show.",
+      "cancel": "Keep trip open",
+      "confirm": "Mark no-show"
     },
     "toast": {
       "loadFailed": "Failed to load ride request.",
