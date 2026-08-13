@@ -5,9 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { MessagesSquare } from "lucide-react";
 import { useAuth, useLocale } from "@/components/shared/providers";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
-import { Badge } from "@/components/ui/badge";
 import {
-  adminBadgeGoldClass,
   adminHeadingClass,
   adminIconBoxClass,
 } from "@/lib/admin-theme";
@@ -50,8 +48,7 @@ export function NotificationTemplatesPage() {
 
   return (
     <div className="min-w-0 space-y-6">
-      <div className="min-w-0 space-y-3">
-        <Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>
+      <div className="min-w-0">
         <div className="flex items-start gap-3">
           <div className={adminIconBoxClass}>
             <MessagesSquare className="size-5" />

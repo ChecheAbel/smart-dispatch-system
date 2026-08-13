@@ -808,9 +808,14 @@ export const extensionSchemas = {
       notes: { type: "string", nullable: true },
       billing_interval: {
         type: "string",
-        enum: ["per_trip", "monthly", "quarterly", "annually"],
+        enum: ["per_trip", "at_contract_end", "monthly", "quarterly", "annually"],
       },
-      payment_terms_days: { type: "integer", nullable: true },
+      payment_terms_days: {
+        type: "integer",
+        minimum: 0,
+        maximum: 365,
+        nullable: true,
+      },
       region_ids: { type: "array", items: { type: "string", format: "uuid" } },
       vehicle_type_ids: {
         type: "array",
@@ -847,9 +852,14 @@ export const extensionSchemas = {
       notes: { type: "string", nullable: true },
       billing_interval: {
         type: "string",
-        enum: ["per_trip", "monthly", "quarterly", "annually"],
+        enum: ["per_trip", "at_contract_end", "monthly", "quarterly", "annually"],
       },
-      payment_terms_days: { type: "integer", nullable: true },
+      payment_terms_days: {
+        type: "integer",
+        minimum: 0,
+        maximum: 365,
+        nullable: true,
+      },
       region_ids: { type: "array", items: { type: "string", format: "uuid" } },
       vehicle_type_ids: {
         type: "array",
@@ -873,9 +883,14 @@ export const extensionSchemas = {
       notes: { type: "string", nullable: true },
       billing_interval: {
         type: "string",
-        enum: ["per_trip", "monthly", "quarterly", "annually"],
+        enum: ["per_trip", "at_contract_end", "monthly", "quarterly", "annually"],
       },
-      payment_terms_days: { type: "integer", nullable: true },
+      payment_terms_days: {
+        type: "integer",
+        minimum: 0,
+        maximum: 365,
+        nullable: true,
+      },
       region_ids: { type: "array", items: { type: "string", format: "uuid" } },
       vehicle_type_ids: {
         type: "array",

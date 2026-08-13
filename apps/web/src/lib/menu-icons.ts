@@ -29,6 +29,7 @@ import {
   Wrench,
   Coins,
   FileText,
+  Fuel,
 } from "lucide-react";
 
 const MENU_ICON_MAP: Record<string, LucideIcon> = {
@@ -72,6 +73,9 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   "vehicle-classes": Award,
   wrench: Wrench,
   "maintenance-work-types": Wrench,
+  "fleet-maintenance": Wrench,
+  fuel: Fuel,
+  "fleet-fuel": Fuel,
   map: Map,
   "map-pin": MapPin,
   "location-management": Map,
@@ -85,6 +89,8 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   contracts: FileText,
   "receipt-text": ReceiptText,
   invoices: ReceiptText,
+  complaints: MessageSquare,
+  "customer-complaints": MessageSquare,
 };
 
 export function getMenuIcon(icon?: string | null): LucideIcon {

@@ -212,6 +212,7 @@ function buildCustomerInvoiceWhere(
   const where: Prisma.InvoiceWhereInput = {
     requesterUserId,
     status: { not: "draft" },
+    issuedAt: { not: null },
   };
 
   if (filter.status) {
@@ -270,6 +271,24 @@ export async function findInvoiceForRequester(
       id,
       requesterUserId,
       status: { not: "draft" },
+      issuedAt: { not: null },
+    },
+    include: invoiceInclude,
+  });
+}
+
+export async function findInvoicesForRequester(
+  ids: string[],
+  requesterUserId: string,
+) {
+  if (ids.length === 0) return [];
+
+  return prisma.invoice.findMany({
+    where: {
+      id: { in: ids },
+      requesterUserId,
+      status: { not: "draft" },
+      issuedAt: { not: null },
     },
     include: invoiceInclude,
   });

@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import { Eye, MoreHorizontal, Receipt } from "lucide-react";
+import { CircleAlert, CircleCheck, Clock3, Eye, MoreHorizontal, Receipt, Wallet } from "lucide-react";
 import type { CustomerInvoice, CustomerVisibleInvoiceStatus } from "@smart-dispatch/types";
 import { useLocale, usePermission } from "@/components/shared/providers";
 import {
@@ -33,13 +33,16 @@ import {
   adminBadgeSuccessClass,
   adminFilterLabelClass,
   adminHeadingClass,
+  adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
 import { USER_DASHBOARD_PATH } from "@/lib/auth-paths";
 import { fetchMyInvoices } from "@/lib/customer-billing-api";
 import { PERMISSIONS } from "@/lib/permissions";
+import { showErrorToast } from "@/lib/toast";
 import { formatMessage, getCustomerInvoicesMessages } from "@/translations";
 import { cn } from "@/lib/utils";
 import { formatContractTermRange } from "@/app/dashboard/_components/ride-requests/ride-request-utils";
+import { BulkInvoicePaymentSheet } from "./bulk-invoice-payment-sheet";
 import { CustomerInvoiceStats } from "./customer-invoice-stats";
 
 const STATUS_FILTER_ALL = "all";
@@ -68,6 +71,33 @@ function formatMoney(amount: number, currency: string, locale: string) {
     currency,
     maximumFractionDigits: 2,
   }).format(amount);
+}
+
+type DueState =
+  | { kind: "paid" }
+  | { kind: "void" }
+  | { kind: "none" }
+  | { kind: "today" }
+  | { kind: "upcoming"; days: number }
+  | { kind: "overdue"; days: number };
+
+function getDueState(invoice: CustomerInvoice): DueState {
+  if (invoice.status === "paid") return { kind: "paid" };
+  if (invoice.status === "void") return { kind: "void" };
+  if (!invoice.due_at) return { kind: "none" };
+
+  const dateOnly = invoice.due_at.includes("T") ? invoice.due_at.slice(0, 10) : invoice.due_at;
+  const [year, month, day] = dateOnly.split("-").map(Number);
+  if (!year || !month || !day) return { kind: "none" };
+
+  const now = new Date();
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  const due = Date.UTC(year, month - 1, day);
+  const days = Math.round((due - today) / 86_400_000);
+
+  if (days === 0) return { kind: "today" };
+  if (days < 0) return { kind: "overdue", days: Math.abs(days) };
+  return { kind: "upcoming", days };
 }
 
 function StatusFilterSelect({
@@ -117,7 +147,17 @@ export function MyInvoicesPage() {
   const copy = getCustomerInvoicesMessages(locale);
   const canRead = usePermission(PERMISSIONS.customer.invoices);
   const [statusFilter, setStatusFilter] = useState<StatusFilterValue>(STATUS_FILTER_ALL);
-  const [refreshKey] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [selectedById, setSelectedById] = useState<Map<string, CustomerInvoice>>(new Map());
+  const [paySheetOpen, setPaySheetOpen] = useState(false);
+
+  const selectedInvoices = useMemo(() => [...selectedById.values()], [selectedById]);
+  const selectedKeys = useMemo(() => new Set(selectedById.keys()), [selectedById]);
+  const selectedTotal = useMemo(
+    () => selectedInvoices.reduce((sum, invoice) => sum + invoice.total_amount, 0),
+    [selectedInvoices],
+  );
+  const selectedCurrency = selectedInvoices[0]?.currency ?? "ETB";
 
   const columns = useMemo<DataTableColumn<CustomerInvoice>[]>(
     () => [
@@ -170,8 +210,37 @@ export function MyInvoicesPage() {
       {
         id: "due",
         header: copy.columns.due,
-        cellClassName: "text-slate-500",
-        cell: (invoice) => formatDate(invoice.due_at, locale),
+        cell: (invoice) => {
+          const dueState = getDueState(invoice);
+          const state =
+            dueState.kind === "paid"
+              ? { label: copy.dueState.paid, icon: CircleCheck, className: "text-emerald-700 dark:text-emerald-300" }
+              : dueState.kind === "void"
+                ? { label: copy.dueState.void, icon: CircleCheck, className: "text-slate-500 dark:text-muted-foreground" }
+                : dueState.kind === "none"
+                  ? { label: copy.dueState.noDate, icon: Clock3, className: "text-slate-400 dark:text-muted-foreground" }
+                  : dueState.kind === "today"
+                    ? { label: copy.dueState.dueToday, icon: Clock3, className: "text-amber-700 dark:text-amber-300" }
+                    : dueState.kind === "overdue"
+                      ? { label: formatMessage(copy.dueState.overdue, { days: dueState.days }), icon: CircleAlert, className: "text-red-700 dark:text-red-300" }
+                      : { label: formatMessage(copy.dueState.dueIn, { days: dueState.days }), icon: Clock3, className: "text-sky-700 dark:text-sky-300" };
+          const StateIcon = state.icon;
+          const hasActiveDueDate = ["today", "upcoming", "overdue"].includes(dueState.kind);
+
+          return (
+            <div className="space-y-1">
+              {hasActiveDueDate ? (
+                <p className="text-sm font-medium text-slate-700 dark:text-foreground">
+                  {formatDate(invoice.due_at, locale)}
+                </p>
+              ) : null}
+              <p className={cn("inline-flex items-center gap-1 font-medium", hasActiveDueDate ? "text-xs" : "text-sm", state.className)}>
+                <StateIcon className="size-3.5" />
+                {state.label}
+              </p>
+            </div>
+          );
+        },
       },
     ],
     [copy, locale],
@@ -188,6 +257,39 @@ export function MyInvoicesPage() {
       }),
     [locale, statusFilter],
   );
+
+  function handleSelectionChange(nextKeys: Set<string>, rows: CustomerInvoice[]) {
+    const rowById = new Map(rows.map((row) => [row.id, row]));
+    const next = new Map<string, CustomerInvoice>();
+
+    for (const key of nextKeys) {
+      const fromRows = rowById.get(key);
+      const existing = selectedById.get(key);
+      const invoice = fromRows ?? existing;
+      if (!invoice || invoice.status !== "issued") continue;
+
+      if (next.size > 0) {
+        const first = next.values().next().value as CustomerInvoice;
+        if (first.currency !== invoice.currency) {
+          showErrorToast({ title: copy.bulkPay.currencyMismatch });
+          return;
+        }
+      }
+
+      next.set(invoice.id, invoice);
+    }
+
+    setSelectedById(next);
+  }
+
+  function clearSelection() {
+    setSelectedById(new Map());
+  }
+
+  function handleStatusFilterChange(value: StatusFilterValue) {
+    setStatusFilter(value);
+    clearSelection();
+  }
 
   if (!canRead) {
     return <PageAccessDenied copy={copy.accessDenied} fallbackPath={USER_DASHBOARD_PATH} />;
@@ -210,10 +312,18 @@ export function MyInvoicesPage() {
         getRowKey={(invoice) => invoice.id}
         showIndexColumn
         refreshDeps={[statusFilter]}
+        rowSelection={{
+          selectedKeys,
+          onChange: handleSelectionChange,
+          isRowSelectable: (invoice) => invoice.status === "issued",
+          selectAllLabel: copy.bulkPay.paySelected,
+          selectRowLabel: (invoice) =>
+            formatMessage(copy.actions.menuLabel, { name: invoice.reference_number }),
+        }}
         toolbarActions={
           <StatusFilterSelect
             value={statusFilter}
-            onChange={setStatusFilter}
+            onChange={handleStatusFilterChange}
             label={copy.statusFilter}
             allLabel={copy.statusAll}
             statusLabels={copy.status}
@@ -250,6 +360,47 @@ export function MyInvoicesPage() {
         emptyDescription={copy.empty.description}
         emptySearchDescription={copy.empty.searchDescription}
         emptyIcon={Receipt}
+      />
+
+      {selectedInvoices.length > 0 ? (
+        <div className="sticky bottom-4 z-20">
+          <div className="flex flex-col gap-3 rounded-xl border border-[#1C3A34]/15 bg-white/95 p-4 shadow-lg backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-[#1C3A34]">
+                {formatMessage(copy.bulkPay.selectedCount, { count: selectedInvoices.length })}
+              </p>
+              <p className="text-sm text-slate-600">
+                {formatMessage(copy.bulkPay.selectedTotal, {
+                  amount: formatMoney(selectedTotal, selectedCurrency, locale),
+                })}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button type="button" variant="outline" onClick={clearSelection}>
+                {copy.bulkPay.clearSelection}
+              </Button>
+              <Button
+                type="button"
+                className={adminPrimaryButtonClass}
+                onClick={() => setPaySheetOpen(true)}
+              >
+                <Wallet className="size-4" />
+                {copy.bulkPay.paySelected}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <BulkInvoicePaymentSheet
+        invoices={selectedInvoices}
+        open={paySheetOpen}
+        locale={locale}
+        onOpenChange={setPaySheetOpen}
+        onPaid={() => {
+          clearSelection();
+          setRefreshKey((value) => value + 1);
+        }}
       />
     </div>
   );

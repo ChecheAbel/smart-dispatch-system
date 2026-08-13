@@ -13,11 +13,15 @@ import {
   listAssignableVehiclesForRideRequest,
   listRideRequestsAdmin,
   unassignRideRequestAdmin,
+  updateRideRequestStatusAdmin,
 } from "../models/ride-request.model";
 import { recordAuditLog } from "../services/audit-log.service";
 import {
   canAdminAssignRideRequest,
   canAdminUnassignRideRequest,
+  getAdminRideRequestTargetStatus,
+  validateAdminRideRequestStatusAction,
+  type AdminRideRequestStatusAction,
 } from "../services/ride-request-admin-policy.service";
 import { validateRideRequestVehicleAssignment } from "../services/ride-request-dispatch.service";
 import { queueRideRequestNotifications } from "../services/notification-dispatch.service";
@@ -35,6 +39,13 @@ const RIDE_REQUEST_STATUSES = new Set<RideRequestStatus>([
   "in_progress",
   "completed",
   "cancelled",
+]);
+
+const ADMIN_STATUS_ACTIONS = new Set<AdminRideRequestStatusAction>([
+  "confirm",
+  "reject",
+  "start",
+  "complete",
 ]);
 
 router.use(authenticate, authorize("admin"));
@@ -158,6 +169,81 @@ router.get(
 
       return sendSuccess(res, {
         ride_request: toAdminRideRequest(rideRequest, { locale }),
+      });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.post(
+  "/:id/status",
+  requirePermission("ride_requests.write"),
+  auditMutations(),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const locale = getRequestLocale(req);
+      const actorUserId = req.user?.id;
+      const rideRequestId = req.params.id;
+      const action = parseAdminStatusAction(req.body?.action);
+
+      if (!actorUserId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      if (!action) {
+        return sendError(res, "A valid action is required.", 400);
+      }
+
+      const existing = await findRideRequestById(rideRequestId);
+      if (!existing) {
+        return sendError(res, "Ride request not found.", 404);
+      }
+
+      const validationError = validateAdminRideRequestStatusAction(existing.status, action, {
+        hasAssignment: Boolean(existing.assignedVehicleId && existing.assignedDriverUserId),
+        scheduledAt: existing.scheduledAt,
+      });
+      if (validationError) {
+        return sendError(res, validationError, 409);
+      }
+
+      const nextStatus = getAdminRideRequestTargetStatus(action);
+      const updated = await updateRideRequestStatusAdmin(rideRequestId, nextStatus, {
+        rejectionReason: getOptionalString(req.body?.rejection_reason),
+      });
+      if (!updated) {
+        return sendError(res, "Ride request not found.", 404);
+      }
+
+      await recordAuditLog({
+        actorUserId,
+        action: "update",
+        module: "ride_requests",
+        entityType: "ride_request",
+        entityId: updated.id,
+        entityLabel: `${updated.pickupAddress} → ${updated.dropoffAddress}`,
+        summary: getStatusActionSummary(action),
+        req,
+      });
+
+      if (action === "confirm") {
+        queueRideRequestNotifications("confirmed", updated.id);
+      } else if (action === "reject") {
+        queueRideRequestNotifications("rejected", updated.id);
+      } else if (action === "start") {
+        queueRideRequestNotifications("started", updated.id);
+      } else if (action === "complete") {
+        queueRideRequestNotifications("completed", updated.id);
+      }
+
+      syncDriverUpcomingTripsAfterChange({
+        before: getRideRequestSnapshot(existing),
+        after: updated,
+      });
+
+      return sendSuccess(res, {
+        ride_request: toAdminRideRequest(updated, { locale }),
       });
     } catch (error) {
       return handleRouteError(res, error);

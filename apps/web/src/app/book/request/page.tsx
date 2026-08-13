@@ -63,6 +63,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import {
   AdminTextField,
+  AdminTextareaField,
   AdminSelectField,
   AdminFormSection,
 } from "@/components/shared/admin-form-field";
@@ -113,6 +114,11 @@ const COPY = {
     passengerNamePlaceholder: "e.g. John Doe",
     mobileNumber: "Contact Mobile Number",
     mobileNumberPlaceholder: "e.g. +251 911...",
+    additionalInformation: "Additional Information",
+    additionalInformationPlaceholder:
+      "Add luggage details, accessibility needs, special instructions, or anything else dispatch should know...",
+    additionalInformationHint: "Optional — this will be shared with the dispatch team.",
+    optional: "Optional",
     pickupLocation: "Pickup Location",
     pickupPlaceholder: "Select a saved pickup location",
     dropoffLocation: "Drop-off Destination",
@@ -219,6 +225,11 @@ const COPY = {
     passengerNamePlaceholder: "ምሳሌ፡ ዮሐንስ አበበ",
     mobileNumber: "የመገናኛ ስልክ ቁጥር",
     mobileNumberPlaceholder: "ምሳሌ፡ +251 911...",
+    additionalInformation: "ተጨማሪ መረጃ",
+    additionalInformationPlaceholder:
+      "ስለ ሻንጣ፣ የተደራሽነት ፍላጎት፣ ልዩ መመሪያ ወይም የመላኪያ ቡድኑ ማወቅ ያለበትን ሌላ መረጃ ያክሉ...",
+    additionalInformationHint: "አማራጭ — ይህ መረጃ ለመላኪያ ቡድኑ ይጋራል።",
+    optional: "አማራጭ",
     pickupLocation: "የመነሻ ቦታ",
     pickupPlaceholder: "የተቀመጠ የመነሻ ቦታ ይምረጡ",
     dropoffLocation: "የመድረሻ ቦታ",
@@ -369,6 +380,7 @@ function VehicleRequestPageContent() {
   const [requestType, setRequestType] = useState<"single" | "contract" | null>(null);
   const [passengerName, setPassengerName] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
+  const [additionalInformation, setAdditionalInformation] = useState("");
   const [regionId, setRegionId] = useState<string>("");
   const [regions, setRegions] = useState<Region[]>([]);
   const [pickupLocations, setPickupLocations] = useState<RideRequestLocationOption[]>([]);
@@ -689,7 +701,15 @@ function VehicleRequestPageContent() {
         scheduled_return_at: scheduledReturnAt?.toISOString() ?? null,
         request_type: requestType,
         selected_vehicles: selectedVehicles,
-        notes: `Passenger: ${passengerName.trim()} · Mobile: ${mobileNumber.trim()}`,
+        notes: [
+          `Passenger: ${passengerName.trim()}`,
+          `Mobile: ${mobileNumber.trim()}`,
+          additionalInformation.trim()
+            ? `Additional information: ${additionalInformation.trim()}`
+            : null,
+        ]
+          .filter(Boolean)
+          .join("\n"),
       });
       setOutcome("success");
       setOutcomeMessage(null);
@@ -706,6 +726,7 @@ function VehicleRequestPageContent() {
     setRequestType(null);
     setPassengerName("");
     setMobileNumber("");
+    setAdditionalInformation("");
     setRegionId("");
     setPickupLocationId("");
     setDropoffLocationId("");
@@ -1278,6 +1299,21 @@ function VehicleRequestPageContent() {
                         {copy.contactPhoneHint}
                       </p>
                     </div>
+
+                    <AdminTextareaField
+                      id="request-additional-information"
+                      label={copy.additionalInformation}
+                      value={additionalInformation}
+                      onChange={(event) => setAdditionalInformation(event.target.value)}
+                      placeholder={copy.additionalInformationPlaceholder}
+                      hint={copy.additionalInformationHint}
+                      optional
+                      optionalLabel={copy.optional}
+                      maxLength={1000}
+                      rows={4}
+                      disabled={isSubmitting}
+                      containerClassName="sm:col-span-2"
+                    />
                   </div>
                 </AdminFormSection>
 

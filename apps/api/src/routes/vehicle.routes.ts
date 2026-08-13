@@ -27,7 +27,10 @@ import {
   updateVehicle,
 } from "../models/vehicle.model";
 import {
+  buildFleetFuelPreviousOdometerMap,
   buildVehicleFuelPreviousOdometerMap,
+  countAllVehicleFuelLogs,
+  countAllVehicleMaintenanceLogs,
   countOpenVehicleMaintenance,
   countVehicleFuelLogs,
   countVehicleHistoryEvents,
@@ -37,7 +40,11 @@ import {
   createVehicleMaintenanceLog,
   findVehicleFuelLogById,
   findVehicleMaintenanceLogById,
+  getFleetFuelStats,
+  getFleetMaintenanceStats,
   isOpenMaintenanceStatus,
+  listAllVehicleFuelLogs,
+  listAllVehicleMaintenanceLogs,
   listVehicleFuelLogs,
   listVehicleHistoryEvents,
   listVehicleMaintenanceLogs,
@@ -292,6 +299,85 @@ router.get("/compliance/summary", requirePermission("compliance.read", "vehicles
   }
 });
 
+router.get("/maintenance", requirePermission("vehicles.read"), async (req: Request, res: Response) => {
+  try {
+    const pagination = parsePaginationQuery(req.query);
+    const status = parseVehicleMaintenanceStatus(req.query.status);
+    if (req.query.status !== undefined && !status) {
+      return sendError(res, "A valid maintenance status is required.", 400);
+    }
+
+    const filters = {
+      vehicleId: getString(req.query.vehicle_id) || undefined,
+      status,
+      search: getString(req.query.search) || undefined,
+    };
+    const result = await paginate(
+      pagination,
+      () => countAllVehicleMaintenanceLogs(filters),
+      (skip, take) => listAllVehicleMaintenanceLogs(filters, { skip, take }),
+    );
+
+    return sendPaginatedSuccess(
+      res,
+      result.data.map((log) =>
+        toPublicVehicleMaintenanceLog(log, { locale: getRequestLocale(req) }),
+      ),
+      result.pagination,
+    );
+  } catch (error) {
+    return handleRouteError(res, error);
+  }
+});
+
+router.get("/maintenance/summary", requirePermission("vehicles.read"), async (_req: Request, res: Response) => {
+  try {
+    return sendSuccess(res, { summary: await getFleetMaintenanceStats() });
+  } catch (error) {
+    return handleRouteError(res, error);
+  }
+});
+
+router.get("/fuel", requirePermission("vehicles.read"), async (req: Request, res: Response) => {
+  try {
+    const pagination = parsePaginationQuery(req.query);
+    const fuelType = parseVehicleFuelType(req.query.fuel_type);
+    if (req.query.fuel_type !== undefined && !fuelType) {
+      return sendError(res, "A valid fuel type is required.", 400);
+    }
+
+    const filters = {
+      vehicleId: getString(req.query.vehicle_id) || undefined,
+      fuelType,
+      search: getString(req.query.search) || undefined,
+    };
+    const result = await paginate(
+      pagination,
+      () => countAllVehicleFuelLogs(filters),
+      (skip, take) => listAllVehicleFuelLogs(filters, { skip, take }),
+    );
+    const previousOdometerById = await buildFleetFuelPreviousOdometerMap(
+      result.data.map((log) => log.vehicleId),
+    );
+
+    return sendPaginatedSuccess(
+      res,
+      toPublicVehicleFuelLogs(result.data, previousOdometerById),
+      result.pagination,
+    );
+  } catch (error) {
+    return handleRouteError(res, error);
+  }
+});
+
+router.get("/fuel/summary", requirePermission("vehicles.read"), async (_req: Request, res: Response) => {
+  try {
+    return sendSuccess(res, { summary: await getFleetFuelStats() });
+  } catch (error) {
+    return handleRouteError(res, error);
+  }
+});
+
 router.get("/:id", requirePermission("vehicles.read", "compliance.read"), async (req: Request, res: Response) => {
   try {
     const locale = getRequestLocale(req);
@@ -423,6 +509,7 @@ router.post(
         nextDueAt: parseOptionalDate(req.body?.next_due_at) ?? null,
         nextDueKm: parseOptionalNumber(req.body?.next_due_km),
         createdById: req.user?.id,
+        driverAtRequestId: vehicle.assignedDriverUserId,
       });
 
       await createVehicleHistoryEvent({
@@ -651,6 +738,7 @@ router.post(
         source: VehicleFuelLogSource.manual,
         notes: getOptionalString(req.body?.notes),
         createdById: req.user?.id,
+        driverAtRefillId: vehicle.assignedDriverUserId,
       });
 
       await createVehicleHistoryEvent({

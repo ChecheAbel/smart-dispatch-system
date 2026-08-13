@@ -6,6 +6,7 @@ import { AuthBackToHomeLink } from "@/components/auth/AuthBackToHomeLink";
 import { AuthLanguageSwitcher } from "@/components/auth/AuthLanguageSwitcher";
 import UserSignInForm from "@/components/auth/UserSignInForm";
 import { useLocale } from "@/components/shared/providers/locale-context";
+import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { getCustomerAuthMessages } from "@/translations";
 
 export function UserSignInPage() {
@@ -27,7 +28,15 @@ export function UserSignInPage() {
       desktopDescription={copy.signIn.desktopDescription}
       footerCopyright={copy.common.copyright}
       leadingAction={<AuthBackToHomeLink />}
-      headerActions={<AuthLanguageSwitcher />}
+      headerActions={
+        <div className="auth-theme-toggle-inline flex items-center gap-2">
+          <ThemeToggle
+            placement="inline"
+            className="rounded-xl border border-slate-200/80 bg-white/70 dark:border-white/10 dark:bg-white/[0.035]"
+          />
+          <AuthLanguageSwitcher />
+        </div>
+      }
     >
       <Suspense
         fallback={

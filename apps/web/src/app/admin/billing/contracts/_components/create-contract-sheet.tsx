@@ -2,7 +2,13 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { FileText, MapPin, Receipt } from "lucide-react";
-import type { ContractBillingInterval, ContractStatus, Region, VehicleClass, VehicleType } from "@smart-dispatch/types";
+import type {
+  ContractBillingInterval,
+  ContractStatus,
+  Region,
+  VehicleClass,
+  VehicleType,
+} from "@smart-dispatch/types";
 import {
   AdminFormSection,
   AdminSelectField,
@@ -64,9 +70,15 @@ const emptyForm: FormState = {
   vehicleClassIds: [],
 };
 
-const CONTRACT_STATUSES: ContractStatus[] = ["draft", "active", "expired", "cancelled"];
+const CONTRACT_STATUSES: ContractStatus[] = [
+  "draft",
+  "active",
+  "expired",
+  "cancelled",
+];
 const CONTRACT_BILLING_INTERVALS: ContractBillingInterval[] = [
   "per_trip",
+  "at_contract_end",
   "monthly",
   "quarterly",
   "annually",
@@ -98,7 +110,9 @@ function ScopeCheckboxGroup({
       <div
         className={cn(
           "max-h-52 space-y-2 overflow-y-auto rounded-xl border bg-slate-50/60 p-3 dark:bg-[#11161d]",
-          error ? "border-red-300 dark:border-red-400/40" : "border-slate-200 dark:border-border",
+          error
+            ? "border-red-300 dark:border-red-400/40"
+            : "border-slate-200 dark:border-border",
         )}
       >
         {items.length === 0 ? (
@@ -125,7 +139,9 @@ function ScopeCheckboxGroup({
                     );
                   }}
                 />
-                <span className="text-sm text-slate-700 dark:text-foreground">{item.label}</span>
+                <span className="text-sm text-slate-700 dark:text-foreground">
+                  {item.label}
+                </span>
               </label>
             );
           })
@@ -147,7 +163,9 @@ export function CreateContractSheet({
   const copy = getAdminContractsMessages(locale);
   const isEdit = mode === "edit";
   const [form, setForm] = useState<FormState>(emptyForm);
-  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof FormState, string>>
+  >({});
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [regions, setRegions] = useState<Region[]>([]);
@@ -165,11 +183,12 @@ export function CreateContractSheet({
 
     async function loadOptions() {
       try {
-        const [regionsResult, vehicleTypesResult, vehicleClassesResult] = await Promise.all([
-          fetchActiveRegions(locale),
-          fetchActiveVehicleTypes(locale),
-          fetchActiveVehicleClasses(locale),
-        ]);
+        const [regionsResult, vehicleTypesResult, vehicleClassesResult] =
+          await Promise.all([
+            fetchActiveRegions(locale),
+            fetchActiveVehicleTypes(locale),
+            fetchActiveVehicleClasses(locale),
+          ]);
 
         if (!cancelled) {
           setRegions(regionsResult);
@@ -210,7 +229,9 @@ export function CreateContractSheet({
             notes: contract.notes ?? "",
             billingInterval: contract.billing_interval,
             paymentTermsDays:
-              contract.payment_terms_days != null ? String(contract.payment_terms_days) : "",
+              contract.payment_terms_days != null
+                ? String(contract.payment_terms_days)
+                : "",
             regionIds: contract.region_ids,
             vehicleTypeIds: contract.vehicle_type_ids,
             vehicleClassIds: contract.vehicle_class_ids,
@@ -262,20 +283,27 @@ export function CreateContractSheet({
 
     const nextErrors: Partial<Record<keyof FormState, string>> = {};
     if (!form.title.trim()) nextErrors.title = copy.errors.titleRequired;
-    if (form.regionIds.length === 0) nextErrors.regionIds = copy.errors.regionsRequired;
-    if (form.vehicleTypeIds.length === 0) nextErrors.vehicleTypeIds = copy.errors.vehicleTypesRequired;
-    if (form.vehicleClassIds.length === 0) nextErrors.vehicleClassIds = copy.errors.vehicleClassesRequired;
+    if (form.regionIds.length === 0)
+      nextErrors.regionIds = copy.errors.regionsRequired;
+    if (form.vehicleTypeIds.length === 0)
+      nextErrors.vehicleTypeIds = copy.errors.vehicleTypesRequired;
+    if (form.vehicleClassIds.length === 0)
+      nextErrors.vehicleClassIds = copy.errors.vehicleClassesRequired;
 
     if (!form.billingInterval) {
       nextErrors.billingInterval = copy.errors.billingIntervalRequired;
     }
 
-    if (form.billingInterval && form.billingInterval !== "per_trip") {
+    if (form.billingInterval) {
       if (!form.paymentTermsDays.trim()) {
         nextErrors.paymentTermsDays = copy.errors.paymentTermsRequired;
       } else {
         const paymentTermsDays = Number(form.paymentTermsDays);
-        if (!Number.isInteger(paymentTermsDays) || paymentTermsDays < 1 || paymentTermsDays > 365) {
+        if (
+          !Number.isInteger(paymentTermsDays) ||
+          paymentTermsDays < 0 ||
+          paymentTermsDays > 365
+        ) {
           nextErrors.paymentTermsDays = copy.errors.paymentTermsInvalid;
         }
       }
@@ -295,7 +323,7 @@ export function CreateContractSheet({
       status: form.status,
       notes: form.notes.trim() || null,
       billing_interval: billingInterval,
-      payment_terms_days: billingInterval !== "per_trip" ? Number(form.paymentTermsDays) : null,
+      payment_terms_days: Number(form.paymentTermsDays),
       region_ids: form.regionIds,
       vehicle_type_ids: form.vehicleTypeIds,
       vehicle_class_ids: form.vehicleClassIds,
@@ -308,9 +336,13 @@ export function CreateContractSheet({
           : await createContract(payload);
 
       showSuccessToast({
-        title: isEdit ? copy.toast.updateSuccess.title : copy.toast.createSuccess.title,
+        title: isEdit
+          ? copy.toast.updateSuccess.title
+          : copy.toast.createSuccess.title,
         description: formatMessage(
-          isEdit ? copy.toast.updateSuccess.description : copy.toast.createSuccess.description,
+          isEdit
+            ? copy.toast.updateSuccess.description
+            : copy.toast.createSuccess.description,
           { title: saved.title },
         ),
       });
@@ -335,19 +367,30 @@ export function CreateContractSheet({
         className="w-full overflow-y-auto data-[side=right]:sm:max-w-6xl"
       >
         <SheetHeader>
-          <SheetTitle>{isEdit ? copy.form.editTitle : copy.form.createTitle}</SheetTitle>
+          <SheetTitle>
+            {isEdit ? copy.form.editTitle : copy.form.createTitle}
+          </SheetTitle>
           <SheetDescription>
             {isEdit ? copy.form.editDescription : copy.form.createDescription}
           </SheetDescription>
         </SheetHeader>
 
-        <form className="space-y-8 px-6 pb-6" onSubmit={(event) => void handleSubmit(event)}>
-          <AdminFormSection icon={FileText} title={copy.form.title} description={copy.eyebrow}>
+        <form
+          className="space-y-8 px-6 pb-6"
+          onSubmit={(event) => void handleSubmit(event)}
+        >
+          <AdminFormSection
+            icon={FileText}
+            title={copy.form.title}
+            description={copy.eyebrow}
+          >
             <AdminSelectField
               id="contract-status"
               label={copy.form.status}
               value={form.status}
-              onValueChange={(value) => updateField("status", value as ContractStatus)}
+              onValueChange={(value) =>
+                updateField("status", value as ContractStatus)
+              }
               items={CONTRACT_STATUSES.map((status) => ({
                 value: status,
                 label: copy.status[status],
@@ -387,12 +430,10 @@ export function CreateContractSheet({
                   setForm((current) => ({
                     ...current,
                     billingInterval: value as ContractBillingInterval,
-                    paymentTermsDays: value === "per_trip" ? "" : current.paymentTermsDays,
                   }));
                   setErrors((current) => ({
                     ...current,
                     billingInterval: undefined,
-                    paymentTermsDays: value === "per_trip" ? undefined : current.paymentTermsDays,
                   }));
                 }}
                 items={CONTRACT_BILLING_INTERVALS.map((interval) => ({
@@ -403,20 +444,27 @@ export function CreateContractSheet({
                 disabled={formDisabled}
                 error={errors.billingInterval}
               />
-              {form.billingInterval && form.billingInterval !== "per_trip" ? (
+              {form.billingInterval ? (
                 <AdminTextField
                   id="contract-payment-terms"
                   label={copy.form.paymentTermsDays}
                   type="number"
-                  min={1}
+                  min={0}
                   max={365}
                   value={form.paymentTermsDays}
-                  onChange={(event) => updateField("paymentTermsDays", event.target.value)}
+                  onChange={(event) =>
+                    updateField("paymentTermsDays", event.target.value)
+                  }
                   placeholder={copy.form.paymentTermsDaysPlaceholder}
                   hint={copy.form.paymentTermsDaysHint}
                   disabled={formDisabled}
                   error={errors.paymentTermsDays}
                 />
+              ) : null}
+              {form.billingInterval === "at_contract_end" ? (
+                <p className="rounded-xl border border-[#C9B87A]/35 bg-[#C9B87A]/10 px-3.5 py-2.5 text-sm leading-relaxed text-[#6f6238] md:col-span-2 dark:text-[#d8c98e]">
+                  {copy.form.atContractEndHint}
+                </p>
               ) : null}
             </div>
           </AdminFormSection>
@@ -458,10 +506,19 @@ export function CreateContractSheet({
           </AdminFormSection>
 
           <SheetFooter className="px-0">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={submitting}
+            >
               {copy.form.cancel}
             </Button>
-            <Button type="submit" className={adminPrimaryButtonClass} disabled={formDisabled}>
+            <Button
+              type="submit"
+              className={adminPrimaryButtonClass}
+              disabled={formDisabled}
+            >
               {submitting
                 ? isEdit
                   ? copy.form.saving

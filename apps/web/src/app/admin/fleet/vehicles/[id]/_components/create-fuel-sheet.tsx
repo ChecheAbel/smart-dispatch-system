@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import { CircleDollarSign, Fuel, Gauge, Plus, Store } from "lucide-react";
-import type { Vehicle, VehicleFuelType } from "@smart-dispatch/types";
+import type { Vehicle, VehicleFuelLog, VehicleFuelType } from "@smart-dispatch/types";
 import { AdminDatePicker } from "@/components/shared/admin-date-picker";
 import { useLocale } from "@/components/shared/providers";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ import {
   adminInputClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
-import { createVehicleFuelLog } from "@/lib/vehicle-api";
+import { createVehicleFuelLog, updateVehicleFuelLog } from "@/lib/vehicle-api";
 import { showSuccessToast } from "@/lib/toast";
 import { formatMessage, getAdminVehiclesMessages } from "@/translations";
 import {
@@ -77,10 +77,25 @@ function emptyFuelForm(): FuelFormState {
   };
 }
 
+function fuelLogForm(log: VehicleFuelLog): FuelFormState {
+  return {
+    logged_at: log.logged_at.slice(0, 10),
+    odometer_km: String(log.odometer_km),
+    quantity_liters: String(log.quantity_liters),
+    total_cost: log.total_cost == null ? "" : String(log.total_cost),
+    fuel_type: log.fuel_type,
+    station_name: log.station_name ?? "",
+    receipt_reference: log.receipt_reference ?? "",
+    notes: log.notes ?? "",
+  };
+}
+
 type CreateFuelSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   vehicle: Vehicle | null;
+  mode?: "create" | "edit";
+  fuelLog?: VehicleFuelLog | null;
   onSuccess?: () => void;
 };
 
@@ -88,6 +103,8 @@ export function CreateFuelSheet({
   open,
   onOpenChange,
   vehicle,
+  mode = "create",
+  fuelLog = null,
   onSuccess,
 }: CreateFuelSheetProps) {
   const { locale } = useLocale();
@@ -95,7 +112,9 @@ export function CreateFuelSheet({
   const detail = copy.detail;
   const fuelCopy = detail.fuel;
 
-  const [form, setForm] = useState<FuelFormState>(emptyFuelForm());
+  const [form, setForm] = useState<FuelFormState>(() =>
+    mode === "edit" && fuelLog ? fuelLogForm(fuelLog) : emptyFuelForm(),
+  );
   const [fieldErrors, setFieldErrors] = useState<FuelFieldErrors>({});
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -152,7 +171,7 @@ export function CreateFuelSheet({
 
     setSubmitting(true);
     try {
-      await createVehicleFuelLog(vehicle.id, {
+      const payload = {
         logged_at: form.logged_at || undefined,
         odometer_km: Math.trunc(odometerKm),
         quantity_liters: quantityLiters,
@@ -161,9 +180,15 @@ export function CreateFuelSheet({
         station_name: stationName,
         receipt_reference: form.receipt_reference.trim() || null,
         notes: form.notes.trim() || null,
-      });
+      };
 
-      showSuccessToast(detail.toast.fuelCreated);
+      if (mode === "edit" && fuelLog) {
+        await updateVehicleFuelLog(vehicle.id, fuelLog.id, payload);
+      } else {
+        await createVehicleFuelLog(vehicle.id, payload);
+      }
+
+      showSuccessToast(mode === "edit" ? detail.toast.fuelUpdated : detail.toast.fuelCreated);
       onSuccess?.();
       handleSheetOpenChange(false);
     } catch (submitError) {
@@ -184,7 +209,9 @@ export function CreateFuelSheet({
         className="flex w-full flex-col gap-0 overflow-y-auto p-0 data-[side=right]:sm:max-w-lg"
       >
         <SheetHeader className="border-b border-slate-100 px-6 py-5 dark:border-border">
-          <SheetTitle className={adminHeadingClass}>{fuelCopy.createTitle}</SheetTitle>
+          <SheetTitle className={adminHeadingClass}>
+            {mode === "edit" ? fuelCopy.editTitle : fuelCopy.createTitle}
+          </SheetTitle>
           <SheetDescription className="leading-relaxed">
             {vehicle
               ? formatMessage(fuelCopy.createSubtitle, { plate: vehicle.plate_number })
@@ -466,7 +493,11 @@ export function CreateFuelSheet({
             className={adminPrimaryButtonClass}
           >
             <Plus className="size-4" />
-            {submitting ? fuelCopy.saving : fuelCopy.create}
+                {submitting
+                  ? fuelCopy.saving
+                  : mode === "edit"
+                    ? fuelCopy.update
+                    : fuelCopy.create}
           </Button>
         </SheetFooter>
       </SheetContent>

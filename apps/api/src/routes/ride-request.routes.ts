@@ -51,7 +51,13 @@ import {
 import { VehicleFuelLogSource, VehicleHistoryEventType, VehicleStatus } from "../generated/prisma";
 import { listActiveRegions } from "../models/region.model";
 import { listActiveBookingLocations } from "../models/location.model";
-import { listActiveContracts, getContractScopeIds, formatContractDate, findReusableContractForRequester } from "../models/contract.model";
+import {
+  findContractById,
+  findReusableContractForRequester,
+  formatContractDate,
+  getContractScopeIds,
+  listActiveContracts,
+} from "../models/contract.model";
 import { listRelevantEnrollmentsForUser } from "../models/contract-enrollment.model";
 import { listActiveVehicleTypesWithAllowedClasses } from "../models/vehicle-type-class.model";
 import { recordAuditLog } from "../services/audit-log.service";
@@ -453,6 +459,7 @@ router.post(
         nextDueAt: parseOptionalDate(req.body?.next_due_at) ?? null,
         nextDueKm: parseOptionalNumber(req.body?.next_due_km),
         createdById: userId,
+        driverAtRequestId: vehicle.assignedDriverUserId,
       });
 
       await createVehicleHistoryEvent({
@@ -695,6 +702,7 @@ router.post(
         source: VehicleFuelLogSource.driver_app,
         notes: getOptionalString(req.body?.notes),
         createdById: userId,
+        driverAtRefillId: vehicle.assignedDriverUserId,
       });
 
       await createVehicleHistoryEvent({
@@ -926,8 +934,6 @@ router.post(
           id: existing.id,
           status: existing.status,
           assignedDriverUserId: existing.assignedDriverUserId,
-          assignedVehicleId: existing.assignedVehicleId,
-          scheduledAt: existing.scheduledAt,
         },
         after: updated,
       });
@@ -1029,7 +1035,7 @@ router.post(
 
       // Prefer an existing matching contract; only mint a new agreement when none is found.
       const isRecurringContract = parsed.data.requestType === "contract";
-      const billingInterval = isRecurringContract ? "monthly" : "per_trip";
+      const billingInterval = isRecurringContract ? "at_contract_end" : "per_trip";
       const firstRequest = requestsToCreate[0];
 
       let resolvedContractId = baseRequestData.contractId ?? null;
@@ -1042,6 +1048,21 @@ router.post(
           vehicleClassId: firstRequest?.vehicleClassId,
         });
         resolvedContractId = reusable?.id ?? null;
+      }
+
+      const resolvedContract = resolvedContractId
+        ? await findContractById(resolvedContractId)
+        : null;
+      const resolvedBillingInterval = resolvedContract?.billingInterval ?? billingInterval;
+      if (
+        resolvedBillingInterval === "at_contract_end" &&
+        !parsed.data.scheduledReturnAt
+      ) {
+        return sendError(
+          res,
+          "A contract end date is required for at-contract-end billing.",
+          400,
+        );
       }
 
       const shouldGenerateContract = !resolvedContractId;

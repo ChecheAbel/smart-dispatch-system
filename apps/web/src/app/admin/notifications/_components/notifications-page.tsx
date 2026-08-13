@@ -5,9 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Bell, Check, Mail, MessageSquare } from "lucide-react";
 import { useAuth, useLocale } from "@/components/shared/providers";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
-import { Badge } from "@/components/ui/badge";
 import {
-  adminBadgeGoldClass,
   adminCardClass,
   adminHeadingClass,
   adminIconBoxClass,
@@ -82,8 +80,7 @@ export function NotificationsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-3">
-        <Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>
+      <div>
         <div className="flex items-start gap-3">
           <div className={adminIconBoxClass}>
             <Bell className="size-5" />

@@ -56,6 +56,8 @@ const DEFAULT_PERMISSIONS = [
   { slug: "invoices.delete", module: "invoices", action: "delete", description: "Void invoices" },
   { slug: "ride_requests.read", module: "ride_requests", action: "read", description: "View customer ride requests in admin dispatch" },
   { slug: "ride_requests.write", module: "ride_requests", action: "write", description: "Approve, assign, start, complete, or reject ride requests" },
+  { slug: "complaints.read", module: "complaints", action: "read", description: "View and manage customer complaints" },
+  { slug: "complaints.write", module: "complaints", action: "write", description: "Update complaint status, priority, assignment, and response" },
   { slug: "driver.vehicle", module: "driver", action: "vehicle", description: "Driver can get their assigned vehicle (GET /api/ride-requests/driver/vehicle)" },
   { slug: "driver.trip", module: "driver", action: "trip", description: "Driver can get trip details for assigned rides (GET /api/ride-requests/driver/:id)" },
   { slug: "driver.upcoming", module: "driver", action: "upcoming", description: "Driver can list upcoming trips and receive live trip events on the realtime Socket.IO namespace (/api/ws)" },
@@ -69,6 +71,8 @@ const DEFAULT_PERMISSIONS = [
   { slug: "customer_requests.write", module: "customer_requests", action: "write", description: "Submit ride requests" },
   { slug: "customer_contracts.read", module: "customer_contracts", action: "read", description: "View enrolled contracts in the customer portal" },
   { slug: "customer_invoices.read", module: "customer_invoices", action: "read", description: "View issued invoices in the customer portal" },
+  { slug: "customer_complaints.read", module: "customer_complaints", action: "read", description: "View submitted complaints in the customer portal" },
+  { slug: "customer_complaints.write", module: "customer_complaints", action: "write", description: "Submit customer complaints" },
 ] as const;
 
 const REMOVED_MENU_SLUGS = ["permissions", "endpoints", "registration-forms", "customer-portal", "customer-profile", "user", "notifications-email", "notifications-sms", "customer-requests"] as const;
@@ -299,8 +303,8 @@ const DEFAULT_MENUS = [
     sortOrder: 17,
     parentSlug: "fleet",
     translations: [
-      { locale: "en", label: "Maintenance Work Types" },
-      { locale: "am", label: "የጥገና የስራ አይነቶች" },
+      { locale: "en", label: "Maintenance Types" },
+      { locale: "am", label: "የጥገና አይነቶች" },
     ],
   },
   {
@@ -312,6 +316,28 @@ const DEFAULT_MENUS = [
     translations: [
       { locale: "en", label: "Vehicles" },
       { locale: "am", label: "ተሽከርካሪዎች" },
+    ],
+  },
+  {
+    slug: "fleet-maintenance",
+    path: "/admin/fleet/maintenance",
+    icon: "wrench",
+    sortOrder: 30,
+    parentSlug: "fleet",
+    translations: [
+      { locale: "en", label: "Maintenance" },
+      { locale: "am", label: "ጥገና" },
+    ],
+  },
+  {
+    slug: "fleet-fuel",
+    path: "/admin/fleet/fuel",
+    icon: "fuel",
+    sortOrder: 40,
+    parentSlug: "fleet",
+    translations: [
+      { locale: "en", label: "Fuel Consumption" },
+      { locale: "am", label: "የነዳጅ ፍጆታ" },
     ],
   },
   {
@@ -414,6 +440,17 @@ const DEFAULT_MENUS = [
     ],
   },
   {
+    slug: "complaints",
+    path: "/admin/complaints",
+    icon: "messages-square",
+    sortOrder: 50,
+    parentSlug: "dispatch",
+    translations: [
+      { locale: "en", label: "Complaint Management" },
+      { locale: "am", label: "የቅሬታ አስተዳደር" },
+    ],
+  },
+  {
     slug: "billing",
     path: null,
     icon: "receipt",
@@ -501,6 +538,17 @@ const DEFAULT_MENUS = [
       { locale: "am", label: "ደረሰኞቼ" },
     ],
   },
+  {
+    slug: "customer-complaints",
+    path: "/dashboard/complaints",
+    icon: "messages-square",
+    sortOrder: 76,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "Complaints" },
+      { locale: "am", label: "ቅሬታዎች" },
+    ],
+  },
 ] as const;
 
 const DEFAULT_ENDPOINTS: Array<{
@@ -551,9 +599,13 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "vehicles.location", method: "GET", path: "/api/vehicles/:id/location", description: "Get latest vehicle location snapshot", permissionSlug: "vehicles.read" },
   { slug: "vehicles.history", method: "GET", path: "/api/vehicles/:id/history", description: "List vehicle history events", permissionSlug: "vehicles.read" },
   { slug: "vehicles.maintenance.list", method: "GET", path: "/api/vehicles/:id/maintenance", description: "List vehicle maintenance logs", permissionSlug: "vehicles.read" },
+  { slug: "vehicles.maintenance.list_all", method: "GET", path: "/api/vehicles/maintenance", description: "List maintenance logs across the fleet", permissionSlug: "vehicles.read" },
+  { slug: "vehicles.maintenance.summary", method: "GET", path: "/api/vehicles/maintenance/summary", description: "Fleet maintenance summary", permissionSlug: "vehicles.read" },
   { slug: "vehicles.maintenance.create", method: "POST", path: "/api/vehicles/:id/maintenance", description: "Create vehicle maintenance log", permissionSlug: "vehicles.write" },
   { slug: "vehicles.maintenance.update", method: "PATCH", path: "/api/vehicles/:id/maintenance/:maintenanceId", description: "Update vehicle maintenance log", permissionSlug: "vehicles.write" },
   { slug: "vehicles.fuel.list", method: "GET", path: "/api/vehicles/:id/fuel", description: "List vehicle fuel logs", permissionSlug: "vehicles.read" },
+  { slug: "vehicles.fuel.list_all", method: "GET", path: "/api/vehicles/fuel", description: "List fuel logs across the fleet", permissionSlug: "vehicles.read" },
+  { slug: "vehicles.fuel.summary", method: "GET", path: "/api/vehicles/fuel/summary", description: "Fleet fuel consumption summary", permissionSlug: "vehicles.read" },
   { slug: "vehicles.fuel.create", method: "POST", path: "/api/vehicles/:id/fuel", description: "Create vehicle fuel log", permissionSlug: "vehicles.write" },
   { slug: "vehicles.fuel.update", method: "PATCH", path: "/api/vehicles/:id/fuel/:fuelLogId", description: "Update vehicle fuel log", permissionSlug: "vehicles.write" },
   { slug: "maintenance_work_types.list", method: "GET", path: "/api/maintenance-work-types", description: "List maintenance work types", permissionSlug: "maintenance_work_types.read" },
@@ -604,6 +656,8 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "customer_billing.contract_enrollments.get", method: "GET", path: "/api/me/contract-enrollments/:id", description: "Get contract enrollment for current customer", permissionSlug: "customer_contracts.read" },
   { slug: "customer_billing.invoices.list", method: "GET", path: "/api/me/invoices", description: "List invoices for current customer", permissionSlug: "customer_invoices.read" },
   { slug: "customer_billing.invoices.get", method: "GET", path: "/api/me/invoices/:id", description: "Get invoice for current customer", permissionSlug: "customer_invoices.read" },
+  { slug: "customer_billing.invoices.confirm_payment", method: "POST", path: "/api/me/invoices/:id/confirm-payment", description: "Confirm payment for a single customer invoice", permissionSlug: "customer_invoices.read" },
+  { slug: "customer_billing.invoices.confirm_payments", method: "POST", path: "/api/me/invoices/confirm-payments", description: "Confirm payment for multiple outstanding customer invoices", permissionSlug: "customer_invoices.read" },
   { slug: "customer_billing.payment_options", method: "GET", path: "/api/me/billing/payment-options", description: "Get customer payment method configuration", permissionSlug: "customer_invoices.read" },
   { slug: "ride_requests.driver_vehicle", method: "GET", path: "/api/ride-requests/driver/vehicle", description: "Get vehicle assigned to driver", permissionSlug: "driver.vehicle" },
   { slug: "ride_requests.driver_trip", method: "GET", path: "/api/ride-requests/driver/:id", description: "Get trip details for an assigned driver ride", permissionSlug: "driver.trip" },
@@ -623,6 +677,13 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "admin_ride_requests.assignable_vehicles", method: "GET", path: "/api/admin/ride-requests/:id/assignable-vehicles", description: "List assignable vehicles for ride request", permissionSlug: "ride_requests.read" },
   { slug: "admin_ride_requests.assign", method: "POST", path: "/api/admin/ride-requests/:id/assign", description: "Assign vehicle to ride request", permissionSlug: "ride_requests.write" },
   { slug: "admin_ride_requests.unassign", method: "POST", path: "/api/admin/ride-requests/:id/unassign", description: "Unassign vehicle from ride request", permissionSlug: "ride_requests.write" },
+  { slug: "complaints.mine.list", method: "GET", path: "/api/complaints/mine", description: "List current customer's complaints", permissionSlug: "customer_complaints.read" },
+  { slug: "complaints.mine.summary", method: "GET", path: "/api/complaints/mine/summary", description: "Summarize current customer's complaints", permissionSlug: "customer_complaints.read" },
+  { slug: "complaints.create", method: "POST", path: "/api/complaints", description: "Submit a customer complaint", permissionSlug: "customer_complaints.write" },
+  { slug: "complaints.get", method: "GET", path: "/api/complaints/:id", description: "Get current customer's complaint", permissionSlug: "customer_complaints.read" },
+  { slug: "complaints.admin.list", method: "GET", path: "/api/complaints/admin", description: "List complaints for administration", permissionSlug: "complaints.read" },
+  { slug: "complaints.admin.summary", method: "GET", path: "/api/complaints/admin/summary", description: "Summarize complaints for administration", permissionSlug: "complaints.read" },
+  { slug: "complaints.admin.update", method: "PATCH", path: "/api/complaints/admin/:id", description: "Manage a complaint", permissionSlug: "complaints.write" },
 ];
 
 async function seedPermissions() {
@@ -755,6 +816,8 @@ async function seedUserRolePermissions() {
           "customer_requests.write",
           "customer_contracts.read",
           "customer_invoices.read",
+          "customer_complaints.read",
+          "customer_complaints.write",
         ],
       },
     },

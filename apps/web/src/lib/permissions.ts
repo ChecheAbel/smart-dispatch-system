@@ -86,6 +86,10 @@ export const PERMISSIONS = {
     read: "ride_requests.read",
     write: "ride_requests.write",
   },
+  complaints: {
+    read: "complaints.read",
+    write: "complaints.write",
+  },
   driver: {
     vehicle: "driver.vehicle",
     trip: "driver.trip",
@@ -102,6 +106,10 @@ export const PERMISSIONS = {
     },
     contracts: "customer_contracts.read",
     invoices: "customer_invoices.read",
+    complaints: {
+      read: "customer_complaints.read",
+      write: "customer_complaints.write",
+    },
   },
 } as const;
 

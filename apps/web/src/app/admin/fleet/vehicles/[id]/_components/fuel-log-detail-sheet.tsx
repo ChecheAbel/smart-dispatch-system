@@ -40,7 +40,13 @@ type FuelLogDetailSheetProps = {
   vehicle: Vehicle | null;
 };
 
-function FuelTypeGlyph({ fuelType, className }: { fuelType: VehicleFuelLog["fuel_type"]; className?: string }) {
+function FuelTypeGlyph({
+  fuelType,
+  className,
+}: {
+  fuelType: VehicleFuelLog["fuel_type"];
+  className?: string;
+}) {
   return fuelType === "diesel" ? (
     <Droplets className={className} />
   ) : (
@@ -65,8 +71,12 @@ function DetailRow({
         </span>
       ) : null}
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium tracking-wide text-slate-400 uppercase">{label}</p>
-        <p className="mt-1 text-sm font-medium break-words text-slate-800 dark:text-slate-200">{value}</p>
+        <p className="text-xs font-medium tracking-wide text-slate-400 uppercase">
+          {label}
+        </p>
+        <p className="mt-1 text-sm font-medium break-words text-slate-800 dark:text-slate-200">
+          {value}
+        </p>
       </div>
     </div>
   );
@@ -86,7 +96,10 @@ export function FuelLogDetailSheet({
   if (!log) {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="right" className="w-full data-[side=right]:sm:max-w-lg" />
+        <SheetContent
+          side="right"
+          className="w-full data-[side=right]:sm:max-w-lg"
+        />
       </Sheet>
     );
   }
@@ -94,7 +107,9 @@ export function FuelLogDetailSheet({
   const notSet = sheetCopy.notSet;
   const refillTitle =
     log.station_name?.trim() ||
-    formatMessage(fuelCopy.refillFallback, { quantity: formatFuelQuantity(log.quantity_liters) });
+    formatMessage(fuelCopy.refillFallback, {
+      quantity: formatFuelQuantity(log.quantity_liters),
+    });
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -103,27 +118,46 @@ export function FuelLogDetailSheet({
         className="flex w-full flex-col gap-0 overflow-y-auto p-0 data-[side=right]:sm:max-w-lg"
       >
         <SheetHeader className="border-b border-slate-100 px-6 py-5 dark:border-border">
-          <SheetTitle className={adminHeadingClass}>{sheetCopy.title}</SheetTitle>
-          <SheetDescription className="leading-relaxed">{sheetCopy.description}</SheetDescription>
+          <SheetTitle className={adminHeadingClass}>
+            {sheetCopy.title}
+          </SheetTitle>
+          <SheetDescription className="leading-relaxed">
+            {sheetCopy.description}
+          </SheetDescription>
         </SheetHeader>
 
         <div className="space-y-4 px-6 py-5">
-          <Card className={cn(adminCardClass, "gap-0 overflow-hidden py-0 shadow-none ring-0")}>
+          <Card
+            className={cn(
+              adminCardClass,
+              "gap-0 overflow-hidden py-0 shadow-none ring-0",
+            )}
+          >
             <div className="flex items-start gap-3 border-b border-slate-100 bg-gradient-to-r from-[#1C3A34]/[0.04] to-transparent px-4 py-4 dark:border-border dark:from-[#C9B87A]/10">
               <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#1C3A34] text-white shadow-sm dark:bg-[#C9B87A] dark:text-[#151a21]">
                 <FuelTypeGlyph fuelType={log.fuel_type} className="size-5" />
               </div>
               <div className="min-w-0 flex-1 space-y-2">
-                <p className="text-lg font-bold tracking-tight text-slate-900 dark:text-foreground">{refillTitle}</p>
+                <p className="text-lg font-bold tracking-tight text-slate-900 dark:text-foreground">
+                  {refillTitle}
+                </p>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="outline" className="border-slate-200 bg-white text-slate-600 dark:border-border dark:bg-white/[0.06] dark:text-slate-300">
+                  <Badge
+                    variant="outline"
+                    className="border-slate-200 bg-white text-slate-600 dark:border-border dark:bg-white/[0.06] dark:text-slate-300"
+                  >
                     {copy.detail.fuelTypes[log.fuel_type]}
                   </Badge>
                   <Badge
                     variant="outline"
-                    className={fuelEfficiencyClass(log.consumption_km_per_liter)}
+                    className={fuelEfficiencyClass(
+                      log.consumption_km_per_liter,
+                    )}
                   >
-                    {formatFuelEfficiency(log.consumption_km_per_liter, fuelCopy)}
+                    {formatFuelEfficiency(
+                      log.consumption_km_per_liter,
+                      fuelCopy,
+                    )}
                   </Badge>
                 </div>
                 {vehicle ? (
@@ -154,6 +188,13 @@ export function FuelLogDetailSheet({
                   value={log.created_by?.name ?? fuelCopy.loggedByUnknown}
                 />
                 <DetailRow
+                  icon={UserRound}
+                  label={fuelCopy.driverAtRefillLabel}
+                  value={
+                    log.driver_at_refill?.name ?? fuelCopy.driverAtRefillUnknown
+                  }
+                />
+                <DetailRow
                   icon={CalendarClock}
                   label={fuelCopy.loggedOnLabel}
                   value={formatFuelDateTime(log.logged_at, locale)}
@@ -174,7 +215,9 @@ export function FuelLogDetailSheet({
                 <DetailRow
                   icon={Gauge}
                   label={fuelCopy.odometer}
-                  value={formatMessage(fuelCopy.kmValue, { count: String(log.odometer_km) })}
+                  value={formatMessage(fuelCopy.kmValue, {
+                    count: String(log.odometer_km),
+                  })}
                 />
                 <DetailRow
                   icon={Fuel}
@@ -208,7 +251,9 @@ export function FuelLogDetailSheet({
                   label={fuelCopy.cost}
                   value={
                     log.total_cost !== null
-                      ? formatMessage(fuelCopy.costValue, { amount: String(log.total_cost) })
+                      ? formatMessage(fuelCopy.costValue, {
+                          amount: String(log.total_cost),
+                        })
                       : notSet
                   }
                 />
@@ -217,7 +262,9 @@ export function FuelLogDetailSheet({
                   label={fuelCopy.pricePerLiter}
                   value={
                     log.price_per_liter !== null
-                      ? formatMessage(fuelCopy.costValue, { amount: String(log.price_per_liter) })
+                      ? formatMessage(fuelCopy.costValue, {
+                          amount: String(log.price_per_liter),
+                        })
                       : notSet
                   }
                 />

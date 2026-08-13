@@ -1,11 +1,20 @@
 import { Router, type Request, type Response } from "express";
-import type { ContractBillingInterval, ContractStatus } from "@smart-dispatch/types";
+import type {
+  ContractBillingInterval,
+  ContractStatus,
+} from "@smart-dispatch/types";
 import type { Prisma } from "../generated/prisma";
 import { auditMutations } from "../middleware/audit-mutation";
-import { authenticate, type AuthenticatedRequest } from "../middleware/authenticate";
+import {
+  authenticate,
+  type AuthenticatedRequest,
+} from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
 import { requirePermission } from "../middleware/require-permission";
-import { toPublicContract, toPublicContracts } from "../mappers/contract.mapper";
+import {
+  toPublicContract,
+  toPublicContracts,
+} from "../mappers/contract.mapper";
 import {
   countContracts,
   createContract,
@@ -21,13 +30,24 @@ import { findFarePlanById } from "../models/fare-plan.model";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
 import { getOptionalString, getString } from "../utils/validation";
-import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
+import {
+  handleRouteError,
+  sendError,
+  sendPaginatedSuccess,
+  sendSuccess,
+} from "../utils/response";
 
 const router = Router();
 
-const CONTRACT_STATUSES = new Set<ContractStatus>(["draft", "active", "expired", "cancelled"]);
+const CONTRACT_STATUSES = new Set<ContractStatus>([
+  "draft",
+  "active",
+  "expired",
+  "cancelled",
+]);
 const CONTRACT_BILLING_INTERVALS = new Set<ContractBillingInterval>([
   "per_trip",
+  "at_contract_end",
   "monthly",
   "quarterly",
   "annually",
@@ -54,7 +74,10 @@ function parseOptionalId(value: unknown) {
 function parseUuidArray(value: unknown) {
   if (!Array.isArray(value)) return undefined;
   return value
-    .filter((item): item is string => typeof item === "string" && item.trim().length > 0)
+    .filter(
+      (item): item is string =>
+        typeof item === "string" && item.trim().length > 0,
+    )
     .map((item) => item.trim());
 }
 
@@ -68,7 +91,7 @@ function parseOptionalPaymentTermsDays(value: unknown) {
   if (value === null) return null;
   if (value === undefined) return undefined;
   const parsed = Number(value);
-  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 365) {
+  if (!Number.isInteger(parsed) || parsed < 0 || parsed > 365) {
     return null;
   }
   return parsed;
@@ -105,7 +128,10 @@ function resolveContractScope(
   const existingScope = getContractScopeIds(existing);
 
   return {
-    regionIds: body.region_ids !== undefined ? (parseUuidArray(body.region_ids) ?? []) : existingScope.regionIds,
+    regionIds:
+      body.region_ids !== undefined
+        ? (parseUuidArray(body.region_ids) ?? [])
+        : existingScope.regionIds,
     vehicleTypeIds:
       body.vehicle_type_ids !== undefined
         ? (parseUuidArray(body.vehicle_type_ids) ?? [])
@@ -126,221 +152,282 @@ async function validateFarePlanId(farePlanId: string | null | undefined) {
   return null;
 }
 
-router.get("/", requirePermission("contracts.read"), async (req: Request, res: Response) => {
-  try {
-    const locale = getRequestLocale(req);
-    const pagination = parsePaginationQuery(req.query);
-    const filter = {
-      search: getOptionalString(req.query.search) ?? undefined,
-      status: parseContractStatus(req.query.status),
-    };
+router.get(
+  "/",
+  requirePermission("contracts.read"),
+  async (req: Request, res: Response) => {
+    try {
+      const locale = getRequestLocale(req);
+      const pagination = parsePaginationQuery(req.query);
+      const filter = {
+        search: getOptionalString(req.query.search) ?? undefined,
+        status: parseContractStatus(req.query.status),
+      };
 
-    const result = await paginate(
-      pagination,
-      () => countContracts(filter),
-      (skip, take) => listContracts(filter, { skip, take }),
-    );
+      const result = await paginate(
+        pagination,
+        () => countContracts(filter),
+        (skip, take) => listContracts(filter, { skip, take }),
+      );
 
-    return sendPaginatedSuccess(
-      res,
-      toPublicContracts(result.data, { locale }),
-      result.pagination,
-    );
-  } catch (error) {
-    return handleRouteError(res, error);
-  }
-});
-
-router.get("/:id/enrollments", requirePermission("contracts.read"), async (req: Request, res: Response) => {
-  try {
-    const contract = await findContractById(req.params.id);
-    if (!contract) {
-      return sendError(res, "Contract not found.", 404);
+      return sendPaginatedSuccess(
+        res,
+        toPublicContracts(result.data, { locale }),
+        result.pagination,
+      );
+    } catch (error) {
+      return handleRouteError(res, error);
     }
+  },
+);
 
-    const enrollments = await listEnrollmentsByContractId(contract.id);
+router.get(
+  "/:id/enrollments",
+  requirePermission("contracts.read"),
+  async (req: Request, res: Response) => {
+    try {
+      const contract = await findContractById(req.params.id);
+      if (!contract) {
+        return sendError(res, "Contract not found.", 404);
+      }
 
-    return sendSuccess(res, {
-      enrollments: toPublicContractEnrollments(enrollments),
-    });
-  } catch (error) {
-    return handleRouteError(res, error);
-  }
-});
+      const enrollments = await listEnrollmentsByContractId(contract.id);
 
-router.get("/:id", requirePermission("contracts.read"), async (req: Request, res: Response) => {
-  try {
-    const locale = getRequestLocale(req);
-    const contract = await findContractById(req.params.id);
-    if (!contract) {
-      return sendError(res, "Contract not found.", 404);
+      return sendSuccess(res, {
+        enrollments: toPublicContractEnrollments(enrollments),
+      });
+    } catch (error) {
+      return handleRouteError(res, error);
     }
+  },
+);
 
-    return sendSuccess(res, {
-      contract: toPublicContract(contract, { locale }),
-    });
-  } catch (error) {
-    return handleRouteError(res, error);
-  }
-});
+router.get(
+  "/:id",
+  requirePermission("contracts.read"),
+  async (req: Request, res: Response) => {
+    try {
+      const locale = getRequestLocale(req);
+      const contract = await findContractById(req.params.id);
+      if (!contract) {
+        return sendError(res, "Contract not found.", 404);
+      }
 
-router.post("/", requirePermission("contracts.write"), async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    const title = getString(req.body?.title);
-    const status = parseContractStatus(req.body?.status) ?? "draft";
-
-    if (!title) {
-      return sendError(res, "Contract title is required.", 400);
+      return sendSuccess(res, {
+        contract: toPublicContract(contract, { locale }),
+      });
+    } catch (error) {
+      return handleRouteError(res, error);
     }
+  },
+);
 
-    const farePlanId = parseOptionalId(req.body?.fare_plan_id);
-    const farePlanError = await validateFarePlanId(farePlanId);
-    if (farePlanError) {
-      return sendError(res, farePlanError, 400);
-    }
+router.post(
+  "/",
+  requirePermission("contracts.write"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const title = getString(req.body?.title);
+      const status = parseContractStatus(req.body?.status) ?? "draft";
 
-    const scope = {
-      regionIds: parseUuidArray(req.body?.region_ids) ?? [],
-      vehicleTypeIds: parseUuidArray(req.body?.vehicle_type_ids) ?? [],
-      vehicleClassIds: parseUuidArray(req.body?.vehicle_class_ids) ?? [],
-    };
-    const scopeError = validateContractScope(scope);
-    if (scopeError) {
-      return sendError(res, scopeError, 400);
-    }
+      if (!title) {
+        return sendError(res, "Contract title is required.", 400);
+      }
 
-    const billingInterval = parseBillingInterval(req.body?.billing_interval);
-    if (!billingInterval) {
-      return sendError(res, "Billing interval is required.", 400);
-    }
-
-    const paymentTermsRaw = req.body?.payment_terms_days;
-    const paymentTermsDays = parseOptionalPaymentTermsDays(paymentTermsRaw);
-    if (paymentTermsRaw !== undefined && paymentTermsRaw !== null && paymentTermsDays === null) {
-      return sendError(res, "Payment terms must be between 1 and 365 days.", 400);
-    }
-
-    const resolvedPaymentTermsDays = billingInterval === "per_trip" ? null : paymentTermsDays;
-    if (billingInterval !== "per_trip" && resolvedPaymentTermsDays == null) {
-      return sendError(res, "Payment terms are required for this billing interval.", 400);
-    }
-
-    const contract = await createContract({
-      title,
-      status,
-      farePlanId,
-      notes: getOptionalString(req.body?.notes),
-      billingInterval,
-      paymentTermsDays: resolvedPaymentTermsDays,
-      regionIds: scope.regionIds,
-      vehicleTypeIds: scope.vehicleTypeIds,
-      vehicleClassIds: scope.vehicleClassIds,
-      createdById: req.user?.id,
-    });
-
-    return sendSuccess(res, { contract: toPublicContract(contract) }, { status: 201 });
-  } catch (error) {
-    return handleRouteError(res, error);
-  }
-});
-
-router.patch("/:id", requirePermission("contracts.write"), async (req: Request, res: Response) => {
-  try {
-    const existing = await findContractById(req.params.id);
-    if (!existing) {
-      return sendError(res, "Contract not found.", 404);
-    }
-
-    const farePlanId =
-      req.body?.fare_plan_id !== undefined ? parseOptionalId(req.body.fare_plan_id) : undefined;
-
-    if (farePlanId !== undefined) {
+      const farePlanId = parseOptionalId(req.body?.fare_plan_id);
       const farePlanError = await validateFarePlanId(farePlanId);
       if (farePlanError) {
         return sendError(res, farePlanError, 400);
       }
-    }
 
-    const scopeFieldsSent =
-      req.body?.region_ids !== undefined ||
-      req.body?.vehicle_type_ids !== undefined ||
-      req.body?.vehicle_class_ids !== undefined;
-
-    const scope = scopeFieldsSent ? resolveContractScope(req.body ?? {}, existing) : null;
-    if (scope) {
+      const scope = {
+        regionIds: parseUuidArray(req.body?.region_ids) ?? [],
+        vehicleTypeIds: parseUuidArray(req.body?.vehicle_type_ids) ?? [],
+        vehicleClassIds: parseUuidArray(req.body?.vehicle_class_ids) ?? [],
+      };
       const scopeError = validateContractScope(scope);
       if (scopeError) {
         return sendError(res, scopeError, 400);
       }
-    }
 
-    const billingInterval =
-      req.body?.billing_interval !== undefined
-        ? parseBillingInterval(req.body.billing_interval)
-        : undefined;
-    if (req.body?.billing_interval !== undefined && !billingInterval) {
-      return sendError(res, "Enter a valid billing interval.", 400);
-    }
+      const billingInterval = parseBillingInterval(req.body?.billing_interval);
+      if (!billingInterval) {
+        return sendError(res, "Billing interval is required.", 400);
+      }
 
-    const paymentTermsRaw = req.body?.payment_terms_days;
-    const paymentTermsDays =
-      paymentTermsRaw !== undefined ? parseOptionalPaymentTermsDays(paymentTermsRaw) : undefined;
-    if (paymentTermsRaw !== undefined && paymentTermsRaw !== null && paymentTermsDays === null) {
-      return sendError(res, "Payment terms must be between 1 and 365 days.", 400);
-    }
+      const paymentTermsRaw = req.body?.payment_terms_days;
+      const paymentTermsDays = parseOptionalPaymentTermsDays(paymentTermsRaw);
+      if (
+        paymentTermsRaw !== undefined &&
+        paymentTermsRaw !== null &&
+        paymentTermsDays === null
+      ) {
+        return sendError(
+          res,
+          "Payment terms must be between 0 and 365 days.",
+          400,
+        );
+      }
 
-    const nextBillingInterval = billingInterval ?? existing.billingInterval;
-    const nextPaymentTermsDays =
-      nextBillingInterval === "per_trip"
-        ? null
-        : paymentTermsDays === undefined
+      const resolvedPaymentTermsDays = paymentTermsDays;
+      if (resolvedPaymentTermsDays == null) {
+        return sendError(
+          res,
+          "Payment terms are required for this billing interval.",
+          400,
+        );
+      }
+
+      const contract = await createContract({
+        title,
+        status,
+        farePlanId,
+        notes: getOptionalString(req.body?.notes),
+        billingInterval,
+        paymentTermsDays: resolvedPaymentTermsDays,
+        regionIds: scope.regionIds,
+        vehicleTypeIds: scope.vehicleTypeIds,
+        vehicleClassIds: scope.vehicleClassIds,
+        createdById: req.user?.id,
+      });
+
+      return sendSuccess(
+        res,
+        { contract: toPublicContract(contract) },
+        { status: 201 },
+      );
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.patch(
+  "/:id",
+  requirePermission("contracts.write"),
+  async (req: Request, res: Response) => {
+    try {
+      const existing = await findContractById(req.params.id);
+      if (!existing) {
+        return sendError(res, "Contract not found.", 404);
+      }
+
+      const farePlanId =
+        req.body?.fare_plan_id !== undefined
+          ? parseOptionalId(req.body.fare_plan_id)
+          : undefined;
+
+      if (farePlanId !== undefined) {
+        const farePlanError = await validateFarePlanId(farePlanId);
+        if (farePlanError) {
+          return sendError(res, farePlanError, 400);
+        }
+      }
+
+      const scopeFieldsSent =
+        req.body?.region_ids !== undefined ||
+        req.body?.vehicle_type_ids !== undefined ||
+        req.body?.vehicle_class_ids !== undefined;
+
+      const scope = scopeFieldsSent
+        ? resolveContractScope(req.body ?? {}, existing)
+        : null;
+      if (scope) {
+        const scopeError = validateContractScope(scope);
+        if (scopeError) {
+          return sendError(res, scopeError, 400);
+        }
+      }
+
+      const billingInterval =
+        req.body?.billing_interval !== undefined
+          ? parseBillingInterval(req.body.billing_interval)
+          : undefined;
+      if (req.body?.billing_interval !== undefined && !billingInterval) {
+        return sendError(res, "Enter a valid billing interval.", 400);
+      }
+
+      const paymentTermsRaw = req.body?.payment_terms_days;
+      const paymentTermsDays =
+        paymentTermsRaw !== undefined
+          ? parseOptionalPaymentTermsDays(paymentTermsRaw)
+          : undefined;
+      if (
+        paymentTermsRaw !== undefined &&
+        paymentTermsRaw !== null &&
+        paymentTermsDays === null
+      ) {
+        return sendError(
+          res,
+          "Payment terms must be between 0 and 365 days.",
+          400,
+        );
+      }
+
+      const nextPaymentTermsDays =
+        paymentTermsDays === undefined
           ? existing.paymentTermsDays
           : paymentTermsDays;
 
-    if (nextBillingInterval !== "per_trip" && nextPaymentTermsDays == null) {
-      return sendError(res, "Payment terms are required for this billing interval.", 400);
+      if (nextPaymentTermsDays == null) {
+        return sendError(
+          res,
+          "Payment terms are required for this billing interval.",
+          400,
+        );
+      }
+
+      const contract = await updateContract(existing.id, {
+        title: getOptionalString(req.body?.title) || undefined,
+        status: parseContractStatus(req.body?.status),
+        farePlanId,
+        notes:
+          req.body?.notes !== undefined
+            ? getOptionalString(req.body?.notes)
+            : undefined,
+        billingInterval,
+        paymentTermsDays:
+          paymentTermsDays === undefined ? undefined : paymentTermsDays,
+        regionIds:
+          req.body?.region_ids !== undefined ? scope?.regionIds : undefined,
+        vehicleTypeIds:
+          req.body?.vehicle_type_ids !== undefined
+            ? scope?.vehicleTypeIds
+            : undefined,
+        vehicleClassIds:
+          req.body?.vehicle_class_ids !== undefined
+            ? scope?.vehicleClassIds
+            : undefined,
+      });
+
+      return sendSuccess(res, {
+        contract: toPublicContract(contract, {
+          locale: getRequestLocale(req),
+        }),
+      });
+    } catch (error) {
+      return handleRouteError(res, error);
     }
+  },
+);
 
-    const contract = await updateContract(existing.id, {
-      title: getOptionalString(req.body?.title) || undefined,
-      status: parseContractStatus(req.body?.status),
-      farePlanId,
-      notes: req.body?.notes !== undefined ? getOptionalString(req.body?.notes) : undefined,
-      billingInterval,
-      paymentTermsDays:
-        nextBillingInterval === "per_trip"
-          ? null
-          : paymentTermsDays === undefined
-            ? undefined
-            : paymentTermsDays,
-      regionIds: req.body?.region_ids !== undefined ? scope?.regionIds : undefined,
-      vehicleTypeIds: req.body?.vehicle_type_ids !== undefined ? scope?.vehicleTypeIds : undefined,
-      vehicleClassIds: req.body?.vehicle_class_ids !== undefined ? scope?.vehicleClassIds : undefined,
-    });
+router.delete(
+  "/:id",
+  requirePermission("contracts.delete"),
+  async (req: Request, res: Response) => {
+    try {
+      const contract = await findContractById(req.params.id);
+      if (!contract) {
+        return sendError(res, "Contract not found.", 404);
+      }
 
-    return sendSuccess(res, {
-      contract: toPublicContract(contract, {
-        locale: getRequestLocale(req),
-      }),
-    });
-  } catch (error) {
-    return handleRouteError(res, error);
-  }
-});
-
-router.delete("/:id", requirePermission("contracts.delete"), async (req: Request, res: Response) => {
-  try {
-    const contract = await findContractById(req.params.id);
-    if (!contract) {
-      return sendError(res, "Contract not found.", 404);
+      await deleteContract(contract.id);
+      return sendSuccess(res, { message: "Contract deleted successfully." });
+    } catch (error) {
+      return handleRouteError(res, error);
     }
-
-    await deleteContract(contract.id);
-    return sendSuccess(res, { message: "Contract deleted successfully." });
-  } catch (error) {
-    return handleRouteError(res, error);
-  }
-});
+  },
+);
 
 export function registerContractRoutes(app: import("express").Express) {
   app.use("/api/contracts", router);

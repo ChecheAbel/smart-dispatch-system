@@ -65,6 +65,44 @@ export interface User {
   roles: RoleSlug[];
 }
 
+export type ComplaintCategory = "trip" | "driver" | "vehicle" | "billing" | "service" | "other";
+export type ComplaintPriority = "low" | "medium" | "high" | "urgent";
+export type ComplaintStatus = "submitted" | "under_review" | "in_progress" | "resolved" | "closed" | "rejected";
+
+export interface ComplaintPerson {
+  id: string;
+  name: string;
+  email: string;
+  mobile_number: string;
+}
+
+export interface Complaint {
+  id: string;
+  reference_number: string;
+  requester_user_id: string;
+  ride_request_id: string | null;
+  assigned_to_user_id: string | null;
+  category: ComplaintCategory;
+  subject: string;
+  description: string;
+  status: ComplaintStatus;
+  priority: ComplaintPriority;
+  admin_response: string | null;
+  resolved_at: string | null;
+  created_at: string;
+  updated_at: string;
+  requester: ComplaintPerson;
+  assigned_to: ComplaintPerson | null;
+  ride_request: { id: string; pickup_address: string; dropoff_address: string; status: RideRequestStatus } | null;
+}
+
+export interface ComplaintSummary {
+  total: number;
+  open: number;
+  urgent: number;
+  resolved: number;
+}
+
 export interface AuthRole {
   user_id: string;
   role_id: string;
@@ -546,6 +584,7 @@ export interface RealtimeLocationPublishInput {
 export interface VehicleMaintenanceLog {
   id: string;
   vehicle_id: string;
+  vehicle: VehicleOperationSummary;
   work_type_id: string;
   work_type: MaintenanceWorkTypeSummary;
   /** Slug alias of `work_type` for backward compatibility. */
@@ -565,17 +604,39 @@ export interface VehicleMaintenanceLog {
     id: string;
     name: string;
   } | null;
+  driver_at_request_user_id: string | null;
+  driver_at_request: {
+    id: string;
+    name: string;
+  } | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface VehicleMaintenanceStats {
+  total: number;
+  open: number;
+  in_progress: number;
+  completed: number;
+  cancelled: number;
 }
 
 export type VehicleFuelType = "diesel" | "petrol" | "other";
 
 export type VehicleFuelLogSource = "manual" | "driver_app" | "import";
 
+export interface VehicleOperationSummary {
+  id: string;
+  plate_number: string;
+  make: string | null;
+  model: string | null;
+  status: VehicleStatus;
+}
+
 export interface VehicleFuelLog {
   id: string;
   vehicle_id: string;
+  vehicle: VehicleOperationSummary;
   logged_at: string;
   odometer_km: number;
   quantity_liters: number;
@@ -593,8 +654,20 @@ export interface VehicleFuelLog {
     id: string;
     name: string;
   } | null;
+  driver_at_refill_user_id: string | null;
+  driver_at_refill: {
+    id: string;
+    name: string;
+  } | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface VehicleFuelStats {
+  total_logs: number;
+  vehicles_fueled: number;
+  total_liters: number;
+  total_cost: number;
 }
 
 export interface VehicleHistoryEvent {
@@ -931,7 +1004,12 @@ export interface RideRequestRequesterSummary {
 
 export type ContractStatus = "draft" | "active" | "expired" | "cancelled";
 
-export type ContractBillingInterval = "per_trip" | "monthly" | "quarterly" | "annually";
+export type ContractBillingInterval =
+  | "per_trip"
+  | "at_contract_end"
+  | "monthly"
+  | "quarterly"
+  | "annually";
 
 export interface ContractFarePlanSummary {
   id: string;
@@ -1112,6 +1190,13 @@ export interface CustomerContractEnrollment {
     payment_terms_days: number | null;
   };
   invoice: CustomerInvoiceSummary | null;
+}
+
+export interface CustomerContractSummary {
+  total: number;
+  active: number;
+  per_trip: number;
+  inactive: number;
 }
 
 export interface CustomerInvoice {

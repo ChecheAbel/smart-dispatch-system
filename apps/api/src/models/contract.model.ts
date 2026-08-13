@@ -299,7 +299,9 @@ export async function findReusableContractForRequester(options: {
   const billingIntervals: ContractBillingInterval[] =
     options.billingInterval === "per_trip"
       ? ["per_trip"]
-      : ["monthly", "quarterly", "annually"];
+      : options.billingInterval === "at_contract_end"
+        ? ["at_contract_end"]
+        : ["monthly", "quarterly", "annually"];
 
   const rideScope = {
     regionId: options.regionId ?? null,

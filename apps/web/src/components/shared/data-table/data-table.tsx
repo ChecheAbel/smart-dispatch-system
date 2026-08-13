@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatMessage, getTranslations } from "@/translations";
@@ -38,6 +39,14 @@ export type DataTableFetchParams = {
   page: number;
   limit: number;
   search: string;
+};
+
+export type DataTableRowSelection<T> = {
+  selectedKeys: ReadonlySet<string>;
+  onChange: (nextKeys: Set<string>, rows: T[]) => void;
+  isRowSelectable?: (row: T) => boolean;
+  selectAllLabel?: string;
+  selectRowLabel?: (row: T) => string;
 };
 
 type DataTableProps<T> = {
@@ -65,6 +74,7 @@ type DataTableProps<T> = {
   actionsColumnHeader?: string;
   toolbarActions?: ReactNode;
   filterBar?: ReactNode;
+  rowSelection?: DataTableRowSelection<T>;
   className?: string;
 };
 
@@ -118,6 +128,7 @@ export function DataTable<T>({
   actionsColumnHeader = "Actions",
   toolbarActions,
   filterBar,
+  rowSelection,
   className,
 }: DataTableProps<T>) {
   const { locale } = useLocale();
@@ -196,6 +207,39 @@ export function DataTable<T>({
     : formatMessage(tableCopy.loadingItems, { item: resolvedItemLabel });
 
   const pageRange = pagination ? getPageRange(pagination) : null;
+
+  const selectableRows = rowSelection
+    ? rows.filter((row) => rowSelection.isRowSelectable?.(row) ?? true)
+    : [];
+  const selectedVisibleCount = selectableRows.filter((row) =>
+    rowSelection?.selectedKeys.has(getRowKey(row)),
+  ).length;
+  const allVisibleSelected =
+    selectableRows.length > 0 && selectedVisibleCount === selectableRows.length;
+  const someVisibleSelected =
+    selectedVisibleCount > 0 && selectedVisibleCount < selectableRows.length;
+
+  function toggleRow(row: T, checked: boolean) {
+    if (!rowSelection) return;
+    if (rowSelection.isRowSelectable && !rowSelection.isRowSelectable(row)) return;
+
+    const key = getRowKey(row);
+    const next = new Set(rowSelection.selectedKeys);
+    if (checked) next.add(key);
+    else next.delete(key);
+    rowSelection.onChange(next, rows);
+  }
+
+  function toggleAllVisible(checked: boolean) {
+    if (!rowSelection) return;
+    const next = new Set(rowSelection.selectedKeys);
+    for (const row of selectableRows) {
+      const key = getRowKey(row);
+      if (checked) next.add(key);
+      else next.delete(key);
+    }
+    rowSelection.onChange(next, rows);
+  }
 
   return (
     <Card
@@ -281,6 +325,24 @@ export function DataTable<T>({
             >
               <thead className="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:border-border dark:bg-muted/65 dark:text-muted-foreground">
                 <tr>
+                  {rowSelection ? (
+                    <th className="w-12 px-4 py-3">
+                      <Checkbox
+                        checked={allVisibleSelected}
+                        disabled={selectableRows.length === 0}
+                        onCheckedChange={(checked) => toggleAllVisible(checked === true)}
+                        aria-label={rowSelection.selectAllLabel ?? "Select all"}
+                        aria-checked={
+                          allVisibleSelected
+                            ? "true"
+                            : someVisibleSelected
+                              ? "mixed"
+                              : "false"
+                        }
+                        className="data-checked:border-[#1C3A34] data-checked:bg-[#1C3A34] data-checked:text-white"
+                      />
+                    </th>
+                  ) : null}
                   {showIndexColumn ? (
                     <th className="w-12 px-4 py-3 text-center">
                       {indexColumnHeader}
@@ -311,12 +373,33 @@ export function DataTable<T>({
                     index,
                     rowIndex,
                   };
+                  const rowKey = getRowKey(row);
+                  const selectable = rowSelection
+                    ? (rowSelection.isRowSelectable?.(row) ?? true)
+                    : false;
+                  const selected = rowSelection?.selectedKeys.has(rowKey) ?? false;
 
                   return (
                     <tr
-                      key={getRowKey(row)}
-                      className="transition-colors hover:bg-slate-50/80 dark:hover:bg-accent/55"
+                      key={rowKey}
+                      className={cn(
+                        "transition-colors hover:bg-slate-50/80 dark:hover:bg-accent/55",
+                        selected && "bg-[#C9B87A]/8 dark:bg-accent/40",
+                      )}
                     >
+                      {rowSelection ? (
+                        <td className="px-4 py-3">
+                          <Checkbox
+                            checked={selected}
+                            disabled={!selectable}
+                            onCheckedChange={(checked) => toggleRow(row, checked === true)}
+                            aria-label={
+                              rowSelection.selectRowLabel?.(row) ?? "Select row"
+                            }
+                            className="data-checked:border-[#1C3A34] data-checked:bg-[#1C3A34] data-checked:text-white"
+                          />
+                        </td>
+                      ) : null}
                       {showIndexColumn ? (
                         <td className="px-4 py-3 text-center text-slate-500 tabular-nums dark:text-muted-foreground">
                           {index}

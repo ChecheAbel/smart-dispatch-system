@@ -28,6 +28,7 @@ import { registerCustomerBillingRoutes } from "./routes/customer-billing.routes"
 import { registerRideRequestRoutes } from "./routes/ride-request.routes";
 import { registerAdminRideRequestRoutes } from "./routes/admin-ride-request.routes";
 import { registerAdminDashboardRoutes } from "./routes/dashboard.routes";
+import { registerComplaintRoutes } from "./routes/complaint.routes";
 import { initSocketIo } from "./websocket/socket-io";
 import { registerRealtimeSocket } from "./websocket/realtime.socket";
 import { startInvoiceAutomationScheduler } from "./services/scheduler.service";
@@ -77,6 +78,7 @@ registerRideRequestRoutes(app);
 registerAdminRideRequestRoutes(app);
 registerSystemSettingsRoutes(app);
 registerAdminDashboardRoutes(app);
+registerComplaintRoutes(app);
 initSocketIo(server);
 registerRealtimeSocket();
 

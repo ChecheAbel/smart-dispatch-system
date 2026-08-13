@@ -177,6 +177,7 @@ export async function generateInvoiceForTrip(rideRequestId: string, options?: { 
       contractId: contract.id,
       requesterUserId: ride.requesterUserId,
       scheduledAt: ride.scheduledAt,
+      scheduledEndsAt: ride.scheduledReturnAt,
       billingInterval: contract.billingInterval as ContractBillingInterval,
     }));
 
@@ -266,6 +267,47 @@ export async function markInvoicePaidForRequester(
   }
 
   return markInvoicePaid(invoiceId, paymentMethod);
+}
+
+export async function markInvoicesPaidForRequester(
+  invoiceIds: string[],
+  requesterUserId: string,
+  paymentMethod: CustomerPaymentMethodId,
+) {
+  const uniqueIds = [...new Set(invoiceIds.map((id) => id.trim()).filter(Boolean))];
+  if (uniqueIds.length === 0) {
+    throw new Error("INVOICE_IDS_REQUIRED");
+  }
+
+  const { findInvoicesForRequester, updateInvoiceStatus } = await import(
+    "../models/invoice.model"
+  );
+  const invoices = await findInvoicesForRequester(uniqueIds, requesterUserId);
+
+  if (invoices.length !== uniqueIds.length) {
+    throw new Error("INVOICE_NOT_FOUND");
+  }
+
+  if (invoices.some((invoice) => invoice.status !== "issued")) {
+    throw new Error("INVOICE_NOT_ISSUED");
+  }
+
+  const currencies = new Set(invoices.map((invoice) => invoice.currency));
+  if (currencies.size > 1) {
+    throw new Error("INVOICE_CURRENCY_MISMATCH");
+  }
+
+  const paidAt = new Date();
+  await Promise.all(
+    invoices.map((invoice) =>
+      updateInvoiceStatus(invoice.id, "paid", {
+        paidAt,
+        paymentMethod,
+      }),
+    ),
+  );
+
+  return findInvoicesForRequester(uniqueIds, requesterUserId);
 }
 
 export async function voidInvoice(invoiceId: string) {

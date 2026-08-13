@@ -43,9 +43,12 @@ type DbMaintenanceLog = {
   nextDueAt: Date | null;
   nextDueKm: number | null;
   createdById: string | null;
+  driverAtRequestId: string | null;
   createdAt: Date;
   updatedAt: Date;
+  vehicle: DbVehicleSummary;
   createdBy: DbPerson | null;
+  driverAtRequest: DbPerson | null;
   workType: {
     id: string;
     slug: string;
@@ -57,6 +60,24 @@ type DbMaintenanceLog = {
   };
 };
 
+type DbVehicleSummary = {
+  id: string;
+  plateNumber: string;
+  make: string | null;
+  model: string | null;
+  status: VehicleMaintenanceLog["vehicle"]["status"];
+};
+
+function toPublicVehicleOperationSummary(vehicle: DbVehicleSummary) {
+  return {
+    id: vehicle.id,
+    plate_number: vehicle.plateNumber,
+    make: vehicle.make,
+    model: vehicle.model,
+    status: vehicle.status,
+  };
+}
+
 export function toPublicVehicleMaintenanceLog(
   log: DbMaintenanceLog,
   options?: { locale?: string },
@@ -66,6 +87,7 @@ export function toPublicVehicleMaintenanceLog(
   return {
     id: log.id,
     vehicle_id: log.vehicleId,
+    vehicle: toPublicVehicleOperationSummary(log.vehicle),
     work_type_id: log.workTypeId,
     work_type: workType,
     type: workType.slug,
@@ -86,6 +108,13 @@ export function toPublicVehicleMaintenanceLog(
           name: formatPersonName(log.createdBy),
         }
       : null,
+    driver_at_request_user_id: log.driverAtRequestId,
+    driver_at_request: log.driverAtRequest
+      ? {
+          id: log.driverAtRequest.id,
+          name: formatPersonName(log.driverAtRequest),
+        }
+      : null,
     created_at: log.createdAt.toISOString(),
     updated_at: log.updatedAt.toISOString(),
   };
@@ -104,9 +133,12 @@ type DbFuelLog = {
   source: VehicleFuelLog["source"];
   notes: string | null;
   createdById: string | null;
+  driverAtRefillId: string | null;
   createdAt: Date;
   updatedAt: Date;
+  vehicle: DbVehicleSummary;
   createdBy: DbPerson | null;
+  driverAtRefill: DbPerson | null;
 };
 
 function computeFuelEfficiency(
@@ -145,6 +177,7 @@ export function toPublicVehicleFuelLog(
   return {
     id: log.id,
     vehicle_id: log.vehicleId,
+    vehicle: toPublicVehicleOperationSummary(log.vehicle),
     logged_at: log.loggedAt.toISOString(),
     odometer_km: log.odometerKm,
     quantity_liters: quantityLiters,
@@ -162,6 +195,13 @@ export function toPublicVehicleFuelLog(
       ? {
           id: log.createdBy.id,
           name: formatPersonName(log.createdBy),
+        }
+      : null,
+    driver_at_refill_user_id: log.driverAtRefillId,
+    driver_at_refill: log.driverAtRefill
+      ? {
+          id: log.driverAtRefill.id,
+          name: formatPersonName(log.driverAtRefill),
         }
       : null,
     created_at: log.createdAt.toISOString(),

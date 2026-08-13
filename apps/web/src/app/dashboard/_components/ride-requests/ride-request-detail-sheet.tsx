@@ -216,6 +216,36 @@ function formatRequesterName(requester: RideRequestRequesterSummary) {
   return [requester.first_name, requester.middle_name, requester.last_name].filter(Boolean).join(" ");
 }
 
+function getPassengerContactDetails(notes: string | null | undefined) {
+  const value = notes?.trim();
+  if (!value) {
+    return null;
+  }
+
+  const normalized = value.replace(/\s+·\s+Mobile:/i, "\nMobile:");
+  const passengerName = normalized.match(/^Passenger:\s*(.+)$/im)?.[1]?.trim() || null;
+  const mobileNumber = normalized.match(/^Mobile:\s*(.+)$/im)?.[1]?.trim() || null;
+
+  return passengerName || mobileNumber ? { passengerName, mobileNumber } : null;
+}
+
+function getAdditionalInformation(notes: string | null | undefined) {
+  const value = notes?.trim();
+  if (!value) {
+    return null;
+  }
+
+  const additionalInformation = value.match(/(?:^|\n)Additional information:\s*([\s\S]+)$/i);
+  if (additionalInformation) {
+    return additionalInformation[1]?.trim() || null;
+  }
+
+  const containsBookingContactMetadata =
+    /^Passenger:\s*/i.test(value) && /(?:^|\n|\s·\s)Mobile:\s*/i.test(value);
+
+  return containsBookingContactMetadata ? null : value;
+}
+
 export function RideRequestDetailSheet({
   request,
   open,
@@ -271,7 +301,8 @@ export function RideRequestDetailSheet({
     : "";
 
   const shortRequestId = request ? request.id.slice(0, 8).toUpperCase() : "";
-  const hasNotes = Boolean(request?.notes?.trim());
+  const passengerContact = getPassengerContactDetails(request?.notes);
+  const additionalInformation = getAdditionalInformation(request?.notes);
   const isSubmitting = Boolean(manageActions?.submitting);
 
   const driverRatingLabelsResolved: RideRequestDriverRatingDisplayLabels =
@@ -544,11 +575,26 @@ export function RideRequestDetailSheet({
             </div>
           </DetailSection>
 
-          {hasNotes ? (
+          {passengerContact ? (
+            <DetailSection title={historyCopy.detailContactSection} icon={UserRound}>
+              <div className="grid gap-3 rounded-xl border border-slate-200/80 bg-white p-3.5 sm:grid-cols-2">
+                <DetailRow
+                  label={historyCopy.detailPassengerName}
+                  value={passengerContact.passengerName ?? "—"}
+                />
+                <DetailRow
+                  label={historyCopy.detailPassengerMobile}
+                  value={passengerContact.mobileNumber ?? "—"}
+                />
+              </div>
+            </DetailSection>
+          ) : null}
+
+          {additionalInformation ? (
             <DetailSection title={historyCopy.detailNotesSection} icon={FileText}>
               <div className="rounded-xl border border-slate-200/80 bg-white p-3.5">
                 <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
-                  {request.notes?.trim()}
+                  {additionalInformation}
                 </p>
               </div>
             </DetailSection>

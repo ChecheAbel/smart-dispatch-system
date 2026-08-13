@@ -1,4 +1,4 @@
-import type { CustomerContractEnrollment, CustomerInvoice, CustomerPaymentMethodId, CustomerPaymentOptions, CustomerVisibleInvoiceStatus } from "@smart-dispatch/types";
+import type { CustomerContractEnrollment, CustomerContractSummary, CustomerInvoice, CustomerPaymentMethodId, CustomerPaymentOptions, CustomerVisibleInvoiceStatus } from "@smart-dispatch/types";
 import { apiClient } from "./api-client";
 import { unwrapApiResponse, unwrapPaginatedApiResponse } from "./api-response";
 
@@ -30,6 +30,11 @@ export async function fetchMyContractEnrollments(params: FetchMyContractEnrollme
 export async function fetchMyContractEnrollmentById(id: string) {
   const { data } = await apiClient.get(`/api/me/contract-enrollments/${id}`);
   return unwrapApiResponse<{ contract_enrollment: CustomerContractEnrollment }>(data);
+}
+
+export async function fetchMyContractSummary() {
+  const { data } = await apiClient.get("/api/me/contract-enrollments/summary");
+  return unwrapApiResponse<{ summary: CustomerContractSummary }>(data).summary;
 }
 
 export async function fetchMyInvoices(params: FetchMyInvoicesParams = {}) {
@@ -70,6 +75,26 @@ export async function confirmCustomerInvoicePayment(
     { params: { locale: params.locale } },
   );
   return unwrapApiResponse<{ invoice: CustomerInvoice }>(data);
+}
+
+export type ConfirmCustomerInvoicesPaymentParams = {
+  invoice_ids: string[];
+  payment_method: CustomerPaymentMethodId;
+  locale?: string;
+};
+
+export async function confirmCustomerInvoicesPayment(
+  params: ConfirmCustomerInvoicesPaymentParams,
+) {
+  const { data } = await apiClient.post(
+    `/api/me/invoices/confirm-payments`,
+    {
+      invoice_ids: params.invoice_ids,
+      payment_method: params.payment_method,
+    },
+    { params: { locale: params.locale } },
+  );
+  return unwrapApiResponse<{ invoices: CustomerInvoice[] }>(data);
 }
 
 export async function fetchMyInvoiceCount(params: Pick<FetchMyInvoicesParams, "status"> = {}) {

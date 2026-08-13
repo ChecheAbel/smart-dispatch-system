@@ -35,7 +35,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { fetchNotificationDeliveryLogs } from "@/lib/notification-delivery-log-api";
-import { adminBadgeGoldClass, adminFilterLabelClass, adminHeadingClass } from "@/lib/admin-theme";
+import { adminFilterLabelClass, adminHeadingClass } from "@/lib/admin-theme";
 import { PERMISSIONS } from "@/lib/permissions";
 import {
   getAdminNotificationDeliveryLogsMessages,
@@ -270,7 +270,6 @@ export function NotificationDeliveryLogsPage() {
     <div className="min-w-0 space-y-6">
       <DataTable
         key={locale}
-        eyebrow={<Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>}
         title={copy.title}
         titleClassName={cn("text-2xl font-extrabold tracking-tight", adminHeadingClass)}
         description={copy.description}

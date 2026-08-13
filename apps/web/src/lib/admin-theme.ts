@@ -41,6 +41,9 @@ export const adminHeaderControlClass =
 export const adminInputClass =
   "h-10 rounded-lg border-slate-200 bg-white px-3.5 text-sm shadow-sm dark:border-border dark:bg-muted/55 dark:text-foreground";
 
+export const adminSelectTriggerClass =
+  "h-10 w-full rounded-lg border-slate-200 bg-white px-3.5 text-sm shadow-sm dark:border-border dark:bg-muted/55 dark:text-foreground";
+
 export const adminFilterLabelClass =
   "text-sm font-medium text-slate-600 dark:text-muted-foreground";
 

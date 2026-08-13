@@ -136,6 +136,7 @@ export function resolveEnrollmentStartDate(options: {
 export function calculateEnrollmentEndDate(
   startsAt: Date,
   billingInterval: ContractBillingInterval,
+  scheduledEndsAt?: Date | null,
 ) {
   const start = new Date(
     Date.UTC(startsAt.getUTCFullYear(), startsAt.getUTCMonth(), startsAt.getUTCDate()),
@@ -144,6 +145,16 @@ export function calculateEnrollmentEndDate(
   switch (billingInterval) {
     case "per_trip":
       return start;
+    case "at_contract_end":
+      return scheduledEndsAt
+        ? new Date(
+            Date.UTC(
+              scheduledEndsAt.getUTCFullYear(),
+              scheduledEndsAt.getUTCMonth(),
+              scheduledEndsAt.getUTCDate(),
+            ),
+          )
+        : start;
     case "monthly": {
       const end = addUtcMonths(start, 1);
       end.setUTCDate(end.getUTCDate() - 1);
@@ -168,10 +179,14 @@ export function calculateEnrollmentEndDate(
 
 export function resolveContractTermForTrip(
   contract: Pick<RideRequestContractOption, "billing_interval" | "current_enrollment">,
-  options: { scheduledAt?: Date | null },
+  options: { scheduledAt?: Date | null; scheduledEndsAt?: Date | null },
 ) {
   const serviceDate = resolveEnrollmentStartDate({ scheduledAt: options.scheduledAt });
   if (!serviceDate) {
+    return null;
+  }
+
+  if (contract.billing_interval === "at_contract_end" && !options.scheduledEndsAt) {
     return null;
   }
 
@@ -187,7 +202,11 @@ export function resolveContractTermForTrip(
     return enrollment;
   }
 
-  const endsAt = calculateEnrollmentEndDate(serviceDate, contract.billing_interval);
+  const endsAt = calculateEnrollmentEndDate(
+    serviceDate,
+    contract.billing_interval,
+    options.scheduledEndsAt,
+  );
 
   return {
     starts_at: day,

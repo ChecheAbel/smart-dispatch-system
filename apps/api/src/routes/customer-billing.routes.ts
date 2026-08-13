@@ -11,6 +11,7 @@ import {
 import {
   countEnrollmentsForRequester,
   findEnrollmentForRequester,
+  getEnrollmentSummaryForRequester,
   listEnrollmentsForRequester,
 } from "../models/contract-enrollment.model";
 import {
@@ -23,7 +24,10 @@ import { parseLocale } from "../utils/locale";
 import { getOptionalString } from "../utils/validation";
 import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
 import { getCustomerPaymentOptions } from "../config/customer-payment-options";
-import { markInvoicePaidForRequester } from "../services/invoice-generation.service";
+import {
+  markInvoicePaidForRequester,
+  markInvoicesPaidForRequester,
+} from "../services/invoice-generation.service";
 import type { CustomerPaymentMethodId } from "@smart-dispatch/types";
 
 const router = Router();
@@ -66,6 +70,25 @@ router.get(
         toCustomerContractEnrollments(result.data),
         result.pagination,
       );
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.get(
+  "/contract-enrollments/summary",
+  requirePermission("customer_contracts.read"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      return sendSuccess(res, {
+        summary: await getEnrollmentSummaryForRequester(userId),
+      });
     } catch (error) {
       return handleRouteError(res, error);
     }
@@ -188,10 +211,59 @@ function mapCustomerPaymentError(error: unknown) {
       return { message: "Invoice not found.", status: 404 };
     case "INVOICE_NOT_ISSUED":
       return { message: "Only outstanding invoices can be marked as paid.", status: 409 };
+    case "INVOICE_IDS_REQUIRED":
+      return { message: "Select at least one invoice to pay.", status: 400 };
+    case "INVOICE_CURRENCY_MISMATCH":
+      return { message: "Selected invoices must share the same currency.", status: 409 };
     default:
       return null;
   }
 }
+
+function parseInvoiceIds(value: unknown) {
+  if (!Array.isArray(value)) return null;
+  const ids = value
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  return ids.length > 0 ? ids : null;
+}
+
+router.post(
+  "/invoices/confirm-payments",
+  requirePermission("customer_invoices.read"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const locale = getRequestLocale(req);
+      const userId = req.user?.id;
+      if (!userId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      const paymentMethod = parsePaymentMethod(req.body?.payment_method);
+      if (!paymentMethod) {
+        return sendError(res, "Invalid payment method.", 400);
+      }
+
+      const invoiceIds = parseInvoiceIds(req.body?.invoice_ids);
+      if (!invoiceIds) {
+        return sendError(res, "invoice_ids must be a non-empty array.", 400);
+      }
+
+      const invoices = await markInvoicesPaidForRequester(invoiceIds, userId, paymentMethod);
+
+      return sendSuccess(res, {
+        invoices: toCustomerInvoices(invoices, { locale }),
+      });
+    } catch (error) {
+      const mapped = mapCustomerPaymentError(error);
+      if (mapped) {
+        return sendError(res, mapped.message, mapped.status);
+      }
+      return handleRouteError(res, error);
+    }
+  },
+);
 
 router.post(
   "/invoices/:id/confirm-payment",

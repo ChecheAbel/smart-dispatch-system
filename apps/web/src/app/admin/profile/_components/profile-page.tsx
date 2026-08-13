@@ -395,10 +395,6 @@ export function ProfilePage() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-1">
-        <p className="text-sm text-slate-500">{copy.description}</p>
-      </div>
-
       <ProfileHero
         user={user}
         roleLabels={roleLabels}

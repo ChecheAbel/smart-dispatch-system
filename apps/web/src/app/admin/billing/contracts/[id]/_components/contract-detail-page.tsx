@@ -11,7 +11,11 @@ import {
   MapPin,
   Pencil,
 } from "lucide-react";
-import type { Contract, ContractEnrollment, ContractStatus } from "@smart-dispatch/types";
+import type {
+  Contract,
+  ContractEnrollment,
+  ContractStatus,
+} from "@smart-dispatch/types";
 import { useAuth, useLocale } from "@/components/shared/providers";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +29,10 @@ import {
   adminIconBoxClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
-import { fetchContractById, fetchContractEnrollments } from "@/lib/contract-api";
+import {
+  fetchContractById,
+  fetchContractEnrollments,
+} from "@/lib/contract-api";
 import { fetchActiveRegions } from "@/lib/region-api";
 import { fetchActiveVehicleClasses } from "@/lib/vehicle-class-api";
 import { fetchActiveVehicleTypes } from "@/lib/vehicle-type-api";
@@ -120,7 +127,13 @@ export function ContractDetailPage() {
     async function loadContract() {
       setLoading(true);
       try {
-        const [result, regions, vehicleTypes, vehicleClasses, enrollmentResult] = await Promise.all([
+        const [
+          result,
+          regions,
+          vehicleTypes,
+          vehicleClasses,
+          enrollmentResult,
+        ] = await Promise.all([
           fetchContractById(params.id, locale),
           fetchActiveRegions(locale),
           fetchActiveVehicleTypes(locale),
@@ -135,8 +148,12 @@ export function ContractDetailPage() {
         setEnrollments(enrollmentResult.enrollments);
 
         const regionMap = new Map(regions.map((item) => [item.id, item.name]));
-        const vehicleTypeMap = new Map(vehicleTypes.map((item) => [item.id, item.name]));
-        const vehicleClassMap = new Map(vehicleClasses.map((item) => [item.id, item.name]));
+        const vehicleTypeMap = new Map(
+          vehicleTypes.map((item) => [item.id, item.name]),
+        );
+        const vehicleClassMap = new Map(
+          vehicleClasses.map((item) => [item.id, item.name]),
+        );
 
         setScopeLabels({
           regions: nextContract.region_ids
@@ -202,8 +219,12 @@ export function ContractDetailPage() {
           <FileText className="size-5" />
         </div>
         <div className="space-y-1">
-          <p className={cn("text-lg", adminHeadingClass)}>{copy.toast.loadFailed.title}</p>
-          <p className="text-sm text-slate-500">{copy.toast.loadFailed.description}</p>
+          <p className={cn("text-lg", adminHeadingClass)}>
+            {copy.toast.loadFailed.title}
+          </p>
+          <p className="text-sm text-slate-500">
+            {copy.toast.loadFailed.description}
+          </p>
         </div>
         <Button
           variant="ghost"
@@ -245,7 +266,12 @@ export function ContractDetailPage() {
             </div>
             <div className="min-w-0 flex-1 space-y-2">
               <p className={adminEyebrowClass}>{copy.eyebrow}</p>
-              <h1 className={cn("text-2xl tracking-tight break-words sm:text-3xl", adminHeadingClass)}>
+              <h1
+                className={cn(
+                  "text-2xl tracking-tight break-words sm:text-3xl",
+                  adminHeadingClass,
+                )}
+              >
                 {contract.title}
               </h1>
               <p className="text-sm text-slate-500">
@@ -253,8 +279,13 @@ export function ContractDetailPage() {
                 {contract.created_by ? ` · ${contract.created_by.name}` : ""}
               </p>
               <div className="flex flex-wrap items-center gap-1.5 pt-1 sm:gap-2">
-                <Badge className={adminBadgeGoldClass}>{contract.reference_number}</Badge>
-                <Badge variant="outline" className={STATUS_BADGE_CLASS[contract.status]}>
+                <Badge className={adminBadgeGoldClass}>
+                  {contract.reference_number}
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className={STATUS_BADGE_CLASS[contract.status]}
+                >
                   {copy.status[contract.status]}
                 </Badge>
               </div>
@@ -274,7 +305,10 @@ export function ContractDetailPage() {
             ) : null}
 
             <div className="grid w-full grid-cols-1 gap-2.5 min-[420px]:grid-cols-3 sm:gap-3 lg:w-auto lg:min-w-[22rem]">
-              <QuickFact label={copy.columns.status} value={copy.status[contract.status]} />
+              <QuickFact
+                label={copy.columns.status}
+                value={copy.status[contract.status]}
+              />
               <QuickFact
                 label={copy.columns.created}
                 value={formatDate(contract.created_at, locale)}
@@ -290,7 +324,12 @@ export function ContractDetailPage() {
       </section>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-5">
-        <section className={cn(adminCardClass, "space-y-4 rounded-2xl p-4 sm:space-y-5 sm:p-5 lg:p-6")}>
+        <section
+          className={cn(
+            adminCardClass,
+            "space-y-4 rounded-2xl p-4 sm:space-y-5 sm:p-5 lg:p-6",
+          )}
+        >
           <SectionHeader
             icon={FileText}
             title={copy.detail.overview}
@@ -298,13 +337,20 @@ export function ContractDetailPage() {
           />
 
           <dl className="grid gap-2.5 sm:grid-cols-2 sm:gap-3">
-            <InfoTile label={copy.columns.reference} value={contract.reference_number} mono />
-            <InfoTile label={copy.columns.status} value={copy.status[contract.status]} />
+            <InfoTile
+              label={copy.columns.reference}
+              value={contract.reference_number}
+              mono
+            />
+            <InfoTile
+              label={copy.columns.status}
+              value={copy.status[contract.status]}
+            />
             <InfoTile
               label={copy.detail.billingInterval}
               value={copy.billingIntervals[contract.billing_interval]}
             />
-            {contract.billing_interval !== "per_trip" && contract.payment_terms_days ? (
+            {contract.payment_terms_days != null ? (
               <InfoTile
                 label={copy.detail.paymentTerms}
                 value={formatMessage(copy.detail.paymentTermsValue, {
@@ -319,19 +365,32 @@ export function ContractDetailPage() {
           </dl>
 
           <div className="rounded-xl border border-dashed border-slate-200 px-3.5 py-3">
-            <p className="text-xs font-medium text-slate-500">{copy.detail.term}</p>
-            <p className="mt-1 text-sm leading-relaxed text-slate-700">{copy.detail.customerTermHint}</p>
+            <p className="text-xs font-medium text-slate-500">
+              {copy.detail.term}
+            </p>
+            <p className="mt-1 text-sm leading-relaxed text-slate-700">
+              {contract.billing_interval === "at_contract_end"
+                ? copy.detail.atContractEndTermHint
+                : copy.detail.customerTermHint}
+            </p>
           </div>
 
           <div className="rounded-xl border border-dashed border-slate-200 px-3.5 py-3">
-            <p className="text-xs font-medium text-slate-500">{copy.detail.notes}</p>
+            <p className="text-xs font-medium text-slate-500">
+              {copy.detail.notes}
+            </p>
             <p className="mt-1 text-sm leading-relaxed text-slate-700">
               {contract.notes || "—"}
             </p>
           </div>
         </section>
 
-        <section className={cn(adminCardClass, "space-y-4 rounded-2xl p-4 sm:space-y-5 sm:p-5 lg:p-6")}>
+        <section
+          className={cn(
+            adminCardClass,
+            "space-y-4 rounded-2xl p-4 sm:space-y-5 sm:p-5 lg:p-6",
+          )}
+        >
           <SectionHeader
             icon={MapPin}
             title={copy.detail.scope}
@@ -361,7 +420,12 @@ export function ContractDetailPage() {
         </section>
       </div>
 
-      <section className={cn(adminCardClass, "space-y-4 rounded-2xl p-4 sm:space-y-5 sm:p-5 lg:p-6")}>
+      <section
+        className={cn(
+          adminCardClass,
+          "space-y-4 rounded-2xl p-4 sm:space-y-5 sm:p-5 lg:p-6",
+        )}
+      >
         <div className="flex flex-wrap items-start justify-between gap-3">
           <SectionHeader
             icon={FileText}
@@ -370,15 +434,21 @@ export function ContractDetailPage() {
           />
           {enrollments.length > 0 ? (
             <Badge variant="outline" className="text-xs text-slate-600">
-              {formatMessage(copy.detail.enrollmentCount, { count: enrollments.length })}
+              {formatMessage(copy.detail.enrollmentCount, {
+                count: enrollments.length,
+              })}
             </Badge>
           ) : null}
         </div>
 
         {enrollments.length === 0 ? (
           <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/70 px-4 py-8 text-center">
-            <p className="text-sm font-medium text-slate-700">{copy.detail.noEnrollments}</p>
-            <p className="mt-1 text-sm text-slate-500">{copy.detail.noEnrollmentsDescription}</p>
+            <p className="text-sm font-medium text-slate-700">
+              {copy.detail.noEnrollments}
+            </p>
+            <p className="mt-1 text-sm text-slate-500">
+              {copy.detail.noEnrollmentsDescription}
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto rounded-xl border border-slate-200/80 dark:border-border">
@@ -416,12 +486,23 @@ export function ContractDetailPage() {
                         : copy.detail.enrollmentStatusEnded;
 
                   return (
-                    <tr key={enrollment.id} className="hover:bg-slate-50/60 dark:hover:bg-white/[0.035]">
-                      <td className="px-4 py-3 text-center text-slate-500 tabular-nums">{index + 1}</td>
+                    <tr
+                      key={enrollment.id}
+                      className="hover:bg-slate-50/60 dark:hover:bg-white/[0.035]"
+                    >
+                      <td className="px-4 py-3 text-center text-slate-500 tabular-nums">
+                        {index + 1}
+                      </td>
                       <td className="px-4 py-3 align-top">
-                        <p className="font-medium text-slate-800">{enrollment.requester.name}</p>
-                        <p className="mt-0.5 text-xs text-slate-500">{enrollment.requester.email}</p>
-                        <p className="text-xs text-slate-500">{enrollment.requester.mobile_number}</p>
+                        <p className="font-medium text-slate-800">
+                          {enrollment.requester.name}
+                        </p>
+                        <p className="mt-0.5 text-xs text-slate-500">
+                          {enrollment.requester.email}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          {enrollment.requester.mobile_number}
+                        </p>
                       </td>
                       <td className="px-4 py-3 align-top text-slate-700">
                         {formatDate(enrollment.starts_at, locale)}
@@ -430,7 +511,12 @@ export function ContractDetailPage() {
                         {formatDate(enrollment.ends_at, locale)}
                       </td>
                       <td className="px-4 py-3 align-top">
-                        <Badge className={cn("text-xs", ENROLLMENT_STATUS_CLASS[periodStatus])}>
+                        <Badge
+                          className={cn(
+                            "text-xs",
+                            ENROLLMENT_STATUS_CLASS[periodStatus],
+                          )}
+                        >
                           {statusLabel}
                         </Badge>
                       </td>
@@ -490,9 +576,15 @@ function QuickFact({
 }) {
   return (
     <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2.5 sm:px-3.5 sm:py-3 dark:border-border dark:bg-white/[0.035]">
-      <p className="text-[11px] font-medium tracking-wide text-slate-400 uppercase">{label}</p>
-      <p className="mt-1 truncate text-sm font-semibold text-slate-800">{value}</p>
-      {hint ? <p className="mt-0.5 text-[11px] text-slate-400">{hint}</p> : null}
+      <p className="text-[11px] font-medium tracking-wide text-slate-400 uppercase">
+        {label}
+      </p>
+      <p className="mt-1 truncate text-sm font-semibold text-slate-800">
+        {value}
+      </p>
+      {hint ? (
+        <p className="mt-0.5 text-[11px] text-slate-400">{hint}</p>
+      ) : null}
     </div>
   );
 }
@@ -509,7 +601,12 @@ function InfoTile({
   return (
     <div className="rounded-xl border border-slate-100 bg-slate-50/60 px-3.5 py-3 dark:border-border dark:bg-white/[0.025]">
       <dt className="text-xs font-medium text-slate-500">{label}</dt>
-      <dd className={cn("mt-1 text-sm font-semibold text-slate-800", mono && "font-mono text-xs")}>
+      <dd
+        className={cn(
+          "mt-1 text-sm font-semibold text-slate-800",
+          mono && "font-mono text-xs",
+        )}
+      >
         {value}
       </dd>
     </div>
@@ -536,12 +633,13 @@ function ScopeGroup({
           </div>
           <div>
             <p className="text-sm font-semibold text-slate-800">{label}</p>
-            <p className="text-xs text-slate-500">
-              {count} selected
-            </p>
+            <p className="text-xs text-slate-500">{count} selected</p>
           </div>
         </div>
-        <Badge variant="outline" className="border-[#C9B87A]/30 bg-[#C9B87A]/10 text-[#8f7d45]">
+        <Badge
+          variant="outline"
+          className="border-[#C9B87A]/30 bg-[#C9B87A]/10 text-[#8f7d45]"
+        >
           {count}
         </Badge>
       </div>

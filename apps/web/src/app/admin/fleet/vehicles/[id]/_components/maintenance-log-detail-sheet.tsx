@@ -19,10 +19,7 @@ import { useLocale } from "@/components/shared/providers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  adminCardClass,
-  adminHeadingClass,
-} from "@/lib/admin-theme";
+import { adminCardClass, adminHeadingClass } from "@/lib/admin-theme";
 import { formatMessage, getAdminVehiclesMessages } from "@/translations";
 import {
   Sheet,
@@ -48,7 +45,13 @@ type MaintenanceLogDetailSheetProps = {
   onComplete?: (log: VehicleMaintenanceLog) => void;
 };
 
-function MaintenanceTypeGlyph({ slug, className }: { slug: string; className?: string }) {
+function MaintenanceTypeGlyph({
+  slug,
+  className,
+}: {
+  slug: string;
+  className?: string;
+}) {
   switch (slug) {
     case "scheduled":
       return <CalendarClock className={className} />;
@@ -84,8 +87,12 @@ function DetailRow({
         </span>
       ) : null}
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium tracking-wide text-slate-400 uppercase">{label}</p>
-        <p className="mt-1 text-sm font-medium text-slate-800 break-words dark:text-slate-200">{value}</p>
+        <p className="text-xs font-medium tracking-wide text-slate-400 uppercase">
+          {label}
+        </p>
+        <p className="mt-1 text-sm font-medium text-slate-800 break-words dark:text-slate-200">
+          {value}
+        </p>
       </div>
     </div>
   );
@@ -108,12 +115,16 @@ export function MaintenanceLogDetailSheet({
   if (!log) {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="right" className="w-full data-[side=right]:sm:max-w-lg" />
+        <SheetContent
+          side="right"
+          className="w-full data-[side=right]:sm:max-w-lg"
+        />
       </Sheet>
     );
   }
 
-  const canComplete = canWrite && (log.status === "open" || log.status === "in_progress");
+  const canComplete =
+    canWrite && (log.status === "open" || log.status === "in_progress");
   const notSet = sheetCopy.notSet;
 
   return (
@@ -123,23 +134,43 @@ export function MaintenanceLogDetailSheet({
         className="flex w-full flex-col gap-0 overflow-y-auto p-0 data-[side=right]:sm:max-w-lg"
       >
         <SheetHeader className="border-b border-slate-100 px-6 py-5 dark:border-border">
-          <SheetTitle className={adminHeadingClass}>{sheetCopy.title}</SheetTitle>
-          <SheetDescription className="leading-relaxed">{sheetCopy.description}</SheetDescription>
+          <SheetTitle className={adminHeadingClass}>
+            {sheetCopy.title}
+          </SheetTitle>
+          <SheetDescription className="leading-relaxed">
+            {sheetCopy.description}
+          </SheetDescription>
         </SheetHeader>
 
         <div className="space-y-4 px-6 py-5">
-          <Card className={cn(adminCardClass, "gap-0 overflow-hidden py-0 shadow-none ring-0")}>
+          <Card
+            className={cn(
+              adminCardClass,
+              "gap-0 overflow-hidden py-0 shadow-none ring-0",
+            )}
+          >
             <div className="flex items-start gap-3 border-b border-slate-100 bg-gradient-to-r from-[#1C3A34]/[0.04] to-transparent px-4 py-4 dark:border-border dark:from-[#C9B87A]/10">
               <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#1C3A34] text-white shadow-sm dark:bg-[#C9B87A] dark:text-[#151a21]">
-                <MaintenanceTypeGlyph slug={log.work_type.slug} className="size-5" />
+                <MaintenanceTypeGlyph
+                  slug={log.work_type.slug}
+                  className="size-5"
+                />
               </div>
               <div className="min-w-0 flex-1 space-y-2">
-                <p className="text-lg font-bold tracking-tight text-slate-900 dark:text-foreground">{log.title}</p>
+                <p className="text-lg font-bold tracking-tight text-slate-900 dark:text-foreground">
+                  {log.title}
+                </p>
                 <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="outline" className={maintenanceStatusClass(log.status)}>
+                  <Badge
+                    variant="outline"
+                    className={maintenanceStatusClass(log.status)}
+                  >
                     {detail.maintenanceStatuses[log.status]}
                   </Badge>
-                  <Badge variant="outline" className="border-slate-200 bg-white text-slate-600 dark:border-border dark:bg-white/[0.06] dark:text-slate-300">
+                  <Badge
+                    variant="outline"
+                    className="border-slate-200 bg-white text-slate-600 dark:border-border dark:bg-white/[0.06] dark:text-slate-300"
+                  >
                     {log.work_type.name}
                   </Badge>
                 </div>
@@ -175,6 +206,14 @@ export function MaintenanceLogDetailSheet({
                   }
                 />
                 <DetailRow
+                  icon={UserRound}
+                  label={maintenanceCopy.driverAtRequestLabel}
+                  value={
+                    log.driver_at_request?.name ??
+                    maintenanceCopy.driverAtRequestUnknown
+                  }
+                />
+                <DetailRow
                   icon={CalendarClock}
                   label={maintenanceCopy.loggedOnLabel}
                   value={formatMaintenanceDateTime(log.created_at, locale)}
@@ -195,24 +234,32 @@ export function MaintenanceLogDetailSheet({
                 <DetailRow
                   icon={CalendarClock}
                   label={maintenanceCopy.startedAt}
-                  value={formatMaintenanceDate(log.started_at, locale) ?? notSet}
+                  value={
+                    formatMaintenanceDate(log.started_at, locale) ?? notSet
+                  }
                 />
                 <DetailRow
                   icon={CheckCircle2}
                   label={sheetCopy.completedAt}
-                  value={formatMaintenanceDate(log.completed_at, locale) ?? notSet}
+                  value={
+                    formatMaintenanceDate(log.completed_at, locale) ?? notSet
+                  }
                 />
                 <DetailRow
                   icon={CalendarClock}
                   label={maintenanceCopy.nextDueAt}
-                  value={formatMaintenanceDate(log.next_due_at, locale) ?? notSet}
+                  value={
+                    formatMaintenanceDate(log.next_due_at, locale) ?? notSet
+                  }
                 />
                 <DetailRow
                   icon={Gauge}
                   label={sheetCopy.nextDueKm}
                   value={
                     log.next_due_km != null
-                      ? formatMessage(sheetCopy.kmValue, { count: String(log.next_due_km) })
+                      ? formatMessage(sheetCopy.kmValue, {
+                          count: String(log.next_due_km),
+                        })
                       : notSet
                   }
                 />
@@ -221,7 +268,9 @@ export function MaintenanceLogDetailSheet({
                   label={maintenanceCopy.odometer}
                   value={
                     log.odometer_km != null
-                      ? formatMessage(sheetCopy.kmValue, { count: String(log.odometer_km) })
+                      ? formatMessage(sheetCopy.kmValue, {
+                          count: String(log.odometer_km),
+                        })
                       : notSet
                   }
                 />
@@ -241,7 +290,9 @@ export function MaintenanceLogDetailSheet({
                   label={maintenanceCopy.cost}
                   value={
                     log.cost_amount != null
-                      ? formatMessage(sheetCopy.costValue, { amount: String(log.cost_amount) })
+                      ? formatMessage(sheetCopy.costValue, {
+                          amount: String(log.cost_amount),
+                        })
                       : notSet
                   }
                 />

@@ -3,9 +3,11 @@ import type {
   VehicleComplianceSummary,
   VehicleDriverOption,
   VehicleFuelLog,
+  VehicleFuelStats,
   VehicleFuelType,
   VehicleHistoryEvent,
   VehicleMaintenanceLog,
+  VehicleMaintenanceStats,
   VehicleMaintenanceStatus,
   VehicleStatus,
 } from "@smart-dispatch/types";
@@ -125,6 +127,25 @@ export async function fetchVehicleMaintenance(
   return unwrapPaginatedApiResponse<VehicleMaintenanceLog>(data);
 }
 
+export async function fetchFleetMaintenance(
+  params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    vehicle_id?: string;
+    status?: VehicleMaintenanceStatus;
+    locale?: string;
+  } = {},
+) {
+  const { data } = await apiClient.get("/api/vehicles/maintenance", { params });
+  return unwrapPaginatedApiResponse<VehicleMaintenanceLog>(data);
+}
+
+export async function fetchFleetMaintenanceStats() {
+  const { data } = await apiClient.get("/api/vehicles/maintenance/summary");
+  return unwrapApiResponse<{ summary: VehicleMaintenanceStats }>(data).summary;
+}
+
 export async function createVehicleMaintenance(id: string, input: CreateVehicleMaintenanceInput) {
   const { data } = await apiClient.post(`/api/vehicles/${id}/maintenance`, input);
   return unwrapApiResponse<{ maintenance_log: VehicleMaintenanceLog }>(data).maintenance_log;
@@ -145,6 +166,24 @@ export async function fetchVehicleFuelLogs(
 ) {
   const { data } = await apiClient.get(`/api/vehicles/${id}/fuel`, { params });
   return unwrapPaginatedApiResponse<VehicleFuelLog>(data);
+}
+
+export async function fetchFleetFuelLogs(
+  params: {
+    page?: number;
+    limit?: number;
+    search?: string;
+    vehicle_id?: string;
+    fuel_type?: VehicleFuelType;
+  } = {},
+) {
+  const { data } = await apiClient.get("/api/vehicles/fuel", { params });
+  return unwrapPaginatedApiResponse<VehicleFuelLog>(data);
+}
+
+export async function fetchFleetFuelStats() {
+  const { data } = await apiClient.get("/api/vehicles/fuel/summary");
+  return unwrapApiResponse<{ summary: VehicleFuelStats }>(data).summary;
 }
 
 export async function createVehicleFuelLog(id: string, input: CreateVehicleFuelLogInput) {

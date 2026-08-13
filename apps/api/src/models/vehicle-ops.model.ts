@@ -21,6 +21,7 @@ export type CreateVehicleMaintenanceInput = {
   nextDueAt?: Date | null;
   nextDueKm?: number | null;
   createdById?: string | null;
+  driverAtRequestId?: string | null;
 };
 
 export type UpdateVehicleMaintenanceInput = {
@@ -46,6 +47,15 @@ export type CreateVehicleHistoryEventInput = {
 };
 
 const maintenanceInclude = {
+  vehicle: {
+    select: {
+      id: true,
+      plateNumber: true,
+      make: true,
+      model: true,
+      status: true,
+    },
+  },
   workType: true,
   createdBy: {
     select: {
@@ -55,7 +65,51 @@ const maintenanceInclude = {
       lastName: true,
     },
   },
+  driverAtRequest: {
+    select: {
+      id: true,
+      firstName: true,
+      middleName: true,
+      lastName: true,
+    },
+  },
 } as const;
+
+export type VehicleMaintenanceLogFilters = {
+  vehicleId?: string;
+  status?: VehicleMaintenanceStatus;
+  search?: string;
+};
+
+function buildMaintenanceWhere(filters: VehicleMaintenanceLogFilters): Prisma.VehicleMaintenanceLogWhereInput {
+  const search = filters.search?.trim();
+
+  return {
+    ...(filters.vehicleId ? { vehicleId: filters.vehicleId } : {}),
+    ...(filters.status ? { status: filters.status } : {}),
+    ...(search
+      ? {
+          OR: [
+            { title: { contains: search, mode: "insensitive" } },
+            { description: { contains: search, mode: "insensitive" } },
+            { vendor: { contains: search, mode: "insensitive" } },
+            { vehicle: { plateNumber: { contains: search, mode: "insensitive" } } },
+            {
+              driverAtRequest: {
+                is: {
+                  OR: [
+                    { firstName: { contains: search, mode: "insensitive" } },
+                    { middleName: { contains: search, mode: "insensitive" } },
+                    { lastName: { contains: search, mode: "insensitive" } },
+                  ],
+                },
+              },
+            },
+          ],
+        }
+      : {}),
+  };
+}
 
 const historyInclude = {
   actor: {
@@ -135,6 +189,45 @@ export async function countVehicleMaintenanceLogs(
   });
 }
 
+export async function listAllVehicleMaintenanceLogs(
+  filters: VehicleMaintenanceLogFilters,
+  options?: { skip?: number; take?: number },
+) {
+  return prisma.vehicleMaintenanceLog.findMany({
+    where: buildMaintenanceWhere(filters),
+    include: maintenanceInclude,
+    orderBy: { createdAt: "desc" },
+    skip: options?.skip ?? 0,
+    take: options?.take ?? 20,
+  });
+}
+
+export async function countAllVehicleMaintenanceLogs(filters: VehicleMaintenanceLogFilters) {
+  return prisma.vehicleMaintenanceLog.count({ where: buildMaintenanceWhere(filters) });
+}
+
+export async function getFleetMaintenanceStats() {
+  const grouped = await prisma.vehicleMaintenanceLog.groupBy({
+    by: ["status"],
+    _count: { _all: true },
+  });
+
+  const stats = {
+    total: 0,
+    open: 0,
+    in_progress: 0,
+    completed: 0,
+    cancelled: 0,
+  };
+
+  for (const row of grouped) {
+    stats[row.status] = row._count._all;
+    stats.total += row._count._all;
+  }
+
+  return stats;
+}
+
 export async function findVehicleMaintenanceLogById(id: string) {
   return prisma.vehicleMaintenanceLog.findUnique({
     where: { id },
@@ -158,6 +251,7 @@ export async function createVehicleMaintenanceLog(input: CreateVehicleMaintenanc
       nextDueAt: input.nextDueAt ?? null,
       nextDueKm: input.nextDueKm ?? null,
       createdById: input.createdById ?? null,
+      driverAtRequestId: input.driverAtRequestId ?? null,
     },
     include: maintenanceInclude,
   });
@@ -207,6 +301,7 @@ export type CreateVehicleFuelLogInput = {
   source?: VehicleFuelLogSource;
   notes?: string | null;
   createdById?: string | null;
+  driverAtRefillId?: string | null;
 };
 
 export type UpdateVehicleFuelLogInput = {
@@ -221,6 +316,15 @@ export type UpdateVehicleFuelLogInput = {
 };
 
 const fuelInclude = {
+  vehicle: {
+    select: {
+      id: true,
+      plateNumber: true,
+      make: true,
+      model: true,
+      status: true,
+    },
+  },
   createdBy: {
     select: {
       id: true,
@@ -229,7 +333,51 @@ const fuelInclude = {
       lastName: true,
     },
   },
+  driverAtRefill: {
+    select: {
+      id: true,
+      firstName: true,
+      middleName: true,
+      lastName: true,
+    },
+  },
 } as const;
+
+export type VehicleFuelLogFilters = {
+  vehicleId?: string;
+  fuelType?: VehicleFuelType;
+  search?: string;
+};
+
+function buildFuelWhere(filters: VehicleFuelLogFilters): Prisma.VehicleFuelLogWhereInput {
+  const search = filters.search?.trim();
+
+  return {
+    ...(filters.vehicleId ? { vehicleId: filters.vehicleId } : {}),
+    ...(filters.fuelType ? { fuelType: filters.fuelType } : {}),
+    ...(search
+      ? {
+          OR: [
+            { stationName: { contains: search, mode: "insensitive" } },
+            { receiptReference: { contains: search, mode: "insensitive" } },
+            { notes: { contains: search, mode: "insensitive" } },
+            { vehicle: { plateNumber: { contains: search, mode: "insensitive" } } },
+            {
+              driverAtRefill: {
+                is: {
+                  OR: [
+                    { firstName: { contains: search, mode: "insensitive" } },
+                    { middleName: { contains: search, mode: "insensitive" } },
+                    { lastName: { contains: search, mode: "insensitive" } },
+                  ],
+                },
+              },
+            },
+          ],
+        }
+      : {}),
+  };
+}
 
 export async function listVehicleFuelLogs(
   vehicleId: string,
@@ -246,6 +394,40 @@ export async function listVehicleFuelLogs(
 
 export async function countVehicleFuelLogs(vehicleId: string) {
   return prisma.vehicleFuelLog.count({ where: { vehicleId } });
+}
+
+export async function listAllVehicleFuelLogs(
+  filters: VehicleFuelLogFilters,
+  options?: { skip?: number; take?: number },
+) {
+  return prisma.vehicleFuelLog.findMany({
+    where: buildFuelWhere(filters),
+    include: fuelInclude,
+    orderBy: [{ loggedAt: "desc" }, { createdAt: "desc" }],
+    skip: options?.skip ?? 0,
+    take: options?.take ?? 20,
+  });
+}
+
+export async function countAllVehicleFuelLogs(filters: VehicleFuelLogFilters) {
+  return prisma.vehicleFuelLog.count({ where: buildFuelWhere(filters) });
+}
+
+export async function getFleetFuelStats() {
+  const [totals, vehicles] = await Promise.all([
+    prisma.vehicleFuelLog.aggregate({
+      _count: { _all: true },
+      _sum: { quantityLiters: true, totalCost: true },
+    }),
+    prisma.vehicleFuelLog.groupBy({ by: ["vehicleId"] }),
+  ]);
+
+  return {
+    total_logs: totals._count._all,
+    vehicles_fueled: vehicles.length,
+    total_liters: Number(totals._sum.quantityLiters ?? 0),
+    total_cost: Number(totals._sum.totalCost ?? 0),
+  };
 }
 
 export async function findVehicleFuelLogById(id: string) {
@@ -269,6 +451,7 @@ export async function createVehicleFuelLog(input: CreateVehicleFuelLogInput) {
       source: input.source ?? VehicleFuelLogSource.manual,
       notes: input.notes?.trim() || null,
       createdById: input.createdById ?? null,
+      driverAtRefillId: input.driverAtRefillId ?? null,
     },
     include: fuelInclude,
   });
@@ -335,6 +518,24 @@ export async function buildVehicleFuelPreviousOdometerMap(vehicleId: string) {
   for (const entry of entries) {
     map.set(entry.id, previous);
     previous = entry.odometerKm;
+  }
+
+  return map;
+}
+
+export async function buildFleetFuelPreviousOdometerMap(vehicleIds: string[]) {
+  const entries = await prisma.vehicleFuelLog.findMany({
+    where: { vehicleId: { in: [...new Set(vehicleIds)] } },
+    orderBy: [{ vehicleId: "asc" }, { loggedAt: "asc" }, { createdAt: "asc" }],
+    select: { id: true, vehicleId: true, odometerKm: true },
+  });
+
+  const previousByVehicle = new Map<string, number>();
+  const map = new Map<string, number | null>();
+
+  for (const entry of entries) {
+    map.set(entry.id, previousByVehicle.get(entry.vehicleId) ?? null);
+    previousByVehicle.set(entry.vehicleId, entry.odometerKm);
   }
 
   return map;

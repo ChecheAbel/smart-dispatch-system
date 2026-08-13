@@ -47,12 +47,24 @@ function addUtcMonths(date: Date, months: number) {
 export function calculateEnrollmentEndDate(
   startsAt: Date,
   billingInterval: ContractBillingInterval,
+  scheduledEndsAt?: Date | null,
 ) {
   const start = getEnrollmentStartDate(startsAt);
 
   switch (billingInterval) {
     case "per_trip":
       return start;
+    case "at_contract_end": {
+      if (!scheduledEndsAt) {
+        throw new Error("Contract end date is required for at-contract-end billing.");
+      }
+
+      const end = toUtcDateOnly(scheduledEndsAt);
+      if (end.getTime() < start.getTime()) {
+        throw new Error("Contract end date must be on or after the start date.");
+      }
+      return end;
+    }
     case "monthly": {
       const end = addUtcMonths(start, 1);
       end.setUTCDate(end.getUTCDate() - 1);
@@ -152,7 +164,10 @@ const customerEnrollmentInclude = {
     },
   },
   invoices: {
-    where: { status: { not: "draft" as const } },
+    where: {
+      status: { not: "draft" as const },
+      issuedAt: { not: null },
+    },
     orderBy: { createdAt: "desc" as const },
     take: 1,
     select: customerEnrollmentInvoiceSelect,
@@ -198,6 +213,7 @@ async function attachUnlinkedInvoicesToEnrollments(
       contractId: { in: contractIds },
       contractEnrollmentId: null,
       status: { not: "draft" },
+      issuedAt: { not: null },
     },
     orderBy: { createdAt: "desc" },
     select: customerEnrollmentInvoiceSelect,
@@ -267,6 +283,24 @@ export async function countEnrollmentsForRequester(requesterUserId: string, sear
   return prisma.contractEnrollment.count({ where });
 }
 
+export async function getEnrollmentSummaryForRequester(requesterUserId: string) {
+  const baseWhere: Prisma.ContractEnrollmentWhereInput = { requesterUserId };
+  const [total, active, perTrip, inactive] = await Promise.all([
+    prisma.contractEnrollment.count({ where: baseWhere }),
+    prisma.contractEnrollment.count({
+      where: { ...baseWhere, contract: { status: "active" } },
+    }),
+    prisma.contractEnrollment.count({
+      where: { ...baseWhere, contract: { billingInterval: "per_trip" } },
+    }),
+    prisma.contractEnrollment.count({
+      where: { ...baseWhere, contract: { status: { in: ["expired", "cancelled"] } } },
+    }),
+  ]);
+
+  return { total, active, per_trip: perTrip, inactive };
+}
+
 export async function findEnrollmentForRequester(id: string, requesterUserId: string) {
   const enrollment = await prisma.contractEnrollment.findFirst({
     where: { id, requesterUserId },
@@ -304,6 +338,7 @@ export async function ensureContractEnrollment(input: {
   contractId: string;
   requesterUserId: string;
   scheduledAt?: Date | null;
+  scheduledEndsAt?: Date | null;
   acceptedAt?: Date;
   billingInterval: ContractBillingInterval;
   client?: Prisma.TransactionClient;
@@ -324,7 +359,11 @@ export async function ensureContractEnrollment(input: {
     return existing;
   }
 
-  const endsAt = calculateEnrollmentEndDate(startDate, input.billingInterval);
+  const endsAt = calculateEnrollmentEndDate(
+    startDate,
+    input.billingInterval,
+    input.scheduledEndsAt,
+  );
 
   return db.contractEnrollment.create({
     data: {

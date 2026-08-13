@@ -20,6 +20,7 @@ async function main() {
       contractId: true,
       requesterUserId: true,
       scheduledAt: true,
+      scheduledReturnAt: true,
       assignedAt: true,
       startedAt: true,
       createdAt: true,
@@ -57,6 +58,7 @@ async function main() {
       contractId: ride.contractId,
       requesterUserId: ride.requesterUserId,
       scheduledAt: ride.scheduledAt,
+      scheduledEndsAt: ride.scheduledReturnAt,
       acceptedAt,
       billingInterval: ride.contract.billingInterval as ContractBillingInterval,
     });

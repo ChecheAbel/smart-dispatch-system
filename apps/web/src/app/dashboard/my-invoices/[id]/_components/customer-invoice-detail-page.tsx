@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, FileText, Loader2, Receipt } from "lucide-react";
-import type { CustomerInvoice, CustomerVisibleInvoiceStatus } from "@smart-dispatch/types";
+import { ArrowLeft, FileText, Loader2, Receipt, WalletCards } from "lucide-react";
+import type { CustomerInvoice, CustomerVisibleInvoiceStatus, InvoicePaymentMethod } from "@smart-dispatch/types";
 import { useLocale, usePermission } from "@/components/shared/providers";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +41,11 @@ const STATUS_BADGE_CLASS: Record<CustomerVisibleInvoiceStatus, string> = {
   issued: adminBadgeGoldClass,
   paid: adminBadgeSuccessClass,
   void: "border-red-200 bg-red-50 text-red-700",
+};
+
+const PAYMENT_METHOD_LOGOS: Partial<Record<InvoicePaymentMethod, string>> = {
+  telebirr: "/providers/telebirr.webp",
+  cbe_birr: "/providers/cbe-birr.webp",
 };
 
 function formatDate(value: string | null, locale: string) {
@@ -237,6 +243,17 @@ export function CustomerInvoiceDetailPage() {
           {invoice.paid_at ? (
             <QuickFact label={copy.detail.paidTitle} value={formatDate(invoice.paid_at, locale)} />
           ) : null}
+          {invoice.status === "paid" ? (
+            <PaymentMethodFact
+              label={copy.detail.paymentMethodTitle}
+              method={invoice.payment_method}
+              value={
+                invoice.payment_method
+                  ? copy.detail.paymentMethods[invoice.payment_method]
+                  : copy.detail.paymentMethods.notRecorded
+              }
+            />
+          ) : null}
           {invoice.status === "void" && invoice.voided_at ? (
             <QuickFact
               label={copy.detail.voidedTitle}
@@ -345,6 +362,36 @@ function QuickFact({
         {value}
       </p>
       {hint ? <p className="mt-0.5 truncate text-[11px] text-slate-400">{hint}</p> : null}
+    </div>
+  );
+}
+
+function PaymentMethodFact({
+  label,
+  method,
+  value,
+}: {
+  label: string;
+  method: InvoicePaymentMethod | null;
+  value: string;
+}) {
+  const logo = method ? PAYMENT_METHOD_LOGOS[method] : undefined;
+
+  return (
+    <div className="rounded-xl border border-slate-100 bg-white/80 px-3 py-2.5 sm:px-3.5 sm:py-3 dark:border-border dark:bg-muted/35">
+      <p className="text-[11px] font-medium tracking-wide text-slate-400 uppercase">{label}</p>
+      <div className="mt-1.5 flex min-w-0 items-center gap-2.5">
+        {logo ? (
+          <span className="flex h-8 w-16 shrink-0 items-center justify-center rounded-md border border-slate-100 bg-white px-1.5 dark:border-border">
+            <Image src={logo} alt="" width={70} height={24} className="max-h-6 w-auto object-contain" />
+          </span>
+        ) : (
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-500 dark:bg-muted dark:text-muted-foreground">
+            <WalletCards className="size-4" />
+          </span>
+        )}
+        <p className="min-w-0 text-sm font-semibold text-slate-800 dark:text-foreground">{value}</p>
+      </div>
     </div>
   );
 }
