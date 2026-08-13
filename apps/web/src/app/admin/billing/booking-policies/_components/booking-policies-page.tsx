@@ -49,6 +49,8 @@ type BookingPolicyFormState = {
   freeCancellationHours: string;
   lateCancellationType: LateCancellationType;
   lateCancellationFee: string;
+  noShowType: LateCancellationType;
+  noShowFee: string;
   currency: string;
 };
 
@@ -60,6 +62,8 @@ const emptyForm: BookingPolicyFormState = {
   freeCancellationHours: "24",
   lateCancellationType: "none",
   lateCancellationFee: "",
+  noShowType: "none",
+  noShowFee: "",
   currency: "ETB",
 };
 
@@ -99,12 +103,19 @@ export function BookingPoliciesPage() {
   const [saving, setSaving] = useState(false);
 
   const isEdit = Boolean(policyId);
-  const showFeeField = form.lateCancellationType === "charge_fee";
+  const showLateFeeField = form.lateCancellationType === "charge_fee";
+  const showNoShowFeeField = form.noShowType === "charge_fee";
+  const showCurrencyField = showLateFeeField || showNoShowFeeField;
   const formDisabled = saving || loading || !canWrite;
 
   const lateCancellationItems = LATE_CANCELLATION_TYPES.map((type) => ({
     value: type,
     label: copy.lateCancellationTypes[type],
+  }));
+
+  const noShowItems = LATE_CANCELLATION_TYPES.map((type) => ({
+    value: type,
+    label: copy.noShowTypes[type],
   }));
 
   const currencyItems = CURRENCY_CODES.map((code) => ({
@@ -145,6 +156,8 @@ export function BookingPoliciesPage() {
               policy.late_cancellation_fee != null
                 ? String(policy.late_cancellation_fee)
                 : "",
+            noShowType: policy.no_show_type,
+            noShowFee: policy.no_show_fee != null ? String(policy.no_show_fee) : "",
             currency: policy.currency,
           });
         }
@@ -221,6 +234,13 @@ export function BookingPoliciesPage() {
       }
     }
 
+    if (form.noShowType === "charge_fee") {
+      const fee = form.noShowFee.trim();
+      if (!fee || !Number.isFinite(Number(fee)) || Number(fee) < 0) {
+        nextErrors.noShowFee = formCopy.errors.noShowFeeRequired;
+      }
+    }
+
     if (Object.keys(nextErrors).length > 0) {
       setFieldErrors(nextErrors);
       return;
@@ -236,6 +256,9 @@ export function BookingPoliciesPage() {
         form.lateCancellationType === "charge_fee"
           ? Number(form.lateCancellationFee.trim())
           : null,
+      no_show_type: form.noShowType,
+      no_show_fee:
+        form.noShowType === "charge_fee" ? Number(form.noShowFee.trim()) : null,
       currency: form.currency,
       is_active: true,
     };
@@ -255,6 +278,8 @@ export function BookingPoliciesPage() {
         lateCancellationType: policy.late_cancellation_type,
         lateCancellationFee:
           policy.late_cancellation_fee != null ? String(policy.late_cancellation_fee) : "",
+        noShowType: policy.no_show_type,
+        noShowFee: policy.no_show_fee != null ? String(policy.no_show_fee) : "",
         currency: policy.currency,
       });
 
@@ -438,67 +463,131 @@ export function BookingPoliciesPage() {
                   </p>
                 </div>
 
-                {showFeeField ? (
-                  <>
-                    <div className="space-y-2">
-                      <Label
-                        htmlFor="booking-policy-late-fee"
-                        className={fieldErrors.lateCancellationFee ? "text-red-700" : undefined}
-                      >
-                        {formCopy.lateCancellationFee}
-                      </Label>
-                      <Input
-                        id="booking-policy-late-fee"
-                        type="number"
-                        min={0}
-                        step="0.01"
-                        value={form.lateCancellationFee}
-                        onChange={(event) =>
-                          updateField("lateCancellationFee", event.target.value)
-                        }
-                        placeholder={formCopy.feePlaceholder}
-                        disabled={formDisabled}
-                        className={cn(
-                          fieldClassName,
-                          "w-full",
-                          fieldErrors.lateCancellationFee && fieldErrorClassName,
-                        )}
-                      />
-                      {fieldErrors.lateCancellationFee ? (
-                        <p className="text-xs text-red-600">{fieldErrors.lateCancellationFee}</p>
-                      ) : null}
-                    </div>
+                {showLateFeeField ? (
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="booking-policy-late-fee"
+                      className={fieldErrors.lateCancellationFee ? "text-red-700" : undefined}
+                    >
+                      {formCopy.lateCancellationFee}
+                    </Label>
+                    <Input
+                      id="booking-policy-late-fee"
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      value={form.lateCancellationFee}
+                      onChange={(event) =>
+                        updateField("lateCancellationFee", event.target.value)
+                      }
+                      placeholder={formCopy.feePlaceholder}
+                      disabled={formDisabled}
+                      className={cn(
+                        fieldClassName,
+                        "w-full",
+                        fieldErrors.lateCancellationFee && fieldErrorClassName,
+                      )}
+                    />
+                    {fieldErrors.lateCancellationFee ? (
+                      <p className="text-xs text-red-600">{fieldErrors.lateCancellationFee}</p>
+                    ) : null}
+                  </div>
+                ) : null}
 
-                    <div className="space-y-2">
-                      <Label htmlFor="booking-policy-currency">{formCopy.currency}</Label>
-                      <Select
-                        items={currencyItems}
-                        value={form.currency}
-                        onValueChange={(value) => updateField("currency", value ?? "ETB")}
-                        disabled={formDisabled}
+                <div className="space-y-2">
+                  <Label htmlFor="booking-policy-no-show-type">{formCopy.noShowType}</Label>
+                  <Select
+                    items={noShowItems}
+                    value={form.noShowType}
+                    onValueChange={(value) =>
+                      updateField("noShowType", (value ?? "none") as LateCancellationType)
+                    }
+                    disabled={formDisabled}
+                  >
+                    <SelectTrigger
+                      id="booking-policy-no-show-type"
+                      className={cn(fieldClassName, "w-full")}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent
+                      alignItemWithTrigger={false}
+                      align="start"
+                      className="w-(--anchor-width)"
+                    >
+                      <SelectGroup>
+                        {noShowItems.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-slate-500">
+                    {copy.noShowTypeHelp[form.noShowType]}
+                  </p>
+                </div>
+
+                {showNoShowFeeField ? (
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="booking-policy-no-show-fee"
+                      className={fieldErrors.noShowFee ? "text-red-700" : undefined}
+                    >
+                      {formCopy.noShowFee}
+                    </Label>
+                    <Input
+                      id="booking-policy-no-show-fee"
+                      type="number"
+                      min={0}
+                      step="0.01"
+                      value={form.noShowFee}
+                      onChange={(event) => updateField("noShowFee", event.target.value)}
+                      placeholder={formCopy.feePlaceholder}
+                      disabled={formDisabled}
+                      className={cn(
+                        fieldClassName,
+                        "w-full",
+                        fieldErrors.noShowFee && fieldErrorClassName,
+                      )}
+                    />
+                    {fieldErrors.noShowFee ? (
+                      <p className="text-xs text-red-600">{fieldErrors.noShowFee}</p>
+                    ) : null}
+                  </div>
+                ) : null}
+
+                {showCurrencyField ? (
+                  <div className="space-y-2">
+                    <Label htmlFor="booking-policy-currency">{formCopy.currency}</Label>
+                    <Select
+                      items={currencyItems}
+                      value={form.currency}
+                      onValueChange={(value) => updateField("currency", value ?? "ETB")}
+                      disabled={formDisabled}
+                    >
+                      <SelectTrigger
+                        id="booking-policy-currency"
+                        className={cn(fieldClassName, "w-full")}
                       >
-                        <SelectTrigger
-                          id="booking-policy-currency"
-                          className={cn(fieldClassName, "w-full")}
-                        >
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent
-                          alignItemWithTrigger={false}
-                          align="start"
-                          className="w-(--anchor-width)"
-                        >
-                          <SelectGroup>
-                            {currencyItems.map((item) => (
-                              <SelectItem key={item.value} value={item.value}>
-                                {item.label}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent
+                        alignItemWithTrigger={false}
+                        align="start"
+                        className="w-(--anchor-width)"
+                      >
+                        <SelectGroup>
+                          {currencyItems.map((item) => (
+                            <SelectItem key={item.value} value={item.value}>
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 ) : null}
               </div>
             </div>

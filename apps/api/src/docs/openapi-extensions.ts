@@ -54,6 +54,7 @@ const rideRequestStatusEnumDescriptions = {
   in_progress: "Trip has started",
   completed: "Trip finished",
   cancelled: "Trip was cancelled",
+  no_show: "Passenger did not show up for the trip",
 } as const;
 
 const rideRequestDriverStatusEnumDescriptions = {
@@ -61,11 +62,13 @@ const rideRequestDriverStatusEnumDescriptions = {
   in_progress: rideRequestStatusEnumDescriptions.in_progress,
   completed: rideRequestStatusEnumDescriptions.completed,
   cancelled: rideRequestStatusEnumDescriptions.cancelled,
+  no_show: rideRequestStatusEnumDescriptions.no_show,
 } as const;
 
 const rideRequestHistoryStatusEnumDescriptions = {
   completed: rideRequestStatusEnumDescriptions.completed,
   cancelled: rideRequestStatusEnumDescriptions.cancelled,
+  no_show: rideRequestStatusEnumDescriptions.no_show,
 } as const;
 
 const rideRequestUpcomingStatusEnumDescriptions = {
@@ -80,7 +83,7 @@ export const extensionParameters = {
     description: "Filter ride requests by lifecycle status.",
     schema: {
       type: "string",
-      enum: ["pending", "confirmed", "in_progress", "completed", "cancelled"],
+      enum: ["pending", "confirmed", "in_progress", "completed", "cancelled", "no_show"],
       "x-enumDescriptions": rideRequestStatusEnumDescriptions,
     },
   },
@@ -90,7 +93,7 @@ export const extensionParameters = {
     description: "Filter history trips by status. Omit to return both values.",
     schema: {
       type: "string",
-      enum: ["completed", "cancelled"],
+      enum: ["completed", "cancelled", "no_show"],
       "x-enumDescriptions": rideRequestHistoryStatusEnumDescriptions,
     },
   },
@@ -1054,28 +1057,28 @@ export const extensionSchemas = {
     properties: {
       action: {
         type: "string",
-        enum: ["start", "complete"],
+        enum: ["start", "complete", "no_show"],
         description:
-          "`start` moves a confirmed trip to `in_progress`. `complete` moves an in-progress trip to `completed`.",
+          "`start` moves a confirmed trip to `in_progress`. `complete` moves an in-progress trip to `completed`. `no_show` marks a confirmed or in-progress trip as passenger no-show and applies booking-policy billing.",
       },
     },
   },
   RideRequestStatus: {
     type: "string",
-    enum: ["pending", "confirmed", "in_progress", "completed", "cancelled"],
+    enum: ["pending", "confirmed", "in_progress", "completed", "cancelled", "no_show"],
     description: "Full ride request lifecycle status for admin APIs.",
     "x-enumDescriptions": rideRequestStatusEnumDescriptions,
   },
   RideRequestDriverStatus: {
     type: "string",
-    enum: ["confirmed", "in_progress", "completed", "cancelled"],
+    enum: ["confirmed", "in_progress", "completed", "cancelled", "no_show"],
     description:
       "Statuses exposed to drivers after admin review and assignment. `pending` is excluded.",
     "x-enumDescriptions": rideRequestDriverStatusEnumDescriptions,
   },
   RideRequestHistoryStatus: {
     type: "string",
-    enum: ["completed", "cancelled"],
+    enum: ["completed", "cancelled", "no_show"],
     description: "Past-trip status filter for driver history.",
     "x-enumDescriptions": rideRequestHistoryStatusEnumDescriptions,
   },
@@ -2855,7 +2858,7 @@ export const extensionPaths = {
       tags: ["Admin Ride Requests"],
       summary: "Update ride request status",
       description:
-        "Admin workflow actions: `confirm`, `reject`, `start`, or `complete`. Reject accepts optional `rejection_reason`. Triggers notification templates when configured.",
+        "Admin workflow actions: `confirm`, `reject`, `start`, `complete`, or `no_show`. Reject accepts optional `rejection_reason`. Triggers notification templates when configured.",
       security,
       parameters: [
         {
@@ -2876,7 +2879,7 @@ export const extensionPaths = {
               properties: {
                 action: {
                   type: "string",
-                  enum: ["confirm", "reject", "start", "complete"],
+                  enum: ["confirm", "reject", "start", "complete", "no_show"],
                 },
                 rejection_reason: { type: "string", nullable: true },
               },

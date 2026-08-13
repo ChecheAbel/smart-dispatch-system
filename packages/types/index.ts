@@ -827,7 +827,8 @@ export type RideRequestStatus =
   | "confirmed"
   | "in_progress"
   | "completed"
-  | "cancelled";
+  | "cancelled"
+  | "no_show";
 
 export type AdminDashboardDailyCount = {
   date: string;
@@ -1022,6 +1023,7 @@ export interface ContractFarePlanSummary {
 }
 
 export type LateCancellationType = "none" | "charge_fee" | "bill_as_trip";
+export type NoShowType = LateCancellationType;
 
 export interface BookingPolicyTranslation {
   locale: string;
@@ -1040,6 +1042,8 @@ export interface BookingPolicy {
   free_cancellation_hours: number;
   late_cancellation_type: LateCancellationType;
   late_cancellation_fee: number | null;
+  no_show_type: NoShowType;
+  no_show_fee: number | null;
   currency: string;
   is_active: boolean;
   created_at: string;
@@ -1056,6 +1060,8 @@ export interface ContractBookingPolicySummary {
   free_cancellation_hours: number;
   late_cancellation_type: LateCancellationType;
   late_cancellation_fee: number | null;
+  no_show_type: NoShowType;
+  no_show_fee: number | null;
   currency: string;
   is_active: boolean;
 }
@@ -1283,6 +1289,7 @@ export interface AdminRideRequest extends RideRequest {
   can_admin_start: boolean;
   start_blocked_by_schedule: boolean;
   can_admin_complete: boolean;
+  can_admin_no_show: boolean;
 }
 
 export interface ApiSuccessResponse<T> {

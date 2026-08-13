@@ -19,6 +19,8 @@ type DbBookingPolicy = {
   freeCancellationHours: number;
   lateCancellationType: LateCancellationType;
   lateCancellationFee: Prisma.Decimal | null;
+  noShowType: LateCancellationType;
+  noShowFee: Prisma.Decimal | null;
   currency: string;
   isActive: boolean;
   createdAt: Date;
@@ -66,6 +68,8 @@ export function toPublicBookingPolicy(
     free_cancellation_hours: policy.freeCancellationHours,
     late_cancellation_type: policy.lateCancellationType,
     late_cancellation_fee: decimalToNumber(policy.lateCancellationFee),
+    no_show_type: policy.noShowType,
+    no_show_fee: decimalToNumber(policy.noShowFee),
     currency: policy.currency,
     is_active: policy.isActive,
     created_at: policy.createdAt.toISOString(),
@@ -95,6 +99,8 @@ export function toPublicBookingPolicySummary(
     free_cancellation_hours: publicPolicy.free_cancellation_hours,
     late_cancellation_type: publicPolicy.late_cancellation_type,
     late_cancellation_fee: publicPolicy.late_cancellation_fee,
+    no_show_type: publicPolicy.no_show_type,
+    no_show_fee: publicPolicy.no_show_fee,
     currency: publicPolicy.currency,
     is_active: publicPolicy.is_active,
   };

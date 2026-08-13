@@ -18,6 +18,7 @@ const RIDE_REQUEST_STATUSES: RideRequestStatus[] = [
   "in_progress",
   "completed",
   "cancelled",
+  "no_show",
 ];
 
 const VEHICLE_STATUSES: VehicleStatus[] = ["active", "maintenance", "retired"];

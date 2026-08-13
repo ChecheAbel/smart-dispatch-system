@@ -62,6 +62,7 @@ const STATUS_COLORS: Record<RideRequestStatus, string> = {
   in_progress: "#1C3A34",
   completed: "#8FB5A8",
   cancelled: "#94a3b8",
+  no_show: "#ea580c",
 };
 
 const VEHICLE_STATUS_COLORS: Record<VehicleStatus, string> = {

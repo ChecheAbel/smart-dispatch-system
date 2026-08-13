@@ -1,6 +1,11 @@
 import type { RideRequestStatus } from "@smart-dispatch/types";
 
-export type AdminRideRequestStatusAction = "confirm" | "reject" | "start" | "complete";
+export type AdminRideRequestStatusAction =
+  | "confirm"
+  | "reject"
+  | "start"
+  | "complete"
+  | "no_show";
 
 const ADMIN_CONFIRM_FROM: RideRequestStatus[] = ["pending"];
 const ADMIN_REJECT_FROM: RideRequestStatus[] = ["pending", "confirmed"];
@@ -8,6 +13,7 @@ const ADMIN_ASSIGN_FROM: RideRequestStatus[] = ["pending", "confirmed"];
 const ADMIN_UNASSIGN_FROM: RideRequestStatus[] = ["pending", "confirmed"];
 const ADMIN_START_FROM: RideRequestStatus[] = ["confirmed"];
 const ADMIN_COMPLETE_FROM: RideRequestStatus[] = ["in_progress"];
+const ADMIN_NO_SHOW_FROM: RideRequestStatus[] = ["confirmed", "in_progress"];
 
 export function isRideRequestScheduledInFuture(scheduledAt: Date | null | undefined) {
   if (!scheduledAt) {
@@ -64,6 +70,13 @@ export function canAdminCompleteRideRequest(status: RideRequestStatus) {
   return ADMIN_COMPLETE_FROM.includes(status);
 }
 
+export function canAdminMarkNoShowRideRequest(
+  status: RideRequestStatus,
+  hasAssignment: boolean,
+) {
+  return ADMIN_NO_SHOW_FROM.includes(status) && hasAssignment;
+}
+
 export function getAdminRideRequestTargetStatus(
   action: AdminRideRequestStatusAction,
 ): RideRequestStatus {
@@ -76,6 +89,8 @@ export function getAdminRideRequestTargetStatus(
       return "in_progress";
     case "complete":
       return "completed";
+    case "no_show":
+      return "no_show";
   }
 }
 
@@ -110,10 +125,18 @@ export function validateAdminRideRequestStatusAction(
     return "Only in-progress ride requests can be completed.";
   }
 
+  if (action === "no_show") {
+    if (!ADMIN_NO_SHOW_FROM.includes(status) || !hasAssignment) {
+      return hasAssignment
+        ? "Only confirmed or in-progress trips can be marked as no-show."
+        : "Assign a vehicle and driver before marking a no-show.";
+    }
+  }
+
   return null;
 }
 
-export type DriverRideRequestStatusAction = "start" | "complete";
+export type DriverRideRequestStatusAction = "start" | "complete" | "no_show";
 
 export function validateDriverRideRequestStatusAction(
   status: RideRequestStatus,
@@ -134,6 +157,10 @@ export function validateDriverRideRequestStatusAction(
     return "Only in-progress ride requests can be completed.";
   }
 
+  if (action === "no_show" && !ADMIN_NO_SHOW_FROM.includes(status)) {
+    return "Only confirmed or in-progress trips can be marked as no-show.";
+  }
+
   return null;
 }
 
@@ -145,5 +172,7 @@ export function getDriverRideRequestTargetStatus(
       return "in_progress";
     case "complete":
       return "completed";
+    case "no_show":
+      return "no_show";
   }
 }

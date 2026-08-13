@@ -25,7 +25,15 @@ type AdminRideRequestReviewSheetProps = {
   onSuccess: (result?: { status: RideRequestStatus }) => void;
 };
 
-type SubmittingAction = "confirm" | "reject" | "assign" | "unassign" | "start" | "complete" | null;
+type SubmittingAction =
+  | "confirm"
+  | "reject"
+  | "assign"
+  | "unassign"
+  | "start"
+  | "complete"
+  | "no_show"
+  | null;
 
 export function AdminRideRequestReviewSheet({
   open,
@@ -51,11 +59,13 @@ export function AdminRideRequestReviewSheet({
   const sheetDescription =
     request?.status === "cancelled"
       ? copy.review.rejectedDescription
-      : request?.status === "completed"
-        ? copy.review.completedDescription
-        : request?.status === "in_progress"
-          ? copy.review.inProgressDescription
-          : copy.review.description;
+      : request?.status === "no_show"
+        ? copy.review.noShowDescription
+        : request?.status === "completed"
+          ? copy.review.completedDescription
+          : request?.status === "in_progress"
+            ? copy.review.inProgressDescription
+            : copy.review.description;
 
   const isBusy = Boolean(submitting);
 
@@ -233,6 +243,27 @@ export function AdminRideRequestReviewSheet({
     }
   }
 
+  async function handleNoShow() {
+    if (!request) {
+      return;
+    }
+
+    setSubmitting("no_show");
+
+    try {
+      const updated = await updateAdminRideRequestStatus(request.id, "no_show", { locale });
+      setRequest(updated);
+      showSuccessToast({ title: copy.toast.noShowMarked });
+      onSuccess({ status: updated.status });
+    } catch (error) {
+      showErrorToast({
+        title: error instanceof Error ? error.message : copy.toast.noShowFailed,
+      });
+    } finally {
+      setSubmitting(null);
+    }
+  }
+
   return (
     <>
       <RideRequestDetailSheet
@@ -287,6 +318,7 @@ export function AdminRideRequestReviewSheet({
                 canReject: request.can_admin_reject,
                 canStart: request.can_admin_start || request.start_blocked_by_schedule,
                 canComplete: request.can_admin_complete,
+                canNoShow: request.can_admin_no_show,
                 confirmLabel: copy.review.approve,
                 rejectLabel: copy.review.reject,
                 confirmingLabel: copy.review.approving,
@@ -295,6 +327,8 @@ export function AdminRideRequestReviewSheet({
                 startingLabel: copy.review.startingTrip,
                 completeLabel: copy.review.completeTrip,
                 completingLabel: copy.review.completingTrip,
+                noShowLabel: copy.review.markNoShow,
+                markingNoShowLabel: copy.review.markingNoShow,
                 startDisabled: request.start_blocked_by_schedule,
                 startDisabledTitle: request.start_blocked_by_schedule
                   ? request.scheduled_at
@@ -307,11 +341,13 @@ export function AdminRideRequestReviewSheet({
                 onReject: () => setRejectOpen(true),
                 onStart: () => void handleStart(),
                 onComplete: () => void handleComplete(),
+                onNoShow: () => void handleNoShow(),
                 submitting:
                   submitting === "confirm" ||
                   submitting === "reject" ||
                   submitting === "start" ||
-                  submitting === "complete"
+                  submitting === "complete" ||
+                  submitting === "no_show"
                     ? submitting
                     : null,
                 rejectButtonClassName:

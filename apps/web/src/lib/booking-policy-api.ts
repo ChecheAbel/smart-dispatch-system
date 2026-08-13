@@ -21,6 +21,8 @@ export type CreateBookingPolicyInput = {
   free_cancellation_hours?: number;
   late_cancellation_type?: LateCancellationType;
   late_cancellation_fee?: number | null;
+  no_show_type?: LateCancellationType;
+  no_show_fee?: number | null;
   currency?: string;
   is_active?: boolean;
 };

@@ -717,6 +717,8 @@ model BookingPolicy {
   freeCancellationHours  Int                   @default(0) @map("free_cancellation_hours")
   lateCancellationType   LateCancellationType  @default(none) @map("late_cancellation_type")
   lateCancellationFee    Decimal?              @map("late_cancellation_fee") @db.Decimal(12, 2)
+  noShowType             LateCancellationType  @default(none) @map("no_show_type")
+  noShowFee              Decimal?              @map("no_show_fee") @db.Decimal(12, 2)
   currency               String                @default("ETB") @db.VarChar(3)
   isActive               Boolean               @default(true) @map("is_active")
   createdAt              DateTime              @default(now()) @map("created_at") @db.Timestamptz
@@ -852,6 +854,7 @@ enum RideRequestStatus {
   in_progress
   completed
   cancelled
+  no_show
 
   @@map("ride_request_status")
 }

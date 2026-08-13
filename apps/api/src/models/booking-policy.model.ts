@@ -19,6 +19,8 @@ export type CreateBookingPolicyInput = {
   freeCancellationHours?: number;
   lateCancellationType?: LateCancellationType;
   lateCancellationFee?: number | null;
+  noShowType?: LateCancellationType;
+  noShowFee?: number | null;
   currency?: string;
   isActive?: boolean;
 };
@@ -30,6 +32,8 @@ export type UpdateBookingPolicyInput = {
   freeCancellationHours?: number;
   lateCancellationType?: LateCancellationType;
   lateCancellationFee?: number | null;
+  noShowType?: LateCancellationType;
+  noShowFee?: number | null;
   currency?: string;
   isActive?: boolean;
 };
@@ -83,6 +87,19 @@ async function ensureUniqueBookingPolicySlug(baseSlug: string) {
 
 export async function findBookingPolicyById(id: string) {
   return prisma.bookingPolicy.findUnique({ where: { id } });
+}
+
+/** Single system policy used by all contracts (settings page). */
+export async function findDefaultBookingPolicy() {
+  const bySlug = await prisma.bookingPolicy.findUnique({
+    where: { slug: "default-booking-policy" },
+  });
+  if (bySlug) return bySlug;
+
+  return prisma.bookingPolicy.findFirst({
+    where: { isActive: true },
+    orderBy: [{ createdAt: "asc" }],
+  });
 }
 
 export async function listBookingPolicies(
@@ -169,6 +186,8 @@ export async function createBookingPolicy(input: CreateBookingPolicyInput) {
       freeCancellationHours: normalizeHours(input.freeCancellationHours),
       lateCancellationType: input.lateCancellationType ?? LateCancellationType.none,
       lateCancellationFee: toOptionalDecimal(input.lateCancellationFee ?? null),
+      noShowType: input.noShowType ?? LateCancellationType.none,
+      noShowFee: toOptionalDecimal(input.noShowFee ?? null),
       currency: input.currency?.trim().toUpperCase() || "ETB",
       isActive: input.isActive ?? true,
     },
@@ -223,6 +242,9 @@ export async function updateBookingPolicy(id: string, input: UpdateBookingPolicy
         input.lateCancellationFee === undefined
           ? undefined
           : toOptionalDecimal(input.lateCancellationFee),
+      noShowType: input.noShowType,
+      noShowFee:
+        input.noShowFee === undefined ? undefined : toOptionalDecimal(input.noShowFee),
       currency: input.currency?.trim().toUpperCase(),
       isActive: input.isActive,
     },

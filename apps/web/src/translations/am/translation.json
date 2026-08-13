@@ -638,7 +638,8 @@
       "confirmed": "ተረጋግጧል",
       "in_progress": "በመስራት ላይ",
       "completed": "ተጠናቋል",
-      "cancelled": "ተሰርዟል"
+      "cancelled": "ተሰርዟል",
+      "no_show": "አልታየም"
     },
     "errors": {
       "pickupRequired": "የመውሰድ አድራሻ ያስፈልጋል።",
@@ -1819,6 +1820,9 @@
       "startingTrip": "በመጀመር ላይ…",
       "completeTrip": "ጉዞ አጠናቅቅ",
       "completingTrip": "በማጠናቀቅ ላይ…",
+      "markNoShow": "አለመታየት ምልክት አድርግ",
+      "markingNoShow": "በማስመዝገብ ላይ…",
+      "noShowDescription": "ይህ ጉዞ እንደ ተሳፋሪ አለመታየት ተመዝግቧል። ዝርዝሮቹን እና የተተገበረ ክፍያ ካለ ከታች ይመልከቱ።",
       "startTripScheduleBlocked": "ጉዞው ከታቀደው የመውሰድ ጊዜ ({time}) በኋላ ሊጀመር ይችላል።",
       "driverRating": {
         "section": "የአሽከርካሪ ደረጃ",
@@ -1882,12 +1886,14 @@
       "unassigned": "መመደብ ተወግዷል።",
       "started": "ጉዞ ተጀምሯል።",
       "completed": "ጉዞ ተጠናቋል።",
+      "noShowMarked": "ጉዞ እንደ አለመታየት ተመዝግቧል።",
       "approveFailed": "ጥያቄ ማረጋገጥ አልተሳካም።",
       "rejectFailed": "ጥያቄ መሰረዝ አልተሳካም።",
       "assignFailed": "ተሽከርካሪ መመደብ አልተሳካም።",
       "unassignFailed": "መመደብ ማስወገድ አልተሳካም።",
       "startFailed": "ጉዞ መጀመር አልተሳካም።",
-      "completeFailed": "ጉዞ ማጠናቀቅ አልተሳካም።"
+      "completeFailed": "ጉዞ ማጠናቀቅ አልተሳካም።",
+      "noShowFailed": "እንደ አለመታየት መመዝገብ አልተሳካም።"
     }
   },
   "adminUserRegistrations": {
@@ -4218,7 +4224,7 @@
   "adminBookingPolicies": {
     "eyebrow": "ክፍያ",
     "title": "የቦታ ማስያዝ ፖሊሲዎች",
-    "description": "ለቅድመ ማስታወሻ፣ ነፃ መሰረዝ እና ዘግይቶ መሰረዝ ቅጣቶች የቦታ ማስያዝ ደንቦችን ያዘጋጁ። እነዚህ ከውሎች ጋር ሊያያዙ ይችላሉ።",
+    "description": "ለውሎች ቅድመ ማስያዝ፣ መሰረዝ እና አለመታየት ደንቦችን ያዘጋጁ።",
     "readOnlyHint": "ይህን ፖሊሲ ማየት ይችላሉ፣ ነገር ግን ለውጦችን ለማስቀመጥ የመጻፍ ፈቃድ ያስፈልጋል።",
     "lateCancellationTypes": {
       "none": "ቅጣት የለም",
@@ -4229,6 +4235,16 @@
       "none": "ደንበኞች ከነፃ ጊዜ በኋላ ዘግይተው ሲሰርዙ ቅጣት አይደርስም።",
       "charge_fee": "ከነፃ ጊዜ በኋላ ሲሰረዝ ቋሚ ክፍያ ይጠይቃል።",
       "bill_as_trip": "ዘግይቶ መሰረዝ እንደሙሉ ጉዞ ይከፈላል።"
+    },
+    "noShowTypes": {
+      "none": "ቅጣት የለም",
+      "charge_fee": "ክፍያ ይጠይቃል",
+      "bill_as_trip": "እንደ ጉዞ ይከፈላል"
+    },
+    "noShowTypeHelp": {
+      "none": "ተሳፋሪ ካልታየ ክፍያ አይጠየቅም።",
+      "charge_fee": "ለአለመታየት ቋሚ ክፍያ ይጠየቃል።",
+      "bill_as_trip": "አለመታየት እንደሙሉ ጉዞ ይከፈላል።"
     },
     "accessDenied": {
       "eyebrow": "መዳረሻ ተከልክሏል",
@@ -4255,6 +4271,8 @@
       "freeCancellationHoursHint": "ቦታ ከመውሰድ በፊት ነፃ መሰረዝ የሚፈቀድበት ሰዓታት።",
       "lateCancellationType": "ዘግይቶ መሰረዝ ፖሊሲ",
       "lateCancellationFee": "ዘግይቶ መሰረዝ ክፍያ",
+      "noShowType": "አለመታየት ፖሊሲ",
+      "noShowFee": "የአለመታየት ክፍያ",
       "currency": "ምንዛሬ",
       "hoursPlaceholder": "ለምሳሌ 24",
       "maxHoursPlaceholder": "ለምሳሌ 720",
@@ -4274,6 +4292,7 @@
         "hoursInvalid": "ሰዓታት ያልተሌክሱ ቁጥር መሆን አለባቸው።",
         "maxLessThanMin": "ከፍተኛ ቅድመ ማስያዝ ከዝቅተኛው ያነሰ መሆን የለበትም።",
         "feeRequired": "ክፍያ ሲጠየቅ የዘግይቶ መሰረዝ ክፍያ ያስፈልጋል።",
+        "noShowFeeRequired": "ክፍያ ሲጠየቅ የአለመታየት ክፍያ ያስፈልጋል።",
         "createFailed": "የቦታ ማስያዝ ፖሊሲ መፍጠር አልተሳካም።",
         "updateFailed": "የቦታ ማስያዝ ፖሊሲ ማዘመን አልተሳካም።",
         "loadFailed": "የቦታ ማስያዝ ፖሊሲ መጫን አልተሳካም።"
@@ -4298,7 +4317,7 @@
       },
       "loadFailed": {
         "title": "መጫን አልተሳካም",
-        "description": "የቦታ ማስያዝ ፖሊሲውን መጫን አልተቻለም።"
+        "description": "የቦታ ማስያዝ ፖሊሲን መጫን አልተቻለም።"
       }
     }
   },

@@ -12,7 +12,7 @@ export type FetchAdminRideRequestsParams = {
   vehicleId?: string;
 };
 
-export type AdminRideRequestStatusAction = "confirm" | "reject" | "start" | "complete";
+export type AdminRideRequestStatusAction = "confirm" | "reject" | "start" | "complete" | "no_show";
 
 export async function fetchAdminRideRequests(params: FetchAdminRideRequestsParams = {}) {
   const { data } = await apiClient.get("/api/admin/ride-requests", {

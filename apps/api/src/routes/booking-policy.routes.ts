@@ -132,6 +132,8 @@ router.post("/", requirePermission("booking_policies.write"), async (req: Reques
     const freeCancellationHours = parseHours(req.body?.free_cancellation_hours);
     const lateCancellationType = parseLateCancellationType(req.body?.late_cancellation_type);
     const lateCancellationFee = parseMoney(req.body?.late_cancellation_fee);
+    const noShowType = parseLateCancellationType(req.body?.no_show_type);
+    const noShowFee = parseMoney(req.body?.no_show_fee);
     const isActive = parseBoolean(req.body?.is_active);
     const currency =
       typeof req.body?.currency === "string" ? req.body.currency.trim().toUpperCase() : undefined;
@@ -183,6 +185,14 @@ router.post("/", requirePermission("booking_policies.write"), async (req: Reques
       return sendError(res, "Late cancellation fee must be a non-negative number.", 400);
     }
 
+    if (req.body?.no_show_type !== undefined && !noShowType) {
+      return sendError(res, "Invalid no-show policy.", 400);
+    }
+
+    if (req.body?.no_show_fee !== undefined && noShowFee === undefined) {
+      return sendError(res, "No-show fee must be a non-negative number.", 400);
+    }
+
     const resolvedMin = minAdvanceBookingHours ?? 0;
     const resolvedMax = maxAdvanceBookingHours ?? 720;
     if (resolvedMax < resolvedMin) {
@@ -198,6 +208,11 @@ router.post("/", requirePermission("booking_policies.write"), async (req: Reques
       return sendError(res, "Late cancellation fee is required when charging a fee.", 400);
     }
 
+    const resolvedNoShowType = noShowType ?? LateCancellationType.none;
+    if (resolvedNoShowType === "charge_fee" && (noShowFee ?? null) === null) {
+      return sendError(res, "No-show fee is required when charging a fee.", 400);
+    }
+
     const policy = await createBookingPolicy({
       translations,
       minAdvanceBookingHours,
@@ -206,6 +221,8 @@ router.post("/", requirePermission("booking_policies.write"), async (req: Reques
       lateCancellationType: resolvedLateType,
       lateCancellationFee:
         resolvedLateType === "charge_fee" ? (lateCancellationFee ?? null) : null,
+      noShowType: resolvedNoShowType,
+      noShowFee: resolvedNoShowType === "charge_fee" ? (noShowFee ?? null) : null,
       currency,
       isActive: isActive ?? true,
     });
@@ -239,6 +256,8 @@ router.patch("/:id", requirePermission("booking_policies.write"), async (req: Re
     const freeCancellationHours = parseHours(req.body?.free_cancellation_hours);
     const lateCancellationType = parseLateCancellationType(req.body?.late_cancellation_type);
     const lateCancellationFee = parseMoney(req.body?.late_cancellation_fee);
+    const noShowType = parseLateCancellationType(req.body?.no_show_type);
+    const noShowFee = parseMoney(req.body?.no_show_fee);
     const isActive = parseBoolean(req.body?.is_active);
     const currency =
       typeof req.body?.currency === "string" ? req.body.currency.trim().toUpperCase() : undefined;
@@ -278,6 +297,14 @@ router.patch("/:id", requirePermission("booking_policies.write"), async (req: Re
       return sendError(res, "Late cancellation fee must be a non-negative number.", 400);
     }
 
+    if (req.body?.no_show_type !== undefined && !noShowType) {
+      return sendError(res, "Invalid no-show policy.", 400);
+    }
+
+    if (req.body?.no_show_fee !== undefined && noShowFee === undefined) {
+      return sendError(res, "No-show fee must be a non-negative number.", 400);
+    }
+
     const resolvedMin =
       minAdvanceBookingHours ?? existing.minAdvanceBookingHours;
     const resolvedMax =
@@ -305,6 +332,20 @@ router.patch("/:id", requirePermission("booking_policies.write"), async (req: Re
       return sendError(res, "Late cancellation fee is required when charging a fee.", 400);
     }
 
+    const resolvedNoShowType = noShowType ?? existing.noShowType;
+    const resolvedNoShowFee =
+      req.body?.no_show_fee !== undefined
+        ? noShowFee
+        : noShowFee === null
+          ? null
+          : existing.noShowFee
+            ? Number(existing.noShowFee)
+            : null;
+
+    if (resolvedNoShowType === "charge_fee" && resolvedNoShowFee === null) {
+      return sendError(res, "No-show fee is required when charging a fee.", 400);
+    }
+
     const policy = await updateBookingPolicy(req.params.id, {
       translations: translations.length ? translations : undefined,
       minAdvanceBookingHours,
@@ -315,6 +356,13 @@ router.patch("/:id", requirePermission("booking_policies.write"), async (req: Re
         resolvedLateType === "charge_fee"
           ? resolvedFee
           : lateCancellationType !== undefined || req.body?.late_cancellation_fee !== undefined
+            ? null
+            : undefined,
+      noShowType,
+      noShowFee:
+        resolvedNoShowType === "charge_fee"
+          ? resolvedNoShowFee
+          : noShowType !== undefined || req.body?.no_show_fee !== undefined
             ? null
             : undefined,
       currency,

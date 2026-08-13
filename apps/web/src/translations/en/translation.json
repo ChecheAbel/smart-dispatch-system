@@ -638,7 +638,8 @@
       "confirmed": "Confirmed",
       "in_progress": "In progress",
       "completed": "Completed",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "no_show": "No-show"
     },
     "errors": {
       "pickupRequired": "Pickup address is required.",
@@ -1819,6 +1820,9 @@
       "startingTrip": "Starting...",
       "completeTrip": "Complete trip",
       "completingTrip": "Completing...",
+      "markNoShow": "Mark no-show",
+      "markingNoShow": "Marking...",
+      "noShowDescription": "This trip was marked as a passenger no-show. Review details and any applied fee below.",
       "startTripScheduleBlocked": "Trip can start after the scheduled pickup time ({time}).",
       "driverRating": {
         "section": "Driver rating",
@@ -1882,12 +1886,14 @@
       "unassigned": "Assignment removed.",
       "started": "Trip started.",
       "completed": "Trip completed.",
+      "noShowMarked": "Trip marked as no-show.",
       "approveFailed": "Failed to approve ride request.",
       "rejectFailed": "Failed to reject ride request.",
       "assignFailed": "Failed to assign vehicle.",
       "unassignFailed": "Failed to remove assignment.",
       "startFailed": "Failed to start trip.",
-      "completeFailed": "Failed to complete trip."
+      "completeFailed": "Failed to complete trip.",
+      "noShowFailed": "Failed to mark trip as no-show."
     }
   },
   "adminUserRegistrations": {
@@ -4218,7 +4224,7 @@
   "adminBookingPolicies": {
     "eyebrow": "Billing",
     "title": "Booking Policies",
-    "description": "Configure booking rules for advance notice, free cancellation, and late cancellation penalties. These can be linked to contracts.",
+    "description": "Configure advance booking, cancellation, and no-show rules for contracts.",
     "readOnlyHint": "You can view this policy, but write access is required to save changes.",
     "lateCancellationTypes": {
       "none": "No penalty",
@@ -4229,6 +4235,16 @@
       "none": "Customers can cancel late without a penalty.",
       "charge_fee": "A fixed fee is charged when cancelling after the free window.",
       "bill_as_trip": "Late cancellations are billed as a full trip."
+    },
+    "noShowTypes": {
+      "none": "No penalty",
+      "charge_fee": "Charge fee",
+      "bill_as_trip": "Bill as trip"
+    },
+    "noShowTypeHelp": {
+      "none": "No charge when the passenger does not show up.",
+      "charge_fee": "A fixed fee is charged for a no-show.",
+      "bill_as_trip": "No-shows are billed as a full trip."
     },
     "accessDenied": {
       "eyebrow": "Access denied",
@@ -4255,6 +4271,8 @@
       "freeCancellationHoursHint": "Hours before pickup when cancellation is free.",
       "lateCancellationType": "Late cancellation policy",
       "lateCancellationFee": "Late cancellation fee",
+      "noShowType": "No-show policy",
+      "noShowFee": "No-show fee",
       "currency": "Currency",
       "hoursPlaceholder": "e.g. 24",
       "maxHoursPlaceholder": "e.g. 720",
@@ -4274,6 +4292,7 @@
         "hoursInvalid": "Hours must be a non-negative number.",
         "maxLessThanMin": "Maximum advance booking must be greater than or equal to the minimum.",
         "feeRequired": "Late cancellation fee is required when charging a fee.",
+        "noShowFeeRequired": "No-show fee is required when charging a fee.",
         "createFailed": "Failed to create booking policy.",
         "updateFailed": "Failed to update booking policy.",
         "loadFailed": "Failed to load booking policy."
@@ -4297,8 +4316,8 @@
         "description": "Could not delete the policy. It may still be linked to contracts."
       },
       "loadFailed": {
-        "title": "Load failed",
-        "description": "Could not load the booking policy."
+        "title": "Could not load",
+        "description": "Failed to load booking policy."
       }
     }
   },

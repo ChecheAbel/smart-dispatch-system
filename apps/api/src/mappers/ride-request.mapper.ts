@@ -27,6 +27,7 @@ import {
   canAdminAssignRideRequest,
   canAdminCompleteRideRequest,
   canAdminConfirmRideRequest,
+  canAdminMarkNoShowRideRequest,
   canAdminRejectRideRequest,
   canAdminStartRideRequest,
   canAdminUnassignRideRequest,
@@ -146,6 +147,8 @@ type DbRideRequest = {
       freeCancellationHours: number;
       lateCancellationType: "none" | "charge_fee" | "bill_as_trip";
       lateCancellationFee: Prisma.Decimal | null;
+      noShowType: "none" | "charge_fee" | "bill_as_trip";
+      noShowFee: Prisma.Decimal | null;
       currency: string;
     } | null;
   } | null;
@@ -454,5 +457,6 @@ export function toAdminRideRequest(
       rideRequest.scheduledAt,
     ),
     can_admin_complete: canAdminCompleteRideRequest(rideRequest.status),
+    can_admin_no_show: canAdminMarkNoShowRideRequest(rideRequest.status, hasAssignment),
   };
 }

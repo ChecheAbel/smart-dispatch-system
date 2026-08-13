@@ -56,6 +56,8 @@ const contractInclude = {
       freeCancellationHours: true,
       lateCancellationType: true,
       lateCancellationFee: true,
+      noShowType: true,
+      noShowFee: true,
       currency: true,
       isActive: true,
     },

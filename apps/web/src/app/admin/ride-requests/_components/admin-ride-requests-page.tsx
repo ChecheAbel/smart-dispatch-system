@@ -56,6 +56,7 @@ const STATUS_FILTER_OPTIONS: RideRequestStatus[] = [
   "in_progress",
   "completed",
   "cancelled",
+  "no_show",
 ];
 
 function formatRequesterName(requester?: RideRequestRequesterSummary) {

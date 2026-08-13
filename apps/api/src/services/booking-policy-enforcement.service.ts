@@ -8,6 +8,8 @@ export type BookingPolicyRules = {
   freeCancellationHours: number;
   lateCancellationType: LateCancellationType;
   lateCancellationFee: number | null | { toNumber: () => number };
+  noShowType?: LateCancellationType;
+  noShowFee?: number | null | { toNumber: () => number };
   currency: string;
 } | null | undefined;
 
@@ -176,6 +178,31 @@ export function canCancelRideRequestWithPolicy(input: {
   now?: Date;
 }) {
   return evaluateRideRequestCancellation(input).allowed;
+}
+
+export type NoShowBilling = {
+  type: LateCancellationType;
+  fee: number | null;
+  currency: string | null;
+};
+
+/**
+ * Resolves no-show penalty from an active contract booking policy.
+ * Without an active policy, no charge applies.
+ */
+export function evaluateNoShowBilling(policy?: BookingPolicyRules): NoShowBilling {
+  if (!isActivePolicy(policy)) {
+    return { type: "none", fee: null, currency: null };
+  }
+
+  const type = policy.noShowType ?? "none";
+  const fee = toFeeNumber(policy.noShowFee);
+
+  return {
+    type,
+    fee: type === "charge_fee" ? fee : null,
+    currency: type === "none" ? null : policy.currency,
+  };
 }
 
 export function getEffectiveCancelDeadline(input: {

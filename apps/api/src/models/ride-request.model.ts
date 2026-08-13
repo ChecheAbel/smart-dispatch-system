@@ -10,7 +10,7 @@ import {
 } from "../services/trip-billing.service";
 import { tryAutoInvoiceCompletedTrip } from "../services/invoice-automation.service";
 import { canEditRideRequest } from "../services/ride-request-policy.service";
-import { evaluateRideRequestCancellation } from "../services/booking-policy-enforcement.service";
+import { evaluateRideRequestCancellation, evaluateNoShowBilling } from "../services/booking-policy-enforcement.service";
 
 export type CreateRideRequestInput = {
   requesterUserId: string;
@@ -118,6 +118,8 @@ const rideRequestInclude = {
           freeCancellationHours: true,
           lateCancellationType: true,
           lateCancellationFee: true,
+          noShowType: true,
+          noShowFee: true,
           currency: true,
         },
       },
@@ -222,7 +224,7 @@ function buildRideRequestDriverWhere(
     if (filters.status) {
       where.status = filters.status;
     } else {
-      where.status = { in: ["completed", "cancelled"] };
+      where.status = { in: ["completed", "cancelled", "no_show"] };
     }
   } else if (filters.status) {
     where.status = filters.status;
@@ -512,6 +514,10 @@ export async function updateRideRequestStatusAdmin(
     return null;
   }
 
+  if (status === "no_show") {
+    return markRideRequestNoShow(existing);
+  }
+
   const data: Prisma.RideRequestUpdateInput = { status };
 
   if (status === "cancelled") {
@@ -571,6 +577,84 @@ export async function updateRideRequestStatusAdmin(
 
     return updated;
   });
+}
+
+async function markRideRequestNoShow(
+  existing: NonNullable<Awaited<ReturnType<typeof findRideRequestById>>>,
+) {
+  const billing = evaluateNoShowBilling(existing.contract?.bookingPolicy);
+  const updateData: Prisma.RideRequestUncheckedUpdateInput = {
+    status: "no_show",
+    completedAt: new Date(),
+    assignedVehicleId: null,
+    assignedDriverUserId: null,
+    assignedAt: null,
+    rejectionReason: "Passenger no-show",
+  };
+
+  if (billing.type === "charge_fee" && billing.fee != null) {
+    updateData.billableAmount = new Prisma.Decimal(billing.fee);
+    updateData.billableCurrency = billing.currency ?? "ETB";
+    const feeNote = `No-show fee applied: ${billing.fee} ${billing.currency ?? "ETB"}.`;
+    updateData.notes = existing.notes ? `${existing.notes}\n${feeNote}` : feeNote;
+  }
+
+  if (billing.type === "bill_as_trip" && existing.contractId) {
+    try {
+      const snapshot = await computeTripBillingSnapshot(
+        existing,
+        existing.contract?.farePlanId ?? null,
+      );
+      if (snapshot) {
+        updateData.farePlanId = snapshot.farePlanId;
+        updateData.distanceKm = snapshot.distanceKm;
+        updateData.durationMinutes = snapshot.durationMinutes;
+        updateData.billableAmount = new Prisma.Decimal(snapshot.billableAmount);
+        updateData.billableCurrency = snapshot.billableCurrency;
+        const tripNote = `No-show billed as trip: ${snapshot.billableAmount} ${snapshot.billableCurrency}.`;
+        updateData.notes = existing.notes ? `${existing.notes}\n${tripNote}` : tripNote;
+      }
+    } catch {
+      // Fare plan may be missing; still allow no-show without billing snapshot.
+    }
+  }
+
+  const shouldEnsureEnrollment = Boolean(existing.contractId);
+
+  const updated = await prisma.$transaction(async (tx) => {
+    if (shouldEnsureEnrollment && existing.contractId) {
+      const contract = await findActiveContractById(existing.contractId);
+      if (!contract) {
+        throw new Error("Linked contract is not available.");
+      }
+
+      await ensureContractEnrollment({
+        contractId: existing.contractId,
+        requesterUserId: existing.requesterUserId,
+        scheduledAt: existing.scheduledAt,
+        scheduledEndsAt: existing.scheduledReturnAt,
+        acceptedAt: new Date(),
+        billingInterval: contract.billingInterval as ContractBillingInterval,
+        client: tx,
+      });
+    }
+
+    return tx.rideRequest.update({
+      where: { id: existing.id },
+      data: updateData,
+      include: rideRequestAdminInclude,
+    });
+  });
+
+  if (
+    updated.contractId &&
+    updated.billableAmount != null &&
+    Number(updated.billableAmount) > 0
+  ) {
+    await tryAutoInvoiceCompletedTrip(updated.id);
+  }
+
+  return updated;
 }
 
 export async function assignRideRequestAdmin(id: string, vehicleId: string) {
@@ -670,6 +754,7 @@ export async function cancelRideRequestForUser(id: string, requesterUserId: stri
 
   const updateData: Prisma.RideRequestUncheckedUpdateInput = {
     status: "cancelled",
+    completedAt: evaluation.isLateCancellation ? new Date() : undefined,
   };
 
   if (evaluation.isLateCancellation) {

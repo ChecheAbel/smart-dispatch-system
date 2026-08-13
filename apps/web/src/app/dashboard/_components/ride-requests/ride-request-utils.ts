@@ -264,6 +264,8 @@ export function statusBadgeClass(status: RideRequestStatus) {
       return "border-emerald-200 bg-emerald-50 text-emerald-800";
     case "cancelled":
       return "border-slate-200 bg-slate-50 text-slate-600";
+    case "no_show":
+      return "border-orange-200 bg-orange-50 text-orange-800";
     default:
       return "";
   }

@@ -39,6 +39,7 @@ const RIDE_REQUEST_STATUSES = new Set<RideRequestStatus>([
   "in_progress",
   "completed",
   "cancelled",
+  "no_show",
 ]);
 
 const ADMIN_STATUS_ACTIONS = new Set<AdminRideRequestStatusAction>([
@@ -46,6 +47,7 @@ const ADMIN_STATUS_ACTIONS = new Set<AdminRideRequestStatusAction>([
   "reject",
   "start",
   "complete",
+  "no_show",
 ]);
 
 router.use(authenticate, authorize("admin"));
@@ -88,6 +90,8 @@ function getStatusActionSummary(action: AdminRideRequestStatusAction) {
       return "Ride request trip started by admin";
     case "complete":
       return "Ride request trip completed by admin";
+    case "no_show":
+      return "Ride request marked as passenger no-show by admin";
   }
 }
 
@@ -235,6 +239,8 @@ router.post(
         queueRideRequestNotifications("started", updated.id);
       } else if (action === "complete") {
         queueRideRequestNotifications("completed", updated.id);
+      } else if (action === "no_show") {
+        queueRideRequestNotifications("cancelled", updated.id);
       }
 
       syncDriverUpcomingTripsAfterChange({

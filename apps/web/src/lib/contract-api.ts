@@ -14,7 +14,6 @@ export type CreateContractInput = {
   title: string;
   status?: ContractStatus;
   fare_plan_id?: string | null;
-  booking_policy_id?: string | null;
   notes?: string | null;
   billing_interval?: ContractBillingInterval;
   payment_terms_days?: number | null;

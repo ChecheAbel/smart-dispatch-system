@@ -69,6 +69,10 @@ export function toPublicContract(contract: DbContract, options?: { locale?: stri
           late_cancellation_fee: contract.bookingPolicy.lateCancellationFee
             ? Number(contract.bookingPolicy.lateCancellationFee)
             : null,
+          no_show_type: contract.bookingPolicy.noShowType,
+          no_show_fee: contract.bookingPolicy.noShowFee
+            ? Number(contract.bookingPolicy.noShowFee)
+            : null,
           currency: contract.bookingPolicy.currency,
           is_active: contract.bookingPolicy.isActive,
         }

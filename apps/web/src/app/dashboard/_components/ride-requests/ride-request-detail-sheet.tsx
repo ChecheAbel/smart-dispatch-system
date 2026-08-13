@@ -60,6 +60,7 @@ type RideRequestManageActions = {
   canReject: boolean;
   canStart?: boolean;
   canComplete?: boolean;
+  canNoShow?: boolean;
   confirmLabel: string;
   rejectLabel: string;
   confirmingLabel: string;
@@ -68,11 +69,14 @@ type RideRequestManageActions = {
   startingLabel?: string;
   completeLabel?: string;
   completingLabel?: string;
+  noShowLabel?: string;
+  markingNoShowLabel?: string;
   onConfirm: () => void;
   onReject: () => void;
   onStart?: () => void;
   onComplete?: () => void;
-  submitting: "confirm" | "reject" | "start" | "complete" | null;
+  onNoShow?: () => void;
+  submitting: "confirm" | "reject" | "start" | "complete" | "no_show" | null;
   startDisabled?: boolean;
   startDisabledTitle?: string;
   rejectButtonClassName?: string;
@@ -647,7 +651,8 @@ export function RideRequestDetailSheet({
         (manageActions.canConfirm ||
           manageActions.canReject ||
           manageActions.canStart ||
-          manageActions.canComplete) ? (
+          manageActions.canComplete ||
+          manageActions.canNoShow) ? (
           <SheetFooter className="shrink-0 border-t border-slate-200/80 px-6 py-4 sm:flex-row sm:justify-end">
             {manageActions.canReject ? (
               <Button
@@ -663,6 +668,19 @@ export function RideRequestDetailSheet({
                 {manageActions.submitting === "reject"
                   ? manageActions.rejectingLabel
                   : manageActions.rejectLabel}
+              </Button>
+            ) : null}
+            {manageActions.canNoShow ? (
+              <Button
+                type="button"
+                variant="outline"
+                className="border-orange-300 text-orange-800 hover:bg-orange-50 hover:text-orange-900"
+                disabled={isSubmitting}
+                onClick={manageActions.onNoShow}
+              >
+                {manageActions.submitting === "no_show"
+                  ? manageActions.markingNoShowLabel
+                  : manageActions.noShowLabel}
               </Button>
             ) : null}
             {manageActions.canConfirm ? (

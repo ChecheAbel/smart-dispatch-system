@@ -81,8 +81,17 @@ export async function generateInvoiceForEnrollment(options: GenerateInvoiceOptio
 
   for (const trip of trips) {
     const snapshot =
-      (await ensureTripBillingSnapshot(trip.id)) ??
-      (await computeTripBillingSnapshot(trip, contract.farePlanId));
+      trip.billableAmount != null && trip.billableCurrency
+        ? {
+            farePlanId: trip.farePlanId,
+            distanceKm: trip.distanceKm != null ? Number(trip.distanceKm) : null,
+            durationMinutes: trip.durationMinutes,
+            billableAmount: Number(trip.billableAmount),
+            billableCurrency: trip.billableCurrency,
+            pricingSnapshot: null,
+          }
+        : ((await ensureTripBillingSnapshot(trip.id)) ??
+          (await computeTripBillingSnapshot(trip, contract.farePlanId)));
 
     if (!snapshot) {
       throw new Error("FARE_PLAN_NOT_FOUND");
@@ -144,7 +153,13 @@ export async function generateInvoiceForTrip(rideRequestId: string, options?: { 
     },
   });
 
-  if (!ride || ride.status !== "completed" || !ride.contractId || !ride.contract) {
+  if (
+    !ride ||
+    !ride.contractId ||
+    !ride.contract ||
+    !["completed", "no_show", "cancelled"].includes(ride.status) ||
+    ride.billableAmount == null
+  ) {
     throw new Error("TRIP_NOT_BILLABLE");
   }
 
@@ -158,14 +173,23 @@ export async function generateInvoiceForTrip(rideRequestId: string, options?: { 
   }
 
   const snapshot =
-    (await ensureTripBillingSnapshot(ride.id)) ??
-    (await computeTripBillingSnapshot(ride, contract.farePlanId));
+    ride.billableAmount != null && ride.billableCurrency
+      ? {
+          farePlanId: ride.farePlanId,
+          distanceKm: ride.distanceKm != null ? Number(ride.distanceKm) : null,
+          durationMinutes: ride.durationMinutes,
+          billableAmount: Number(ride.billableAmount),
+          billableCurrency: ride.billableCurrency,
+          pricingSnapshot: null as null,
+        }
+      : ((await ensureTripBillingSnapshot(ride.id)) ??
+        (await computeTripBillingSnapshot(ride, contract.farePlanId)));
 
   if (!snapshot) {
     throw new Error("FARE_PLAN_NOT_FOUND");
   }
 
-  const completedDay = ride.completedAt ?? new Date();
+  const completedDay = ride.completedAt ?? ride.updatedAt ?? new Date();
   const periodStart = new Date(
     Date.UTC(completedDay.getUTCFullYear(), completedDay.getUTCMonth(), completedDay.getUTCDate()),
   );

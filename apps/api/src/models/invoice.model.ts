@@ -365,28 +365,51 @@ export async function findUnbilledContractTrips(input: {
   periodStart: Date;
   periodEnd: Date;
 }) {
+  const periodEndInclusive = endOfUtcDay(input.periodEnd);
+
   return prisma.rideRequest.findMany({
     where: {
       contractId: input.contractId,
       requesterUserId: input.requesterUserId,
-      status: "completed",
-      completedAt: {
-        gte: input.periodStart,
-        lte: new Date(
-          Date.UTC(
-            input.periodEnd.getUTCFullYear(),
-            input.periodEnd.getUTCMonth(),
-            input.periodEnd.getUTCDate(),
-            23,
-            59,
-            59,
-            999,
-          ),
-        ),
-      },
       invoiceLineItem: null,
+      OR: [
+        {
+          status: "completed",
+          completedAt: {
+            gte: input.periodStart,
+            lte: periodEndInclusive,
+          },
+        },
+        {
+          status: "no_show",
+          billableAmount: { not: null },
+          completedAt: {
+            gte: input.periodStart,
+            lte: periodEndInclusive,
+          },
+        },
+        {
+          status: "cancelled",
+          billableAmount: { not: null },
+          OR: [
+            {
+              completedAt: {
+                gte: input.periodStart,
+                lte: periodEndInclusive,
+              },
+            },
+            {
+              completedAt: null,
+              updatedAt: {
+                gte: input.periodStart,
+                lte: periodEndInclusive,
+              },
+            },
+          ],
+        },
+      ],
     },
-    orderBy: [{ completedAt: "asc" }, { createdAt: "asc" }],
+    orderBy: [{ completedAt: "asc" }, { updatedAt: "asc" }, { createdAt: "asc" }],
   });
 }
 
@@ -482,7 +505,8 @@ export async function findUnbilledPerTripRides(rideRequestId?: string) {
   return prisma.rideRequest.findMany({
     where: {
       ...(rideRequestId ? { id: rideRequestId } : {}),
-      status: "completed",
+      status: { in: ["completed", "no_show", "cancelled"] },
+      billableAmount: { not: null },
       contractId: { not: null },
       invoiceLineItem: null,
       contract: {

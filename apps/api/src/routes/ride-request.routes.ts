@@ -84,6 +84,7 @@ const RIDE_REQUEST_STATUSES = new Set<RideRequestStatus>([
   "in_progress",
   "completed",
   "cancelled",
+  "no_show",
 ]);
 
 router.use(authenticate);
@@ -345,10 +346,10 @@ router.get(
       const pagination = parsePaginationQuery(req.query);
       const status = parseStatusFilter(req.query.status);
 
-      if (status && status !== "completed" && status !== "cancelled") {
+      if (status && status !== "completed" && status !== "cancelled" && status !== "no_show") {
         return sendError(
           res,
-          "History trips can only be filtered by completed or cancelled status.",
+          "History trips can only be filtered by completed, cancelled, or no-show status.",
           400,
         );
       }
@@ -866,6 +867,7 @@ router.get(
 const DRIVER_STATUS_ACTIONS = new Set<DriverRideRequestStatusAction>([
   "start",
   "complete",
+  "no_show",
 ]);
 
 function parseDriverStatusAction(value: unknown): DriverRideRequestStatusAction | null {
