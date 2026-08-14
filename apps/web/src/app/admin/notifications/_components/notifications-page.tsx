@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Bell, Check, Mail, MessageSquare } from "lucide-react";
+import { Bell, Check, Mail, MessageSquare, Smartphone } from "lucide-react";
 import { useAuth, useLocale } from "@/components/shared/providers";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import {
@@ -14,12 +14,21 @@ import { PERMISSIONS } from "@/lib/permissions";
 import { getAdminNotificationsMessages } from "@/translations";
 import { cn } from "@/lib/utils";
 import { EmailNotificationSettings } from "./email-notification-settings";
+import { PushNotificationSettings } from "./push-notification-settings";
 import { SmsNotificationSettings } from "./sms-notification-settings";
 
-type NotificationTab = "email" | "sms";
+type NotificationTab = "email" | "sms" | "push";
 
 function parseTab(value: string | null): NotificationTab {
-  return value === "sms" ? "sms" : "email";
+  if (value === "sms") {
+    return "sms";
+  }
+
+  if (value === "push") {
+    return "push";
+  }
+
+  return "email";
 }
 
 type ChannelOption = {
@@ -76,6 +85,12 @@ export function NotificationsPage() {
       description: copy.channels.sms.description,
       icon: MessageSquare,
     },
+    {
+      id: "push",
+      title: copy.channels.push.title,
+      description: copy.channels.push.description,
+      icon: Smartphone,
+    },
   ];
 
   return (
@@ -102,7 +117,7 @@ export function NotificationsPage() {
           <p className="text-sm text-slate-500">{copy.channels.description}</p>
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {channels.map((channel) => {
             const Icon = channel.icon;
             const isActive = activeTab === channel.id;
@@ -155,15 +170,21 @@ export function NotificationsPage() {
         <div className="flex items-center gap-3">
           <div className="h-px flex-1 bg-slate-200 dark:bg-border" />
           <span className="text-xs font-semibold tracking-wide text-slate-400 uppercase">
-            {activeTab === "email" ? copy.channels.email.title : copy.channels.sms.title}
+            {activeTab === "email"
+              ? copy.channels.email.title
+              : activeTab === "sms"
+                ? copy.channels.sms.title
+                : copy.channels.push.title}
           </span>
           <div className="h-px flex-1 bg-slate-200 dark:bg-border" />
         </div>
 
         {activeTab === "email" ? (
           <EmailNotificationSettings canWrite={canWrite} />
-        ) : (
+        ) : activeTab === "sms" ? (
           <SmsNotificationSettings canWrite={canWrite} />
+        ) : (
+          <PushNotificationSettings />
         )}
       </section>
     </div>

@@ -9,8 +9,7 @@ import {
 } from "@smart-dispatch/types";
 import { getAccessToken } from "@/lib/auth-session";
 import { fetchVehicleLocation } from "@/lib/vehicle-location-api";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+import { getRealtimeServerUrl } from "@/lib/realtime-url";
 
 const LIVE_THRESHOLD_MS = 2 * 60 * 1000;
 
@@ -57,7 +56,7 @@ export function useVehicleLocation(vehicleId: string, enabled = true) {
           return;
         }
 
-        socket = io(`${API_URL}${REALTIME_NAMESPACE}`, {
+        socket = io(`${getRealtimeServerUrl()}${REALTIME_NAMESPACE}`, {
           auth: { token },
           transports: ["websocket"],
         });

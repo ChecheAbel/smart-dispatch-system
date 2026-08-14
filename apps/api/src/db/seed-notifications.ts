@@ -4,5 +4,5 @@ import { ensureNotificationTemplates } from "../models/notification-template.mod
 export async function seedNotifications() {
   await ensureNotificationConfigurations();
   await ensureNotificationTemplates();
-  console.log("[Seed] Notification configurations ready");
+  console.log("[Seed] Notification configurations and templates ready");
 }

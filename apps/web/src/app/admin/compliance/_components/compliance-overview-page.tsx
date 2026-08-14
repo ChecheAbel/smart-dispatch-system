@@ -15,13 +15,12 @@ import type { VehicleComplianceStatus, VehicleComplianceSummary } from "@smart-d
 import { useAuth, useLocale } from "@/components/shared/providers";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { StatCard } from "@/components/shared/stat-card";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  adminBadgeGoldClass,
-  adminEyebrowClass,
+  adminCardClass,
   adminHeadingClass,
-  adminPrimaryButtonClass,
+  adminIconBoxClass,
 } from "@/lib/admin-theme";
 import { canReadCompliance } from "@/lib/permissions";
 import { fetchVehicleComplianceSummary } from "@/lib/vehicle-api";
@@ -30,23 +29,22 @@ import { cn } from "@/lib/utils";
 
 const STATUS_ORDER: VehicleComplianceStatus[] = ["expired", "due_soon", "ok", "not_set"];
 
-const STATUS_ACCENT: Record<VehicleComplianceStatus, string> = {
-  expired: "bg-red-500",
-  due_soon: "bg-amber-400",
-  ok: "bg-[#1C3A34]",
-  not_set: "bg-slate-300",
+const STATUS_CARD_CLASS: Record<VehicleComplianceStatus, string> = {
+  expired: "border-red-200/80 bg-red-50/50 hover:bg-red-50 dark:border-red-400/25 dark:bg-red-400/10 dark:hover:bg-red-400/15",
+  due_soon: "border-amber-200/80 bg-amber-50/50 hover:bg-amber-50 dark:border-amber-400/25 dark:bg-amber-400/10 dark:hover:bg-amber-400/15",
+  ok: "border-emerald-200/80 bg-emerald-50/50 hover:bg-emerald-50 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:hover:bg-emerald-400/15",
+  not_set: "border-slate-200/80 bg-slate-50/80 hover:bg-slate-50 dark:border-border dark:bg-muted/40 dark:hover:bg-muted/55",
 };
 
-const STATUS_TRACK: Record<VehicleComplianceStatus, string> = {
-  expired: "bg-red-50",
-  due_soon: "bg-amber-50",
-  ok: "bg-[#1C3A34]/[0.06]",
-  not_set: "bg-slate-100",
+const STATUS_COUNT_CLASS: Record<VehicleComplianceStatus, string> = {
+  expired: "text-red-700 dark:text-red-300",
+  due_soon: "text-amber-800 dark:text-amber-200",
+  ok: "text-emerald-800 dark:text-emerald-200",
+  not_set: "text-slate-700 dark:text-muted-foreground",
 };
 
 type ComplianceReportType = "insurance" | "inspection";
 
-type StatusCopy = ReturnType<typeof getAdminComplianceMessages>["status"];
 type StatsCopy = ReturnType<typeof getAdminComplianceMessages>["stats"];
 type OverviewCopy = ReturnType<typeof getAdminComplianceMessages>["overview"];
 
@@ -55,13 +53,6 @@ function statusLabel(status: VehicleComplianceStatus, stats: StatsCopy) {
   if (status === "due_soon") return stats.dueSoon;
   if (status === "ok") return stats.ok;
   return stats.notSet;
-}
-
-function statusDescription(status: VehicleComplianceStatus, stats: StatsCopy) {
-  if (status === "expired") return stats.expiredDescription;
-  if (status === "due_soon") return stats.dueSoonDescription;
-  if (status === "ok") return stats.okDescription;
-  return stats.notSetDescription;
 }
 
 function issueCount(summary: Record<VehicleComplianceStatus, number>) {
@@ -75,7 +66,6 @@ function ComplianceDomainSection({
   summary,
   totalVehicles,
   statsCopy,
-  statusCopy,
   overviewCopy,
   loading,
 }: {
@@ -85,7 +75,6 @@ function ComplianceDomainSection({
   summary: VehicleComplianceSummary[ComplianceReportType];
   totalVehicles: number;
   statsCopy: StatsCopy;
-  statusCopy: StatusCopy;
   overviewCopy: OverviewCopy;
   loading: boolean;
 }) {
@@ -96,122 +85,85 @@ function ComplianceDomainSection({
     totalVehicles > 0 ? Math.round((summary.ok / totalVehicles) * 100) : 0;
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]">
-      <div className="relative border-b border-slate-100 px-5 py-5 sm:px-6">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(201,184,122,0.18),_transparent_55%),linear-gradient(135deg,_rgba(28,58,52,0.06),_transparent_50%)]" />
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div className="flex min-w-0 items-start gap-3.5">
-            <span className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[#1C3A34] text-white shadow-sm">
-              <Icon className="size-5" strokeWidth={2.25} />
-            </span>
-            <div className="min-w-0 space-y-1">
-              <h2 className={cn("text-xl font-extrabold tracking-tight", adminHeadingClass)}>
-                {title}
-              </h2>
-              <p className="max-w-md text-sm leading-relaxed text-slate-500">{description}</p>
-            </div>
+    <section className={cn(adminCardClass, "overflow-hidden rounded-xl")}>
+      <div className="flex flex-col gap-4 border-b border-slate-200/80 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:border-border">
+        <div className="flex min-w-0 items-start gap-3">
+          <div className={adminIconBoxClass}>
+            <Icon className="size-4" />
           </div>
-          <Link
-            href={basePath}
-            className={cn(
-              adminPrimaryButtonClass,
-              "inline-flex shrink-0 items-center justify-center gap-1.5 self-start",
-            )}
-          >
-            {overviewCopy.viewAll}
-            <ArrowRight className="size-3.5" />
-          </Link>
+          <div className="min-w-0">
+            <h2 className={cn("text-base font-semibold", adminHeadingClass)}>{title}</h2>
+            <p className="mt-0.5 text-sm text-slate-500 dark:text-muted-foreground">{description}</p>
+          </div>
         </div>
+        <Button
+          variant="outline"
+          size="sm"
+          className="shrink-0 self-start sm:self-center"
+          render={<Link href={basePath} />}
+          nativeButton={false}
+        >
+          {overviewCopy.viewAll}
+          <ArrowRight className="size-3.5" />
+        </Button>
       </div>
 
-      <div className="grid gap-0 sm:grid-cols-[minmax(0,11rem)_1fr]">
-        <div className="flex flex-col justify-center border-b border-slate-100 px-5 py-6 sm:border-r sm:border-b-0 sm:px-6">
-          <p className={adminEyebrowClass}>{overviewCopy.validRate}</p>
-          {loading ? (
-            <Skeleton className="mt-3 h-12 w-20" />
-          ) : (
-            <p className="mt-2 text-5xl font-extrabold tracking-tight tabular-nums text-[#1C3A34]">
-              {validPercent}
-              <span className="text-2xl font-bold text-[#C9B87A]">%</span>
-            </p>
-          )}
-          {loading ? (
-            <Skeleton className="mt-3 h-4 w-36" />
-          ) : (
-            <p className="mt-3 text-sm leading-relaxed text-slate-500">
-              {formatMessage(overviewCopy.compliantSummary, {
-                valid: String(summary.ok),
-                total: String(totalVehicles),
-              })}
-            </p>
-          )}
-          {!loading ? (
-            <p
-              className={cn(
-                "mt-2 text-xs font-semibold",
-                issues > 0 ? "text-amber-700" : "text-emerald-700",
-              )}
-            >
-              {issues > 0
-                ? formatMessage(overviewCopy.needsAction, { count: String(issues) })
-                : overviewCopy.allCompliant}
-            </p>
-          ) : null}
-        </div>
+      <div className="space-y-4 px-5 py-4 sm:px-6 sm:py-5">
+        {loading ? (
+          <Skeleton className="h-4 w-64" />
+        ) : (
+          <p className="text-sm text-slate-600 dark:text-muted-foreground">
+            {formatMessage(overviewCopy.compliantSummary, {
+              valid: String(summary.ok),
+              total: String(totalVehicles),
+            })}{" "}
+            <span className="text-slate-400 dark:text-muted-foreground/70">({validPercent}%)</span>
+            {issues > 0 ? (
+              <>
+                {" · "}
+                <span className="font-medium text-amber-800 dark:text-amber-200">
+                  {formatMessage(overviewCopy.needsAction, { count: String(issues) })}
+                </span>
+              </>
+            ) : (
+              <>
+                {" · "}
+                <span className="font-medium text-emerald-700 dark:text-emerald-300">
+                  {overviewCopy.allCompliant}
+                </span>
+              </>
+            )}
+          </p>
+        )}
 
-        <div className="divide-y divide-slate-100">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {STATUS_ORDER.map((status) => {
             const count = summary[status];
-            const share =
-              totalVehicles > 0 ? Math.round((count / totalVehicles) * 100) : 0;
 
             return (
               <Link
                 key={status}
                 href={`${basePath}?status=${status}`}
-                className="group flex items-center gap-4 px-5 py-3.5 transition hover:bg-[#1C3A34]/[0.02] sm:px-6"
+                className={cn(
+                  "rounded-lg border px-3 py-3 transition-colors",
+                  STATUS_CARD_CLASS[status],
+                )}
               >
-                <span
-                  className={cn(
-                    "flex size-9 shrink-0 items-center justify-center rounded-lg",
-                    STATUS_TRACK[status],
-                  )}
-                >
-                  <span className={cn("size-2.5 rounded-full", STATUS_ACCENT[status])} />
-                </span>
-                <div className="min-w-0 flex-1 space-y-1.5">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-slate-800">
-                        {statusLabel(status, statsCopy)}
-                      </p>
-                      <p className="truncate text-xs text-slate-500">
-                        {statusDescription(status, statsCopy)}
-                      </p>
-                    </div>
-                    <div className="shrink-0 text-right">
-                      {loading ? (
-                        <Skeleton className="ml-auto h-6 w-8" />
-                      ) : (
-                        <p className="text-lg font-extrabold tabular-nums text-[#1C3A34]">
-                          {count}
-                        </p>
-                      )}
-                      <p className="text-[10px] font-semibold tracking-wide text-slate-400 uppercase">
-                        {statusCopy[status]}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
-                    {loading ? null : (
-                      <div
-                        className={cn("h-full rounded-full transition-all", STATUS_ACCENT[status])}
-                        style={{ width: `${Math.max(share, count > 0 ? 6 : 0)}%` }}
-                      />
+                <p className="text-xs font-medium text-slate-600 dark:text-muted-foreground">
+                  {statusLabel(status, statsCopy)}
+                </p>
+                {loading ? (
+                  <Skeleton className="mt-2 h-7 w-10" />
+                ) : (
+                  <p
+                    className={cn(
+                      "mt-1 text-2xl font-bold tabular-nums tracking-tight",
+                      STATUS_COUNT_CLASS[status],
                     )}
-                  </div>
-                </div>
-                <ArrowRight className="size-4 shrink-0 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-[#1C3A34]" />
+                  >
+                    {count}
+                  </p>
+                )}
               </Link>
             );
           })}
@@ -265,23 +217,26 @@ export function ComplianceOverviewPage() {
   const data = summary ?? emptySummary;
 
   return (
-    <div className="w-full max-w-none space-y-8">
-      <header className="space-y-2">
-        <Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>
-        <h1 className={cn("text-2xl font-extrabold tracking-tight sm:text-3xl", adminHeadingClass)}>
+    <div className="w-full max-w-none space-y-6">
+      <header className="space-y-1">
+        <h1 className={cn("text-2xl font-bold tracking-tight sm:text-[1.75rem]", adminHeadingClass)}>
           {copy.overview.title}
         </h1>
-        <p className="max-w-2xl text-sm leading-relaxed text-slate-500">
+        <p className="max-w-2xl text-sm text-slate-500 dark:text-muted-foreground">
           {copy.overview.description}
         </p>
-        {!loading && data.vehicles_needing_attention > 0 ? (
-          <p className="text-sm font-medium text-amber-800">
+      </header>
+
+      {!loading && data.vehicles_needing_attention > 0 ? (
+        <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-900 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+          <p>
             {formatMessage(copy.overview.attentionMessage, {
               count: String(data.vehicles_needing_attention),
             })}
           </p>
-        ) : null}
-      </header>
+        </div>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
@@ -316,7 +271,7 @@ export function ComplianceOverviewPage() {
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-4 xl:grid-cols-2">
         <ComplianceDomainSection
           type="insurance"
           title={copy.overview.insuranceSection}
@@ -324,7 +279,6 @@ export function ComplianceOverviewPage() {
           summary={data.insurance}
           totalVehicles={data.total_vehicles}
           statsCopy={copy.stats}
-          statusCopy={copy.status}
           overviewCopy={copy.overview}
           loading={loading}
         />
@@ -335,7 +289,6 @@ export function ComplianceOverviewPage() {
           summary={data.inspection}
           totalVehicles={data.total_vehicles}
           statsCopy={copy.stats}
-          statusCopy={copy.status}
           overviewCopy={copy.overview}
           loading={loading}
         />

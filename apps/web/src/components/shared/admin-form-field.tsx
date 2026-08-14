@@ -346,29 +346,38 @@ export function AdminSelectField({
 }
 
 type AdminFormSectionProps = {
+  id?: string;
   title: string;
   description?: string;
   icon?: LucideIcon;
+  step?: number;
   children: React.ReactNode;
   className?: string;
 };
 
 export function AdminFormSection({
+  id,
   title,
   description,
   icon: Icon,
+  step,
   children,
   className,
 }: AdminFormSectionProps) {
   return (
     <section
+      id={id}
       className={cn(
         "rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6 dark:border-border dark:bg-card dark:shadow-black/15",
         className,
       )}
     >
       <div className="mb-5 flex items-start gap-3 border-b border-slate-100 pb-4 dark:border-border">
-        {Icon ? (
+        {step != null ? (
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#1C3A34]/8 text-xs font-bold text-[#1C3A34] dark:bg-accent dark:text-[var(--brand-accent)]">
+            {step}
+          </div>
+        ) : Icon ? (
           <div className="rounded-lg bg-[#1C3A34]/8 p-2 text-[#1C3A34] dark:bg-accent dark:text-[var(--brand-accent)]">
             <Icon className="size-4" />
           </div>

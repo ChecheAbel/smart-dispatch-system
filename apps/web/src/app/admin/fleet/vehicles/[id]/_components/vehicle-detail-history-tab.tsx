@@ -5,18 +5,24 @@ import {
   adminHeadingClass,
   adminIconBoxClass,
 } from "@/lib/admin-theme";
+import { formatGlobalDateTime } from "@/lib/ethiopian-calendar";
+import type { SupportedLocale } from "@/lib/locale";
 import { formatMessage, getAdminVehiclesMessages } from "@/translations";
 import { cn } from "@/lib/utils";
-import { historyIcon } from "./vehicle-detail-shared";
+import { formatVehicleHistorySummary, historyIcon } from "./vehicle-detail-shared";
 
 type VehicleDetailHistoryTabProps = {
+  copy: ReturnType<typeof getAdminVehiclesMessages>;
   detail: ReturnType<typeof getAdminVehiclesMessages>["detail"];
+  locale: SupportedLocale;
   history: VehicleHistoryEvent[];
   historyLoading: boolean;
 };
 
 export function VehicleDetailHistoryTab({
+  copy,
   detail,
+  locale,
   history,
   historyLoading,
 }: VehicleDetailHistoryTabProps) {
@@ -69,10 +75,10 @@ export function VehicleDetailHistoryTab({
                 <div className="rounded-xl border border-slate-100 bg-slate-50/40 px-3.5 py-3 transition hover:bg-white dark:border-border dark:bg-muted/35 dark:hover:bg-accent/70 sm:px-4">
                   <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between sm:gap-2">
                     <p className="text-sm font-semibold text-slate-800 dark:text-foreground">
-                      {event.summary}
+                      {formatVehicleHistorySummary(event, copy, locale)}
                     </p>
                     <time className="text-xs text-slate-400 dark:text-muted-foreground sm:shrink-0">
-                      {new Date(event.created_at).toLocaleString()}
+                      {formatGlobalDateTime(event.created_at, locale)}
                     </time>
                   </div>
                   <p className="mt-1.5 text-xs text-slate-500 dark:text-muted-foreground">

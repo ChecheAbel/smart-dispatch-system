@@ -217,6 +217,7 @@ enum TokenType {
 enum NotificationChannel {
   email
   sms
+  push
 
   @@map("notification_channel")
 }
@@ -228,6 +229,7 @@ enum NotificationModule {
   inspection
   invoices
   password_reset
+  system
 
   @@map("notification_module")
 }

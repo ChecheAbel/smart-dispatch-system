@@ -1,6 +1,11 @@
 import type { ContractBillingInterval, RideRequestStatus } from "@smart-dispatch/types";
 import { Prisma } from "../generated/prisma";
 import { prisma } from "../db/prisma";
+import {
+  getRideScheduleWindow,
+  rideScheduleWindowsOverlap,
+  type RideScheduleWindow,
+} from "../services/ride-request-scheduling.service";
 import { ensureContractEnrollment } from "./contract-enrollment.model";
 import { findActiveContractById } from "./contract.model";
 import { findVehicleById } from "./vehicle.model";
@@ -390,14 +395,51 @@ export async function findRideRequestById(id: string) {
   });
 }
 
-export async function findActiveRideRequestForVehicle(vehicleId: string, exceptRideRequestId?: string) {
-  return prisma.rideRequest.findFirst({
+export async function findSchedulingConflictForVehicle(
+  vehicleId: string,
+  input: {
+    window: RideScheduleWindow;
+    exceptRideRequestId?: string;
+  },
+) {
+  const assignments = await prisma.rideRequest.findMany({
     where: {
       assignedVehicleId: vehicleId,
       status: { in: ["confirmed", "in_progress"] },
-      ...(exceptRideRequestId ? { NOT: { id: exceptRideRequestId } } : {}),
+      ...(input.exceptRideRequestId ? { NOT: { id: input.exceptRideRequestId } } : {}),
     },
-    select: { id: true },
+    select: {
+      id: true,
+      scheduledAt: true,
+      scheduledReturnAt: true,
+      status: true,
+    },
+  });
+
+  for (const assignment of assignments) {
+    const otherWindow = getRideScheduleWindow({
+      scheduledAt: assignment.scheduledAt,
+      scheduledReturnAt: assignment.scheduledReturnAt,
+      status: assignment.status,
+    });
+
+    if (rideScheduleWindowsOverlap(input.window, otherWindow)) {
+      return assignment;
+    }
+  }
+
+  return null;
+}
+
+/** @deprecated Use findSchedulingConflictForVehicle for schedule-aware checks. */
+export async function findActiveRideRequestForVehicle(vehicleId: string, exceptRideRequestId?: string) {
+  return findSchedulingConflictForVehicle(vehicleId, {
+    window: getRideScheduleWindow({
+      scheduledAt: null,
+      scheduledReturnAt: null,
+      status: "in_progress",
+    }),
+    exceptRideRequestId,
   });
 }
 
@@ -444,10 +486,50 @@ export async function listAssignableVehiclesForRideRequest(
     vehicleTypeId: string | null;
     vehicleClassId: string | null;
     assignedVehicleId: string | null;
+    scheduledAt: Date | null;
+    scheduledReturnAt: Date | null;
+    status: string;
   },
   options?: { search?: string; take?: number },
 ) {
   const search = options?.search?.trim();
+  const candidateWindow = getRideScheduleWindow({
+    scheduledAt: rideRequest.scheduledAt,
+    scheduledReturnAt: rideRequest.scheduledReturnAt,
+    status: rideRequest.status,
+  });
+
+  const activeAssignments = await prisma.rideRequest.findMany({
+    where: {
+      assignedVehicleId: { not: null },
+      status: { in: ["confirmed", "in_progress"] },
+      NOT: { id: rideRequest.id },
+    },
+    select: {
+      assignedVehicleId: true,
+      scheduledAt: true,
+      scheduledReturnAt: true,
+      status: true,
+    },
+  });
+
+  const blockedVehicleIds = new Set<string>();
+
+  for (const assignment of activeAssignments) {
+    if (!assignment.assignedVehicleId) {
+      continue;
+    }
+
+    const otherWindow = getRideScheduleWindow({
+      scheduledAt: assignment.scheduledAt,
+      scheduledReturnAt: assignment.scheduledReturnAt,
+      status: assignment.status,
+    });
+
+    if (rideScheduleWindowsOverlap(candidateWindow, otherWindow)) {
+      blockedVehicleIds.add(assignment.assignedVehicleId);
+    }
+  }
 
   const vehicles = await prisma.vehicle.findMany({
     where: {
@@ -455,14 +537,9 @@ export async function listAssignableVehiclesForRideRequest(
       assignedDriverUserId: { not: null },
       ...(rideRequest.vehicleTypeId ? { vehicleTypeId: rideRequest.vehicleTypeId } : {}),
       ...(rideRequest.vehicleClassId ? { vehicleClassId: rideRequest.vehicleClassId } : {}),
-      NOT: {
-        rideRequestAssignments: {
-          some: {
-            status: { in: ["confirmed", "in_progress"] },
-            NOT: { id: rideRequest.id },
-          },
-        },
-      },
+      ...(blockedVehicleIds.size > 0
+        ? { id: { notIn: [...blockedVehicleIds] } }
+        : {}),
       ...(search
         ? {
             OR: [
@@ -491,17 +568,19 @@ export async function listAssignableVehiclesForRideRequest(
     take: options?.take ?? 50,
   });
 
+  const availableVehicles = vehicles;
+
   if (
     rideRequest.assignedVehicleId &&
-    !vehicles.some((vehicle) => vehicle.id === rideRequest.assignedVehicleId)
+    !availableVehicles.some((vehicle) => vehicle.id === rideRequest.assignedVehicleId)
   ) {
     const assignedVehicle = await findVehicleById(rideRequest.assignedVehicleId);
     if (assignedVehicle) {
-      return [assignedVehicle, ...vehicles];
+      return [assignedVehicle, ...availableVehicles];
     }
   }
 
-  return vehicles;
+  return availableVehicles;
 }
 
 export async function updateRideRequestStatusAdmin(

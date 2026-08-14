@@ -25,6 +25,30 @@ export type UpdateNotificationTemplateInput = {
   body?: string;
 };
 
+function withPushChannel(rules: NotificationTemplateSeed[]): NotificationTemplateSeed[] {
+  const pushTemplates = rules
+    .filter((rule) => rule.channel === "email")
+    .map((emailRule) => {
+      const smsRule = rules.find(
+        (rule) =>
+          rule.channel === "sms" &&
+          rule.event === emailRule.event &&
+          rule.recipient === emailRule.recipient,
+      );
+
+      return {
+        module: emailRule.module,
+        event: emailRule.event,
+        channel: "push" as const,
+        recipient: emailRule.recipient,
+        subject: emailRule.subject ?? "Smart Dispatch",
+        body: smsRule?.body ?? emailRule.body,
+      };
+    });
+
+  return [...rules, ...pushTemplates];
+}
+
 const RIDE_REQUEST_RULES: NotificationTemplateSeed[] = [
   {
     module: "ride_requests",
@@ -362,11 +386,11 @@ const PASSWORD_RESET_RULES: NotificationTemplateSeed[] = [
 ];
 
 const DEFAULT_TEMPLATES = [
-  ...RIDE_REQUEST_RULES,
-  ...USER_REGISTRATION_RULES,
-  ...INSURANCE_RULES,
-  ...INSPECTION_RULES,
-  ...INVOICE_RULES,
+  ...withPushChannel(RIDE_REQUEST_RULES),
+  ...withPushChannel(USER_REGISTRATION_RULES),
+  ...withPushChannel(INSURANCE_RULES),
+  ...withPushChannel(INSPECTION_RULES),
+  ...withPushChannel(INVOICE_RULES),
   ...PASSWORD_RESET_RULES,
 ];
 

@@ -29,8 +29,9 @@ const MODULES = new Set<NotificationModule>([
   "inspection",
   "invoices",
   "password_reset",
+  "system",
 ]);
-const CHANNELS = new Set<NotificationChannel>(["email", "sms"]);
+const CHANNELS = new Set<NotificationChannel>(["email", "sms", "push"]);
 
 function parseStatus(value: unknown): NotificationDeliveryStatus | undefined {
   const status = getOptionalString(value);

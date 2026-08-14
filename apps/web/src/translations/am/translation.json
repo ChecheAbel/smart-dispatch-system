@@ -2159,10 +2159,10 @@
   "adminNotifications": {
     "eyebrow": "የስርዓት ቅንብሮች",
     "title": "ማሳወቂያዎች",
-    "description": "ለወጪ መላኪያ የኢሜይል እና የኤስኤምኤስ አቅራቢ ምስክርነቶችን ያዋቅሩ።",
+    "description": "ለወጪ መላኪያ የኢሜይል፣ የኤስኤምኤስ እና የሞባይል ፑሽ ማሳወቂያ መላኪያን ያዋቅሩ።",
     "channels": {
       "title": "የመላኪያ መንገድ",
-      "description": "ማዋቀር የሚፈልጉትን የአቅራቢ ምስክርነት ይምረጡ።",
+      "description": "ማዋቀር የሚፈልጉትን የአቅራቢ ምስክርነት ወይም የብሮድካስት መሳሪያ ይምረጡ።",
       "email": {
         "title": "ኢሜይል",
         "description": "ለወጪ ኢሜይል SMTP፣ SendGrid ወይም Mailgun።"
@@ -2170,6 +2170,10 @@
       "sms": {
         "title": "ኤስኤምኤስ",
         "description": "ለወጪ የጽሁፍ መልዕክት AfroSMS።"
+      },
+      "push": {
+        "title": "የሞባይል ፑሽ",
+        "description": "ለሞባይል መሳሪያዎች የ FCM ብሮድካስት አገልግሎት ግንኙነት።"
       }
     },
     "accessDenied": {
@@ -2392,6 +2396,141 @@
       }
     }
   },
+  "adminNotificationsPush": {
+    "title": "የሞባይል ፑሽ",
+    "description": "የሞባይል ፑሽ ብሮድካስት አገልግሎት የግንኙነት ሁኔታ።",
+    "status": {
+      "configuredTitle": "የፑሽ አገልግሎት ተገናኝቷል",
+      "configuredDescription": "የብሮድካስት API ተዋቅሯል። መልዕክቶች በ user-{id} targets ስር በተመዘገቡ መሳሪያዎች ላይ ይደርሳሉ።",
+      "notConfiguredTitle": "የፑሽ አገልግሎት አልተዋቀረም",
+      "notConfiguredDescription": "የሞባይል ፑሽን ለማንቃት በ API server ላይ NOTIFICATION_BROADCAST_URL እና NOTIFICATION_APPLICATION_ID ያዋቅሩ።"
+    },
+    "sendCta": {
+      "title": "መልዕክት ላክ",
+      "description": "ወደ ቡድን ወይም የተመረጡ ሰዎች ኢሜይል፣ ኤስኤምኤስ ወይም ፑሽ ይጻፉ።",
+      "button": "መልዕክት መላኪያን ክፈት"
+    },
+    "errors": {
+      "loadFailed": "የፑሽ ማሳወቂያ ቅንብርን ማረጋገጥ አልተቻለም።"
+    }
+  },
+  "adminNotificationsSend": {
+    "eyebrow": "የስርዓት ቅንብሮች",
+    "title": "መልዕክት ላክ",
+    "description": "እንዴት እንደሚላክ፣ ማን እንደሚቀበል ይምረጡ፣ ከዚያ መልዕክቱን ይጻፉ።",
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፍቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት የማሳወቂያዎችን የማየት ፍቃድ ያስፈልጋል። አስተዳዳሪው ለሚናዎ notifications.read እንዲሰጥ ይጠይቁ።",
+      "sessionHint": "ፍቃዶች በቅርቡ ከተቀየሩ፣ ክፍለ ጊዜዎን ለማደስ ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚናዎ ፍቃዶች ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
+    "channels": {
+      "title": "እንዴት ይላካል",
+      "description": "አንድ ወይም ከዚያ በላይ መንገዶችን ይምረጡ። ኢሜይል ወይም ስልክ የሌላቸው ተቀባዮች ለዚያ መንገድ ይዘለላሉ።",
+      "checking": "በማረጋገጥ ላይ…",
+      "ready": "ለመላክ ዝግጁ",
+      "unavailable": "አልተዋቀረም",
+      "setup": "ይህን መንገድ ያዋቅሩ",
+      "email": {
+        "title": "ኢሜይል",
+        "description": "ወደ የእያንዳንዱ ተቀባይ ኢሜይል ይላኩ።"
+      },
+      "sms": {
+        "title": "ኤስኤምኤስ",
+        "description": "ወደ የእያንዳንዱ ተቀባይ ሞባይል ቁጥር ይላኩ።"
+      },
+      "push": {
+        "title": "የሞባይል ፑሽ",
+        "description": "ወደ የተመዘገቡ መሳሪያዎች ፑሽ ማሳወቂያ ይላኩ።"
+      }
+    },
+    "sections": {
+      "recipients": {
+        "title": "ማን ይቀበላል",
+        "description": "ወደ ሙሉ ቡድን ይላኩ፣ ወይም የተወሰኑ ሰዎችን ይምረጡ።"
+      },
+      "message": {
+        "title": "ምን ይላካል",
+        "description": "ተመሳሳይ ጽሁፍ በተመረጡት መንገዶች ሁሉ ይላካል።"
+      }
+    },
+    "audience": {
+      "drivers": "ሁሉም አሽከርካሪዎች",
+      "driversHint": "ንቁ አሽከርካሪዎች፣ እስከ 500።",
+      "customers": "ሁሉም ደንበኞች",
+      "customersHint": "ንቁ የደንበኛ መለያዎች፣ እስከ 500።",
+      "dispatchers": "ሁሉም ዲስፓችአሮች",
+      "dispatchersHint": "ንቁ የዲስፓች መለያዎች፣ እስከ 500።"
+    },
+    "form": {
+      "modeGroup": "ቡድን",
+      "modePeople": "ሰዎች",
+      "userSearch": "በስም ወይም በኢሜይል ይፈልጉ",
+      "userSearchHint": "ቢያንስ ሁለት ፊደላት ይተይቡ።",
+      "userSearchPlaceholder": "ለምሳሌ Jane Doe ወይም jane@cheche.et",
+      "searching": "በመፈለግ ላይ…",
+      "noResults": "“{query}” የሚመሳሰል ተጠቃሚ የለም።",
+      "selectedCount": "{count} ተመርጠዋል",
+      "clearRecipients": "አጽዳ",
+      "clearSearch": "ፍለጋን አጽዳ",
+      "addUser": "{name} ጨምር",
+      "removeUser": "ተቀባይን አስወግድ",
+      "roleLabels": {
+        "admin": "አስተዳዳሪ",
+        "dispatcher": "ዲስፓቸር",
+        "driver": "አሽከርካሪ",
+        "user": "ደንበኛ"
+      },
+      "titleLabel": "ርዕስ",
+      "titlePlaceholder": "ለምሳሌ የአገልግሎት ማሻሻያ",
+      "titleOptional": "ለኤስኤምኤስ ብቻ አማራጭ",
+      "messageLabel": "መልዕክት",
+      "messagePlaceholder": "መልዕክቱን ይጻፉ…",
+      "characterCount": "{current} / {max}",
+      "review": "ይመልከቱ እና ይላኩ",
+      "reviewEmpty": "ለመቀጠል መንገድ እና ተቀባዮችን ይምረጡ።",
+      "reviewSummary": "{channels} · {recipients}",
+      "send": "መልዕክት ላክ",
+      "sending": "በመላክ ላይ…",
+      "sendToAudience": "ወደ {audience} ላክ",
+      "sendToPeople": "{count} ሰዎች"
+    },
+    "confirm": {
+      "title": "ይህን መልዕክት ይላኩ?",
+      "description": "መላኪያ ወዲያውኑ ይጀምራል እና መቀልበስ አይቻልም።",
+      "via": "መንገዶች",
+      "to": "ተቀባዮች",
+      "message": "መልዕክት",
+      "groupWarning": "ይህ በተመረጠው ቡድን ውስጥ እስከ 500 ሰዎች ሊደርስ ይችላል።",
+      "cancel": "ተመለስ",
+      "send": "አሁን ላክ"
+    },
+    "results": {
+      "sent": "{count} ተልኳል",
+      "skipped": "{count} ተዘልሏል",
+      "failed": "{count} አልተሳካም"
+    },
+    "validation": {
+      "title": "አስፈላጊ መስኮችን ይመልከቱ",
+      "description": "መንገድ ይምረጡ፣ መልዕክት ያክሉ፣ እና ቢያንስ አንድ ተቀባይ ይምረጡ።",
+      "channelsRequired": "ቢያንስ አንድ ዝግጁ መንገድ ይምረጡ።",
+      "recipientsRequired": "ቡድን ወይም ቢያንስ አንድ ሰው ይምረጡ።",
+      "titleRequired": "ለኢሜይል ወይም ፑሽ ርዕስ ያስገቡ።",
+      "messageRequired": "መልዕክት ያስገቡ።"
+    },
+    "toast": {
+      "sendSuccess": {
+        "title": "መልዕክት ተልኳል",
+        "description": "ለ {count} ተቀባይ(ዎች) ተልኳል።"
+      },
+      "sendFailed": {
+        "title": "መልዕክት መላክ አልተቻለም",
+        "description": "እባክዎ መንገዶቹን ያረጋግጡና እንደገና ይሞክሩ።"
+      }
+    }
+  },
   "adminNotificationTemplates": {
     "eyebrow": "የስርዓት ቅንብሮች",
     "title": "የመልዕክት አብነቶች",
@@ -2507,10 +2646,14 @@
     "enabledLabel": "ነቅቷል",
     "subjectLabel": "የኢሜይል ርዕስ",
     "subjectPlaceholder": "ለዚህ ማሳወቂያ የኢሜይል ርዕስ",
+    "titleLabel": "የፑሽ ርዕስ",
+    "titlePlaceholder": "በመሳሪያው ላይ የሚታየው ርዕስ",
     "bodyLabel": "መልዕክት",
     "bodyPlaceholder": "የማሳወቂያ መልዕክቱን ይጻፉ...",
     "testEmailLabel": "የሙከራ ኢሜይል",
     "testEmailPlaceholder": "you@example.com",
+    "testPushLabel": "የተቀባይ መለያ ኢሜይል",
+    "testPushPlaceholder": "driver@example.com",
     "testPhoneLabel": "የሙከራ ስልክ",
     "testPhonePlaceholder": "+2519XXXXXXXX",
     "testAction": "ሙከራ ላክ",
@@ -2519,14 +2662,16 @@
       "title": "የሙከራ መልዕክት ላክ",
       "descriptionEmail": "ይህን አብነት ከናሙና ቦታ ማስተካከያዎች ጋር ወደ የእርስዎ ኢንቦክስ ይላካል።",
       "descriptionSms": "ይህን አብነት ከናሙና ቦታ ማስተካከያዎች ጋር ወደ ስልክ ቁጥር ይላካል።",
+      "descriptionPush": "ይህን አብነት ከናሙና ቦታ ማስተካከያዎች ጋር እንደ FCM ፑሽ ይላካል። መለያው የተመዘገበ መሳሪያ ሊኖረው ይገባል።",
       "previewTitle": "የመልዕክት ቅድመ እይታ",
       "previewNote": "የሙከራ መልዕክቶች ቦታ ማስተካከያዎችን በናሙና እሴቶች ይተካሉ (ለምሳሌ Jane Doe፣ ቦሌ አየር ማረፊያ)።",
       "emailHint": "ርዕስ፣ ይዘት እና ማድረስ ለማረጋገጥ የሚያዩትን ኢሜይል ይጠቀሙ።",
       "phoneHint": "የሀገር ኮድ ያካትቱ፣ ለምሳሌ +2519XXXXXXXX።",
+      "pushHint": "የተጠቃሚውን የመለያ ኢሜይል ያስገቡ። ፑሹ ለዚያ ተጠቃሚ ለተመዘገቡ መሳሪያዎች ይላካል።",
       "recipientRequired": "ሙከራ ከመላክዎ በፊት ተቀባይ ያስገቡ።",
       "emailInvalid": "ትክክለኛ ኢሜይል ያስገቡ።",
       "phoneInvalid": "ከሀገር ኮድ ጋር ትክክለኛ ስልክ ቁጥር ያስገቡ።",
-      "providerNote": "ማድረስ በስርዓት ቅንብሮች → ማሳወቂያዎች ውስጥ ከተቀመጡ የኢሜይል ወይም ኤስኤምኤስ አቅራቢዎች ይከናወናል።"
+      "providerNote": "ኢሜይል እና ኤስኤምኤስ የተቀመጡ አቅራቢዎችን ይጠቀማሉ። ፑሽ የተዋቀረውን FCM ብሮድካስት አገልግሎት ይጠቀማል።"
     },
     "saveAction": "የመልዕክት አብነቶችን አስቀምጥ",
     "saving": "በማስቀመጥ ላይ…",
@@ -2582,7 +2727,8 @@
     },
     "channels": {
       "email": "ኢሜይል",
-      "sms": "ኤስኤምኤስ"
+      "sms": "ኤስኤምኤስ",
+      "push": "ፑሽ"
     },
     "recipients": {
       "requester": "ደንበኛ",
@@ -2738,7 +2884,7 @@
   "adminNotificationDeliveryLogs": {
     "eyebrow": "የስርዓት ቅንብሮች",
     "title": "የማሳወቂያ ማድረስ መዝገብ",
-    "description": "ከመልዕክት አብነቶች የተላኩ፣ የተዘለሉ እና የከሰሉ ኢሜይል እና ኤስኤምኤስ ማድረሶችን ይከታተሉ።",
+    "description": "ከመልዕክት አብነቶች እና ከadmin ብሮድካስት የተላኩ፣ የተዘለሉ እና የከሰሉ ኢሜይል፣ ኤስኤምኤስ እና ፑሽ ማድረሶችን ይከታተሉ።",
     "searchPlaceholder": "በተቀባይ፣ ክስተት፣ ስህተት ወይም ማጣቀሻ ይፈልጉ...",
     "itemLabel": "ማድረስ",
     "filters": {
@@ -2780,7 +2926,12 @@
       "insurance": "የኢንሹራንስ ተገዢነት",
       "inspection": "የፍተሻ ተገዢነት",
       "invoices": "ደረሰኞች እና ክፍያ",
-      "password_reset": "የይለፍ ቃል እንደገና ማตከል"
+      "password_reset": "የይለፍ ቃል እንደገና ማตከል",
+      "system": "ስርዓት"
+    },
+    "eventLabels": {
+      "admin.broadcast": "የአስተዳዳሪ መልዕክት",
+      "test.push": "የሙከራ ፑሽ ማሳወቂያ"
     },
     "recipientLabels": {
       "requester": "ደንበኛ",
@@ -2791,7 +2942,8 @@
     },
     "channelLabels": {
       "email": "ኢሜይል",
-      "sms": "ኤስኤምኤስ"
+      "sms": "ኤስኤምኤስ",
+      "push": "ፑሽ"
     },
     "kindLabels": {
       "live": "ቀጥተኛ",
@@ -3458,6 +3610,27 @@
         "dates": "ቀኖች",
         "additionalNotes": "ተጨማሪ ማስታወሻዎች"
       },
+      "tracking": {
+        "title": "ቀጥታ አቀማመጥ ክትትል",
+        "description": "ከተመደበው አሽከርካሪ መሣሪያ የሚመጣ በቀጥታ አቀማመጥ።",
+        "connected": "ተገናኝቷል",
+        "disconnected": "ተቋርጧል",
+        "live": "ቀጥታ",
+        "stale": "ያረጀ",
+        "assignedDriver": "የተመደበ አሽከርካሪ",
+        "lastUpdate": "መጨረሻ ዝመና",
+        "speed": "ፍጥነት",
+        "unknownTime": "ያልታወቀ",
+        "noLocationYet": "እስካሁን አቀማመጥ የለም",
+        "errorTitle": "ቀጥታ ዝመናዎች ጊዜያዊ አልተገኙም",
+        "errorWithLocation": "በታች የመጨረሻው የታወቀ አቀማመጥ ተሽከርካሪ ይታያል። ለመገናኘት እንደገና መሞከር እንቀጥላለን።",
+        "errorWithoutLocation": "በዚህ ጊዜ ከቀጥታ ክትትል ጋር መገናኘት አልተቻለም። እንደገና መሞከር እንቀጥራለን።",
+        "unassignedHint": "ቀጥታ GPS ክትትል እንዲሰራ ለዚህ ተሽከርካሪ አሽከርካሪ ይመድቡ።",
+        "waitingForGps": "ተመደበው አሽከርካሪ GPS አቀማመጥ እስኪያጋር ድረስ በመጠበቅ ላይ…",
+        "mapRecenter": "ካርታ ወደ ማዕከል",
+        "mapZoomIn": "አጉል",
+        "mapZoomOut": "አሳንስ"
+      },
       "maintenance": {
         "createTitle": "ጥገና መመዝገብ",
         "createSubtitle": "በ {plate} ላይ ምን ስራ እየተሰራ ነው?",
@@ -3633,6 +3806,19 @@
         "fuel_logged": "የነዳጅ ሙሌ ተመዝግቧል",
         "fuel_updated": "የነዳጅ መዝገብ ተዘምኗል",
         "expiry_updated": "የማብቂያ ቀኖች ተዘምነዋል"
+      },
+      "historySummaries": {
+        "created": "ተሽከርካሪ {plate} ተፈጥሯል",
+        "status_changed": "ሁኔታ ከ {from} ወደ {to} ተቀይሯል",
+        "driver_assigned": "ነባሪ ሹፌር ተመድቧል",
+        "driver_unassigned": "ነባሪ ሹፌር ተነስቷል",
+        "maintenance_opened": "ጥገና ተከፍቷል፡ {title}",
+        "maintenance_updated": "ጥገና ተዘምኗል፡ {title}",
+        "maintenance_completed": "ጥገና ተጠናቋል፡ {title}",
+        "maintenance_cancelled": "ጥገና ተሰርዟል፡ {title}",
+        "fuel_logged": "የነዳጅ ሙሌ ተመዝግቧል፡ {quantity} ሊ. በ {odometer} ኪ.ሜ.",
+        "fuel_updated": "የነዳጅ መዝገብ ተዘምኗል፡ {quantity} ሊ. በ {odometer} ኪ.ሜ.",
+        "expiry_updated": "የተገዢነት ዝርዝሮች ተዘምነዋል"
       },
       "toast": {
         "loadFailed": {

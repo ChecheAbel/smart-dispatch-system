@@ -76,6 +76,7 @@ const DEFAULT_PERMISSIONS = [
   { slug: "customer_invoices.read", module: "customer_invoices", action: "read", description: "View issued invoices in the customer portal" },
   { slug: "customer_complaints.read", module: "customer_complaints", action: "read", description: "View submitted complaints in the customer portal" },
   { slug: "customer_complaints.write", module: "customer_complaints", action: "write", description: "Submit customer complaints" },
+  { slug: "devices.register", module: "devices", action: "register", description: "Register FCM device tokens for push notifications (POST /api/devices/tokens)" },
 ] as const;
 
 const REMOVED_MENU_SLUGS = ["permissions", "endpoints", "registration-forms", "customer-portal", "customer-profile", "user", "notifications-email", "notifications-sms", "customer-requests"] as const;
@@ -220,6 +221,17 @@ const DEFAULT_MENUS = [
     translations: [
       { locale: "en", label: "Notifications" },
       { locale: "am", label: "ማሳወቂያዎች" },
+    ],
+  },
+  {
+    slug: "notification-send",
+    path: "/admin/notifications/send",
+    icon: "send",
+    sortOrder: 15,
+    parentSlug: "system-settings",
+    translations: [
+      { locale: "en", label: "Send message" },
+      { locale: "am", label: "መልዕክት ላክ" },
     ],
   },
   {
@@ -600,6 +612,11 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "notifications.sms.get", method: "GET", path: "/api/notifications/sms", description: "Get SMS notification configuration", permissionSlug: "notifications.read" },
   { slug: "notifications.sms.update", method: "PATCH", path: "/api/notifications/sms", description: "Update SMS notification configuration", permissionSlug: "notifications.write" },
   { slug: "notifications.sms.test", method: "POST", path: "/api/notifications/sms/test", description: "Send test SMS", permissionSlug: "notifications.write" },
+  { slug: "notifications.push.status", method: "GET", path: "/api/notifications/push/status", description: "Check push notification service configuration", permissionSlug: "notifications.read" },
+  { slug: "notifications.push.broadcast", method: "POST", path: "/api/notifications/push/broadcast", description: "Broadcast push notification to mobile devices", permissionSlug: "notifications.write" },
+  { slug: "notifications.push.test", method: "POST", path: "/api/notifications/push/test", description: "Send test push notification to one user", permissionSlug: "notifications.write" },
+  { slug: "notifications.send", method: "POST", path: "/api/notifications/send", description: "Send a custom email, SMS, and/or push message to a group or selected people", permissionSlug: "notifications.write" },
+  { slug: "devices.tokens.register", method: "POST", path: "/api/devices/tokens", description: "Register FCM device token for the authenticated user", permissionSlug: "devices.register" },
   { slug: "notifications.ride_requests.rules.list", method: "GET", path: "/api/notifications/templates", description: "List notification templates", permissionSlug: "notifications.read" },
   { slug: "notifications.ride_requests.rules.update", method: "PUT", path: "/api/notifications/templates", description: "Update notification templates", permissionSlug: "notifications.write" },
   { slug: "notifications.ride_requests.rules.test", method: "POST", path: "/api/notifications/templates/:id/test", description: "Send test notification template", permissionSlug: "notifications.write" },
@@ -849,6 +866,7 @@ async function seedUserRolePermissions() {
           "customer_invoices.read",
           "customer_complaints.read",
           "customer_complaints.write",
+          "devices.register",
         ],
       },
     },
@@ -869,7 +887,7 @@ async function seedDriverRolePermissions() {
 
   const permissions = await prisma.permission.findMany({
     where: {
-      slug: { in: ["driver.vehicle", "driver.trip", "driver.upcoming", "driver.history", "driver.maintenance", "driver.fuel", "driver.location"] },
+      slug: { in: ["driver.vehicle", "driver.trip", "driver.upcoming", "driver.history", "driver.maintenance", "driver.fuel", "driver.location", "devices.register"] },
     },
     orderBy: { slug: "asc" },
   });

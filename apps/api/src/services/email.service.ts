@@ -49,7 +49,7 @@ export async function getEmailConfig() {
   return resolveEmailConfig(record);
 }
 
-function assertEmailReady(config: EmailConfig) {
+export function assertEmailReady(config: EmailConfig) {
   if (!config.isEnabled) {
     throw new EmailConfigurationError("Email delivery is disabled.");
   }

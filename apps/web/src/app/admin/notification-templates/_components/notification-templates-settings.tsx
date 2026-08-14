@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Mail, MessageSquare, Save } from "lucide-react";
+import { Mail, MessageSquare, Save, Smartphone } from "lucide-react";
 import type {
   NotificationChannel,
   NotificationModule,
@@ -39,6 +39,7 @@ import {
   parseNotificationModule,
 } from "./notification-template-modules";
 import {
+  CHANNEL_ORDER,
   getEventChannelStats,
   MODULE_EVENTS,
   shouldShowTemplate,
@@ -112,7 +113,27 @@ function getChannelLabel(
   channel: NotificationChannel,
   copy: ReturnType<typeof getAdminNotificationTemplatesMessages>,
 ) {
-  return channel === "email" ? copy.channels.email : copy.channels.sms;
+  if (channel === "email") {
+    return copy.channels.email;
+  }
+
+  if (channel === "sms") {
+    return copy.channels.sms;
+  }
+
+  return copy.channels.push;
+}
+
+function getChannelIcon(channel: NotificationChannel) {
+  if (channel === "email") {
+    return Mail;
+  }
+
+  if (channel === "sms") {
+    return MessageSquare;
+  }
+
+  return Smartphone;
 }
 
 export function NotificationTemplatesSettings({
@@ -304,7 +325,7 @@ export function NotificationTemplatesSettings({
         return {
           id: template.id,
           is_enabled: form?.is_enabled ?? template.is_enabled,
-          subject: template.channel === "email" ? form?.subject ?? "" : null,
+          subject: template.channel === "sms" ? null : form?.subject ?? "",
           body: form?.body ?? template.body,
         };
       });
@@ -439,8 +460,11 @@ export function NotificationTemplatesSettings({
                   recipientTemplates.find((template) => template.channel === activeChannel) ??
                   recipientTemplates[0];
                 const form = formState[activeTemplate.id];
-                const hasEmail = recipientTemplates.some((template) => template.channel === "email");
-                const hasSms = recipientTemplates.some((template) => template.channel === "sms");
+                const availableChannels = CHANNEL_ORDER.filter((channel) =>
+                  recipientTemplates.some((template) => template.channel === channel),
+                );
+                const showChannelSwitch = availableChannels.length > 1;
+                const ActiveChannelIcon = getChannelIcon(activeChannel);
 
                 return (
                   <div
@@ -456,10 +480,10 @@ export function NotificationTemplatesSettings({
                       </div>
 
                       <div className="flex items-center gap-3">
-                        {hasEmail && hasSms ? (
+                        {showChannelSwitch ? (
                           <div className="inline-flex rounded-lg border border-slate-200 bg-white p-0.5 dark:border-border dark:bg-[#11161d]">
-                            {(["email", "sms"] as const).map((channel) => {
-                              const Icon = channel === "email" ? Mail : MessageSquare;
+                            {availableChannels.map((channel) => {
+                              const Icon = getChannelIcon(channel);
                               const isActive = activeChannel === channel;
 
                               return (
@@ -482,11 +506,7 @@ export function NotificationTemplatesSettings({
                           </div>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-slate-600 dark:border-[#C9B87A]/55 dark:bg-[#C9B87A]/10 dark:text-[#d8c77f]">
-                            {activeChannel === "email" ? (
-                              <Mail className="size-3.5" />
-                            ) : (
-                              <MessageSquare className="size-3.5" />
-                            )}
+                            <ActiveChannelIcon className="size-3.5" />
                             {getChannelLabel(activeChannel, copy)}
                           </span>
                         )}
@@ -507,18 +527,24 @@ export function NotificationTemplatesSettings({
                     </div>
 
                     <div className="space-y-4 p-4">
-                      {activeTemplate.channel === "email" ? (
+                      {activeTemplate.channel === "sms" ? null : (
                         <AdminTextField
                           id={`template-subject-${activeTemplate.id}`}
-                          label={copy.subjectLabel}
+                          label={
+                            activeTemplate.channel === "push" ? copy.titleLabel : copy.subjectLabel
+                          }
                           value={form?.subject ?? ""}
                           onChange={(event) =>
                             updateTemplateForm(activeTemplate.id, { subject: event.target.value })
                           }
                           disabled={!canWrite}
-                          placeholder={copy.subjectPlaceholder}
+                          placeholder={
+                            activeTemplate.channel === "push"
+                              ? copy.titlePlaceholder
+                              : copy.subjectPlaceholder
+                          }
                         />
-                      ) : null}
+                      )}
 
                       <AdminTextareaField
                         id={`template-body-${activeTemplate.id}`}

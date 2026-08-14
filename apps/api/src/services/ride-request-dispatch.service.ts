@@ -1,5 +1,6 @@
 import { findVehicleById } from "../models/vehicle.model";
-import { findActiveRideRequestForVehicle } from "../models/ride-request.model";
+import { findSchedulingConflictForVehicle } from "../models/ride-request.model";
+import { getRideScheduleWindow } from "./ride-request-scheduling.service";
 
 type RideRequestForDispatch = {
   id: string;
@@ -7,6 +8,8 @@ type RideRequestForDispatch = {
   vehicleTypeId: string | null;
   vehicleClassId: string | null;
   assignedVehicleId: string | null;
+  scheduledAt: Date | null;
+  scheduledReturnAt: Date | null;
 };
 
 export async function validateRideRequestVehicleAssignment(
@@ -35,11 +38,18 @@ export async function validateRideRequestVehicleAssignment(
     return { ok: false, error: "Selected vehicle class does not match this ride request." };
   }
 
-  const conflict = await findActiveRideRequestForVehicle(vehicleId, rideRequest.id);
+  const conflict = await findSchedulingConflictForVehicle(vehicleId, {
+    window: getRideScheduleWindow({
+      scheduledAt: rideRequest.scheduledAt,
+      scheduledReturnAt: rideRequest.scheduledReturnAt,
+      status: rideRequest.status,
+    }),
+    exceptRideRequestId: rideRequest.id,
+  });
   if (conflict) {
     return {
       ok: false,
-      error: "This vehicle is already assigned to another active ride request.",
+      error: "This vehicle is already assigned to another ride during the requested schedule.",
     };
   }
 

@@ -88,7 +88,13 @@ function statusBadgeClass(status: NotificationDeliveryStatus) {
 function getEventTitle(
   log: NotificationDeliveryLog,
   templatesCopy: ReturnType<typeof getAdminNotificationTemplatesMessages>,
+  deliveryLogsCopy: ReturnType<typeof getAdminNotificationDeliveryLogsMessages>,
 ) {
+  const eventLabel = deliveryLogsCopy.eventLabels[log.event as keyof typeof deliveryLogsCopy.eventLabels];
+  if (eventLabel) {
+    return eventLabel;
+  }
+
   // Union-indexed event maps share no common keys, so cast for a string lookup.
   const events = templatesCopy.events[log.module] as
     | Record<string, { title: string } | undefined>
@@ -102,7 +108,7 @@ function formatDeliveryNote(log: NotificationDeliveryLog) {
     return log.error_message;
   }
 
-  if (log.channel === "email" && log.subject) {
+  if ((log.channel === "email" || log.channel === "push") && log.subject) {
     return log.subject;
   }
 
@@ -168,7 +174,7 @@ export function NotificationDeliveryLogsPage() {
             : (statusFilter as NotificationDeliveryStatus),
         module:
           moduleFilter === "all" ? undefined : (moduleFilter as NotificationModule),
-        channel: channelFilter === "all" ? undefined : (channelFilter as "email" | "sms"),
+        channel: channelFilter === "all" ? undefined : (channelFilter as NotificationDeliveryLog["channel"]),
         is_test:
           kindFilter === "live" ? false : kindFilter === "test" ? true : undefined,
         from: fromDate ? toStartOfDayIso(toDateKey(fromDate)) : undefined,
@@ -202,7 +208,7 @@ export function NotificationDeliveryLogsPage() {
             <div className="min-w-0 space-y-1">
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <p className="text-sm font-medium text-slate-900">
-                  {getEventTitle(log, templatesCopy)}
+                  {getEventTitle(log, templatesCopy, copy)}
                 </p>
                 {log.is_test ? (
                   <Badge
@@ -340,6 +346,7 @@ export function NotificationDeliveryLogsPage() {
                     { value: "user_registrations", label: copy.moduleLabels.user_registrations },
                     { value: "insurance", label: copy.moduleLabels.insurance },
                     { value: "inspection", label: copy.moduleLabels.inspection },
+                    { value: "system", label: copy.moduleLabels.system },
                   ]}
                   value={moduleFilter}
                   onValueChange={(value) => {
@@ -361,6 +368,7 @@ export function NotificationDeliveryLogsPage() {
                       </SelectItem>
                       <SelectItem value="insurance">{copy.moduleLabels.insurance}</SelectItem>
                       <SelectItem value="inspection">{copy.moduleLabels.inspection}</SelectItem>
+                      <SelectItem value="system">{copy.moduleLabels.system}</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -373,6 +381,7 @@ export function NotificationDeliveryLogsPage() {
                     { value: "all", label: copy.filters.channelAll },
                     { value: "email", label: copy.channelLabels.email },
                     { value: "sms", label: copy.channelLabels.sms },
+                    { value: "push", label: copy.channelLabels.push },
                   ]}
                   value={channelFilter}
                   onValueChange={(value) => {
@@ -390,6 +399,7 @@ export function NotificationDeliveryLogsPage() {
                       <SelectItem value="all">{copy.filters.channelAll}</SelectItem>
                       <SelectItem value="email">{copy.channelLabels.email}</SelectItem>
                       <SelectItem value="sms">{copy.channelLabels.sms}</SelectItem>
+                      <SelectItem value="push">{copy.channelLabels.push}</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>
@@ -482,7 +492,7 @@ export function NotificationDeliveryLogsPage() {
               />
               <DetailField
                 label={copy.detail.event}
-                value={getEventTitle(selectedLog, templatesCopy)}
+                value={getEventTitle(selectedLog, templatesCopy, copy)}
               />
               <DetailField
                 label={copy.detail.channel}
@@ -495,7 +505,7 @@ export function NotificationDeliveryLogsPage() {
               <DetailField label={copy.detail.contact} value={selectedLog.recipient_contact} />
               <DetailField label={copy.detail.entityType} value={selectedLog.entity_type} />
               <DetailField label={copy.detail.entityId} value={selectedLog.entity_id} />
-              {selectedLog.channel === "email" ? (
+              {selectedLog.channel === "email" || selectedLog.channel === "push" ? (
                 <DetailField label={copy.detail.subject} value={selectedLog.subject} />
               ) : null}
               <DetailField label={copy.detail.body} value={selectedLog.body_preview} />

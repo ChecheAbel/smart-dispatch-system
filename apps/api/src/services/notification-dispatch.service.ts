@@ -1,5 +1,6 @@
 import type {
   InvoiceNotificationEvent,
+  NotificationChannel,
   NotificationModule,
   NotificationTemplateRecipient,
   PasswordResetNotificationEvent,
@@ -8,7 +9,7 @@ import type {
 } from "@smart-dispatch/types";
 import { findRideRequestById } from "../models/ride-request.model";
 import { findInvoiceById } from "../models/invoice.model";
-import { findUserByIdWithRoles } from "../models/user.model";
+import { findUserByEmail, findUserByIdWithRoles } from "../models/user.model";
 import { getRideRequestSettings } from "../models/app-setting.model";
 import {
   findNotificationTemplateById,
@@ -21,6 +22,13 @@ import {
 } from "./notification-template.service";
 import { sendEmailMessage, EmailConfigurationError, EmailDeliveryError } from "./email.service";
 import { sendAfroSmsMessage, SmsConfigurationError, SmsDeliveryError } from "./sms.service";
+import {
+  broadcastPushNotification,
+  isPushNotificationConfigured,
+  toPushTarget,
+  PushNotificationConfigurationError,
+  PushNotificationDeliveryError,
+} from "./push-notification.service";
 
 type TemplateContext = Record<string, string>;
 
@@ -291,7 +299,7 @@ function buildInvoiceContext(
 function resolveRideRequestContact(
   rideRequest: NonNullable<Awaited<ReturnType<typeof findRideRequestById>>>,
   recipient: NotificationTemplateRecipient,
-  channel: "email" | "sms",
+  channel: NotificationChannel,
 ) {
   const user =
     recipient === "driver" ? rideRequest.assignedDriver : rideRequest.requester;
@@ -300,27 +308,200 @@ function resolveRideRequestContact(
     return null;
   }
 
-  return channel === "email" ? user.email?.trim() || null : user.mobileNumber?.trim() || null;
+  return channel === "sms" ? user.mobileNumber?.trim() || null : user.email?.trim() || null;
 }
 
 function resolveUserRegistrationContact(
   user: NonNullable<Awaited<ReturnType<typeof findUserByIdWithRoles>>>,
-  channel: "email" | "sms",
+  channel: NotificationChannel,
 ) {
-  return channel === "email" ? user.email?.trim() || null : user.mobileNumber?.trim() || null;
+  return channel === "sms" ? user.mobileNumber?.trim() || null : user.email?.trim() || null;
 }
 
 function resolvePasswordResetContact(
   user: NonNullable<Awaited<ReturnType<typeof findUserByIdWithRoles>>>,
-  channel: "email" | "sms",
+  channel: NotificationChannel,
 ) {
   return resolveUserRegistrationContact(user, channel);
+}
+
+function resolveRideRequestUserId(
+  rideRequest: NonNullable<Awaited<ReturnType<typeof findRideRequestById>>>,
+  recipient: NotificationTemplateRecipient,
+) {
+  if (recipient === "driver") {
+    return rideRequest.assignedDriverUserId;
+  }
+
+  if (recipient === "requester") {
+    return rideRequest.requesterUserId;
+  }
+
+  return null;
+}
+
+function resolveUserRegistrationUserId(
+  user: NonNullable<Awaited<ReturnType<typeof findUserByIdWithRoles>>>,
+  recipient: NotificationTemplateRecipient,
+) {
+  if (recipient === "applicant") {
+    return user.id;
+  }
+
+  return null;
+}
+
+function resolvePasswordResetUserId(
+  user: NonNullable<Awaited<ReturnType<typeof findUserByIdWithRoles>>>,
+  recipient: NotificationTemplateRecipient,
+) {
+  if (recipient === "applicant") {
+    return user.id;
+  }
+
+  return null;
+}
+
+function resolveInvoiceUserId(
+  invoice: NonNullable<Awaited<ReturnType<typeof findInvoiceById>>>,
+  recipient: NotificationTemplateRecipient,
+) {
+  if (recipient === "requester" || recipient === "account_holder") {
+    return invoice.requesterUserId;
+  }
+
+  return null;
+}
+
+function formatPushTitle(module: NotificationModule, event: string) {
+  const label = `${module}.${event}`.replace(/_/g, " ");
+  return label.charAt(0).toUpperCase() + label.slice(1);
+}
+
+async function dispatchPushNotifications(
+  module: NotificationModule,
+  event: string,
+  entityId: string,
+  context: TemplateContext,
+  templates: Awaited<ReturnType<typeof listEnabledNotificationTemplates>>,
+  resolveUserId: (
+    template: Awaited<ReturnType<typeof listEnabledNotificationTemplates>>[number],
+  ) => string | null,
+) {
+  if (!isPushNotificationConfigured() || templates.length === 0) {
+    return;
+  }
+
+  const seenUserIds = new Set<string>();
+
+  for (const template of templates) {
+    if (template.channel !== "push") {
+      continue;
+    }
+
+    const userId = resolveUserId(template);
+    const renderedSubject = renderNotificationTemplate(template.subject ?? "", context).trim();
+    const message = renderNotificationTemplate(template.body, context).trim();
+    const title = renderedSubject || formatPushTitle(module, event);
+    const pushTarget = userId ? toPushTarget(userId) : null;
+
+    if (!userId || seenUserIds.has(userId)) {
+      if (!userId) {
+        logPushDeliveryAttempt({
+          status: "skipped",
+          module,
+          event,
+          recipient: template.recipient,
+          entityId,
+          entityType: moduleToEntityType(module),
+          templateId: template.id,
+          subject: title,
+          bodyPreview: message,
+          errorMessage: "Recipient user ID is missing.",
+        });
+      }
+      continue;
+    }
+
+    seenUserIds.add(userId);
+
+    if (!message) {
+      logPushDeliveryAttempt({
+        status: "skipped",
+        module,
+        event,
+        recipient: template.recipient,
+        entityId,
+        entityType: moduleToEntityType(module),
+        templateId: template.id,
+        recipientContact: pushTarget,
+        subject: title,
+        errorMessage: "Push message body is empty.",
+      });
+      continue;
+    }
+
+    try {
+      await broadcastPushNotification({
+        targets: [pushTarget!],
+        title,
+        message,
+        channels: ["fcm"],
+        data: {
+          type: `${module}.${event}`,
+          module,
+          event,
+          entityId,
+          recipient: template.recipient,
+        },
+      });
+      logPushDeliveryAttempt({
+        status: "sent",
+        module,
+        event,
+        recipient: template.recipient,
+        entityId,
+        entityType: moduleToEntityType(module),
+        templateId: template.id,
+        recipientContact: pushTarget,
+        subject: title,
+        bodyPreview: message,
+      });
+      console.log(
+        `[Push] Sent ${module}/${event}/${template.recipient} to user ${userId}.`,
+      );
+    } catch (error) {
+      const messageText =
+        error instanceof PushNotificationConfigurationError ||
+        error instanceof PushNotificationDeliveryError
+          ? error.message
+          : error instanceof Error
+            ? error.message
+            : "Unknown push notification error.";
+      logPushDeliveryAttempt({
+        status: "failed",
+        module,
+        event,
+        recipient: template.recipient,
+        entityId,
+        entityType: moduleToEntityType(module),
+        templateId: template.id,
+        recipientContact: pushTarget,
+        subject: title,
+        bodyPreview: message,
+        errorMessage: messageText,
+      });
+      console.error(
+        `[Push] Failed ${module}/${event}/${template.recipient} for ${entityId}: ${messageText}`,
+      );
+    }
+  }
 }
 
 function resolveInvoiceContact(
   invoice: NonNullable<Awaited<ReturnType<typeof findInvoiceById>>>,
   recipient: NotificationTemplateRecipient,
-  channel: "email" | "sms",
+  channel: NotificationChannel,
 ) {
   if (recipient !== "requester") {
     return null;
@@ -328,11 +509,11 @@ function resolveInvoiceContact(
 
   const profile = invoice.requester.requesterProfile;
 
-  if (channel === "email") {
-    return profile?.billingContactEmail?.trim() || invoice.requester.email?.trim() || null;
+  if (channel === "sms") {
+    return invoice.requester.mobileNumber?.trim() || null;
   }
 
-  return invoice.requester.mobileNumber?.trim() || null;
+  return profile?.billingContactEmail?.trim() || invoice.requester.email?.trim() || null;
 }
 
 function moduleToEntityType(module: NotificationModule) {
@@ -348,6 +529,8 @@ function moduleToEntityType(module: NotificationModule) {
       return "invoice";
     case "password_reset":
       return "user";
+    case "system":
+      return "system";
   }
 }
 
@@ -357,7 +540,7 @@ function logDeliveryAttempt(input: {
     id: string;
     module: string;
     event: string;
-    channel: "email" | "sms";
+    channel: NotificationChannel;
     recipient: NotificationTemplateRecipient;
   };
   entityId: string;
@@ -376,6 +559,37 @@ function logDeliveryAttempt(input: {
     templateId: input.template.id,
     entityType: input.isTest ? "test" : moduleToEntityType(input.template.module as NotificationModule),
     entityId: input.isTest ? null : input.entityId,
+    recipientContact: input.recipientContact,
+    subject: input.subject,
+    bodyPreview: input.bodyPreview,
+    errorMessage: input.errorMessage,
+    isTest: input.isTest ?? false,
+  });
+}
+
+function logPushDeliveryAttempt(input: {
+  status: "sent" | "skipped" | "failed";
+  module: NotificationModule;
+  event: string;
+  recipient: NotificationTemplateRecipient;
+  entityId?: string | null;
+  entityType?: string | null;
+  templateId?: string | null;
+  recipientContact?: string | null;
+  subject?: string | null;
+  bodyPreview?: string | null;
+  errorMessage?: string | null;
+  isTest?: boolean;
+}) {
+  queueNotificationDeliveryLog({
+    status: input.status,
+    module: input.module,
+    event: input.event,
+    channel: "push",
+    recipient: input.recipient,
+    templateId: input.templateId ?? null,
+    entityType: input.entityType ?? null,
+    entityId: input.entityId ?? null,
     recipientContact: input.recipientContact,
     subject: input.subject,
     bodyPreview: input.bodyPreview,
@@ -405,6 +619,10 @@ async function deliverTemplate(
     return sendEmailMessage({ to, subject, body: renderedBody });
   }
 
+  if (template.channel === "push") {
+    throw new PushNotificationDeliveryError("Push templates are delivered through FCM, not email or SMS.");
+  }
+
   const to = contactOverride?.trim();
   if (!to) {
     throw new SmsDeliveryError("Recipient phone number is required.");
@@ -421,6 +639,9 @@ async function dispatchTemplates(
   resolveContact: (
     template: Awaited<ReturnType<typeof listEnabledNotificationTemplates>>[number],
   ) => string | null,
+  resolveUserId?: (
+    template: Awaited<ReturnType<typeof listEnabledNotificationTemplates>>[number],
+  ) => string | null,
 ) {
   const templates = await listEnabledNotificationTemplates(module, event);
 
@@ -429,6 +650,10 @@ async function dispatchTemplates(
   }
 
   for (const template of templates) {
+    if (template.channel === "push") {
+      continue;
+    }
+
     const renderedBody = renderNotificationTemplate(template.body, context);
     const renderedSubject =
       template.channel === "email"
@@ -477,6 +702,17 @@ async function dispatchTemplates(
       });
     }
   }
+
+  if (resolveUserId) {
+    await dispatchPushNotifications(
+      module,
+      event,
+      entityId,
+      context,
+      templates,
+      resolveUserId,
+    );
+  }
 }
 
 export async function sendRideRequestNotifications(
@@ -490,8 +726,13 @@ export async function sendRideRequestNotifications(
 
   const context = buildRideRequestContext(rideRequest);
 
-  await dispatchTemplates("ride_requests", event, rideRequestId, context, (template) =>
-    resolveRideRequestContact(rideRequest, template.recipient, template.channel),
+  await dispatchTemplates(
+    "ride_requests",
+    event,
+    rideRequestId,
+    context,
+    (template) => resolveRideRequestContact(rideRequest, template.recipient, template.channel),
+    (template) => resolveRideRequestUserId(rideRequest, template.recipient),
   );
 }
 
@@ -507,8 +748,13 @@ export async function sendUserRegistrationNotifications(
 
   const context = buildUserRegistrationContext(user, options.rejectionReason);
 
-  await dispatchTemplates("user_registrations", event, userId, context, (template) =>
-    resolveUserRegistrationContact(user, template.channel),
+  await dispatchTemplates(
+    "user_registrations",
+    event,
+    userId,
+    context,
+    (template) => resolveUserRegistrationContact(user, template.channel),
+    (template) => resolveUserRegistrationUserId(user, template.recipient),
   );
 }
 
@@ -528,8 +774,13 @@ export async function sendPasswordResetNotifications(
 
   const context = buildPasswordResetContext(user, input);
 
-  await dispatchTemplates("password_reset", event, userId, context, (template) =>
-    resolvePasswordResetContact(user, template.channel),
+  await dispatchTemplates(
+    "password_reset",
+    event,
+    userId,
+    context,
+    (template) => resolvePasswordResetContact(user, template.channel),
+    (template) => resolvePasswordResetUserId(user, template.recipient),
   );
 }
 
@@ -544,8 +795,13 @@ export async function sendInvoiceNotifications(
 
   const context = buildInvoiceContext(invoice);
 
-  await dispatchTemplates("invoices", event, invoiceId, context, (template) =>
-    resolveInvoiceContact(invoice, template.recipient, template.channel),
+  await dispatchTemplates(
+    "invoices",
+    event,
+    invoiceId,
+    context,
+    (template) => resolveInvoiceContact(invoice, template.recipient, template.channel),
+    (template) => resolveInvoiceUserId(invoice, template.recipient),
   );
 }
 
@@ -595,19 +851,74 @@ export async function sendNotificationTemplateTest(
   const contact = contactOverride?.trim();
   if (!contact) {
     throw new Error(
-      template.channel === "email"
+      template.channel === "email" || template.channel === "push"
         ? "A test email address is required."
         : "A test phone number is required.",
     );
   }
 
   const context = buildSampleContextForModule(template.module as NotificationModule);
-
   const renderedBody = renderNotificationTemplate(template.body, context);
-  const renderedSubject =
-    template.channel === "email"
-      ? renderNotificationTemplate(template.subject ?? "", context).trim()
-      : null;
+  const renderedSubject = renderNotificationTemplate(template.subject ?? "", context).trim();
+
+  if (template.channel === "push") {
+    const user = await findUserByEmail(contact);
+    if (!user) {
+      throw new Error("No user was found with that email address.");
+    }
+
+    const title = renderedSubject || formatPushTitle(template.module as NotificationModule, template.event);
+
+    try {
+      await broadcastPushNotification({
+        targets: [toPushTarget(user.id)],
+        title,
+        message: renderedBody,
+        channels: ["fcm"],
+        data: {
+          type: `${template.module}.${template.event}`,
+          module: template.module,
+          event: template.event,
+          entityId: template.id,
+          recipient: template.recipient,
+        },
+      });
+      logPushDeliveryAttempt({
+        status: "sent",
+        module: template.module as NotificationModule,
+        event: template.event,
+        recipient: template.recipient,
+        entityId: template.id,
+        entityType: "test",
+        templateId: template.id,
+        recipientContact: toPushTarget(user.id),
+        subject: title,
+        bodyPreview: renderedBody,
+        isTest: true,
+      });
+      return;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown notification error.";
+      logPushDeliveryAttempt({
+        status: "failed",
+        module: template.module as NotificationModule,
+        event: template.event,
+        recipient: template.recipient,
+        entityId: template.id,
+        entityType: "test",
+        templateId: template.id,
+        recipientContact: toPushTarget(user.id),
+        subject: title,
+        bodyPreview: renderedBody,
+        errorMessage: message,
+        isTest: true,
+      });
+      throw error;
+    }
+  }
+
+  const renderedEmailSubject =
+    template.channel === "email" ? renderedSubject : null;
 
   try {
     await deliverTemplate(template, context, contact);
@@ -616,7 +927,7 @@ export async function sendNotificationTemplateTest(
       template,
       entityId: template.id,
       recipientContact: contact,
-      subject: renderedSubject,
+      subject: renderedEmailSubject,
       bodyPreview: renderedBody,
       isTest: true,
     });
@@ -628,7 +939,7 @@ export async function sendNotificationTemplateTest(
       template,
       entityId: template.id,
       recipientContact: contact,
-      subject: renderedSubject,
+      subject: renderedEmailSubject,
       bodyPreview: renderedBody,
       errorMessage: message,
       isTest: true,
@@ -639,7 +950,7 @@ export async function sendNotificationTemplateTest(
 
 export function validateNotificationTemplateInput(input: {
   module: NotificationModule;
-  channel: "email" | "sms";
+  channel: "email" | "sms" | "push";
   isEnabled?: boolean;
   subject?: string | null;
   body?: string;
@@ -663,14 +974,16 @@ export function validateNotificationTemplateInput(input: {
       return "Message body must be 2000 characters or fewer.";
     }
 
-    if (input.channel === "email") {
+    if (input.channel === "email" || input.channel === "push") {
       const subject = input.subject?.trim() ?? "";
       if (!subject) {
-        return "Email subject is required when email notifications are enabled.";
+        return input.channel === "push"
+          ? "Push title is required when push notifications are enabled."
+          : "Email subject is required when email notifications are enabled.";
       }
 
       if (subject.length > 255) {
-        return "Email subject must be 255 characters or fewer.";
+        return "Title must be 255 characters or fewer.";
       }
     }
   }
@@ -680,7 +993,7 @@ export function validateNotificationTemplateInput(input: {
   }
 
   if (input.subject !== undefined && input.subject && input.subject.trim().length > 255) {
-    return "Email subject must be 255 characters or fewer.";
+    return "Title must be 255 characters or fewer.";
   }
 
   return null;
@@ -691,4 +1004,6 @@ export {
   EmailDeliveryError,
   SmsConfigurationError,
   SmsDeliveryError,
+  PushNotificationConfigurationError,
+  PushNotificationDeliveryError,
 };

@@ -234,6 +234,24 @@ export async function listDrivers(options?: { search?: string; take?: number }) 
   );
 }
 
+export async function listUsersByIds(ids: string[]) {
+  const unique = [...new Set(ids.map((id) => id.trim()).filter(Boolean))];
+  if (unique.length === 0) {
+    return [];
+  }
+
+  const users = await prisma.user.findMany({
+    where: { id: { in: unique } },
+    select: { id: true, email: true, mobileNumber: true },
+  });
+
+  const byId = new Map(users.map((user) => [user.id, user]));
+  return unique.flatMap((id) => {
+    const user = byId.get(id);
+    return user ? [user] : [];
+  });
+}
+
 export async function deleteUser(userId: string) {
   return prisma.user.delete({ where: { id: userId } });
 }

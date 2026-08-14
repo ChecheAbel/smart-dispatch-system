@@ -5,6 +5,7 @@ import L from "leaflet";
 import { Crosshair, MapPin, Minus, Plus } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import { createMapMarkerIcon } from "@/lib/map/map-marker";
+import { formatGlobalTime } from "@/lib/ethiopian-calendar";
 import { Button } from "@/components/ui/button";
 import "@/components/shared/map-marker/map-marker.css";
 import "./vehicle-live-map-popup.css";
@@ -53,6 +54,12 @@ export type VehicleLiveMapProps = {
   height?: number;
   showMarker?: boolean;
   lastUpdatedAt?: string | null;
+  locale?: "en" | "am";
+  ariaLabels?: {
+    recenter?: string;
+    zoomIn?: string;
+    zoomOut?: string;
+  };
 };
 
 export function VehicleLiveMap({
@@ -63,6 +70,8 @@ export function VehicleLiveMap({
   height = 380,
   showMarker = true,
   lastUpdatedAt = null,
+  locale = "en",
+  ariaLabels,
 }: VehicleLiveMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -159,7 +168,7 @@ export function VehicleLiveMap({
             size="icon-sm"
             onClick={handleRecenter}
             className="size-9 border-slate-200 bg-white/95 text-[#1C3A34] shadow-md backdrop-blur hover:bg-white flex items-center justify-center rounded-lg"
-            aria-label="Recenter"
+            aria-label={ariaLabels?.recenter ?? "Recenter"}
           >
             <Crosshair className="size-4" />
           </Button>
@@ -169,7 +178,7 @@ export function VehicleLiveMap({
             size="icon-sm"
             onClick={handleZoomIn}
             className="size-9 border-slate-200 bg-white/95 text-[#1C3A34] shadow-md backdrop-blur hover:bg-white flex items-center justify-center rounded-lg"
-            aria-label="Zoom in"
+            aria-label={ariaLabels?.zoomIn ?? "Zoom in"}
           >
             <Plus className="size-4" />
           </Button>
@@ -179,7 +188,7 @@ export function VehicleLiveMap({
             size="icon-sm"
             onClick={handleZoomOut}
             className="size-9 border-slate-200 bg-white/95 text-[#1C3A34] shadow-md backdrop-blur hover:bg-white flex items-center justify-center rounded-lg"
-            aria-label="Zoom out"
+            aria-label={ariaLabels?.zoomOut ?? "Zoom out"}
           >
             <Minus className="size-4" />
           </Button>
@@ -194,7 +203,7 @@ export function VehicleLiveMap({
           </span>
           {lastUpdatedAt ? (
             <span className="text-white/70">
-              · {new Date(lastUpdatedAt).toLocaleTimeString(undefined, { timeStyle: "short" })}
+              · {formatGlobalTime(lastUpdatedAt, locale)}
             </span>
           ) : null}
         </div>

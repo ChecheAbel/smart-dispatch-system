@@ -30,6 +30,49 @@ export async function sendTestSms(input: { to: string }) {
   return unwrapApiResponse<{ delivery: { provider: string; to: string; message: string } }>(data);
 }
 
+export async function fetchPushStatus() {
+  const { data } = await apiClient.get("/api/notifications/push/status");
+  return unwrapApiResponse<{ configured: boolean }>(data);
+}
+
+export type PushAudience = "drivers" | "customers" | "dispatchers";
+
+export type SendPushBroadcastInput = {
+  title: string;
+  message: string;
+  user_ids?: string[];
+  audience?: PushAudience;
+};
+
+export async function sendPushBroadcast(input: SendPushBroadcastInput) {
+  const { data } = await apiClient.post("/api/notifications/push/broadcast", input);
+  return unwrapApiResponse<{ delivery: Record<string, unknown>; recipient_count: number }>(data);
+}
+
+export type OutboundChannel = "email" | "sms" | "push";
+
+export type SendOutboundMessageInput = {
+  channels: OutboundChannel[];
+  title?: string;
+  message: string;
+  user_ids?: string[];
+  audience?: PushAudience;
+};
+
+export type ChannelSendCounts = {
+  sent: number;
+  skipped: number;
+  failed: number;
+};
+
+export async function sendOutboundMessage(input: SendOutboundMessageInput) {
+  const { data } = await apiClient.post("/api/notifications/send", input);
+  return unwrapApiResponse<{
+    recipient_count: number;
+    results: Partial<Record<OutboundChannel, ChannelSendCounts>>;
+  }>(data);
+}
+
 export type NotificationTemplateInput = {
   id: string;
   is_enabled: boolean;

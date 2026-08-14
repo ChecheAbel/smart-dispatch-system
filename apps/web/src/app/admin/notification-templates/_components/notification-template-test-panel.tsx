@@ -48,6 +48,8 @@ export function NotificationTemplateTestPanel({
   const copy = getAdminNotificationTemplatesMessages(locale);
   const testCopy = copy.test;
   const isEmail = template.channel === "email";
+  const isPush = template.channel === "push";
+  const usesEmailRecipient = isEmail || isPush;
   const [fieldError, setFieldError] = useState<string | null>(null);
 
   const previewBody = useMemo(() => truncatePreview(body), [body]);
@@ -60,11 +62,11 @@ export function NotificationTemplateTestPanel({
       return testCopy.recipientRequired;
     }
 
-    if (isEmail && !EMAIL_PATTERN.test(trimmed)) {
+    if (usesEmailRecipient && !EMAIL_PATTERN.test(trimmed)) {
       return testCopy.emailInvalid;
     }
 
-    if (!isEmail && !PHONE_PATTERN.test(trimmed)) {
+    if (!usesEmailRecipient && !PHONE_PATTERN.test(trimmed)) {
       return testCopy.phoneInvalid;
     }
 
@@ -91,7 +93,11 @@ export function NotificationTemplateTestPanel({
         <div className="min-w-0 flex-1">
           <h4 className={cn("text-sm font-bold", adminHeadingClass)}>{testCopy.title}</h4>
           <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
-            {isEmail ? testCopy.descriptionEmail : testCopy.descriptionSms}
+            {isEmail
+              ? testCopy.descriptionEmail
+              : isPush
+                ? testCopy.descriptionPush
+                : testCopy.descriptionSms}
           </p>
         </div>
       </div>
@@ -102,16 +108,18 @@ export function NotificationTemplateTestPanel({
             {testCopy.previewTitle}
           </p>
           <div className="rounded-lg border border-slate-200/80 bg-white px-3.5 py-3 shadow-sm dark:border-border dark:bg-[#11161d]">
-            {isEmail ? (
+            {isEmail || isPush ? (
               <p className="text-xs font-semibold text-[#1C3A34]">
-                <span className="font-medium text-slate-500">{copy.subjectLabel}: </span>
-                {previewSubject || copy.subjectPlaceholder}
+                <span className="font-medium text-slate-500">
+                  {isPush ? copy.titleLabel : copy.subjectLabel}:{" "}
+                </span>
+                {previewSubject || (isPush ? copy.titlePlaceholder : copy.subjectPlaceholder)}
               </p>
             ) : null}
             <p
               className={cn(
                 "text-sm leading-relaxed whitespace-pre-wrap text-slate-600",
-                isEmail && "mt-2 border-t border-slate-100 pt-2 dark:border-border",
+                (isEmail || isPush) && "mt-2 border-t border-slate-100 pt-2 dark:border-border",
               )}
             >
               {previewBody || copy.bodyPlaceholder}
@@ -128,12 +136,12 @@ export function NotificationTemplateTestPanel({
               fieldError && "text-red-700 dark:text-red-300",
             )}
           >
-            {isEmail ? copy.testEmailLabel : copy.testPhoneLabel}
+            {isEmail ? copy.testEmailLabel : isPush ? copy.testPushLabel : copy.testPhoneLabel}
           </Label>
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <div className="relative min-w-0 flex-1">
-              {isEmail ? (
+              {usesEmailRecipient ? (
                 <Mail
                   className={cn(
                     "pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2",
@@ -162,7 +170,11 @@ export function NotificationTemplateTestPanel({
                 disabled={!canWrite || isSending}
                 aria-invalid={Boolean(fieldError)}
                 placeholder={
-                  isEmail ? copy.testEmailPlaceholder : copy.testPhonePlaceholder
+                  usesEmailRecipient
+                    ? isPush
+                      ? copy.testPushPlaceholder
+                      : copy.testEmailPlaceholder
+                    : copy.testPhonePlaceholder
                 }
                 className={cn(
                   adminInputClass,
@@ -194,7 +206,11 @@ export function NotificationTemplateTestPanel({
             <p className="text-xs text-red-600">{fieldError}</p>
           ) : (
             <p className="text-xs leading-relaxed text-slate-500">
-              {isEmail ? testCopy.emailHint : testCopy.phoneHint}
+              {isEmail
+                ? testCopy.emailHint
+                : isPush
+                  ? testCopy.pushHint
+                  : testCopy.phoneHint}
             </p>
           )}
         </div>

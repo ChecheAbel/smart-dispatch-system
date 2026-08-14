@@ -4,8 +4,11 @@ import dynamic from "next/dynamic";
 import { MapPin, Radio, WifiOff } from "lucide-react";
 import type { Vehicle } from "@smart-dispatch/types";
 import { useVehicleLocation } from "@/hooks/use-vehicle-location";
+import type { SupportedLocale } from "@/lib/locale";
 import { adminCardClass, adminHeadingClass, adminIconBoxClass } from "@/lib/admin-theme";
 import { getVehiclePhotoUrl } from "@/lib/vehicle-photo";
+import { formatGlobalDateTime } from "@/lib/ethiopian-calendar";
+import { getAdminVehiclesMessages } from "@/translations";
 import { cn } from "@/lib/utils";
 
 const LazyVehicleLiveMap = dynamic(
@@ -20,21 +23,17 @@ const DEFAULT_CENTER = {
 
 type VehicleDetailTrackingTabProps = {
   vehicle: Vehicle;
+  detail: ReturnType<typeof getAdminVehiclesMessages>["detail"];
+  locale: SupportedLocale;
 };
 
-function formatLastUpdated(recordedAt: string) {
-  const date = new Date(recordedAt);
-  if (Number.isNaN(date.getTime())) {
-    return "Unknown";
-  }
-
-  return date.toLocaleString(undefined, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+function formatLastUpdated(recordedAt: string, locale: SupportedLocale, unknownLabel: string) {
+  const formatted = formatGlobalDateTime(recordedAt, locale);
+  return formatted === "—" ? unknownLabel : formatted;
 }
 
-export function VehicleDetailTrackingTab({ vehicle }: VehicleDetailTrackingTabProps) {
+export function VehicleDetailTrackingTab({ vehicle, detail, locale }: VehicleDetailTrackingTabProps) {
+  const tracking = detail.tracking;
   const { location, connected, loading, error, isLive } = useVehicleLocation(vehicle.id);
   const hasLocation = Boolean(location);
   const assignedDriver = vehicle.assigned_driver?.name;
@@ -50,10 +49,8 @@ export function VehicleDetailTrackingTab({ vehicle }: VehicleDetailTrackingTabPr
             <MapPin className="size-4 text-[#8f7d45] animate-bounce" />
           </div>
           <div>
-            <h2 className={cn("text-base", adminHeadingClass)}>Live Location Tracking</h2>
-            <p className="text-sm text-slate-500">
-              Real-time position from the assigned driver&apos;s device.
-            </p>
+            <h2 className={cn("text-base", adminHeadingClass)}>{tracking.title}</h2>
+            <p className="text-sm text-slate-500">{tracking.description}</p>
           </div>
         </div>
 
@@ -67,7 +64,7 @@ export function VehicleDetailTrackingTab({ vehicle }: VehicleDetailTrackingTabPr
             )}
           >
             <Radio className="size-3.5" />
-            {connected ? "Connected" : "Disconnected"}
+            {connected ? tracking.connected : tracking.disconnected}
           </span>
           {hasLocation ? (
             <span
@@ -76,7 +73,7 @@ export function VehicleDetailTrackingTab({ vehicle }: VehicleDetailTrackingTabPr
                 isLive ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700",
               )}
             >
-              {isLive ? "Live" : "Stale"}
+              {isLive ? tracking.live : tracking.stale}
             </span>
           ) : null}
         </div>
@@ -84,17 +81,29 @@ export function VehicleDetailTrackingTab({ vehicle }: VehicleDetailTrackingTabPr
 
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3">
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Assigned driver</p>
-          <p className="mt-1 text-sm font-semibold text-[#1C3A34]">{assignedDriver ?? "Unassigned"}</p>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3">
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Last update</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
+            {tracking.assignedDriver}
+          </p>
           <p className="mt-1 text-sm font-semibold text-[#1C3A34]">
-            {location ? formatLastUpdated(location.recorded_at) : loading ? "Loading..." : "No location yet"}
+            {assignedDriver ?? detail.overview.unassigned}
           </p>
         </div>
         <div className="rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3">
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">Speed</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
+            {tracking.lastUpdate}
+          </p>
+          <p className="mt-1 text-sm font-semibold text-[#1C3A34]">
+            {location
+              ? formatLastUpdated(location.recorded_at, locale, tracking.unknownTime)
+              : loading
+                ? detail.loading
+                : tracking.noLocationYet}
+          </p>
+        </div>
+        <div className="rounded-xl border border-slate-200 bg-slate-50/70 px-4 py-3">
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-400">
+            {tracking.speed}
+          </p>
           <p className="mt-1 text-sm font-semibold text-[#1C3A34]">
             {location?.speed_kmh != null ? `${location.speed_kmh.toFixed(1)} km/h` : "—"}
           </p>
@@ -105,11 +114,9 @@ export function VehicleDetailTrackingTab({ vehicle }: VehicleDetailTrackingTabPr
         <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-200">
           <WifiOff className="mt-0.5 size-4 shrink-0" />
           <div>
-            <p className="font-semibold">Live updates are temporarily unavailable</p>
+            <p className="font-semibold">{tracking.errorTitle}</p>
             <p className="mt-0.5 text-xs leading-relaxed text-amber-800 dark:text-amber-200/75">
-              {hasLocation
-                ? "The last known vehicle location is shown below. We will keep trying to reconnect automatically."
-                : "We could not connect to live tracking right now. We will keep trying automatically."}
+              {hasLocation ? tracking.errorWithLocation : tracking.errorWithoutLocation}
             </p>
           </div>
         </div>
@@ -117,7 +124,7 @@ export function VehicleDetailTrackingTab({ vehicle }: VehicleDetailTrackingTabPr
 
       {!assignedDriver && !loading ? (
         <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-500">
-          Assign a driver to this vehicle to enable live GPS tracking.
+          {tracking.unassignedHint}
         </div>
       ) : null}
 
@@ -129,12 +136,16 @@ export function VehicleDetailTrackingTab({ vehicle }: VehicleDetailTrackingTabPr
         height={380}
         showMarker={hasLocation}
         lastUpdatedAt={location?.recorded_at ?? null}
+        locale={locale}
+        ariaLabels={{
+          recenter: tracking.mapRecenter,
+          zoomIn: tracking.mapZoomIn,
+          zoomOut: tracking.mapZoomOut,
+        }}
       />
 
       {!hasLocation && !loading ? (
-        <p className="text-sm text-slate-500">
-          Waiting for the assigned driver to share a GPS location.
-        </p>
+        <p className="text-sm text-slate-500">{tracking.waitingForGps}</p>
       ) : null}
     </section>
   );

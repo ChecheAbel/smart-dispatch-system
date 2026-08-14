@@ -131,6 +131,45 @@ export function formatGlobalDate(value: string | Date | null | undefined, locale
 }
 
 /**
+ * Global date-time formatter that supports Ethiopian calendar for Amharic locale.
+ */
+export function formatGlobalDateTime(value: string | Date | null | undefined, locale: string): string {
+  if (!value) return "—";
+  const date = typeof value === "string" ? new Date(value) : value;
+  if (Number.isNaN(date.getTime())) return "—";
+
+  if (locale === "am") {
+    return `${formatEthiopianDate(date, "am")} (${formatEthiopianTime(date, "am")})`;
+  }
+
+  return date.toLocaleString(locale, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/**
+ * Global time formatter that supports Ethiopian time for Amharic locale.
+ */
+export function formatGlobalTime(value: string | Date | null | undefined, locale: string): string {
+  if (!value) return "—";
+  const date = typeof value === "string" ? new Date(value) : value;
+  if (Number.isNaN(date.getTime())) return "—";
+
+  if (locale === "am") {
+    return formatEthiopianTime(date, "am");
+  }
+
+  return date.toLocaleTimeString(locale, {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+/**
  * Converts an Ethiopian date back to Gregorian Date.
  * year, month (1-13), day (1-30).
  */

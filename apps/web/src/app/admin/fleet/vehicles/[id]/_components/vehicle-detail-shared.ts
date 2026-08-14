@@ -11,6 +11,8 @@ import {
   Wrench,
 } from "lucide-react";
 import { formatEthiopianDate, formatEthiopianTime } from "@/lib/ethiopian-calendar";
+import type { SupportedLocale } from "@/lib/locale";
+import { formatMessage, getAdminVehiclesMessages } from "@/translations";
 import type {
   Vehicle,
   VehicleFuelType,
@@ -203,5 +205,86 @@ export function historyIcon(eventType: VehicleHistoryEvent["event_type"]) {
       return AlertTriangle;
     default:
       return History;
+  }
+}
+
+function parseHistorySummarySuffix(summary: string) {
+  const idx = summary.indexOf(": ");
+  return idx >= 0 ? summary.slice(idx + 2) : null;
+}
+
+function parseCreatedPlate(summary: string) {
+  const match = summary.match(/^Vehicle (.+) created$/);
+  return match?.[1] ?? null;
+}
+
+function parseFuelHistorySummary(summary: string) {
+  const match = summary.match(/([\d.]+)\s*L at ([\d.]+)\s*km/i);
+  if (!match) {
+    return null;
+  }
+
+  return { quantity: match[1], odometer: match[2] };
+}
+
+function vehicleStatusLabel(
+  status: unknown,
+  statusCopy: ReturnType<typeof getAdminVehiclesMessages>["status"],
+) {
+  if (typeof status !== "string") {
+    return "—";
+  }
+
+  return statusCopy[status as keyof typeof statusCopy] ?? status;
+}
+
+export function formatVehicleHistorySummary(
+  event: VehicleHistoryEvent,
+  copy: ReturnType<typeof getAdminVehiclesMessages>,
+  locale: SupportedLocale,
+) {
+  if (locale === "en") {
+    return event.summary;
+  }
+
+  const summaries = copy.detail.historySummaries as Record<string, string>;
+  const template = summaries[event.event_type];
+  if (!template) {
+    return event.summary;
+  }
+
+  const meta = event.metadata;
+
+  switch (event.event_type) {
+    case "created":
+      return formatMessage(template, {
+        plate: parseCreatedPlate(event.summary) ?? "—",
+      });
+    case "status_changed":
+      return formatMessage(template, {
+        from: vehicleStatusLabel(meta.from, copy.status),
+        to: vehicleStatusLabel(meta.to, copy.status),
+      });
+    case "driver_assigned":
+    case "driver_unassigned":
+    case "expiry_updated":
+      return template;
+    case "maintenance_opened":
+    case "maintenance_updated":
+    case "maintenance_completed":
+    case "maintenance_cancelled":
+      return formatMessage(template, {
+        title: parseHistorySummarySuffix(event.summary) ?? "—",
+      });
+    case "fuel_logged":
+    case "fuel_updated": {
+      const parsed = parseFuelHistorySummary(event.summary);
+      return formatMessage(template, {
+        quantity: String(meta.quantity_liters ?? parsed?.quantity ?? "—"),
+        odometer: String(meta.odometer_km ?? parsed?.odometer ?? "—"),
+      });
+    }
+    default:
+      return event.summary;
   }
 }

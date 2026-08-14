@@ -1,10 +1,11 @@
 import type {
+  NotificationChannel,
   NotificationModule,
   NotificationTemplate,
   NotificationTemplateRecipient,
 } from "@smart-dispatch/types";
 
-export const MODULE_EVENTS: Record<NotificationModule, string[]> = {
+export const MODULE_EVENTS: Record<Exclude<NotificationModule, "system">, string[]> = {
   ride_requests: [
     "created",
     "confirmed",
@@ -21,8 +22,10 @@ export const MODULE_EVENTS: Record<NotificationModule, string[]> = {
   password_reset: ["email_requested", "sms_requested"],
 };
 
+export const CHANNEL_ORDER: NotificationChannel[] = ["email", "sms", "push"];
+
 export const EVENT_GROUPS: Record<
-  NotificationModule,
+  Exclude<NotificationModule, "system">,
   { id: string; events: string[] }[]
 > = {
   ride_requests: [

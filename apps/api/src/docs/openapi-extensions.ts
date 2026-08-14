@@ -7,7 +7,12 @@ export const extensionTags = [
   {
     name: "Notifications",
     description:
-      "Email/SMS provider settings and message templates (admin only)",
+      "Email/SMS provider settings, push broadcasts, and message templates (admin only)",
+  },
+  {
+    name: "Devices",
+    description:
+      "Mobile device token registration for FCM push notifications (authenticated users)",
   },
   {
     name: "System Settings",
@@ -143,7 +148,7 @@ export const extensionSchemas = {
           "Module-specific event slug (e.g. `created`, `approved`, `assigned`)",
         example: "created",
       },
-      channel: { type: "string", enum: ["email", "sms"] },
+      channel: { type: "string", enum: ["email", "sms", "push"] },
       recipient: {
         type: "string",
         enum: ["requester", "driver", "applicant", "fleet_manager"],
@@ -152,7 +157,7 @@ export const extensionSchemas = {
       subject: {
         type: "string",
         nullable: true,
-        description: "Email subject (null for SMS)",
+        description: "Email subject or push title (null for SMS)",
       },
       body: { type: "string" },
       created_at: { type: "string", format: "date-time" },
@@ -171,10 +176,13 @@ export const extensionSchemas = {
           "user_registrations",
           "insurance",
           "inspection",
+          "invoices",
+          "password_reset",
+          "system",
         ],
       },
       event: { type: "string" },
-      channel: { type: "string", enum: ["email", "sms"] },
+      channel: { type: "string", enum: ["email", "sms", "push"] },
       recipient: {
         type: "string",
         enum: ["requester", "driver", "applicant", "fleet_manager"],
@@ -185,7 +193,7 @@ export const extensionSchemas = {
       recipient_contact: {
         type: "string",
         nullable: true,
-        description: "Email address or phone number used",
+        description: "Email address, phone number, or push target (e.g. user-{id})",
       },
       subject: { type: "string", nullable: true },
       body_preview: { type: "string", nullable: true },
@@ -204,6 +212,23 @@ export const extensionSchemas = {
       channel: { type: "string", enum: ["email", "sms"] },
       recipient_contact: { type: "string", nullable: true },
       error_message: { type: "string", nullable: true },
+    },
+  },
+  RegisteredDeviceToken: {
+    type: "object",
+    description:
+      "FCM device registration returned by the external notification service after token upsert.",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      clientId: {
+        type: "string",
+        description: "Push target for this user, in the form `user-{userId}`.",
+        example: "user-abc123",
+      },
+      platform: { type: "string", enum: ["android", "ios"] },
+      isActive: { type: "boolean" },
+      createdAt: { type: "string", format: "date-time" },
+      updatedAt: { type: "string", format: "date-time" },
     },
   },
   AuditLog: {
@@ -1278,6 +1303,83 @@ export const extensionPaths = {
       },
     },
   },
+  "/api/notifications/send": {
+    post: {
+      tags: ["Notifications"],
+      summary: "Send a custom message",
+      description:
+        "Send a custom email, SMS, and/or mobile push message to a group (drivers, customers, dispatchers) or to specific user IDs. Recipients missing an email or phone number are skipped for that channel.",
+      security,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["channels", "message"],
+              properties: {
+                channels: {
+                  type: "array",
+                  minItems: 1,
+                  items: { type: "string", enum: ["email", "sms", "push"] },
+                },
+                audience: {
+                  type: "string",
+                  enum: ["drivers", "customers", "dispatchers"],
+                },
+                user_ids: {
+                  type: "array",
+                  items: { type: "string", format: "uuid" },
+                },
+                title: {
+                  type: "string",
+                  maxLength: 80,
+                  description: "Required when email or push is selected.",
+                },
+                message: { type: "string", maxLength: 500 },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: "Message dispatch result",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      recipient_count: { type: "integer" },
+                      results: {
+                        type: "object",
+                        additionalProperties: {
+                          type: "object",
+                          properties: {
+                            sent: { type: "integer" },
+                            skipped: { type: "integer" },
+                            failed: { type: "integer" },
+                          },
+                        },
+                      },
+                    },
+                  },
+                  message: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+  },
   "/api/notifications/{channel}": {
     get: {
       tags: ["Notifications"],
@@ -1439,6 +1541,78 @@ export const extensionPaths = {
       },
     },
   },
+  "/api/devices/tokens": {
+    post: {
+      tags: ["Devices"],
+      summary: "Register FCM device token",
+      description:
+        "Registers or updates an FCM device token for the authenticated user. " +
+        "The API proxies to the external notification service (`POST /api/v1/devices/tokens`) " +
+        "and sets `clientId` to `user-{userId}` so push broadcasts can target the device. " +
+        "Requires `devices.register` permission (customer and driver roles by default). " +
+        "`NOTIFICATION_BROADCAST_URL` and `NOTIFICATION_APPLICATION_ID` must be configured on the API server.",
+      security,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["token", "platform"],
+              properties: {
+                token: {
+                  type: "string",
+                  description: "FCM device token from the client SDK",
+                  example: "fcm-device-token-from-client-sdk",
+                },
+                platform: {
+                  type: "string",
+                  enum: ["android", "ios"],
+                  example: "android",
+                },
+                clientId: {
+                  type: "string",
+                  description:
+                    "Optional. If provided, must match `user-{authenticatedUserId}` or the request is rejected.",
+                  example: "user-abc123",
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "201": {
+          description: "Device token registered",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      device: {
+                        $ref: "#/components/schemas/RegisteredDeviceToken",
+                      },
+                    },
+                  },
+                  message: {
+                    type: "string",
+                    example: "Device token registered successfully.",
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+  },
   "/api/notification-delivery-logs": {
     get: {
       tags: ["Notification Delivery Logs"],
@@ -1470,13 +1644,16 @@ export const extensionPaths = {
               "user_registrations",
               "insurance",
               "inspection",
+              "invoices",
+              "password_reset",
+              "system",
             ],
           },
         },
         {
           name: "channel",
           in: "query",
-          schema: { type: "string", enum: ["email", "sms"] },
+          schema: { type: "string", enum: ["email", "sms", "push"] },
         },
         { name: "event", in: "query", schema: { type: "string" } },
         { name: "is_test", in: "query", schema: { type: "boolean" } },

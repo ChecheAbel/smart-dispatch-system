@@ -371,13 +371,21 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
 
       {tab === "schedule" ? <VehicleDetailScheduleTab vehicle={vehicle} locale={locale} /> : null}
 
-      {tab === "tracking" ? <VehicleDetailTrackingTab vehicle={vehicle} /> : null}
+      {tab === "tracking" ? <VehicleDetailTrackingTab vehicle={vehicle} detail={detail} locale={locale} /> : null}
 
       {tab === "maintenance" ? <VehicleDetailMaintenanceTab vehicle={vehicle} detail={detail} canWrite={canWriteFleet} maintenance={maintenance} maintenanceLoading={maintenanceLoading} onOpenCreateSheet={() => setMaintenanceSheetOpen(true)} onCompleteMaintenance={(log) => void handleCompleteMaintenance(log)} /> : null}
 
       {tab === "fuel" ? <VehicleDetailFuelTab vehicle={vehicle} detail={detail} canWrite={canWriteFleet} fuelLogs={fuelLogs} fuelLoading={fuelLoading} onOpenCreateSheet={() => setFuelSheetOpen(true)} /> : null}
 
-      {tab === "history" ? <VehicleDetailHistoryTab detail={detail} history={history} historyLoading={historyLoading} /> : null}
+      {tab === "history" ? (
+        <VehicleDetailHistoryTab
+          copy={copy}
+          detail={detail}
+          locale={locale}
+          history={history}
+          historyLoading={historyLoading}
+        />
+      ) : null}
 
       <UpdateComplianceSheet open={complianceSheetOpen} onOpenChange={setComplianceSheetOpen} type={complianceSheetType} vehicle={vehicle} onSuccess={() => void handleComplianceSaved()} />
 

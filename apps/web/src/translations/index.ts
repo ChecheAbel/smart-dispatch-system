@@ -10,6 +10,8 @@ import type {
   AdminNotificationTemplatesMessages,
   AdminNotificationDeliveryLogsMessages,
   AdminNotificationsSmsMessages,
+  AdminNotificationsPushMessages,
+  AdminNotificationsSendMessages,
   AdminRolesMessages,
   AdminUsersMessages,
   AdminUserRegistrationsMessages,
@@ -56,6 +58,8 @@ export type {
   AdminNotificationTemplatesMessages,
   AdminNotificationDeliveryLogsMessages,
   AdminNotificationsSmsMessages,
+  AdminNotificationsPushMessages,
+  AdminNotificationsSendMessages,
   AdminRolesMessages,
   AdminUsersMessages,
   AdminUserRegistrationsMessages,
@@ -137,6 +141,18 @@ export function getAdminNotificationsSmsMessages(
   locale: SupportedLocale,
 ): AdminNotificationsSmsMessages {
   return getTranslations(locale).adminNotificationsSms;
+}
+
+export function getAdminNotificationsPushMessages(
+  locale: SupportedLocale,
+): AdminNotificationsPushMessages {
+  return getTranslations(locale).adminNotificationsPush;
+}
+
+export function getAdminNotificationsSendMessages(
+  locale: SupportedLocale,
+): AdminNotificationsSendMessages {
+  return getTranslations(locale).adminNotificationsSend;
 }
 
 export function getAdminNotificationsRideRequestsMessages(

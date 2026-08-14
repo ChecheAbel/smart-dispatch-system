@@ -2159,10 +2159,10 @@
   "adminNotifications": {
     "eyebrow": "System settings",
     "title": "Notifications",
-    "description": "Configure email and SMS provider credentials for outbound delivery.",
+    "description": "Configure email, SMS, and mobile push delivery for outbound notifications.",
     "channels": {
       "title": "Delivery channel",
-      "description": "Choose which provider credentials you want to configure.",
+      "description": "Choose which provider credentials or broadcast tools you want to configure.",
       "email": {
         "title": "Email",
         "description": "SMTP, SendGrid, or Mailgun for outbound email."
@@ -2170,6 +2170,10 @@
       "sms": {
         "title": "SMS",
         "description": "AfroSMS messaging for outbound text delivery."
+      },
+      "push": {
+        "title": "Mobile push",
+        "description": "FCM broadcast service connection for mobile devices."
       }
     },
     "accessDenied": {
@@ -2392,6 +2396,141 @@
       }
     }
   },
+  "adminNotificationsPush": {
+    "title": "Mobile push",
+    "description": "Connection status for the mobile push broadcast service.",
+    "status": {
+      "configuredTitle": "Push service connected",
+      "configuredDescription": "The broadcast API is configured. Messages are delivered to devices registered under user-{id} targets.",
+      "notConfiguredTitle": "Push service not configured",
+      "notConfiguredDescription": "Set NOTIFICATION_BROADCAST_URL and NOTIFICATION_APPLICATION_ID on the API server to enable mobile push."
+    },
+    "sendCta": {
+      "title": "Send a message",
+      "description": "Compose email, SMS, or push to a group or to specific people.",
+      "button": "Open send message"
+    },
+    "errors": {
+      "loadFailed": "Failed to check push notification configuration."
+    }
+  },
+  "adminNotificationsSend": {
+    "eyebrow": "System settings",
+    "title": "Send message",
+    "description": "Choose how to send, who should receive it, then write the message.",
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to notifications is required to open this page. Ask an administrator to grant the notifications.read permission for your role.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "channels": {
+      "title": "How to send",
+      "description": "Select one or more channels. Recipients missing an email or phone number are skipped for that channel.",
+      "checking": "Checking…",
+      "ready": "Ready to send",
+      "unavailable": "Not configured",
+      "setup": "Set up this channel",
+      "email": {
+        "title": "Email",
+        "description": "Send to each recipient’s email address."
+      },
+      "sms": {
+        "title": "SMS",
+        "description": "Send to each recipient’s mobile number."
+      },
+      "push": {
+        "title": "Mobile push",
+        "description": "Send a push notification to registered devices."
+      }
+    },
+    "sections": {
+      "recipients": {
+        "title": "Who receives it",
+        "description": "Send to a whole group, or pick specific people."
+      },
+      "message": {
+        "title": "What to send",
+        "description": "The same text is used on every selected channel."
+      }
+    },
+    "audience": {
+      "drivers": "All drivers",
+      "driversHint": "Active drivers, up to 500.",
+      "customers": "All customers",
+      "customersHint": "Active customer accounts, up to 500.",
+      "dispatchers": "All dispatchers",
+      "dispatchersHint": "Active dispatcher accounts, up to 500."
+    },
+    "form": {
+      "modeGroup": "Group",
+      "modePeople": "People",
+      "userSearch": "Find by name or email",
+      "userSearchHint": "Type at least two characters.",
+      "userSearchPlaceholder": "e.g. Jane Doe or jane@cheche.et",
+      "searching": "Searching…",
+      "noResults": "No users match “{query}”.",
+      "selectedCount": "{count} selected",
+      "clearRecipients": "Clear",
+      "clearSearch": "Clear search",
+      "addUser": "Add {name}",
+      "removeUser": "Remove recipient",
+      "roleLabels": {
+        "admin": "Admin",
+        "dispatcher": "Dispatcher",
+        "driver": "Driver",
+        "user": "Customer"
+      },
+      "titleLabel": "Title",
+      "titlePlaceholder": "e.g. Service update",
+      "titleOptional": "optional for SMS only",
+      "messageLabel": "Message",
+      "messagePlaceholder": "Write the message…",
+      "characterCount": "{current} / {max}",
+      "review": "Review and send",
+      "reviewEmpty": "Select a channel and recipients to continue.",
+      "reviewSummary": "{channels} · {recipients}",
+      "send": "Send message",
+      "sending": "Sending…",
+      "sendToAudience": "Send to {audience}",
+      "sendToPeople": "{count} people"
+    },
+    "confirm": {
+      "title": "Send this message?",
+      "description": "Delivery starts immediately and cannot be undone.",
+      "via": "Channels",
+      "to": "Recipients",
+      "message": "Message",
+      "groupWarning": "This can reach up to 500 people in the selected group.",
+      "cancel": "Back",
+      "send": "Send now"
+    },
+    "results": {
+      "sent": "{count} sent",
+      "skipped": "{count} skipped",
+      "failed": "{count} failed"
+    },
+    "validation": {
+      "title": "Check required fields",
+      "description": "Choose a channel, add a message, and select at least one recipient.",
+      "channelsRequired": "Select at least one ready channel.",
+      "recipientsRequired": "Select a group or at least one person.",
+      "titleRequired": "Enter a title for email or push.",
+      "messageRequired": "Enter a message."
+    },
+    "toast": {
+      "sendSuccess": {
+        "title": "Message sent",
+        "description": "Delivered to {count} recipient(s)."
+      },
+      "sendFailed": {
+        "title": "Could not send message",
+        "description": "Please check the channels and try again."
+      }
+    }
+  },
   "adminNotificationTemplates": {
     "eyebrow": "System settings",
     "title": "Message templates",
@@ -2507,10 +2646,14 @@
     "enabledLabel": "Enabled",
     "subjectLabel": "Email subject",
     "subjectPlaceholder": "Subject line for this notification",
+    "titleLabel": "Push title",
+    "titlePlaceholder": "Title shown on the device",
     "bodyLabel": "Message",
     "bodyPlaceholder": "Write the notification message...",
     "testEmailLabel": "Test email",
     "testEmailPlaceholder": "you@example.com",
+    "testPushLabel": "Recipient account email",
+    "testPushPlaceholder": "driver@example.com",
     "testPhoneLabel": "Test phone",
     "testPhonePlaceholder": "+2519XXXXXXXX",
     "testAction": "Send test",
@@ -2519,14 +2662,16 @@
       "title": "Send test message",
       "descriptionEmail": "Deliver this template to your inbox using sample placeholder data.",
       "descriptionSms": "Deliver this template to a phone number using sample placeholder data.",
+      "descriptionPush": "Send this template as an FCM push using sample placeholder data. The account must have a registered device.",
       "previewTitle": "Message preview",
       "previewNote": "Test messages replace placeholders with sample values such as Jane Doe and Bole International Airport.",
       "emailHint": "Use an email address you can access to verify subject, body, and delivery.",
       "phoneHint": "Include country code, for example +2519XXXXXXXX.",
+      "pushHint": "Enter the user's account email. The push is sent to devices registered for that user.",
       "recipientRequired": "Enter a recipient before sending the test.",
       "emailInvalid": "Enter a valid email address.",
       "phoneInvalid": "Enter a valid phone number with country code.",
-      "providerNote": "Delivery uses your saved email or SMS provider under System Settings → Notifications."
+      "providerNote": "Email and SMS use your saved providers. Push uses the configured FCM broadcast service."
     },
     "saveAction": "Save message templates",
     "saving": "Saving...",
@@ -2582,7 +2727,8 @@
     },
     "channels": {
       "email": "Email",
-      "sms": "SMS"
+      "sms": "SMS",
+      "push": "Push"
     },
     "recipients": {
       "requester": "Customer",
@@ -2738,7 +2884,7 @@
   "adminNotificationDeliveryLogs": {
     "eyebrow": "System settings",
     "title": "Notification delivery log",
-    "description": "Track sent, skipped, and failed email and SMS deliveries from message templates.",
+    "description": "Track sent, skipped, and failed email, SMS, and push deliveries from message templates and admin broadcasts.",
     "searchPlaceholder": "Search by recipient, event, error, or reference...",
     "itemLabel": "delivery",
     "filters": {
@@ -2780,7 +2926,12 @@
       "insurance": "Insurance compliance",
       "inspection": "Inspection compliance",
       "invoices": "Invoices & billing",
-      "password_reset": "Password reset"
+      "password_reset": "Password reset",
+      "system": "System"
+    },
+    "eventLabels": {
+      "admin.broadcast": "Admin message",
+      "test.push": "Test push notification"
     },
     "recipientLabels": {
       "requester": "Customer",
@@ -2791,7 +2942,8 @@
     },
     "channelLabels": {
       "email": "Email",
-      "sms": "SMS"
+      "sms": "SMS",
+      "push": "Push"
     },
     "kindLabels": {
       "live": "Live",
@@ -3458,6 +3610,27 @@
         "dates": "Dates",
         "additionalNotes": "Additional notes"
       },
+      "tracking": {
+        "title": "Live location tracking",
+        "description": "Real-time position from the assigned driver's device.",
+        "connected": "Connected",
+        "disconnected": "Disconnected",
+        "live": "Live",
+        "stale": "Stale",
+        "assignedDriver": "Assigned driver",
+        "lastUpdate": "Last update",
+        "speed": "Speed",
+        "unknownTime": "Unknown",
+        "noLocationYet": "No location yet",
+        "errorTitle": "Live updates are temporarily unavailable",
+        "errorWithLocation": "The last known vehicle location is shown below. We will keep trying to reconnect automatically.",
+        "errorWithoutLocation": "We could not connect to live tracking right now. We will keep trying automatically.",
+        "unassignedHint": "Assign a driver to this vehicle to enable live GPS tracking.",
+        "waitingForGps": "Waiting for the assigned driver to share a GPS location.",
+        "mapRecenter": "Recenter map",
+        "mapZoomIn": "Zoom in",
+        "mapZoomOut": "Zoom out"
+      },
       "maintenance": {
         "createTitle": "Log maintenance",
         "createSubtitle": "What work is being done on {plate}?",
@@ -3633,6 +3806,19 @@
         "fuel_logged": "Fuel refill logged",
         "fuel_updated": "Fuel log updated",
         "expiry_updated": "Expiry dates updated"
+      },
+      "historySummaries": {
+        "created": "Vehicle {plate} created",
+        "status_changed": "Status changed from {from} to {to}",
+        "driver_assigned": "Default driver assigned",
+        "driver_unassigned": "Default driver unassigned",
+        "maintenance_opened": "Maintenance opened: {title}",
+        "maintenance_updated": "Maintenance updated: {title}",
+        "maintenance_completed": "Maintenance completed: {title}",
+        "maintenance_cancelled": "Maintenance cancelled: {title}",
+        "fuel_logged": "Fuel refill logged: {quantity} L at {odometer} km",
+        "fuel_updated": "Fuel log updated: {quantity} L at {odometer} km",
+        "expiry_updated": "Compliance details updated"
       },
       "toast": {
         "loadFailed": {

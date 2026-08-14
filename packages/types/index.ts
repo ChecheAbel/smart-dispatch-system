@@ -162,7 +162,7 @@ export interface NotificationDeliveryLog {
   created_at: string;
 }
 
-export type NotificationChannel = "email" | "sms";
+export type NotificationChannel = "email" | "sms" | "push";
 
 export interface NotificationConfiguration {
   id: string;
@@ -185,7 +185,8 @@ export type NotificationModule =
   | "insurance"
   | "inspection"
   | "invoices"
-  | "password_reset";
+  | "password_reset"
+  | "system";
 
 export type RideRequestNotificationEvent =
   | "created"
@@ -332,6 +333,7 @@ export const NOTIFICATION_TEMPLATE_PLACEHOLDERS: Record<
   inspection: INSPECTION_NOTIFICATION_PLACEHOLDERS,
   invoices: INVOICE_NOTIFICATION_PLACEHOLDERS,
   password_reset: PASSWORD_RESET_NOTIFICATION_PLACEHOLDERS,
+  system: [],
 };
 
 /** @deprecated Use NotificationTemplate */
