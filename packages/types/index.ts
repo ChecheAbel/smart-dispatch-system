@@ -1357,3 +1357,54 @@ export interface BrandingSettings {
   support_phone: string | null;
   website_url: string | null;
 }
+
+export interface BusinessTinLicense {
+  license_no: string;
+  main_guid: string | null;
+  business_name: string;
+  legal_status: string | null;
+  issued_date: string | null;
+  expiry_date: string | null;
+}
+
+export interface BusinessTinRegistration {
+  tin: string;
+  owner_name: string;
+  licenses: BusinessTinLicense[];
+}
+
+export interface BusinessLicenseAddress {
+  region: string | null;
+  zone: string | null;
+  woreda: string | null;
+  kebele: string | null;
+  house_no: string | null;
+  mobile_phone: string | null;
+  regular_phone: string | null;
+}
+
+export interface BusinessLicenseSubGroup {
+  code: number | null;
+  description: string | null;
+}
+
+export type BusinessLicenseAssociate = Record<string, unknown>;
+
+export interface BusinessLicenseDetail {
+  main_guid: string | null;
+  owner_tin: string;
+  date_registered: string | null;
+  trade_name: string | null;
+  license_no: string;
+  status: number | null;
+  status_description: string | null;
+  capital: number | null;
+  associates: BusinessLicenseAssociate[];
+  address: BusinessLicenseAddress | null;
+  sub_groups: BusinessLicenseSubGroup[];
+  renewed_to: string | null;
+  renewed_to_date_string: string | null;
+  renewal_date: string | null;
+  renewed_from: string | null;
+  cancellation_date: string | null;
+}

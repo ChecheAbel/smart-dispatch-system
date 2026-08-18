@@ -361,7 +361,7 @@
         "jobTitle": "Fleet manager",
         "registrationNumber": "Business registration no.",
         "organizationAddress": "Street, city, region",
-        "taxId": "Tax identification number",
+        "taxId": "10-digit TIN",
         "officialReference": "Reference or procurement code",
         "billingContactName": "Finance officer",
         "billingContactEmail": "billing@agency.gov.et"
@@ -391,6 +391,7 @@
         "jobTitleRequired": "Job title is required.",
         "organizationAddressRequired": "Organization address is required.",
         "taxIdRequired": "Tax ID / TIN is required.",
+        "taxIdInvalid": "Enter a valid 10-digit TIN.",
         "registrationNumberRequired": "Business registration number is required.",
         "entityTypeRequired": "Government entity type is required.",
         "officialReferenceRequired": "Official reference / procurement code is required.",
@@ -399,6 +400,25 @@
         "billingContactEmailInvalid": "Enter a valid billing contact email.",
         "createFailedTitle": "Could not create account",
         "createFailedDescription": "Registration failed. Please try again."
+      },
+      "tinLookup": {
+        "hint": "Enter your 10-digit TIN to fill organization details automatically.",
+        "digitsProgress": "{current} of {total} digits",
+        "lookingUp": "Looking up this TIN…",
+        "searchingTitle": "Searching eTrade",
+        "searchingDescription": "Checking which businesses are registered under this TIN.",
+        "foundCount": "{count} businesses found for this TIN",
+        "foundOne": "1 business found for this TIN",
+        "ownerLabel": "Registered to {name}",
+        "selectBusiness": "Select the business you are registering. The form will fill from that license.",
+        "filled": "Organization details were filled from this TIN. You can edit them if needed.",
+        "filling": "Loading details for this business…",
+        "noLicenses": "No business licenses were found for this TIN. Enter the remaining details manually.",
+        "failed": "Could not look up this TIN. You can still enter the details manually.",
+        "licenseNo": "License {licenseNo}",
+        "issued": "Issued {date}",
+        "expires": "Expires {date}",
+        "selected": "Selected"
       }
     },
     "forgotPassword": {
@@ -2003,6 +2023,36 @@
         "lastName": "Last name",
         "email": "Email address",
         "mobile": "Mobile number"
+      },
+      "businessRecord": {
+        "title": "Business record",
+        "description": "Official eTrade details for the submitted TIN and license number.",
+        "loading": "Looking up this business in eTrade…",
+        "missingTin": "This application does not include a valid TIN, so official business details cannot be loaded.",
+        "failed": "Could not load official business details from eTrade.",
+        "noMatch": "The submitted license number was not found under this TIN.",
+        "otherLicenses": "Other licenses under this TIN",
+        "nameMismatch": "The submitted organization name does not match the registered business name.",
+        "fields": {
+          "ownerName": "Owner name",
+          "tradeName": "Trade name",
+          "businessName": "Registered business name",
+          "licenseNo": "License number",
+          "status": "License status",
+          "dateRegistered": "Date registered",
+          "capital": "Capital",
+          "region": "Region",
+          "zone": "Zone",
+          "woreda": "Woreda",
+          "kebele": "Kebele",
+          "houseNo": "House no.",
+          "mobilePhone": "Business mobile",
+          "regularPhone": "Business phone",
+          "activities": "Business activities",
+          "renewalDate": "Renewal date",
+          "renewedTo": "Renewed to",
+          "cancellationDate": "Cancellation date"
+        }
       }
     },
     "rejectModal": {

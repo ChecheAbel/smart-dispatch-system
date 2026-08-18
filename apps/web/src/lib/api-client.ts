@@ -28,7 +28,8 @@ function isAuthRequest(url?: string) {
     url.includes("/api/auth/register-user") ||
     url.includes("/api/auth/forgot-password") ||
     url.includes("/api/auth/verify-reset-otp") ||
-    url.includes("/api/auth/reset-password")
+    url.includes("/api/auth/reset-password") ||
+    url.includes("/api/business-tin/")
   );
 }
 

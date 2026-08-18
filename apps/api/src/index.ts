@@ -31,6 +31,7 @@ import { registerAdminRideRequestRoutes } from "./routes/admin-ride-request.rout
 import { registerAdminDashboardRoutes } from "./routes/dashboard.routes";
 import { registerComplaintRoutes } from "./routes/complaint.routes";
 import { registerDeviceTokenRoutes } from "./routes/device-token.routes";
+import { registerBusinessTinRoutes } from "./routes/business-tin.routes";
 import { initSocketIo } from "./websocket/socket-io";
 import { registerRealtimeSocket } from "./websocket/realtime.socket";
 import { startInvoiceAutomationScheduler } from "./services/scheduler.service";
@@ -83,6 +84,7 @@ registerSystemSettingsRoutes(app);
 registerAdminDashboardRoutes(app);
 registerComplaintRoutes(app);
 registerDeviceTokenRoutes(app);
+registerBusinessTinRoutes(app);
 initSocketIo(server);
 registerRealtimeSocket();
 

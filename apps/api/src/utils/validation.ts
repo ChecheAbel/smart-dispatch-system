@@ -96,6 +96,20 @@ export function isValidEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+const ETHIOPIAN_TIN_PATTERN = /^\d{10}$/;
+
+export function normalizeEthiopianTin(value: string) {
+  const digits = value.trim().replace(/\D/g, "");
+  if (!ETHIOPIAN_TIN_PATTERN.test(digits)) {
+    return undefined;
+  }
+  return digits;
+}
+
+export function isValidEthiopianTin(value: string) {
+  return Boolean(normalizeEthiopianTin(value));
+}
+
 const ETHIOPIAN_MOBILE_LOCAL_PATTERN = /^[79]\d{8}$/;
 
 export function normalizeEthiopianMobileNumber(value: string) {

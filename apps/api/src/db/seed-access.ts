@@ -597,6 +597,8 @@ const DEFAULT_ENDPOINTS: Array<{
 }> = [
   { slug: "users.list", method: "GET", path: "/api/users", description: "List users", permissionSlug: "users.read" },
   { slug: "users.create", method: "POST", path: "/api/users", description: "Create user", permissionSlug: "users.write" },
+  { slug: "business_tin.lookup", method: "GET", path: "/api/business-tin/:tin", description: "Look up a business TIN with eTrade registration", permissionSlug: "users.read" },
+  { slug: "business_tin.license.lookup", method: "GET", path: "/api/business-tin/:tin/license", description: "Look up a business trade license by TIN and license number", permissionSlug: "users.read" },
   { slug: "roles.list", method: "GET", path: "/api/roles", description: "List roles", permissionSlug: "roles.read" },
   { slug: "roles.create", method: "POST", path: "/api/roles", description: "Create role", permissionSlug: "roles.write" },
   { slug: "roles.update", method: "PATCH", path: "/api/roles/:id", description: "Update role", permissionSlug: "roles.write" },

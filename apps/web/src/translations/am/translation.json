@@ -361,7 +361,7 @@
         "jobTitle": "የተሽከርካሪ አስተዳዳሪ",
         "registrationNumber": "የንግድ ምዝገባ ቁጥር",
         "organizationAddress": "መንገድ፣ ከተማ፣ ክልል",
-        "taxId": "የግብር መለያ ቁጥር",
+        "taxId": "10-አሃዝ ቲን",
         "officialReference": "ማጣቀሻ ወይም የግዥ ኮድ",
         "billingContactName": "የፋይናንስ ባለሙያ",
         "billingContactEmail": "billing@agency.gov.et"
@@ -391,6 +391,7 @@
         "jobTitleRequired": "የስራ መደብ ያስፈልጋል።",
         "organizationAddressRequired": "የድርጅት አድራሻ ያስፈልጋል።",
         "taxIdRequired": "የግብር መለያ / ቲን ያስፈልጋል።",
+        "taxIdInvalid": "ትክክለኛ 10-አሃዝ ቲን ያስገቡ።",
         "registrationNumberRequired": "የንግድ ምዝገባ ቁጥር ያስፈልጋል።",
         "entityTypeRequired": "የመንግስት አካል አይነት ያስፈልጋል።",
         "officialReferenceRequired": "ይፋዊ ማጣቀሻ / የግዥ ኮድ ያስፈልጋል።",
@@ -399,6 +400,25 @@
         "billingContactEmailInvalid": "ትክክለኛ የክፍያ ተጠሪ ኢሜይል ያስገቡ።",
         "createFailedTitle": "መለያ መፍጠር አልተሳካም",
         "createFailedDescription": "ምዝገባ አልተሳካም። እባክዎ እንደገና ይሞክሩ።"
+      },
+      "tinLookup": {
+        "hint": "የድርጅት መረጃውን በራስ-ሰር ለመሙላት 10-አሃዝ ቲን ያስገቡ።",
+        "digitsProgress": "{current} ከ {total} አሃዞች",
+        "lookingUp": "ቲን በመፈለግ ላይ…",
+        "searchingTitle": "eTrade በመፈለግ ላይ",
+        "searchingDescription": "በዚህ ቲን ስር የተመዘገቡ ድርጅቶችን በመፈተሽ ላይ።",
+        "foundCount": "ለዚህ ቲን {count} ድርጅቶች ተገኝተዋል",
+        "foundOne": "ለዚህ ቲን 1 ድርጅት ተገኝቷል",
+        "ownerLabel": "ባለቤት {name}",
+        "selectBusiness": "የሚመዘገቡትን ድርጅት ይምረጡ። ቅጹ ከዚያ ፈቃድ ይሞላል።",
+        "filled": "የድርጅት መረጃው ከዚህ ቲን ተሞልቷል። አስፈላጊ ከሆነ ማስተካከል ይችላሉ።",
+        "filling": "የዚህ ድርጅት ዝርዝር በመጫን ላይ…",
+        "noLicenses": "ለዚህ ቲን የንግድ ፈቃድ አልተገኘም። የቀሩትን ዝርዝሮች በእጅ ያስገቡ።",
+        "failed": "ይህን ቲን መፈለግ አልተቻለም። ዝርዝሮቹን በእጅ ማስገባት ይችላሉ።",
+        "licenseNo": "ፈቃድ {licenseNo}",
+        "issued": "የተሰጠበት {date}",
+        "expires": "የሚያበቃው {date}",
+        "selected": "ተመርጧል"
       }
     },
     "forgotPassword": {
@@ -2003,6 +2023,36 @@
         "lastName": "የአያት ስም",
         "email": "ኢሜይል",
         "mobile": "ሞባይል ቁጥር"
+      },
+      "businessRecord": {
+        "title": "የንግድ መዝገብ",
+        "description": "ለቀረበው ቲን እና የፈቃድ ቁጥር ከ eTrade የተገኙ ይፋዊ ዝርዝሮች።",
+        "loading": "ይህን ድርጅት በ eTrade በመፈለግ ላይ…",
+        "missingTin": "ይህ ማመልከቻ ትክክለኛ ቲን የለውም፣ ስለዚህ ይፋዊ የንግድ ዝርዝሮችን መጫን አይቻልም።",
+        "failed": "ከ eTrade ይፋዊ የንግድ ዝርዝሮችን መጫን አልተቻለም።",
+        "noMatch": "የቀረበው የፈቃድ ቁጥር በዚህ ቲን ስር አልተገኘም።",
+        "otherLicenses": "በዚህ ቲን ስር ያሉ ሌሎች ፈቃዶች",
+        "nameMismatch": "የቀረበው የድርጅት ስም ከተመዘገበው የንግድ ስም ጋር አይዛመድም።",
+        "fields": {
+          "ownerName": "የባለቤት ስም",
+          "tradeName": "የንግድ ስም",
+          "businessName": "የተመዘገበ የድርጅት ስም",
+          "licenseNo": "የፈቃድ ቁጥር",
+          "status": "የፈቃድ ሁኔታ",
+          "dateRegistered": "የተመዘገበበት ቀን",
+          "capital": "ካፒታል",
+          "region": "ክልል",
+          "zone": "ዞን",
+          "woreda": "ወረዳ",
+          "kebele": "ቀበሌ",
+          "houseNo": "የቤት ቁ.",
+          "mobilePhone": "የንግድ ሞባይል",
+          "regularPhone": "የንግድ ስልክ",
+          "activities": "የንግድ ስራዎች",
+          "renewalDate": "የእድሳት ቀን",
+          "renewedTo": "እስከ",
+          "cancellationDate": "የመሰረዝ ቀን"
+        }
       }
     },
     "rejectModal": {

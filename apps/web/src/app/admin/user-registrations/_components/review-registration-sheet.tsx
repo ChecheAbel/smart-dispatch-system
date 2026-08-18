@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Loader2, UserRound } from "lucide-react";
 import type { User } from "@smart-dispatch/types";
 import { UserRequesterProfileSection } from "@/app/admin/users/_components/user-requester-profile-section";
+import { BusinessRecordSection } from "./business-record-section";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -222,6 +223,10 @@ export function ReviewRegistrationSheet({
               </section>
 
               {user.requester_profile ? <UserRequesterProfileSection user={user} /> : null}
+
+              {user.requester_profile?.segment === "business" ? (
+                <BusinessRecordSection profile={user.requester_profile} locale={locale} />
+              ) : null}
 
               {isRejected && user.account_block_reason ? (
                 <section className="space-y-3 rounded-lg border border-red-200 bg-red-50/60 p-5">

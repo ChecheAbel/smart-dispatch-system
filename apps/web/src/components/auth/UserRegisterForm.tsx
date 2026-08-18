@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useState, type FormEvent, type ReactNode } from "react";
 import Link from "next/link";
 import {
+  AlertCircle,
   ArrowLeft,
   ArrowRight,
   Building2,
@@ -18,16 +19,19 @@ import {
   Mail,
   MapPin,
   Phone,
+  Search,
   ShieldCheck,
   UserRound,
 } from "lucide-react";
-import type { RequesterSegment } from "@smart-dispatch/types";
+import type { BusinessTinLicense, RequesterSegment } from "@smart-dispatch/types";
 import AuthShell from "@/components/auth/AuthShell";
 import { AuthBackToHomeLink } from "@/components/auth/AuthBackToHomeLink";
 import { AuthLanguageSwitcher } from "@/components/auth/AuthLanguageSwitcher";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { useLocale } from "@/components/shared/providers/locale-context";
+import { useBusinessTinAutofill } from "@/hooks/use-business-tin-autofill";
 import { registerUserApplication } from "@/lib/auth-api";
+import type { BusinessTinAutofillFields } from "@/lib/business-tin-api";
 import {
   ETHIOPIA_MOBILE_COUNTRY_CODE,
   ETHIOPIAN_MOBILE_PLACEHOLDER,
@@ -35,6 +39,7 @@ import {
   isValidEthiopianMobileLocal,
   sanitizeEthiopianMobileInput,
 } from "@/lib/ethiopian-mobile";
+import { isValidEthiopianTin, sanitizeEthiopianTinInput } from "@/lib/ethiopian-tin";
 import { GOVERNMENT_ENTITY_TYPES, REQUESTER_SEGMENT_OPTIONS } from "@/lib/requester-segments";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { isValidEmail } from "@/lib/validation";
@@ -154,7 +159,11 @@ function validateOrganizationStep(form: FormState, errorsCopy: RegisterCopy["err
     if (!form.organizationAddress.trim()) {
       errors.organizationAddress = errorsCopy.organizationAddressRequired;
     }
-    if (!form.taxId.trim()) errors.taxId = errorsCopy.taxIdRequired;
+    if (!form.taxId.trim()) {
+      errors.taxId = errorsCopy.taxIdRequired;
+    } else if (!isValidEthiopianTin(form.taxId)) {
+      errors.taxId = errorsCopy.taxIdInvalid;
+    }
     if (!form.registrationNumber.trim()) {
       errors.registrationNumber = errorsCopy.registrationNumberRequired;
     }
@@ -240,6 +249,252 @@ function validateAccountTypeStep(
     return { segment: errorsCopy.selectAccountType };
   }
   return {};
+}
+
+function TinLookupSection({
+  copy,
+  taxId,
+  error,
+  disabled,
+  lookup,
+  onChange,
+}: {
+  copy: RegisterCopy;
+  taxId: string;
+  error?: string;
+  disabled: boolean;
+  lookup: ReturnType<typeof useBusinessTinAutofill>;
+  onChange: (value: string) => void;
+}) {
+  const isSearching = lookup.status === "loading" && lookup.licenses.length === 0;
+  const showPicker = lookup.licenses.length > 0;
+  const canChoose = lookup.licenses.length > 1;
+
+  return (
+    <div className="space-y-3">
+      <label htmlFor="user-tax-id" className={cn(labelClassName, error && errorLabelClassName)}>
+        {copy.fields.taxId}
+      </label>
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+        <input
+          id="user-tax-id"
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          maxLength={10}
+          value={taxId}
+          onChange={(event) => onChange(sanitizeEthiopianTinInput(event.target.value))}
+          disabled={disabled}
+          placeholder={copy.placeholders.taxId}
+          className={cn(
+            inputClassName,
+            "pr-16",
+            error && errorInputClassName,
+            isSearching && "border-[#1C3A34]/40 dark:border-[#C9B87A]/40",
+          )}
+        />
+        <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-2 text-xs font-medium text-slate-400">
+          {isSearching ? <Loader2 className="h-4 w-4 animate-spin text-[#1C3A34] dark:text-[#C9B87A]" /> : null}
+          <span>{taxId.length}/10</span>
+        </div>
+      </div>
+
+      {error ? (
+        <p className="text-xs text-red-600">{error}</p>
+      ) : taxId.length > 0 && taxId.length < 10 ? (
+        <p className="text-xs text-slate-500 dark:text-[#8b95a2]">
+          {formatMessage(copy.tinLookup.digitsProgress, {
+            current: taxId.length,
+            total: 10,
+          })}
+        </p>
+      ) : (
+        <p className="text-xs text-slate-500 dark:text-[#8b95a2]">{copy.tinLookup.hint}</p>
+      )}
+
+      {isSearching ? (
+        <div className="rounded-2xl border border-[#1C3A34]/15 bg-[#1C3A34]/[0.04] px-4 py-4 dark:border-[#C9B87A]/20 dark:bg-[#C9B87A]/[0.06]">
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#1C3A34] text-white dark:bg-[#203f38] dark:text-[#C9B87A]">
+              <Loader2 className="h-4 w-4 animate-spin" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-[#1C3A34] dark:text-[#e8ecf1]">
+                {copy.tinLookup.searchingTitle}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-[#8b95a2]">
+                {copy.tinLookup.searchingDescription}
+              </p>
+            </div>
+          </div>
+          <div className="mt-4 space-y-2">
+            <div className="h-16 animate-pulse rounded-2xl bg-white/80 dark:bg-white/5" />
+            <div className="h-16 animate-pulse rounded-2xl bg-white/60 dark:bg-white/[0.04]" />
+          </div>
+        </div>
+      ) : null}
+
+      {lookup.status === "error" ? (
+        <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50/80 px-4 py-3 dark:border-red-400/20 dark:bg-red-950/20">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-300" />
+          <p className="text-xs leading-relaxed text-red-700 dark:text-red-300">
+            {lookup.errorMessage || copy.tinLookup.failed}
+          </p>
+        </div>
+      ) : null}
+
+      {lookup.status === "empty" ? (
+        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50/80 px-4 py-3 dark:border-amber-400/20 dark:bg-amber-950/20">
+          <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-300" />
+          <p className="text-xs leading-relaxed text-amber-800 dark:text-amber-200">
+            {copy.tinLookup.noLicenses}
+          </p>
+        </div>
+      ) : null}
+
+      {showPicker ? (
+        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/50 dark:border-white/10 dark:bg-[#11161d]">
+          <div className="border-b border-slate-200 px-4 py-3 dark:border-white/10">
+            <p className="text-sm font-semibold text-[#1C3A34] dark:text-[#e8ecf1]">
+              {lookup.licenses.length === 1
+                ? copy.tinLookup.foundOne
+                : formatMessage(copy.tinLookup.foundCount, { count: lookup.licenses.length })}
+            </p>
+            {lookup.ownerName ? (
+              <p className="mt-1 text-xs text-slate-500 dark:text-[#8b95a2]">
+                {formatMessage(copy.tinLookup.ownerLabel, { name: lookup.ownerName })}
+              </p>
+            ) : null}
+            {canChoose ? (
+              <p className="mt-2 text-xs leading-relaxed text-slate-500 dark:text-[#8b95a2]">
+                {copy.tinLookup.selectBusiness}
+              </p>
+            ) : null}
+          </div>
+
+          <div
+            className="max-h-72 space-y-2 overflow-y-auto p-2"
+            role={canChoose ? "radiogroup" : undefined}
+            aria-label={canChoose ? copy.tinLookup.selectBusiness : undefined}
+          >
+            {lookup.licenses.map((license) => (
+              <TinBusinessOption
+                key={license.license_no}
+                copy={copy}
+                license={license}
+                fallbackName={lookup.ownerName}
+                selected={lookup.selectedLicenseNo === license.license_no}
+                filling={lookup.isFilling && lookup.selectedLicenseNo === license.license_no}
+                disabled={disabled || lookup.isFilling}
+                interactive={canChoose}
+                onSelect={() => lookup.selectLicense(license.license_no)}
+              />
+            ))}
+          </div>
+
+          {lookup.isFilling ? (
+            <p className="flex items-center gap-2 border-t border-slate-200 px-4 py-3 text-xs text-slate-500 dark:border-white/10 dark:text-[#8b95a2]">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              {copy.tinLookup.filling}
+            </p>
+          ) : null}
+
+          {lookup.status === "filled" ? (
+            <p className="flex items-center gap-2 border-t border-emerald-100 bg-emerald-50/70 px-4 py-3 text-xs text-emerald-800 dark:border-emerald-400/15 dark:bg-emerald-950/20 dark:text-emerald-200">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              {copy.tinLookup.filled}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function TinBusinessOption({
+  copy,
+  license,
+  fallbackName,
+  selected,
+  filling,
+  disabled,
+  interactive,
+  onSelect,
+}: {
+  copy: RegisterCopy;
+  license: BusinessTinLicense;
+  fallbackName: string;
+  selected: boolean;
+  filling: boolean;
+  disabled: boolean;
+  interactive: boolean;
+  onSelect: () => void;
+}) {
+  const details = [
+    formatMessage(copy.tinLookup.licenseNo, { licenseNo: license.license_no }),
+    license.issued_date
+      ? formatMessage(copy.tinLookup.issued, { date: license.issued_date })
+      : null,
+    license.expiry_date
+      ? formatMessage(copy.tinLookup.expires, { date: license.expiry_date })
+      : null,
+  ].filter(Boolean);
+
+  const className = cn(
+    "flex w-full items-start gap-3 rounded-xl border px-3 py-3 text-left transition-all",
+    selected
+      ? "border-[#1C3A34] bg-white ring-2 ring-[#1C3A34]/15 dark:border-[#C9B87A]/55 dark:bg-[#171c24] dark:ring-[#C9B87A]/15"
+      : "border-transparent bg-white hover:border-slate-200 dark:bg-[#171c24] dark:hover:border-white/10",
+  );
+
+  const content = (
+    <>
+      <div
+        className={cn(
+          "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+          selected
+            ? "bg-[#1C3A34] text-white dark:bg-[#203f38] dark:text-[#C9B87A]"
+            : "bg-slate-100 text-slate-400 dark:bg-[#1b212a] dark:text-[#8f99a6]",
+        )}
+      >
+        {filling ? <Loader2 className="h-4 w-4 animate-spin" /> : <Building2 className="h-4 w-4" />}
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-sm font-semibold text-slate-900 dark:text-[#e8ecf1]">
+            {license.business_name || fallbackName}
+          </p>
+          {selected ? (
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#1C3A34]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[#1C3A34] dark:bg-[#C9B87A]/15 dark:text-[#C9B87A]">
+              <Check className="h-3 w-3" />
+              {copy.tinLookup.selected}
+            </span>
+          ) : null}
+        </div>
+        <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-[#8b95a2]">
+          {details.join(" · ")}
+        </p>
+      </div>
+    </>
+  );
+
+  if (!interactive) {
+    return <div className={className}>{content}</div>;
+  }
+
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      disabled={disabled}
+      onClick={onSelect}
+      className={cn(className, "disabled:cursor-not-allowed disabled:opacity-70")}
+    >
+      {content}
+    </button>
+  );
 }
 
 function SegmentBadge({
@@ -504,6 +759,28 @@ export default function UserRegisterForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+
+  const fillFromTin = useCallback((fields: BusinessTinAutofillFields) => {
+    setForm((current) => ({
+      ...current,
+      organizationName: fields.organizationName,
+      registrationNumber: fields.registrationNumber,
+      organizationAddress: fields.organizationAddress,
+    }));
+    setFieldErrors((current) => {
+      const next = { ...current };
+      if (fields.organizationName) delete next.organizationName;
+      if (fields.registrationNumber) delete next.registrationNumber;
+      if (fields.organizationAddress) delete next.organizationAddress;
+      return next;
+    });
+  }, []);
+
+  const tinLookup = useBusinessTinAutofill({
+    tin: form.taxId,
+    enabled: form.segment === "business",
+    onFill: fillFromTin,
+  });
 
   const stepSegment =
     currentStep === 0 ? (selectedSegment ?? "individual") : form.segment;
@@ -1014,6 +1291,17 @@ export default function UserRegisterForm() {
             <div className="space-y-6">
               <SegmentBadge segment={form.segment} copy={copy} />
 
+              {form.segment === "business" ? (
+                <TinLookupSection
+                  copy={copy}
+                  taxId={form.taxId}
+                  error={fieldErrors.taxId}
+                  disabled={isSubmitting}
+                  lookup={tinLookup}
+                  onChange={(value) => updateField("taxId", value)}
+                />
+              ) : null}
+
               <div>
                 <label
                   htmlFor="user-organization-name"
@@ -1150,28 +1438,7 @@ export default function UserRegisterForm() {
                 ) : null}
               </div>
 
-              {form.segment === "business" ? (
-                <div>
-                  <label
-                    htmlFor="user-tax-id"
-                    className={cn(labelClassName, fieldErrors.taxId && errorLabelClassName)}
-                  >
-                    {copy.fields.taxId}
-                  </label>
-                  <input
-                    id="user-tax-id"
-                    type="text"
-                    value={form.taxId}
-                    onChange={(event) => updateField("taxId", event.target.value)}
-                    disabled={isSubmitting}
-                    placeholder={copy.placeholders.taxId}
-                    className={cn(plainInputClassName, fieldErrors.taxId && errorInputClassName)}
-                  />
-                  {fieldErrors.taxId ? (
-                    <p className="mt-1.5 text-xs text-red-600">{fieldErrors.taxId}</p>
-                  ) : null}
-                </div>
-              ) : (
+              {form.segment === "government" ? (
                 <>
                   <div>
                     <label
@@ -1256,7 +1523,7 @@ export default function UserRegisterForm() {
                     </div>
                   </div>
                 </>
-              )}
+              ) : null}
             </div>
           ) : null}
 

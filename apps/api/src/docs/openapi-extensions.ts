@@ -50,6 +50,10 @@ export const extensionTags = [
     description:
       "Customer commercial agreements linked to fare plans and ride requests (admin only)",
   },
+  {
+    name: "Business TIN",
+    description: "Look up Ethiopian business TIN registration details via eTrade.",
+  },
 ] as const;
 
 const rideRequestStatusEnumDescriptions = {
@@ -105,6 +109,71 @@ export const extensionParameters = {
 } as const;
 
 export const extensionSchemas = {
+  BusinessTinLicense: {
+    type: "object",
+    properties: {
+      license_no: { type: "string", example: "AK/AA/14/671/642182/2009" },
+      main_guid: { type: "string", format: "uuid", nullable: true },
+      business_name: { type: "string", example: "TEWODROS SHIFRAW AMEDE" },
+      legal_status: { type: "string", nullable: true, example: "1" },
+      issued_date: { type: "string", nullable: true, example: "2/6/2009" },
+      expiry_date: { type: "string", nullable: true, example: "30/10/2009" },
+    },
+  },
+  BusinessTinRegistration: {
+    type: "object",
+    properties: {
+      tin: { type: "string", example: "1111111111" },
+      owner_name: { type: "string", example: "TEWODROS SHIFRAW AMEDE" },
+      licenses: {
+        type: "array",
+        items: { $ref: "#/components/schemas/BusinessTinLicense" },
+      },
+    },
+  },
+  BusinessLicenseAddress: {
+    type: "object",
+    properties: {
+      region: { type: "string", nullable: true },
+      zone: { type: "string", nullable: true },
+      woreda: { type: "string", nullable: true },
+      kebele: { type: "string", nullable: true },
+      house_no: { type: "string", nullable: true },
+      mobile_phone: { type: "string", nullable: true },
+      regular_phone: { type: "string", nullable: true },
+    },
+  },
+  BusinessLicenseSubGroup: {
+    type: "object",
+    properties: {
+      code: { type: "integer", nullable: true, example: 71114 },
+      description: { type: "string", nullable: true },
+    },
+  },
+  BusinessLicenseDetail: {
+    type: "object",
+    properties: {
+      main_guid: { type: "string", format: "uuid", nullable: true },
+      owner_tin: { type: "string", example: "1111111111" },
+      date_registered: { type: "string", nullable: true, example: "2/6/2009" },
+      trade_name: { type: "string", nullable: true },
+      license_no: { type: "string", example: "AK/AA/14/671/642182/2009" },
+      status: { type: "integer", nullable: true, example: 6 },
+      status_description: { type: "string", nullable: true, example: "Closed" },
+      capital: { type: "number", nullable: true, example: 383707 },
+      associates: { type: "array", items: { type: "object", additionalProperties: true } },
+      address: { $ref: "#/components/schemas/BusinessLicenseAddress", nullable: true },
+      sub_groups: {
+        type: "array",
+        items: { $ref: "#/components/schemas/BusinessLicenseSubGroup" },
+      },
+      renewed_to: { type: "string", nullable: true },
+      renewed_to_date_string: { type: "string", nullable: true },
+      renewal_date: { type: "string", nullable: true },
+      renewed_from: { type: "string", nullable: true },
+      cancellation_date: { type: "string", nullable: true },
+    },
+  },
   NotificationConfiguration: {
     type: "object",
     description:
@@ -1123,6 +1192,97 @@ const notFound = { $ref: "#/components/responses/NotFound" } as const;
 const badRequest = { $ref: "#/components/responses/BadRequest" } as const;
 
 export const extensionPaths = {
+  "/api/business-tin/{tin}": {
+    get: {
+      tags: ["Business TIN"],
+      summary: "Look up a business TIN",
+      description:
+        "Looks up an Ethiopian business TIN through the configured eTrade registration service. Returns the owner name and trade licenses when a match is found.",
+      parameters: [
+        {
+          name: "tin",
+          in: "path",
+          required: true,
+          schema: { type: "string", pattern: "^\\d{10}$", example: "1111111111" },
+          description: "10-digit Ethiopian TIN",
+        },
+      ],
+      responses: {
+        "200": {
+          description: "TIN registration",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      registration: {
+                        $ref: "#/components/schemas/BusinessTinRegistration",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "404": notFound,
+      },
+    },
+  },
+  "/api/business-tin/{tin}/license": {
+    get: {
+      tags: ["Business TIN"],
+      summary: "Look up a business trade license",
+      description:
+        "Returns full eTrade license details for a TIN and license number selected from the TIN registration list.",
+      parameters: [
+        {
+          name: "tin",
+          in: "path",
+          required: true,
+          schema: { type: "string", pattern: "^\\d{10}$", example: "1111111111" },
+          description: "10-digit Ethiopian TIN",
+        },
+        {
+          name: "license_no",
+          in: "query",
+          required: true,
+          schema: { type: "string", example: "AK/AA/14/671/642182/2009" },
+          description: "Trade license number from the TIN registration licenses list",
+        },
+      ],
+      responses: {
+        "200": {
+          description: "Business license detail",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      license: {
+                        $ref: "#/components/schemas/BusinessLicenseDetail",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "404": notFound,
+      },
+    },
+  },
   "/api/notifications/templates": {
     get: {
       tags: ["Notifications"],
