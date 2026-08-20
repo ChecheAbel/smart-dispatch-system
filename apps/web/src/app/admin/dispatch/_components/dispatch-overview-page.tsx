@@ -39,6 +39,7 @@ import {
   statusBadgeClass,
 } from "@/app/dashboard/_components/ride-requests/ride-request-utils";
 import { AdminRideRequestReviewSheet } from "@/app/admin/ride-requests/_components/admin-ride-request-review-sheet";
+import { DispatchLiveBoard } from "./dispatch-live-board";
 import {
   adminCardClass,
   adminEyebrowClass,
@@ -959,6 +960,14 @@ export function DispatchOverviewPage() {
           />
         ) : null}
       </div>
+
+      {canReadRideRequests && showFleet ? (
+        <DispatchLiveBoard
+          locale={locale}
+          copy={copy}
+          onReviewTrip={openReview}
+        />
+      ) : null}
 
       <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(20rem,0.9fr)]">
         <div className="min-w-0 space-y-5">

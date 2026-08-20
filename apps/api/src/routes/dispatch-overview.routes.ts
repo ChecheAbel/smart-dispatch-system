@@ -5,7 +5,7 @@ import { authorize } from "../middleware/authorize";
 import { auditMutations } from "../middleware/audit-mutation";
 import { requirePermission } from "../middleware/require-permission";
 import { userHasPermission } from "../models/permission.model";
-import { getAdminDispatchOverview } from "../models/dispatch-overview.model";
+import { getAdminDispatchBoard, getAdminDispatchOverview } from "../models/dispatch-overview.model";
 import { applyDispatchAutoAssignments } from "../services/dispatch-allocation.service";
 import { runRideRequestExpiryJob } from "../services/ride-request-expiry.service";
 import {
@@ -65,6 +65,32 @@ router.get("/overview", async (req: AuthenticatedRequest, res: Response) => {
     });
 
     return sendSuccess(res, { overview });
+  } catch (error) {
+    return handleRouteError(res, error);
+  }
+});
+
+router.get("/board", async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return sendError(res, "Unauthorized.", 401);
+    }
+
+    const [canReadRideRequests, canReadVehicles] = await Promise.all([
+      userHasPermission(userId, "ride_requests.read"),
+      userHasPermission(userId, "vehicles.read"),
+    ]);
+
+    if (!canReadRideRequests || !canReadVehicles) {
+      return sendError(res, "You do not have access to the live dispatch board.", 403);
+    }
+
+    const board = await getAdminDispatchBoard(
+      parseLocale(req.query, req.headers["accept-language"]),
+    );
+
+    return sendSuccess(res, { board });
   } catch (error) {
     return handleRouteError(res, error);
   }

@@ -992,6 +992,36 @@ export type AdminDispatchOverview = {
   complaints: AdminDispatchComplaintItem[];
 };
 
+export type AdminDispatchBoardTrip = {
+  id: string;
+  requester_name: string;
+  pickup: string;
+  dropoff: string;
+  scheduled_at: string | null;
+  passenger_count: number;
+  sla_priority: DispatchSlaPriority | null;
+  suggested_vehicle: AdminDispatchSuggestedVehicle | null;
+  pickup_latitude: number | null;
+  pickup_longitude: number | null;
+};
+
+export type AdminDispatchBoardVehicle = {
+  id: string;
+  plate_number: string;
+  driver_name: string | null;
+  busy: boolean;
+  location: {
+    latitude: number;
+    longitude: number;
+    recorded_at: string;
+  } | null;
+};
+
+export type AdminDispatchBoard = {
+  trips: AdminDispatchBoardTrip[];
+  vehicles: AdminDispatchBoardVehicle[];
+};
+
 export type AdminDashboardAnalytics = {
   period_days: number;
   ride_requests: {

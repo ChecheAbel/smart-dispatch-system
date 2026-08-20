@@ -1935,6 +1935,16 @@
       "emptyDisrupted": "የተስተጓጎለ ጉዞ የለም።",
       "emptyDisruptedHint": "በራስ-ሰር መቀየር መኪና ካልተገኘ የተረጋገጡ እና በሂደት ያሉ ጉዞዎች እዚህ ይቆያሉ።"
     },
+    "board": {
+      "title": "የቀጥታ ካርታ",
+      "description": "የመኪና ቦታዎች በቀጥታ። ያልተመደቡ መነሻዎች እንደ ምልክት ይታያሉ — ከመመደብ የሚያስፈልግ ይክፈቷቸው።",
+      "available": "ነጻ",
+      "busy": "ተይዟል",
+      "unmatchedPickup": "ያልተመደበ መነሻ",
+      "live": "ቀጥታ",
+      "offline": "ከመስመር ውጭ",
+      "fitAll": "ሁሉንም አሳይ"
+    },
     "disruption": {
       "vehicleUnavailable": "መኪና አይገኝም",
       "driverUnavailable": "አሽከርካሪ አይገኝም",

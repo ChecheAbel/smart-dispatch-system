@@ -1125,6 +1125,65 @@ export const extensionSchemas = {
       },
     },
   },
+  AdminDispatchBoard: {
+    type: "object",
+    properties: {
+      trips: {
+        type: "array",
+        items: { $ref: "#/components/schemas/AdminDispatchBoardTrip" },
+      },
+      vehicles: {
+        type: "array",
+        items: { $ref: "#/components/schemas/AdminDispatchBoardVehicle" },
+      },
+    },
+  },
+  AdminDispatchBoardTrip: {
+    type: "object",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      requester_name: { type: "string" },
+      pickup: { type: "string" },
+      dropoff: { type: "string" },
+      scheduled_at: { type: "string", format: "date-time", nullable: true },
+      passenger_count: { type: "integer" },
+      sla_priority: {
+        type: "string",
+        nullable: true,
+        enum: ["overdue", "due_soon", "on_track", "unscheduled"],
+      },
+      suggested_vehicle: {
+        type: "object",
+        nullable: true,
+        properties: {
+          id: { type: "string", format: "uuid" },
+          plate_number: { type: "string" },
+          driver_name: { type: "string", nullable: true },
+          distance_meters: { type: "integer", nullable: true },
+        },
+      },
+      pickup_latitude: { type: "number", nullable: true },
+      pickup_longitude: { type: "number", nullable: true },
+    },
+  },
+  AdminDispatchBoardVehicle: {
+    type: "object",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      plate_number: { type: "string" },
+      driver_name: { type: "string", nullable: true },
+      busy: { type: "boolean" },
+      location: {
+        type: "object",
+        nullable: true,
+        properties: {
+          latitude: { type: "number" },
+          longitude: { type: "number" },
+          recorded_at: { type: "string", format: "date-time" },
+        },
+      },
+    },
+  },
   AdminRideRequest: {
     type: "object",
     description:
@@ -3094,6 +3153,39 @@ export const extensionPaths = {
                     type: "object",
                     properties: {
                       overview: { $ref: "#/components/schemas/AdminDispatchOverview" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+  },
+  "/api/admin/dispatch/board": {
+    get: {
+      tags: ["Dispatch"],
+      summary: "Live dispatch board",
+      description:
+        "Unassigned trips and dispatchable vehicles with last known GPS. Used by the drag-and-drop dispatcher. Requires `ride_requests.read` and `vehicles.read`.",
+      security,
+      parameters: [{ $ref: "#/components/parameters/Locale" }],
+      responses: {
+        "200": {
+          description: "Live dispatch board",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      board: { $ref: "#/components/schemas/AdminDispatchBoard" },
                     },
                   },
                 },

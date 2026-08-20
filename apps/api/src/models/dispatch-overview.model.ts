@@ -1,4 +1,5 @@
 import type {
+  AdminDispatchBoard,
   AdminDispatchComplaintItem,
   AdminDispatchOverview,
   AdminDispatchQueueItem,
@@ -332,5 +333,109 @@ export async function getAdminDispatchOverview(options: {
       disrupted: queues[3],
     },
     complaints: complaints?.items ?? [],
+  };
+}
+
+function toCoord(value: unknown): number | null {
+  if (value == null) {
+    return null;
+  }
+
+  const numeric = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+export async function getAdminDispatchBoard(locale?: string): Promise<AdminDispatchBoard> {
+  const now = new Date();
+  const [tripRows, vehicles, busyIds, locations] = await Promise.all([
+    prisma.rideRequest.findMany({
+      where: {
+        status: { in: ["pending", "confirmed"] },
+        assignedVehicleId: null,
+      },
+      include: queueInclude,
+      orderBy: [{ scheduledAt: { sort: "asc", nulls: "last" } }, { createdAt: "asc" }],
+      take: NEEDS_ASSIGNMENT_POOL,
+    }),
+    prisma.vehicle.findMany({
+      where: { status: "active", assignedDriverUserId: { not: null } },
+      select: {
+        id: true,
+        plateNumber: true,
+        assignedDriver: { select: { firstName: true, middleName: true, lastName: true } },
+      },
+      orderBy: { plateNumber: "asc" },
+    }),
+    getBusyVehicleIds(now),
+    prisma.vehicleLocationSnapshot.findMany({
+      select: {
+        vehicleId: true,
+        latitude: true,
+        longitude: true,
+        recordedAt: true,
+      },
+    }),
+  ]);
+
+  const suggestions = await suggestAllocationsForTrips(tripRows);
+  const locationByVehicle = new Map(
+    locations.map((row) => {
+      const latitude = toCoord(row.latitude);
+      const longitude = toCoord(row.longitude);
+      return [
+        row.vehicleId,
+        latitude != null && longitude != null
+          ? { latitude, longitude, recorded_at: row.recordedAt.toISOString() }
+          : null,
+      ] as const;
+    }),
+  );
+
+  const trips = [...tripRows]
+    .sort((left, right) => {
+      const slaLeft = suggestions.get(left.id)?.sla.rank ?? Number.MAX_SAFE_INTEGER;
+      const slaRight = suggestions.get(right.id)?.sla.rank ?? Number.MAX_SAFE_INTEGER;
+      if (slaLeft !== slaRight) {
+        return slaLeft - slaRight;
+      }
+      return left.createdAt.getTime() - right.createdAt.getTime();
+    })
+    .slice(0, QUEUE_LIMIT * 2)
+    .map((row) => {
+      const item = toQueueItem(row, locale, (() => {
+        const suggestion = suggestions.get(row.id);
+        return suggestion
+          ? {
+              sla_priority: suggestion.sla.priority,
+              sla_minutes: suggestion.sla.minutesUntilPickup,
+              suggested_vehicle: suggestion.vehicle,
+              can_auto_assign: suggestion.canAutoAssign,
+            }
+          : undefined;
+      })());
+
+      return {
+        id: item.id,
+        requester_name: item.requester_name,
+        pickup: item.pickup,
+        dropoff: item.dropoff,
+        scheduled_at: item.scheduled_at,
+        passenger_count: item.passenger_count,
+        sla_priority: item.sla_priority ?? null,
+        suggested_vehicle: item.suggested_vehicle ?? null,
+        pickup_latitude: toCoord(row.pickupLatitude),
+        pickup_longitude: toCoord(row.pickupLongitude),
+      };
+    });
+
+  return {
+    trips,
+    vehicles: vehicles.map((vehicle) => ({
+      id: vehicle.id,
+      plate_number: vehicle.plateNumber,
+      driver_name: personName(vehicle.assignedDriver) || null,
+      busy: busyIds.has(vehicle.id),
+      location: locationByVehicle.get(vehicle.id) ?? null,
+    })),
   };
 }

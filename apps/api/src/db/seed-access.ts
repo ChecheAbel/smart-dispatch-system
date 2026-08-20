@@ -737,6 +737,7 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "ride_requests.driver_fuel_create", method: "POST", path: "/api/ride-requests/driver/fuel", description: "Create a fuel log for the driver's assigned vehicle", permissionSlug: "driver.fuel" },
   { slug: "ride_requests.driver_fuel_update", method: "PATCH", path: "/api/ride-requests/driver/fuel/:fuelLogId", description: "Update a fuel log on the driver's assigned vehicle", permissionSlug: "driver.fuel" },
   { slug: "admin_dispatch.overview", method: "GET", path: "/api/admin/dispatch/overview", description: "Dispatcher working board overview", permissionSlug: "ride_requests.read" },
+  { slug: "admin_dispatch.board", method: "GET", path: "/api/admin/dispatch/board", description: "Live dispatch board with trips and vehicle positions", permissionSlug: "ride_requests.read" },
   { slug: "admin_dispatch.auto_assign", method: "POST", path: "/api/admin/dispatch/auto-assign", description: "Auto-assign vehicles by SLA priority", permissionSlug: "ride_requests.write" },
   { slug: "admin_ride_requests.list", method: "GET", path: "/api/admin/ride-requests", description: "List all ride requests", permissionSlug: "ride_requests.read" },
   { slug: "admin_dashboard.analytics", method: "GET", path: "/api/admin/dashboard/analytics", description: "Admin dashboard reporting analytics", permissionSlug: "ride_requests.read" },

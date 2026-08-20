@@ -1935,6 +1935,16 @@
       "emptyDisrupted": "No disrupted trips.",
       "emptyDisruptedHint": "Confirmed or live trips stay here if auto-reroute cannot find a vehicle."
     },
+    "board": {
+      "title": "Live map",
+      "description": "Live vehicle positions. Unmatched pickups show as pins — open them from Needs assignment.",
+      "available": "Available",
+      "busy": "Busy",
+      "unmatchedPickup": "Unmatched pickup",
+      "live": "Live",
+      "offline": "Offline",
+      "fitAll": "Fit all"
+    },
     "disruption": {
       "vehicleUnavailable": "Vehicle unavailable",
       "driverUnavailable": "Driver unavailable",

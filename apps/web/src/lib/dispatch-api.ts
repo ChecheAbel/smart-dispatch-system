@@ -1,4 +1,4 @@
-import type { AdminDispatchAutoAssignResult, AdminDispatchOverview } from "@smart-dispatch/types";
+import type { AdminDispatchAutoAssignResult, AdminDispatchBoard, AdminDispatchOverview } from "@smart-dispatch/types";
 import { apiClient } from "./api-client";
 import { unwrapApiResponse } from "./api-response";
 
@@ -7,6 +7,13 @@ export async function fetchAdminDispatchOverview(locale?: string) {
     params: { locale },
   });
   return unwrapApiResponse<{ overview: AdminDispatchOverview }>(data).overview;
+}
+
+export async function fetchAdminDispatchBoard(locale?: string) {
+  const { data } = await apiClient.get("/api/admin/dispatch/board", {
+    params: { locale },
+  });
+  return unwrapApiResponse<{ board: AdminDispatchBoard }>(data).board;
 }
 
 export async function autoAssignDispatchQueue(options: { locale?: string; rideRequestIds?: string[] } = {}) {
