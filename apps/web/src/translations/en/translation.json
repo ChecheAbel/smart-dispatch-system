@@ -5440,6 +5440,9 @@
       "hours": "hrs",
       "days": "days"
     },
+    "badges": {
+      "notification": "Notification"
+    },
     "sections": {
       "rideRequests": {
         "title": "Ride requests",
@@ -5498,6 +5501,8 @@
       "rangeInfo": "Allowed range: {min}–{max} {suffix}",
       "saveButton": "Save changes",
       "savingButton": "Saving…",
+      "unsavedChanges": "You have unsaved changes",
+      "allSaved": "All changes saved",
       "readOnlyHint": "You have view-only access. Ask an administrator to grant write permission."
     },
     "toast": {

@@ -5440,6 +5440,9 @@
       "hours": "ሰዓት",
       "days": "ቀን"
     },
+    "badges": {
+      "notification": "ማሳወቂያ"
+    },
     "sections": {
       "rideRequests": {
         "title": "የጉዞ ጥያቄዎች",
@@ -5498,6 +5501,8 @@
       "rangeInfo": "የተፈቀደ ክልል፦ {min}–{max} {suffix}",
       "saveButton": "ለውጦችን አስቀምጥ",
       "savingButton": "በማስቀመጥ ላይ…",
+      "unsavedChanges": "ያልተቀመጡ ለውጦች አሉዎት",
+      "allSaved": "ሁሉም ለውጦች ተቀምጠዋል",
       "readOnlyHint": "የማየት ብቻ ፈቃድ አለዎት። የመጻፍ ፈቃድ ለማግኘት አስተዳዳሪ ያግኙ።"
     },
     "toast": {
