@@ -3674,6 +3674,8 @@ export const extensionPaths = {
                     type: "object",
                     properties: {
                       ride_request_cancel_grace_minutes: { type: "integer" },
+                      ride_request_edit_grace_minutes: { type: "integer" },
+                      ride_request_reminder_hours: { type: "integer" },
                       invoice_due_soon_days: { type: "integer" },
                       insurance_due_soon_days: { type: "integer" },
                       inspection_due_soon_days: { type: "integer" },
@@ -3705,6 +3707,16 @@ export const extensionPaths = {
                   type: "integer",
                   minimum: 1,
                   maximum: 1440,
+                },
+                ride_request_edit_grace_minutes: {
+                  type: "integer",
+                  minimum: 1,
+                  maximum: 1440,
+                },
+                ride_request_reminder_hours: {
+                  type: "integer",
+                  minimum: 1,
+                  maximum: 168,
                 },
                 invoice_due_soon_days: {
                   type: "integer",
@@ -3739,6 +3751,8 @@ export const extensionPaths = {
                     type: "object",
                     properties: {
                       ride_request_cancel_grace_minutes: { type: "integer" },
+                      ride_request_edit_grace_minutes: { type: "integer" },
+                      ride_request_reminder_hours: { type: "integer" },
                       invoice_due_soon_days: { type: "integer" },
                       insurance_due_soon_days: { type: "integer" },
                       inspection_due_soon_days: { type: "integer" },

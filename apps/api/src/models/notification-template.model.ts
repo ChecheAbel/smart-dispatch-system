@@ -200,6 +200,21 @@ const RIDE_REQUEST_RULES: NotificationTemplateSeed[] = [
     recipient: "requester",
     body: "Smart Dispatch: your ride request from {pickup} to {dropoff} was cancelled before {cancel_deadline_at}.",
   },
+  {
+    module: "ride_requests",
+    event: "reminder",
+    channel: "email",
+    recipient: "requester",
+    subject: "Upcoming ride reminder",
+    body: "Hello {requester_name}, this is a reminder that your ride from {pickup} to {dropoff} is scheduled for {scheduled_at} (within {reminder_hours} hours).",
+  },
+  {
+    module: "ride_requests",
+    event: "reminder",
+    channel: "sms",
+    recipient: "requester",
+    body: "Smart Dispatch reminder: your ride from {pickup} to {dropoff} is at {scheduled_at}.",
+  },
 ];
 
 const COMPLIANCE_EVENT_RULES = (

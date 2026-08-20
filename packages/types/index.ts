@@ -196,7 +196,8 @@ export type RideRequestNotificationEvent =
   | "assigned"
   | "started"
   | "completed"
-  | "cancelled";
+  | "cancelled"
+  | "reminder";
 
 export type UserRegistrationNotificationEvent = "submitted" | "approved" | "rejected";
 
@@ -241,6 +242,7 @@ export const RIDE_REQUEST_NOTIFICATION_PLACEHOLDERS = [
   "reference",
   "cancel_deadline_minutes",
   "cancel_deadline_at",
+  "reminder_hours",
 ] as const;
 
 export const USER_REGISTRATION_NOTIFICATION_PLACEHOLDERS = [

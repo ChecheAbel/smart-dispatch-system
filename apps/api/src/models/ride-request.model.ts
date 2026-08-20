@@ -9,6 +9,7 @@ import {
 import { ensureContractEnrollment } from "./contract-enrollment.model";
 import { findActiveContractById } from "./contract.model";
 import { findVehicleById } from "./vehicle.model";
+import { getDeadlineSettings } from "./app-setting.model";
 import {
   computeTripBillingSnapshot,
   ensureTripBillingSnapshot,
@@ -952,4 +953,42 @@ export async function isVehicleTypeClassAllowed(vehicleTypeId: string, vehicleCl
   });
 
   return Boolean(link);
+}
+
+export async function findReminderDueRideRequests(
+  hoursBefore: number = getDeadlineSettings().ride_request_reminder_hours,
+  asOf: Date = new Date(),
+) {
+  const windowEnd = new Date(asOf.getTime() + hoursBefore * 60 * 60 * 1000);
+
+  return prisma.rideRequest.findMany({
+    where: {
+      status: "confirmed",
+      scheduledAt: {
+        gte: asOf,
+        lte: windowEnd,
+      },
+    },
+    orderBy: [{ scheduledAt: "asc" }],
+    select: { id: true, scheduledAt: true },
+  });
+}
+
+export async function wasRideRequestNotificationSent(
+  rideRequestId: string,
+  event: string,
+) {
+  const log = await prisma.notificationDeliveryLog.findFirst({
+    where: {
+      module: "ride_requests",
+      event,
+      entityType: "ride_request",
+      entityId: rideRequestId,
+      status: "sent",
+      isTest: false,
+    },
+    select: { id: true },
+  });
+
+  return Boolean(log);
 }

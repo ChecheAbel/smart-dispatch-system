@@ -4,6 +4,7 @@ import { Prisma } from "../generated/prisma";
 export const APP_SETTING_KEYS = {
   rideRequestCancelGraceMinutes: "ride_request_cancel_grace_minutes",
   rideRequestEditGraceMinutes: "ride_request_edit_grace_minutes",
+  rideRequestReminderHours: "ride_request_reminder_hours",
   invoiceDueSoonDays: "invoice_due_soon_days",
   insuranceDueSoonDays: "insurance_due_soon_days",
   inspectionDueSoonDays: "inspection_due_soon_days",
@@ -13,6 +14,7 @@ export const APP_SETTING_KEYS = {
 type DeadlineSettingKey =
   | typeof APP_SETTING_KEYS.rideRequestCancelGraceMinutes
   | typeof APP_SETTING_KEYS.rideRequestEditGraceMinutes
+  | typeof APP_SETTING_KEYS.rideRequestReminderHours
   | typeof APP_SETTING_KEYS.invoiceDueSoonDays
   | typeof APP_SETTING_KEYS.insuranceDueSoonDays
   | typeof APP_SETTING_KEYS.inspectionDueSoonDays;
@@ -20,6 +22,7 @@ type DeadlineSettingKey =
 export type DeadlineSettings = {
   ride_request_cancel_grace_minutes: number;
   ride_request_edit_grace_minutes: number;
+  ride_request_reminder_hours: number;
   invoice_due_soon_days: number;
   insurance_due_soon_days: number;
   inspection_due_soon_days: number;
@@ -39,6 +42,7 @@ export type BrandingSettings = {
 const DEFAULT_DEADLINE_SETTINGS: DeadlineSettings = {
   ride_request_cancel_grace_minutes: 15,
   ride_request_edit_grace_minutes: 15,
+  ride_request_reminder_hours: 2,
   invoice_due_soon_days: 3,
   insurance_due_soon_days: 30,
   inspection_due_soon_days: 30,
@@ -78,6 +82,10 @@ function toPositiveInteger(
       minutes > 0
     ) {
       return Math.trunc(minutes);
+    }
+    const hours = (value as Record<string, unknown>).hours;
+    if (typeof hours === "number" && Number.isFinite(hours) && hours > 0) {
+      return Math.trunc(hours);
     }
     const days = (value as Record<string, unknown>).days;
     if (typeof days === "number" && Number.isFinite(days) && days > 0) {
@@ -178,6 +186,7 @@ export async function loadAppSettings() {
   const [
     rideRequestCancelGraceMinutes,
     rideRequestEditGraceMinutes,
+    rideRequestReminderHours,
     invoiceDueSoonDays,
     insuranceDueSoonDays,
     inspectionDueSoonDays,
@@ -190,6 +199,10 @@ export async function loadAppSettings() {
     readSetting(
       APP_SETTING_KEYS.rideRequestEditGraceMinutes,
       DEFAULT_DEADLINE_SETTINGS.ride_request_edit_grace_minutes,
+    ),
+    readSetting(
+      APP_SETTING_KEYS.rideRequestReminderHours,
+      DEFAULT_DEADLINE_SETTINGS.ride_request_reminder_hours,
     ),
     readSetting(
       APP_SETTING_KEYS.invoiceDueSoonDays,
@@ -209,6 +222,7 @@ export async function loadAppSettings() {
   cachedSettings = {
     ride_request_cancel_grace_minutes: rideRequestCancelGraceMinutes,
     ride_request_edit_grace_minutes: rideRequestEditGraceMinutes,
+    ride_request_reminder_hours: rideRequestReminderHours,
     invoice_due_soon_days: invoiceDueSoonDays,
     insurance_due_soon_days: insuranceDueSoonDays,
     inspection_due_soon_days: inspectionDueSoonDays,
@@ -222,6 +236,9 @@ export async function loadAppSettings() {
     }),
     upsertSetting(APP_SETTING_KEYS.rideRequestEditGraceMinutes, {
       minutes: rideRequestEditGraceMinutes,
+    }),
+    upsertSetting(APP_SETTING_KEYS.rideRequestReminderHours, {
+      hours: rideRequestReminderHours,
     }),
     upsertSetting(APP_SETTING_KEYS.invoiceDueSoonDays, {
       days: invoiceDueSoonDays,
@@ -246,6 +263,9 @@ export async function updateDeadlineSettings(input: DeadlineSettings) {
     }),
     upsertSetting(APP_SETTING_KEYS.rideRequestEditGraceMinutes, {
       minutes: input.ride_request_edit_grace_minutes,
+    }),
+    upsertSetting(APP_SETTING_KEYS.rideRequestReminderHours, {
+      hours: input.ride_request_reminder_hours,
     }),
     upsertSetting(APP_SETTING_KEYS.invoiceDueSoonDays, {
       days: input.invoice_due_soon_days,

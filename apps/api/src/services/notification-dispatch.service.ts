@@ -76,6 +76,7 @@ function buildRideRequestSampleContext(): TemplateContext {
     reference: "A1B2C3D4",
     cancel_deadline_minutes: "15",
     cancel_deadline_at: "15 Jul 2026, 14:45",
+    reminder_hours: "2",
   };
 }
 
@@ -230,7 +231,8 @@ function daysOverdue(date: Date | null | undefined, from: Date = new Date()) {
 function buildRideRequestContext(
   rideRequest: NonNullable<Awaited<ReturnType<typeof findRideRequestById>>>,
 ): TemplateContext {
-  const cancelDeadlineMinutes = getRideRequestSettings().ride_request_cancel_grace_minutes;
+  const settings = getRideRequestSettings();
+  const cancelDeadlineMinutes = settings.ride_request_cancel_grace_minutes;
   const cancelDeadlineAt = new Date(
     rideRequest.createdAt.getTime() + cancelDeadlineMinutes * 60 * 1000,
   );
@@ -252,6 +254,7 @@ function buildRideRequestContext(
     reference: rideRequest.id.slice(0, 8).toUpperCase(),
     cancel_deadline_minutes: String(cancelDeadlineMinutes),
     cancel_deadline_at: formatScheduledAt(cancelDeadlineAt),
+    reminder_hours: String(settings.ride_request_reminder_hours),
   };
 }
 

@@ -5,6 +5,7 @@ import { unwrapApiResponse } from "./api-response";
 export type DeadlineSettings = {
   ride_request_cancel_grace_minutes: number;
   ride_request_edit_grace_minutes: number;
+  ride_request_reminder_hours: number;
   invoice_due_soon_days: number;
   insurance_due_soon_days: number;
   inspection_due_soon_days: number;

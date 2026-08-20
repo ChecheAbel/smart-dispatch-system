@@ -118,6 +118,11 @@ router.patch(
         1,
         1440,
       );
+      const ride_request_reminder_hours = parsePositiveInt(
+        req.body?.ride_request_reminder_hours,
+        1,
+        168,
+      );
       const invoice_due_soon_days = parsePositiveInt(
         req.body?.invoice_due_soon_days,
         1,
@@ -137,6 +142,7 @@ router.patch(
       if (
         ride_request_cancel_grace_minutes == null ||
         ride_request_edit_grace_minutes == null ||
+        ride_request_reminder_hours == null ||
         invoice_due_soon_days == null ||
         insurance_due_soon_days == null ||
         inspection_due_soon_days == null
@@ -147,6 +153,7 @@ router.patch(
       await updateDeadlineSettings({
         ride_request_cancel_grace_minutes,
         ride_request_edit_grace_minutes,
+        ride_request_reminder_hours,
         invoice_due_soon_days,
         insurance_due_soon_days,
         inspection_due_soon_days,

@@ -34,7 +34,7 @@ import { registerDeviceTokenRoutes } from "./routes/device-token.routes";
 import { registerBusinessTinRoutes } from "./routes/business-tin.routes";
 import { initSocketIo } from "./websocket/socket-io";
 import { registerRealtimeSocket } from "./websocket/realtime.socket";
-import { startInvoiceAutomationScheduler } from "./services/scheduler.service";
+import { startInvoiceAutomationScheduler, startRideRequestReminderScheduler } from "./services/scheduler.service";
 import { requestLogger } from "./middleware/request-logger";
 import { ensureDriverLicenseUploadDir, getDriverLicenseUploadDir } from "./utils/driver-license-upload";
 import { ensureVehicleUploadDir, getVehicleUploadDir } from "./utils/vehicle-photo-upload";
@@ -108,6 +108,7 @@ async function start() {
   server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
     startInvoiceAutomationScheduler();
+    startRideRequestReminderScheduler();
   });
 }
 

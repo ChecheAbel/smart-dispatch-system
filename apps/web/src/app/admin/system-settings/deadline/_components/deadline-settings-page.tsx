@@ -33,6 +33,7 @@ import {
 type DeadlineFieldKey =
   | "ride_request_cancel_grace_minutes"
   | "ride_request_edit_grace_minutes"
+  | "ride_request_reminder_hours"
   | "invoice_due_soon_days"
   | "insurance_due_soon_days"
   | "inspection_due_soon_days";
@@ -42,6 +43,7 @@ type DeadlineSectionId = "rideRequests" | "billing" | "compliance";
 const DEFAULT_VALUES: Record<DeadlineFieldKey, string> = {
   ride_request_cancel_grace_minutes: "15",
   ride_request_edit_grace_minutes: "15",
+  ride_request_reminder_hours: "2",
   invoice_due_soon_days: "3",
   insurance_due_soon_days: "30",
   inspection_due_soon_days: "30",
@@ -50,7 +52,7 @@ const DEFAULT_VALUES: Record<DeadlineFieldKey, string> = {
 const FIELDS: Array<{
   key: DeadlineFieldKey;
   section: DeadlineSectionId;
-  unit: "minutes" | "days";
+  unit: "minutes" | "hours" | "days";
   min: number;
   max: number;
   placeholder: string;
@@ -70,6 +72,14 @@ const FIELDS: Array<{
     min: 1,
     max: 1440,
     placeholder: "15",
+  },
+  {
+    key: "ride_request_reminder_hours",
+    section: "rideRequests",
+    unit: "hours",
+    min: 1,
+    max: 168,
+    placeholder: "2",
   },
   {
     key: "invoice_due_soon_days",
@@ -108,7 +118,7 @@ const SECTIONS: Array<{
 
 function formatPreview(
   value: string,
-  unit: "minutes" | "days",
+  unit: "minutes" | "hours" | "days",
   copy: ReturnType<typeof getAdminDeadlineSettingsMessages>,
 ) {
   const parsed = Number(value);
@@ -158,6 +168,7 @@ export function DeadlineSettingsPage() {
         setValues({
           ride_request_cancel_grace_minutes: String(result.ride_request_cancel_grace_minutes),
           ride_request_edit_grace_minutes: String(result.ride_request_edit_grace_minutes),
+          ride_request_reminder_hours: String(result.ride_request_reminder_hours),
           invoice_due_soon_days: String(result.invoice_due_soon_days),
           insurance_due_soon_days: String(result.insurance_due_soon_days),
           inspection_due_soon_days: String(result.inspection_due_soon_days),
@@ -216,6 +227,9 @@ export function DeadlineSettingsPage() {
         ride_request_edit_grace_minutes: Math.trunc(
           Number(values.ride_request_edit_grace_minutes),
         ),
+        ride_request_reminder_hours: Math.trunc(
+          Number(values.ride_request_reminder_hours),
+        ),
         invoice_due_soon_days: Math.trunc(Number(values.invoice_due_soon_days)),
         insurance_due_soon_days: Math.trunc(Number(values.insurance_due_soon_days)),
         inspection_due_soon_days: Math.trunc(Number(values.inspection_due_soon_days)),
@@ -224,6 +238,7 @@ export function DeadlineSettingsPage() {
       setValues({
         ride_request_cancel_grace_minutes: String(saved.ride_request_cancel_grace_minutes),
         ride_request_edit_grace_minutes: String(saved.ride_request_edit_grace_minutes),
+        ride_request_reminder_hours: String(saved.ride_request_reminder_hours),
         invoice_due_soon_days: String(saved.invoice_due_soon_days),
         insurance_due_soon_days: String(saved.insurance_due_soon_days),
         inspection_due_soon_days: String(saved.inspection_due_soon_days),

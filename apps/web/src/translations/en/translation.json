@@ -2862,7 +2862,8 @@
       "ride_requests": {
         "booking": "Booking",
         "review": "Review & approval",
-        "dispatch": "Dispatch & trip"
+        "dispatch": "Dispatch & trip",
+        "reminders": "Reminders"
       },
       "user_registrations": {
         "registration": "Account lifecycle"
@@ -2954,6 +2955,10 @@
         "cancelled": {
           "title": "Request cancelled",
           "description": "Sent when a customer cancels a pending request."
+        },
+        "reminder": {
+          "title": "Upcoming ride reminder",
+          "description": "Sent to the customer before a confirmed trip’s scheduled time."
         }
       },
       "user_registrations": {
@@ -5414,7 +5419,7 @@
   "adminDeadlineSettings": {
     "eyebrow": "System settings",
     "title": "Deadlines",
-    "description": "Set how long customers can cancel or edit requests, and when invoices and compliance items should be flagged as due soon.",
+    "description": "Set how long customers can cancel or edit requests, when ride reminders go out, and when invoices and compliance items should be flagged as due soon.",
     "loading": "Loading deadline settings...",
     "accessDenied": {
       "eyebrow": "Access denied",
@@ -5426,17 +5431,19 @@
     },
     "previews": {
       "minutes": "{value} minutes",
+      "hours": "{value} hours",
       "days": "{value} days",
       "empty": "—"
     },
     "units": {
       "minutes": "min",
+      "hours": "hrs",
       "days": "days"
     },
     "sections": {
       "rideRequests": {
         "title": "Ride requests",
-        "description": "Grace periods after a customer submits a pending request."
+        "description": "Grace periods after submission and how early customers are reminded of upcoming trips."
       },
       "billing": {
         "title": "Invoices",
@@ -5459,6 +5466,12 @@
         "description": "Control how long customers can edit a pending ride request after submission.",
         "helper": "Applies to pending requests in the customer dashboard and edit forms.",
         "label": "Edit window"
+      },
+      "ride_request_reminder_hours": {
+        "title": "Ride request reminder",
+        "description": "How many hours before the scheduled time to remind the customer.",
+        "helper": "Applies to confirmed rides with a scheduled time. Templates are under Notification templates → Ride requests → Reminder.",
+        "label": "Reminder lead time"
       },
       "invoice_due_soon_days": {
         "title": "Invoices",
