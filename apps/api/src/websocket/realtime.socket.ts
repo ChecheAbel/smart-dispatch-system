@@ -18,6 +18,7 @@ import {
 } from "../models/vehicle-location.model";
 import { evaluateVehicleGeofenceStatus } from "../models/vehicle-geofence.model";
 import { findVehicleById } from "../models/vehicle.model";
+import { queueGeofenceViolationNotifications } from "../services/notification-dispatch.service";
 import { authenticateSocketUser } from "./socket-auth";
 import { getSocketIo } from "./socket-io";
 
@@ -269,6 +270,12 @@ function registerNamespace(io: ReturnType<typeof getSocketIo>) {
             namespace.to(entityRoom(vehicleEntity(vehicleId))).emit(RealtimeEvents.GeofenceStatus, {
               vehicle_id: vehicleId,
               statuses,
+            });
+
+            queueGeofenceViolationNotifications(vehicleId, statuses, {
+              driverUserId: userId,
+              latitude: payload.latitude,
+              longitude: payload.longitude,
             });
           } catch (error) {
             socket.emit(

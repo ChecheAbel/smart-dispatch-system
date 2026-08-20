@@ -15,6 +15,7 @@ export const MODULE_EVENTS: Record<Exclude<NotificationModule, "system">, string
     "completed",
     "cancelled",
   ],
+  geofencing: ["violation"],
   user_registrations: ["submitted", "approved", "rejected"],
   insurance: ["due_soon", "expired"],
   inspection: ["due_soon", "expired"],
@@ -33,6 +34,7 @@ export const EVENT_GROUPS: Record<
     { id: "review", events: ["confirmed", "rejected"] },
     { id: "dispatch", events: ["assigned", "started", "completed"] },
   ],
+  geofencing: [{ id: "alerts", events: ["violation"] }],
   user_registrations: [{ id: "registration", events: ["submitted", "approved", "rejected"] }],
   insurance: [{ id: "compliance", events: ["due_soon", "expired"] }],
   inspection: [{ id: "compliance", events: ["due_soon", "expired"] }],
@@ -61,6 +63,10 @@ export function shouldShowTemplate(
 
   if (module === "password_reset") {
     return recipient === "account_holder";
+  }
+
+  if (module === "geofencing") {
+    return recipient === "driver";
   }
 
   if (recipient === "driver") {

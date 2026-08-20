@@ -385,6 +385,24 @@ const PASSWORD_RESET_RULES: NotificationTemplateSeed[] = [
   },
 ];
 
+const GEOFENCING_RULES: NotificationTemplateSeed[] = [
+  {
+    module: "geofencing",
+    event: "violation",
+    channel: "email",
+    recipient: "driver",
+    subject: "Geofence alert: {vehicle_plate}",
+    body: "Hello {driver_name}, vehicle {vehicle_plate} triggered a geofence alert for {geofence_name} ({geofence_kind}). Status: {violation_type}. Location: {latitude}, {longitude}. Ref: {reference}.",
+  },
+  {
+    module: "geofencing",
+    event: "violation",
+    channel: "sms",
+    recipient: "driver",
+    body: "Smart Dispatch: {vehicle_plate} geofence alert - {geofence_name} ({violation_type}).",
+  },
+];
+
 const DEFAULT_TEMPLATES = [
   ...withPushChannel(RIDE_REQUEST_RULES),
   ...withPushChannel(USER_REGISTRATION_RULES),
@@ -392,6 +410,7 @@ const DEFAULT_TEMPLATES = [
   ...withPushChannel(INSPECTION_RULES),
   ...withPushChannel(INVOICE_RULES),
   ...PASSWORD_RESET_RULES,
+  ...withPushChannel(GEOFENCING_RULES),
 ];
 
 export async function ensureNotificationTemplates() {

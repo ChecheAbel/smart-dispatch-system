@@ -2704,6 +2704,10 @@
         "passwordReset": {
           "title": "Password reset",
           "description": "Available for forgot-password email link and SMS verification code templates."
+        },
+        "geofencing": {
+          "title": "Geofencing alerts",
+          "description": "Available for driver alerts when a vehicle leaves an allowed zone or enters a restricted zone."
         }
       },
       "items": {
@@ -2780,6 +2784,16 @@
           "reset_code": "6-digit verification code (SMS flow)",
           "expires_minutes": "Minutes until the link or code expires",
           "reference": "Short account reference code"
+        },
+        "geofencing": {
+          "driver_name": "Assigned driver full name",
+          "vehicle_plate": "Vehicle plate number",
+          "geofence_name": "Geofence name",
+          "geofence_kind": "Geofence type (allowed or restricted)",
+          "violation_type": "Violation type (outside_allowed or inside_restricted)",
+          "latitude": "Vehicle latitude at alert time",
+          "longitude": "Vehicle longitude at alert time",
+          "reference": "Short vehicle reference code"
         }
       }
     },
@@ -2864,6 +2878,9 @@
       },
       "password_reset": {
         "recovery": "Password recovery"
+      },
+      "geofencing": {
+        "alerts": "Geofence alerts"
       }
     },
     "channels": {
@@ -2902,6 +2919,10 @@
       "passwordReset": {
         "title": "Password reset",
         "description": "Messages sent when a user requests a password reset by email or SMS."
+      },
+      "geofencing": {
+        "title": "Geofencing",
+        "description": "Alerts sent to drivers when a vehicle leaves an allowed zone or enters a restricted zone."
       }
     },
     "events": {
@@ -2992,6 +3013,12 @@
           "title": "Verification code requested",
           "description": "Sent by SMS when a user requests a password reset verification code."
         }
+      },
+      "geofencing": {
+        "violation": {
+          "title": "Geofence violation",
+          "description": "Sent to the driver when the vehicle leaves an allowed zone or enters a restricted zone."
+        }
       }
     },
     "errors": {
@@ -3068,6 +3095,7 @@
       "inspection": "Inspection compliance",
       "invoices": "Invoices & billing",
       "password_reset": "Password reset",
+      "geofencing": "Geofencing",
       "system": "System"
     },
     "eventLabels": {

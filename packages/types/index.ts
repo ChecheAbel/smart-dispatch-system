@@ -186,6 +186,7 @@ export type NotificationModule =
   | "inspection"
   | "invoices"
   | "password_reset"
+  | "geofencing"
   | "system";
 
 export type RideRequestNotificationEvent =
@@ -204,6 +205,8 @@ export type ComplianceNotificationEvent = "due_soon" | "expired";
 export type InvoiceNotificationEvent = "generated" | "due_soon" | "overdue";
 
 export type PasswordResetNotificationEvent = "email_requested" | "sms_requested";
+
+export type GeofencingNotificationEvent = "violation";
 
 export type NotificationTemplateRecipient =
   | "requester"
@@ -305,6 +308,17 @@ export const PASSWORD_RESET_NOTIFICATION_PLACEHOLDERS = [
   "reference",
 ] as const;
 
+export const GEOFENCING_NOTIFICATION_PLACEHOLDERS = [
+  "driver_name",
+  "vehicle_plate",
+  "geofence_name",
+  "geofence_kind",
+  "violation_type",
+  "latitude",
+  "longitude",
+  "reference",
+] as const;
+
 export type RideRequestNotificationPlaceholder =
   (typeof RIDE_REQUEST_NOTIFICATION_PLACEHOLDERS)[number];
 
@@ -323,6 +337,9 @@ export type InvoiceNotificationPlaceholder =
 export type PasswordResetNotificationPlaceholder =
   (typeof PASSWORD_RESET_NOTIFICATION_PLACEHOLDERS)[number];
 
+export type GeofencingNotificationPlaceholder =
+  (typeof GEOFENCING_NOTIFICATION_PLACEHOLDERS)[number];
+
 export const NOTIFICATION_TEMPLATE_PLACEHOLDERS: Record<
   NotificationModule,
   readonly string[]
@@ -333,6 +350,7 @@ export const NOTIFICATION_TEMPLATE_PLACEHOLDERS: Record<
   inspection: INSPECTION_NOTIFICATION_PLACEHOLDERS,
   invoices: INVOICE_NOTIFICATION_PLACEHOLDERS,
   password_reset: PASSWORD_RESET_NOTIFICATION_PLACEHOLDERS,
+  geofencing: GEOFENCING_NOTIFICATION_PLACEHOLDERS,
   system: [],
 };
 

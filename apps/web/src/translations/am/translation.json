@@ -2704,6 +2704,10 @@
         "passwordReset": {
           "title": "የይለፍ ቃል እንደገና ማตከል",
           "description": "ለኢሜይል የማስተካከያ ሊንክ እና ለኤስኤምኤስ የማረጋገጫ ኮድ አብነቶች ይገኛሉ።"
+        },
+        "geofencing": {
+          "title": "የጂኦፌንስ ማስጠንቀቂያዎች",
+          "description": "ተሽከርካሪ ከተፈቀደ ዞን ሲወጣ ወይም ወደ የተከለከለ ዞን ሲገባ ለአሽከርካሪ ማስጠንቀቂያ አብነቶች ይገኛሉ።"
         }
       },
       "items": {
@@ -2780,6 +2784,16 @@
           "reset_code": "6-አሃዝ የማረጋገጫ ኮድ (ኤስኤምኤስ)",
           "expires_minutes": "ለሊንክ ወይም ኮድ የተሰጠ ጊዜ በደቂባ",
           "reference": "አጭር የመለያ ማጣቀሻ ኮድ"
+        },
+        "geofencing": {
+          "driver_name": "የተመደበ አሽከርካሪ ሙሉ ስም",
+          "vehicle_plate": "የተሽከርካሪ ሰሌዳ",
+          "geofence_name": "የጂኦፌንስ ስም",
+          "geofence_kind": "የጂኦፌንስ አይነት (ተፈቅዷል ወይም ተከልክሏል)",
+          "violation_type": "የጥሰት አይነት (outside_allowed ወይም inside_restricted)",
+          "latitude": "በማስጠንቀቂያ ጊዜ ኬክሮስ",
+          "longitude": "በማስጠንቀቂያ ጊዜ ኬንትሮስ",
+          "reference": "አጭር የተሽከርካሪ ማጣቀሻ ኮድ"
         }
       }
     },
@@ -2864,6 +2878,9 @@
       },
       "password_reset": {
         "recovery": "የይለፍ ቃል እንደገና ማตከል"
+      },
+      "geofencing": {
+        "alerts": "የጂኦፌንስ ማስጠንቀቂያዎች"
       }
     },
     "channels": {
@@ -2902,6 +2919,10 @@
       "passwordReset": {
         "title": "የይለፍ ቃል እንደገና ማตከል",
         "description": "ተጠቃሚ በኢሜይል ወይም በኤስኤምኤስ የይለፍ ቃል ማስተካከያ ሲጠይቅ የሚላኩ መልዕክቶች።"
+      },
+      "geofencing": {
+        "title": "ጂኦፌንሲንግ",
+        "description": "ተሽከርካሪ ከተፈቀደ ዞን ሲወጣ ወይም ወደ የተከለከለ ዞን ሲገባ ለአሽከርካሪ የሚላኩ ማስጠንቀቂያዎች።"
       }
     },
     "events": {
@@ -2992,6 +3013,12 @@
           "title": "የማረጋገጫ ኮድ ተጠይቋል",
           "description": "ተጠቃሚ የይለፍ ቃል ማስተካከያ ኮድ ሲጠይቅ በኤስኤምኤስ ይላካል።"
         }
+      },
+      "geofencing": {
+        "violation": {
+          "title": "የጂኦፌንስ ጥሰት",
+          "description": "ተሽከርካሪ ከተፈቀደ ዞን ሲወጣ ወይም ወደ የተከለከለ ዞን ሲገባ ለአሽከርካሪ ይላካል።"
+        }
       }
     },
     "errors": {
@@ -3068,7 +3095,8 @@
       "inspection": "የፍተሻ ተገዢነት",
       "invoices": "ደረሰኞች እና ክፍያ",
       "password_reset": "የይለፍ ቃል እንደገና ማตከል",
-      "system": "ስርዓት"
+      "system": "ስርዓት",
+      "geofencing": "ጂኦፌንሲንግ"
     },
     "eventLabels": {
       "admin.broadcast": "የአስተዳዳሪ መልዕክት",

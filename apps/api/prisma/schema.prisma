@@ -229,6 +229,7 @@ enum NotificationModule {
   inspection
   invoices
   password_reset
+  geofencing
   system
 
   @@map("notification_module")

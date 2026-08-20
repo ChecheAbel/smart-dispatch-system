@@ -1,4 +1,5 @@
 import type {
+  GeofencingNotificationEvent,
   InvoiceNotificationEvent,
   NotificationChannel,
   NotificationModule,
@@ -6,10 +7,12 @@ import type {
   PasswordResetNotificationEvent,
   RideRequestNotificationEvent,
   UserRegistrationNotificationEvent,
+  VehicleGeofenceStatus,
 } from "@smart-dispatch/types";
 import { findRideRequestById } from "../models/ride-request.model";
 import { findInvoiceById } from "../models/invoice.model";
 import { findUserByEmail, findUserByIdWithRoles } from "../models/user.model";
+import { findVehicleById } from "../models/vehicle.model";
 import { getRideRequestSettings } from "../models/app-setting.model";
 import {
   findNotificationTemplateById,
@@ -151,6 +154,19 @@ function buildPasswordResetSampleContext(): TemplateContext {
   };
 }
 
+function buildGeofencingSampleContext(): TemplateContext {
+  return {
+    driver_name: "Driver Smith",
+    vehicle_plate: "AA-1-53421",
+    geofence_name: "Addis operating zone",
+    geofence_kind: "allowed",
+    violation_type: "outside_allowed",
+    latitude: "9.03000",
+    longitude: "38.74000",
+    reference: "A1B2C3D4",
+  };
+}
+
 function buildSampleContextForModule(module: NotificationModule): TemplateContext {
   switch (module) {
     case "user_registrations":
@@ -163,6 +179,8 @@ function buildSampleContextForModule(module: NotificationModule): TemplateContex
       return buildInvoiceSampleContext();
     case "password_reset":
       return buildPasswordResetSampleContext();
+    case "geofencing":
+      return buildGeofencingSampleContext();
     default:
       return buildRideRequestSampleContext();
   }
@@ -524,6 +542,7 @@ function moduleToEntityType(module: NotificationModule) {
       return "user";
     case "insurance":
     case "inspection":
+    case "geofencing":
       return "vehicle";
     case "invoices":
       return "invoice";
@@ -837,6 +856,137 @@ export function queueInvoiceNotifications(
   invoiceId: string,
 ) {
   void sendInvoiceNotifications(event, invoiceId);
+}
+
+const GEOFENCE_VIOLATION_COOLDOWN_MS = 10 * 60 * 1000;
+
+type GeofenceViolationMemory = {
+  violating: boolean;
+  lastNotifiedAt: number | null;
+};
+
+const geofenceViolationMemory = new Map<string, GeofenceViolationMemory>();
+
+function isGeofenceViolating(status: VehicleGeofenceStatus) {
+  return (
+    (status.kind === "allowed" && !status.inside) ||
+    (status.kind === "restricted" && status.inside)
+  );
+}
+
+function geofenceViolationType(status: VehicleGeofenceStatus) {
+  if (status.kind === "allowed" && !status.inside) {
+    return "outside_allowed";
+  }
+  if (status.kind === "restricted" && status.inside) {
+    return "inside_restricted";
+  }
+  return "ok";
+}
+
+function shouldNotifyGeofenceViolation(vehicleId: string, status: VehicleGeofenceStatus) {
+  const key = `${vehicleId}:${status.id}`;
+  const now = Date.now();
+  const previous = geofenceViolationMemory.get(key);
+  const currentlyViolating = isGeofenceViolating(status);
+
+  if (!currentlyViolating) {
+    geofenceViolationMemory.set(key, { violating: false, lastNotifiedAt: previous?.lastNotifiedAt ?? null });
+    return false;
+  }
+
+  const enteredViolation = !previous?.violating;
+  const cooldownElapsed =
+    previous?.lastNotifiedAt == null ||
+    now - previous.lastNotifiedAt >= GEOFENCE_VIOLATION_COOLDOWN_MS;
+
+  const shouldNotify = enteredViolation && cooldownElapsed;
+
+  geofenceViolationMemory.set(key, {
+    violating: true,
+    lastNotifiedAt: shouldNotify ? now : previous?.lastNotifiedAt ?? null,
+  });
+
+  return shouldNotify;
+}
+
+export async function sendGeofenceViolationNotifications(
+  vehicleId: string,
+  status: VehicleGeofenceStatus,
+  options: {
+    driverUserId?: string | null;
+    latitude: number;
+    longitude: number;
+  },
+) {
+  const vehicle = await findVehicleById(vehicleId);
+  if (!vehicle) {
+    return;
+  }
+
+  let driver = vehicle.assignedDriver;
+  if (!driver && options.driverUserId) {
+    driver = await findUserByIdWithRoles(options.driverUserId);
+  }
+
+  const driverUserId = vehicle.assignedDriverUserId ?? options.driverUserId ?? null;
+  if (!driverUserId) {
+    return;
+  }
+
+  const context: TemplateContext = {
+    driver_name: driver
+      ? formatPersonName({
+          firstName: driver.firstName,
+          middleName: driver.middleName,
+          lastName: driver.lastName,
+        })
+      : "Driver",
+    vehicle_plate: vehicle.plateNumber,
+    geofence_name: status.name,
+    geofence_kind: status.kind,
+    violation_type: geofenceViolationType(status),
+    latitude: options.latitude.toFixed(5),
+    longitude: options.longitude.toFixed(5),
+    reference: vehicleId.slice(0, 8).toUpperCase(),
+  };
+
+  const event: GeofencingNotificationEvent = "violation";
+
+  await dispatchTemplates(
+    "geofencing",
+    event,
+    vehicleId,
+    context,
+    (template) => {
+      if (template.recipient !== "driver" || !driver) {
+        return null;
+      }
+      if (template.channel === "sms") {
+        return driver.mobileNumber?.trim() || null;
+      }
+      return driver.email?.trim() || null;
+    },
+    (template) => (template.recipient === "driver" ? driverUserId : null),
+  );
+}
+
+export function queueGeofenceViolationNotifications(
+  vehicleId: string,
+  statuses: VehicleGeofenceStatus[],
+  options: {
+    driverUserId?: string | null;
+    latitude: number;
+    longitude: number;
+  },
+) {
+  for (const status of statuses) {
+    if (!shouldNotifyGeofenceViolation(vehicleId, status)) {
+      continue;
+    }
+
+    void sendGeofenceViolationNotifications(vehicleId, status, options);
+  }
 }
 
 export async function sendNotificationTemplateTest(

@@ -3,6 +3,7 @@ import {
   CarFront,
   ClipboardList,
   KeyRound,
+  MapPinned,
   Receipt,
   ShieldCheck,
   UserRoundCheck,
@@ -17,7 +18,8 @@ export type NotificationModuleCopyKey =
   | "insurance"
   | "inspection"
   | "invoices"
-  | "passwordReset";
+  | "passwordReset"
+  | "geofencing";
 
 export type NotificationModuleDefinition = {
   id: NotificationModule;
@@ -33,6 +35,12 @@ export const NOTIFICATION_MODULE_DEFINITIONS: NotificationModuleDefinition[] = [
     category: "operations",
     copyKey: "rideRequests",
     icon: CarFront,
+  },
+  {
+    id: "geofencing",
+    category: "operations",
+    copyKey: "geofencing",
+    icon: MapPinned,
   },
   {
     id: "user_registrations",
