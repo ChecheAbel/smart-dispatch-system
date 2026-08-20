@@ -194,6 +194,7 @@ export type RideRequestNotificationEvent =
   | "confirmed"
   | "rejected"
   | "assigned"
+  | "rerouted"
   | "started"
   | "completed"
   | "cancelled"
@@ -913,6 +914,12 @@ export type AdminDashboardCompliancePoint = {
 
 export type DispatchSlaPriority = "overdue" | "due_soon" | "on_track" | "unscheduled";
 
+export type DispatchDisruptionReason =
+  | "vehicle_unavailable"
+  | "driver_unavailable"
+  | "geofence_violation"
+  | "stale_location";
+
 export type AdminDispatchSuggestedVehicle = {
   id: string;
   plate_number: string;
@@ -935,6 +942,7 @@ export type AdminDispatchQueueItem = {
   sla_minutes?: number | null;
   suggested_vehicle?: AdminDispatchSuggestedVehicle | null;
   can_auto_assign?: boolean;
+  disruption_reason?: DispatchDisruptionReason | null;
 };
 
 export type AdminDispatchAutoAssignResult = {
@@ -970,6 +978,7 @@ export type AdminDispatchOverview = {
     needs_assignment: number;
     in_progress: number;
     upcoming_today: number;
+    disrupted: number;
     open_complaints: number;
     urgent_complaints: number;
   };
@@ -978,6 +987,7 @@ export type AdminDispatchOverview = {
     needs_assignment: AdminDispatchQueueItem[];
     in_progress: AdminDispatchQueueItem[];
     upcoming_today: AdminDispatchQueueItem[];
+    disrupted: AdminDispatchQueueItem[];
   };
   complaints: AdminDispatchComplaintItem[];
 };

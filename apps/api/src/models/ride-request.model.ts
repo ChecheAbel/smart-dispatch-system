@@ -752,13 +752,29 @@ async function markRideRequestNoShow(
 }
 
 export async function assignRideRequestAdmin(id: string, vehicleId: string) {
+  return assignOrReassignRideRequestAdmin(id, vehicleId, { forceStatus: "confirmed" });
+}
+
+export async function reassignRideRequestAdmin(id: string, vehicleId: string) {
+  return assignOrReassignRideRequestAdmin(id, vehicleId, { keepStatus: true });
+}
+
+async function assignOrReassignRideRequestAdmin(
+  id: string,
+  vehicleId: string,
+  options: { forceStatus?: RideRequestStatus; keepStatus?: boolean },
+) {
   const vehicle = await findVehicleById(vehicleId);
-  if (!vehicle?.assignedDriverUserId) {
+  if (!vehicle?.assignedDriverUserId || vehicle.status !== "active") {
     return null;
   }
 
   const existing = await findRideRequestById(id);
   if (!existing) {
+    return null;
+  }
+
+  if (options.keepStatus && existing.status !== "confirmed" && existing.status !== "in_progress") {
     return null;
   }
 
@@ -786,7 +802,7 @@ export async function assignRideRequestAdmin(id: string, vehicleId: string) {
         assignedVehicleId: vehicleId,
         assignedDriverUserId: vehicle.assignedDriverUserId,
         assignedAt: new Date(),
-        status: "confirmed",
+        status: options.keepStatus ? existing.status : (options.forceStatus ?? "confirmed"),
       },
       include: rideRequestAdminInclude,
     });

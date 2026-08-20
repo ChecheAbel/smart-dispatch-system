@@ -11,6 +11,7 @@ export const MODULE_EVENTS: Record<Exclude<NotificationModule, "system">, string
     "confirmed",
     "rejected",
     "assigned",
+    "rerouted",
     "started",
     "completed",
     "cancelled",
@@ -33,7 +34,7 @@ export const EVENT_GROUPS: Record<
   ride_requests: [
     { id: "booking", events: ["created", "cancelled"] },
     { id: "review", events: ["confirmed", "rejected"] },
-    { id: "dispatch", events: ["assigned", "started", "completed"] },
+    { id: "dispatch", events: ["assigned", "rerouted", "started", "completed"] },
     { id: "reminders", events: ["reminder"] },
   ],
   geofencing: [{ id: "alerts", events: ["violation"] }],
@@ -44,7 +45,7 @@ export const EVENT_GROUPS: Record<
   password_reset: [{ id: "recovery", events: ["email_requested", "sms_requested"] }],
 };
 
-const DRIVER_EVENTS = new Set(["assigned", "started", "completed"]);
+const DRIVER_EVENTS = new Set(["assigned", "rerouted", "started", "completed"]);
 
 export function shouldShowTemplate(
   module: NotificationModule,

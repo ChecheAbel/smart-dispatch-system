@@ -35,6 +35,8 @@ export type DispatchAllocationTrip = {
   createdAt: Date;
   pickupLatitude?: Prisma.Decimal | number | null;
   pickupLongitude?: Prisma.Decimal | number | null;
+  referenceLatitude?: number | null;
+  referenceLongitude?: number | null;
 };
 
 type AllocationVehicle = {
@@ -47,6 +49,7 @@ type AllocationVehicle = {
 };
 
 type ActiveAssignment = {
+  rideRequestId: string;
   assignedVehicleId: string | null;
   scheduledAt: Date | null;
   scheduledReturnAt: Date | null;
@@ -124,7 +127,19 @@ export function compareDispatchSla(a: DispatchAllocationTrip, b: DispatchAllocat
   return a.createdAt.getTime() - b.createdAt.getTime();
 }
 
-function vehicleConflicts(vehicleId: string, trip: DispatchAllocationTrip, assignments: ActiveAssignment[]) {
+function referencePoint(trip: DispatchAllocationTrip): LatLng | null {
+  if (trip.referenceLatitude != null && trip.referenceLongitude != null) {
+    return { latitude: trip.referenceLatitude, longitude: trip.referenceLongitude };
+  }
+
+  return pickupPoint(trip);
+}
+
+function vehicleConflicts(
+  vehicleId: string,
+  trip: DispatchAllocationTrip,
+  assignments: ActiveAssignment[],
+) {
   const candidateWindow = getRideScheduleWindow({
     scheduledAt: trip.scheduledAt,
     scheduledReturnAt: trip.scheduledReturnAt,
@@ -132,6 +147,10 @@ function vehicleConflicts(vehicleId: string, trip: DispatchAllocationTrip, assig
   });
 
   return assignments.some((assignment) => {
+    if (assignment.rideRequestId === trip.id) {
+      return false;
+    }
+
     if (assignment.assignedVehicleId !== vehicleId) {
       return false;
     }
@@ -158,8 +177,12 @@ function pickVehicle(
   trip: DispatchAllocationTrip,
   context: AllocationContext,
 ): { vehicle: AllocationVehicle; distanceMeters: number | null } | null {
-  const pickup = pickupPoint(trip);
+  const pickup = referencePoint(trip);
   const eligible = context.vehicles.filter((vehicle) => {
+    if (vehicle.id === trip.assignedVehicleId) {
+      return false;
+    }
+
     if (context.reservedVehicleIds.has(vehicle.id)) {
       return false;
     }
@@ -215,6 +238,7 @@ async function loadAllocationContext(): Promise<AllocationContext> {
         status: { in: ["confirmed", "in_progress"] },
       },
       select: {
+        id: true,
         assignedVehicleId: true,
         scheduledAt: true,
         scheduledReturnAt: true,
@@ -246,7 +270,13 @@ async function loadAllocationContext(): Promise<AllocationContext> {
       driverName: personName(vehicle.assignedDriver),
       location: locationByVehicle.get(vehicle.id) ?? null,
     })),
-    assignments,
+    assignments: assignments.map((assignment) => ({
+      rideRequestId: assignment.id,
+      assignedVehicleId: assignment.assignedVehicleId,
+      scheduledAt: assignment.scheduledAt,
+      scheduledReturnAt: assignment.scheduledReturnAt,
+      status: assignment.status,
+    })),
     reservedVehicleIds: new Set<string>(),
   };
 }
@@ -346,6 +376,7 @@ export async function autoAssignDispatchQueue(
 
     context.reservedVehicleIds.add(pick.vehicle.id);
     context.assignments.push({
+      rideRequestId: trip.id,
       assignedVehicleId: pick.vehicle.id,
       scheduledAt: trip.scheduledAt,
       scheduledReturnAt: trip.scheduledReturnAt,
@@ -360,6 +391,12 @@ export async function autoAssignDispatchQueue(
   }
 
   return { assigned, skipped };
+}
+
+export async function pickReplacementForTrip(trip: DispatchAllocationTrip) {
+  const context = await loadAllocationContext();
+  const pick = pickVehicle(trip, context);
+  return pick ? toSuggestedVehicle(pick) : null;
 }
 
 export async function applyDispatchAutoAssignments(

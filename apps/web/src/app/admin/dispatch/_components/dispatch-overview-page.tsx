@@ -8,6 +8,7 @@ import {
   CalendarClock,
   CarFront,
   CheckCircle2,
+  CircleHelp,
   ClipboardList,
   Clock3,
   MapPin,
@@ -22,6 +23,7 @@ import type {
   AdminDispatchOverview,
   AdminDispatchQueueItem,
   ComplaintPriority,
+  DispatchDisruptionReason,
   DispatchSlaPriority,
   RideRequestStatus,
 } from "@smart-dispatch/types";
@@ -31,6 +33,7 @@ import { StatCard } from "@/components/shared/stat-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   formatScheduledAt,
   statusBadgeClass,
@@ -53,6 +56,7 @@ const emptyOverview: AdminDispatchOverview = {
     needs_assignment: 0,
     in_progress: 0,
     upcoming_today: 0,
+    disrupted: 0,
     open_complaints: 0,
     urgent_complaints: 0,
   },
@@ -61,6 +65,7 @@ const emptyOverview: AdminDispatchOverview = {
     needs_assignment: [],
     in_progress: [],
     upcoming_today: [],
+    disrupted: [],
   },
   complaints: [],
 };
@@ -99,6 +104,64 @@ function slaLabel(priority: DispatchSlaPriority, copy: OverviewCopy) {
   return copy.sla.unscheduled;
 }
 
+function disruptionLabel(reason: DispatchDisruptionReason, copy: OverviewCopy) {
+  if (reason === "vehicle_unavailable") return copy.disruption.vehicleUnavailable;
+  if (reason === "driver_unavailable") return copy.disruption.driverUnavailable;
+  if (reason === "geofence_violation") return copy.disruption.geofenceViolation;
+  return copy.disruption.staleLocation;
+}
+
+function DisruptedTripsHelp({
+  copy,
+  label,
+  labelClassName,
+}: {
+  copy: OverviewCopy;
+  label?: string;
+  labelClassName?: string;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        aria-label={label ? undefined : copy.disruption.helpAria}
+        render={
+          <span
+            className="inline-flex cursor-help items-center gap-1.5 rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-[#1C3A34]/20 dark:focus-visible:ring-[var(--brand-accent)]/35"
+            tabIndex={0}
+            onClick={(event) => event.stopPropagation()}
+          />
+        }
+      >
+        {label ? <span className={labelClassName}>{label}</span> : null}
+        <CircleHelp
+          className={cn(
+            "size-3.5 shrink-0 text-slate-400",
+            !label && "transition-colors hover:text-slate-700 dark:hover:text-foreground",
+          )}
+        />
+      </TooltipTrigger>
+      <TooltipContent
+        side="bottom"
+        align="start"
+        className="max-w-sm flex-col items-start gap-2 whitespace-normal py-2.5 text-left leading-relaxed"
+      >
+        <p className="font-semibold">{copy.disruption.helpTitle}</p>
+        <p>{copy.disruption.helpIntro}</p>
+        <div>
+          <p>{copy.disruption.helpIncludes}</p>
+          <ul className="mt-1 list-disc space-y-1 pl-4">
+            <li>{copy.disruption.helpVehicle}</li>
+            <li>{copy.disruption.helpDriver}</li>
+            <li>{copy.disruption.helpGeofence}</li>
+            <li>{copy.disruption.helpStale}</li>
+          </ul>
+        </div>
+        <p>{copy.disruption.helpOutcome}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
 function formatDistance(meters: number) {
   if (meters < 1000) {
     return `${Math.round(meters)} m`;
@@ -119,6 +182,7 @@ function SectionHeader({
   href,
   viewAll,
   action,
+  titleHint,
 }: {
   icon: LucideIcon;
   title: string;
@@ -127,6 +191,7 @@ function SectionHeader({
   href: string;
   viewAll: string;
   action?: ReactNode;
+  titleHint?: ReactNode;
 }) {
   return (
     <div className="flex flex-col gap-4 border-b border-slate-200/80 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:border-border">
@@ -136,7 +201,9 @@ function SectionHeader({
         </div>
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className={cn("text-base font-semibold", adminHeadingClass)}>{title}</h2>
+            {titleHint ?? (
+              <h2 className={cn("text-base font-semibold", adminHeadingClass)}>{title}</h2>
+            )}
             {typeof count === "number" ? (
               <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold tabular-nums text-slate-600 dark:bg-muted dark:text-muted-foreground">
                 {count}
@@ -340,6 +407,186 @@ function AssignmentBoard({
           <div className="grid gap-3">
             {items.map((item) => (
               <AssignmentCard
+                key={item.id}
+                item={item}
+                copy={copy}
+                locale={locale}
+                statusLabels={statusLabels}
+                onReview={onReview}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function DisruptionCard({
+  item,
+  copy,
+  locale,
+  statusLabels,
+  onReview,
+}: {
+  item: AdminDispatchQueueItem;
+  copy: OverviewCopy;
+  locale: string;
+  statusLabels: Record<RideRequestStatus, string>;
+  onReview: (id: string) => void;
+}) {
+  const suggestion = item.suggested_vehicle;
+  const suggestionLabel = suggestion
+    ? [suggestion.plate_number, suggestion.driver_name].filter(Boolean).join(" · ")
+    : copy.allocation.noVehicle;
+  const currentLabel = [item.assigned_vehicle_plate, item.assigned_driver_name].filter(Boolean).join(" · ");
+  const distanceLabel =
+    suggestion?.distance_meters != null
+      ? formatMessage(copy.allocation.distance, {
+          distance: formatDistance(suggestion.distance_meters),
+        })
+      : null;
+
+  return (
+    <article className="rounded-xl border border-red-100 border-l-[3px] border-l-red-500 bg-red-50/40 p-4 shadow-sm dark:border-red-400/25 dark:border-l-red-400 dark:bg-red-400/8">
+      <div className="flex items-start justify-between gap-3">
+        <button
+          type="button"
+          onClick={() => onReview(item.id)}
+          className="min-w-0 flex-1 rounded-md text-left"
+        >
+          <p className="truncate text-sm font-semibold text-slate-800 dark:text-foreground">
+            {item.requester_name}
+          </p>
+        </button>
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+          {item.disruption_reason ? (
+            <Badge
+              variant="outline"
+              className="border-red-200 bg-red-50 text-red-700 dark:border-red-400/30 dark:bg-red-400/10 dark:text-red-200"
+            >
+              {disruptionLabel(item.disruption_reason, copy)}
+            </Badge>
+          ) : null}
+          <Badge variant="outline" className={cn("capitalize", statusBadgeClass(item.status))}>
+            {statusLabels[item.status]}
+          </Badge>
+        </div>
+      </div>
+
+      <button type="button" onClick={() => onReview(item.id)} className="mt-3 w-full rounded-md text-left">
+        <div className="space-y-2">
+          <div className="flex items-start gap-2.5">
+            <span className="mt-1.5 size-2 shrink-0 rounded-full bg-emerald-500" />
+            <div className="min-w-0">
+              <p className={adminEyebrowClass}>{copy.pickup}</p>
+              <p className="mt-0.5 truncate text-sm text-slate-700 dark:text-foreground">{item.pickup}</p>
+            </div>
+          </div>
+          <div className="ml-[3px] h-3 w-px bg-slate-200 dark:bg-border" />
+          <div className="flex items-start gap-2.5">
+            <span className="mt-1.5 size-2 shrink-0 rounded-full border-2 border-red-400 bg-white dark:bg-card" />
+            <div className="min-w-0">
+              <p className={adminEyebrowClass}>{copy.dropoff}</p>
+              <p className="mt-0.5 truncate text-sm text-slate-700 dark:text-foreground">{item.dropoff}</p>
+            </div>
+          </div>
+        </div>
+      </button>
+
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-500 dark:text-muted-foreground">
+        <span className="inline-flex items-center gap-1">
+          <Clock3 className="size-3.5" />
+          {formatScheduledAt(item.scheduled_at, locale)}
+        </span>
+        {currentLabel ? (
+          <span className="inline-flex items-center gap-1">
+            <Truck className="size-3.5" />
+            {currentLabel}
+          </span>
+        ) : null}
+      </div>
+
+      <div className="mt-3 flex items-start gap-2 rounded-lg border border-slate-200/80 bg-white/80 px-3 py-2.5 dark:border-border dark:bg-muted/30">
+        <CarFront className="mt-0.5 size-4 shrink-0 text-[var(--brand-primary)] dark:text-[var(--brand-accent)]" />
+        <div className="min-w-0 flex-1">
+          <p className={adminEyebrowClass}>{copy.allocation.suggested}</p>
+          <p className="mt-0.5 truncate text-sm font-medium text-slate-800 dark:text-foreground">
+            {suggestionLabel}
+          </p>
+          {distanceLabel ? (
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-muted-foreground">{distanceLabel}</p>
+          ) : null}
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Button type="button" size="sm" variant="outline" onClick={() => onReview(item.id)}>
+          {copy.review}
+          <ArrowRight className="size-3.5" />
+        </Button>
+      </div>
+    </article>
+  );
+}
+
+function DisruptionBoard({
+  copy,
+  items,
+  loading,
+  locale,
+  statusLabels,
+  onReview,
+}: {
+  copy: OverviewCopy;
+  items: AdminDispatchQueueItem[];
+  loading: boolean;
+  locale: string;
+  statusLabels: Record<RideRequestStatus, string>;
+  onReview: (id: string) => void;
+}) {
+  return (
+    <section id="dispatch-disrupted" className={cn(adminCardClass, "overflow-hidden rounded-xl scroll-mt-24")}>
+      <SectionHeader
+        icon={AlertTriangle}
+        title={copy.queues.disrupted}
+        description={copy.queues.disruptedDescription}
+        count={loading ? undefined : items.length}
+        href="/admin/ride-requests"
+        viewAll={copy.viewAll}
+        titleHint={
+          <h2 className={cn("text-base font-semibold", adminHeadingClass)}>
+            <DisruptedTripsHelp
+              copy={copy}
+              label={copy.queues.disrupted}
+              labelClassName="text-base font-semibold"
+            />
+          </h2>
+        }
+      />
+
+      <div className="p-4 sm:p-5">
+        {loading ? (
+          <div className="grid gap-3">
+            {Array.from({ length: 2 }).map((_, index) => (
+              <div key={index} className="space-y-3 rounded-xl border border-slate-200/80 p-4 dark:border-border">
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-3 w-64" />
+                <Skeleton className="h-12 w-full" />
+              </div>
+            ))}
+          </div>
+        ) : items.length === 0 ? (
+          <EmptyState
+            icon={CheckCircle2}
+            title={copy.queues.emptyDisrupted}
+            hint={copy.queues.emptyDisruptedHint}
+            tone="success"
+          />
+        ) : (
+          <div className="grid gap-3">
+            {items.map((item) => (
+              <DisruptionCard
                 key={item.id}
                 item={item}
                 copy={copy}
@@ -607,6 +854,9 @@ export function DispatchOverviewPage() {
   const waitingLabel = formatMessage(copy.waitingCount, {
     count: String(data.counts.needs_assignment),
   });
+  const disruptedLabel = formatMessage(copy.attentionDisrupted, {
+    count: String(data.counts.disrupted),
+  });
 
   return (
     <div className="w-full max-w-none space-y-6">
@@ -616,6 +866,18 @@ export function DispatchOverviewPage() {
         </h1>
         <p className="max-w-2xl text-sm text-slate-500 dark:text-muted-foreground">{copy.description}</p>
       </header>
+
+      {!loading && canReadRideRequests && data.counts.disrupted > 0 ? (
+        <button
+          type="button"
+          onClick={() => scrollToSection("dispatch-disrupted")}
+          className="flex w-full items-start gap-3 rounded-lg border border-red-200 bg-red-50/80 px-4 py-3 text-left text-sm text-red-900 transition-colors hover:bg-red-50 dark:border-red-400/30 dark:bg-red-400/10 dark:text-red-100 dark:hover:bg-red-400/15"
+        >
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+          <span className="min-w-0 flex-1">{disruptedLabel}</span>
+          <span className="shrink-0 font-semibold">{copy.attentionView}</span>
+        </button>
+      ) : null}
 
       {!loading && data.counts.urgent_complaints > 0 ? (
         <button
@@ -636,6 +898,16 @@ export function DispatchOverviewPage() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-5">
         {canReadRideRequests ? (
           <>
+            <StatCard
+              title={copy.stats.disrupted}
+              value={data.counts.disrupted}
+              description={copy.stats.disruptedDescription}
+              icon={AlertTriangle}
+              loading={loading}
+              active={data.counts.disrupted > 0}
+              onClick={() => scrollToSection("dispatch-disrupted")}
+              titleAccessory={<DisruptedTripsHelp copy={copy} />}
+            />
             <StatCard
               title={copy.stats.needsAssignment}
               value={data.counts.needs_assignment}
@@ -691,14 +963,24 @@ export function DispatchOverviewPage() {
       <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1.4fr)_minmax(20rem,0.9fr)]">
         <div className="min-w-0 space-y-5">
           {canReadRideRequests ? (
-            <AssignmentBoard
-              copy={copy}
-              items={data.queues.needs_assignment}
-              loading={loading}
-              locale={locale}
-              statusLabels={requestCopy.status}
-              onReview={openReview}
-            />
+            <>
+              <DisruptionBoard
+                copy={copy}
+                items={data.queues.disrupted}
+                loading={loading}
+                locale={locale}
+                statusLabels={requestCopy.status}
+                onReview={openReview}
+              />
+              <AssignmentBoard
+                copy={copy}
+                items={data.queues.needs_assignment}
+                loading={loading}
+                locale={locale}
+                statusLabels={requestCopy.status}
+                onReview={openReview}
+              />
+            </>
           ) : null}
         </div>
 

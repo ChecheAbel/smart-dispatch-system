@@ -1882,6 +1882,7 @@
     "waitingCount": "{count} waiting",
     "passengerCount": "{count} passengers",
     "attentionUrgentComplaints": "{count} urgent complaints are open.",
+    "attentionDisrupted": "{count} trips need a new vehicle after a disruption.",
     "attentionView": "Review now",
     "sla": {
       "overdue": "Overdue",
@@ -1903,6 +1904,8 @@
       "toastFailed": "Assignment failed."
     },
     "stats": {
+      "disrupted": "Disrupted",
+      "disruptedDescription": "Trips whose assigned vehicle later became unusable",
       "needsAssignment": "Needs assignment",
       "needsAssignmentDescription": "Pending or confirmed trips with no vehicle",
       "liveNow": "Live now",
@@ -1915,6 +1918,8 @@
       "openComplaintsDescription": "Complaints still waiting on a response"
     },
     "queues": {
+      "disrupted": "Disrupted trips",
+      "disruptedDescription": "The assigned vehicle later became unusable. A replacement is chosen automatically when one is free.",
       "needsAssignment": "Needs assignment",
       "needsAssignmentDescription": "Trips with no matching vehicle yet. Matches are assigned automatically.",
       "liveNow": "Live now",
@@ -1926,7 +1931,24 @@
       "emptyLiveNow": "No trips are in progress.",
       "emptyLiveHint": "Trips appear here after a driver starts the ride.",
       "emptyUpcomingToday": "No trips scheduled for today.",
-      "emptyUpcomingHint": "Today's remaining pickups will appear here."
+      "emptyUpcomingHint": "Today's remaining pickups will appear here.",
+      "emptyDisrupted": "No disrupted trips.",
+      "emptyDisruptedHint": "Confirmed or live trips stay here if auto-reroute cannot find a vehicle."
+    },
+    "disruption": {
+      "vehicleUnavailable": "Vehicle unavailable",
+      "driverUnavailable": "Driver unavailable",
+      "geofenceViolation": "Geofence violation",
+      "staleLocation": "Location stale",
+      "helpAria": "What disrupted trips means",
+      "helpTitle": "What are disrupted trips?",
+      "helpIntro": "These trips already had a matching vehicle assigned. Something changed afterward, so that vehicle can no longer complete the ride. A vehicle that is in maintenance, retired, or has no driver is never assigned in the first place.",
+      "helpIncludes": "A trip appears here when, after assignment:",
+      "helpVehicle": "The assigned vehicle is later put in maintenance or retired",
+      "helpDriver": "The assigned vehicle’s driver is later removed or replaced",
+      "helpGeofence": "A live trip leaves an allowed area or enters a restricted one",
+      "helpStale": "A live trip stops sending GPS for more than 5 minutes",
+      "helpOutcome": "The system looks for another matching vehicle automatically. If none is free, the trip stays here for review."
     },
     "fleet": {
       "title": "Fleet at a glance",
@@ -3028,6 +3050,10 @@
         "assigned": {
           "title": "Vehicle assigned",
           "description": "Sent when a vehicle and driver are assigned to a trip."
+        },
+        "rerouted": {
+          "title": "Trip rerouted",
+          "description": "Sent when a trip is automatically moved to another vehicle after a disruption."
         },
         "started": {
           "title": "Trip started",

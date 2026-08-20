@@ -19,6 +19,7 @@ import {
 import { evaluateVehicleGeofenceStatus } from "../models/vehicle-geofence.model";
 import { findVehicleById } from "../models/vehicle.model";
 import { queueGeofenceViolationNotifications } from "../services/notification-dispatch.service";
+import { queueTripDisruptionReroute } from "../services/trip-disruption.service";
 import { authenticateSocketUser } from "./socket-auth";
 import { getSocketIo } from "./socket-io";
 
@@ -277,6 +278,16 @@ function registerNamespace(io: ReturnType<typeof getSocketIo>) {
               latitude: payload.latitude,
               longitude: payload.longitude,
             });
+
+            if (
+              statuses.some(
+                (status) =>
+                  (status.kind === "allowed" && !status.inside) ||
+                  (status.kind === "restricted" && status.inside),
+              )
+            ) {
+              queueTripDisruptionReroute({ vehicleId });
+            }
           } catch (error) {
             socket.emit(
               RealtimeEvents.SessionError,

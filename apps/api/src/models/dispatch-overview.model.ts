@@ -3,6 +3,7 @@ import type {
   AdminDispatchOverview,
   AdminDispatchQueueItem,
   ComplaintPriority,
+  DispatchDisruptionReason,
   RideRequestStatus,
 } from "@smart-dispatch/types";
 import type { Prisma } from "../generated/prisma";
@@ -13,6 +14,7 @@ import {
   rideScheduleWindowsOverlap,
 } from "../services/ride-request-scheduling.service";
 import { suggestAllocationsForTrips } from "../services/dispatch-allocation.service";
+import { listUnresolvedDisruptions } from "../services/trip-disruption.service";
 import { countVehicles } from "./vehicle.model";
 import { getComplaintSummary } from "./complaint.model";
 
@@ -61,6 +63,7 @@ function toQueueItem(
     sla_minutes: AdminDispatchQueueItem["sla_minutes"];
     suggested_vehicle: AdminDispatchQueueItem["suggested_vehicle"];
     can_auto_assign: boolean;
+    disruption_reason?: DispatchDisruptionReason | null;
   },
 ): AdminDispatchQueueItem {
   const pickupName = rideRequest.pickupLocation
@@ -87,6 +90,7 @@ function toQueueItem(
           sla_minutes: allocation.sla_minutes,
           suggested_vehicle: allocation.suggested_vehicle,
           can_auto_assign: allocation.can_auto_assign,
+          ...(allocation.disruption_reason ? { disruption_reason: allocation.disruption_reason } : {}),
         }
       : {}),
   };
@@ -145,6 +149,36 @@ async function listNeedsAssignmentQueue(locale?: string) {
     });
 }
 
+async function listDisruptedQueue(locale?: string) {
+  const disruptions = await listUnresolvedDisruptions();
+  if (disruptions.length === 0) {
+    return [] as AdminDispatchQueueItem[];
+  }
+
+  const rows = await prisma.rideRequest.findMany({
+    where: { id: { in: disruptions.map((item) => item.id) } },
+    include: queueInclude,
+  });
+  const byId = new Map(rows.map((row) => [row.id, row]));
+
+  return disruptions.flatMap((disruption) => {
+    const row = byId.get(disruption.id);
+    if (!row) {
+      return [];
+    }
+
+    return [
+      toQueueItem(row, locale, {
+        sla_priority: "unscheduled",
+        sla_minutes: null,
+        suggested_vehicle: disruption.suggestedVehicle,
+        can_auto_assign: Boolean(disruption.suggestedVehicle),
+        disruption_reason: disruption.reason,
+      }),
+    ];
+  });
+}
+
 async function getBusyVehicleIds(now: Date) {
   const assignments = await prisma.rideRequest.findMany({
     where: {
@@ -196,24 +230,6 @@ export async function getAdminDispatchOverview(options: {
   const now = new Date();
   const today = addisDayBounds(now);
 
-  const empty: AdminDispatchOverview = {
-    counts: {
-      pending_approval: 0,
-      needs_assignment: 0,
-      in_progress: 0,
-      upcoming_today: 0,
-      open_complaints: 0,
-      urgent_complaints: 0,
-    },
-    fleet: null,
-    queues: {
-      needs_assignment: [],
-      in_progress: [],
-      upcoming_today: [],
-    },
-    complaints: [],
-  };
-
   const needsAssignmentWhere: Prisma.RideRequestWhereInput = {
     status: { in: ["pending", "confirmed"] },
     assignedVehicleId: null,
@@ -237,8 +253,9 @@ export async function getAdminDispatchOverview(options: {
           listNeedsAssignmentQueue(options.locale),
           listQueue({ status: "in_progress" }, [{ startedAt: "desc" }, { createdAt: "desc" }], options.locale),
           listQueue(upcomingTodayWhere, [{ scheduledAt: "asc" }], options.locale),
+          listDisruptedQueue(options.locale),
         ])
-      : Promise.resolve([[], [], []] as AdminDispatchQueueItem[][]),
+      : Promise.resolve([[], [], [], []] as AdminDispatchQueueItem[][]),
     options.includeFleet
       ? Promise.all([
           countVehicles({ status: "active", assignedOnly: true }),
@@ -303,6 +320,7 @@ export async function getAdminDispatchOverview(options: {
       needs_assignment: rideCounts[1],
       in_progress: rideCounts[2],
       upcoming_today: rideCounts[3],
+      disrupted: queues[3].length,
       open_complaints: complaints?.open ?? 0,
       urgent_complaints: complaints?.urgent ?? 0,
     },
@@ -311,6 +329,7 @@ export async function getAdminDispatchOverview(options: {
       needs_assignment: queues[0],
       in_progress: queues[1],
       upcoming_today: queues[2],
+      disrupted: queues[3],
     },
     complaints: complaints?.items ?? [],
   };

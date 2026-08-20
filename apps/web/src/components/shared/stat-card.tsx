@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -12,6 +13,7 @@ type StatCardProps = {
   active?: boolean;
   onClick?: () => void;
   className?: string;
+  titleAccessory?: ReactNode;
 };
 
 export function StatCard({
@@ -24,6 +26,7 @@ export function StatCard({
   active = false,
   onClick,
   className,
+  titleAccessory,
 }: StatCardProps) {
   const isInteractive = Boolean(onClick);
 
@@ -54,14 +57,17 @@ export function StatCard({
       )}
     >
       <div className="flex items-start justify-between gap-3">
-        <p
-          className={cn(
-            "min-w-0 flex-1 text-sm font-semibold tracking-tight text-[#1C3A34] dark:text-foreground",
-            comingSoon && "text-slate-400 dark:text-muted-foreground",
-          )}
-        >
-          {title}
-        </p>
+        <div className="flex min-w-0 flex-1 items-center gap-1.5">
+          <p
+            className={cn(
+              "min-w-0 text-sm font-semibold tracking-tight text-[#1C3A34] dark:text-foreground",
+              comingSoon && "text-slate-400 dark:text-muted-foreground",
+            )}
+          >
+            {title}
+          </p>
+          {titleAccessory}
+        </div>
         <span
           className={cn(
             "flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#1C3A34]/[0.08] text-[#1C3A34] dark:bg-[var(--brand-accent)]/12 dark:text-[var(--brand-accent)]",

@@ -1033,6 +1033,11 @@ export const extensionSchemas = {
         },
       },
       can_auto_assign: { type: "boolean" },
+      disruption_reason: {
+        type: "string",
+        nullable: true,
+        enum: ["vehicle_unavailable", "driver_unavailable", "geofence_violation", "stale_location"],
+      },
     },
   },
   AdminDispatchAutoAssignResult: {
@@ -1079,6 +1084,7 @@ export const extensionSchemas = {
           needs_assignment: { type: "integer" },
           in_progress: { type: "integer" },
           upcoming_today: { type: "integer" },
+          disrupted: { type: "integer" },
           open_complaints: { type: "integer" },
           urgent_complaints: { type: "integer" },
         },
@@ -1104,6 +1110,10 @@ export const extensionSchemas = {
             items: { $ref: "#/components/schemas/AdminDispatchQueueItem" },
           },
           upcoming_today: {
+            type: "array",
+            items: { $ref: "#/components/schemas/AdminDispatchQueueItem" },
+          },
+          disrupted: {
             type: "array",
             items: { $ref: "#/components/schemas/AdminDispatchQueueItem" },
           },

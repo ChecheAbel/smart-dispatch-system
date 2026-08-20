@@ -72,6 +72,7 @@ import {
 } from "../models/vehicle-geofence.model";
 import { mapVehicleGeofence, mapVehicleGeofences } from "../mappers/vehicle-geofence.mapper";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
+import { queueTripDisruptionReroute } from "../services/trip-disruption.service";
 import { parseLocale } from "../utils/locale";
 import { buildVehiclePhotoUrl, vehiclePhotoUpload } from "../utils/vehicle-photo-upload";
 import { getOptionalString, getString, getStringArray, parseBoolean } from "../utils/validation";
@@ -564,6 +565,7 @@ router.post(
           status: VehicleStatus.maintenance,
           actorUserId: req.user?.id,
         });
+        queueTripDisruptionReroute({ vehicleId: vehicle.id, actorUserId: req.user?.id });
       }
 
       return sendSuccess(
@@ -680,6 +682,7 @@ router.patch(
           status: VehicleStatus.maintenance,
           actorUserId: req.user?.id,
         });
+        queueTripDisruptionReroute({ vehicleId: vehicle.id, actorUserId: req.user?.id });
       }
 
       return sendSuccess(res, {
@@ -1373,6 +1376,13 @@ router.patch("/:id", requirePermission("vehicles.write", "compliance.write"), (r
         ...parseComplianceBody(req.body ?? {}),
         actorUserId: req.user?.id,
       });
+
+      const leftActive = existing.status === VehicleStatus.active && vehicle.status !== VehicleStatus.active;
+      const driverChanged =
+        (existing.assignedDriverUserId ?? null) !== (vehicle.assignedDriverUserId ?? null);
+      if (leftActive || driverChanged) {
+        queueTripDisruptionReroute({ vehicleId: vehicle.id, actorUserId: req.user?.id });
+      }
 
       return sendSuccess(res, {
         vehicle: toPublicVehicle(vehicle, { locale }),

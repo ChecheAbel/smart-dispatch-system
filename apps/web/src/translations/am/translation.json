@@ -1882,6 +1882,7 @@
     "waitingCount": "{count} በመጠባበቅ",
     "passengerCount": "{count} ተሳፋሪዎች",
     "attentionUrgentComplaints": "{count} አስቸኳይ ቅሬታዎች ክፍት ናቸው።",
+    "attentionDisrupted": "{count} ጉዞዎች ከመስተጓጎል በኋላ አዲስ መኪና ያስፈልጋቸዋል።",
     "attentionView": "አሁን ይመልከቱ",
     "sla": {
       "overdue": "ጊዜው አልፏል",
@@ -1903,6 +1904,8 @@
       "toastFailed": "መመደብ አልተሳካም።"
     },
     "stats": {
+      "disrupted": "ተስተጓጉለው",
+      "disruptedDescription": "የተመደበው መኪና በኋላ ጥቅም ላይ ሊውል ያልቻለባቸው ጉዞዎች",
       "needsAssignment": "መመደብ ያስፈልጋል",
       "needsAssignmentDescription": "መኪና ያልተመደበላቸው በመጠባበቅ ወይም የተረጋገጡ ጉዞዎች",
       "liveNow": "አሁን በሂደት",
@@ -1915,6 +1918,8 @@
       "openComplaintsDescription": "ምላሽ የሚጠብቁ ቅሬታዎች"
     },
     "queues": {
+      "disrupted": "የተስተጓጎሉ ጉዞዎች",
+      "disruptedDescription": "የተመደበው መኪና በኋላ ጥቅም ላይ ሊውል አልቻለም። ነጻ መኪና ሲኖር በራስ-ሰር ይቀየራል።",
       "needsAssignment": "መመደብ ያስፈልጋል",
       "needsAssignmentDescription": "ተስማሚ መኪና የሌላቸው ጉዞዎች። የሚዛመድ መኪና ሲኖር በራስ-ሰር ይመደባል።",
       "liveNow": "አሁን በሂደት",
@@ -1926,7 +1931,24 @@
       "emptyLiveNow": "በሂደት ላይ ያለ ጉዞ የለም።",
       "emptyLiveHint": "አሽከርካሪ ጉዞ ሲጀምር እዚህ ይታያል።",
       "emptyUpcomingToday": "ለዛሬ የታቀደ ጉዞ የለም።",
-      "emptyUpcomingHint": "የዛሬ የቀሩ መውሰዶች እዚህ ይታያሉ።"
+      "emptyUpcomingHint": "የዛሬ የቀሩ መውሰዶች እዚህ ይታያሉ።",
+      "emptyDisrupted": "የተስተጓጎለ ጉዞ የለም።",
+      "emptyDisruptedHint": "በራስ-ሰር መቀየር መኪና ካልተገኘ የተረጋገጡ እና በሂደት ያሉ ጉዞዎች እዚህ ይቆያሉ።"
+    },
+    "disruption": {
+      "vehicleUnavailable": "መኪና አይገኝም",
+      "driverUnavailable": "አሽከርካሪ አይገኝም",
+      "geofenceViolation": "የጂኦፌንስ ጥሰት",
+      "staleLocation": "የአካባቢ መረጃ አልፏል",
+      "helpAria": "የተስተጓጎሉ ጉዞዎች ምን ማለት እንደሆነ",
+      "helpTitle": "የተስተጓጎሉ ጉዞዎች ምንድን ናቸው?",
+      "helpIntro": "እነዚህ ጉዞዎች አስቀድመው ተስማሚ መኪና ተመድቦላቸዋል። ከዚያ በኋላ የሆነ ነገር ተቀይሮ የተመደበው መኪና ጉዞውን መጨረስ አይችልም። በጥገና፣ ከአገልግሎት የወጣ ወይም አሽከርካሪ የሌለው መኪና ከመጀመሪያው አይመደብም።",
+      "helpIncludes": "ከመመደብ በኋላ የሚከተለው ሲከሰት ጉዞው እዚህ ይታያል:",
+      "helpVehicle": "የተመደበው መኪና በኋላ ለጥገና ሲገባ ወይም ከአገልግሎት ሲወጣ",
+      "helpDriver": "የተመደበው መኪና አሽከርካሪ በኋላ ሲወገድ ወይም ሲቀየር",
+      "helpGeofence": "በሂደት ያለ ጉዞ ከተፈቀደ ቦታ ሲወጣ ወይም ወደ ተከለከለ ቦታ ሲገባ",
+      "helpStale": "በሂደት ያለ ጉዞ ከ5 ደቂቃ በላይ የጂፒኤስ ሪፖርት ማድረግ ሲያቆም",
+      "helpOutcome": "ሥርዓቱ ሌላ ተስማሚ መኪና በራስ-ሰር ይፈልጋል። ካልተገኘ ጉዞው ለግምገማ እዚህ ይቆያል።"
     },
     "fleet": {
       "title": "የመኪኖች አጠቃላይ እይታ",
@@ -3028,6 +3050,10 @@
         "assigned": {
           "title": "ተሽከርካሪ ተመድቧል",
           "description": "ለጉዞ ተሽከርካሪ እና አሽከርካሪ ሲመደቡ ይላካል።"
+        },
+        "rerouted": {
+          "title": "ጉዞ ተቀይሯል",
+          "description": "በመስተጓጎል ጉዞው ወደ ሌላ መኪና በራስ-ሰር ሲቀየር ይላካል።"
         },
         "started": {
           "title": "ጉዞ ተጀምሯል",

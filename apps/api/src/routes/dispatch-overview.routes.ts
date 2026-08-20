@@ -8,6 +8,10 @@ import { userHasPermission } from "../models/permission.model";
 import { getAdminDispatchOverview } from "../models/dispatch-overview.model";
 import { applyDispatchAutoAssignments } from "../services/dispatch-allocation.service";
 import { runRideRequestExpiryJob } from "../services/ride-request-expiry.service";
+import {
+  isTripDisruptionRerouteEnabled,
+  rerouteDisruptedTrips,
+} from "../services/trip-disruption.service";
 import { parseLocale } from "../utils/locale";
 import { handleRouteError, sendError, sendSuccess } from "../utils/response";
 
@@ -48,6 +52,9 @@ router.get("/overview", async (req: AuthenticatedRequest, res: Response) => {
     if (canReadRideRequests) {
       await runRideRequestExpiryJob();
       await applyDispatchAutoAssignments({ actorUserId: userId, req });
+      if (isTripDisruptionRerouteEnabled()) {
+        await rerouteDisruptedTrips({ actorUserId: userId });
+      }
     }
 
     const overview = await getAdminDispatchOverview({
