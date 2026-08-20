@@ -794,8 +794,8 @@
     "detailYes": "አዎ",
     "detailNo": "አይ",
     "detailAsap": "በተቻለ ፍጥነት",
-    "detailRejectionReason": "የመከልከል ምክንያት",
-    "detailRejectionReasonHint": "ጥያቄው በተሰረዘበት ጊዜ በመላኪያ የቀረበ መልሳሽ።",
+    "detailRejectionReason": "የመሰረዝ ምክንያት",
+    "detailRejectionReasonHint": "ይህ ጥያቄ ለምን እንደተሰረዘ።",
     "detailAssignmentSection": "የመላኪያ መመደብ",
     "detailAssignmentSectionDescription": "ለጉዞዎ የተመደበ ተሽከርካሪ እና አሽከርካሪ።",
     "detailAssignmentAssignedBadge": "ተመድቧል",
@@ -1870,6 +1870,91 @@
       }
     }
   },
+  "adminDispatch": {
+    "title": "የመላኪያ አጠቃላይ እይታ",
+    "description": "የሚዛመዱ መኪኖች በራስ-ሰር ይመደባሉ። ያልተመደቡ ጉዞዎችን፣ በሂደት ያሉትን እና የመኪና ወይም የቅሬታ ችግሮችን ይመልከቱ።",
+    "viewAll": "ሁሉንም ይመልከቱ",
+    "review": "ይገምግሙ",
+    "open": "ክፈት",
+    "pickup": "መነሻ",
+    "dropoff": "መድረሻ",
+    "unassigned": "ያልተመደበ",
+    "waitingCount": "{count} በመጠባበቅ",
+    "passengerCount": "{count} ተሳፋሪዎች",
+    "attentionUrgentComplaints": "{count} አስቸኳይ ቅሬታዎች ክፍት ናቸው።",
+    "attentionView": "አሁን ይመልከቱ",
+    "sla": {
+      "overdue": "ጊዜው አልፏል",
+      "dueSoon": "በቅርቡ",
+      "onTrack": "በሰዓቱ",
+      "unscheduled": "የመውሰድ ጊዜ የለም"
+    },
+    "allocation": {
+      "suggested": "የቀረበ",
+      "noVehicle": "ተስማሚ መኪና የለም",
+      "assignSuggested": "ይመድቡ",
+      "assigning": "እየተመደበ...",
+      "autoAssign": "የቀረቡትን ሁሉ ይመድቡ",
+      "autoAssigning": "እየተመደበ...",
+      "distance": "{distance} ርቀት",
+      "toastAssigned": "{plate} ለ {name} ተመድቧል።",
+      "toastAssignedMany": "መኪኖች ለ {count} ጉዞዎች ተመድበዋል።",
+      "toastNone": "በራስ-ሰር ሊመደብ የሚችል ጉዞ የለም።",
+      "toastFailed": "መመደብ አልተሳካም።"
+    },
+    "stats": {
+      "needsAssignment": "መመደብ ያስፈልጋል",
+      "needsAssignmentDescription": "መኪና ያልተመደበላቸው በመጠባበቅ ወይም የተረጋገጡ ጉዞዎች",
+      "liveNow": "አሁን በሂደት",
+      "liveNowDescription": "አሁን በመንገድ ላይ ያሉ ጉዞዎች",
+      "upcomingToday": "የዛሬ የሚመጡ",
+      "upcomingTodayDescription": "ለዛሬ የታቀዱ መውሰዶች",
+      "availableVehicles": "ነጻ መኪኖች",
+      "availableVehiclesDescription": "አሽከርካሪ ያላቸው እና አሁን ነጻ የሆኑ ንቁ መኪኖች",
+      "openComplaints": "ክፍት ቅሬታዎች",
+      "openComplaintsDescription": "ምላሽ የሚጠብቁ ቅሬታዎች"
+    },
+    "queues": {
+      "needsAssignment": "መመደብ ያስፈልጋል",
+      "needsAssignmentDescription": "ተስማሚ መኪና የሌላቸው ጉዞዎች። የሚዛመድ መኪና ሲኖር በራስ-ሰር ይመደባል።",
+      "liveNow": "አሁን በሂደት",
+      "liveNowDescription": "የጀመሩ ጉዞዎች።",
+      "upcomingToday": "የዛሬ የሚመጡ",
+      "upcomingTodayDescription": "ለዛሬ የቀሩ መውሰዶች።",
+      "emptyNeedsAssignment": "መኪና የሚጠብቅ ጉዞ የለም።",
+      "emptyNeedsHint": "ተስማሚ መኪና ሲኖር ጉዞው በራሱ ይመደባል።",
+      "emptyLiveNow": "በሂደት ላይ ያለ ጉዞ የለም።",
+      "emptyLiveHint": "አሽከርካሪ ጉዞ ሲጀምር እዚህ ይታያል።",
+      "emptyUpcomingToday": "ለዛሬ የታቀደ ጉዞ የለም።",
+      "emptyUpcomingHint": "የዛሬ የቀሩ መውሰዶች እዚህ ይታያሉ።"
+    },
+    "fleet": {
+      "title": "የመኪኖች አጠቃላይ እይታ",
+      "description": "አሽከርካሪ ያላቸው ንቁ መኪኖች እና አሁን ነጻ መሆናቸው።",
+      "dispatchable": "ለመላክ ዝግጁ",
+      "available": "አሁን ነጻ",
+      "busy": "አሁን ተይዟል",
+      "viewVehicles": "መኪኖችን ይመልከቱ"
+    },
+    "complaints": {
+      "title": "ክፍት ቅሬታዎች",
+      "description": "አስቸኳይ እቃዎች መጀመሪያ። ለምላሽ የቅሬታ ወረፋውን ይክፈቱ።",
+      "empty": "ክፍት ቅሬታ የለም።",
+      "emptyHint": "አዲስ ቅሬታዎች እዚህ ይታያሉ።",
+      "urgent": "አስቸኳይ",
+      "high": "ከፍተኛ",
+      "medium": "መካከለኛ",
+      "low": "ዝቅተኛ"
+    },
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "የመላኪያ አጠቃላይ እይታን ለመክፈት የጉዞ ጥያቄዎችን ወይም ቅሬታዎችን የማየት ፈቃድ ያስፈልጋል።",
+      "sessionHint": "ፈቃዶች ታርፈው ከተቀየሩ፣ ክፍለ ጊዜዎን ለማደስ ይውጡ እና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶች ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    }
+  },
   "adminRideRequests": {
     "eyebrow": "መላኪያ",
     "title": "የጉዞ ጥያቄዎች",
@@ -1944,7 +2029,7 @@
       "approving": "በማረጋገጥ ላይ…",
       "reject": "ጥያቄ ይቀበሉ",
       "rejecting": "በመሰረዝ ላይ…",
-      "rejectedDescription": "ይህ ጥያቄ ተሰርዟል። ዝርዝሮቹን እና የመከልከል ምክንያቱን ከታች ይመልከቱ።",
+      "rejectedDescription": "ይህ ጥያቄ ተሰርዟል። ዝርዝሮቹን እና ምክንያቱን ከታች ይመልከቱ።",
       "inProgressDescription": "ይህ ጉዞ በሂደት ላይ ነው። ከታች ያለውን መመደብ እና የመንገድ ዝርዝር ይመልከቱ።",
       "completedDescription": "ይህ ጉዞ ተጠናቋል። የመጨረሻው መመደብ እና የመንገድ ዝርዝር ከታች ይታያሉ።",
       "loadEmpty": "የጉዞ ጥያቄ ዝርዝሮች ሊጫኑ አልተቻሉም።",

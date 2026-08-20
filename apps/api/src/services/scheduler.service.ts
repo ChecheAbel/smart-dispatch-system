@@ -6,6 +6,11 @@ import {
   runInvoiceAutomation,
 } from "./invoice-automation.service";
 import {
+  formatRideRequestExpirySummary,
+  isRideRequestExpiryEnabled,
+  runRideRequestExpiryJob,
+} from "./ride-request-expiry.service";
+import {
   formatRideRequestReminderSummary,
   getRideRequestReminderIntervalMs,
   getRideRequestReminderStartupDelayMs,
@@ -18,6 +23,7 @@ let invoiceAutomationRunning = false;
 
 let rideRequestReminderTimer: NodeJS.Timeout | null = null;
 let rideRequestReminderRunning = false;
+let rideRequestExpiryRunning = false;
 
 async function executeInvoiceAutomation(trigger: "startup" | "interval") {
   if (invoiceAutomationRunning) {
@@ -41,6 +47,37 @@ async function executeInvoiceAutomation(trigger: "startup" | "interval") {
     console.error(`[Scheduler] Invoice automation failed (${trigger}): ${message}`);
   } finally {
     invoiceAutomationRunning = false;
+  }
+}
+
+async function executeRideRequestExpiry(trigger: "startup" | "interval") {
+  if (!isRideRequestExpiryEnabled()) {
+    return;
+  }
+
+  if (rideRequestExpiryRunning) {
+    console.log(
+      `[Scheduler] Skipping ride request expiry (${trigger}): previous run still in progress.`,
+    );
+    return;
+  }
+
+  rideRequestExpiryRunning = true;
+
+  try {
+    const result = await runRideRequestExpiryJob();
+    console.log(formatRideRequestExpirySummary(result));
+
+    if (result.errors.length > 0) {
+      for (const error of result.errors) {
+        console.error(`[RideRequestExpiry] ${error}`);
+      }
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown scheduler error.";
+    console.error(`[Scheduler] Ride request expiry failed (${trigger}): ${message}`);
+  } finally {
+    rideRequestExpiryRunning = false;
   }
 }
 
@@ -69,6 +106,14 @@ async function executeRideRequestReminder(trigger: "startup" | "interval") {
   } finally {
     rideRequestReminderRunning = false;
   }
+}
+
+async function executeRideRequestJobs(trigger: "startup" | "interval") {
+  if (isRideRequestReminderEnabled()) {
+    await executeRideRequestReminder(trigger);
+  }
+
+  await executeRideRequestExpiry(trigger);
 }
 
 export function startInvoiceAutomationScheduler() {
@@ -107,9 +152,12 @@ export async function runInvoiceAutomationNow() {
 }
 
 export function startRideRequestReminderScheduler() {
-  if (!isRideRequestReminderEnabled()) {
+  const reminderEnabled = isRideRequestReminderEnabled();
+  const expiryEnabled = isRideRequestExpiryEnabled();
+
+  if (!reminderEnabled && !expiryEnabled) {
     console.log(
-      "[Scheduler] Ride request reminder disabled (RIDE_REQUEST_REMINDER_ENABLED=false).",
+      "[Scheduler] Ride request reminder and expiry disabled (RIDE_REQUEST_REMINDER_ENABLED=false, RIDE_REQUEST_EXPIRY_ENABLED=false).",
     );
     return;
   }
@@ -118,15 +166,15 @@ export function startRideRequestReminderScheduler() {
   const startupDelayMs = getRideRequestReminderStartupDelayMs();
 
   console.log(
-    `[Scheduler] Ride request reminder enabled. First run in ${startupDelayMs}ms, then every ${intervalMs}ms.`,
+    `[Scheduler] Ride request jobs enabled (reminder=${reminderEnabled}, expiry=${expiryEnabled}). First run in ${startupDelayMs}ms, then every ${intervalMs}ms.`,
   );
 
   setTimeout(() => {
-    void executeRideRequestReminder("startup");
+    void executeRideRequestJobs("startup");
   }, startupDelayMs);
 
   rideRequestReminderTimer = setInterval(() => {
-    void executeRideRequestReminder("interval");
+    void executeRideRequestJobs("interval");
   }, intervalMs);
 
   rideRequestReminderTimer.unref?.();
@@ -140,5 +188,5 @@ export function stopRideRequestReminderScheduler() {
 }
 
 export async function runRideRequestReminderNow() {
-  await executeRideRequestReminder("interval");
+  await executeRideRequestJobs("interval");
 }

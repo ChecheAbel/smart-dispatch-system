@@ -62,6 +62,7 @@ import {
 import { listRelevantEnrollmentsForUser } from "../models/contract-enrollment.model";
 import { listActiveVehicleTypesWithAllowedClasses } from "../models/vehicle-type-class.model";
 import { recordAuditLog } from "../services/audit-log.service";
+import { applyDispatchAutoAssignments } from "../services/dispatch-allocation.service";
 import {
   validateDriverRideRequestStatusAction,
   getDriverRideRequestTargetStatus,
@@ -941,6 +942,10 @@ router.post(
         after: updated,
       });
 
+      if (action === "complete" || action === "no_show") {
+        await applyDispatchAutoAssignments({ actorUserId: userId, req });
+      }
+
       return sendSuccess(res, {
         ride_request: toPublicRideRequest(updated, { locale }),
       });
@@ -1116,8 +1121,19 @@ router.post(
         }
       }
 
+      const autoAssigned = await applyDispatchAutoAssignments({
+        rideRequestIds: createdRequests.map((rideRequest) => rideRequest.id),
+        actorUserId: userId,
+        req,
+      });
+      const assignedById = new Map(
+        autoAssigned.assigned.map((item) => [item.rideRequest.id, item.rideRequest]),
+      );
+
       return sendSuccess(res, { 
-        ride_requests: createdRequests.map((r) => toPublicRideRequest(r, { locale })) 
+        ride_requests: createdRequests.map((rideRequest) =>
+          toPublicRideRequest(assignedById.get(rideRequest.id) ?? rideRequest, { locale }),
+        ),
       }, { status: 201, message: "Ride request submitted successfully." });
     } catch (error) {
       return handleRouteError(res, error);
@@ -1199,8 +1215,14 @@ router.patch(
         req,
       });
 
+      const autoAssigned = await applyDispatchAutoAssignments({
+        rideRequestIds: [result.id],
+        actorUserId: userId,
+        req,
+      });
+
       return sendSuccess(res, {
-        ride_request: toPublicRideRequest(result, { locale }),
+        ride_request: toPublicRideRequest(autoAssigned.assigned[0]?.rideRequest ?? result, { locale }),
       });
     } catch (error) {
       return handleRouteError(res, error);
@@ -1244,6 +1266,8 @@ router.post(
       });
 
       queueRideRequestNotifications("cancelled", result.id);
+
+      await applyDispatchAutoAssignments({ actorUserId: userId, req });
 
       return sendSuccess(res, {
         ride_request: toPublicRideRequest(result, { locale }),

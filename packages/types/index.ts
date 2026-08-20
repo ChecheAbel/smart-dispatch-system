@@ -911,6 +911,77 @@ export type AdminDashboardCompliancePoint = {
   count: number;
 };
 
+export type DispatchSlaPriority = "overdue" | "due_soon" | "on_track" | "unscheduled";
+
+export type AdminDispatchSuggestedVehicle = {
+  id: string;
+  plate_number: string;
+  driver_name: string | null;
+  distance_meters: number | null;
+};
+
+export type AdminDispatchQueueItem = {
+  id: string;
+  status: RideRequestStatus;
+  scheduled_at: string | null;
+  started_at: string | null;
+  pickup: string;
+  dropoff: string;
+  requester_name: string;
+  assigned_vehicle_plate: string | null;
+  assigned_driver_name: string | null;
+  passenger_count: number;
+  sla_priority?: DispatchSlaPriority | null;
+  sla_minutes?: number | null;
+  suggested_vehicle?: AdminDispatchSuggestedVehicle | null;
+  can_auto_assign?: boolean;
+};
+
+export type AdminDispatchAutoAssignResult = {
+  assigned: number;
+  skipped: number;
+  results: Array<{
+    ride_request_id: string;
+    status: "assigned" | "skipped";
+    reason?: string;
+    vehicle_plate?: string | null;
+  }>;
+};
+
+export type AdminDispatchComplaintItem = {
+  id: string;
+  reference_number: string;
+  subject: string;
+  priority: ComplaintPriority;
+  status: ComplaintStatus;
+  requester_name: string;
+  created_at: string;
+};
+
+export type AdminDispatchFleetSummary = {
+  dispatchable: number;
+  available: number;
+  busy: number;
+};
+
+export type AdminDispatchOverview = {
+  counts: {
+    pending_approval: number;
+    needs_assignment: number;
+    in_progress: number;
+    upcoming_today: number;
+    open_complaints: number;
+    urgent_complaints: number;
+  };
+  fleet: AdminDispatchFleetSummary | null;
+  queues: {
+    needs_assignment: AdminDispatchQueueItem[];
+    in_progress: AdminDispatchQueueItem[];
+    upcoming_today: AdminDispatchQueueItem[];
+  };
+  complaints: AdminDispatchComplaintItem[];
+};
+
 export type AdminDashboardAnalytics = {
   period_days: number;
   ride_requests: {

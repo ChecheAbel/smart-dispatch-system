@@ -8,6 +8,7 @@ export type AdminMenusMessages = Translations["adminMenus"];
 export type AdminUsersMessages = Translations["adminUsers"];
 export type AdminUserRegistrationsMessages = Translations["adminUserRegistrations"];
 export type AdminRideRequestsMessages = Translations["adminRideRequests"];
+export type AdminDispatchMessages = Translations["adminDispatch"];
 export type AdminNotificationsMessages = Translations["adminNotifications"];
 export type AdminNotificationsEmailMessages = Translations["adminNotificationsEmail"];
 export type AdminNotificationsSmsMessages = Translations["adminNotificationsSms"];

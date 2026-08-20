@@ -191,14 +191,14 @@ const RIDE_REQUEST_RULES: NotificationTemplateSeed[] = [
     channel: "email",
     recipient: "requester",
     subject: "Ride request cancelled",
-    body: "Hello {requester_name}, your ride request from {pickup} to {dropoff} has been cancelled before {cancel_deadline_at}.",
+    body: "Hello {requester_name}, your ride request from {pickup} to {dropoff} has been cancelled. Reason: {rejection_reason}",
   },
   {
     module: "ride_requests",
     event: "cancelled",
     channel: "sms",
     recipient: "requester",
-    body: "Smart Dispatch: your ride request from {pickup} to {dropoff} was cancelled before {cancel_deadline_at}.",
+    body: "Smart Dispatch: your ride request from {pickup} to {dropoff} was cancelled. Reason: {rejection_reason}",
   },
   {
     module: "ride_requests",

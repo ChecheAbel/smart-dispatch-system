@@ -143,6 +143,14 @@ export function hasAnyPermission(
   return slugs.some((slug) => hasPermission(slug));
 }
 
+export function canReadDispatch(hasPermission: (slug: string) => boolean) {
+  return hasAnyPermission(
+    hasPermission,
+    PERMISSIONS.ride_requests.read,
+    PERMISSIONS.complaints.read,
+  );
+}
+
 export function canReadCompliance(hasPermission: (slug: string) => boolean) {
   return hasAnyPermission(
     hasPermission,

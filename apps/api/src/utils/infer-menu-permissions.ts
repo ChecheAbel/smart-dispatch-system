@@ -146,6 +146,10 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
     return ["ride_requests.read", "complaints.read"];
   }
 
+  if (normalizedSlug === "dispatch-overview" || normalizedPath === "/admin/dispatch") {
+    return ["ride_requests.read", "complaints.read"];
+  }
+
   if (normalizedSlug === "ride-requests") {
     return ["ride_requests.read"];
   }

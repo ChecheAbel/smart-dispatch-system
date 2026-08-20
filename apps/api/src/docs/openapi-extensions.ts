@@ -36,6 +36,10 @@ export const extensionTags = [
       "Configurable maintenance work categories used by vehicle maintenance logs (admin only)",
   },
   {
+    name: "Dispatch",
+    description: "Dispatcher working board: assignment queues, live trips, fleet availability, and open complaints.",
+  },
+  {
     name: "Admin Ride Requests",
     description:
       "Ride request review, dispatch, status management, and driver trip views.",
@@ -996,6 +1000,118 @@ export const extensionSchemas = {
       vehicle_class_ids: {
         type: "array",
         items: { type: "string", format: "uuid" },
+      },
+    },
+  },
+  AdminDispatchQueueItem: {
+    type: "object",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      status: { $ref: "#/components/schemas/RideRequestStatus" },
+      scheduled_at: { type: "string", format: "date-time", nullable: true },
+      started_at: { type: "string", format: "date-time", nullable: true },
+      pickup: { type: "string" },
+      dropoff: { type: "string" },
+      requester_name: { type: "string" },
+      assigned_vehicle_plate: { type: "string", nullable: true },
+      assigned_driver_name: { type: "string", nullable: true },
+      passenger_count: { type: "integer" },
+      sla_priority: {
+        type: "string",
+        nullable: true,
+        enum: ["overdue", "due_soon", "on_track", "unscheduled"],
+      },
+      sla_minutes: { type: "integer", nullable: true },
+      suggested_vehicle: {
+        type: "object",
+        nullable: true,
+        properties: {
+          id: { type: "string", format: "uuid" },
+          plate_number: { type: "string" },
+          driver_name: { type: "string", nullable: true },
+          distance_meters: { type: "integer", nullable: true },
+        },
+      },
+      can_auto_assign: { type: "boolean" },
+    },
+  },
+  AdminDispatchAutoAssignResult: {
+    type: "object",
+    properties: {
+      assigned: { type: "integer" },
+      skipped: { type: "integer" },
+      results: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            ride_request_id: { type: "string", format: "uuid" },
+            status: { type: "string", enum: ["assigned", "skipped"] },
+            reason: { type: "string" },
+            vehicle_plate: { type: "string", nullable: true },
+          },
+        },
+      },
+    },
+  },
+  AdminDispatchComplaintItem: {
+    type: "object",
+    properties: {
+      id: { type: "string", format: "uuid" },
+      reference_number: { type: "string" },
+      subject: { type: "string" },
+      priority: { type: "string", enum: ["low", "medium", "high", "urgent"] },
+      status: {
+        type: "string",
+        enum: ["submitted", "under_review", "in_progress", "resolved", "closed", "rejected"],
+      },
+      requester_name: { type: "string" },
+      created_at: { type: "string", format: "date-time" },
+    },
+  },
+  AdminDispatchOverview: {
+    type: "object",
+    properties: {
+      counts: {
+        type: "object",
+        properties: {
+          pending_approval: { type: "integer" },
+          needs_assignment: { type: "integer" },
+          in_progress: { type: "integer" },
+          upcoming_today: { type: "integer" },
+          open_complaints: { type: "integer" },
+          urgent_complaints: { type: "integer" },
+        },
+      },
+      fleet: {
+        type: "object",
+        nullable: true,
+        properties: {
+          dispatchable: { type: "integer" },
+          available: { type: "integer" },
+          busy: { type: "integer" },
+        },
+      },
+      queues: {
+        type: "object",
+        properties: {
+          needs_assignment: {
+            type: "array",
+            items: { $ref: "#/components/schemas/AdminDispatchQueueItem" },
+          },
+          in_progress: {
+            type: "array",
+            items: { $ref: "#/components/schemas/AdminDispatchQueueItem" },
+          },
+          upcoming_today: {
+            type: "array",
+            items: { $ref: "#/components/schemas/AdminDispatchQueueItem" },
+          },
+        },
+      },
+      complaints: {
+        type: "array",
+        items: { $ref: "#/components/schemas/AdminDispatchComplaintItem" },
       },
     },
   },
@@ -2947,6 +3063,88 @@ export const extensionPaths = {
       },
     },
   },
+  "/api/admin/dispatch/overview": {
+    get: {
+      tags: ["Dispatch"],
+      summary: "Dispatch overview",
+      description:
+        "Working board for dispatchers: assignment queue, live trips, upcoming today, fleet availability, and open complaints. Matching unassigned trips are assigned automatically. Requires `ride_requests.read` or `complaints.read`.",
+      security,
+      parameters: [{ $ref: "#/components/parameters/Locale" }],
+      responses: {
+        "200": {
+          description: "Dispatch overview",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      overview: { $ref: "#/components/schemas/AdminDispatchOverview" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+  },
+  "/api/admin/dispatch/auto-assign": {
+    post: {
+      tags: ["Dispatch"],
+      summary: "Auto-assign vehicles by SLA",
+      description:
+        "Assigns matching vehicles to pending or confirmed unassigned trips, highest SLA risk first. Assignment also approves a pending request. Nearest available vehicle with a driver wins. Requires `ride_requests.write`.",
+      security,
+      requestBody: {
+        required: false,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                ride_request_ids: {
+                  type: "array",
+                  items: { type: "string", format: "uuid" },
+                  description: "Limit assignment to these trips. Omit to process the full unassigned queue.",
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: "Auto-assign result",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      result: { $ref: "#/components/schemas/AdminDispatchAutoAssignResult" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+  },
   "/api/admin/ride-requests": {
     get: {
       tags: ["Admin Ride Requests"],
@@ -3038,7 +3236,7 @@ export const extensionPaths = {
       tags: ["Admin Ride Requests"],
       summary: "List assignable vehicles for dispatch",
       description:
-        "Returns active vehicles with an assigned driver that match the ride request type/class. Only available for confirmed requests (or when already assigned).",
+        "Returns active vehicles with an assigned driver that match the ride request type/class. Available for pending or confirmed requests (or when already assigned).",
       security,
       parameters: [
         {
@@ -3090,7 +3288,7 @@ export const extensionPaths = {
       tags: ["Admin Ride Requests"],
       summary: "Assign vehicle to ride request",
       description:
-        "Assigns a fleet vehicle to a confirmed ride request. Driver is inherited from the vehicle's default driver. Requires `ride_requests.write`.",
+        "Assigns a fleet vehicle to a pending or confirmed ride request. Pending requests are approved as part of assignment. Driver is inherited from the vehicle's default driver. Requires `ride_requests.write`.",
       security,
       parameters: [
         {

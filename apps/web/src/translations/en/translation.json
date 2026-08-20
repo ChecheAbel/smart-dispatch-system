@@ -794,8 +794,8 @@
     "detailYes": "Yes",
     "detailNo": "No",
     "detailAsap": "As soon as possible",
-    "detailRejectionReason": "Rejection reason",
-    "detailRejectionReasonHint": "Provided by dispatch when this request was rejected.",
+    "detailRejectionReason": "Cancellation reason",
+    "detailRejectionReasonHint": "Why this request was cancelled.",
     "detailAssignmentSection": "Dispatch assignment",
     "detailAssignmentSectionDescription": "Vehicle and driver assigned to your trip.",
     "detailAssignmentAssignedBadge": "Assigned",
@@ -1870,6 +1870,91 @@
       }
     }
   },
+  "adminDispatch": {
+    "title": "Dispatch overview",
+    "description": "Matching vehicles are assigned automatically. Review unmatched trips, live rides, and fleet or complaint issues.",
+    "viewAll": "View all",
+    "review": "Review",
+    "open": "Open",
+    "pickup": "Pickup",
+    "dropoff": "Drop-off",
+    "unassigned": "Unassigned",
+    "waitingCount": "{count} waiting",
+    "passengerCount": "{count} passengers",
+    "attentionUrgentComplaints": "{count} urgent complaints are open.",
+    "attentionView": "Review now",
+    "sla": {
+      "overdue": "Overdue",
+      "dueSoon": "Due soon",
+      "onTrack": "On track",
+      "unscheduled": "No pickup time"
+    },
+    "allocation": {
+      "suggested": "Suggested",
+      "noVehicle": "No matching vehicle",
+      "assignSuggested": "Assign",
+      "assigning": "Assigning...",
+      "autoAssign": "Assign all suggested",
+      "autoAssigning": "Assigning...",
+      "distance": "{distance} away",
+      "toastAssigned": "Assigned {plate} to {name}.",
+      "toastAssignedMany": "Assigned vehicles to {count} trips.",
+      "toastNone": "No trips could be auto-assigned.",
+      "toastFailed": "Assignment failed."
+    },
+    "stats": {
+      "needsAssignment": "Needs assignment",
+      "needsAssignmentDescription": "Pending or confirmed trips with no vehicle",
+      "liveNow": "Live now",
+      "liveNowDescription": "Trips currently underway",
+      "upcomingToday": "Upcoming today",
+      "upcomingTodayDescription": "Scheduled pickups later today",
+      "availableVehicles": "Available vehicles",
+      "availableVehiclesDescription": "Active vehicles with a driver that are free now",
+      "openComplaints": "Open complaints",
+      "openComplaintsDescription": "Complaints still waiting on a response"
+    },
+    "queues": {
+      "needsAssignment": "Needs assignment",
+      "needsAssignmentDescription": "Trips with no matching vehicle yet. Matches are assigned automatically.",
+      "liveNow": "Live now",
+      "liveNowDescription": "Trips that have already started.",
+      "upcomingToday": "Upcoming today",
+      "upcomingTodayDescription": "Scheduled pickups later today.",
+      "emptyNeedsAssignment": "Nothing waiting for a vehicle.",
+      "emptyNeedsHint": "When a matching vehicle is free, the trip is assigned on its own.",
+      "emptyLiveNow": "No trips are in progress.",
+      "emptyLiveHint": "Trips appear here after a driver starts the ride.",
+      "emptyUpcomingToday": "No trips scheduled for today.",
+      "emptyUpcomingHint": "Today's remaining pickups will appear here."
+    },
+    "fleet": {
+      "title": "Fleet at a glance",
+      "description": "Active vehicles with drivers, and whether they are free right now.",
+      "dispatchable": "Ready to dispatch",
+      "available": "Available now",
+      "busy": "Busy now",
+      "viewVehicles": "View vehicles"
+    },
+    "complaints": {
+      "title": "Open complaints",
+      "description": "Urgent items first. Open the complaints queue to respond.",
+      "empty": "No open complaints.",
+      "emptyHint": "New complaints will appear here.",
+      "urgent": "Urgent",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to ride requests or complaints is required to open dispatch overview.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    }
+  },
   "adminRideRequests": {
     "eyebrow": "Dispatch",
     "title": "Ride requests",
@@ -1944,7 +2029,7 @@
       "approving": "Approving...",
       "reject": "Reject request",
       "rejecting": "Rejecting...",
-      "rejectedDescription": "This request was rejected. Review the details and rejection reason below.",
+      "rejectedDescription": "This request was cancelled. Review the details and reason below.",
       "inProgressDescription": "This trip is in progress. Review assignment and route details below.",
       "completedDescription": "This trip has been completed. Review the final assignment and route details below.",
       "loadEmpty": "Ride request details could not be loaded.",

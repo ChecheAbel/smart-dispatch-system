@@ -16,6 +16,7 @@ import {
   updateRideRequestStatusAdmin,
 } from "../models/ride-request.model";
 import { recordAuditLog } from "../services/audit-log.service";
+import { applyDispatchAutoAssignments } from "../services/dispatch-allocation.service";
 import {
   canAdminAssignRideRequest,
   canAdminUnassignRideRequest,
@@ -175,7 +176,7 @@ router.get(
       }
 
       if (!canAdminAssignRideRequest(rideRequest.status) && !rideRequest.assignedVehicleId) {
-        return sendError(res, "Vehicles can only be listed for confirmed ride requests.", 409);
+        return sendError(res, "Vehicles can only be listed for pending or confirmed ride requests.", 409);
       }
 
       const search = getOptionalString(req.query.search) ?? undefined;
@@ -279,8 +280,20 @@ router.post(
         after: updated,
       });
 
+      let rideRequest = updated;
+      if (action === "confirm") {
+        const autoAssigned = await applyDispatchAutoAssignments({
+          rideRequestIds: [updated.id],
+          actorUserId,
+          req,
+        });
+        rideRequest = autoAssigned.assigned[0]?.rideRequest ?? updated;
+      } else if (action === "reject" || action === "complete" || action === "no_show") {
+        await applyDispatchAutoAssignments({ actorUserId, req });
+      }
+
       return sendSuccess(res, {
-        ride_request: toAdminRideRequest(updated, { locale }),
+        ride_request: toAdminRideRequest(rideRequest, { locale }),
       });
     } catch (error) {
       return handleRouteError(res, error);
@@ -313,7 +326,7 @@ router.post(
       }
 
       if (!canAdminAssignRideRequest(existing.status)) {
-        return sendError(res, "Only confirmed ride requests can be assigned.", 409);
+        return sendError(res, "Only pending or confirmed ride requests can be assigned.", 409);
       }
 
       const validation = await validateRideRequestVehicleAssignment(existing, vehicleId);
@@ -337,6 +350,9 @@ router.post(
         req,
       });
 
+      if (existing.status === "pending") {
+        queueRideRequestNotifications("confirmed", updated.id);
+      }
       queueRideRequestNotifications("assigned", updated.id);
 
       syncDriverUpcomingTripsAfterChange({
@@ -395,6 +411,12 @@ router.post(
       syncDriverUpcomingTripsAfterChange({
         before: getRideRequestSnapshot(existing),
         after: updated,
+      });
+
+      await applyDispatchAutoAssignments({
+        excludeRideRequestIds: [updated.id],
+        actorUserId,
+        req,
       });
 
       return sendSuccess(res, {

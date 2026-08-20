@@ -2,6 +2,7 @@ import type { ContractBillingInterval, RideRequestStatus } from "@smart-dispatch
 import { Prisma } from "../generated/prisma";
 import { prisma } from "../db/prisma";
 import {
+  getRideExpectedEndAt,
   getRideScheduleWindow,
   rideScheduleWindowsOverlap,
   type RideScheduleWindow,
@@ -596,7 +597,7 @@ export async function listAssignableVehiclesForRideRequest(
 export async function updateRideRequestStatusAdmin(
   id: string,
   status: RideRequestStatus,
-  options?: { rejectionReason?: string | null },
+  options?: { rejectionReason?: string | null; notesAppend?: string | null },
 ) {
   const existing = await findRideRequestById(id);
   if (!existing) {
@@ -622,6 +623,10 @@ export async function updateRideRequestStatusAdmin(
     data.startedAt = new Date();
   } else if (status === "completed") {
     data.completedAt = new Date();
+    const completionNote = options?.notesAppend?.trim();
+    if (completionNote) {
+      data.notes = existing.notes ? `${existing.notes}\n${completionNote}` : completionNote;
+    }
   }
 
   const shouldEnsureEnrollment =
@@ -972,6 +977,67 @@ export async function findReminderDueRideRequests(
     orderBy: [{ scheduledAt: "asc" }],
     select: { id: true, scheduledAt: true },
   });
+}
+
+const EXPIRED_RIDE_REQUEST_BATCH = 50;
+
+export function buildExpiredRideRequestReason(scheduledAt: Date | null) {
+  if (!scheduledAt) {
+    return "Automatically cancelled because the scheduled pickup time has passed.";
+  }
+
+  const when = scheduledAt.toLocaleString("en-GB", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+
+  return `Automatically cancelled because the scheduled pickup time (${when}) has passed.`;
+}
+
+export async function findExpiredUnstartedRideRequests(asOf: Date = new Date()) {
+  return prisma.rideRequest.findMany({
+    where: {
+      status: { in: ["pending", "confirmed"] },
+      scheduledAt: { lt: asOf },
+    },
+    orderBy: [{ scheduledAt: "asc" }, { createdAt: "asc" }],
+    take: EXPIRED_RIDE_REQUEST_BATCH,
+    select: {
+      id: true,
+      status: true,
+      scheduledAt: true,
+      assignedDriverUserId: true,
+    },
+  });
+}
+
+export const AUTO_COMPLETED_TRIP_NOTE =
+  "Automatically completed because the driver did not mark the trip complete after the scheduled end.";
+
+export async function findStaleInProgressRideRequests(asOf: Date = new Date()) {
+  const rows = await prisma.rideRequest.findMany({
+    where: { status: "in_progress" },
+    orderBy: [{ startedAt: "asc" }, { createdAt: "asc" }],
+    select: {
+      id: true,
+      status: true,
+      scheduledAt: true,
+      scheduledReturnAt: true,
+      startedAt: true,
+      assignedDriverUserId: true,
+    },
+  });
+
+  return rows
+    .filter((ride) => {
+      const endAt = getRideExpectedEndAt({
+        scheduledAt: ride.scheduledAt,
+        scheduledReturnAt: ride.scheduledReturnAt,
+        startedAt: ride.startedAt,
+      });
+      return Boolean(endAt && endAt.getTime() < asOf.getTime());
+    })
+    .slice(0, EXPIRED_RIDE_REQUEST_BATCH);
 }
 
 export async function wasRideRequestNotificationSent(
