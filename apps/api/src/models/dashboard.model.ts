@@ -80,6 +80,8 @@ function pickRegionName(translations: unknown, locale?: string, slug?: string) {
 export type AdminDashboardAnalyticsOptions = {
   locale?: string;
   periodDays?: number;
+  fromDate?: Date;
+  toDate?: Date;
   includeRideRequests?: boolean;
   includeFleet?: boolean;
   includeCompliance?: boolean;
@@ -91,11 +93,25 @@ export type AdminDashboardAnalyticsOptions = {
 export async function getAdminDashboardAnalytics(
   options: AdminDashboardAnalyticsOptions,
 ): Promise<AdminDashboardAnalytics> {
-  const periodDays = options.periodDays ?? DEFAULT_PERIOD_DAYS;
-  const since = startOfUtcDay(new Date());
-  since.setUTCDate(since.getUTCDate() - (periodDays - 1));
+  const today = startOfUtcDay(new Date());
+  const normalizedTo = options.toDate ? startOfUtcDay(options.toDate) : today;
+  const normalizedFrom = options.fromDate
+    ? startOfUtcDay(options.fromDate)
+    : new Date(
+        normalizedTo.getTime() - ((options.periodDays ?? DEFAULT_PERIOD_DAYS) - 1) * 86400000,
+      );
+  const from = normalizedFrom <= normalizedTo ? normalizedFrom : normalizedTo;
+  const to = normalizedTo >= normalizedFrom ? normalizedTo : normalizedFrom;
+  const untilExclusive = new Date(to);
+  untilExclusive.setUTCDate(untilExclusive.getUTCDate() + 1);
 
-  const buckets = buildDailyBuckets(periodDays);
+  const periodDays =
+    Math.floor((to.getTime() - from.getTime()) / 86400000) + 1;
+  const buckets = buildDailyBuckets(periodDays).map((_, index) => {
+    const date = new Date(from);
+    date.setUTCDate(from.getUTCDate() + index);
+    return date.toISOString().slice(0, 10);
+  });
   const rideTrend = Object.fromEntries(buckets.map((date) => [date, 0]));
   const fuelCostTrend = Object.fromEntries(buckets.map((date) => [date, 0]));
   const fuelLitersTrend = Object.fromEntries(buckets.map((date) => [date, 0]));
@@ -113,17 +129,21 @@ export async function getAdminDashboardAnalytics(
   };
 
   if (options.includeRideRequests) {
+    const rideRangeFilter = { createdAt: { gte: from, lt: untilExclusive } };
+
     const [statusGroups, rideRequests, regionGroups] = await Promise.all([
       prisma.rideRequest.groupBy({
         by: ["status"],
+        where: rideRangeFilter,
         _count: { _all: true },
       }),
       prisma.rideRequest.findMany({
-        where: { createdAt: { gte: since } },
+        where: rideRangeFilter,
         select: { createdAt: true },
       }),
       prisma.rideRequest.groupBy({
         by: ["regionId"],
+        where: rideRangeFilter,
         _count: { _all: true },
       }),
     ]);
@@ -209,7 +229,7 @@ export async function getAdminDashboardAnalytics(
 
   if (options.includeFuel) {
     const fuelLogs = await prisma.vehicleFuelLog.findMany({
-      where: { loggedAt: { gte: since } },
+      where: { loggedAt: { gte: from, lt: untilExclusive } },
       select: {
         loggedAt: true,
         totalCost: true,
@@ -234,18 +254,22 @@ export async function getAdminDashboardAnalytics(
   }
 
   if (options.includePayments) {
+    const invoiceRangeFilter = {
+      OR: [
+        { paidAt: { gte: from, lt: untilExclusive } },
+        { issuedAt: { gte: from, lt: untilExclusive } },
+        { createdAt: { gte: from, lt: untilExclusive } },
+      ],
+    };
+
     const [statusGroups, invoices] = await Promise.all([
       prisma.invoice.groupBy({
         by: ["status"],
+        where: invoiceRangeFilter,
         _count: { _all: true },
       }),
       prisma.invoice.findMany({
-        where: {
-          OR: [
-            { paidAt: { gte: since } },
-            { issuedAt: { gte: since } },
-          ],
-        },
+        where: invoiceRangeFilter,
         select: {
           status: true,
           totalAmount: true,
@@ -302,7 +326,7 @@ export async function getAdminDashboardAnalytics(
   if (options.includeRegistrations) {
     const registrations = await prisma.user.findMany({
       where: {
-        createdAt: { gte: since },
+        createdAt: { gte: from, lt: untilExclusive },
         requesterProfile: { isNot: null },
       },
       select: { createdAt: true },

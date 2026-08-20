@@ -5,8 +5,11 @@ import {
   Activity,
   CalendarCheck,
   CalendarDays,
+  CalendarRange,
   Car,
+  ChevronDown,
   ClipboardList,
+  RefreshCcw,
   TrendingUp,
   UserRound,
   Wallet,
@@ -50,6 +53,8 @@ import { fetchMyInvoices } from "@/lib/customer-billing-api";
 import type { RideRequest, CustomerInvoice, RideRequestStatus } from "@smart-dispatch/types";
 import { cn } from "@/lib/utils";
 
+type DashboardPreset = "today" | "week" | "month" | "year" | "custom";
+
 type DonutSlice = {
   key: string;
   label: string;
@@ -63,7 +68,77 @@ const STATUS_COLORS: Record<RideRequestStatus, string> = {
   in_progress: "#1C3A34",
   completed: "#8FB5A8",
   cancelled: "#94a3b8",
+  no_show: "#ea580c",
 };
+
+function toIsoDate(value: Date) {
+  const year = value.getFullYear();
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const day = String(value.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function startOfLocalDay(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function startOfWeek(date: Date) {
+  const value = startOfLocalDay(date);
+  const day = value.getDay();
+  const offset = day === 0 ? 6 : day - 1;
+  value.setDate(value.getDate() - offset);
+  return value;
+}
+
+function startOfMonth(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function startOfYear(date: Date) {
+  return new Date(date.getFullYear(), 0, 1);
+}
+
+function dateDiffDays(fromIso: string, toIso: string) {
+  const from = new Date(`${fromIso}T00:00:00`);
+  const to = new Date(`${toIso}T00:00:00`);
+  return Math.floor((to.getTime() - from.getTime()) / 86400000) + 1;
+}
+
+function rangeForPreset(preset: Exclude<DashboardPreset, "custom">) {
+  const now = new Date();
+  const today = toIsoDate(now);
+
+  switch (preset) {
+    case "today":
+      return { from: today, to: today };
+    case "week":
+      return { from: toIsoDate(startOfWeek(now)), to: today };
+    case "month":
+      return { from: toIsoDate(startOfMonth(now)), to: today };
+    case "year":
+      return { from: toIsoDate(startOfYear(now)), to: today };
+  }
+}
+
+function buildDateBuckets(fromIso: string, toIso: string) {
+  const days: string[] = [];
+  const count = Math.max(1, dateDiffDays(fromIso, toIso));
+  const start = new Date(`${fromIso}T00:00:00`);
+
+  for (let index = 0; index < count; index += 1) {
+    const date = new Date(start);
+    date.setDate(start.getDate() + index);
+    days.push(toIsoDate(date));
+  }
+
+  return days;
+}
+
+function isDateInRange(value: string | null | undefined, fromIso: string, toIso: string) {
+  if (!value) return false;
+  const day = value.slice(0, 10);
+  return day >= fromIso && day <= toIso;
+}
 
 function DashboardDonutChart({
   slices,
@@ -175,29 +250,29 @@ function formatMoney(value: number, locale: string) {
   return `${formatCurrency(value, locale)} ETB`;
 }
 
-function buildLast30Days() {
-  const days: string[] = [];
-  const now = new Date();
-  for (let i = 29; i >= 0; i -= 1) {
-    const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-    days.push(d.toISOString().slice(0, 10));
-  }
-  return days;
-}
-
 export function UserDashboardPage() {
   const { user, hasPermission } = useAuth();
   const { locale } = useLocale();
   const copy = getCustomerDashboardMessages(locale);
   const charts = copy.comingSoonCharts;
+  const filters = copy.filters;
   const rideTrendGradientId = useId().replace(/:/g, "");
 
   const canReadRequests = hasPermission("customer_requests.read");
   const canReadInvoices = hasPermission("customer_invoices.read");
 
+  const initialRange = useMemo(() => rangeForPreset("month"), []);
+  const todayIso = useMemo(() => toIsoDate(new Date()), []);
+
   const [requests, setRequests] = useState<RideRequest[]>([]);
   const [invoices, setInvoices] = useState<CustomerInvoice[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [preset, setPreset] = useState<DashboardPreset>("month");
+  const [fromDate, setFromDate] = useState(initialRange.from);
+  const [toDate, setToDate] = useState(initialRange.to);
+  const [appliedFromDate, setAppliedFromDate] = useState(initialRange.from);
+  const [appliedToDate, setAppliedToDate] = useState(initialRange.to);
 
   useEffect(() => {
     let active = true;
@@ -205,8 +280,8 @@ export function UserDashboardPage() {
       setLoading(true);
       try {
         const [requestsRes, invoicesRes] = await Promise.all([
-          canReadRequests ? fetchRideRequests({ limit: 100 }) : { data: [] },
-          canReadInvoices ? fetchMyInvoices({ limit: 100 }) : { data: [] },
+          canReadRequests ? fetchRideRequests({ limit: 200 }) : { data: [] as RideRequest[] },
+          canReadInvoices ? fetchMyInvoices({ limit: 200 }) : { data: [] as CustomerInvoice[] },
         ]);
         if (active) {
           setRequests(requestsRes.data);
@@ -224,28 +299,75 @@ export function UserDashboardPage() {
     };
   }, [canReadRequests, canReadInvoices]);
 
+  function applyRange(from: string, to: string) {
+    const normalizedFrom = from <= to ? from : to;
+    const normalizedTo = to >= from ? to : from;
+    setFromDate(normalizedFrom);
+    setToDate(normalizedTo);
+    setAppliedFromDate(normalizedFrom);
+    setAppliedToDate(normalizedTo);
+  }
+
+  function selectPreset(nextPreset: DashboardPreset) {
+    setPreset(nextPreset);
+    if (nextPreset === "custom") return;
+    const range = rangeForPreset(nextPreset);
+    applyRange(range.from, range.to);
+  }
+
+  function applyCustomFilters() {
+    applyRange(fromDate, toDate);
+  }
+
+  function resetFilters() {
+    const range = rangeForPreset("month");
+    setPreset("month");
+    applyRange(range.from, range.to);
+  }
+
   const displayName =
     [user.first_name, user.last_name].filter(Boolean).join(" ").trim() || user.email;
 
-  const totalBookings = requests.length;
+  const periodRequests = useMemo(
+    () =>
+      requests.filter((request) =>
+        isDateInRange(request.created_at, appliedFromDate, appliedToDate),
+      ),
+    [requests, appliedFromDate, appliedToDate],
+  );
+
+  const periodInvoices = useMemo(
+    () =>
+      invoices.filter((invoice) =>
+        isDateInRange(invoice.issued_at ?? invoice.created_at, appliedFromDate, appliedToDate),
+      ),
+    [invoices, appliedFromDate, appliedToDate],
+  );
+
+  const totalBookings = periodRequests.length;
   const activeRequests = requests.filter((r) => r.status === "pending").length;
   const tripsInProgress = requests.filter((r) => r.status === "in_progress").length;
 
+  const periodLabel = formatMessage(filters.selectedRange, {
+    from: appliedFromDate,
+    to: appliedToDate,
+  });
+
   const bookingTrend = useMemo(() => {
-    return buildLast30Days().map((dateStr) => {
-      const count = requests.filter((r) => r.created_at.slice(0, 10) === dateStr).length;
+    return buildDateBuckets(appliedFromDate, appliedToDate).map((dateStr) => {
+      const count = periodRequests.filter((r) => r.created_at.slice(0, 10) === dateStr).length;
       return { date: dateStr, count };
     });
-  }, [requests]);
+  }, [periodRequests, appliedFromDate, appliedToDate]);
 
   const spendingTrend = useMemo(() => {
-    return buildLast30Days().map((dateStr) => {
-      const total_cost = invoices
-        .filter((inv) => inv.issued_at?.slice(0, 10) === dateStr)
+    return buildDateBuckets(appliedFromDate, appliedToDate).map((dateStr) => {
+      const total_cost = periodInvoices
+        .filter((inv) => (inv.issued_at ?? inv.created_at)?.slice(0, 10) === dateStr)
         .reduce((sum, inv) => sum + (inv.total_amount || 0), 0);
       return { date: dateStr, total_cost };
     });
-  }, [invoices]);
+  }, [periodInvoices, appliedFromDate, appliedToDate]);
 
   const requestStatuses = useMemo(() => {
     const statuses: RideRequestStatus[] = [
@@ -255,7 +377,7 @@ export function UserDashboardPage() {
       "completed",
       "cancelled",
     ];
-    const labels: Record<RideRequestStatus, string> = {
+    const labels: Record<string, string> = {
       pending: locale === "am" ? "በመጠባበቅ ላይ" : "Pending",
       confirmed: locale === "am" ? "የተረጋገጠ" : "Confirmed",
       in_progress: locale === "am" ? "በሂደት ላይ" : "In progress",
@@ -263,7 +385,7 @@ export function UserDashboardPage() {
       cancelled: locale === "am" ? "የተሰረዘ" : "Cancelled",
     };
     return statuses.map((status) => {
-      const count = requests.filter((r) => r.status === status).length;
+      const count = periodRequests.filter((r) => r.status === status).length;
       return {
         key: status,
         status,
@@ -272,11 +394,11 @@ export function UserDashboardPage() {
         color: STATUS_COLORS[status],
       };
     });
-  }, [requests, locale]);
+  }, [periodRequests, locale]);
 
   const tripTypes = useMemo(() => {
     const counts: Record<string, number> = {};
-    requests.forEach((r) => {
+    periodRequests.forEach((r) => {
       const name =
         r.vehicle_class?.name ||
         r.vehicle_type?.name ||
@@ -290,7 +412,7 @@ export function UserDashboardPage() {
       count: counts[name],
       color: colors[index % colors.length],
     }));
-  }, [requests, locale]);
+  }, [periodRequests, locale]);
 
   const requestStatusLegend: DashboardChartLegendItem[] = useMemo(
     () =>
@@ -316,7 +438,7 @@ export function UserDashboardPage() {
     [tripTypes],
   );
 
-  const totalSpent = invoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0);
+  const totalSpent = periodInvoices.reduce((sum, inv) => sum + (inv.total_amount || 0), 0);
 
   return (
     <div className="space-y-8">
@@ -325,6 +447,121 @@ export function UserDashboardPage() {
           {formatMessage(copy.welcome, { name: displayName })}
         </h2>
         <p className="max-w-2xl text-sm text-slate-500">{copy.description}</p>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 shadow-sm dark:border-border dark:bg-card">
+        <button
+          type="button"
+          onClick={() => setFiltersOpen((open) => !open)}
+          aria-expanded={filtersOpen}
+          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50/80 dark:hover:bg-white/[0.03]"
+        >
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#1C3A34]/8 text-[#1C3A34] dark:bg-[#C9B87A]/15 dark:text-[#C9B87A]">
+              <CalendarRange className="h-4 w-4" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+                {filters.periodLabel}
+              </p>
+              <p className="truncate text-xs text-slate-500 dark:text-slate-400">{periodLabel}</p>
+            </div>
+          </div>
+          <ChevronDown
+            className={cn(
+              "h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200",
+              filtersOpen && "rotate-180",
+            )}
+          />
+        </button>
+
+        {filtersOpen ? (
+          <div className="space-y-4 border-t border-slate-100 px-4 py-4 dark:border-border">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+              <div className="space-y-2">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  {filters.choosePeriod}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {(
+                    [
+                      ["today", filters.today],
+                      ["week", filters.thisWeek],
+                      ["month", filters.thisMonth],
+                      ["year", filters.thisYear],
+                      ["custom", filters.customRange],
+                    ] as const
+                  ).map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => selectPreset(value)}
+                      disabled={loading}
+                      className={cn(
+                        "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
+                        preset === value
+                          ? "border-[#1C3A34] bg-[#1C3A34] text-white dark:border-[#C9B87A] dark:bg-[#C9B87A] dark:text-[#1C3A34]"
+                          : "border-slate-200 bg-white text-slate-600 hover:border-[#1C3A34]/40 dark:border-border dark:bg-background dark:text-slate-300",
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {preset === "custom" ? (
+                <div className="grid gap-2 sm:grid-cols-2 lg:min-w-[340px]">
+                  <label className="space-y-1 text-xs font-medium text-slate-600 dark:text-slate-300">
+                    <span>{filters.fromDate}</span>
+                    <input
+                      type="date"
+                      value={fromDate}
+                      onChange={(event) => setFromDate(event.target.value)}
+                      max={toDate}
+                      disabled={loading}
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 dark:border-border dark:bg-background dark:text-foreground"
+                    />
+                  </label>
+                  <label className="space-y-1 text-xs font-medium text-slate-600 dark:text-slate-300">
+                    <span>{filters.toDate}</span>
+                    <input
+                      type="date"
+                      value={toDate}
+                      onChange={(event) => setToDate(event.target.value)}
+                      min={fromDate}
+                      max={todayIso}
+                      disabled={loading}
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#1C3A34]/20 dark:border-border dark:bg-background dark:text-foreground"
+                    />
+                  </label>
+                </div>
+              ) : null}
+            </div>
+
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={resetFilters}
+                disabled={loading}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50 dark:border-border dark:text-slate-300"
+              >
+                <RefreshCcw className="h-3.5 w-3.5" />
+                {filters.reset}
+              </button>
+              {preset === "custom" ? (
+                <button
+                  type="button"
+                  onClick={applyCustomFilters}
+                  disabled={loading}
+                  className="rounded-lg bg-[#1C3A34] px-3 py-2 text-xs font-semibold text-white hover:bg-[#162e29] disabled:opacity-70 dark:bg-[#C9B87A] dark:text-[#1C3A34] dark:hover:bg-[#bca969]"
+                >
+                  {filters.apply}
+                </button>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -364,13 +601,13 @@ export function UserDashboardPage() {
           eyebrow={charts.activityEyebrow}
           title={charts.activityTitle}
           description={charts.activityDescription}
-          periodLabel={charts.periodLabel}
+          periodLabel={periodLabel}
         >
           <div className="grid gap-5 xl:grid-cols-12">
             <DashboardChartCard
               icon={TrendingUp}
               title={charts.bookingsTrendTitle}
-              description={charts.bookingsTrendDescription}
+              description={periodLabel}
               highlight={totalBookings}
               highlightLabel={charts.totalLabel}
               loading={loading}
@@ -470,7 +707,7 @@ export function UserDashboardPage() {
           eyebrow={charts.billingEyebrow}
           title={charts.billingTitle}
           description={charts.billingDescription}
-          periodLabel={charts.periodLabel}
+          periodLabel={periodLabel}
         >
           <div className="grid gap-5 xl:grid-cols-12">
             <DashboardChartCard
@@ -501,7 +738,7 @@ export function UserDashboardPage() {
             <DashboardChartCard
               icon={Wallet}
               title={charts.spendingTrendTitle}
-              description={charts.spendingTrendDescription}
+              description={periodLabel}
               highlight={formatMoney(totalSpent, locale)}
               highlightLabel={charts.spentLabel}
               loading={loading}

@@ -10,17 +10,25 @@ const router = Router();
 
 function parsePeriodDays(value: unknown) {
   if (typeof value === "number" && Number.isFinite(value)) {
-    return Math.min(90, Math.max(7, Math.trunc(value)));
+    return Math.min(366, Math.max(1, Math.trunc(value)));
   }
 
   if (typeof value === "string" && value.trim()) {
     const parsed = Number(value);
     if (Number.isFinite(parsed)) {
-      return Math.min(90, Math.max(7, Math.trunc(parsed)));
+      return Math.min(366, Math.max(1, Math.trunc(parsed)));
     }
   }
 
   return 30;
+}
+
+function parseIsoDate(value: unknown) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return null;
+  const date = new Date(`${trimmed}T00:00:00.000Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
 router.use(authenticate, authorize("admin"));
@@ -34,6 +42,8 @@ router.get("/analytics", async (req: AuthenticatedRequest, res: Response) => {
 
     const locale = parseLocale(req.query, req.headers["accept-language"]);
     const periodDays = parsePeriodDays(req.query.period_days);
+    const fromDate = parseIsoDate(req.query.from_date);
+    const toDate = parseIsoDate(req.query.to_date);
 
     const [
       canReadRideRequests,
@@ -62,6 +72,8 @@ router.get("/analytics", async (req: AuthenticatedRequest, res: Response) => {
     const analytics = await getAdminDashboardAnalytics({
       locale,
       periodDays,
+      fromDate: fromDate ?? undefined,
+      toDate: toDate ?? undefined,
       includeRideRequests: canReadRideRequests,
       includeFleet: canReadVehicles,
       includeCompliance: canReadCompliance || canReadVehicles,
