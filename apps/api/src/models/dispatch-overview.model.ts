@@ -167,6 +167,11 @@ async function getBusyVehicleIds(now: Date) {
       continue;
     }
 
+    if (assignment.status === "in_progress") {
+      busyIds.add(assignment.assignedVehicleId);
+      continue;
+    }
+
     const window = getRideScheduleWindow({
       scheduledAt: assignment.scheduledAt,
       scheduledReturnAt: assignment.scheduledReturnAt,

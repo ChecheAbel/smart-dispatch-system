@@ -24,11 +24,30 @@ export function getAddisDayBounds(now = new Date()) {
 export function getRideScheduleWindow(input: RideScheduleInput): RideScheduleWindow {
   const now = input.now ?? new Date();
 
+  if (input.status === "in_progress") {
+    const start = input.scheduledAt && input.scheduledAt.getTime() < now.getTime()
+      ? input.scheduledAt
+      : now;
+    const expectedEnd = getRideExpectedEndAt({
+      scheduledAt: input.scheduledAt,
+      scheduledReturnAt: input.scheduledReturnAt,
+    });
+    const end =
+      expectedEnd && expectedEnd.getTime() > now.getTime()
+        ? expectedEnd
+        : new Date(now.getTime() + DEFAULT_BUSY_BLOCK_MS);
+    return { start, end };
+  }
+
   if (input.scheduledAt) {
     const start = input.scheduledAt;
+    const expectedEnd = getRideExpectedEndAt({
+      scheduledAt: input.scheduledAt,
+      scheduledReturnAt: input.scheduledReturnAt,
+    });
     const end =
-      input.scheduledReturnAt && input.scheduledReturnAt.getTime() >= start.getTime()
-        ? input.scheduledReturnAt
+      expectedEnd && expectedEnd.getTime() >= start.getTime()
+        ? expectedEnd
         : start;
     return { start, end };
   }
