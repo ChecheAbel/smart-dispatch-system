@@ -4,6 +4,7 @@ import {
   type RealtimeEntityRef,
   type RealtimeLocationPublishInput,
   type RealtimeSessionReady,
+  type VehicleGeofenceStatusPayload,
   type VehicleLocationSnapshot,
 } from "@smart-dispatch/types";
 import { toPublicRideRequest } from "../mappers/ride-request.mapper";
@@ -15,6 +16,7 @@ import {
   findVehicleLocationByVehicleId,
   upsertVehicleLocation,
 } from "../models/vehicle-location.model";
+import { evaluateVehicleGeofenceStatus } from "../models/vehicle-geofence.model";
 import { findVehicleById } from "../models/vehicle.model";
 import { authenticateSocketUser } from "./socket-auth";
 import { getSocketIo } from "./socket-io";
@@ -61,6 +63,7 @@ type RealtimeServerEvents = {
   [RealtimeEvents.LocationChanged]: (data: VehicleLocationSnapshot) => void;
   [RealtimeEvents.LocationSubscribed]: (data: RealtimeEntityRef) => void;
   [RealtimeEvents.LocationUnsubscribed]: (data: RealtimeEntityRef) => void;
+  [RealtimeEvents.GeofenceStatus]: (data: VehicleGeofenceStatusPayload) => void;
 };
 
 let realtimeNamespace: Namespace<
@@ -101,6 +104,18 @@ async function sendLocationSnapshot(socket: RealtimeSocket, entity: RealtimeEnti
     RealtimeEvents.LocationSnapshot,
     snapshot ? toPublicVehicleLocationSnapshot(snapshot) : null,
   );
+
+  if (snapshot) {
+    const publicSnapshot = toPublicVehicleLocationSnapshot(snapshot);
+    const statuses = await evaluateVehicleGeofenceStatus(entity.entity_id, {
+      latitude: publicSnapshot.latitude,
+      longitude: publicSnapshot.longitude,
+    });
+    socket.emit(RealtimeEvents.GeofenceStatus, {
+      vehicle_id: entity.entity_id,
+      statuses,
+    });
+  }
 }
 
 async function resolveSessionCapabilities(userId: string) {
@@ -246,6 +261,15 @@ function registerNamespace(io: ReturnType<typeof getSocketIo>) {
 
             const payload = toPublicVehicleLocationSnapshot(snapshot);
             namespace.to(entityRoom(vehicleEntity(vehicleId))).emit(RealtimeEvents.LocationChanged, payload);
+
+            const statuses = await evaluateVehicleGeofenceStatus(vehicleId, {
+              latitude: payload.latitude,
+              longitude: payload.longitude,
+            });
+            namespace.to(entityRoom(vehicleEntity(vehicleId))).emit(RealtimeEvents.GeofenceStatus, {
+              vehicle_id: vehicleId,
+              statuses,
+            });
           } catch (error) {
             socket.emit(
               RealtimeEvents.SessionError,

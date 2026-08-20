@@ -33,6 +33,20 @@ import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "
 
 const router = Router();
 
+function parseIsoDate(value: unknown) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return null;
+  const date = new Date(`${trimmed}T00:00:00.000Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function exclusiveEndOfUtcDay(date: Date) {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() + 1);
+  return next;
+}
+
 const RIDE_REQUEST_STATUSES = new Set<RideRequestStatus>([
   "pending",
   "confirmed",
@@ -116,7 +130,24 @@ router.get(
       const search = getOptionalString(req.query.search) ?? undefined;
       const upcoming = parseBoolean(req.query.upcoming) === true;
       const vehicleId = getOptionalString(req.query.vehicleId) ?? undefined;
-      const filters = { status, search, upcoming: upcoming || undefined, vehicleId };
+      const fromDate = parseIsoDate(req.query.from_date);
+      const toDate = parseIsoDate(req.query.to_date);
+
+      if (req.query.from_date !== undefined && !fromDate) {
+        return sendError(res, "A valid from_date (YYYY-MM-DD) is required.", 400);
+      }
+      if (req.query.to_date !== undefined && !toDate) {
+        return sendError(res, "A valid to_date (YYYY-MM-DD) is required.", 400);
+      }
+
+      const filters = {
+        status,
+        search,
+        upcoming: upcoming || undefined,
+        vehicleId,
+        fromDate: fromDate ?? undefined,
+        toDate: toDate ? exclusiveEndOfUtcDay(toDate) : undefined,
+      };
 
       const result = await paginate(
         pagination,

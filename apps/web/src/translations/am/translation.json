@@ -1255,6 +1255,69 @@
         "not_set": "አልተሞላም"
       }
     },
+    "export": {
+      "button": "አውርድ",
+      "excel": "ኤክሴል አውርድ",
+      "pdf": "ፒዲኤፍ አውርድ",
+      "reportTitle": "የአስተዳዳሪ ዳሽቦርድ ሪፖርት",
+      "period": "ጊዜ",
+      "metric": "መለኪያ",
+      "value": "እሴት",
+      "date": "ቀን",
+      "count": "ብዛት",
+      "status": "ሁኔታ",
+      "region": "ክልል",
+      "type": "አይነት",
+      "empty": "ለዚህ ጊዜ የሚወርድ መረጃ የለም።",
+      "detail": {
+        "date": "ቀን",
+        "customer": "ደንበኛ",
+        "company": "ድርጅት",
+        "status": "ሁኔታ",
+        "pickup": "መነሻ",
+        "dropoff": "መድረሻ",
+        "vehiclePlate": "የመኪና ሰሌዳ",
+        "requestedBy": "ጠያቂ",
+        "driver": "ሹፌር",
+        "liters": "ሊትር",
+        "cost": "ወጪ",
+        "station": "ጣቢያ",
+        "noRows": "በዚህ ጊዜ ዝርዝር መረጃ የለም"
+      },
+      "report": {
+        "eyebrow": "ስማርት ዲስፓች · ትንታኔ",
+        "subtitle": "ለተመረጠው ጊዜ የዲስፓች አፈጻጸም፣ የመኪና ጤና፣ ክፍያ እና ዕድገት አጠቃላይ እይታ።",
+        "generatedAt": "ተፈጥሯል {datetime}",
+        "footerBrand": "ስማርት ዲስፓች ሲስተም",
+        "pageLabel": "ገጽ {page} ከ {pages}",
+        "kpiTotalRides": "ጠቅላላ ጉዞዎች",
+        "trendSummary": "{total} በ {points} ቀናት",
+        "fuelSummary": "ጠቅላላ የነዳጅ ወጪ {total}",
+        "paymentSummary": "የተከፈለ ገቢ {total}"
+      },
+      "toast": {
+        "success": {
+          "title": "ማውረድ ተሳክቷል",
+          "description": "የዳሽቦርድ ሪፖርትዎ በተሳካ ሁኔታ ወርዷል።"
+        },
+        "failed": {
+          "title": "ማውረድ አልተሳካም",
+          "description": "የዳሽቦርድ ሪፖርቱን ማውረድ አልተቻለም።"
+        }
+      },
+      "sheets": {
+        "summary": "ማጠቃለያ",
+        "rideStatus": "የጉዞ ሁኔታ",
+        "rideTrend": "የጉዞ ጥያቄ ዝርዝር",
+        "rideRegion": "ጉዞ በክልል",
+        "fleetStatus": "የመኪና ሁኔታ",
+        "compliance": "ተገዢነት",
+        "fuel": "የነዳጅ ወጪ ዝርዝር",
+        "paymentStatus": "የደረሰኝ ሁኔታ",
+        "paymentTrend": "የክፍያ አዝማሚያ",
+        "registrations": "ምዝገባዎች"
+      }
+    },
     "comingSoonStats": {
       "bookingsTitle": "ንቁ ቦታ ማስያዣዎች",
       "bookingsDescription": "በመጠባበቅ ላይ እና የተረጋገጡ የጉዞ ጥያቄዎች",
@@ -3627,6 +3690,7 @@
         "overview": "አጠቃላይ እይታ",
         "compliance": "ተገዢነት",
         "tracking": "ቀጥታ ክትትል",
+        "geofencing": "ጂኦፌንስ",
         "schedule": "የጊዜ ሰሌዳ",
         "maintenance": "ጥገና",
         "fuel": "ነዳጅ",
@@ -3708,6 +3772,100 @@
         "mapRecenter": "ካርታ ወደ ማዕከል",
         "mapZoomIn": "አጉል",
         "mapZoomOut": "አሳንስ"
+      },
+      "geofencing": {
+        "title": "ጂኦፌንስ",
+        "description": "ለዚህ ተሽከርካሪ አንድ የተፈቀደ አካባቢ ወይም የተከለከለ ዞን ያዘጋጁ።",
+        "create": "ጂኦፌንስ አዘጋጅ",
+        "edit": "አርትዕ",
+        "delete": "ሰርዝ",
+        "cancel": "ይቅር",
+        "save": "ለውጦችን አስቀምጥ",
+        "saving": "በማስቀመጥ ላይ...",
+        "createTitle": "ጂኦፌንስ አዘጋጅ",
+        "createSubtitle": "ለዚህ ተሽከርካሪ በካርታ ላይ ክብ ወይም ፖሊጎን ይሳሉ።",
+        "editTitle": "ጂኦፌንስ አርትዕ",
+        "editSubtitle": "የጋራ ስም፣ አይነት ወይም ቅርጽ ያዘምኑ።",
+        "emptyTitle": "እስካሁን ጂኦፌንስ የለም",
+        "emptyHint": "ይህን ተሽከርካሪ በካርታ ላይ ለመከታተል የተፈቀደ አካባቢ ወይም የተከለከለ ዞን ያዘጋጁ።",
+        "active": "ንቁ",
+        "inactive": "ቦዝኗል",
+        "deleteConfirm": "ጂኦፌንስ \"{name}\" ይሰረዝ? ይህ ሊቀለበስ አይችልም።",
+        "kind": {
+          "allowed": "የተፈቀደ",
+          "restricted": "የተከለከለ"
+        },
+        "shape": {
+          "circle": "ክብ",
+          "polygon": "ፖሊጎን"
+        },
+        "fields": {
+          "name": "ስም",
+          "namePlaceholder": "ለምሳሌ የጋራጅ ወሰን",
+          "kind": "አይነት",
+          "shape": "ቅርጽ",
+          "active": "ንቁ",
+          "activeHint": "ቦዝኗል ጋሮች ከክትትል እና ከግምገማ ይደበቃሉ።"
+        },
+        "map": {
+          "clickForCenter": "የክብ ማዕከል ለማስቀመጥ ካርታውን ይጫኑ።",
+          "clickForVertex": "የፖሊጎን ነጥቦች ለመጨመር ካርታውን ይጫኑ (ቢያንስ 3)።",
+          "radius": "ራዲየስ (ሜትር)",
+          "undoPoint": "ነጥብ መልስ",
+          "clearPoints": "ነጥቦችን አጽዳ",
+          "recenter": "ካርታ ወደ ማዕከል",
+          "zoomIn": "አጉል",
+          "zoomOut": "አሳንስ"
+        },
+        "summary": {
+          "circle": "{radius} ሜ ራዲየስ",
+          "polygon": "{count} ነጥቦች"
+        },
+        "details": {
+          "overview": "የጂኦፌንስ ዝርዝር",
+          "mapTitle": "የጋራ ቅድመ እይታ",
+          "mapHint": "አረንጓዴ የተፈቀደ አካባቢን፣ ቀይ የተከለከለ ዞንን ያመለክታል።",
+          "coverage": "ሽፋን",
+          "center": "ማዕከል ነጥብ",
+          "updatedAt": "መጨረሻ ዝመና"
+        },
+        "status": {
+          "insideAllowed": "በተፈቀደ ዞን ውስጥ",
+          "outsideAllowed": "ከተፈቀደ ዞን ውጭ",
+          "inRestricted": "በተከለከለ ዞን ውስጥ",
+          "noViolation": "በጂኦፌንስ ደንቦች ውስጥ"
+        },
+        "validation": {
+          "nameRequired": "ስም ያስፈልጋል።",
+          "circleRequired": "የክብ ማዕከል እና ከዜሮ በላይ ራዲየስ ያስቀምጡ።",
+          "polygonRequired": "ቢያንስ 3 የፖሊጎን ነጥቦች ይጨምሩ።"
+        },
+        "toast": {
+          "loadFailed": {
+            "title": "ጂኦፌንሶችን መጫን አልተቻለም",
+            "description": "እባክዎ እንደገና ይሞክሩ።"
+          },
+          "created": {
+            "title": "ጂኦፌንስ ተፈጥሯል",
+            "description": "ጋራው አሁን በክትትል ላይ ይገኛል።"
+          },
+          "updated": {
+            "title": "ጂኦፌንስ ተዘምኗል",
+            "description": "ለውጦችዎ ተቀምጠዋል።"
+          },
+          "deleted": {
+            "title": "ጂኦፌንስ ተሰርዟል",
+            "description": "ጋራው ተወግዷል።"
+          },
+          "saveFailed": {
+            "title": "ጂኦፌንስ ማስቀመጥ አልተቻለም",
+            "description": "እባክዎ ቅጹን ይመልከቱ እና እንደገና ይሞክሩ።"
+          },
+          "deleteFailed": {
+            "title": "ጂኦፌንስ መሰረዝ አልተቻለም",
+            "description": "እባክዎ እንደገና ይሞክሩ።"
+          }
+        }
       },
       "maintenance": {
         "createTitle": "ጥገና መመዝገብ",

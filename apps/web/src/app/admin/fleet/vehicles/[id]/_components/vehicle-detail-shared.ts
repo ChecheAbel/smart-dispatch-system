@@ -51,7 +51,15 @@ export {
 
 export const textareaClassName = complianceTextareaClassName;
 
-export type DetailTab = "overview" | "compliance" | "maintenance" | "fuel" | "history" | "tracking" | "schedule";
+export type DetailTab =
+  | "overview"
+  | "compliance"
+  | "maintenance"
+  | "fuel"
+  | "history"
+  | "tracking"
+  | "schedule"
+  | "geofencing";
 
 export const FUEL_TYPES: VehicleFuelType[] = ["diesel", "petrol", "other"];
 
@@ -88,7 +96,8 @@ export function parseTab(value: string | null): DetailTab {
     value === "fuel" ||
     value === "history" ||
     value === "tracking" ||
-    value === "schedule"
+    value === "schedule" ||
+    value === "geofencing"
   ) {
     return value;
   }

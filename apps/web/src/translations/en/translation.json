@@ -1255,6 +1255,69 @@
         "not_set": "Not set"
       }
     },
+    "export": {
+      "button": "Export",
+      "excel": "Export Excel",
+      "pdf": "Export PDF",
+      "reportTitle": "Admin Dashboard Report",
+      "period": "Period",
+      "metric": "Metric",
+      "value": "Value",
+      "date": "Date",
+      "count": "Count",
+      "status": "Status",
+      "region": "Region",
+      "type": "Type",
+      "empty": "Nothing available to export for this period.",
+      "detail": {
+        "date": "Date",
+        "customer": "Customer",
+        "company": "Company",
+        "status": "Status",
+        "pickup": "Pickup",
+        "dropoff": "Drop-off",
+        "vehiclePlate": "Vehicle plate",
+        "requestedBy": "Requested by",
+        "driver": "Driver",
+        "liters": "Liters",
+        "cost": "Cost",
+        "station": "Station",
+        "noRows": "No detailed records in this period"
+      },
+      "report": {
+        "eyebrow": "Smart Dispatch · Analytics",
+        "subtitle": "Executive overview of dispatch performance, fleet health, billing, and growth for the selected period.",
+        "generatedAt": "Generated {datetime}",
+        "footerBrand": "Smart Dispatch System",
+        "pageLabel": "Page {page} of {pages}",
+        "kpiTotalRides": "Total rides",
+        "trendSummary": "{total} across {points} days",
+        "fuelSummary": "Fuel spend total {total}",
+        "paymentSummary": "Paid revenue {total}"
+      },
+      "toast": {
+        "success": {
+          "title": "Export ready",
+          "description": "Your dashboard report downloaded successfully."
+        },
+        "failed": {
+          "title": "Export failed",
+          "description": "Could not export the dashboard report."
+        }
+      },
+      "sheets": {
+        "summary": "Summary",
+        "rideStatus": "Ride status",
+        "rideTrend": "Ride requests detail",
+        "rideRegion": "Ride regions",
+        "fleetStatus": "Fleet status",
+        "compliance": "Compliance",
+        "fuel": "Fuel spend detail",
+        "paymentStatus": "Invoice status",
+        "paymentTrend": "Payment trend",
+        "registrations": "Registrations"
+      }
+    },
     "comingSoonStats": {
       "bookingsTitle": "Active bookings",
       "bookingsDescription": "Pending and confirmed trip requests",
@@ -3627,6 +3690,7 @@
         "overview": "Overview",
         "compliance": "Compliance",
         "tracking": "Live Tracking",
+        "geofencing": "Geofencing",
         "schedule": "Schedule",
         "maintenance": "Maintenance",
         "fuel": "Fuel",
@@ -3708,6 +3772,100 @@
         "mapRecenter": "Recenter map",
         "mapZoomIn": "Zoom in",
         "mapZoomOut": "Zoom out"
+      },
+      "geofencing": {
+        "title": "Geofencing",
+        "description": "Set one allowed operating area or restricted zone for this vehicle.",
+        "create": "Set geofence",
+        "edit": "Edit",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "save": "Save changes",
+        "saving": "Saving...",
+        "createTitle": "Set geofence",
+        "createSubtitle": "Draw a circle or polygon on the map for this vehicle.",
+        "editTitle": "Edit geofence",
+        "editSubtitle": "Update the fence name, type, or shape.",
+        "emptyTitle": "No geofence yet",
+        "emptyHint": "Set an allowed area or restricted zone to monitor this vehicle on the map.",
+        "active": "Active",
+        "inactive": "Inactive",
+        "deleteConfirm": "Delete geofence \"{name}\"? This cannot be undone.",
+        "kind": {
+          "allowed": "Allowed",
+          "restricted": "Restricted"
+        },
+        "shape": {
+          "circle": "Circle",
+          "polygon": "Polygon"
+        },
+        "fields": {
+          "name": "Name",
+          "namePlaceholder": "e.g. Depot perimeter",
+          "kind": "Type",
+          "shape": "Shape",
+          "active": "Active",
+          "activeHint": "Inactive fences are hidden from tracking and evaluation."
+        },
+        "map": {
+          "clickForCenter": "Click the map to set the circle center.",
+          "clickForVertex": "Click the map to add polygon points (at least 3).",
+          "radius": "Radius (meters)",
+          "undoPoint": "Undo point",
+          "clearPoints": "Clear points",
+          "recenter": "Recenter map",
+          "zoomIn": "Zoom in",
+          "zoomOut": "Zoom out"
+        },
+        "summary": {
+          "circle": "{radius} m radius",
+          "polygon": "{count} points"
+        },
+        "details": {
+          "overview": "Geofence details",
+          "mapTitle": "Fence preview",
+          "mapHint": "Green marks an allowed area, red marks a restricted zone.",
+          "coverage": "Coverage",
+          "center": "Center point",
+          "updatedAt": "Last updated"
+        },
+        "status": {
+          "insideAllowed": "Inside allowed zone",
+          "outsideAllowed": "Outside allowed zone",
+          "inRestricted": "In restricted zone",
+          "noViolation": "Within geofence rules"
+        },
+        "validation": {
+          "nameRequired": "Name is required.",
+          "circleRequired": "Set a circle center and radius greater than zero.",
+          "polygonRequired": "Add at least 3 polygon points."
+        },
+        "toast": {
+          "loadFailed": {
+            "title": "Could not load geofences",
+            "description": "Please try again."
+          },
+          "created": {
+            "title": "Geofence created",
+            "description": "The fence is now available on tracking."
+          },
+          "updated": {
+            "title": "Geofence updated",
+            "description": "Your changes have been saved."
+          },
+          "deleted": {
+            "title": "Geofence deleted",
+            "description": "The fence was removed."
+          },
+          "saveFailed": {
+            "title": "Could not save geofence",
+            "description": "Please check the form and try again."
+          },
+          "deleteFailed": {
+            "title": "Could not delete geofence",
+            "description": "Please try again."
+          }
+        }
       },
       "maintenance": {
         "createTitle": "Log maintenance",

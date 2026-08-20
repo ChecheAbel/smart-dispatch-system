@@ -536,6 +536,42 @@ export interface VehicleLocationSnapshot {
   updated_at: string;
 }
 
+export type GeofenceShape = "circle" | "polygon";
+
+export type GeofenceKind = "allowed" | "restricted";
+
+export type GeofenceCoordinate = {
+  latitude: number;
+  longitude: number;
+};
+
+export interface VehicleGeofence {
+  id: string;
+  vehicle_id: string;
+  name: string;
+  kind: GeofenceKind;
+  shape: GeofenceShape;
+  is_active: boolean;
+  center_latitude: number | null;
+  center_longitude: number | null;
+  radius_m: number | null;
+  coordinates: GeofenceCoordinate[] | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface VehicleGeofenceStatus {
+  id: string;
+  name: string;
+  kind: GeofenceKind;
+  inside: boolean;
+}
+
+export interface VehicleGeofenceStatusPayload {
+  vehicle_id: string;
+  statuses: VehicleGeofenceStatus[];
+}
+
 export const REALTIME_NAMESPACE = "/api/ws";
 
 export const RealtimeEvents = {
@@ -550,6 +586,7 @@ export const RealtimeEvents = {
   LocationUnsubscribe: "location.unsubscribe",
   LocationSubscribed: "location.subscribed",
   LocationUnsubscribed: "location.unsubscribed",
+  GeofenceStatus: "geofence.status",
   TripsRefresh: "trips.refresh",
   TripsSnapshot: "trips.snapshot",
   TripsAdded: "trips.added",

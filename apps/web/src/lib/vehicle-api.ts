@@ -175,10 +175,37 @@ export async function fetchFleetFuelLogs(
     search?: string;
     vehicle_id?: string;
     fuel_type?: VehicleFuelType;
+    from_date?: string;
+    to_date?: string;
   } = {},
 ) {
   const { data } = await apiClient.get("/api/vehicles/fuel", { params });
   return unwrapPaginatedApiResponse<VehicleFuelLog>(data);
+}
+
+export async function fetchAllFleetFuelLogsForExport(
+  params: {
+    search?: string;
+    vehicle_id?: string;
+    fuel_type?: VehicleFuelType;
+    from_date?: string;
+    to_date?: string;
+  } = {},
+) {
+  const limit = 100;
+  let page = 1;
+  const items: VehicleFuelLog[] = [];
+
+  while (true) {
+    const result = await fetchFleetFuelLogs({ ...params, page, limit });
+    items.push(...result.data);
+    if (!result.pagination.has_next) {
+      break;
+    }
+    page += 1;
+  }
+
+  return items;
 }
 
 export async function fetchFleetFuelStats() {

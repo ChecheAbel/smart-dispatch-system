@@ -347,6 +347,8 @@ export type VehicleFuelLogFilters = {
   vehicleId?: string;
   fuelType?: VehicleFuelType;
   search?: string;
+  fromDate?: Date;
+  toDate?: Date;
 };
 
 function buildFuelWhere(filters: VehicleFuelLogFilters): Prisma.VehicleFuelLogWhereInput {
@@ -355,6 +357,14 @@ function buildFuelWhere(filters: VehicleFuelLogFilters): Prisma.VehicleFuelLogWh
   return {
     ...(filters.vehicleId ? { vehicleId: filters.vehicleId } : {}),
     ...(filters.fuelType ? { fuelType: filters.fuelType } : {}),
+    ...(filters.fromDate || filters.toDate
+      ? {
+          loggedAt: {
+            ...(filters.fromDate ? { gte: filters.fromDate } : {}),
+            ...(filters.toDate ? { lt: filters.toDate } : {}),
+          },
+        }
+      : {}),
     ...(search
       ? {
           OR: [

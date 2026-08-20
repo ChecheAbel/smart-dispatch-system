@@ -50,6 +50,8 @@ export type ListRideRequestsAdminFilters = {
   search?: string;
   upcoming?: boolean;
   vehicleId?: string;
+  fromDate?: Date;
+  toDate?: Date;
 };
 
 export type ListRideRequestsForDriverFilters = {
@@ -211,6 +213,13 @@ function buildRideRequestAdminWhere(
 
   if (filters.vehicleId) {
     where.assignedVehicleId = filters.vehicleId;
+  }
+
+  if (filters.fromDate || filters.toDate) {
+    where.createdAt = {
+      ...(filters.fromDate ? { gte: filters.fromDate } : {}),
+      ...(filters.toDate ? { lt: filters.toDate } : {}),
+    };
   }
 
   return where;

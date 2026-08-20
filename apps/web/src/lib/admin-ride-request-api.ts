@@ -10,6 +10,8 @@ export type FetchAdminRideRequestsParams = {
   search?: string;
   upcoming?: boolean;
   vehicleId?: string;
+  from_date?: string;
+  to_date?: string;
 };
 
 export type AdminRideRequestStatusAction = "confirm" | "reject" | "start" | "complete" | "no_show";
@@ -24,9 +26,30 @@ export async function fetchAdminRideRequests(params: FetchAdminRideRequestsParam
       search: params.search || undefined,
       upcoming: params.upcoming ? true : undefined,
       vehicleId: params.vehicleId || undefined,
+      from_date: params.from_date || undefined,
+      to_date: params.to_date || undefined,
     },
   });
   return unwrapPaginatedApiResponse<AdminRideRequest>(data);
+}
+
+export async function fetchAllAdminRideRequestsForExport(
+  params: Omit<FetchAdminRideRequestsParams, "page" | "limit">,
+) {
+  const limit = 100;
+  let page = 1;
+  const items: AdminRideRequest[] = [];
+
+  while (true) {
+    const result = await fetchAdminRideRequests({ ...params, page, limit });
+    items.push(...result.data);
+    if (!result.pagination.has_next) {
+      break;
+    }
+    page += 1;
+  }
+
+  return items;
 }
 
 export async function fetchAdminRideRequestCount(

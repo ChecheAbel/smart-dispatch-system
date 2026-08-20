@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, CalendarClock, ClipboardList, Fuel, History, ShieldCheck, Truck, Wrench, MapPin, Calendar } from "lucide-react";
+import { ArrowLeft, CalendarClock, ClipboardList, Fuel, History, MapPinned, ShieldCheck, Truck, Wrench, MapPin, Calendar } from "lucide-react";
 import type { Vehicle, VehicleFuelLog, VehicleHistoryEvent, VehicleMaintenanceLog } from "@smart-dispatch/types";
 import { useAuth, useLocale } from "@/components/shared/providers";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { adminCardClass, adminEyebrowClass, adminHeadingClass, adminIconBoxClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
 import { VehicleDetailScheduleTab } from "./vehicle-detail-schedule-tab";
 import { VehicleDetailTrackingTab } from "./vehicle-detail-tracking-tab";
+import { VehicleDetailGeofencingTab } from "./vehicle-detail-geofencing-tab";
 import { canReadVehicle, canWriteCompliance as userCanWriteCompliance, PERMISSIONS } from "@/lib/permissions";
 import { fetchVehicleById, fetchVehicleFuelLogs, fetchVehicleHistory, fetchVehicleMaintenance, updateVehicleMaintenance } from "@/lib/vehicle-api";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
@@ -239,6 +240,13 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
           : null,
         canViewFleetOps
           ? {
+              id: "geofencing" as const,
+              label: detail.tabs.geofencing,
+              icon: MapPinned,
+            }
+          : null,
+        canViewFleetOps
+          ? {
               id: "maintenance" as const,
               label: detail.tabs.maintenance,
               icon: Wrench,
@@ -253,7 +261,7 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
             }
           : null,
       ].filter((item): item is NonNullable<typeof item> => item !== null),
-    [canViewFleetOps, detail.tabs.compliance, detail.tabs.fuel, detail.tabs.history, detail.tabs.maintenance, detail.tabs.overview],
+    [canViewFleetOps, detail.tabs.compliance, detail.tabs.fuel, detail.tabs.geofencing, detail.tabs.history, detail.tabs.maintenance, detail.tabs.overview],
   );
 
   if (!canRead) {
@@ -372,6 +380,10 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
       {tab === "schedule" ? <VehicleDetailScheduleTab vehicle={vehicle} locale={locale} /> : null}
 
       {tab === "tracking" ? <VehicleDetailTrackingTab vehicle={vehicle} detail={detail} locale={locale} /> : null}
+
+      {tab === "geofencing" ? (
+        <VehicleDetailGeofencingTab vehicle={vehicle} detail={detail} canWrite={canWriteFleet} />
+      ) : null}
 
       {tab === "maintenance" ? <VehicleDetailMaintenanceTab vehicle={vehicle} detail={detail} canWrite={canWriteFleet} maintenance={maintenance} maintenanceLoading={maintenanceLoading} onOpenCreateSheet={() => setMaintenanceSheetOpen(true)} onCompleteMaintenance={(log) => void handleCompleteMaintenance(log)} /> : null}
 

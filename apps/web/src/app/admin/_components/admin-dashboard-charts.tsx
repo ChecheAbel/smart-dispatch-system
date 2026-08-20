@@ -52,9 +52,16 @@ import {
   dashboardChartTooltipWrapperStyle,
 } from "@/components/shared/dashboard-chart-tooltip";
 import { adminEyebrowClass, adminHeadingClass } from "@/lib/admin-theme";
+import {
+  buildFuelLogDetailRows,
+  buildRideRequestDetailRows,
+} from "@/lib/admin-dashboard-export";
+import { fetchAllAdminRideRequestsForExport } from "@/lib/admin-ride-request-api";
 import type { SupportedLocale } from "@/lib/locale";
+import { fetchAllFleetFuelLogsForExport } from "@/lib/vehicle-api";
 import { formatMessage, getAdminDashboardMessages } from "@/translations";
 import { cn } from "@/lib/utils";
+import { DashboardChartExportMenu } from "./dashboard-chart-export-menu";
 
 const STATUS_COLORS: Record<RideRequestStatus, string> = {
   pending: "#C9B87A",
@@ -93,6 +100,8 @@ type AdminDashboardChartsProps = {
   analytics: AdminDashboardAnalytics | null;
   loading: boolean;
   locale: SupportedLocale;
+  fromDate: string;
+  toDate: string;
   canReadRideRequests: boolean;
   canReadVehicles: boolean;
   canViewCompliance: boolean;
@@ -295,6 +304,8 @@ export function AdminDashboardCharts({
   analytics,
   loading,
   locale,
+  fromDate,
+  toDate,
   canReadRideRequests,
   canReadVehicles,
   canViewCompliance,
@@ -303,6 +314,7 @@ export function AdminDashboardCharts({
 }: AdminDashboardChartsProps) {
   const copy = getAdminDashboardMessages(locale);
   const charts = copy.charts;
+  const exportCopy = copy.export;
   const rideTrendGradientId = useId().replace(/:/g, "");
   const paymentPaidColor = dashboardChartTheme.brand;
 
@@ -486,6 +498,27 @@ export function AdminDashboardCharts({
               }
               emptyLabel={charts.empty}
               className="xl:col-span-8"
+              actions={
+                <DashboardChartExportMenu
+                  copy={copy}
+                  disabled={loading || rideTrendTotal === 0}
+                  fromDate={fromDate}
+                  toDate={toDate}
+                  getTable={async () => {
+                    const requests = await fetchAllAdminRideRequestsForExport({
+                      locale,
+                      from_date: fromDate,
+                      to_date: toDate,
+                    });
+                    const detail = buildRideRequestDetailRows(requests, copy);
+                    return {
+                      title: charts.rideTrendTitle,
+                      head: detail.head,
+                      rows: detail.rows,
+                    };
+                  }}
+                />
+              }
             >
               {!loading && rideRequests ? (
                 <ResponsiveContainer width="100%" height="100%">
@@ -577,6 +610,19 @@ export function AdminDashboardCharts({
               empty={!loading && rideStatusTotal === 0}
               emptyLabel={charts.empty}
               className="xl:col-span-4"
+              actions={
+                <DashboardChartExportMenu
+                  copy={copy}
+                  disabled={loading || rideStatusTotal === 0}
+                  fromDate={fromDate}
+                  toDate={toDate}
+                  getTable={() => ({
+                    title: charts.rideStatusTitle,
+                    head: [exportCopy.status, exportCopy.count],
+                    rows: rideStatuses.map((item) => [item.label, item.count]),
+                  })}
+                />
+              }
               footer={
                 !loading ? (
                   <DashboardChartLegend
@@ -614,6 +660,19 @@ export function AdminDashboardCharts({
               emptyLabel={charts.empty}
               className="xl:col-span-12"
               contentClassName="!h-auto !min-h-0"
+              actions={
+                <DashboardChartExportMenu
+                  copy={copy}
+                  disabled={loading || regionChartRows.length === 0}
+                  fromDate={fromDate}
+                  toDate={toDate}
+                  getTable={() => ({
+                    title: charts.rideRegionTitle,
+                    head: [exportCopy.region, exportCopy.count],
+                    rows: regionChartRows.map((row) => [row.label, row.count]),
+                  })}
+                />
+              }
             >
               {!loading && rideRequests ? (
                 <div style={{ height: regionChartHeight }}>
@@ -709,6 +768,19 @@ export function AdminDashboardCharts({
                 empty={!loading && fleetStatusTotal === 0}
                 emptyLabel={charts.empty}
                 className="xl:col-span-4"
+                actions={
+                  <DashboardChartExportMenu
+                    copy={copy}
+                    disabled={loading || fleetStatusTotal === 0}
+                    fromDate={fromDate}
+                    toDate={toDate}
+                    getTable={() => ({
+                      title: charts.fleetStatusTitle,
+                      head: [exportCopy.status, exportCopy.count],
+                      rows: fleetStatuses.map((item) => [item.label, item.count]),
+                    })}
+                  />
+                }
                 footer={
                   !loading ? (
                     <DashboardChartLegend
@@ -754,6 +826,31 @@ export function AdminDashboardCharts({
                 }
                 emptyLabel={charts.empty}
                 className="xl:col-span-8"
+                actions={
+                  <DashboardChartExportMenu
+                    copy={copy}
+                    disabled={
+                      loading ||
+                      complianceChartData.every(
+                        (item) => item.insurance === 0 && item.inspection === 0,
+                      )
+                    }
+                    fromDate={fromDate}
+                    toDate={toDate}
+                    getTable={() => ({
+                      title: charts.complianceTitle,
+                      head: [
+                        exportCopy.type,
+                        exportCopy.status,
+                        exportCopy.count,
+                      ],
+                      rows: complianceChartData.flatMap((item) => [
+                        [charts.insuranceLabel, item.label, item.insurance],
+                        [charts.inspectionLabel, item.label, item.inspection],
+                      ]),
+                    })}
+                  />
+                }
                 footer={
                   !loading ? (
                     <DashboardChartLegend items={complianceLegend} />
@@ -826,6 +923,26 @@ export function AdminDashboardCharts({
                 empty={!loading && fuelSpendTotal <= 0}
                 emptyLabel={charts.empty}
                 className="xl:col-span-12"
+                actions={
+                  <DashboardChartExportMenu
+                    copy={copy}
+                    disabled={loading || fuelSpendTotal <= 0}
+                    fromDate={fromDate}
+                    toDate={toDate}
+                    getTable={async () => {
+                      const logs = await fetchAllFleetFuelLogsForExport({
+                        from_date: fromDate,
+                        to_date: toDate,
+                      });
+                      const detail = buildFuelLogDetailRows(logs, copy);
+                      return {
+                        title: charts.fuelSpendTitle,
+                        head: detail.head,
+                        rows: detail.rows,
+                      };
+                    }}
+                  />
+                }
               >
                 {!loading && fuel && fuelSpendTotal > 0 ? (
                   <ResponsiveContainer width="100%" height="100%">
@@ -907,6 +1024,19 @@ export function AdminDashboardCharts({
               empty={!loading && invoiceStatusTotal === 0}
               emptyLabel={charts.empty}
               className="xl:col-span-4"
+              actions={
+                <DashboardChartExportMenu
+                  copy={copy}
+                  disabled={loading || invoiceStatusTotal === 0}
+                  fromDate={fromDate}
+                  toDate={toDate}
+                  getTable={() => ({
+                    title: charts.paymentStatusTitle,
+                    head: [exportCopy.status, exportCopy.count],
+                    rows: invoiceStatuses.map((item) => [item.label, item.count]),
+                  })}
+                />
+              }
               footer={
                 !loading ? (
                   <DashboardChartLegend
@@ -942,6 +1072,27 @@ export function AdminDashboardCharts({
               }
               emptyLabel={charts.empty}
               className="xl:col-span-8"
+              actions={
+                <DashboardChartExportMenu
+                  copy={copy}
+                  disabled={loading || !payments || !hasTrendData(payments.trend)}
+                  fromDate={fromDate}
+                  toDate={toDate}
+                  getTable={() => ({
+                    title: charts.paymentTrendTitle,
+                    head: [
+                      exportCopy.date,
+                      charts.paidAmountLabel,
+                      charts.issuedAmountLabel,
+                    ],
+                    rows: (payments?.trend ?? []).map((point) => [
+                      point.date,
+                      point.paid_amount,
+                      point.issued_amount,
+                    ]),
+                  })}
+                />
+              }
               footer={
                 !loading ? (
                   <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1043,6 +1194,22 @@ export function AdminDashboardCharts({
             loading={loading}
             empty={!loading && registrationTotal <= 0}
             emptyLabel={charts.empty}
+            actions={
+              <DashboardChartExportMenu
+                copy={copy}
+                disabled={loading || registrationTotal <= 0}
+                fromDate={fromDate}
+                toDate={toDate}
+                getTable={() => ({
+                  title: charts.registrationTrendTitle,
+                  head: [exportCopy.date, exportCopy.count],
+                  rows: (registrations?.trend ?? []).map((point) => [
+                    point.date,
+                    point.count,
+                  ]),
+                })}
+              />
+            }
           >
             {!loading && registrations && registrationTotal > 0 ? (
               <ResponsiveContainer width="100%" height="100%">

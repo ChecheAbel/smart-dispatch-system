@@ -2,12 +2,34 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { AdminDashboardAnalytics } from "@smart-dispatch/types";
-import { CalendarRange, ChevronDown, RefreshCcw } from "lucide-react";
+import {
+  CalendarRange,
+  ChevronDown,
+  Download,
+  FileSpreadsheet,
+  FileText,
+  RefreshCcw,
+} from "lucide-react";
 import { useAuth, useLocale } from "@/components/shared/providers";
-import { adminHeadingClass } from "@/lib/admin-theme";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  exportAdminDashboardExcel,
+  exportAdminDashboardPdf,
+} from "@/lib/admin-dashboard-export";
+import { fetchAllAdminRideRequestsForExport } from "@/lib/admin-ride-request-api";
+import { adminHeadingClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
 import { fetchAdminDashboardAnalytics } from "@/lib/dashboard-api";
 import { PERMISSIONS, canReadCompliance } from "@/lib/permissions";
+import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
+import { fetchAllFleetFuelLogsForExport } from "@/lib/vehicle-api";
 import { formatMessage, getAdminDashboardMessages } from "@/translations";
 import { AdminDashboardCharts } from "./admin-dashboard-charts";
 import { AdminDashboardStats } from "./admin-dashboard-stats";
@@ -86,6 +108,7 @@ export function AdminDashboard() {
     null,
   );
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [preset, setPreset] = useState<DashboardPreset>("month");
   const [fromDate, setFromDate] = useState(initialRange.from);
@@ -168,17 +191,119 @@ export function AdminDashboard() {
     canViewRegistrations ||
     canReadInvoices;
 
+  const canExport = Boolean(analytics) && hasReportingAccess && !loading;
+
+  async function handleExport(format: "excel" | "pdf") {
+    if (!analytics) {
+      return;
+    }
+
+    setExporting(true);
+    try {
+      const [rideRequests, fuelLogs] = await Promise.all([
+        canReadRideRequests
+          ? fetchAllAdminRideRequestsForExport({
+              locale,
+              from_date: appliedFromDate,
+              to_date: appliedToDate,
+            })
+          : Promise.resolve([]),
+        canReadVehicles
+          ? fetchAllFleetFuelLogsForExport({
+              from_date: appliedFromDate,
+              to_date: appliedToDate,
+            })
+          : Promise.resolve([]),
+      ]);
+
+      const payload = {
+        analytics,
+        fromDate: appliedFromDate,
+        toDate: appliedToDate,
+        copy,
+        access: {
+          canReadRideRequests,
+          canReadVehicles,
+          canViewCompliance,
+          canReadInvoices,
+          canViewRegistrations,
+        },
+        rideRequests,
+        fuelLogs,
+      };
+
+      if (format === "excel") {
+        await exportAdminDashboardExcel(payload);
+      } else {
+        await exportAdminDashboardPdf(payload);
+      }
+
+      showSuccessToast({
+        title: copy.export.toast.success.title,
+        description: copy.export.toast.success.description,
+      });
+    } catch (error) {
+      showErrorToast({
+        title: copy.export.toast.failed.title,
+        description:
+          error instanceof Error
+            ? error.message
+            : copy.export.toast.failed.description,
+      });
+    } finally {
+      setExporting(false);
+    }
+  }
+
   return (
     <div className="space-y-8">
-      <div className="space-y-1">
-        <h2
-          className={`text-2xl font-extrabold tracking-tight ${adminHeadingClass}`}
-        >
-          {formatMessage(copy.welcome, { name: displayName })}
-        </h2>
-        <p className="max-w-3xl text-sm text-slate-500 dark:text-muted-foreground">
-          {copy.description}
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 space-y-1">
+          <h2
+            className={`text-2xl font-extrabold tracking-tight ${adminHeadingClass}`}
+          >
+            {formatMessage(copy.welcome, { name: displayName })}
+          </h2>
+          <p className="max-w-3xl text-sm text-slate-500 dark:text-muted-foreground">
+            {copy.description}
+          </p>
+        </div>
+
+        {hasReportingAccess ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  type="button"
+                  disabled={!canExport || exporting}
+                  className={cn(adminPrimaryButtonClass, "shrink-0 shadow-sm")}
+                />
+              }
+            >
+              <Download className="size-4" />
+              {copy.export.button}
+              <ChevronDown className="size-3.5 opacity-70" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuGroup>
+                <DropdownMenuItem
+                  disabled={exporting}
+                  onClick={() => void handleExport("excel")}
+                >
+                  <FileSpreadsheet />
+                  {copy.export.excel}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={exporting}
+                  onClick={() => void handleExport("pdf")}
+                >
+                  <FileText />
+                  {copy.export.pdf}
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : null}
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white/95 shadow-sm dark:border-border dark:bg-card">
@@ -319,6 +444,8 @@ export function AdminDashboard() {
           analytics={analytics}
           loading={loading}
           locale={locale}
+          fromDate={appliedFromDate}
+          toDate={appliedToDate}
           canReadRideRequests={canReadRideRequests}
           canReadVehicles={canReadVehicles}
           canViewCompliance={canViewCompliance}

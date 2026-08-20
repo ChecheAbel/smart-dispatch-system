@@ -63,13 +63,36 @@ import { findVehicleLocationByVehicleId } from "../models/vehicle-location.model
 import { toPublicVehicleType } from "../mappers/vehicle-type.mapper";
 import { toPublicVehicleClass } from "../mappers/vehicle-class.mapper";
 import { isVehicleTypeClassAllowed } from "../models/vehicle-type-class.model";
+import {
+  createVehicleGeofence,
+  deleteVehicleGeofence,
+  findVehicleGeofenceById,
+  listVehicleGeofences,
+  updateVehicleGeofence,
+} from "../models/vehicle-geofence.model";
+import { mapVehicleGeofence, mapVehicleGeofences } from "../mappers/vehicle-geofence.mapper";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
 import { buildVehiclePhotoUrl, vehiclePhotoUpload } from "../utils/vehicle-photo-upload";
 import { getOptionalString, getString, getStringArray, parseBoolean } from "../utils/validation";
 import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
+import type { GeofenceCoordinate, GeofenceKind, GeofenceShape } from "@smart-dispatch/types";
 
 const router = Router();
+
+function parseIsoDate(value: unknown) {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return null;
+  const date = new Date(`${trimmed}T00:00:00.000Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function exclusiveEndOfUtcDay(date: Date) {
+  const next = new Date(date);
+  next.setUTCDate(next.getUTCDate() + 1);
+  return next;
+}
 
 router.get("/public", async (req: Request, res: Response) => {
   try {
@@ -346,10 +369,21 @@ router.get("/fuel", requirePermission("vehicles.read"), async (req: Request, res
       return sendError(res, "A valid fuel type is required.", 400);
     }
 
+    const fromDate = parseIsoDate(req.query.from_date);
+    const toDate = parseIsoDate(req.query.to_date);
+    if (req.query.from_date !== undefined && !fromDate) {
+      return sendError(res, "A valid from_date (YYYY-MM-DD) is required.", 400);
+    }
+    if (req.query.to_date !== undefined && !toDate) {
+      return sendError(res, "A valid to_date (YYYY-MM-DD) is required.", 400);
+    }
+
     const filters = {
       vehicleId: getString(req.query.vehicle_id) || undefined,
       fuelType,
       search: getString(req.query.search) || undefined,
+      fromDate: fromDate ?? undefined,
+      toDate: toDate ? exclusiveEndOfUtcDay(toDate) : undefined,
     };
     const result = await paginate(
       pagination,
@@ -858,6 +892,266 @@ router.patch(
           previousOdometerKm: previousOdometerById.get(log.id) ?? null,
         }),
       });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+function parseGeofenceKind(value: unknown): GeofenceKind | undefined {
+  return value === "allowed" || value === "restricted" ? value : undefined;
+}
+
+function parseGeofenceShape(value: unknown): GeofenceShape | undefined {
+  return value === "circle" || value === "polygon" ? value : undefined;
+}
+
+function parseGeofenceCoordinates(value: unknown): GeofenceCoordinate[] | null | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null) {
+    return null;
+  }
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+
+  const coordinates: GeofenceCoordinate[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== "object") {
+      return undefined;
+    }
+    const record = item as Record<string, unknown>;
+    const latitude = Number(record.latitude ?? record.lat);
+    const longitude = Number(record.longitude ?? record.lng ?? record.lon);
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      return undefined;
+    }
+    coordinates.push({ latitude, longitude });
+  }
+
+  return coordinates;
+}
+
+function parseOptionalFiniteNumber(value: unknown): number | null | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null || value === "") {
+    return null;
+  }
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+router.get(
+  "/:id/geofences",
+  requirePermission("vehicles.read"),
+  async (req: Request, res: Response) => {
+    try {
+      const vehicle = await findVehicleById(req.params.id);
+      if (!vehicle) {
+        return sendError(res, "Vehicle not found.", 404);
+      }
+
+      const geofences = await listVehicleGeofences(vehicle.id);
+      return sendSuccess(res, { geofences: mapVehicleGeofences(geofences) });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.post(
+  "/:id/geofences",
+  requirePermission("vehicles.write"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const vehicle = await findVehicleById(req.params.id);
+      if (!vehicle) {
+        return sendError(res, "Vehicle not found.", 404);
+      }
+
+      const name = getString(req.body?.name);
+      const kind = parseGeofenceKind(req.body?.kind);
+      const shape = parseGeofenceShape(req.body?.shape);
+      const isActive =
+        req.body?.is_active !== undefined ? parseBoolean(req.body.is_active) : true;
+      const centerLatitude = parseOptionalFiniteNumber(req.body?.center_latitude);
+      const centerLongitude = parseOptionalFiniteNumber(req.body?.center_longitude);
+      const radiusM = parseOptionalFiniteNumber(req.body?.radius_m);
+      const coordinates = parseGeofenceCoordinates(req.body?.coordinates);
+
+      if (!name) {
+        return sendError(res, "Geofence name is required.", 400);
+      }
+      if (!kind) {
+        return sendError(res, "Geofence kind must be allowed or restricted.", 400);
+      }
+      if (!shape) {
+        return sendError(res, "Geofence shape must be circle or polygon.", 400);
+      }
+      if (req.body?.coordinates !== undefined && coordinates === undefined) {
+        return sendError(res, "Geofence coordinates are invalid.", 400);
+      }
+      if (
+        req.body?.center_latitude !== undefined &&
+        centerLatitude === undefined
+      ) {
+        return sendError(res, "A valid center latitude is required.", 400);
+      }
+      if (
+        req.body?.center_longitude !== undefined &&
+        centerLongitude === undefined
+      ) {
+        return sendError(res, "A valid center longitude is required.", 400);
+      }
+      if (req.body?.radius_m !== undefined && radiusM === undefined) {
+        return sendError(res, "A valid radius is required.", 400);
+      }
+
+      const geofence = await createVehicleGeofence(vehicle.id, {
+        name,
+        kind,
+        shape,
+        isActive: isActive ?? true,
+        centerLatitude: centerLatitude ?? null,
+        centerLongitude: centerLongitude ?? null,
+        radiusM: radiusM ?? null,
+        coordinates: coordinates ?? null,
+      });
+
+      return sendSuccess(res, { geofence: mapVehicleGeofence(geofence) }, { status: 201 });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.patch(
+  "/:id/geofences/:geofenceId",
+  requirePermission("vehicles.write"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const vehicle = await findVehicleById(req.params.id);
+      if (!vehicle) {
+        return sendError(res, "Vehicle not found.", 404);
+      }
+
+      const existing = await findVehicleGeofenceById(vehicle.id, req.params.geofenceId);
+      if (!existing) {
+        return sendError(res, "Geofence not found.", 404);
+      }
+
+      const name = req.body?.name !== undefined ? getString(req.body.name) : existing.name;
+      const kind =
+        req.body?.kind !== undefined ? parseGeofenceKind(req.body.kind) : existing.kind;
+      const shape =
+        req.body?.shape !== undefined ? parseGeofenceShape(req.body.shape) : existing.shape;
+      const isActive =
+        req.body?.is_active !== undefined
+          ? parseBoolean(req.body.is_active)
+          : existing.isActive;
+
+      const centerLatitude =
+        req.body?.center_latitude !== undefined
+          ? parseOptionalFiniteNumber(req.body.center_latitude)
+          : existing.centerLat == null
+            ? null
+            : Number(existing.centerLat);
+      const centerLongitude =
+        req.body?.center_longitude !== undefined
+          ? parseOptionalFiniteNumber(req.body.center_longitude)
+          : existing.centerLng == null
+            ? null
+            : Number(existing.centerLng);
+      const radiusM =
+        req.body?.radius_m !== undefined
+          ? parseOptionalFiniteNumber(req.body.radius_m)
+          : existing.radiusM;
+      const coordinates =
+        req.body?.coordinates !== undefined
+          ? parseGeofenceCoordinates(req.body.coordinates)
+          : undefined;
+
+      if (!name) {
+        return sendError(res, "Geofence name is required.", 400);
+      }
+      if (!kind) {
+        return sendError(res, "Geofence kind must be allowed or restricted.", 400);
+      }
+      if (!shape) {
+        return sendError(res, "Geofence shape must be circle or polygon.", 400);
+      }
+      if (req.body?.coordinates !== undefined && coordinates === undefined) {
+        return sendError(res, "Geofence coordinates are invalid.", 400);
+      }
+      if (
+        req.body?.center_latitude !== undefined &&
+        centerLatitude === undefined
+      ) {
+        return sendError(res, "A valid center latitude is required.", 400);
+      }
+      if (
+        req.body?.center_longitude !== undefined &&
+        centerLongitude === undefined
+      ) {
+        return sendError(res, "A valid center longitude is required.", 400);
+      }
+      if (req.body?.radius_m !== undefined && radiusM === undefined) {
+        return sendError(res, "A valid radius is required.", 400);
+      }
+
+      let nextCoordinates =
+        coordinates === undefined
+          ? (Array.isArray(existing.coordinates)
+              ? (existing.coordinates as GeofenceCoordinate[])
+              : null)
+          : coordinates;
+
+      if (shape === "circle") {
+        nextCoordinates = null;
+      }
+
+      const geofence = await updateVehicleGeofence(vehicle.id, existing.id, {
+        name,
+        kind,
+        shape,
+        isActive: isActive ?? true,
+        centerLatitude: shape === "polygon" ? null : (centerLatitude ?? null),
+        centerLongitude: shape === "polygon" ? null : (centerLongitude ?? null),
+        radiusM: shape === "polygon" ? null : (radiusM ?? null),
+        coordinates: nextCoordinates,
+      });
+
+      if (!geofence) {
+        return sendError(res, "Geofence not found.", 404);
+      }
+
+      return sendSuccess(res, { geofence: mapVehicleGeofence(geofence) });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.delete(
+  "/:id/geofences/:geofenceId",
+  requirePermission("vehicles.write"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const vehicle = await findVehicleById(req.params.id);
+      if (!vehicle) {
+        return sendError(res, "Vehicle not found.", 404);
+      }
+
+      const deleted = await deleteVehicleGeofence(vehicle.id, req.params.geofenceId);
+      if (!deleted) {
+        return sendError(res, "Geofence not found.", 404);
+      }
+
+      return sendSuccess(res, { message: "Geofence deleted." });
     } catch (error) {
       return handleRouteError(res, error);
     }

@@ -5,6 +5,8 @@ import {
   RealtimeEvents,
   type RealtimeEntityRef,
   type RealtimeSessionReady,
+  type VehicleGeofenceStatus,
+  type VehicleGeofenceStatusPayload,
   type VehicleLocationSnapshot,
 } from "@smart-dispatch/types";
 import { getAccessToken } from "@/lib/auth-session";
@@ -26,6 +28,7 @@ function vehicleEntity(vehicleId: string): RealtimeEntityRef {
 
 export function useVehicleLocation(vehicleId: string, enabled = true) {
   const [location, setLocation] = useState<VehicleLocationSnapshot | null>(null);
+  const [geofenceStatuses, setGeofenceStatuses] = useState<VehicleGeofenceStatus[]>([]);
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,6 +88,11 @@ export function useVehicleLocation(vehicleId: string, enabled = true) {
           if (active) setLocation(data);
         });
 
+        socket.on(RealtimeEvents.GeofenceStatus, (data: VehicleGeofenceStatusPayload) => {
+          if (!active || data.vehicle_id !== vehicleId) return;
+          setGeofenceStatuses(data.statuses);
+        });
+
         socket.on(RealtimeEvents.SessionError, (message: string) => {
           if (process.env.NODE_ENV !== "production") {
             console.error("Live tracking session error:", message);
@@ -124,6 +132,7 @@ export function useVehicleLocation(vehicleId: string, enabled = true) {
 
   return {
     location,
+    geofenceStatuses,
     connected,
     loading: enabled && Boolean(vehicleId) ? loading : false,
     error,

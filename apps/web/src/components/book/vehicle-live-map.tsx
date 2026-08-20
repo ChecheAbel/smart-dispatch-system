@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import L from "leaflet";
 import { Crosshair, MapPin, Minus, Plus } from "lucide-react";
 import "leaflet/dist/leaflet.css";
+import type { VehicleGeofence } from "@smart-dispatch/types";
 import { createMapMarkerIcon } from "@/lib/map/map-marker";
 import { formatGlobalTime } from "@/lib/ethiopian-calendar";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,24 @@ function buildVehicleLiveMapPopupHtml(popupText: string, imageUrl?: string | nul
   `;
 }
 
+function fenceStyle(kind: VehicleGeofence["kind"]) {
+  if (kind === "restricted") {
+    return {
+      color: "#dc2626",
+      fillColor: "#ef4444",
+      fillOpacity: 0.16,
+      weight: 2,
+    };
+  }
+
+  return {
+    color: "#059669",
+    fillColor: "#10b981",
+    fillOpacity: 0.16,
+    weight: 2,
+  };
+}
+
 export type VehicleLiveMapProps = {
   latitude: number;
   longitude: number;
@@ -55,6 +74,7 @@ export type VehicleLiveMapProps = {
   showMarker?: boolean;
   lastUpdatedAt?: string | null;
   locale?: "en" | "am";
+  geofences?: VehicleGeofence[];
   ariaLabels?: {
     recenter?: string;
     zoomIn?: string;
@@ -71,11 +91,13 @@ export function VehicleLiveMap({
   showMarker = true,
   lastUpdatedAt = null,
   locale = "en",
+  geofences = [],
   ariaLabels,
 }: VehicleLiveMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markerRef = useRef<L.Marker | null>(null);
+  const geofenceLayerRef = useRef<L.LayerGroup | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [displayCoords, setDisplayCoords] = useState({ latitude, longitude });
 
@@ -97,6 +119,7 @@ export function VehicleLiveMap({
       maxZoom: 19,
     }).addTo(map);
 
+    geofenceLayerRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
     setMapReady(true);
 
@@ -109,9 +132,11 @@ export function VehicleLiveMap({
       map.remove();
       mapRef.current = null;
       markerRef.current = null;
+      geofenceLayerRef.current = null;
       setMapReady(false);
     };
-  }, [latitude, longitude]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- map mounts once
+  }, []);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -142,6 +167,46 @@ export function VehicleLiveMap({
     setDisplayCoords({ latitude, longitude });
   }, [latitude, longitude, popupText, popupImageUrl, showMarker]);
 
+  useEffect(() => {
+    const layer = geofenceLayerRef.current;
+    if (!layer) {
+      return;
+    }
+
+    layer.clearLayers();
+
+    for (const fence of geofences) {
+      if (!fence.is_active) {
+        continue;
+      }
+
+      const style = fenceStyle(fence.kind);
+
+      if (
+        fence.shape === "circle" &&
+        fence.center_latitude != null &&
+        fence.center_longitude != null &&
+        fence.radius_m != null &&
+        fence.radius_m > 0
+      ) {
+        L.circle([fence.center_latitude, fence.center_longitude], {
+          radius: fence.radius_m,
+          ...style,
+        })
+          .bindTooltip(fence.name, { sticky: true })
+          .addTo(layer);
+        continue;
+      }
+
+      if (fence.shape === "polygon" && fence.coordinates && fence.coordinates.length >= 3) {
+        const latlngs = fence.coordinates.map(
+          (point) => [point.latitude, point.longitude] as L.LatLngExpression,
+        );
+        L.polygon(latlngs, style).bindTooltip(fence.name, { sticky: true }).addTo(layer);
+      }
+    }
+  }, [geofences, mapReady]);
+
   function handleZoomIn() {
     mapRef.current?.zoomIn();
   }
@@ -152,12 +217,17 @@ export function VehicleLiveMap({
 
   function handleRecenter() {
     if (mapRef.current) {
-      mapRef.current.setView([displayCoords.latitude, displayCoords.longitude], 14, { animate: true });
+      mapRef.current.setView([displayCoords.latitude, displayCoords.longitude], 14, {
+        animate: true,
+      });
     }
   }
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-[#e8eef0] shadow-sm" style={{ height: `${height}px` }}>
+    <div
+      className="relative overflow-hidden rounded-xl border border-slate-200 bg-[#e8eef0] shadow-sm"
+      style={{ height: `${height}px` }}
+    >
       <div ref={containerRef} className="absolute inset-0 z-0" />
 
       {mapReady && (
@@ -202,9 +272,7 @@ export function VehicleLiveMap({
             {displayCoords.latitude.toFixed(6)}, {displayCoords.longitude.toFixed(6)}
           </span>
           {lastUpdatedAt ? (
-            <span className="text-white/70">
-              · {formatGlobalTime(lastUpdatedAt, locale)}
-            </span>
+            <span className="text-white/70">· {formatGlobalTime(lastUpdatedAt, locale)}</span>
           ) : null}
         </div>
       ) : null}
