@@ -251,14 +251,14 @@ const RIDE_REQUEST_RULES: NotificationTemplateSeed[] = [
     channel: "email",
     recipient: "dispatcher",
     subject: "Dispatch escalation: {requester_name}",
-    body: "Hello dispatcher, trip {reference} for {requester_name} from {pickup} to {dropoff} still needs a vehicle. Reason: {escalation_reason}. Waiting {wait_minutes} minutes. Scheduled: {scheduled_at}.",
+    body: "Hello dispatcher, trip {reference} for {requester_name} from {pickup} to {dropoff} needs attention. Reason: {escalation_reason}. Waiting {wait_minutes} minutes. Scheduled: {scheduled_at}.",
   },
   {
     module: "ride_requests",
     event: "escalated",
     channel: "sms",
     recipient: "dispatcher",
-    body: "Smart Dispatch: unmatched trip {reference} for {requester_name} ({pickup} → {dropoff}) needs a vehicle. Waited {wait_minutes} min.",
+    body: "Smart Dispatch: trip {reference} for {requester_name} ({pickup} → {dropoff}) needs attention ({escalation_reason}). Waited {wait_minutes} min.",
   },
   {
     module: "ride_requests",

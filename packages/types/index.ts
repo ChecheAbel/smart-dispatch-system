@@ -1116,6 +1116,7 @@ export type AdminDispatchOverview = {
     in_progress: number;
     upcoming_today: number;
     disrupted: number;
+    not_started: number;
     escalated: number;
     open_complaints: number;
     urgent_complaints: number;
@@ -1126,6 +1127,7 @@ export type AdminDispatchOverview = {
     in_progress: AdminDispatchQueueItem[];
     upcoming_today: AdminDispatchQueueItem[];
     disrupted: AdminDispatchQueueItem[];
+    not_started: AdminDispatchQueueItem[];
   };
   complaints: AdminDispatchComplaintItem[];
 };

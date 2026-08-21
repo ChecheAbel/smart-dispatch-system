@@ -1907,6 +1907,7 @@
     "passengerCount": "{count} passengers",
     "attentionUrgentComplaints": "{count} urgent complaints are open.",
     "attentionDisrupted": "{count} trips need a new vehicle after a disruption.",
+    "attentionNotStarted": "{count} assigned trips have not started after pickup.",
     "attentionEscalated": "{count} trips waited too long and were escalated.",
     "attentionView": "Review now",
     "sla": {
@@ -1935,6 +1936,8 @@
     "stats": {
       "disrupted": "Disrupted",
       "disruptedDescription": "Trips whose assigned vehicle later became unusable",
+      "notStarted": "Not started",
+      "notStartedDescription": "Assigned trips past pickup that the driver has not started",
       "needsAssignment": "Needs assignment",
       "needsAssignmentDescription": "Pending or confirmed trips with no vehicle",
       "liveNow": "Live now",
@@ -1949,6 +1952,8 @@
     "queues": {
       "disrupted": "Disrupted trips",
       "disruptedDescription": "The assigned vehicle later became unusable. A replacement is chosen automatically when one is free.",
+      "notStarted": "Assigned, not started",
+      "notStartedDescription": "Pickup time has passed and the assigned driver has not started. Reassign, mark no-show, or contact the driver.",
       "needsAssignment": "Needs assignment",
       "needsAssignmentDescription": "Trips with no matching vehicle yet. Matches are assigned automatically.",
       "liveNow": "Live now",
@@ -1962,7 +1967,9 @@
       "emptyUpcomingToday": "No trips scheduled for today.",
       "emptyUpcomingHint": "Today's remaining pickups will appear here.",
       "emptyDisrupted": "No disrupted trips.",
-      "emptyDisruptedHint": "Confirmed or live trips stay here if auto-reroute cannot find a vehicle."
+      "emptyDisruptedHint": "Confirmed or live trips stay here if auto-reroute cannot find a vehicle.",
+      "emptyNotStarted": "No late starts right now.",
+      "emptyNotStartedHint": "Assigned trips appear here after the dispatcher grace window past pickup."
     },
     "board": {
       "title": "Live map",
@@ -3196,7 +3203,7 @@
           "cancel_deadline_minutes": "Configured cancel window in minutes",
           "cancel_deadline_at": "Formatted cancel deadline time",
           "reminder_hours": "Configured reminder lead time in hours",
-          "escalation_reason": "Why the trip was escalated (unmatched or disrupted)",
+          "escalation_reason": "Why the trip was escalated (unmatched, disrupted, or assigned_not_started)",
           "escalation_level": "Escalation level (dispatcher or supervisor)",
           "wait_minutes": "How long the trip has been waiting"
         },
@@ -3444,7 +3451,7 @@
         },
         "escalated": {
           "title": "Dispatcher escalation",
-          "description": "Sent to dispatchers when an unmatched or disrupted trip has waited past the dispatcher deadline."
+          "description": "Sent to dispatchers when an unmatched, disrupted, or assigned-not-started trip has waited past the dispatcher deadline."
         },
         "escalated_supervisor": {
           "title": "Supervisor escalation",
@@ -5984,8 +5991,8 @@
       },
       "dispatch_escalate_dispatcher_minutes": {
         "title": "Dispatcher escalation",
-        "description": "How long an unmatched leftover or disrupted trip waits before notifying dispatchers.",
-        "helper": "Unmatched trips escalate when pickup is this close (or overdue). Disrupted trips escalate after this many minutes unresolved. Enable templates under Notification templates → Escalation.",
+        "description": "Grace window before notifying dispatchers about unmatched, disrupted, or assigned-not-started trips.",
+        "helper": "Unmatched trips escalate when pickup is this close (or overdue). Disrupted trips escalate after this many minutes unresolved. Assigned trips that are not started escalate this many minutes after pickup. Enable templates under Notification templates → Escalation.",
         "label": "Notify dispatchers after"
       },
       "dispatch_escalate_supervisor_minutes": {

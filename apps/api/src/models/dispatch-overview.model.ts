@@ -16,6 +16,8 @@ import {
 } from "../services/ride-request-scheduling.service";
 import { suggestAllocationsForTrips } from "../services/dispatch-allocation.service";
 import {
+  assignedNotStartedEscalationCutoff,
+  getAssignedNotStartedEscalationLevel,
   getDisruptedEscalationLevel,
   getUnmatchedEscalationLevel,
 } from "../services/dispatch-escalation.service";
@@ -217,6 +219,50 @@ async function listDisruptedQueue(locale?: string) {
     });
 }
 
+async function listNotStartedQueue(locale?: string, now = new Date()) {
+  const rows = await prisma.rideRequest.findMany({
+    where: {
+      status: "confirmed",
+      assignedVehicleId: { not: null },
+      assignedDriverUserId: { not: null },
+      scheduledAt: { lte: assignedNotStartedEscalationCutoff(now) },
+    },
+    include: queueInclude,
+    orderBy: [{ scheduledAt: "asc" }, { createdAt: "asc" }],
+    take: NEEDS_ASSIGNMENT_POOL,
+  });
+
+  return rows
+    .map((row) => {
+      const escalationLevel = getAssignedNotStartedEscalationLevel(row.scheduledAt, now);
+      return {
+        item: toQueueItem(row, locale, {
+          sla_priority: "overdue",
+          sla_minutes: row.scheduledAt
+            ? Math.max(
+                0,
+                Math.round((now.getTime() - row.scheduledAt.getTime()) / 60_000),
+              )
+            : null,
+          suggested_vehicle: null,
+          can_auto_assign: false,
+          escalation_level: escalationLevel,
+        }),
+        escalationRank:
+          escalationLevel === "supervisor" ? 0 : escalationLevel === "dispatcher" ? 1 : 2,
+      };
+    })
+    .filter(({ item }) => Boolean(item.escalation_level))
+    .sort((left, right) => {
+      if (left.escalationRank !== right.escalationRank) {
+        return left.escalationRank - right.escalationRank;
+      }
+      return (left.item.sla_minutes ?? 0) > (right.item.sla_minutes ?? 0) ? -1 : 1;
+    })
+    .slice(0, QUEUE_LIMIT)
+    .map(({ item }) => item);
+}
+
 async function getBusyVehicleIds(now: Date) {
   const assignments = await prisma.rideRequest.findMany({
     where: {
@@ -292,8 +338,9 @@ export async function getAdminDispatchOverview(options: {
           listQueue({ status: "in_progress" }, [{ startedAt: "desc" }, { createdAt: "desc" }], options.locale),
           listQueue(upcomingTodayWhere, [{ scheduledAt: "asc" }], options.locale),
           listDisruptedQueue(options.locale),
+          listNotStartedQueue(options.locale, now),
         ])
-      : Promise.resolve([[], [], [], []] as AdminDispatchQueueItem[][]),
+      : Promise.resolve([[], [], [], [], []] as AdminDispatchQueueItem[][]),
     options.includeFleet
       ? Promise.all([
           countVehicles({ status: "active", assignedOnly: true }),
@@ -359,9 +406,11 @@ export async function getAdminDispatchOverview(options: {
       in_progress: rideCounts[2],
       upcoming_today: rideCounts[3],
       disrupted: queues[3].length,
+      not_started: queues[4].length,
       escalated:
         queues[0].filter((item) => item.escalation_level).length +
-        queues[3].filter((item) => item.escalation_level).length,
+        queues[3].filter((item) => item.escalation_level).length +
+        queues[4].filter((item) => item.escalation_level).length,
       open_complaints: complaints?.open ?? 0,
       urgent_complaints: complaints?.urgent ?? 0,
     },
@@ -371,6 +420,7 @@ export async function getAdminDispatchOverview(options: {
       in_progress: queues[1],
       upcoming_today: queues[2],
       disrupted: queues[3],
+      not_started: queues[4],
     },
     complaints: complaints?.items ?? [],
   };

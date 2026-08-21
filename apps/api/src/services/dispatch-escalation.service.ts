@@ -11,9 +11,12 @@ import {
 
 const ESCALATION_BATCH = 40;
 
+export type DispatchEscalationReason = "unmatched" | "disrupted" | "assigned_not_started";
+
 export type DispatchEscalationResult = {
   unmatched: number;
   disrupted: number;
+  assignedNotStarted: number;
   notifiedDispatcher: number;
   notifiedSupervisor: number;
   errors: string[];
@@ -75,6 +78,35 @@ export function getDisruptedEscalationLevel(
   return null;
 }
 
+/**
+ * Assigned confirmed trips escalate only after scheduled pickup + dispatcher grace,
+ * then again at the supervisor threshold. Trips stay open for manual start / no-show / cancel.
+ */
+export function getAssignedNotStartedEscalationLevel(
+  scheduledAt: Date | null,
+  now = new Date(),
+): DispatchEscalationLevel | null {
+  if (!scheduledAt) {
+    return null;
+  }
+
+  const settings = getDeadlineSettings();
+  const dispatcherWait = settings.dispatch_escalate_dispatcher_minutes;
+  const supervisorWait = supervisorMinutes(
+    dispatcherWait,
+    settings.dispatch_escalate_supervisor_minutes,
+  );
+
+  const minutesPastPickup = (now.getTime() - scheduledAt.getTime()) / 60_000;
+  if (minutesPastPickup < dispatcherWait) {
+    return null;
+  }
+  if (minutesPastPickup >= supervisorWait) {
+    return "supervisor";
+  }
+  return "dispatcher";
+}
+
 function waitMinutesForUnmatched(scheduledAt: Date | null, createdAt: Date, now: Date) {
   if (!scheduledAt) {
     return Math.max(0, Math.round((now.getTime() - createdAt.getTime()) / 60_000));
@@ -83,10 +115,20 @@ function waitMinutesForUnmatched(scheduledAt: Date | null, createdAt: Date, now:
   return Math.max(0, Math.round(Math.abs(now.getTime() - scheduledAt.getTime()) / 60_000));
 }
 
+function waitMinutesPastPickup(scheduledAt: Date, now: Date) {
+  return Math.max(0, Math.round((now.getTime() - scheduledAt.getTime()) / 60_000));
+}
+
+/** Pickup cutoff so SQL can skip trips still inside the post-pickup grace window. */
+export function assignedNotStartedEscalationCutoff(now = new Date()) {
+  const graceMinutes = getDeadlineSettings().dispatch_escalate_dispatcher_minutes;
+  return new Date(now.getTime() - graceMinutes * 60_000);
+}
+
 async function notifyEscalation(input: {
   rideRequestId: string;
   level: DispatchEscalationLevel;
-  reason: "unmatched" | "disrupted";
+  reason: DispatchEscalationReason;
   waitMinutes: number;
 }) {
   const event: RideRequestNotificationEvent =
@@ -105,10 +147,49 @@ async function notifyEscalation(input: {
   return true;
 }
 
+async function escalateAtLevel(
+  result: DispatchEscalationResult,
+  input: {
+    rideRequestId: string;
+    level: DispatchEscalationLevel;
+    reason: DispatchEscalationReason;
+    waitMinutes: number;
+  },
+) {
+  if (input.level === "supervisor") {
+    const sentSupervisor = await notifyEscalation({
+      ...input,
+      level: "supervisor",
+    });
+    if (sentSupervisor) {
+      result.notifiedSupervisor += 1;
+    }
+    if (!(await wasRideRequestNotificationSent(input.rideRequestId, "escalated"))) {
+      const sentDispatcher = await notifyEscalation({
+        ...input,
+        level: "dispatcher",
+      });
+      if (sentDispatcher) {
+        result.notifiedDispatcher += 1;
+      }
+    }
+    return;
+  }
+
+  const sent = await notifyEscalation({
+    ...input,
+    level: "dispatcher",
+  });
+  if (sent) {
+    result.notifiedDispatcher += 1;
+  }
+}
+
 export async function runDispatchEscalationJob(): Promise<DispatchEscalationResult> {
   const result: DispatchEscalationResult = {
     unmatched: 0,
     disrupted: 0,
+    assignedNotStarted: 0,
     notifiedDispatcher: 0,
     notifiedSupervisor: 0,
     errors: [],
@@ -136,39 +217,46 @@ export async function runDispatchEscalationJob(): Promise<DispatchEscalationResu
     const waitMinutes = waitMinutesForUnmatched(trip.scheduledAt, trip.createdAt, now);
 
     try {
-      if (level === "supervisor") {
-        const sentSupervisor = await notifyEscalation({
-          rideRequestId: trip.id,
-          level: "supervisor",
-          reason: "unmatched",
-          waitMinutes,
-        });
-        if (sentSupervisor) {
-          result.notifiedSupervisor += 1;
-        }
-        if (!(await wasRideRequestNotificationSent(trip.id, "escalated"))) {
-          const sentDispatcher = await notifyEscalation({
-            rideRequestId: trip.id,
-            level: "dispatcher",
-            reason: "unmatched",
-            waitMinutes,
-          });
-          if (sentDispatcher) {
-            result.notifiedDispatcher += 1;
-          }
-        }
-        continue;
-      }
-
-      const sent = await notifyEscalation({
+      await escalateAtLevel(result, {
         rideRequestId: trip.id,
-        level: "dispatcher",
+        level,
         reason: "unmatched",
         waitMinutes,
       });
-      if (sent) {
-        result.notifiedDispatcher += 1;
-      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown escalation error.";
+      result.errors.push(`Ride ${trip.id}: ${message}`);
+    }
+  }
+
+  const assignedNotStarted = await prisma.rideRequest.findMany({
+    where: {
+      status: "confirmed",
+      assignedVehicleId: { not: null },
+      assignedDriverUserId: { not: null },
+      scheduledAt: { lte: assignedNotStartedEscalationCutoff(now) },
+    },
+    select: { id: true, scheduledAt: true },
+    orderBy: [{ scheduledAt: "asc" }, { createdAt: "asc" }],
+    take: ESCALATION_BATCH,
+  });
+
+  for (const trip of assignedNotStarted) {
+    const level = getAssignedNotStartedEscalationLevel(trip.scheduledAt, now);
+    if (!level || !trip.scheduledAt) {
+      continue;
+    }
+
+    result.assignedNotStarted += 1;
+    const waitMinutes = waitMinutesPastPickup(trip.scheduledAt, now);
+
+    try {
+      await escalateAtLevel(result, {
+        rideRequestId: trip.id,
+        level,
+        reason: "assigned_not_started",
+        waitMinutes,
+      });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown escalation error.";
       result.errors.push(`Ride ${trip.id}: ${message}`);
@@ -187,39 +275,12 @@ export async function runDispatchEscalationJob(): Promise<DispatchEscalationResu
     result.disrupted += 1;
 
     try {
-      if (level === "supervisor") {
-        const sentSupervisor = await notifyEscalation({
-          rideRequestId: disruption.id,
-          level: "supervisor",
-          reason: "disrupted",
-          waitMinutes,
-        });
-        if (sentSupervisor) {
-          result.notifiedSupervisor += 1;
-        }
-        if (!(await wasRideRequestNotificationSent(disruption.id, "escalated"))) {
-          const sentDispatcher = await notifyEscalation({
-            rideRequestId: disruption.id,
-            level: "dispatcher",
-            reason: "disrupted",
-            waitMinutes,
-          });
-          if (sentDispatcher) {
-            result.notifiedDispatcher += 1;
-          }
-        }
-        continue;
-      }
-
-      const sent = await notifyEscalation({
+      await escalateAtLevel(result, {
         rideRequestId: disruption.id,
-        level: "dispatcher",
+        level,
         reason: "disrupted",
         waitMinutes,
       });
-      if (sent) {
-        result.notifiedDispatcher += 1;
-      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown escalation error.";
       result.errors.push(`Ride ${disruption.id}: ${message}`);
@@ -234,5 +295,5 @@ export function isDispatchEscalationEnabled() {
 }
 
 export function formatDispatchEscalationSummary(result: DispatchEscalationResult) {
-  return `[DispatchEscalation] unmatched=${result.unmatched}, disrupted=${result.disrupted}, dispatcher=${result.notifiedDispatcher}, supervisor=${result.notifiedSupervisor}, errors=${result.errors.length}`;
+  return `[DispatchEscalation] unmatched=${result.unmatched}, assignedNotStarted=${result.assignedNotStarted}, disrupted=${result.disrupted}, dispatcher=${result.notifiedDispatcher}, supervisor=${result.notifiedSupervisor}, errors=${result.errors.length}`;
 }

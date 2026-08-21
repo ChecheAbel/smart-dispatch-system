@@ -60,6 +60,7 @@ const emptyOverview: AdminDispatchOverview = {
     in_progress: 0,
     upcoming_today: 0,
     disrupted: 0,
+    not_started: 0,
     escalated: 0,
     open_complaints: 0,
     urgent_complaints: 0,
@@ -70,6 +71,7 @@ const emptyOverview: AdminDispatchOverview = {
     in_progress: [],
     upcoming_today: [],
     disrupted: [],
+    not_started: [],
   },
   complaints: [],
 };
@@ -650,6 +652,7 @@ function CompactQueue({
   viewAll,
   unassignedLabel,
   locale,
+  copy,
   onReview,
 }: {
   id: string;
@@ -664,6 +667,7 @@ function CompactQueue({
   viewAll: string;
   unassignedLabel: string;
   locale: string;
+  copy: OverviewCopy;
   onReview: (id: string) => void;
 }) {
   return (
@@ -704,9 +708,12 @@ function CompactQueue({
                   <p className="truncate text-sm font-semibold text-slate-800 dark:text-foreground">
                     {item.requester_name}
                   </p>
-                  <span className="shrink-0 text-xs tabular-nums text-slate-500 dark:text-muted-foreground">
-                    {formatScheduledAt(item.scheduled_at, locale)}
-                  </span>
+                  <div className="flex shrink-0 items-center gap-2">
+                    <EscalationBadge level={item.escalation_level} copy={copy} />
+                    <span className="text-xs tabular-nums text-slate-500 dark:text-muted-foreground">
+                      {formatScheduledAt(item.scheduled_at, locale)}
+                    </span>
+                  </div>
                 </div>
                 <p className="flex items-center gap-1.5 truncate text-sm text-slate-600 dark:text-muted-foreground">
                   <MapPin className="size-3.5 shrink-0" />
@@ -892,9 +899,22 @@ export function DispatchOverviewPage() {
   const disruptedLabel = formatMessage(copy.attentionDisrupted, {
     count: String(data.counts.disrupted),
   });
+  const notStartedLabel = formatMessage(copy.attentionNotStarted, {
+    count: String(data.counts.not_started),
+  });
   const escalatedLabel = formatMessage(copy.attentionEscalated, {
     count: String(data.counts.escalated),
   });
+
+  function escalatedSectionId() {
+    if (data.queues.not_started.some((item) => item.escalation_level)) {
+      return "dispatch-not-started";
+    }
+    if (data.queues.needs_assignment.some((item) => item.escalation_level)) {
+      return "dispatch-needs";
+    }
+    return "dispatch-disrupted";
+  }
 
   return (
     <div className="w-full max-w-none space-y-6">
@@ -908,17 +928,23 @@ export function DispatchOverviewPage() {
       {!loading && canReadRideRequests && data.counts.escalated > 0 ? (
         <button
           type="button"
-          onClick={() =>
-            scrollToSection(
-              data.queues.needs_assignment.some((item) => item.escalation_level)
-                ? "dispatch-needs"
-                : "dispatch-disrupted",
-            )
-          }
+          onClick={() => scrollToSection(escalatedSectionId())}
           className="flex w-full items-start gap-3 rounded-lg border border-orange-200 bg-orange-50/80 px-4 py-3 text-left text-sm text-orange-950 transition-colors hover:bg-orange-50 dark:border-orange-400/30 dark:bg-orange-400/10 dark:text-orange-100 dark:hover:bg-orange-400/15"
         >
           <Megaphone className="mt-0.5 size-4 shrink-0" />
           <span className="min-w-0 flex-1">{escalatedLabel}</span>
+          <span className="shrink-0 font-semibold">{copy.attentionView}</span>
+        </button>
+      ) : null}
+
+      {!loading && canReadRideRequests && data.counts.not_started > 0 ? (
+        <button
+          type="button"
+          onClick={() => scrollToSection("dispatch-not-started")}
+          className="flex w-full items-start gap-3 rounded-lg border border-amber-200 bg-amber-50/80 px-4 py-3 text-left text-sm text-amber-950 transition-colors hover:bg-amber-50 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100 dark:hover:bg-amber-400/15"
+        >
+          <Clock3 className="mt-0.5 size-4 shrink-0" />
+          <span className="min-w-0 flex-1">{notStartedLabel}</span>
           <span className="shrink-0 font-semibold">{copy.attentionView}</span>
         </button>
       ) : null}
@@ -963,6 +989,15 @@ export function DispatchOverviewPage() {
               active={data.counts.disrupted > 0}
               onClick={() => scrollToSection("dispatch-disrupted")}
               titleAccessory={<DisruptedTripsHelp copy={copy} />}
+            />
+            <StatCard
+              title={copy.stats.notStarted}
+              value={data.counts.not_started}
+              description={copy.stats.notStartedDescription}
+              icon={Clock3}
+              loading={loading}
+              active={data.counts.not_started > 0}
+              onClick={() => scrollToSection("dispatch-not-started")}
             />
             <StatCard
               title={copy.stats.needsAssignment}
@@ -1036,6 +1071,22 @@ export function DispatchOverviewPage() {
                 statusLabels={requestCopy.status}
                 onReview={openReview}
               />
+              <CompactQueue
+                id="dispatch-not-started"
+                title={copy.queues.notStarted}
+                description={copy.queues.notStartedDescription}
+                href="/admin/ride-requests"
+                icon={Clock3}
+                items={data.queues.not_started}
+                empty={copy.queues.emptyNotStarted}
+                emptyHint={copy.queues.emptyNotStartedHint}
+                loading={loading}
+                viewAll={copy.viewAll}
+                unassignedLabel={copy.unassigned}
+                locale={locale}
+                copy={copy}
+                onReview={openReview}
+              />
               <AssignmentBoard
                 copy={copy}
                 items={data.queues.needs_assignment}
@@ -1065,6 +1116,7 @@ export function DispatchOverviewPage() {
                 viewAll={copy.viewAll}
                 unassignedLabel={copy.unassigned}
                 locale={locale}
+                copy={copy}
                 onReview={openReview}
               />
               <CompactQueue
@@ -1080,6 +1132,7 @@ export function DispatchOverviewPage() {
                 viewAll={copy.viewAll}
                 unassignedLabel={copy.unassigned}
                 locale={locale}
+                copy={copy}
                 onReview={openReview}
               />
             </>

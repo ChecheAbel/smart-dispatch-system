@@ -1098,6 +1098,7 @@ export const extensionSchemas = {
           in_progress: { type: "integer" },
           upcoming_today: { type: "integer" },
           disrupted: { type: "integer" },
+          not_started: { type: "integer" },
           escalated: { type: "integer" },
           open_complaints: { type: "integer" },
           urgent_complaints: { type: "integer" },
@@ -1128,6 +1129,10 @@ export const extensionSchemas = {
             items: { $ref: "#/components/schemas/AdminDispatchQueueItem" },
           },
           disrupted: {
+            type: "array",
+            items: { $ref: "#/components/schemas/AdminDispatchQueueItem" },
+          },
+          not_started: {
             type: "array",
             items: { $ref: "#/components/schemas/AdminDispatchQueueItem" },
           },

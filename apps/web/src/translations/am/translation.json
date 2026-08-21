@@ -1907,6 +1907,7 @@
     "passengerCount": "{count} ተሳፋሪዎች",
     "attentionUrgentComplaints": "{count} አስቸኳይ ቅሬታዎች ክፍት ናቸው።",
     "attentionDisrupted": "{count} ጉዞዎች ከመስተጓጎል በኋላ አዲስ መኪና ያስፈልጋቸዋል።",
+    "attentionNotStarted": "{count} የተመደቡ ጉዞዎች ከመውሰድ በኋላ አልተጀመሩም።",
     "attentionEscalated": "{count} ጉዞዎች ከልክ በላይ ጠብቀው ተሻገሩ።",
     "attentionView": "አሁን ይመልከቱ",
     "sla": {
@@ -1935,6 +1936,8 @@
     "stats": {
       "disrupted": "ተስተጓጉለው",
       "disruptedDescription": "የተመደበው መኪና በኋላ ጥቅም ላይ ሊውል ያልቻለባቸው ጉዞዎች",
+      "notStarted": "አልተጀመረም",
+      "notStartedDescription": "መውሰድ ያለፈባቸው የተመደቡ ጉዞዎች አሽከርካሪው ገና ያልጀመራቸው",
       "needsAssignment": "መመደብ ያስፈልጋል",
       "needsAssignmentDescription": "መኪና ያልተመደበላቸው በመጠባበቅ ወይም የተረጋገጡ ጉዞዎች",
       "liveNow": "አሁን በሂደት",
@@ -1949,6 +1952,8 @@
     "queues": {
       "disrupted": "የተስተጓጎሉ ጉዞዎች",
       "disruptedDescription": "የተመደበው መኪና በኋላ ጥቅም ላይ ሊውል አልቻለም። ነጻ መኪና ሲኖር በራስ-ሰር ይቀየራል።",
+      "notStarted": "ተመድቧል፣ አልተጀመረም",
+      "notStartedDescription": "የመውሰድ ጊዜ አልፏል እና የተመደበው አሽከርካሪ አልጀመረም። እንደገና ይመድቡ፣ አለመታየት ምልክት ያድርጉ፣ ወይም አሽከርካሪውን ያግኙ።",
       "needsAssignment": "መመደብ ያስፈልጋል",
       "needsAssignmentDescription": "ተስማሚ መኪና የሌላቸው ጉዞዎች። የሚዛመድ መኪና ሲኖር በራስ-ሰር ይመደባል።",
       "liveNow": "አሁን በሂደት",
@@ -1962,7 +1967,9 @@
       "emptyUpcomingToday": "ለዛሬ የታቀደ ጉዞ የለም።",
       "emptyUpcomingHint": "የዛሬ የቀሩ መውሰዶች እዚህ ይታያሉ።",
       "emptyDisrupted": "የተስተጓጎለ ጉዞ የለም።",
-      "emptyDisruptedHint": "በራስ-ሰር መቀየር መኪና ካልተገኘ የተረጋገጡ እና በሂደት ያሉ ጉዞዎች እዚህ ይቆያሉ።"
+      "emptyDisruptedHint": "በራስ-ሰር መቀየር መኪና ካልተገኘ የተረጋገጡ እና በሂደት ያሉ ጉዞዎች እዚህ ይቆያሉ።",
+      "emptyNotStarted": "በዘግይቶ የሚጀምር ጉዞ የለም።",
+      "emptyNotStartedHint": "የተመደቡ ጉዞዎች ከመውሰድ በኋላ የዲስፓቸር የጊዜ መስኮት ሲያልፍ እዚህ ይታያሉ።"
     },
     "board": {
       "title": "የቀጥታ ካርታ",
@@ -3196,7 +3203,7 @@
           "cancel_deadline_minutes": "የተዋቀረ የመሰረዝ ጊዜ በደቂቃ",
           "cancel_deadline_at": "የመሰረዝ የመጨረሻ ጊዜ",
           "reminder_hours": "የተዋቀረ የማሳሰቢያ ጊዜ በሰዓት",
-          "escalation_reason": "ጉዞው ለምን እንደተሻገረ (ያልተመደበ ወይም የተስተጓጎለ)",
+          "escalation_reason": "ጉዞው ለምን እንደተሻገረ (ያልተመደበ፣ የተስተጓጎለ፣ ወይም ተመድቶ ያልተጀመረ)",
           "escalation_level": "የማሻገሪያ ደረጃ (ዲስፓቸር ወይም ተቆጣጣሪ)",
           "wait_minutes": "ጉዞው ለምን ያህል ደቂቃ እንደጠበቀ"
         },
@@ -3444,7 +3451,7 @@
         },
         "escalated": {
           "title": "የዲስፓቸር ማሻገሪያ",
-          "description": "ያልተመደበ ወይም የተስተጓጎለ ጉዞ ከዲስፓቸር ጊዜ በላይ ሲጠብቅ ለዲስፓቸሮች ይላካል።"
+          "description": "ያልተመደበ፣ የተስተጓጎለ፣ ወይም ተመድቶ ያልተጀመረ ጉዞ ከዲስፓቸር ጊዜ በላይ ሲጠብቅ ለዲስፓቸሮች ይላካል።"
         },
         "escalated_supervisor": {
           "title": "የተቆጣጣሪ ማሻገሪያ",
@@ -5984,8 +5991,8 @@
       },
       "dispatch_escalate_dispatcher_minutes": {
         "title": "የዲስፓቸር ማሻገሪያ",
-        "description": "ያልተመደበ ወይም የተስተጓጎለ ጉዞ ለዲስፓቸሮች ከማሳወቅ በፊት ምን ያህል እንደሚጠብቅ።",
-        "helper": "ያልተመደቡ ጉዞዎች መውሰድ ይህን ያህል ሲቀርብ (ወይም ሲያልፍ) ይሻገራሉ። የተስተጓጎሉ ጉዞዎች ይህን ያህል ደቂቃ ካልተፈቱ በኋላ ይሻገራሉ። አብነቶችን በማሳወቂያ አብነቶች → ማሻገሪያ ስር ያንቁ።",
+        "description": "ያልተመደበ፣ የተስተጓጎለ፣ ወይም ተመድቶ ያልተጀመረ ጉዞ ለዲስፓቸሮች ከማሳወቅ በፊት ያለው የጊዜ መስኮት።",
+        "helper": "ያልተመደቡ ጉዞዎች መውሰድ ይህን ያህል ሲቀርብ (ወይም ሲያልፍ) ይሻገራሉ። የተስተጓጎሉ ጉዞዎች ይህን ያህል ደቂቃ ካልተፈቱ በኋላ ይሻገራሉ። የተመደቡ ግን ያልተጀመሩ ጉዞዎች ከመውሰድ በኋላ ይህን ያህል ደቂቃ ሲያልፍ ይሻገራሉ። አብነቶችን በማሳወቂያ አብነቶች → ማሻገሪያ ስር ያንቁ።",
         "label": "ዲስፓቸሮችን አሳውቅ ከ"
       },
       "dispatch_escalate_supervisor_minutes": {
