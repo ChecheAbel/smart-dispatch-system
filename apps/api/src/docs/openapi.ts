@@ -79,6 +79,13 @@ export const openApiSpec = {
               license_photo_url: { type: "string", nullable: true },
               license_photo_back_url: { type: "string", nullable: true },
               created_at: { type: "string", format: "date-time" },
+              rating: {
+                type: "object",
+                properties: {
+                  average: { type: "number", nullable: true, example: 4.6 },
+                  count: { type: "integer", example: 12 },
+                },
+              },
             },
           },
           assigned_vehicle: {

@@ -2359,6 +2359,7 @@
         "email": "Email",
         "mobile": "Mobile",
         "license": "License",
+        "rating": "Rating",
         "vehicle": "Assigned vehicle",
         "status": "Status",
         "actions": "Actions"
@@ -2368,6 +2369,8 @@
         "description": "Approved driver applications will appear here.",
         "searchDescription": "Try a different search term."
       },
+      "ratingUnrated": "No ratings",
+      "ratingCount": "{count} ratings",
       "actions": {
         "view": "View",
         "menuLabel": "Actions for {name}"
@@ -2386,6 +2389,7 @@
     "detail": {
       "title": "Driver details",
       "description": "License, contact details, and assigned vehicle for this driver.",
+      "loading": "Loading driver…",
       "submittedAt": "Submitted on {date}",
       "profileSection": "Driver details",
       "profileSectionDescription": "Personal information and login identity.",
@@ -2396,6 +2400,10 @@
       "licensePhotoBack": "License photo (back)",
       "licensePhotoMissing": "No license photo was uploaded.",
       "openPhoto": "Open full photo",
+      "ratingSection": "Trip rating",
+      "ratingSectionDescription": "Average score from completed trips rated by requesters.",
+      "ratingUnrated": "This driver has not been rated yet.",
+      "ratingCount": "{count} ratings",
       "vehicleSection": "Assigned vehicle",
       "vehicleSectionDescription": "Default vehicle for this driver. Assignment is managed from the vehicle record.",
       "vehicleUnassigned": "No vehicle assigned",

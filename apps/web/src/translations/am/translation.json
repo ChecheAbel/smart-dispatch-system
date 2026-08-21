@@ -2359,6 +2359,7 @@
         "email": "ኢሜይል",
         "mobile": "ሞባይል",
         "license": "ፈቃድ",
+        "rating": "ደረጃ",
         "vehicle": "የተመደበ ተሽከርካሪ",
         "status": "ሁኔታ",
         "actions": "እርምጃዎች"
@@ -2368,6 +2369,8 @@
         "description": "የጸደቁ የአሽከርካሪ ማመልከቻዎች እዚህ ይታያሉ።",
         "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
       },
+      "ratingUnrated": "ደረጃ የለም",
+      "ratingCount": "{count} ደረጃዎች",
       "actions": {
         "view": "ይመልከቱ",
         "menuLabel": "ለ {name} እርምጃዎች"
@@ -2386,6 +2389,7 @@
     "detail": {
       "title": "የአሽከርካሪ ዝርዝሮች",
       "description": "የዚህ አሽከርካሪ ፈቃድ፣ የመገኛ ዝርዝሮች እና የተመደበ ተሽከርካሪ።",
+      "loading": "አሽከርካሪ በመጫን ላይ…",
       "submittedAt": "በ {date} ቀርቧል",
       "profileSection": "የአሽከርካሪ ዝርዝሮች",
       "profileSectionDescription": "የግል መረጃዎች እና የመግቢያ መለያ።",
@@ -2396,6 +2400,10 @@
       "licensePhotoBack": "የፈቃድ ፎቶ (ጀርባ)",
       "licensePhotoMissing": "የፈቃድ ፎቶ አልተሰቀለም።",
       "openPhoto": "ሙሉ ፎቶ ክፈት",
+      "ratingSection": "የጉዞ ደረጃ",
+      "ratingSectionDescription": "ከተጠናቀቁ ጉዞዎች በጠያቂዎች የተሰጠ አማካይ ውጤት።",
+      "ratingUnrated": "ይህ አሽከርካሪ እስካሁን ደረጃ አልተሰጠውም።",
+      "ratingCount": "{count} ደረጃዎች",
       "vehicleSection": "የተመደበ ተሽከርካሪ",
       "vehicleSectionDescription": "ለዚህ አሽከርካሪ ነባሪ ተሽከርካሪ። ምደባ ከተሽከርካሪው መዝገብ ይተዳደራል።",
       "vehicleUnassigned": "ተሽከርካሪ አልተመደበም",

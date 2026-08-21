@@ -26,12 +26,19 @@ export interface Role {
   translations?: RoleTranslation[];
 }
 
+/** Aggregated trip ratings received by a driver. */
+export interface DriverRatingSummary {
+  average: number | null;
+  count: number;
+}
+
 /** Driver-specific profile linked to a user account. */
 export interface DriverProfile {
   license_number: string;
   license_photo_url: string | null;
   license_photo_back_url: string | null;
   created_at: string;
+  rating: DriverRatingSummary;
 }
 
 /** Vehicle currently assigned as a driver's default unit. */

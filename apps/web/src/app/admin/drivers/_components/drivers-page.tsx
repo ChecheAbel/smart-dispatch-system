@@ -34,6 +34,7 @@ import { PERMISSIONS } from "@/lib/permissions";
 import { adminBadgeGoldClass } from "@/lib/admin-theme";
 import { cn } from "@/lib/utils";
 import { DriverDetailSheet } from "./driver-detail-sheet";
+import { DriverRatingCell } from "./driver-rating";
 import { DriverStats } from "./driver-stats";
 import {
   formatAssignedVehicle,
@@ -129,6 +130,17 @@ export function DriversPage() {
         cell: (user) => user.driver?.license_number || "—",
       },
       {
+        id: "rating",
+        header: copy.directory.columns.rating,
+        cell: (user) => (
+          <DriverRatingCell
+            rating={user.driver?.rating}
+            unratedLabel={copy.directory.ratingUnrated}
+            countTemplate={copy.directory.ratingCount}
+          />
+        ),
+      },
+      {
         id: "vehicle",
         header: copy.directory.columns.vehicle,
         cellClassName: "text-slate-600",
@@ -196,7 +208,7 @@ export function DriversPage() {
         showIndexColumn
         renderRowActions={renderRowActions}
         actionsColumnHeader={copy.directory.columns.actions}
-        minTableWidth="1080px"
+        minTableWidth="1180px"
         emptyIcon={IdCard}
         emptyTitle={copy.directory.empty.title}
         emptyDescription={copy.directory.empty.description}

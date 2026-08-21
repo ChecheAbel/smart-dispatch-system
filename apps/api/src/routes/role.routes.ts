@@ -23,7 +23,7 @@ import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
 import { getOptionalString, getString, getRoleTranslations, getStringArray } from "../utils/validation";
 import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
-import { toPublicUser } from "../mappers/user.mapper";
+import { toPublicUsers } from "../mappers/user.mapper";
 
 const router = Router();
 
@@ -131,7 +131,7 @@ router.get("/:id/users", requirePermission("roles.read"), async (req: Request, r
   try {
     const users = await findUsersByRoleId(req.params.id);
     return sendSuccess(res, {
-      users: users.map((user) => toPublicUser(user)),
+      users: await toPublicUsers(users),
     });
   } catch (error) {
     return handleRouteError(res, error);

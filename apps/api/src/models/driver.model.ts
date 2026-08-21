@@ -78,3 +78,46 @@ export async function upsertDriverProfile(input: UpsertDriverProfileInput) {
     },
   });
 }
+
+export type DriverRatingSummaryRecord = {
+  average: number | null;
+  count: number;
+};
+
+function roundAverage(value: number | null | undefined) {
+  if (value == null || Number.isNaN(value)) {
+    return null;
+  }
+
+  return Math.round(value * 10) / 10;
+}
+
+export async function getDriverRatingSummaries(driverUserIds: string[]) {
+  const uniqueIds = [...new Set(driverUserIds.filter(Boolean))];
+  const summaries = new Map<string, DriverRatingSummaryRecord>();
+
+  if (uniqueIds.length === 0) {
+    return summaries;
+  }
+
+  const grouped = await prisma.rideRequestDriverRating.groupBy({
+    by: ["driverUserId"],
+    where: { driverUserId: { in: uniqueIds } },
+    _avg: { rating: true },
+    _count: { _all: true },
+  });
+
+  for (const row of grouped) {
+    summaries.set(row.driverUserId, {
+      average: roundAverage(row._avg.rating),
+      count: row._count._all,
+    });
+  }
+
+  return summaries;
+}
+
+export async function getDriverRatingSummary(driverUserId: string) {
+  const summaries = await getDriverRatingSummaries([driverUserId]);
+  return summaries.get(driverUserId) ?? { average: null, count: 0 };
+}

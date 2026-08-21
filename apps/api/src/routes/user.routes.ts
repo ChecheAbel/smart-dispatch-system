@@ -5,7 +5,7 @@ import { auditMutations } from "../middleware/audit-mutation";
 import { authenticate } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
 import { requirePermission } from "../middleware/require-permission";
-import { toPublicUser } from "../mappers/user.mapper";
+import { toPublicUsers, toPublicUserWithRating } from "../mappers/user.mapper";
 import { toPublicRole } from "../mappers/role.mapper";
 import {
   assignRoleToUser,
@@ -75,7 +75,7 @@ router.get("/", requirePermission("users.read"), async (req: Request, res: Respo
 
     return sendPaginatedSuccess(
       res,
-      result.data.map((user) => toPublicUser(user)),
+      await toPublicUsers(result.data),
       result.pagination,
     );
   } catch (error) {
@@ -90,7 +90,7 @@ router.get("/:id", requirePermission("users.read"), async (req: Request, res: Re
       return sendError(res, "User not found.", 404);
     }
 
-    return sendSuccess(res, { user: toPublicUser(user) });
+    return sendSuccess(res, { user: await toPublicUserWithRating(user) });
   } catch (error) {
     return handleRouteError(res, error);
   }
@@ -143,7 +143,7 @@ router.put(
         });
 
         const updated = await findUserByIdWithRoles(user.id);
-        return sendSuccess(res, { user: toPublicUser(updated ?? user) });
+        return sendSuccess(res, { user: await toPublicUserWithRating(updated ?? user) });
       } catch (error) {
         return handleRouteError(res, error);
       }
@@ -183,7 +183,7 @@ router.post("/", requirePermission("users.write"), async (req: Request, res: Res
       accountActivation: parseAccountActivation(req.body?.account_activation),
     });
 
-    return sendSuccess(res, { user: toPublicUser(user) }, { status: 201 });
+    return sendSuccess(res, { user: await toPublicUserWithRating(user) }, { status: 201 });
   } catch (error) {
     return handleRouteError(res, error);
   }
@@ -204,7 +204,7 @@ router.patch("/:id", requirePermission("users.write"), async (req: Request, res:
       accountActivation: parseAccountActivation(req.body?.account_activation),
     });
 
-    return sendSuccess(res, { user: toPublicUser(user) });
+    return sendSuccess(res, { user: await toPublicUserWithRating(user) });
   } catch (error) {
     return handleRouteError(res, error);
   }
@@ -248,7 +248,7 @@ router.patch("/:id/account-status", requirePermission("users.write"), async (req
       });
     }
 
-    return sendSuccess(res, { user: toPublicUser(user) });
+    return sendSuccess(res, { user: await toPublicUserWithRating(user) });
   } catch (error) {
     return handleRouteError(res, error);
   }
@@ -272,7 +272,7 @@ router.patch("/:id/account-activation", requirePermission("users.write"), async 
       queueUserRegistrationNotifications("approved", user.id);
     }
 
-    return sendSuccess(res, { user: toPublicUser(user) });
+    return sendSuccess(res, { user: await toPublicUserWithRating(user) });
   } catch (error) {
     return handleRouteError(res, error);
   }
