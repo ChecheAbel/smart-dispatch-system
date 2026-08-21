@@ -6,6 +6,8 @@ export type DeadlineSettings = {
   ride_request_cancel_grace_minutes: number;
   ride_request_edit_grace_minutes: number;
   ride_request_reminder_hours: number;
+  dispatch_escalate_dispatcher_minutes: number;
+  dispatch_escalate_supervisor_minutes: number;
   invoice_due_soon_days: number;
   insurance_due_soon_days: number;
   inspection_due_soon_days: number;

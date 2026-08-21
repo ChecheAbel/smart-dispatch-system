@@ -11,7 +11,7 @@ import type {
 } from "@smart-dispatch/types";
 import { findRideRequestById } from "../models/ride-request.model";
 import { findInvoiceById } from "../models/invoice.model";
-import { findUserByEmail, findUserByIdWithRoles } from "../models/user.model";
+import { findUserByEmail, findUserByIdWithRoles, listActiveUsersByRoleSlug } from "../models/user.model";
 import { findVehicleById } from "../models/vehicle.model";
 import { getRideRequestSettings } from "../models/app-setting.model";
 import {
@@ -77,6 +77,9 @@ function buildRideRequestSampleContext(): TemplateContext {
     cancel_deadline_minutes: "15",
     cancel_deadline_at: "15 Jul 2026, 14:45",
     reminder_hours: "2",
+    escalation_reason: "unmatched",
+    escalation_level: "dispatcher",
+    wait_minutes: "18",
   };
 }
 
@@ -255,6 +258,9 @@ function buildRideRequestContext(
     cancel_deadline_minutes: String(cancelDeadlineMinutes),
     cancel_deadline_at: formatScheduledAt(cancelDeadlineAt),
     reminder_hours: String(settings.ride_request_reminder_hours),
+    escalation_reason: "—",
+    escalation_level: "—",
+    wait_minutes: "—",
   };
 }
 
@@ -737,16 +743,141 @@ async function dispatchTemplates(
   }
 }
 
+function staffRoleForRecipient(recipient: NotificationTemplateRecipient) {
+  if (recipient === "dispatcher") {
+    return "dispatcher";
+  }
+  if (recipient === "supervisor") {
+    return "admin";
+  }
+  return null;
+}
+
+async function dispatchStaffTemplates(
+  module: NotificationModule,
+  event: string,
+  entityId: string,
+  context: TemplateContext,
+) {
+  const templates = await listEnabledNotificationTemplates(module, event);
+  if (templates.length === 0) {
+    return;
+  }
+
+  const usersByRole = new Map<string, Awaited<ReturnType<typeof listActiveUsersByRoleSlug>>>();
+
+  async function usersForRole(roleSlug: string) {
+    const cached = usersByRole.get(roleSlug);
+    if (cached) {
+      return cached;
+    }
+    const users = await listActiveUsersByRoleSlug(roleSlug);
+    usersByRole.set(roleSlug, users);
+    return users;
+  }
+
+  for (const template of templates) {
+    const roleSlug = staffRoleForRecipient(template.recipient);
+    if (!roleSlug) {
+      continue;
+    }
+
+    const users = await usersForRole(roleSlug);
+    if (users.length === 0) {
+      console.warn(
+        `[Notification] Skipped ${module}/${event}/${template.channel}/${template.recipient}: no ${roleSlug} users.`,
+      );
+      logDeliveryAttempt({
+        status: "skipped",
+        template,
+        entityId,
+        subject: renderNotificationTemplate(template.subject ?? "", context).trim() || null,
+        bodyPreview: renderNotificationTemplate(template.body, context),
+        errorMessage: `No active ${roleSlug} users to notify.`,
+      });
+      continue;
+    }
+
+    if (template.channel === "push") {
+      continue;
+    }
+
+    const renderedBody = renderNotificationTemplate(template.body, context);
+    const renderedSubject =
+      template.channel === "email"
+        ? renderNotificationTemplate(template.subject ?? "", context).trim()
+        : null;
+
+    for (const user of users) {
+      const contact =
+        template.channel === "sms" ? user.mobileNumber?.trim() || null : user.email?.trim() || null;
+
+      try {
+        if (!contact) {
+          logDeliveryAttempt({
+            status: "skipped",
+            template,
+            entityId,
+            subject: renderedSubject,
+            bodyPreview: renderedBody,
+            errorMessage: "Recipient contact is missing.",
+          });
+          continue;
+        }
+
+        await deliverTemplate(template, context, contact);
+        logDeliveryAttempt({
+          status: "sent",
+          template,
+          entityId,
+          recipientContact: contact,
+          subject: renderedSubject,
+          bodyPreview: renderedBody,
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Unknown notification error.";
+        logDeliveryAttempt({
+          status: "failed",
+          template,
+          entityId,
+          recipientContact: contact,
+          subject: renderedSubject,
+          bodyPreview: renderedBody,
+          errorMessage: message,
+        });
+      }
+    }
+  }
+
+  const pushTemplates = templates.filter((template) => template.channel === "push");
+  for (const template of pushTemplates) {
+    const roleSlug = staffRoleForRecipient(template.recipient);
+    if (!roleSlug) {
+      continue;
+    }
+    const users = await usersForRole(roleSlug);
+    for (const user of users) {
+      await dispatchPushNotifications(module, event, entityId, context, [template], () => user.id);
+    }
+  }
+}
+
 export async function sendRideRequestNotifications(
   event: RideRequestNotificationEvent,
   rideRequestId: string,
+  extras: TemplateContext = {},
 ) {
   const rideRequest = await findRideRequestById(rideRequestId);
   if (!rideRequest) {
     return;
   }
 
-  const context = buildRideRequestContext(rideRequest);
+  const context = { ...buildRideRequestContext(rideRequest), ...extras };
+
+  if (event === "escalated" || event === "escalated_supervisor") {
+    await dispatchStaffTemplates("ride_requests", event, rideRequestId, context);
+    return;
+  }
 
   await dispatchTemplates(
     "ride_requests",
@@ -830,8 +961,9 @@ export async function sendInvoiceNotifications(
 export function queueRideRequestNotifications(
   event: RideRequestNotificationEvent,
   rideRequestId: string,
+  extras: TemplateContext = {},
 ) {
-  void sendRideRequestNotifications(event, rideRequestId);
+  void sendRideRequestNotifications(event, rideRequestId, extras);
 }
 
 export function queueUserRegistrationNotifications(

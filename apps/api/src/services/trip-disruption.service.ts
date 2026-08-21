@@ -15,6 +15,26 @@ const REROUTE_COOLDOWN_MS = 10 * 60 * 1000;
 const DISRUPTION_LIMIT = 40;
 
 const rerouteCooldown = new Map<string, number>();
+const disruptionFirstSeen = new Map<string, number>();
+
+export function noteDisruptionSeen(tripId: string, now = Date.now()) {
+  if (!disruptionFirstSeen.has(tripId)) {
+    disruptionFirstSeen.set(tripId, now);
+  }
+  return disruptionFirstSeen.get(tripId) ?? now;
+}
+
+export function clearDisruptionSeen(tripId: string) {
+  disruptionFirstSeen.delete(tripId);
+}
+
+export function getDisruptionWaitMinutes(tripId: string, now = Date.now()) {
+  const seen = disruptionFirstSeen.get(tripId);
+  if (!seen) {
+    return 0;
+  }
+  return Math.max(0, Math.round((now - seen) / 60_000));
+}
 
 export type DisruptedTrip = {
   id: string;
@@ -180,9 +200,11 @@ export async function listUnresolvedDisruptions(options?: { vehicleId?: string }
   for (const trip of trips) {
     const disruption = await detectTripDisruption(trip);
     if (!disruption) {
+      clearDisruptionSeen(trip.id);
       continue;
     }
 
+    noteDisruptionSeen(trip.id);
     unresolved.push({
       id: trip.id,
       reason: disruption.reason,
@@ -210,8 +232,11 @@ export async function rerouteDisruptedTrips(
     try {
       const disruption = await detectTripDisruption(trip);
       if (!disruption) {
+        clearDisruptionSeen(trip.id);
         continue;
       }
+
+      noteDisruptionSeen(trip.id);
 
       if (onCooldown(trip.id)) {
         result.unresolved.push({
@@ -248,6 +273,7 @@ export async function rerouteDisruptedTrips(
             },
             after: synced,
           });
+          clearDisruptionSeen(trip.id);
           result.rerouted += 1;
           continue;
         }
@@ -289,6 +315,7 @@ export async function rerouteDisruptedTrips(
         after: updated,
       });
 
+      clearDisruptionSeen(trip.id);
       result.rerouted += 1;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown reroute error.";

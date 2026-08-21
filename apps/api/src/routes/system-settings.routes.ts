@@ -123,6 +123,16 @@ router.patch(
         1,
         168,
       );
+      const dispatch_escalate_dispatcher_minutes = parsePositiveInt(
+        req.body?.dispatch_escalate_dispatcher_minutes,
+        1,
+        1440,
+      );
+      const dispatch_escalate_supervisor_minutes = parsePositiveInt(
+        req.body?.dispatch_escalate_supervisor_minutes,
+        1,
+        1440,
+      );
       const invoice_due_soon_days = parsePositiveInt(
         req.body?.invoice_due_soon_days,
         1,
@@ -143,6 +153,8 @@ router.patch(
         ride_request_cancel_grace_minutes == null ||
         ride_request_edit_grace_minutes == null ||
         ride_request_reminder_hours == null ||
+        dispatch_escalate_dispatcher_minutes == null ||
+        dispatch_escalate_supervisor_minutes == null ||
         invoice_due_soon_days == null ||
         insurance_due_soon_days == null ||
         inspection_due_soon_days == null
@@ -150,10 +162,20 @@ router.patch(
         return sendError(res, "Enter valid deadline values.", 400);
       }
 
+      if (dispatch_escalate_supervisor_minutes < dispatch_escalate_dispatcher_minutes) {
+        return sendError(
+          res,
+          "Supervisor escalation wait must be at least the dispatcher wait.",
+          400,
+        );
+      }
+
       await updateDeadlineSettings({
         ride_request_cancel_grace_minutes,
         ride_request_edit_grace_minutes,
         ride_request_reminder_hours,
+        dispatch_escalate_dispatcher_minutes,
+        dispatch_escalate_supervisor_minutes,
         invoice_due_soon_days,
         insurance_due_soon_days,
         inspection_due_soon_days,

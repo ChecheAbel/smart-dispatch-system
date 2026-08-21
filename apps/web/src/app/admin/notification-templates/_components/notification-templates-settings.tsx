@@ -60,6 +60,8 @@ const RECIPIENT_ORDER: NotificationTemplateRecipient[] = [
   "applicant",
   "driver",
   "fleet_manager",
+  "dispatcher",
+  "supervisor",
 ];
 
 function RulesSkeleton() {
@@ -104,6 +106,18 @@ function getRecipientLabel(
 
   if (recipient === "fleet_manager") {
     return copy.recipients.fleet_manager;
+  }
+
+  if (recipient === "dispatcher") {
+    return copy.recipients.dispatcher;
+  }
+
+  if (recipient === "supervisor") {
+    return copy.recipients.supervisor;
+  }
+
+  if (recipient === "account_holder") {
+    return copy.recipients.account_holder;
   }
 
   return copy.recipients.applicant;

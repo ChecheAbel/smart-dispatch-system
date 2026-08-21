@@ -7,6 +7,7 @@ import {
   Clock3,
   FileText,
   Loader2,
+  Megaphone,
   Save,
   ShieldCheck,
 } from "lucide-react";
@@ -37,11 +38,13 @@ type DeadlineFieldKey =
   | "ride_request_cancel_grace_minutes"
   | "ride_request_edit_grace_minutes"
   | "ride_request_reminder_hours"
+  | "dispatch_escalate_dispatcher_minutes"
+  | "dispatch_escalate_supervisor_minutes"
   | "invoice_due_soon_days"
   | "insurance_due_soon_days"
   | "inspection_due_soon_days";
 
-type DeadlineSectionId = "rideRequests" | "billing" | "compliance";
+type DeadlineSectionId = "rideRequests" | "dispatch" | "billing" | "compliance";
 
 type DeadlineUnit = "minutes" | "hours" | "days";
 
@@ -51,6 +54,8 @@ const DEFAULT_VALUES: Record<DeadlineFieldKey, string> = {
   ride_request_cancel_grace_minutes: "15",
   ride_request_edit_grace_minutes: "15",
   ride_request_reminder_hours: "2",
+  dispatch_escalate_dispatcher_minutes: "15",
+  dispatch_escalate_supervisor_minutes: "30",
   invoice_due_soon_days: "3",
   insurance_due_soon_days: "30",
   inspection_due_soon_days: "30",
@@ -91,6 +96,24 @@ const FIELDS: Array<{
     emphasized: true,
   },
   {
+    key: "dispatch_escalate_dispatcher_minutes",
+    section: "dispatch",
+    unit: "minutes",
+    min: 1,
+    max: 1440,
+    placeholder: "15",
+    emphasized: true,
+  },
+  {
+    key: "dispatch_escalate_supervisor_minutes",
+    section: "dispatch",
+    unit: "minutes",
+    min: 1,
+    max: 1440,
+    placeholder: "30",
+    emphasized: true,
+  },
+  {
     key: "invoice_due_soon_days",
     section: "billing",
     unit: "days",
@@ -121,6 +144,7 @@ const SECTIONS: Array<{
   icon: typeof Clock3;
 }> = [
   { id: "rideRequests", icon: CarFront },
+  { id: "dispatch", icon: Megaphone },
   { id: "billing", icon: FileText },
   { id: "compliance", icon: ShieldCheck },
 ];
@@ -130,6 +154,12 @@ function settingsToForm(settings: DeadlineSettings): Record<DeadlineFieldKey, st
     ride_request_cancel_grace_minutes: String(settings.ride_request_cancel_grace_minutes),
     ride_request_edit_grace_minutes: String(settings.ride_request_edit_grace_minutes),
     ride_request_reminder_hours: String(settings.ride_request_reminder_hours),
+    dispatch_escalate_dispatcher_minutes: String(
+      settings.dispatch_escalate_dispatcher_minutes ?? 15,
+    ),
+    dispatch_escalate_supervisor_minutes: String(
+      settings.dispatch_escalate_supervisor_minutes ?? 30,
+    ),
     invoice_due_soon_days: String(settings.invoice_due_soon_days),
     insurance_due_soon_days: String(settings.insurance_due_soon_days),
     inspection_due_soon_days: String(settings.inspection_due_soon_days),
@@ -350,6 +380,17 @@ export function DeadlineSettingsPage() {
       return;
     }
 
+    if (
+      Number(values.dispatch_escalate_supervisor_minutes) <
+      Number(values.dispatch_escalate_dispatcher_minutes)
+    ) {
+      showErrorToast({
+        title: copy.toast.invalidValues.title,
+        description: copy.toast.invalidValues.description,
+      });
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -361,6 +402,12 @@ export function DeadlineSettingsPage() {
           Number(values.ride_request_edit_grace_minutes),
         ),
         ride_request_reminder_hours: Math.trunc(Number(values.ride_request_reminder_hours)),
+        dispatch_escalate_dispatcher_minutes: Math.trunc(
+          Number(values.dispatch_escalate_dispatcher_minutes),
+        ),
+        dispatch_escalate_supervisor_minutes: Math.trunc(
+          Number(values.dispatch_escalate_supervisor_minutes),
+        ),
         invoice_due_soon_days: Math.trunc(Number(values.invoice_due_soon_days)),
         insurance_due_soon_days: Math.trunc(Number(values.insurance_due_soon_days)),
         inspection_due_soon_days: Math.trunc(Number(values.inspection_due_soon_days)),

@@ -12,6 +12,7 @@ import {
   ClipboardList,
   Clock3,
   MapPin,
+  Megaphone,
   MessageSquareWarning,
   Route,
   Truck,
@@ -24,6 +25,7 @@ import type {
   AdminDispatchQueueItem,
   ComplaintPriority,
   DispatchDisruptionReason,
+  DispatchEscalationLevel,
   DispatchSlaPriority,
   RideRequestStatus,
 } from "@smart-dispatch/types";
@@ -58,6 +60,7 @@ const emptyOverview: AdminDispatchOverview = {
     in_progress: 0,
     upcoming_today: 0,
     disrupted: 0,
+    escalated: 0,
     open_complaints: 0,
     urgent_complaints: 0,
   },
@@ -110,6 +113,35 @@ function disruptionLabel(reason: DispatchDisruptionReason, copy: OverviewCopy) {
   if (reason === "driver_unavailable") return copy.disruption.driverUnavailable;
   if (reason === "geofence_violation") return copy.disruption.geofenceViolation;
   return copy.disruption.staleLocation;
+}
+
+function escalationLabel(level: DispatchEscalationLevel, copy: OverviewCopy) {
+  return level === "supervisor" ? copy.escalation.supervisor : copy.escalation.dispatcher;
+}
+
+function EscalationBadge({
+  level,
+  copy,
+}: {
+  level?: DispatchEscalationLevel | null;
+  copy: OverviewCopy;
+}) {
+  if (!level) {
+    return null;
+  }
+
+  return (
+    <Badge
+      variant="outline"
+      className={
+        level === "supervisor"
+          ? "border-red-200 bg-red-50 text-red-700 dark:border-red-400/30 dark:bg-red-400/10 dark:text-red-200"
+          : "border-orange-200 bg-orange-50 text-orange-800 dark:border-orange-400/30 dark:bg-orange-400/10 dark:text-orange-200"
+      }
+    >
+      {escalationLabel(level, copy)}
+    </Badge>
+  );
 }
 
 function DisruptedTripsHelp({
@@ -300,6 +332,7 @@ function AssignmentCard({
           <Badge variant="outline" className={SLA_BADGE_CLASS[sla]}>
             {slaLabel(sla, copy)}
           </Badge>
+          <EscalationBadge level={item.escalation_level} copy={copy} />
           <Badge variant="outline" className={cn("capitalize", statusBadgeClass(item.status))}>
             {statusLabels[item.status]}
           </Badge>
@@ -469,6 +502,7 @@ function DisruptionCard({
               {disruptionLabel(item.disruption_reason, copy)}
             </Badge>
           ) : null}
+          <EscalationBadge level={item.escalation_level} copy={copy} />
           <Badge variant="outline" className={cn("capitalize", statusBadgeClass(item.status))}>
             {statusLabels[item.status]}
           </Badge>
@@ -858,6 +892,9 @@ export function DispatchOverviewPage() {
   const disruptedLabel = formatMessage(copy.attentionDisrupted, {
     count: String(data.counts.disrupted),
   });
+  const escalatedLabel = formatMessage(copy.attentionEscalated, {
+    count: String(data.counts.escalated),
+  });
 
   return (
     <div className="w-full max-w-none space-y-6">
@@ -867,6 +904,24 @@ export function DispatchOverviewPage() {
         </h1>
         <p className="max-w-2xl text-sm text-slate-500 dark:text-muted-foreground">{copy.description}</p>
       </header>
+
+      {!loading && canReadRideRequests && data.counts.escalated > 0 ? (
+        <button
+          type="button"
+          onClick={() =>
+            scrollToSection(
+              data.queues.needs_assignment.some((item) => item.escalation_level)
+                ? "dispatch-needs"
+                : "dispatch-disrupted",
+            )
+          }
+          className="flex w-full items-start gap-3 rounded-lg border border-orange-200 bg-orange-50/80 px-4 py-3 text-left text-sm text-orange-950 transition-colors hover:bg-orange-50 dark:border-orange-400/30 dark:bg-orange-400/10 dark:text-orange-100 dark:hover:bg-orange-400/15"
+        >
+          <Megaphone className="mt-0.5 size-4 shrink-0" />
+          <span className="min-w-0 flex-1">{escalatedLabel}</span>
+          <span className="shrink-0 font-semibold">{copy.attentionView}</span>
+        </button>
+      ) : null}
 
       {!loading && canReadRideRequests && data.counts.disrupted > 0 ? (
         <button

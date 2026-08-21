@@ -1883,12 +1883,17 @@
     "passengerCount": "{count} passengers",
     "attentionUrgentComplaints": "{count} urgent complaints are open.",
     "attentionDisrupted": "{count} trips need a new vehicle after a disruption.",
+    "attentionEscalated": "{count} trips waited too long and were escalated.",
     "attentionView": "Review now",
     "sla": {
       "overdue": "Overdue",
       "dueSoon": "Due soon",
       "onTrack": "On track",
       "unscheduled": "No pickup time"
+    },
+    "escalation": {
+      "dispatcher": "Escalated",
+      "supervisor": "Supervisor"
     },
     "allocation": {
       "suggested": "Suggested",
@@ -2840,7 +2845,11 @@
           "status": "Current request status",
           "reference": "Short request reference code",
           "cancel_deadline_minutes": "Configured cancel window in minutes",
-          "cancel_deadline_at": "Formatted cancel deadline time"
+          "cancel_deadline_at": "Formatted cancel deadline time",
+          "reminder_hours": "Configured reminder lead time in hours",
+          "escalation_reason": "Why the trip was escalated (unmatched or disrupted)",
+          "escalation_level": "Escalation level (dispatcher or supervisor)",
+          "wait_minutes": "How long the trip has been waiting"
         },
         "userRegistrations": {
           "applicant_name": "Applicant full name",
@@ -2980,7 +2989,8 @@
         "booking": "Booking",
         "review": "Review & approval",
         "dispatch": "Dispatch & trip",
-        "reminders": "Reminders"
+        "reminders": "Reminders",
+        "escalation": "Escalation"
       },
       "user_registrations": {
         "registration": "Account lifecycle"
@@ -3011,7 +3021,9 @@
       "driver": "Driver",
       "applicant": "Applicant",
       "fleet_manager": "Fleet manager",
-      "account_holder": "Account holder"
+      "account_holder": "Account holder",
+      "dispatcher": "Dispatcher",
+      "supervisor": "Supervisor"
     },
     "modules": {
       "rideRequests": {
@@ -3080,6 +3092,14 @@
         "reminder": {
           "title": "Upcoming ride reminder",
           "description": "Sent to the customer before a confirmed trip’s scheduled time."
+        },
+        "escalated": {
+          "title": "Dispatcher escalation",
+          "description": "Sent to dispatchers when an unmatched or disrupted trip has waited past the dispatcher deadline."
+        },
+        "escalated_supervisor": {
+          "title": "Supervisor escalation",
+          "description": "Sent to administrators when the trip is still unresolved after the supervisor deadline."
         }
       },
       "user_registrations": {
@@ -3233,7 +3253,9 @@
       "driver": "Driver",
       "applicant": "Applicant",
       "fleet_manager": "Fleet manager",
-      "account_holder": "Account holder"
+      "account_holder": "Account holder",
+      "dispatcher": "Dispatcher",
+      "supervisor": "Supervisor"
     },
     "channelLabels": {
       "email": "Email",
@@ -5540,7 +5562,7 @@
   "adminDeadlineSettings": {
     "eyebrow": "System settings",
     "title": "Deadlines",
-    "description": "Set how long customers can cancel or edit requests, when ride reminders go out, and when invoices and compliance items should be flagged as due soon.",
+    "description": "Set how long customers can cancel or edit requests, when ride reminders go out, when unmatched trips escalate, and when invoices and compliance items should be flagged as due soon.",
     "loading": "Loading deadline settings...",
     "accessDenied": {
       "eyebrow": "Access denied",
@@ -5569,6 +5591,10 @@
         "title": "Ride requests",
         "description": "Grace periods after submission and how early customers are reminded of upcoming trips."
       },
+      "dispatch": {
+        "title": "Dispatch escalation",
+        "description": "How long unmatched or disrupted trips wait before notifying dispatchers, then administrators."
+      },
       "billing": {
         "title": "Invoices",
         "description": "When issued invoices should enter the due-soon window."
@@ -5596,6 +5622,18 @@
         "description": "How many hours before the scheduled time to remind the customer.",
         "helper": "Applies to confirmed rides with a scheduled time. Templates are under Notification templates → Ride requests → Reminder.",
         "label": "Reminder lead time"
+      },
+      "dispatch_escalate_dispatcher_minutes": {
+        "title": "Dispatcher escalation",
+        "description": "How long an unmatched leftover or disrupted trip waits before notifying dispatchers.",
+        "helper": "Unmatched trips escalate when pickup is this close (or overdue). Disrupted trips escalate after this many minutes unresolved. Enable templates under Notification templates → Escalation.",
+        "label": "Notify dispatchers after"
+      },
+      "dispatch_escalate_supervisor_minutes": {
+        "title": "Supervisor escalation",
+        "description": "How long the same trip waits before notifying administrators if it is still unresolved.",
+        "helper": "Must be at least as long as the dispatcher wait. Notifies the Administrator role.",
+        "label": "Notify supervisors after"
       },
       "invoice_due_soon_days": {
         "title": "Invoices",

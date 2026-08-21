@@ -15,7 +15,14 @@ import {
   rideScheduleWindowsOverlap,
 } from "../services/ride-request-scheduling.service";
 import { suggestAllocationsForTrips } from "../services/dispatch-allocation.service";
-import { listUnresolvedDisruptions } from "../services/trip-disruption.service";
+import {
+  getDisruptedEscalationLevel,
+  getUnmatchedEscalationLevel,
+} from "../services/dispatch-escalation.service";
+import {
+  getDisruptionWaitMinutes,
+  listUnresolvedDisruptions,
+} from "../services/trip-disruption.service";
 import { countVehicles } from "./vehicle.model";
 import { getComplaintSummary } from "./complaint.model";
 
@@ -65,6 +72,7 @@ function toQueueItem(
     suggested_vehicle: AdminDispatchQueueItem["suggested_vehicle"];
     can_auto_assign: boolean;
     disruption_reason?: DispatchDisruptionReason | null;
+    escalation_level?: AdminDispatchQueueItem["escalation_level"];
   },
 ): AdminDispatchQueueItem {
   const pickupName = rideRequest.pickupLocation
@@ -92,6 +100,7 @@ function toQueueItem(
           suggested_vehicle: allocation.suggested_vehicle,
           can_auto_assign: allocation.can_auto_assign,
           ...(allocation.disruption_reason ? { disruption_reason: allocation.disruption_reason } : {}),
+          ...(allocation.escalation_level ? { escalation_level: allocation.escalation_level } : {}),
         }
       : {}),
   };
@@ -125,29 +134,50 @@ async function listNeedsAssignmentQueue(locale?: string) {
   });
 
   const suggestions = await suggestAllocationsForTrips(rows);
+  const now = new Date();
 
   return [...rows]
-    .sort((left, right) => {
-      const slaLeft = suggestions.get(left.id)?.sla.rank ?? Number.MAX_SAFE_INTEGER;
-      const slaRight = suggestions.get(right.id)?.sla.rank ?? Number.MAX_SAFE_INTEGER;
-      if (slaLeft !== slaRight) {
-        return slaLeft - slaRight;
-      }
-
-      return left.createdAt.getTime() - right.createdAt.getTime();
-    })
-    .slice(0, QUEUE_LIMIT)
     .map((row) => {
       const suggestion = suggestions.get(row.id);
-      return toQueueItem(row, locale, suggestion
-        ? {
-            sla_priority: suggestion.sla.priority,
-            sla_minutes: suggestion.sla.minutesUntilPickup,
-            suggested_vehicle: suggestion.vehicle,
-            can_auto_assign: suggestion.canAutoAssign,
-          }
-        : undefined);
-    });
+      const escalationLevel = getUnmatchedEscalationLevel(row.scheduledAt, row.createdAt, now);
+      return {
+        row,
+        suggestion,
+        slaRank: suggestion?.sla.rank ?? Number.MAX_SAFE_INTEGER,
+        escalationRank: escalationLevel === "supervisor" ? 0 : escalationLevel === "dispatcher" ? 1 : 2,
+      };
+    })
+    .sort((left, right) => {
+      if (left.escalationRank !== right.escalationRank) {
+        return left.escalationRank - right.escalationRank;
+      }
+      if (left.slaRank !== right.slaRank) {
+        return left.slaRank - right.slaRank;
+      }
+      return left.row.createdAt.getTime() - right.row.createdAt.getTime();
+    })
+    .slice(0, QUEUE_LIMIT)
+    .map(({ row, suggestion }) =>
+      toQueueItem(
+        row,
+        locale,
+        suggestion
+          ? {
+              sla_priority: suggestion.sla.priority,
+              sla_minutes: suggestion.sla.minutesUntilPickup,
+              suggested_vehicle: suggestion.vehicle,
+              can_auto_assign: suggestion.canAutoAssign,
+              escalation_level: getUnmatchedEscalationLevel(row.scheduledAt, row.createdAt, now),
+            }
+          : {
+              sla_priority: "unscheduled",
+              sla_minutes: null,
+              suggested_vehicle: null,
+              can_auto_assign: false,
+              escalation_level: getUnmatchedEscalationLevel(row.scheduledAt, row.createdAt, now),
+            },
+      ),
+    );
 }
 
 async function listDisruptedQueue(locale?: string) {
@@ -162,22 +192,29 @@ async function listDisruptedQueue(locale?: string) {
   });
   const byId = new Map(rows.map((row) => [row.id, row]));
 
-  return disruptions.flatMap((disruption) => {
-    const row = byId.get(disruption.id);
-    if (!row) {
-      return [];
-    }
+  return disruptions
+    .flatMap((disruption) => {
+      const row = byId.get(disruption.id);
+      if (!row) {
+        return [];
+      }
 
-    return [
-      toQueueItem(row, locale, {
-        sla_priority: "unscheduled",
-        sla_minutes: null,
-        suggested_vehicle: disruption.suggestedVehicle,
-        can_auto_assign: Boolean(disruption.suggestedVehicle),
-        disruption_reason: disruption.reason,
-      }),
-    ];
-  });
+      return [
+        toQueueItem(row, locale, {
+          sla_priority: "unscheduled",
+          sla_minutes: null,
+          suggested_vehicle: disruption.suggestedVehicle,
+          can_auto_assign: Boolean(disruption.suggestedVehicle),
+          disruption_reason: disruption.reason,
+          escalation_level: getDisruptedEscalationLevel(getDisruptionWaitMinutes(disruption.id)),
+        }),
+      ];
+    })
+    .sort((left, right) => {
+      const rank = (level: AdminDispatchQueueItem["escalation_level"]) =>
+        level === "supervisor" ? 0 : level === "dispatcher" ? 1 : 2;
+      return rank(left.escalation_level) - rank(right.escalation_level);
+    });
 }
 
 async function getBusyVehicleIds(now: Date) {
@@ -322,6 +359,9 @@ export async function getAdminDispatchOverview(options: {
       in_progress: rideCounts[2],
       upcoming_today: rideCounts[3],
       disrupted: queues[3].length,
+      escalated:
+        queues[0].filter((item) => item.escalation_level).length +
+        queues[3].filter((item) => item.escalation_level).length,
       open_complaints: complaints?.open ?? 0,
       urgent_complaints: complaints?.urgent ?? 0,
     },

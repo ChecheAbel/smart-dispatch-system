@@ -1883,12 +1883,17 @@
     "passengerCount": "{count} ተሳፋሪዎች",
     "attentionUrgentComplaints": "{count} አስቸኳይ ቅሬታዎች ክፍት ናቸው።",
     "attentionDisrupted": "{count} ጉዞዎች ከመስተጓጎል በኋላ አዲስ መኪና ያስፈልጋቸዋል።",
+    "attentionEscalated": "{count} ጉዞዎች ከልክ በላይ ጠብቀው ተሻገሩ።",
     "attentionView": "አሁን ይመልከቱ",
     "sla": {
       "overdue": "ጊዜው አልፏል",
       "dueSoon": "በቅርቡ",
       "onTrack": "በሰዓቱ",
       "unscheduled": "የመውሰድ ጊዜ የለም"
+    },
+    "escalation": {
+      "dispatcher": "ተሻግሯል",
+      "supervisor": "ተቆጣጣሪ"
     },
     "allocation": {
       "suggested": "የቀረበ",
@@ -2840,7 +2845,11 @@
           "status": "የአሁኑ የጥያቄ ሁኔታ",
           "reference": "አጭር የጥያቄ ማጣቀሻ ኮድ",
           "cancel_deadline_minutes": "የተዋቀረ የመሰረዝ ጊዜ በደቂቃ",
-          "cancel_deadline_at": "የመሰረዝ የመጨረሻ ጊዜ"
+          "cancel_deadline_at": "የመሰረዝ የመጨረሻ ጊዜ",
+          "reminder_hours": "የተዋቀረ የማሳሰቢያ ጊዜ በሰዓት",
+          "escalation_reason": "ጉዞው ለምን እንደተሻገረ (ያልተመደበ ወይም የተስተጓጎለ)",
+          "escalation_level": "የማሻገሪያ ደረጃ (ዲስፓቸር ወይም ተቆጣጣሪ)",
+          "wait_minutes": "ጉዞው ለምን ያህል ደቂቃ እንደጠበቀ"
         },
         "userRegistrations": {
           "applicant_name": "የአመልካች ሙሉ ስም",
@@ -2980,7 +2989,8 @@
         "booking": "ቦታ ማስያዝ",
         "review": "ግምገማ እና ማረጋገጫ",
         "dispatch": "መላኪያ እና ጉዞ",
-        "reminders": "ማሳሰቢያዎች"
+        "reminders": "ማሳሰቢያዎች",
+        "escalation": "ማሻገሪያ"
       },
       "user_registrations": {
         "registration": "የመለያ ዑደት"
@@ -3011,7 +3021,9 @@
       "driver": "አሽከርካሪ",
       "applicant": "አመልካች",
       "fleet_manager": "የመኪና ቡድን አስተዳዳሪ",
-      "account_holder": "የመለያ ባለቤት"
+      "account_holder": "የመለያ ባለቤት",
+      "dispatcher": "ዲስፓቸር",
+      "supervisor": "ተቆጣጣሪ"
     },
     "modules": {
       "rideRequests": {
@@ -3080,6 +3092,14 @@
         "reminder": {
           "title": "የሚመጣ ጉዞ ማሳሰቢያ",
           "description": "ለተረጋገጠ ጉዞ ከተያዘው ጊዜ በፊት ለደንበኛው ይላካል።"
+        },
+        "escalated": {
+          "title": "የዲስፓቸር ማሻገሪያ",
+          "description": "ያልተመደበ ወይም የተስተጓጎለ ጉዞ ከዲስፓቸር ጊዜ በላይ ሲጠብቅ ለዲስፓቸሮች ይላካል።"
+        },
+        "escalated_supervisor": {
+          "title": "የተቆጣጣሪ ማሻገሪያ",
+          "description": "ጉዞው ከተቆጣጣሪ ጊዜ በኋላም ካልተፈታ ለአስተዳዳሪዎች ይላካል።"
         }
       },
       "user_registrations": {
@@ -3233,7 +3253,9 @@
       "driver": "አሽከርካሪ",
       "applicant": "አመልካች",
       "fleet_manager": "የመኪና ቡድን አስተዳዳሪ",
-      "account_holder": "የመለያ ባለቤት"
+      "account_holder": "የመለያ ባለቤት",
+      "dispatcher": "ዲስፓቸር",
+      "supervisor": "ተቆጣጣሪ"
     },
     "channelLabels": {
       "email": "ኢሜይል",
@@ -5540,7 +5562,7 @@
   "adminDeadlineSettings": {
     "eyebrow": "የስርዓት ቅንብሮች",
     "title": "የጊዜ ገደቦች",
-    "description": "ደንበኞች ጥያቄዎችን ለምን ያህል ጊዜ መሰረዝ ወይም ማስተካከል እንደሚችሉ፣ የጉዞ ማሳሰቢያ መቼ እንደሚላክ፣ እንዲሁም ክፍያ መጠየቂያዎች እና ተገዢነት መቼ እንደሚጠቁሙ ያዘጋጁ።",
+    "description": "ደንበኞች ጥያቄዎችን ለምን ያህል ጊዜ መሰረዝ ወይም ማስተካከል እንደሚችሉ፣ የጉዞ ማሳሰቢያ መቼ እንደሚላክ፣ ያልተመደቡ ጉዞዎች መቼ እንደሚሻገሩ፣ እንዲሁም ክፍያ መጠየቂያዎች እና ተገዢነት መቼ እንደሚጠቁሙ ያዘጋጁ።",
     "loading": "የጊዜ ገደብ ቅንብሮችን በመጫን ላይ...",
     "accessDenied": {
       "eyebrow": "መዳረሻ ተከልክሏል",
@@ -5569,6 +5591,10 @@
         "title": "የጉዞ ጥያቄዎች",
         "description": "ከማስገባት በኋላ ያለ ጊዜ ገደብ እና ለሚመጡ ጉዞዎች ማሳሰቢያ መቼ እንደሚላክ።"
       },
+      "dispatch": {
+        "title": "የመላኪያ ማሻገሪያ",
+        "description": "ያልተመደቡ ወይም የተስተጓጎሉ ጉዞዎች ለዲስፓቸሮች ከዚያም ለአስተዳዳሪዎች ከማሳወቅ በፊት ምን ያህል እንደሚጠብቁ።"
+      },
       "billing": {
         "title": "የክፍያ መጠየቂያዎች",
         "description": "የተሰጡ ክፍያ መጠየቂያዎች መቼ ወደ ቅርብ ጊዜ መስኮት እንደሚገቡ።"
@@ -5596,6 +5622,18 @@
         "description": "ከተያዘው ጊዜ ስንት ሰዓት በፊት ለደንበኛው ማሳሰቢያ እንደሚላክ።",
         "helper": "ለተረጋገጡ እና የተያዘ ጊዜ ላላቸው ጉዞዎች ይተገበራል። አብነቶች በማሳወቂያ አብነቶች → የጉዞ ጥያቄዎች → ማሳሰቢያ ስር ናቸው።",
         "label": "የማሳሰቢያ ጊዜ"
+      },
+      "dispatch_escalate_dispatcher_minutes": {
+        "title": "የዲስፓቸር ማሻገሪያ",
+        "description": "ያልተመደበ ወይም የተስተጓጎለ ጉዞ ለዲስፓቸሮች ከማሳወቅ በፊት ምን ያህል እንደሚጠብቅ።",
+        "helper": "ያልተመደቡ ጉዞዎች መውሰድ ይህን ያህል ሲቀርብ (ወይም ሲያልፍ) ይሻገራሉ። የተስተጓጎሉ ጉዞዎች ይህን ያህል ደቂቃ ካልተፈቱ በኋላ ይሻገራሉ። አብነቶችን በማሳወቂያ አብነቶች → ማሻገሪያ ስር ያንቁ።",
+        "label": "ዲስፓቸሮችን አሳውቅ ከ"
+      },
+      "dispatch_escalate_supervisor_minutes": {
+        "title": "የተቆጣጣሪ ማሻገሪያ",
+        "description": "ጉዞው ካልተፈታ ለአስተዳዳሪዎች ከማሳወቅ በፊት ምን ያህል እንደሚጠብቅ።",
+        "helper": "ቢያንስ እንደ የዲስፓቸር ጊዜ መሆን አለበት። የአስተዳዳሪ ሚናን ያሳውቃል።",
+        "label": "ተቆጣጣሪዎችን አሳውቅ ከ"
       },
       "invoice_due_soon_days": {
         "title": "የክፍያ መጠየቂያዎች",

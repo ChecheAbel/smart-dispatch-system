@@ -16,6 +16,8 @@ export const MODULE_EVENTS: Record<Exclude<NotificationModule, "system">, string
     "completed",
     "cancelled",
     "reminder",
+    "escalated",
+    "escalated_supervisor",
   ],
   geofencing: ["violation"],
   user_registrations: ["submitted", "approved", "rejected"],
@@ -36,6 +38,7 @@ export const EVENT_GROUPS: Record<
     { id: "review", events: ["confirmed", "rejected"] },
     { id: "dispatch", events: ["assigned", "rerouted", "started", "completed"] },
     { id: "reminders", events: ["reminder"] },
+    { id: "escalation", events: ["escalated", "escalated_supervisor"] },
   ],
   geofencing: [{ id: "alerts", events: ["violation"] }],
   user_registrations: [{ id: "registration", events: ["submitted", "approved", "rejected"] }],
@@ -70,6 +73,14 @@ export function shouldShowTemplate(
 
   if (module === "geofencing") {
     return recipient === "driver";
+  }
+
+  if (event === "escalated") {
+    return recipient === "dispatcher";
+  }
+
+  if (event === "escalated_supervisor") {
+    return recipient === "supervisor";
   }
 
   if (recipient === "driver") {

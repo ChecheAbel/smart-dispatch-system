@@ -245,6 +245,36 @@ const RIDE_REQUEST_RULES: NotificationTemplateSeed[] = [
     recipient: "requester",
     body: "Smart Dispatch reminder: your ride from {pickup} to {dropoff} is at {scheduled_at}.",
   },
+  {
+    module: "ride_requests",
+    event: "escalated",
+    channel: "email",
+    recipient: "dispatcher",
+    subject: "Dispatch escalation: {requester_name}",
+    body: "Hello dispatcher, trip {reference} for {requester_name} from {pickup} to {dropoff} still needs a vehicle. Reason: {escalation_reason}. Waiting {wait_minutes} minutes. Scheduled: {scheduled_at}.",
+  },
+  {
+    module: "ride_requests",
+    event: "escalated",
+    channel: "sms",
+    recipient: "dispatcher",
+    body: "Smart Dispatch: unmatched trip {reference} for {requester_name} ({pickup} → {dropoff}) needs a vehicle. Waited {wait_minutes} min.",
+  },
+  {
+    module: "ride_requests",
+    event: "escalated_supervisor",
+    channel: "email",
+    recipient: "supervisor",
+    subject: "Supervisor escalation: {requester_name}",
+    body: "Hello, trip {reference} for {requester_name} from {pickup} to {dropoff} is still unresolved after dispatcher escalation. Reason: {escalation_reason}. Waiting {wait_minutes} minutes. Scheduled: {scheduled_at}.",
+  },
+  {
+    module: "ride_requests",
+    event: "escalated_supervisor",
+    channel: "sms",
+    recipient: "supervisor",
+    body: "Smart Dispatch supervisor: trip {reference} for {requester_name} is still unresolved ({escalation_reason}, {wait_minutes} min).",
+  },
 ];
 
 const COMPLIANCE_EVENT_RULES = (

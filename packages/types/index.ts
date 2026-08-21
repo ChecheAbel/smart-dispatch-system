@@ -198,7 +198,9 @@ export type RideRequestNotificationEvent =
   | "started"
   | "completed"
   | "cancelled"
-  | "reminder";
+  | "reminder"
+  | "escalated"
+  | "escalated_supervisor";
 
 export type UserRegistrationNotificationEvent = "submitted" | "approved" | "rejected";
 
@@ -215,7 +217,9 @@ export type NotificationTemplateRecipient =
   | "driver"
   | "applicant"
   | "fleet_manager"
-  | "account_holder";
+  | "account_holder"
+  | "dispatcher"
+  | "supervisor";
 
 export interface NotificationTemplate {
   id: string;
@@ -244,6 +248,9 @@ export const RIDE_REQUEST_NOTIFICATION_PLACEHOLDERS = [
   "cancel_deadline_minutes",
   "cancel_deadline_at",
   "reminder_hours",
+  "escalation_reason",
+  "escalation_level",
+  "wait_minutes",
 ] as const;
 
 export const USER_REGISTRATION_NOTIFICATION_PLACEHOLDERS = [
@@ -920,6 +927,8 @@ export type DispatchDisruptionReason =
   | "geofence_violation"
   | "stale_location";
 
+export type DispatchEscalationLevel = "dispatcher" | "supervisor";
+
 export type AdminDispatchSuggestedVehicle = {
   id: string;
   plate_number: string;
@@ -943,6 +952,7 @@ export type AdminDispatchQueueItem = {
   suggested_vehicle?: AdminDispatchSuggestedVehicle | null;
   can_auto_assign?: boolean;
   disruption_reason?: DispatchDisruptionReason | null;
+  escalation_level?: DispatchEscalationLevel | null;
 };
 
 export type AdminDispatchAutoAssignResult = {
@@ -979,6 +989,7 @@ export type AdminDispatchOverview = {
     in_progress: number;
     upcoming_today: number;
     disrupted: number;
+    escalated: number;
     open_complaints: number;
     urgent_complaints: number;
   };

@@ -7,6 +7,10 @@ import { requirePermission } from "../middleware/require-permission";
 import { userHasPermission } from "../models/permission.model";
 import { getAdminDispatchBoard, getAdminDispatchOverview } from "../models/dispatch-overview.model";
 import { applyDispatchAutoAssignments } from "../services/dispatch-allocation.service";
+import {
+  isDispatchEscalationEnabled,
+  runDispatchEscalationJob,
+} from "../services/dispatch-escalation.service";
 import { runRideRequestExpiryJob } from "../services/ride-request-expiry.service";
 import {
   isTripDisruptionRerouteEnabled,
@@ -54,6 +58,9 @@ router.get("/overview", async (req: AuthenticatedRequest, res: Response) => {
       await applyDispatchAutoAssignments({ actorUserId: userId, req });
       if (isTripDisruptionRerouteEnabled()) {
         await rerouteDisruptedTrips({ actorUserId: userId });
+      }
+      if (isDispatchEscalationEnabled()) {
+        await runDispatchEscalationJob();
       }
     }
 

@@ -224,7 +224,7 @@ export const extensionSchemas = {
       channel: { type: "string", enum: ["email", "sms", "push"] },
       recipient: {
         type: "string",
-        enum: ["requester", "driver", "applicant", "fleet_manager"],
+        enum: ["requester", "driver", "applicant", "fleet_manager", "account_holder", "dispatcher", "supervisor"],
       },
       is_enabled: { type: "boolean" },
       subject: {
@@ -258,7 +258,7 @@ export const extensionSchemas = {
       channel: { type: "string", enum: ["email", "sms", "push"] },
       recipient: {
         type: "string",
-        enum: ["requester", "driver", "applicant", "fleet_manager"],
+        enum: ["requester", "driver", "applicant", "fleet_manager", "account_holder", "dispatcher", "supervisor"],
       },
       template_id: { type: "string", format: "uuid", nullable: true },
       entity_type: { type: "string", nullable: true, example: "ride_request" },
@@ -1038,6 +1038,11 @@ export const extensionSchemas = {
         nullable: true,
         enum: ["vehicle_unavailable", "driver_unavailable", "geofence_violation", "stale_location"],
       },
+      escalation_level: {
+        type: "string",
+        nullable: true,
+        enum: ["dispatcher", "supervisor"],
+      },
     },
   },
   AdminDispatchAutoAssignResult: {
@@ -1085,6 +1090,7 @@ export const extensionSchemas = {
           in_progress: { type: "integer" },
           upcoming_today: { type: "integer" },
           disrupted: { type: "integer" },
+          escalated: { type: "integer" },
           open_complaints: { type: "integer" },
           urgent_complaints: { type: "integer" },
         },
@@ -3976,6 +3982,8 @@ export const extensionPaths = {
                       ride_request_cancel_grace_minutes: { type: "integer" },
                       ride_request_edit_grace_minutes: { type: "integer" },
                       ride_request_reminder_hours: { type: "integer" },
+                      dispatch_escalate_dispatcher_minutes: { type: "integer" },
+                      dispatch_escalate_supervisor_minutes: { type: "integer" },
                       invoice_due_soon_days: { type: "integer" },
                       insurance_due_soon_days: { type: "integer" },
                       inspection_due_soon_days: { type: "integer" },
@@ -4018,6 +4026,16 @@ export const extensionPaths = {
                   minimum: 1,
                   maximum: 168,
                 },
+                dispatch_escalate_dispatcher_minutes: {
+                  type: "integer",
+                  minimum: 1,
+                  maximum: 1440,
+                },
+                dispatch_escalate_supervisor_minutes: {
+                  type: "integer",
+                  minimum: 1,
+                  maximum: 1440,
+                },
                 invoice_due_soon_days: {
                   type: "integer",
                   minimum: 1,
@@ -4053,6 +4071,8 @@ export const extensionPaths = {
                       ride_request_cancel_grace_minutes: { type: "integer" },
                       ride_request_edit_grace_minutes: { type: "integer" },
                       ride_request_reminder_hours: { type: "integer" },
+                      dispatch_escalate_dispatcher_minutes: { type: "integer" },
+                      dispatch_escalate_supervisor_minutes: { type: "integer" },
                       invoice_due_soon_days: { type: "integer" },
                       insurance_due_soon_days: { type: "integer" },
                       inspection_due_soon_days: { type: "integer" },

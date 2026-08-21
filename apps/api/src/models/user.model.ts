@@ -252,6 +252,23 @@ export async function listUsersByIds(ids: string[]) {
   });
 }
 
+export async function listActiveUsersByRoleSlug(roleSlug: string, take = 200) {
+  return prisma.user.findMany({
+    where: {
+      accountStatus: "active",
+      accountActivation: "activated",
+      authRoles: {
+        some: {
+          role: { slug: roleSlug.trim().toLowerCase() },
+        },
+      },
+    },
+    select: { id: true, email: true, mobileNumber: true },
+    orderBy: { createdAt: "asc" },
+    take,
+  });
+}
+
 export async function deleteUser(userId: string) {
   return prisma.user.delete({ where: { id: userId } });
 }

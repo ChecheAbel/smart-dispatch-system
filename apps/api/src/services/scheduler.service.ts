@@ -16,6 +16,11 @@ import {
   rerouteDisruptedTrips,
 } from "./trip-disruption.service";
 import {
+  formatDispatchEscalationSummary,
+  isDispatchEscalationEnabled,
+  runDispatchEscalationJob,
+} from "./dispatch-escalation.service";
+import {
   formatRideRequestReminderSummary,
   getRideRequestReminderIntervalMs,
   getRideRequestReminderStartupDelayMs,
@@ -30,6 +35,7 @@ let rideRequestReminderTimer: NodeJS.Timeout | null = null;
 let rideRequestReminderRunning = false;
 let rideRequestExpiryRunning = false;
 let tripDisruptionRunning = false;
+let dispatchEscalationRunning = false;
 
 async function executeInvoiceAutomation(trigger: "startup" | "interval") {
   if (invoiceAutomationRunning) {
@@ -145,6 +151,37 @@ async function executeRideRequestReminder(trigger: "startup" | "interval") {
   }
 }
 
+async function executeDispatchEscalation(trigger: "startup" | "interval") {
+  if (!isDispatchEscalationEnabled()) {
+    return;
+  }
+
+  if (dispatchEscalationRunning) {
+    console.log(
+      `[Scheduler] Skipping dispatch escalation (${trigger}): previous run still in progress.`,
+    );
+    return;
+  }
+
+  dispatchEscalationRunning = true;
+
+  try {
+    const result = await runDispatchEscalationJob();
+    console.log(formatDispatchEscalationSummary(result));
+
+    if (result.errors.length > 0) {
+      for (const error of result.errors) {
+        console.error(`[DispatchEscalation] ${error}`);
+      }
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown scheduler error.";
+    console.error(`[Scheduler] Dispatch escalation failed (${trigger}): ${message}`);
+  } finally {
+    dispatchEscalationRunning = false;
+  }
+}
+
 async function executeRideRequestJobs(trigger: "startup" | "interval") {
   if (isRideRequestReminderEnabled()) {
     await executeRideRequestReminder(trigger);
@@ -152,6 +189,7 @@ async function executeRideRequestJobs(trigger: "startup" | "interval") {
 
   await executeRideRequestExpiry(trigger);
   await executeTripDisruption(trigger);
+  await executeDispatchEscalation(trigger);
 }
 
 export function startInvoiceAutomationScheduler() {
@@ -193,10 +231,11 @@ export function startRideRequestReminderScheduler() {
   const reminderEnabled = isRideRequestReminderEnabled();
   const expiryEnabled = isRideRequestExpiryEnabled();
   const disruptionEnabled = isTripDisruptionRerouteEnabled();
+  const escalationEnabled = isDispatchEscalationEnabled();
 
-  if (!reminderEnabled && !expiryEnabled && !disruptionEnabled) {
+  if (!reminderEnabled && !expiryEnabled && !disruptionEnabled && !escalationEnabled) {
     console.log(
-      "[Scheduler] Ride request jobs disabled (reminder, expiry, and disruption reroute are off).",
+      "[Scheduler] Ride request jobs disabled (reminder, expiry, disruption reroute, and escalation are off).",
     );
     return;
   }
@@ -205,7 +244,7 @@ export function startRideRequestReminderScheduler() {
   const startupDelayMs = getRideRequestReminderStartupDelayMs();
 
   console.log(
-    `[Scheduler] Ride request jobs enabled (reminder=${reminderEnabled}, expiry=${expiryEnabled}, disruption=${disruptionEnabled}). First run in ${startupDelayMs}ms, then every ${intervalMs}ms.`,
+    `[Scheduler] Ride request jobs enabled (reminder=${reminderEnabled}, expiry=${expiryEnabled}, disruption=${disruptionEnabled}, escalation=${escalationEnabled}). First run in ${startupDelayMs}ms, then every ${intervalMs}ms.`,
   );
 
   setTimeout(() => {

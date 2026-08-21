@@ -241,6 +241,8 @@ enum NotificationTemplateRecipient {
   applicant
   fleet_manager
   account_holder
+  dispatcher
+  supervisor
 
   @@map("notification_template_recipient")
 }

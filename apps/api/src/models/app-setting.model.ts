@@ -5,6 +5,8 @@ export const APP_SETTING_KEYS = {
   rideRequestCancelGraceMinutes: "ride_request_cancel_grace_minutes",
   rideRequestEditGraceMinutes: "ride_request_edit_grace_minutes",
   rideRequestReminderHours: "ride_request_reminder_hours",
+  dispatchEscalateDispatcherMinutes: "dispatch_escalate_dispatcher_minutes",
+  dispatchEscalateSupervisorMinutes: "dispatch_escalate_supervisor_minutes",
   invoiceDueSoonDays: "invoice_due_soon_days",
   insuranceDueSoonDays: "insurance_due_soon_days",
   inspectionDueSoonDays: "inspection_due_soon_days",
@@ -15,6 +17,8 @@ type DeadlineSettingKey =
   | typeof APP_SETTING_KEYS.rideRequestCancelGraceMinutes
   | typeof APP_SETTING_KEYS.rideRequestEditGraceMinutes
   | typeof APP_SETTING_KEYS.rideRequestReminderHours
+  | typeof APP_SETTING_KEYS.dispatchEscalateDispatcherMinutes
+  | typeof APP_SETTING_KEYS.dispatchEscalateSupervisorMinutes
   | typeof APP_SETTING_KEYS.invoiceDueSoonDays
   | typeof APP_SETTING_KEYS.insuranceDueSoonDays
   | typeof APP_SETTING_KEYS.inspectionDueSoonDays;
@@ -23,6 +27,8 @@ export type DeadlineSettings = {
   ride_request_cancel_grace_minutes: number;
   ride_request_edit_grace_minutes: number;
   ride_request_reminder_hours: number;
+  dispatch_escalate_dispatcher_minutes: number;
+  dispatch_escalate_supervisor_minutes: number;
   invoice_due_soon_days: number;
   insurance_due_soon_days: number;
   inspection_due_soon_days: number;
@@ -43,6 +49,8 @@ const DEFAULT_DEADLINE_SETTINGS: DeadlineSettings = {
   ride_request_cancel_grace_minutes: 15,
   ride_request_edit_grace_minutes: 15,
   ride_request_reminder_hours: 2,
+  dispatch_escalate_dispatcher_minutes: 15,
+  dispatch_escalate_supervisor_minutes: 30,
   invoice_due_soon_days: 3,
   insurance_due_soon_days: 30,
   inspection_due_soon_days: 30,
@@ -187,6 +195,8 @@ export async function loadAppSettings() {
     rideRequestCancelGraceMinutes,
     rideRequestEditGraceMinutes,
     rideRequestReminderHours,
+    dispatchEscalateDispatcherMinutes,
+    dispatchEscalateSupervisorMinutes,
     invoiceDueSoonDays,
     insuranceDueSoonDays,
     inspectionDueSoonDays,
@@ -203,6 +213,14 @@ export async function loadAppSettings() {
     readSetting(
       APP_SETTING_KEYS.rideRequestReminderHours,
       DEFAULT_DEADLINE_SETTINGS.ride_request_reminder_hours,
+    ),
+    readSetting(
+      APP_SETTING_KEYS.dispatchEscalateDispatcherMinutes,
+      DEFAULT_DEADLINE_SETTINGS.dispatch_escalate_dispatcher_minutes,
+    ),
+    readSetting(
+      APP_SETTING_KEYS.dispatchEscalateSupervisorMinutes,
+      DEFAULT_DEADLINE_SETTINGS.dispatch_escalate_supervisor_minutes,
     ),
     readSetting(
       APP_SETTING_KEYS.invoiceDueSoonDays,
@@ -223,6 +241,11 @@ export async function loadAppSettings() {
     ride_request_cancel_grace_minutes: rideRequestCancelGraceMinutes,
     ride_request_edit_grace_minutes: rideRequestEditGraceMinutes,
     ride_request_reminder_hours: rideRequestReminderHours,
+    dispatch_escalate_dispatcher_minutes: dispatchEscalateDispatcherMinutes,
+    dispatch_escalate_supervisor_minutes: Math.max(
+      dispatchEscalateSupervisorMinutes,
+      dispatchEscalateDispatcherMinutes,
+    ),
     invoice_due_soon_days: invoiceDueSoonDays,
     insurance_due_soon_days: insuranceDueSoonDays,
     inspection_due_soon_days: inspectionDueSoonDays,
@@ -239,6 +262,12 @@ export async function loadAppSettings() {
     }),
     upsertSetting(APP_SETTING_KEYS.rideRequestReminderHours, {
       hours: rideRequestReminderHours,
+    }),
+    upsertSetting(APP_SETTING_KEYS.dispatchEscalateDispatcherMinutes, {
+      minutes: cachedSettings.dispatch_escalate_dispatcher_minutes,
+    }),
+    upsertSetting(APP_SETTING_KEYS.dispatchEscalateSupervisorMinutes, {
+      minutes: cachedSettings.dispatch_escalate_supervisor_minutes,
     }),
     upsertSetting(APP_SETTING_KEYS.invoiceDueSoonDays, {
       days: invoiceDueSoonDays,
@@ -266,6 +295,12 @@ export async function updateDeadlineSettings(input: DeadlineSettings) {
     }),
     upsertSetting(APP_SETTING_KEYS.rideRequestReminderHours, {
       hours: input.ride_request_reminder_hours,
+    }),
+    upsertSetting(APP_SETTING_KEYS.dispatchEscalateDispatcherMinutes, {
+      minutes: input.dispatch_escalate_dispatcher_minutes,
+    }),
+    upsertSetting(APP_SETTING_KEYS.dispatchEscalateSupervisorMinutes, {
+      minutes: input.dispatch_escalate_supervisor_minutes,
     }),
     upsertSetting(APP_SETTING_KEYS.invoiceDueSoonDays, {
       days: input.invoice_due_soon_days,
