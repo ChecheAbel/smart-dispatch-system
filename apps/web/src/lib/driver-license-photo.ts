@@ -1,9 +1,14 @@
 export const DRIVER_LICENSE_PHOTO_MAX_SIZE_BYTES = 5 * 1024 * 1024;
 export const DRIVER_LICENSE_PHOTO_ACCEPT = "image/jpeg,image/png,image/webp";
 
-export function validateDriverLicensePhoto(file: File | null): string | undefined {
+export function validateDriverLicensePhoto(
+  file: File | null,
+  options?: { required?: boolean; requiredMessage?: string },
+): string | undefined {
+  const required = options?.required ?? true;
+
   if (!file) {
-    return "Driver license photo is required.";
+    return required ? (options?.requiredMessage ?? "Driver license photo is required.") : undefined;
   }
 
   if (!DRIVER_LICENSE_PHOTO_ACCEPT.split(",").includes(file.type)) {

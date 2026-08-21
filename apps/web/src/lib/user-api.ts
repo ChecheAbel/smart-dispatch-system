@@ -1,4 +1,4 @@
-import type { AccountActivation, AccountStatus, Role, User } from "@smart-dispatch/types";
+import type { AccountActivation, AccountStatus, Role, RoleSlug, User } from "@smart-dispatch/types";
 import { apiClient } from "./api-client";
 import { unwrapApiResponse, unwrapPaginatedApiResponse } from "./api-response";
 
@@ -8,7 +8,9 @@ export type FetchUsersParams = {
   search?: string;
   account_status?: AccountStatus;
   account_activation?: AccountActivation;
+  role_slug?: RoleSlug;
   has_requester_profile?: boolean;
+  has_assigned_vehicle?: boolean;
 };
 
 export type CreateUserInput = {
@@ -58,7 +60,10 @@ export async function deleteUser(id: string) {
 }
 
 export async function fetchUserCount(
-  params: Pick<FetchUsersParams, "account_status" | "account_activation" | "has_requester_profile"> = {},
+  params: Pick<
+    FetchUsersParams,
+    "account_status" | "account_activation" | "has_requester_profile" | "role_slug" | "has_assigned_vehicle"
+  > = {},
 ) {
   const result = await fetchUsers({ page: 1, limit: 1, ...params });
   return result.pagination.total;
@@ -95,4 +100,25 @@ export async function setUserRoles(userId: string, roleIds: string[], locale?: s
     params: locale ? { locale } : undefined,
   });
   return unwrapApiResponse<{ roles: Role[] }>(data).roles;
+}
+
+export async function upsertUserDriverProfile(
+  userId: string,
+  input: {
+    driver_license_number: string;
+    driver_license_photo_front?: File | null;
+    driver_license_photo_back?: File | null;
+  },
+) {
+  const formData = new FormData();
+  formData.append("driver_license_number", input.driver_license_number);
+  if (input.driver_license_photo_front) {
+    formData.append("driver_license_photo_front", input.driver_license_photo_front);
+  }
+  if (input.driver_license_photo_back) {
+    formData.append("driver_license_photo_back", input.driver_license_photo_back);
+  }
+
+  const { data } = await apiClient.put(`/api/users/${userId}/driver-profile`, formData);
+  return unwrapApiResponse<{ user: User }>(data).user;
 }

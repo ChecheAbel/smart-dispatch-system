@@ -29,6 +29,7 @@ import { registerCustomerBillingRoutes } from "./routes/customer-billing.routes"
 import { registerRideRequestRoutes } from "./routes/ride-request.routes";
 import { registerAdminRideRequestRoutes } from "./routes/admin-ride-request.routes";
 import { registerDispatchOverviewRoutes } from "./routes/dispatch-overview.routes";
+import { registerDriverAttendanceRoutes } from "./routes/driver-attendance.routes";
 import { registerAdminDashboardRoutes } from "./routes/dashboard.routes";
 import { registerComplaintRoutes } from "./routes/complaint.routes";
 import { registerDeviceTokenRoutes } from "./routes/device-token.routes";
@@ -82,6 +83,7 @@ registerCustomerBillingRoutes(app);
 registerRideRequestRoutes(app);
 registerAdminRideRequestRoutes(app);
 registerDispatchOverviewRoutes(app);
+registerDriverAttendanceRoutes(app);
 registerSystemSettingsRoutes(app);
 registerAdminDashboardRoutes(app);
 registerComplaintRoutes(app);

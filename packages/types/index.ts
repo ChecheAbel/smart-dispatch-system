@@ -30,6 +30,55 @@ export interface Role {
 export interface DriverProfile {
   license_number: string;
   license_photo_url: string | null;
+  license_photo_back_url: string | null;
+  created_at: string;
+}
+
+/** Vehicle currently assigned as a driver's default unit. */
+export interface AssignedVehicleSummary {
+  id: string;
+  plate_number: string;
+  make: string | null;
+  model: string | null;
+}
+
+export type DriverAttendanceStatus = "present" | "absent" | "late" | "on_leave" | "off_duty";
+
+export interface DriverAttendancePerson {
+  id: string;
+  name: string;
+  email: string;
+  mobile_number: string;
+  assigned_vehicle: AssignedVehicleSummary | null;
+}
+
+export interface DriverAttendance {
+  id: string;
+  driver_user_id: string;
+  work_date: string;
+  status: DriverAttendanceStatus;
+  check_in_at: string | null;
+  check_out_at: string | null;
+  notes: string | null;
+  recorded_by: { id: string; name: string } | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DriverAttendanceRosterItem {
+  driver: DriverAttendancePerson;
+  attendance: DriverAttendance | null;
+}
+
+export interface DriverAttendanceSummary {
+  work_date: string;
+  total_drivers: number;
+  present: number;
+  absent: number;
+  late: number;
+  on_leave: number;
+  off_duty: number;
+  unmarked: number;
 }
 
 export type RequesterSegment = "individual" | "business" | "government";
@@ -58,6 +107,7 @@ export interface User {
   last_name: string;
   mobile_number: string;
   driver: DriverProfile | null;
+  assigned_vehicle: AssignedVehicleSummary | null;
   requester_profile: RequesterProfile | null;
   account_status: AccountStatus;
   account_activation: AccountActivation;

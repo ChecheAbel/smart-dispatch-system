@@ -5,16 +5,19 @@ import {
   Ban,
   CheckCircle2,
   Clock3,
+  IdCard,
+  ImagePlus,
   KeyRound,
   Mail,
   PauseCircle,
   Shield,
   UserRound,
+  X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { AccountActivation, AccountStatus, Role, User } from "@smart-dispatch/types";
 import { fetchRoles } from "@/lib/role-api";
-import { createUser, fetchUserById, fetchUserRoles, setUserRoles, updateUser } from "@/lib/user-api";
+import { createUser, fetchUserById, fetchUserRoles, setUserRoles, updateUser, upsertUserDriverProfile } from "@/lib/user-api";
 import {
   ETHIOPIA_MOBILE_COUNTRY_CODE,
   formatEthiopianMobileNumber,
@@ -54,6 +57,12 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { isValidDriverLicenseNumber, normalizeDriverLicenseNumber } from "@/lib/driver-license";
+import {
+  DRIVER_LICENSE_PHOTO_ACCEPT,
+  getDriverLicensePhotoUrl,
+  validateDriverLicensePhoto,
+} from "@/lib/driver-license-photo";
 import { UserRequesterProfileSection } from "./user-requester-profile-section";
 
 type UserFormSheetMode = "create" | "edit";
@@ -77,7 +86,9 @@ type UserFormState = {
   accountActivation: AccountActivation;
 };
 
-type FieldErrors = Partial<Record<keyof UserFormState, string>>;
+type FieldErrors = Partial<
+  Record<keyof UserFormState | "licenseNumber" | "licenseFront" | "licenseBack", string>
+>;
 
 const emptyForm: UserFormState = {
   email: "",
@@ -112,81 +123,11 @@ const ACCOUNT_STATUS_OPTIONS: {
   value: AccountStatus;
   icon: LucideIcon;
   iconClassName: string;
-  selectedClassName: string;
 }[] = [
-  {
-    value: "active",
-    icon: CheckCircle2,
-    iconClassName: "text-emerald-700",
-    selectedClassName: "border-emerald-300 bg-emerald-50/70 ring-2 ring-emerald-200",
-  },
-  {
-    value: "suspended",
-    icon: PauseCircle,
-    iconClassName: "text-amber-700",
-    selectedClassName: "border-amber-300 bg-amber-50/70 ring-2 ring-amber-200",
-  },
-  {
-    value: "deactivated",
-    icon: Ban,
-    iconClassName: "text-slate-600",
-    selectedClassName: "border-slate-300 bg-slate-50 ring-2 ring-slate-200",
-  },
+  { value: "active", icon: CheckCircle2, iconClassName: "text-emerald-700" },
+  { value: "suspended", icon: PauseCircle, iconClassName: "text-amber-700" },
+  { value: "deactivated", icon: Ban, iconClassName: "text-slate-600" },
 ];
-
-type AccessStatusOptionProps = {
-  icon: LucideIcon;
-  iconClassName: string;
-  title: string;
-  description: string;
-  selected: boolean;
-  selectedClassName: string;
-  onSelect: () => void;
-  disabled?: boolean;
-};
-
-function AccessStatusOption({
-  icon: Icon,
-  iconClassName,
-  title,
-  description,
-  selected,
-  selectedClassName,
-  onSelect,
-  disabled = false,
-}: AccessStatusOptionProps) {
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      disabled={disabled}
-      aria-pressed={selected}
-      className={cn(
-        "w-full rounded-lg border border-slate-200 bg-white p-4 text-left transition-colors",
-        "hover:border-slate-300 hover:bg-slate-50/80",
-        "disabled:cursor-not-allowed disabled:opacity-60",
-        selected && selectedClassName,
-      )}
-    >
-      <div className="flex items-start gap-3">
-        <div className={cn(adminIconBoxClass, selected && "bg-white")}>
-          <Icon className={cn("size-4", iconClassName)} />
-        </div>
-        <div className="min-w-0 flex-1 space-y-1">
-          <p className={cn("text-sm font-semibold", adminHeadingClass)}>{title}</p>
-          <p className="text-xs leading-relaxed text-slate-500">{description}</p>
-        </div>
-        <div
-          className={cn(
-            "mt-1 size-4 shrink-0 rounded-full border-2",
-            selected ? "border-[#1C3A34] bg-[#1C3A34] shadow-[inset_0_0_0_2px_white]" : "border-slate-300",
-          )}
-          aria-hidden
-        />
-      </div>
-    </button>
-  );
-}
 
 function SectionHeader({
   icon: Icon,
@@ -214,6 +155,104 @@ function RolesSkeleton() {
   return <Skeleton className="h-10 w-full rounded-lg" />;
 }
 
+function LicensePhotoField({
+  id,
+  label,
+  hint,
+  previewUrl,
+  fileName,
+  error,
+  disabled,
+  replaceLabel,
+  canRemove = true,
+  onChange,
+}: {
+  id: string;
+  label: string;
+  hint: string;
+  previewUrl: string | null;
+  fileName?: string | null;
+  error?: string;
+  disabled?: boolean;
+  replaceLabel: string;
+  canRemove?: boolean;
+  onChange: (file: File | null) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id} className={error ? "text-red-700" : undefined}>
+        {label}
+      </Label>
+      <div
+        className={cn(
+          "rounded-xl border border-dashed border-slate-300 bg-slate-50/80 p-4",
+          error && "border-red-300 bg-red-50/60",
+        )}
+      >
+        {previewUrl ? (
+          <div className="space-y-3">
+            <div className="relative overflow-hidden rounded-lg border border-slate-200 bg-white">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={previewUrl} alt={label} className="max-h-48 w-full object-contain" />
+              {canRemove ? (
+                <button
+                  type="button"
+                  onClick={() => onChange(null)}
+                  disabled={disabled}
+                  className="absolute right-2 top-2 inline-flex size-8 items-center justify-center rounded-full bg-white/95 text-slate-600 shadow-sm transition-colors hover:text-[#1C3A34]"
+                  aria-label={`Remove ${label}`}
+                >
+                  <X className="size-4" />
+                </button>
+              ) : null}
+            </div>
+            {fileName ? <p className="text-xs text-slate-500">{fileName}</p> : null}
+            <label
+              htmlFor={`${id}-replace`}
+              className="inline-flex cursor-pointer text-sm font-semibold text-[#1C3A34] hover:text-[#C9B87A]"
+            >
+              {replaceLabel}
+            </label>
+            <input
+              id={`${id}-replace`}
+              type="file"
+              accept={DRIVER_LICENSE_PHOTO_ACCEPT}
+              className="sr-only"
+              disabled={disabled}
+              onChange={(event) => {
+                onChange(event.target.files?.[0] ?? null);
+                event.target.value = "";
+              }}
+            />
+          </div>
+        ) : (
+          <label htmlFor={id} className="flex cursor-pointer flex-col items-center justify-center gap-3 py-6 text-center">
+            <div className="flex size-12 items-center justify-center rounded-full bg-[#1C3A34]/8 text-[#1C3A34]">
+              <ImagePlus className="size-5" />
+            </div>
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-[#1C3A34]">{label}</p>
+              <p className="text-xs text-slate-500">{hint}</p>
+            </div>
+            <input
+              id={id}
+              type="file"
+              accept={DRIVER_LICENSE_PHOTO_ACCEPT}
+              className="sr-only"
+              disabled={disabled}
+              onChange={(event) => {
+                onChange(event.target.files?.[0] ?? null);
+                event.target.value = "";
+              }}
+            />
+          </label>
+        )}
+      </div>
+      {error ? <p className="text-xs text-red-600">{error}</p> : null}
+    </div>
+  );
+}
+
 export function CreateUserSheet({
   open,
   onOpenChange,
@@ -236,6 +275,11 @@ export function CreateUserSheet({
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
   const [rolesLoading, setRolesLoading] = useState(false);
   const [loadedUser, setLoadedUser] = useState<User | null>(null);
+  const [licenseNumber, setLicenseNumber] = useState("");
+  const [licenseFrontFile, setLicenseFrontFile] = useState<File | null>(null);
+  const [licenseBackFile, setLicenseBackFile] = useState<File | null>(null);
+  const [licenseFrontPreview, setLicenseFrontPreview] = useState<string | null>(null);
+  const [licenseBackPreview, setLicenseBackPreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (!open) {
@@ -248,6 +292,11 @@ export function CreateUserSheet({
       setSelectedRoleId(null);
       setRolesLoading(false);
       setLoadedUser(null);
+      setLicenseNumber("");
+      setLicenseFrontFile(null);
+      setLicenseBackFile(null);
+      setLicenseFrontPreview(null);
+      setLicenseBackPreview(null);
       return;
     }
 
@@ -268,6 +317,11 @@ export function CreateUserSheet({
           setForm(emptyForm);
           setSelectedRoleId(null);
           setLoadedUser(null);
+          setLicenseNumber("");
+          setLicenseFrontFile(null);
+          setLicenseBackFile(null);
+          setLicenseFrontPreview(null);
+          setLicenseBackPreview(null);
           return;
         }
 
@@ -287,6 +341,11 @@ export function CreateUserSheet({
           setForm(mapUserToForm(user));
           setLoadedUser(user);
           setSelectedRoleId(assignedRoles[0]?.id ?? null);
+          setLicenseNumber(user.driver?.license_number ?? "");
+          setLicenseFrontFile(null);
+          setLicenseBackFile(null);
+          setLicenseFrontPreview(getDriverLicensePhotoUrl(user.driver?.license_photo_url));
+          setLicenseBackPreview(getDriverLicensePhotoUrl(user.driver?.license_photo_back_url));
         }
       } catch (err) {
         if (!cancelled) {
@@ -330,6 +389,25 @@ export function CreateUserSheet({
     ],
     [allRoles, formCopy.roleNoneOption],
   );
+
+  const selectedRole = allRoles.find((role) => role.id === selectedRoleId) ?? null;
+  const isDriverRole = selectedRole?.slug === "driver";
+  const existingFrontUrl = getDriverLicensePhotoUrl(loadedUser?.driver?.license_photo_url);
+  const existingBackUrl = getDriverLicensePhotoUrl(loadedUser?.driver?.license_photo_back_url);
+
+  useEffect(() => {
+    if (!licenseFrontFile) return;
+    const url = URL.createObjectURL(licenseFrontFile);
+    setLicenseFrontPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [licenseFrontFile]);
+
+  useEffect(() => {
+    if (!licenseBackFile) return;
+    const url = URL.createObjectURL(licenseBackFile);
+    setLicenseBackPreview(url);
+    return () => URL.revokeObjectURL(url);
+  }, [licenseBackFile]);
 
   function updateField<K extends keyof UserFormState>(key: K, value: UserFormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -383,6 +461,32 @@ export function CreateUserSheet({
       errors.mobile = formCopy.errors.mobileInvalid;
     }
 
+    if (isDriverRole) {
+      if (!isValidDriverLicenseNumber(licenseNumber)) {
+        errors.licenseNumber = formCopy.errors.licenseRequired;
+      }
+
+      const frontError = validateDriverLicensePhoto(licenseFrontFile, {
+        required: !isEdit || !existingFrontUrl,
+        requiredMessage: formCopy.errors.licenseFrontRequired,
+      });
+      if (frontError) {
+        errors.licenseFront = frontError === formCopy.errors.licenseFrontRequired
+          ? frontError
+          : formCopy.errors.licensePhotoInvalid;
+      }
+
+      const backError = validateDriverLicensePhoto(licenseBackFile, {
+        required: !isEdit || !existingBackUrl,
+        requiredMessage: formCopy.errors.licenseBackRequired,
+      });
+      if (backError) {
+        errors.licenseBack = backError === formCopy.errors.licenseBackRequired
+          ? backError
+          : formCopy.errors.licensePhotoInvalid;
+      }
+    }
+
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
       return;
@@ -406,6 +510,13 @@ export function CreateUserSheet({
           account_activation: form.accountActivation,
         });
         await setUserRoles(userId, roleIds, locale);
+        if (isDriverRole) {
+          await upsertUserDriverProfile(userId, {
+            driver_license_number: normalizeDriverLicenseNumber(licenseNumber),
+            driver_license_photo_front: licenseFrontFile,
+            driver_license_photo_back: licenseBackFile,
+          });
+        }
         showSuccessToast(toastCopy.updateSuccess);
       } else {
         const user = await createUser({
@@ -420,6 +531,13 @@ export function CreateUserSheet({
         });
         if (roleIds.length > 0) {
           await setUserRoles(user.id, roleIds, locale);
+        }
+        if (isDriverRole) {
+          await upsertUserDriverProfile(user.id, {
+            driver_license_number: normalizeDriverLicenseNumber(licenseNumber),
+            driver_license_photo_front: licenseFrontFile,
+            driver_license_photo_back: licenseBackFile,
+          });
         }
         showSuccessToast(toastCopy.createSuccess);
       }
@@ -623,24 +741,40 @@ export function CreateUserSheet({
                 description={formCopy.accessSectionDescription}
               />
               <Separator />
-              <div className="space-y-5">
-                <div className="space-y-3">
-                  <Label className="text-sm font-semibold text-slate-900">{formCopy.accountStatus}</Label>
-                  <div className="space-y-2">
-                    {ACCOUNT_STATUS_OPTIONS.map((option) => (
-                      <AccessStatusOption
-                        key={option.value}
-                        icon={option.icon}
-                        iconClassName={option.iconClassName}
-                        title={copy.status[option.value]}
-                        description={formCopy.statusDescriptions[option.value]}
-                        selected={form.accountStatus === option.value}
-                        selectedClassName={option.selectedClassName}
-                        onSelect={() => updateField("accountStatus", option.value)}
-                        disabled={submitting}
-                      />
-                    ))}
-                  </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="user-account-status">{formCopy.accountStatus}</Label>
+                  <Select
+                    items={ACCOUNT_STATUS_OPTIONS.map((option) => ({
+                      label: copy.status[option.value],
+                      value: option.value,
+                    }))}
+                    value={form.accountStatus}
+                    onValueChange={(value) => {
+                      if (value) updateField("accountStatus", value as AccountStatus);
+                    }}
+                    disabled={submitting}
+                  >
+                    <SelectTrigger id="user-account-status" className={selectTriggerClassName}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {ACCOUNT_STATUS_OPTIONS.map((option) => {
+                          const Icon = option.icon;
+                          return (
+                            <SelectItem key={option.value} value={option.value}>
+                              <Icon className={cn("size-4", option.iconClassName)} />
+                              {copy.status[option.value]}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-slate-500">
+                    {formCopy.statusDescriptions[form.accountStatus]}
+                  </p>
                 </div>
 
                 <div className="flex items-center gap-4 rounded-lg border border-slate-200 bg-white p-4">
@@ -709,6 +843,96 @@ export function CreateUserSheet({
                 </div>
               )}
             </section>
+
+            {isDriverRole ? (
+              <section className="space-y-4 rounded-lg border border-slate-200 bg-[#f8fafb]/60 p-5">
+                <SectionHeader
+                  icon={IdCard}
+                  title={formCopy.driverSection}
+                  description={formCopy.driverSectionDescription}
+                />
+                <Separator />
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label
+                      htmlFor="user-license-number"
+                      className={fieldErrors.licenseNumber ? "text-red-700" : undefined}
+                    >
+                      {formCopy.licenseNumber}
+                    </Label>
+                    <Input
+                      id="user-license-number"
+                      value={licenseNumber}
+                      onChange={(event) => {
+                        setLicenseNumber(event.target.value.toUpperCase());
+                        setFieldErrors((current) => {
+                          if (!current.licenseNumber) return current;
+                          const next = { ...current };
+                          delete next.licenseNumber;
+                          return next;
+                        });
+                      }}
+                      placeholder={formCopy.licenseNumberPlaceholder}
+                      className={cn(fieldClassName, fieldErrors.licenseNumber && fieldErrorClassName)}
+                      autoComplete="off"
+                    />
+                    <p className="text-xs text-slate-500">{formCopy.licenseNumberHelp}</p>
+                    {fieldErrors.licenseNumber ? (
+                      <p className="text-xs text-red-600">{fieldErrors.licenseNumber}</p>
+                    ) : null}
+                  </div>
+
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    <LicensePhotoField
+                      id="user-license-front"
+                      label={formCopy.licenseFront}
+                      hint={formCopy.licensePhotoHint}
+                      previewUrl={licenseFrontFile ? licenseFrontPreview : existingFrontUrl}
+                      fileName={licenseFrontFile?.name}
+                      error={fieldErrors.licenseFront}
+                      disabled={submitting}
+                      replaceLabel={formCopy.licensePhotoReplace}
+                      canRemove={Boolean(licenseFrontFile)}
+                      onChange={(file) => {
+                        setLicenseFrontFile(file);
+                        if (!file) {
+                          setLicenseFrontPreview(null);
+                        }
+                        setFieldErrors((current) => {
+                          if (!current.licenseFront) return current;
+                          const next = { ...current };
+                          delete next.licenseFront;
+                          return next;
+                        });
+                      }}
+                    />
+                    <LicensePhotoField
+                      id="user-license-back"
+                      label={formCopy.licenseBack}
+                      hint={formCopy.licensePhotoHint}
+                      previewUrl={licenseBackFile ? licenseBackPreview : existingBackUrl}
+                      fileName={licenseBackFile?.name}
+                      error={fieldErrors.licenseBack}
+                      disabled={submitting}
+                      replaceLabel={formCopy.licensePhotoReplace}
+                      canRemove={Boolean(licenseBackFile)}
+                      onChange={(file) => {
+                        setLicenseBackFile(file);
+                        if (!file) {
+                          setLicenseBackPreview(null);
+                        }
+                        setFieldErrors((current) => {
+                          if (!current.licenseBack) return current;
+                          const next = { ...current };
+                          delete next.licenseBack;
+                          return next;
+                        });
+                      }}
+                    />
+                  </div>
+                </div>
+              </section>
+            ) : null}
 
             {error ? <p className="text-sm text-red-600">{error}</p> : null}
 

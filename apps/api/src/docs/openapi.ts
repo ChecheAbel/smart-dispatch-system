@@ -70,9 +70,30 @@ export const openApiSpec = {
             type: "string",
             enum: ["pending", "activated"],
           },
+          account_block_reason: { type: "string", nullable: true },
+          driver: {
+            type: "object",
+            nullable: true,
+            properties: {
+              license_number: { type: "string" },
+              license_photo_url: { type: "string", nullable: true },
+              license_photo_back_url: { type: "string", nullable: true },
+              created_at: { type: "string", format: "date-time" },
+            },
+          },
+          assigned_vehicle: {
+            type: "object",
+            nullable: true,
+            properties: {
+              id: { type: "string", format: "uuid" },
+              plate_number: { type: "string" },
+              make: { type: "string", nullable: true },
+              model: { type: "string", nullable: true },
+            },
+          },
           roles: {
             type: "array",
-            items: { type: "string", enum: ["admin", "dispatcher", "driver"] },
+            items: { type: "string", enum: ["admin", "dispatcher", "driver", "user"] },
           },
         },
       },
@@ -758,6 +779,24 @@ export const openApiSpec = {
             name: "account_activation",
             in: "query",
             schema: { type: "string", enum: ["pending", "activated"] },
+          },
+          {
+            name: "role_slug",
+            in: "query",
+            schema: { type: "string", enum: ["admin", "dispatcher", "driver", "user"] },
+            description: "Limit results to users who have this role",
+          },
+          {
+            name: "has_requester_profile",
+            in: "query",
+            schema: { type: "boolean" },
+            description: "Limit results to customer registration applicants",
+          },
+          {
+            name: "has_assigned_vehicle",
+            in: "query",
+            schema: { type: "boolean" },
+            description: "Limit results to users with or without a default assigned vehicle",
           },
         ],
         responses: {

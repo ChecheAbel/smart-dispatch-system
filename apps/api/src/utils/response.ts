@@ -8,6 +8,7 @@ import type {
 import { Prisma } from "../generated/prisma";
 import { AuthError } from "../services/auth.service";
 import { RequesterProfileValidationError } from "./requester-profile";
+import { DriverProfileError } from "../models/driver.model";
 import { VehicleGeofenceValidationError } from "../models/vehicle-geofence.model";
 
 export function sendSuccess<T>(
@@ -51,9 +52,14 @@ export function handleRouteError(res: Response, error: unknown) {
 
   if (
     error instanceof RequesterProfileValidationError ||
-    error instanceof VehicleGeofenceValidationError
+    error instanceof VehicleGeofenceValidationError ||
+    error instanceof DriverProfileError
   ) {
-    return sendError(res, error.message, 400);
+    return sendError(
+      res,
+      error.message,
+      error instanceof DriverProfileError ? error.status : 400,
+    );
   }
 
   if (error instanceof Prisma.PrismaClientKnownRequestError) {

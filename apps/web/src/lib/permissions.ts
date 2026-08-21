@@ -10,6 +10,10 @@ export const PERMISSIONS = {
     read: "user_registrations.read",
     write: "user_registrations.write",
   },
+  drivers: {
+    read: "drivers.read",
+    write: "drivers.write",
+  },
   roles: {
     read: "roles.read",
     write: "roles.write",

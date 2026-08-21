@@ -158,6 +158,8 @@ model User {
   vehicleLocationSnapshots     VehicleLocationSnapshot[] @relation("VehicleLocationDriver")
   submittedComplaints          Complaint[]               @relation("ComplaintRequester")
   assignedComplaints           Complaint[]               @relation("ComplaintAssignee")
+  driverAttendances            DriverAttendance[]        @relation("DriverAttendanceDriver")
+  recordedDriverAttendances    DriverAttendance[]        @relation("DriverAttendanceRecordedBy")
 
   @@index([email])
   @@index([mobileNumber])
@@ -186,16 +188,47 @@ model RequesterProfile {
 }
 
 model Driver {
-  id              String   @id @default(uuid()) @db.Uuid
-  userId          String   @unique @map("user_id") @db.Uuid
-  licenseNumber   String   @unique @map("license_number") @db.VarChar(50)
-  licensePhotoUrl String?  @map("license_photo_url") @db.VarChar(500)
-  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                   String   @id @default(uuid()) @db.Uuid
+  userId               String   @unique @map("user_id") @db.Uuid
+  licenseNumber        String   @unique @map("license_number") @db.VarChar(50)
+  licensePhotoUrl      String?  @map("license_photo_url") @db.VarChar(500)
+  licensePhotoBackUrl  String?  @map("license_photo_back_url") @db.VarChar(500)
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([licenseNumber])
   @@map("drivers")
+}
+
+enum DriverAttendanceStatus {
+  present
+  absent
+  late
+  on_leave
+  off_duty
+
+  @@map("driver_attendance_status")
+}
+
+model DriverAttendance {
+  id               String                 @id @default(uuid()) @db.Uuid
+  driverUserId     String                 @map("driver_user_id") @db.Uuid
+  workDate         DateTime               @map("work_date") @db.Date
+  status           DriverAttendanceStatus
+  checkInAt        DateTime?              @map("check_in_at") @db.Timestamptz
+  checkOutAt       DateTime?              @map("check_out_at") @db.Timestamptz
+  notes            String?                @db.Text
+  recordedByUserId String?                @map("recorded_by_user_id") @db.Uuid
+  createdAt        DateTime               @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime               @updatedAt @map("updated_at") @db.Timestamptz
+  driver           User                   @relation("DriverAttendanceDriver", fields: [driverUserId], references: [id], onDelete: Cascade)
+  recordedBy       User?                  @relation("DriverAttendanceRecordedBy", fields: [recordedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([driverUserId, workDate])
+  @@index([workDate, status])
+  @@index([recordedByUserId])
+  @@map("driver_attendances")
 }
 
 model AuthRole {

@@ -7,6 +7,7 @@ export type AdminAuditLogsMessages = Translations["adminAuditLogs"];
 export type AdminMenusMessages = Translations["adminMenus"];
 export type AdminUsersMessages = Translations["adminUsers"];
 export type AdminUserRegistrationsMessages = Translations["adminUserRegistrations"];
+export type AdminDriversMessages = Translations["adminDrivers"];
 export type AdminRideRequestsMessages = Translations["adminRideRequests"];
 export type AdminDispatchMessages = Translations["adminDispatch"];
 export type AdminNotificationsMessages = Translations["adminNotifications"];

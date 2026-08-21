@@ -1,10 +1,12 @@
 import { Router, type Request, type Response } from "express";
 import bcrypt from "bcrypt";
+import multer from "multer";
 import { auditMutations } from "../middleware/audit-mutation";
 import { authenticate } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
 import { requirePermission } from "../middleware/require-permission";
 import { toPublicUser } from "../mappers/user.mapper";
+import { toPublicRole } from "../mappers/role.mapper";
 import {
   assignRoleToUser,
   listAuthRolesByUserId,
@@ -21,6 +23,7 @@ import {
   updateUserAccountActivation,
   updateUserAccountStatus,
 } from "../models/user.model";
+import { upsertDriverProfile } from "../models/driver.model";
 import { queueUserRegistrationNotifications } from "../services/notification-dispatch.service";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
@@ -28,14 +31,20 @@ import {
   getOptionalString,
   getString,
   getStringArray,
+  isValidDriverLicenseNumber,
   isValidEmail,
+  normalizeDriverLicenseNumber,
   parseAccountActivation,
   parseAccountStatus,
   parseBoolean,
+  parseRoleSlug,
 } from "../utils/validation";
 import { parseRequesterSegment } from "../utils/requester-profile";
 import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
-import { toPublicRole } from "../mappers/role.mapper";
+import {
+  buildDriverLicensePhotoUrl,
+  driverLicensePhotoUpload,
+} from "../utils/driver-license-upload";
 
 const router = Router();
 
@@ -52,8 +61,10 @@ router.get("/", requirePermission("users.read"), async (req: Request, res: Respo
       search: getString(req.query.search) || undefined,
       accountStatus: parseAccountStatus(req.query.account_status),
       accountActivation: parseAccountActivation(req.query.account_activation),
+      roleSlug: parseRoleSlug(req.query.role_slug),
       requesterSegment: parseRequesterSegment(req.query.requester_segment) ?? undefined,
       hasRequesterProfile: parseBoolean(req.query.has_requester_profile),
+      hasAssignedVehicle: parseBoolean(req.query.has_assigned_vehicle),
     };
 
     const result = await paginate(
@@ -84,6 +95,61 @@ router.get("/:id", requirePermission("users.read"), async (req: Request, res: Re
     return handleRouteError(res, error);
   }
 });
+
+function driverLicenseUploadError(error: unknown) {
+  if (error instanceof multer.MulterError) {
+    if (error.code === "LIMIT_FILE_SIZE") {
+      return "Driver license photo must be 5 MB or smaller.";
+    }
+    return error.message;
+  }
+
+  return error instanceof Error ? error.message : "Upload failed.";
+}
+
+router.put(
+  "/:id/driver-profile",
+  requirePermission("users.write"),
+  (req: Request, res: Response) => {
+    driverLicensePhotoUpload.fields([
+      { name: "driver_license_photo_front", maxCount: 1 },
+      { name: "driver_license_photo_back", maxCount: 1 },
+    ])(req, res, async (uploadError) => {
+      if (uploadError) {
+        return sendError(res, driverLicenseUploadError(uploadError), 400);
+      }
+
+      try {
+        const user = await findUserByIdWithRoles(req.params.id);
+        if (!user) {
+          return sendError(res, "User not found.", 404);
+        }
+
+        const licenseInput = getString(req.body?.driver_license_number);
+        const licenseNumber = normalizeDriverLicenseNumber(licenseInput);
+        if (!licenseNumber || !isValidDriverLicenseNumber(licenseInput)) {
+          return sendError(res, "Enter a valid driver license number.", 400);
+        }
+
+        const files = req.files as { [field: string]: Express.Multer.File[] } | undefined;
+        const frontFile = files?.driver_license_photo_front?.[0];
+        const backFile = files?.driver_license_photo_back?.[0];
+
+        await upsertDriverProfile({
+          userId: user.id,
+          licenseNumber,
+          licensePhotoUrl: frontFile ? buildDriverLicensePhotoUrl(frontFile.filename) : undefined,
+          licensePhotoBackUrl: backFile ? buildDriverLicensePhotoUrl(backFile.filename) : undefined,
+        });
+
+        const updated = await findUserByIdWithRoles(user.id);
+        return sendSuccess(res, { user: toPublicUser(updated ?? user) });
+      } catch (error) {
+        return handleRouteError(res, error);
+      }
+    });
+  },
+);
 
 router.post("/", requirePermission("users.write"), async (req: Request, res: Response) => {
   try {

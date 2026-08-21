@@ -1,7 +1,15 @@
-import type { AccountActivation, AccountStatus } from "@smart-dispatch/types";
+import type { AccountActivation, AccountStatus, DriverAttendanceStatus, RoleSlug } from "@smart-dispatch/types";
 
 const ACCOUNT_STATUSES: AccountStatus[] = ["active", "suspended", "deactivated"];
 const ACCOUNT_ACTIVATIONS: AccountActivation[] = ["pending", "activated"];
+const ROLE_SLUGS: RoleSlug[] = ["admin", "dispatcher", "driver", "user"];
+const DRIVER_ATTENDANCE_STATUSES: DriverAttendanceStatus[] = [
+  "present",
+  "absent",
+  "late",
+  "on_leave",
+  "off_duty",
+];
 
 export function getString(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -90,6 +98,47 @@ export function parseAccountActivation(value: unknown): AccountActivation | unde
   return ACCOUNT_ACTIVATIONS.includes(value as AccountActivation)
     ? (value as AccountActivation)
     : undefined;
+}
+
+export function parseRoleSlug(value: unknown): RoleSlug | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim().toLowerCase();
+  return ROLE_SLUGS.includes(normalized as RoleSlug) ? (normalized as RoleSlug) : undefined;
+}
+
+export function parseDriverAttendanceStatus(value: unknown): DriverAttendanceStatus | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim().toLowerCase() as DriverAttendanceStatus;
+  return DRIVER_ATTENDANCE_STATUSES.includes(normalized) ? normalized : undefined;
+}
+
+const WORK_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+export function parseWorkDate(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim();
+  if (!WORK_DATE_PATTERN.test(trimmed)) return undefined;
+  const parsed = new Date(`${trimmed}T00:00:00.000Z`);
+  if (Number.isNaN(parsed.getTime())) return undefined;
+  return trimmed;
+}
+
+export function workDateToDate(workDate: string) {
+  return new Date(`${workDate}T00:00:00.000Z`);
+}
+
+export function formatWorkDate(value: Date) {
+  return value.toISOString().slice(0, 10);
+}
+
+export function combineWorkDateAndTime(workDate: string, time: string | null | undefined) {
+  if (!time?.trim()) return null;
+  const normalized = time.trim();
+  if (/^\d{2}:\d{2}$/.test(normalized)) {
+    return new Date(`${workDate}T${normalized}:00+03:00`);
+  }
+  const parsed = new Date(normalized);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
 export function isValidEmail(email: string) {

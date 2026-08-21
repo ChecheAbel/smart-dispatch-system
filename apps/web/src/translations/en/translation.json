@@ -1621,6 +1621,7 @@
       "modules": {
         "users": "Users",
         "user_registrations": "User registrations",
+        "drivers": "Drivers",
         "roles": "Roles",
         "menus": "Menus",
         "notifications": "Notifications",
@@ -1792,6 +1793,15 @@
         "billingContactEmail": "Billing email"
       },
       "roleNoneOption": "No role assigned",
+      "driverSection": "Driver license",
+      "driverSectionDescription": "Required when this account is assigned the driver role.",
+      "licenseNumber": "Driving license ID",
+      "licenseNumberPlaceholder": "ET-123456",
+      "licenseNumberHelp": "5–30 letters, numbers, or hyphens. Spaces are removed automatically.",
+      "licenseFront": "License photo (front)",
+      "licenseBack": "License photo (back)",
+      "licensePhotoHint": "JPG, PNG, or WEBP up to 5 MB",
+      "licensePhotoReplace": "Replace photo",
       "optional": "(optional)",
       "cancel": "Cancel",
       "create": "Create user",
@@ -1807,6 +1817,10 @@
         "lastNameRequired": "Last name is required.",
         "mobileRequired": "Mobile number is required.",
         "mobileInvalid": "Enter a valid 9-digit number starting with 9 (Ethio Telecom) or 7 (Safaricom).",
+        "licenseRequired": "Enter a valid driving license ID.",
+        "licenseFrontRequired": "Front license photo is required.",
+        "licenseBackRequired": "Back license photo is required.",
+        "licensePhotoInvalid": "Upload a JPG, PNG, or WEBP image up to 5 MB.",
         "createFailed": "Failed to create user.",
         "updateFailed": "Failed to update user.",
         "loadFailed": "Failed to load user."
@@ -2297,6 +2311,165 @@
       },
       "loadFailed": {
         "title": "Could not load application",
+        "description": "Please try again or refresh the page."
+      }
+    }
+  },
+  "adminDrivers": {
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to drivers is required to open this page. Ask an administrator to grant the drivers.read permission for your role.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "status": {
+      "active": "Active",
+      "suspended": "Suspended",
+      "deactivated": "Deactivated"
+    },
+    "assignment": {
+      "assigned": "Assigned",
+      "unassigned": "Unassigned"
+    },
+    "directory": {
+      "eyebrow": "Workforce",
+      "title": "Drivers",
+      "description": "Hired drivers, license details, and the vehicle assigned as their default unit.",
+      "searchPlaceholder": "Search by name, email, mobile, or license...",
+      "itemLabel": "driver",
+      "filters": {
+        "status": "Status",
+        "assignment": "Vehicle",
+        "statusOptions": {
+          "all": "All statuses",
+          "active": "Active",
+          "suspended": "Suspended",
+          "deactivated": "Deactivated"
+        },
+        "assignmentOptions": {
+          "all": "All assignments",
+          "assigned": "Assigned to a vehicle",
+          "unassigned": "Unassigned"
+        }
+      },
+      "columns": {
+        "name": "Driver",
+        "email": "Email",
+        "mobile": "Mobile",
+        "license": "License",
+        "vehicle": "Assigned vehicle",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "empty": {
+        "title": "No drivers found",
+        "description": "Approved driver applications will appear here.",
+        "searchDescription": "Try a different search term."
+      },
+      "actions": {
+        "view": "View",
+        "menuLabel": "Actions for {name}"
+      },
+      "stats": {
+        "title": "Hired drivers",
+        "description": "Approved drivers who can be assigned to vehicles",
+        "activeTitle": "Active",
+        "activeDescription": "Drivers who can currently take trips",
+        "unassignedTitle": "Unassigned",
+        "unassignedDescription": "Hired drivers without a default vehicle",
+        "suspendedTitle": "Suspended",
+        "suspendedDescription": "Drivers temporarily blocked from taking trips"
+      }
+    },
+    "detail": {
+      "title": "Driver details",
+      "description": "License, contact details, and assigned vehicle for this driver.",
+      "submittedAt": "Submitted on {date}",
+      "profileSection": "Driver details",
+      "profileSectionDescription": "Personal information and login identity.",
+      "licenseSection": "Driver license",
+      "licenseSectionDescription": "License number and photo submitted during application.",
+      "licensePhoto": "License photo",
+      "licensePhotoFront": "License photo (front)",
+      "licensePhotoBack": "License photo (back)",
+      "licensePhotoMissing": "No license photo was uploaded.",
+      "openPhoto": "Open full photo",
+      "vehicleSection": "Assigned vehicle",
+      "vehicleSectionDescription": "Default vehicle for this driver. Assignment is managed from the vehicle record.",
+      "vehicleUnassigned": "No vehicle assigned",
+      "openVehicle": "Open vehicle",
+      "fields": {
+        "firstName": "First name",
+        "middleName": "Middle name",
+        "lastName": "Last name",
+        "email": "Email address",
+        "mobile": "Mobile number",
+        "licenseNumber": "License number",
+        "plate": "Plate number",
+        "make": "Make",
+        "model": "Model"
+      }
+    },
+    "attendance": {
+      "eyebrow": "Workforce",
+      "title": "Driver attendance",
+      "description": "Review check-in and check-out records submitted from the driver app for the selected day.",
+      "searchPlaceholder": "Search by name, email, mobile, or license...",
+      "itemLabel": "driver",
+      "status": {
+        "present": "Present",
+        "absent": "Absent",
+        "late": "Late",
+        "on_leave": "On leave",
+        "off_duty": "Off duty",
+        "unmarked": "Unmarked"
+      },
+      "filters": {
+        "date": "Work date",
+        "pickDate": "Pick a date",
+        "status": "Status",
+        "statusOptions": {
+          "all": "All statuses",
+          "unmarked": "Unmarked",
+          "present": "Present",
+          "absent": "Absent",
+          "late": "Late",
+          "on_leave": "On leave",
+          "off_duty": "Off duty"
+        }
+      },
+      "columns": {
+        "name": "Driver",
+        "mobile": "Mobile",
+        "vehicle": "Assigned vehicle",
+        "status": "Status",
+        "checkIn": "Check-in",
+        "checkOut": "Check-out",
+        "notes": "Notes"
+      },
+      "empty": {
+        "title": "No drivers for this date",
+        "description": "Hired drivers appear here. Check-in and check-out times show after they are submitted from the driver app.",
+        "searchDescription": "Try a different search or status filter."
+      },
+      "stats": {
+        "presentTitle": "Present",
+        "presentDescription": "Checked in or marked present",
+        "lateTitle": "Late",
+        "lateDescription": "Arrived after the expected start",
+        "absentTitle": "Absent",
+        "absentDescription": "Did not report for duty",
+        "leaveTitle": "On leave",
+        "leaveDescription": "Approved leave for this date",
+        "unmarkedTitle": "Unmarked",
+        "unmarkedDescription": "Hired drivers without a record yet"
+      }
+    },
+    "toast": {
+      "loadFailed": {
+        "title": "Could not load driver",
         "description": "Please try again or refresh the page."
       }
     }

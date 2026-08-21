@@ -1621,6 +1621,7 @@
       "modules": {
         "users": "ተጠቃሚዎች",
         "user_registrations": "የተጠቃሚ ምዝገባዎች",
+        "drivers": "አሽከርካሪዎች",
         "roles": "ሚናዎች",
         "menus": "ሜኑዎች",
         "notifications": "ማሳወቂያዎች",
@@ -1792,6 +1793,15 @@
         "billingContactEmail": "የክፍያ ኢሜይል"
       },
       "roleNoneOption": "ምንም ሚና አልተመደበም",
+      "driverSection": "የአሽከርካሪ ፈቃድ",
+      "driverSectionDescription": "ለዚህ መለያ የአሽከርካሪ ሚና ሲመደብ ያስፈልጋል።",
+      "licenseNumber": "የመንጃ ፈቃድ መለያ",
+      "licenseNumberPlaceholder": "ET-123456",
+      "licenseNumberHelp": "5–30 ፊደላት፣ ቁጥሮች ወይም ሰረዞች። ክፍተቶች በራስ-ሰር ይወገዳሉ።",
+      "licenseFront": "የፈቃድ ፎቶ (ፊት)",
+      "licenseBack": "የፈቃድ ፎቶ (ጀርባ)",
+      "licensePhotoHint": "JPG፣ PNG ወይም WEBP እስከ 5 ሜባ",
+      "licensePhotoReplace": "ፎቶ ቀይር",
       "optional": "(አማራጭ)",
       "cancel": "ሰርዝ",
       "create": "ተጠቃሚ ፍጠር",
@@ -1807,6 +1817,10 @@
         "lastNameRequired": "የአያት ስም ያስፈልጋል።",
         "mobileRequired": "ስልክ ቁጥር ያስፈልጋል።",
         "mobileInvalid": "በ 9 (ኢትዮ ቴሌኮም) ወይም በ 7 (ሳፋሪኮም) የሚጀምር ትክክለኛ 9-አሃዝ ቁጥር ያስገቡ።",
+        "licenseRequired": "ትክክለኛ የመንጃ ፈቃድ መለያ ያስገቡ።",
+        "licenseFrontRequired": "የፈቃድ ፊት ፎቶ ያስፈልጋል።",
+        "licenseBackRequired": "የፈቃድ ጀርባ ፎቶ ያስፈልጋል።",
+        "licensePhotoInvalid": "እስከ 5 ሜባ JPG፣ PNG ወይም WEBP ምስል ይስቀሉ።",
         "createFailed": "ተጠቃሚ መፍጠር አልተቻለም።",
         "updateFailed": "ተጠቃሚ ማዘመን አልተቻለም።",
         "loadFailed": "ተጠቃሚ መጫን አልተቻለም።"
@@ -2297,6 +2311,165 @@
       },
       "loadFailed": {
         "title": "ማመልከቻ መጫን አልተቻለም",
+        "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+      }
+    }
+  },
+  "adminDrivers": {
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህን ገጽ ለመክፈት አሽከርካሪዎችን የማየት ፈቃድ ያስፈልጋል። አስተዳዳሪዎ ሚናዎ ላይ drivers.read ፈቃድ እንዲሰጥዎት ይጠይቁ።",
+      "sessionHint": "ፈቃዶች ቅር ብለው ከተቀየሩ፣ ክፍያዎን ለማደስ ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚና ፈቃዶችዎ ይቆጣጠራል።",
+      "goToDashboard": "ወደ ዳሽቦርድ ይሂዱ"
+    },
+    "status": {
+      "active": "ንቁ",
+      "suspended": "ታግዷል",
+      "deactivated": "ቦዝኗል"
+    },
+    "assignment": {
+      "assigned": "ተመድቧል",
+      "unassigned": "ያልተመደበ"
+    },
+    "directory": {
+      "eyebrow": "ሰራተኞች",
+      "title": "አሽከርካሪዎች",
+      "description": "የተቀጠሩ አሽከርካሪዎች፣ የፈቃድ ዝርዝሮች እና እንደ ነባሪ የተመደበላቸው ተሽከርካሪ።",
+      "searchPlaceholder": "በስም፣ ኢሜይል፣ ሞባይል ወይም ፈቃድ ይፈልጉ...",
+      "itemLabel": "አሽከርካሪ",
+      "filters": {
+        "status": "ሁኔታ",
+        "assignment": "ተሽከርካሪ",
+        "statusOptions": {
+          "all": "ሁሉም ሁኔታዎች",
+          "active": "ንቁ",
+          "suspended": "ታግዷል",
+          "deactivated": "ቦዝኗል"
+        },
+        "assignmentOptions": {
+          "all": "ሁሉም ምደባዎች",
+          "assigned": "ተሽከርካሪ የተመደበላቸው",
+          "unassigned": "ያልተመደቡ"
+        }
+      },
+      "columns": {
+        "name": "አሽከርካሪ",
+        "email": "ኢሜይል",
+        "mobile": "ሞባይል",
+        "license": "ፈቃድ",
+        "vehicle": "የተመደበ ተሽከርካሪ",
+        "status": "ሁኔታ",
+        "actions": "እርምጃዎች"
+      },
+      "empty": {
+        "title": "ምንም አሽከርካሪ አልተገኘም",
+        "description": "የጸደቁ የአሽከርካሪ ማመልከቻዎች እዚህ ይታያሉ።",
+        "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+      },
+      "actions": {
+        "view": "ይመልከቱ",
+        "menuLabel": "ለ {name} እርምጃዎች"
+      },
+      "stats": {
+        "title": "የተቀጠሩ አሽከርካሪዎች",
+        "description": "ተሽከርካሪ ሊመደብላቸው የሚችሉ የጸደቁ አሽከርካሪዎች",
+        "activeTitle": "ንቁ",
+        "activeDescription": "አሁን ጉዞ መውሰድ የሚችሉ አሽከርካሪዎች",
+        "unassignedTitle": "ያልተመደቡ",
+        "unassignedDescription": "ነባሪ ተሽከርካሪ የሌላቸው የተቀጠሩ አሽከርካሪዎች",
+        "suspendedTitle": "ታግደዋል",
+        "suspendedDescription": "ለጊዜው ጉዞ ከመውሰድ የታገዱ አሽከርካሪዎች"
+      }
+    },
+    "detail": {
+      "title": "የአሽከርካሪ ዝርዝሮች",
+      "description": "የዚህ አሽከርካሪ ፈቃድ፣ የመገኛ ዝርዝሮች እና የተመደበ ተሽከርካሪ።",
+      "submittedAt": "በ {date} ቀርቧል",
+      "profileSection": "የአሽከርካሪ ዝርዝሮች",
+      "profileSectionDescription": "የግል መረጃዎች እና የመግቢያ መለያ።",
+      "licenseSection": "የአሽከርካሪ ፈቃድ",
+      "licenseSectionDescription": "በማመልከቻ ጊዜ የቀረበ የፈቃድ ቁጥር እና ፎቶ።",
+      "licensePhoto": "የፈቃድ ፎቶ",
+      "licensePhotoFront": "የፈቃድ ፎቶ (ፊት)",
+      "licensePhotoBack": "የፈቃድ ፎቶ (ጀርባ)",
+      "licensePhotoMissing": "የፈቃድ ፎቶ አልተሰቀለም።",
+      "openPhoto": "ሙሉ ፎቶ ክፈት",
+      "vehicleSection": "የተመደበ ተሽከርካሪ",
+      "vehicleSectionDescription": "ለዚህ አሽከርካሪ ነባሪ ተሽከርካሪ። ምደባ ከተሽከርካሪው መዝገብ ይተዳደራል።",
+      "vehicleUnassigned": "ተሽከርካሪ አልተመደበም",
+      "openVehicle": "ተሽከርካሪ ክፈት",
+      "fields": {
+        "firstName": "የመጀመሪያ ስም",
+        "middleName": "የአባት ስም",
+        "lastName": "የአያት ስም",
+        "email": "ኢሜይል",
+        "mobile": "ሞባይል ቁጥር",
+        "licenseNumber": "የፈቃድ ቁጥር",
+        "plate": "የሰሌዳ ቁጥር",
+        "make": "አምራች",
+        "model": "ሞዴል"
+      }
+    },
+    "attendance": {
+      "eyebrow": "ሰራተኞች",
+      "title": "የአሽከርካሪ መገኘት",
+      "description": "ከአሽከርካሪ መተግበሪያ ለተመረጠው ቀን የቀረቡ የመግቢያ እና የመውጫ መዝገቦችን ይመልከቱ።",
+      "searchPlaceholder": "በስም፣ ኢሜይል፣ ሞባይል ወይም ፈቃድ ይፈልጉ...",
+      "itemLabel": "አሽከርካሪ",
+      "status": {
+        "present": "ተገኝቷል",
+        "absent": "ቀርቷል",
+        "late": "ዘግይቷል",
+        "on_leave": "በፈቃድ ላይ",
+        "off_duty": "ከስራ ውጭ",
+        "unmarked": "ያልተመዘገበ"
+      },
+      "filters": {
+        "date": "የስራ ቀን",
+        "pickDate": "ቀን ይምረጡ",
+        "status": "ሁኔታ",
+        "statusOptions": {
+          "all": "ሁሉም ሁኔታዎች",
+          "unmarked": "ያልተመዘገበ",
+          "present": "ተገኝቷል",
+          "absent": "ቀርቷል",
+          "late": "ዘግይቷል",
+          "on_leave": "በፈቃድ ላይ",
+          "off_duty": "ከስራ ውጭ"
+        }
+      },
+      "columns": {
+        "name": "አሽከርካሪ",
+        "mobile": "ሞባይል",
+        "vehicle": "የተመደበ ተሽከርካሪ",
+        "status": "ሁኔታ",
+        "checkIn": "መግቢያ",
+        "checkOut": "መውጫ",
+        "notes": "ማስታወሻ"
+      },
+      "empty": {
+        "title": "ለዚህ ቀን አሽከርካሪ አልተገኘም",
+        "description": "የተቀጠሩ አሽከርካሪዎች እዚህ ይታያሉ። የመግቢያ እና የመውጫ ሰዓቶች ከአሽከርካሪ መተግበሪያ ከቀረቡ በኋላ ይታያሉ።",
+        "searchDescription": "ሌላ የፍለጋ ቃል ወይም ማጣሪያ ይሞክሩ።"
+      },
+      "stats": {
+        "presentTitle": "ተገኝተዋል",
+        "presentDescription": "ገብተው ወይም ተገኝተዋል የተባሉ",
+        "lateTitle": "ዘግይተዋል",
+        "lateDescription": "ከተጠበቀው መጀመሪያ በኋላ የደረሱ",
+        "absentTitle": "ቀርተዋል",
+        "absentDescription": "ለስራ ያልቀረቡ",
+        "leaveTitle": "በፈቃድ ላይ",
+        "leaveDescription": "ለዚህ ቀን የጸደቀ ፈቃድ",
+        "unmarkedTitle": "ያልተመዘገቡ",
+        "unmarkedDescription": "ገና መዝገብ የሌላቸው የተቀጠሩ አሽከርካሪዎች"
+      }
+    },
+    "toast": {
+      "loadFailed": {
+        "title": "አሽከርካሪ መጫን አልተቻለም",
         "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
       }
     }

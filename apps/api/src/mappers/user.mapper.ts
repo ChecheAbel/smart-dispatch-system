@@ -17,6 +17,14 @@ type UserWithRelations = {
   driverProfile?: {
     licenseNumber: string;
     licensePhotoUrl: string | null;
+    licensePhotoBackUrl?: string | null;
+    createdAt: Date;
+  } | null;
+  assignedVehicle?: {
+    id: string;
+    plateNumber: string;
+    make: string | null;
+    model: string | null;
   } | null;
   requesterProfile?: DbRequesterProfile | null;
 };
@@ -30,6 +38,14 @@ export function toPublicUser(user: UserWithRelations): User {
     last_name: user.lastName,
     mobile_number: user.mobileNumber,
     driver: user.driverProfile ? toPublicDriverProfile(user.driverProfile) : null,
+    assigned_vehicle: user.assignedVehicle
+      ? {
+          id: user.assignedVehicle.id,
+          plate_number: user.assignedVehicle.plateNumber,
+          make: user.assignedVehicle.make,
+          model: user.assignedVehicle.model,
+        }
+      : null,
     requester_profile: user.requesterProfile
       ? toPublicRequesterProfile(user.requesterProfile)
       : null,

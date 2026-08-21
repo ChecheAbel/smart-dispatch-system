@@ -12,6 +12,8 @@ const DEFAULT_PERMISSIONS = [
   { slug: "users.delete", module: "users", action: "delete", description: "Delete users" },
   { slug: "user_registrations.read", module: "user_registrations", action: "read", description: "View customer registration applications" },
   { slug: "user_registrations.write", module: "user_registrations", action: "write", description: "Approve or reject customer registration applications" },
+  { slug: "drivers.read", module: "drivers", action: "read", description: "View hired drivers and attendance" },
+  { slug: "drivers.write", module: "drivers", action: "write", description: "Manage hired drivers and attendance records" },
   { slug: "roles.read", module: "roles", action: "read", description: "View roles" },
   { slug: "roles.write", module: "roles", action: "write", description: "Create and update roles" },
   { slug: "roles.delete", module: "roles", action: "delete", description: "Delete roles" },
@@ -79,7 +81,18 @@ const DEFAULT_PERMISSIONS = [
   { slug: "devices.register", module: "devices", action: "register", description: "Register FCM device tokens for push notifications (POST /api/devices/tokens)" },
 ] as const;
 
-const REMOVED_MENU_SLUGS = ["permissions", "endpoints", "registration-forms", "customer-portal", "customer-profile", "user", "notifications-email", "notifications-sms", "customer-requests"] as const;
+const REMOVED_MENU_SLUGS = [
+  "permissions",
+  "endpoints",
+  "registration-forms",
+  "customer-portal",
+  "customer-profile",
+  "user",
+  "notifications-email",
+  "notifications-sms",
+  "customer-requests",
+  "drivers-applications",
+] as const;
 
 const REMOVED_PERMISSION_SLUGS = [
   "permissions.read",
@@ -155,6 +168,39 @@ const DEFAULT_MENUS = [
     translations: [
       { locale: "en", label: "Registrations" },
       { locale: "am", label: "ምዝገባዎች" },
+    ],
+  },
+  {
+    slug: "drivers",
+    path: null,
+    icon: "id-card",
+    sortOrder: 35,
+    parentSlug: null,
+    translations: [
+      { locale: "en", label: "Driver Management" },
+      { locale: "am", label: "የአሽከርካሪ አስተዳደር" },
+    ],
+  },
+  {
+    slug: "drivers-directory",
+    path: "/admin/drivers",
+    icon: "id-card",
+    sortOrder: 10,
+    parentSlug: "drivers",
+    translations: [
+      { locale: "en", label: "Drivers" },
+      { locale: "am", label: "አሽከርካሪዎች" },
+    ],
+  },
+  {
+    slug: "drivers-attendance",
+    path: "/admin/drivers/attendance",
+    icon: "clock",
+    sortOrder: 20,
+    parentSlug: "drivers",
+    translations: [
+      { locale: "en", label: "Attendance" },
+      { locale: "am", label: "መገኘት" },
     ],
   },
   {
@@ -608,6 +654,13 @@ const DEFAULT_ENDPOINTS: Array<{
 }> = [
   { slug: "users.list", method: "GET", path: "/api/users", description: "List users", permissionSlug: "users.read" },
   { slug: "users.create", method: "POST", path: "/api/users", description: "Create user", permissionSlug: "users.write" },
+  { slug: "users.driver_profile.upsert", method: "PUT", path: "/api/users/:id/driver-profile", description: "Create or update a user's driver license profile", permissionSlug: "users.write" },
+  { slug: "driver_attendance.list", method: "GET", path: "/api/driver-attendance", description: "List driver attendance for a work date", permissionSlug: "drivers.read" },
+  { slug: "driver_attendance.summary", method: "GET", path: "/api/driver-attendance/summary", description: "Summarize driver attendance for a work date", permissionSlug: "drivers.read" },
+  { slug: "driver_attendance.upsert", method: "PUT", path: "/api/driver-attendance", description: "Create or update a driver attendance record", permissionSlug: "drivers.write" },
+  { slug: "driver_attendance.check_in", method: "POST", path: "/api/driver-attendance/check-in", description: "Check a driver in", permissionSlug: "drivers.write" },
+  { slug: "driver_attendance.check_out", method: "POST", path: "/api/driver-attendance/check-out", description: "Check a driver out", permissionSlug: "drivers.write" },
+  { slug: "driver_attendance.delete", method: "DELETE", path: "/api/driver-attendance/:id", description: "Clear a driver attendance record", permissionSlug: "drivers.write" },
   { slug: "business_tin.lookup", method: "GET", path: "/api/business-tin/:tin", description: "Look up a business TIN with eTrade registration", permissionSlug: "users.read" },
   { slug: "business_tin.license.lookup", method: "GET", path: "/api/business-tin/:tin/license", description: "Look up a business trade license by TIN and license number", permissionSlug: "users.read" },
   { slug: "roles.list", method: "GET", path: "/api/roles", description: "List roles", permissionSlug: "roles.read" },

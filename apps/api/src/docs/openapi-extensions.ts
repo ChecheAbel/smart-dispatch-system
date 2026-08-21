@@ -36,6 +36,10 @@ export const extensionTags = [
       "Configurable maintenance work categories used by vehicle maintenance logs (admin only)",
   },
   {
+    name: "Driver Attendance",
+    description: "Daily driver attendance roster, check-in/out, and leave records (admin only)",
+  },
+  {
     name: "Dispatch",
     description: "Dispatcher working board: assignment queues, live trips, fleet availability, and open complaints.",
   },
@@ -1383,6 +1387,155 @@ const notFound = { $ref: "#/components/responses/NotFound" } as const;
 const badRequest = { $ref: "#/components/responses/BadRequest" } as const;
 
 export const extensionPaths = {
+  "/api/driver-attendance": {
+    get: {
+      tags: ["Driver Attendance"],
+      summary: "List driver attendance roster",
+      description:
+        "Lists hired drivers and their attendance record for a work date (Africa/Addis_Ababa). Defaults to today.",
+      security,
+      parameters: [
+        { name: "date", in: "query", schema: { type: "string", format: "date" }, description: "Work date (YYYY-MM-DD)" },
+        {
+          name: "status",
+          in: "query",
+          schema: {
+            type: "string",
+            enum: ["present", "absent", "late", "on_leave", "off_duty", "unmarked"],
+          },
+        },
+        { name: "search", in: "query", schema: { type: "string" } },
+        { $ref: "#/components/parameters/Page" },
+        { $ref: "#/components/parameters/Limit" },
+      ],
+      responses: {
+        "200": { description: "Attendance roster" },
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+    put: {
+      tags: ["Driver Attendance"],
+      summary: "Create or update driver attendance",
+      security,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["driver_user_id", "status"],
+              properties: {
+                driver_user_id: { type: "string", format: "uuid" },
+                work_date: { type: "string", format: "date" },
+                status: {
+                  type: "string",
+                  enum: ["present", "absent", "late", "on_leave", "off_duty"],
+                },
+                check_in_at: { type: "string", nullable: true, description: "HH:mm or ISO timestamp" },
+                check_out_at: { type: "string", nullable: true },
+                notes: { type: "string", nullable: true },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "200": { description: "Attendance saved" },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+  },
+  "/api/driver-attendance/summary": {
+    get: {
+      tags: ["Driver Attendance"],
+      summary: "Summarize driver attendance for a work date",
+      security,
+      parameters: [
+        { name: "date", in: "query", schema: { type: "string", format: "date" } },
+      ],
+      responses: {
+        "200": { description: "Attendance summary" },
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+  },
+  "/api/driver-attendance/check-in": {
+    post: {
+      tags: ["Driver Attendance"],
+      summary: "Check a driver in",
+      security,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["driver_user_id"],
+              properties: {
+                driver_user_id: { type: "string", format: "uuid" },
+                work_date: { type: "string", format: "date" },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "200": { description: "Checked in" },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+  },
+  "/api/driver-attendance/check-out": {
+    post: {
+      tags: ["Driver Attendance"],
+      summary: "Check a driver out",
+      security,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["driver_user_id"],
+              properties: {
+                driver_user_id: { type: "string", format: "uuid" },
+                work_date: { type: "string", format: "date" },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "200": { description: "Checked out" },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+  },
+  "/api/driver-attendance/{id}": {
+    delete: {
+      tags: ["Driver Attendance"],
+      summary: "Clear a driver attendance record",
+      security,
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+      responses: {
+        "200": { description: "Attendance cleared" },
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+  },
   "/api/business-tin/{tin}": {
     get: {
       tags: ["Business TIN"],

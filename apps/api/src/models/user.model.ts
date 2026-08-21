@@ -29,6 +29,7 @@ export type ListUsersFilter = {
   roleSlug?: string;
   requesterSegment?: RequesterSegment;
   hasRequesterProfile?: boolean;
+  hasAssignedVehicle?: boolean;
 };
 
 const userWithRelationsInclude = {
@@ -38,6 +39,14 @@ const userWithRelationsInclude = {
   },
   driverProfile: true,
   requesterProfile: true,
+  assignedVehicle: {
+    select: {
+      id: true,
+      plateNumber: true,
+      make: true,
+      model: true,
+    },
+  },
 } satisfies Prisma.UserInclude;
 
 function normalizeEmail(email: string) {
@@ -72,6 +81,13 @@ function buildUserWhere(filter?: ListUsersFilter): Prisma.UserWhereInput {
           },
         },
       },
+      {
+        driverProfile: {
+          is: {
+            licenseNumber: { contains: search, mode: "insensitive" },
+          },
+        },
+      },
     ];
   }
 
@@ -95,6 +111,12 @@ function buildUserWhere(filter?: ListUsersFilter): Prisma.UserWhereInput {
         },
       },
     };
+  }
+
+  if (filter.hasAssignedVehicle === true) {
+    where.assignedVehicle = { isNot: null };
+  } else if (filter.hasAssignedVehicle === false) {
+    where.assignedVehicle = { is: null };
   }
 
   return where;

@@ -59,10 +59,14 @@ function isAccountUsable(user: DbUser) {
 }
 
 async function toSafeUser(user: DbUser): Promise<User> {
-  const [roles, driverProfile, requesterProfile] = await Promise.all([
+  const [roles, driverProfile, requesterProfile, assignedVehicle] = await Promise.all([
     findRolesByUserId(user.id),
     findDriverByUserId(user.id),
     findRequesterProfileByUserId(user.id),
+    prisma.vehicle.findUnique({
+      where: { assignedDriverUserId: user.id },
+      select: { id: true, plateNumber: true, make: true, model: true },
+    }),
   ]);
 
   return {
@@ -73,6 +77,14 @@ async function toSafeUser(user: DbUser): Promise<User> {
     last_name: user.lastName,
     mobile_number: user.mobileNumber,
     driver: driverProfile ? toPublicDriverProfile(driverProfile) : null,
+    assigned_vehicle: assignedVehicle
+      ? {
+          id: assignedVehicle.id,
+          plate_number: assignedVehicle.plateNumber,
+          make: assignedVehicle.make,
+          model: assignedVehicle.model,
+        }
+      : null,
     requester_profile: requesterProfile ? toPublicRequesterProfile(requesterProfile) : null,
     account_status: user.accountStatus,
     account_activation: user.accountActivation,

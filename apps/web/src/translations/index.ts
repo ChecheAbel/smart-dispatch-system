@@ -15,6 +15,7 @@ import type {
   AdminRolesMessages,
   AdminUsersMessages,
   AdminUserRegistrationsMessages,
+  AdminDriversMessages,
   AdminRideRequestsMessages,
   AdminDispatchMessages,
   AdminVehicleTypesMessages,
@@ -64,6 +65,7 @@ export type {
   AdminRolesMessages,
   AdminUsersMessages,
   AdminUserRegistrationsMessages,
+  AdminDriversMessages,
   AdminRideRequestsMessages,
   AdminDispatchMessages,
   AdminVehicleTypesMessages,
@@ -119,6 +121,10 @@ export function getAdminUserRegistrationsMessages(
   locale: SupportedLocale,
 ): AdminUserRegistrationsMessages {
   return getTranslations(locale).adminUserRegistrations;
+}
+
+export function getAdminDriversMessages(locale: SupportedLocale): AdminDriversMessages {
+  return getTranslations(locale).adminDrivers;
 }
 
 export function getAdminRideRequestsMessages(
