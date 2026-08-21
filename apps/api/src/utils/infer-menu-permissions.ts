@@ -53,9 +53,11 @@ export function inferMenuPermissionSlugs(slug: string, path?: string | null) {
   if (
     normalizedSlug === "drivers" ||
     normalizedSlug === "drivers-directory" ||
+    normalizedSlug === "drivers-shifts" ||
     normalizedSlug === "drivers-attendance" ||
     normalizedSlug === "drivers-performance" ||
     normalizedPath === "/admin/drivers" ||
+    normalizedPath === "/admin/drivers/shifts" ||
     normalizedPath === "/admin/drivers/attendance" ||
     normalizedPath === "/admin/drivers/performance"
   ) {

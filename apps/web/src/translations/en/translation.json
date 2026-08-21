@@ -2420,6 +2420,109 @@
         "model": "Model"
       }
     },
+    "shifts": {
+      "eyebrow": "Workforce",
+      "title": "Driver shifts",
+      "description": "Assign hired drivers to a configured shift period for the selected work date.",
+      "searchPlaceholder": "Search by name, email, mobile, or license...",
+      "itemLabel": "driver",
+      "unassigned": "Unassigned",
+      "templates": {
+        "morning": "Morning",
+        "afternoon": "Afternoon",
+        "night": "Night"
+      },
+      "views": {
+        "day": "Day",
+        "week": "Week"
+      },
+      "filters": {
+        "date": "Work date",
+        "pickDate": "Pick a date",
+        "shift": "Shift",
+        "search": "Search",
+        "shiftOptions": {
+          "all": "All shifts",
+          "unassigned": "Unassigned"
+        }
+      },
+      "columns": {
+        "name": "Driver",
+        "mobile": "Mobile",
+        "vehicle": "Assigned vehicle",
+        "shift": "Shift",
+        "hours": "Hours"
+      },
+      "empty": {
+        "title": "No drivers for this date",
+        "description": "Hired drivers appear here. Assign a configured shift period for coverage.",
+        "searchDescription": "Try a different search or shift filter."
+      },
+      "stats": {
+        "shiftDescription": "Scheduled {hours}",
+        "unassignedTitle": "Unassigned",
+        "unassignedDescription": "Hired drivers without a shift yet"
+      },
+      "week": {
+        "title": "Week of {range}",
+        "description": "Click a day to highlight it, then assign a configured period in each cell.",
+        "prev": "Previous week",
+        "next": "Next week",
+        "today": "Today",
+        "assignedCount": "{assigned} of {total}"
+      },
+      "periods": {
+        "button": "Periods",
+        "title": "Shift periods",
+        "description": "Configure the named time ranges used when assigning drivers. Overnight periods are allowed, such as 10:00 PM to 6:00 AM.",
+        "add": "Add period",
+        "edit": "Edit period",
+        "save": "Save period",
+        "cancel": "Cancel",
+        "name": "Name",
+        "start": "Starts",
+        "end": "Ends",
+        "active": "Active",
+        "inactive": "Inactive",
+        "empty": "No shift periods yet. Add one to start assigning drivers.",
+        "hoursHint": "Use 24-hour time in this form. Assignment lists show 12-hour time. If end is earlier than start, the period runs overnight.",
+        "toast": {
+          "created": {
+            "title": "Period added",
+            "description": "Drivers can now be assigned to this shift."
+          },
+          "updated": {
+            "title": "Period updated",
+            "description": "Assignment lists now use the new hours."
+          },
+          "deleted": {
+            "title": "Period deleted",
+            "description": "This shift is no longer available to assign."
+          },
+          "failed": {
+            "title": "Could not save period",
+            "description": "Please try again."
+          }
+        },
+        "delete": {
+          "title": "Delete shift period?",
+          "description": "Delete {name}? Drivers already assigned to this period must be unassigned first.",
+          "confirm": "Delete",
+          "cancel": "Cancel",
+          "deleting": "Deleting…"
+        }
+      },
+      "toast": {
+        "saved": {
+          "title": "Shift updated",
+          "description": "The driver’s shift for that date has been saved."
+        },
+        "failed": {
+          "title": "Could not update shift",
+          "description": "Please try again."
+        }
+      }
+    },
     "attendance": {
       "eyebrow": "Workforce",
       "title": "Driver attendance",

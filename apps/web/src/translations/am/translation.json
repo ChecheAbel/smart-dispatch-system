@@ -2420,6 +2420,109 @@
         "model": "ሞዴል"
       }
     },
+    "shifts": {
+      "eyebrow": "ሰራተኞች",
+      "title": "የአሽከርካሪ ፈረቃዎች",
+      "description": "የተቀጠሩ አሽከርካሪዎችን ለተመረጠው የስራ ቀን በተዋቀረ ፈረቃ ይመድቡ።",
+      "searchPlaceholder": "በስም፣ ኢሜይል፣ ሞባይል ወይም ፈቃድ ይፈልጉ...",
+      "itemLabel": "አሽከርካሪ",
+      "unassigned": "ያልተመደበ",
+      "templates": {
+        "morning": "ጠዋት",
+        "afternoon": "ከሰዓት",
+        "night": "ማታ"
+      },
+      "views": {
+        "day": "ቀን",
+        "week": "ሳምንት"
+      },
+      "filters": {
+        "date": "የስራ ቀን",
+        "pickDate": "ቀን ይምረጡ",
+        "shift": "ፈረቃ",
+        "search": "ፍለጋ",
+        "shiftOptions": {
+          "all": "ሁሉም ፈረቃዎች",
+          "unassigned": "ያልተመደበ"
+        }
+      },
+      "columns": {
+        "name": "አሽከርካሪ",
+        "mobile": "ሞባይል",
+        "vehicle": "የተመደበ ተሽከርካሪ",
+        "shift": "ፈረቃ",
+        "hours": "ሰዓት"
+      },
+      "empty": {
+        "title": "ለዚህ ቀን አሽከርካሪ የለም",
+        "description": "የተቀጠሩ አሽከርካሪዎች እዚህ ይታያሉ። ለሽፋን የተዋቀረ ፈረቃ ይመድቡ።",
+        "searchDescription": "ሌላ የፍለጋ ቃል ወይም የፈረቃ ማጣሪያ ይሞክሩ።"
+      },
+      "stats": {
+        "shiftDescription": "የታቀደ {hours}",
+        "unassignedTitle": "ያልተመደበ",
+        "unassignedDescription": "ገና ፈረቃ ያልተመደበላቸው አሽከርካሪዎች"
+      },
+      "week": {
+        "title": "የ {range} ሳምንት",
+        "description": "ቀን በመጫን ያድምቁ፣ ከዚያ በእያንዳንዱ ህዋስ የተዋቀረ ፈረቃ ይመድቡ።",
+        "prev": "ያለፈው ሳምንት",
+        "next": "የሚቀጥለው ሳምንት",
+        "today": "ዛሬ",
+        "assignedCount": "{assigned} ከ {total}"
+      },
+      "periods": {
+        "button": "ጊዜያት",
+        "title": "የፈረቃ ጊዜያት",
+        "description": "አሽከርካሪ ሲመድቡ የሚጠቀሙባቸውን ስም ያላቸው የሰዓት ክልሎች ያዋቅሩ። ማታ እስከ ጥዋት የሚዘልቅ ፈረቃ ይፈቀዳል።",
+        "add": "ጊዜ ጨምር",
+        "edit": "ጊዜ አርትዕ",
+        "save": "ጊዜ አስቀምጥ",
+        "cancel": "ሰርዝ",
+        "name": "ስም",
+        "start": "መጀመሪያ",
+        "end": "መጨረሻ",
+        "active": "ንቁ",
+        "inactive": "ቦዝኗል",
+        "empty": "ገና የፈረቃ ጊዜ የለም። አሽከርካሪ ለመመደብ አንዱን ይጨምሩ።",
+        "hoursHint": "በዚህ ቅጽ 24-ሰዓት ይጠቀሙ። ዝርዝሮች 12-ሰዓት ያሳያሉ። መጨረሻ ከመጀመሪያ በፊት ከሆነ ፈረቃው ሌሊት ያድራል።",
+        "toast": {
+          "created": {
+            "title": "ጊዜ ተጨመረ",
+            "description": "አሽከርካሪዎች አሁን ወደዚህ ፈረቃ ሊመደቡ ይችላሉ።"
+          },
+          "updated": {
+            "title": "ጊዜ ተዘምኗል",
+            "description": "የምደባ ዝርዝሮች አዲሱን ሰዓት ይጠቀማሉ።"
+          },
+          "deleted": {
+            "title": "ጊዜ ተሰርዟል",
+            "description": "ይህ ፈረቃ ከእንግዲህ ለምደባ አይገኝም።"
+          },
+          "failed": {
+            "title": "ጊዜ ማስቀመጥ አልተቻለም",
+            "description": "እባክዎ እንደገና ይሞክሩ።"
+          }
+        },
+        "delete": {
+          "title": "የፈረቃ ጊዜ ይሰረዝ?",
+          "description": "{name} ይሰረዝ? ለዚህ ጊዜ የተመደቡ አሽከርካሪዎች መጀመሪያ መነሳት አለባቸው።",
+          "confirm": "ሰርዝ",
+          "cancel": "ተወው",
+          "deleting": "እየሰረዘ…"
+        }
+      },
+      "toast": {
+        "saved": {
+          "title": "ፈረቃ ተቀምጧል",
+          "description": "የአሽከርካሪው ፈረቃ ለዚያ ቀን ተቀምጧል።"
+        },
+        "failed": {
+          "title": "ፈረቃ ማዘመን አልተቻለም",
+          "description": "እባክዎ እንደገና ይሞክሩ።"
+        }
+      }
+    },
     "attendance": {
       "eyebrow": "ሰራተኞች",
       "title": "የአሽከርካሪ መገኘት",

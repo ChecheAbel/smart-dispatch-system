@@ -12,8 +12,8 @@ const DEFAULT_PERMISSIONS = [
   { slug: "users.delete", module: "users", action: "delete", description: "Delete users" },
   { slug: "user_registrations.read", module: "user_registrations", action: "read", description: "View customer registration applications" },
   { slug: "user_registrations.write", module: "user_registrations", action: "write", description: "Approve or reject customer registration applications" },
-  { slug: "drivers.read", module: "drivers", action: "read", description: "View hired drivers, attendance, and performance" },
-  { slug: "drivers.write", module: "drivers", action: "write", description: "Manage hired drivers and attendance records" },
+  { slug: "drivers.read", module: "drivers", action: "read", description: "View hired drivers, shifts, attendance, and performance" },
+  { slug: "drivers.write", module: "drivers", action: "write", description: "Manage hired drivers, shift assignments, and attendance records" },
   { slug: "roles.read", module: "roles", action: "read", description: "View roles" },
   { slug: "roles.write", module: "roles", action: "write", description: "Create and update roles" },
   { slug: "roles.delete", module: "roles", action: "delete", description: "Delete roles" },
@@ -92,7 +92,10 @@ const REMOVED_MENU_SLUGS = [
   "notifications-sms",
   "customer-requests",
   "drivers-applications",
+  "applications",
 ] as const;
+
+const REMOVED_MENU_PATHS = ["/admin/drivers/applications"] as const;
 
 const REMOVED_PERMISSION_SLUGS = [
   "permissions.read",
@@ -190,6 +193,17 @@ const DEFAULT_MENUS = [
     translations: [
       { locale: "en", label: "Drivers" },
       { locale: "am", label: "አሽከርካሪዎች" },
+    ],
+  },
+  {
+    slug: "drivers-shifts",
+    path: "/admin/drivers/shifts",
+    icon: "calendar-clock",
+    sortOrder: 15,
+    parentSlug: "drivers",
+    translations: [
+      { locale: "en", label: "Shifts" },
+      { locale: "am", label: "ፈረቃዎች" },
     ],
   },
   {
@@ -672,6 +686,15 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "driver_attendance.check_in", method: "POST", path: "/api/driver-attendance/check-in", description: "Check a driver in", permissionSlug: "drivers.write" },
   { slug: "driver_attendance.check_out", method: "POST", path: "/api/driver-attendance/check-out", description: "Check a driver out", permissionSlug: "drivers.write" },
   { slug: "driver_attendance.delete", method: "DELETE", path: "/api/driver-attendance/:id", description: "Clear a driver attendance record", permissionSlug: "drivers.write" },
+  { slug: "driver_shifts.templates", method: "GET", path: "/api/driver-shifts/templates", description: "List driver shift templates", permissionSlug: "drivers.read" },
+  { slug: "driver_shifts.templates.create", method: "POST", path: "/api/driver-shifts/templates", description: "Create a driver shift period", permissionSlug: "drivers.write" },
+  { slug: "driver_shifts.templates.update", method: "PATCH", path: "/api/driver-shifts/templates/:id", description: "Update a driver shift period", permissionSlug: "drivers.write" },
+  { slug: "driver_shifts.templates.delete", method: "DELETE", path: "/api/driver-shifts/templates/:id", description: "Delete a driver shift period", permissionSlug: "drivers.write" },
+  { slug: "driver_shifts.list", method: "GET", path: "/api/driver-shifts", description: "List driver shift assignments for a work date", permissionSlug: "drivers.read" },
+  { slug: "driver_shifts.summary", method: "GET", path: "/api/driver-shifts/summary", description: "Summarize driver shift coverage for a work date", permissionSlug: "drivers.read" },
+  { slug: "driver_shifts.week", method: "GET", path: "/api/driver-shifts/week", description: "List driver shift coverage for an ISO week", permissionSlug: "drivers.read" },
+  { slug: "driver_shifts.upsert", method: "PUT", path: "/api/driver-shifts", description: "Assign or clear a driver shift for a work date", permissionSlug: "drivers.write" },
+  { slug: "driver_shifts.delete", method: "DELETE", path: "/api/driver-shifts/:id", description: "Clear a driver shift assignment", permissionSlug: "drivers.write" },
   { slug: "business_tin.lookup", method: "GET", path: "/api/business-tin/:tin", description: "Look up a business TIN with eTrade registration", permissionSlug: "users.read" },
   { slug: "business_tin.license.lookup", method: "GET", path: "/api/business-tin/:tin/license", description: "Look up a business trade license by TIN and license number", permissionSlug: "users.read" },
   { slug: "roles.list", method: "GET", path: "/api/roles", description: "List roles", permissionSlug: "roles.read" },
@@ -911,7 +934,12 @@ async function seedEndpoints() {
 
 async function deleteRemovedMenus() {
   await prisma.menu.deleteMany({
-    where: { slug: { in: [...REMOVED_MENU_SLUGS] } },
+    where: {
+      OR: [
+        { slug: { in: [...REMOVED_MENU_SLUGS] } },
+        { path: { in: [...REMOVED_MENU_PATHS] } },
+      ],
+    },
   });
 }
 
@@ -1016,4 +1044,34 @@ export async function seedAccessControl() {
   await seedAdminRolePermissions(permissionIds);
   await seedUserRolePermissions();
   await seedDriverRolePermissions();
+  await seedDriverShiftTemplates();
+}
+
+const DEFAULT_SHIFT_TEMPLATES = [
+  { slug: "morning", name: "Morning", startTime: "06:00", endTime: "14:00", sortOrder: 10 },
+  { slug: "afternoon", name: "Afternoon", startTime: "14:00", endTime: "22:00", sortOrder: 20 },
+  { slug: "night", name: "Night", startTime: "22:00", endTime: "06:00", sortOrder: 30 },
+] as const;
+
+async function seedDriverShiftTemplates() {
+  const existing = await prisma.driverShiftTemplate.count();
+  if (existing > 0) {
+    console.log("[Seed] Driver shift templates already present");
+    return;
+  }
+
+  for (const template of DEFAULT_SHIFT_TEMPLATES) {
+    await prisma.driverShiftTemplate.create({
+      data: {
+        slug: template.slug,
+        name: template.name,
+        startTime: template.startTime,
+        endTime: template.endTime,
+        sortOrder: template.sortOrder,
+        active: true,
+      },
+    });
+  }
+
+  console.log(`[Seed] Driver shift templates created (${DEFAULT_SHIFT_TEMPLATES.length})`);
 }

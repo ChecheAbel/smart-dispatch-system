@@ -88,6 +88,17 @@ export function parseBoolean(value: unknown): boolean | undefined {
   return undefined;
 }
 
+export function parseShiftClockTime(value: unknown): string | undefined {
+  const time = getString(value);
+  const match = /^(\d{1,2}):(\d{2})(?::\d{2})?$/.exec(time);
+  if (!match) return undefined;
+
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (hour > 23 || minute > 59) return undefined;
+  return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+}
+
 export function parseAccountStatus(value: unknown): AccountStatus | undefined {
   if (typeof value !== "string") return undefined;
   return ACCOUNT_STATUSES.includes(value as AccountStatus) ? (value as AccountStatus) : undefined;

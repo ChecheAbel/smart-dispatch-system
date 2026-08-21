@@ -160,6 +160,8 @@ model User {
   assignedComplaints           Complaint[]               @relation("ComplaintAssignee")
   driverAttendances            DriverAttendance[]        @relation("DriverAttendanceDriver")
   recordedDriverAttendances    DriverAttendance[]        @relation("DriverAttendanceRecordedBy")
+  driverShiftAssignments       DriverShiftAssignment[]   @relation("DriverShiftAssignmentDriver")
+  assignedDriverShiftAssignments DriverShiftAssignment[] @relation("DriverShiftAssignmentAssignedBy")
 
   @@index([email])
   @@index([mobileNumber])
@@ -229,6 +231,41 @@ model DriverAttendance {
   @@index([workDate, status])
   @@index([recordedByUserId])
   @@map("driver_attendances")
+}
+
+model DriverShiftTemplate {
+  id          String                  @id @default(uuid()) @db.Uuid
+  slug        String                  @unique @db.VarChar(50)
+  name        String                  @db.VarChar(100)
+  startTime   String                  @map("start_time") @db.VarChar(5)
+  endTime     String                  @map("end_time") @db.VarChar(5)
+  sortOrder   Int                     @default(0) @map("sort_order")
+  active      Boolean                 @default(true)
+  createdAt   DateTime                @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt   DateTime                @updatedAt @map("updated_at") @db.Timestamptz
+  assignments DriverShiftAssignment[]
+
+  @@index([active, sortOrder])
+  @@map("driver_shift_templates")
+}
+
+model DriverShiftAssignment {
+  id               String              @id @default(uuid()) @db.Uuid
+  driverUserId     String              @map("driver_user_id") @db.Uuid
+  workDate         DateTime            @map("work_date") @db.Date
+  shiftTemplateId  String              @map("shift_template_id") @db.Uuid
+  notes            String?             @db.Text
+  assignedByUserId String?             @map("assigned_by_user_id") @db.Uuid
+  createdAt        DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt        DateTime            @updatedAt @map("updated_at") @db.Timestamptz
+  driver           User                @relation("DriverShiftAssignmentDriver", fields: [driverUserId], references: [id], onDelete: Cascade)
+  shiftTemplate    DriverShiftTemplate @relation(fields: [shiftTemplateId], references: [id], onDelete: Restrict)
+  assignedBy       User?               @relation("DriverShiftAssignmentAssignedBy", fields: [assignedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([driverUserId, workDate])
+  @@index([workDate, shiftTemplateId])
+  @@index([assignedByUserId])
+  @@map("driver_shift_assignments")
 }
 
 model AuthRole {

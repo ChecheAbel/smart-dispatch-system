@@ -100,6 +100,64 @@ export interface DriverAttendanceSummary {
   unmarked: number;
 }
 
+export interface DriverShiftTemplate {
+  id: string;
+  slug: string;
+  name: string;
+  start_time: string;
+  end_time: string;
+  sort_order: number;
+  active: boolean;
+}
+
+export interface DriverShiftAssignment {
+  id: string;
+  driver_user_id: string;
+  work_date: string;
+  shift: DriverShiftTemplate;
+  notes: string | null;
+  assigned_by: { id: string; name: string } | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DriverShiftRosterItem {
+  driver: DriverAttendancePerson;
+  assignment: DriverShiftAssignment | null;
+}
+
+export interface DriverShiftCount {
+  template: DriverShiftTemplate;
+  count: number;
+}
+
+export interface DriverShiftSummary {
+  work_date: string;
+  total_drivers: number;
+  unassigned: number;
+  by_shift: DriverShiftCount[];
+}
+
+export interface DriverShiftWeekDaySummary {
+  work_date: string;
+  assigned: number;
+  unassigned: number;
+  by_shift: Array<{ template_id: string; slug: string; count: number }>;
+}
+
+export interface DriverShiftWeekRosterItem {
+  driver: DriverAttendancePerson;
+  assignments: Record<string, DriverShiftAssignment>;
+}
+
+export interface DriverShiftWeek {
+  start_date: string;
+  end_date: string;
+  templates: DriverShiftTemplate[];
+  days: DriverShiftWeekDaySummary[];
+  roster: DriverShiftWeekRosterItem[];
+}
+
 export type RequesterSegment = "individual" | "business" | "government";
 
 export interface RequesterProfile {

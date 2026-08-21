@@ -40,6 +40,10 @@ export const extensionTags = [
     description: "Daily driver attendance roster, check-in/out, and leave records (admin only)",
   },
   {
+    name: "Driver Shifts",
+    description: "Named work shifts and daily driver roster assignments (admin only)",
+  },
+  {
     name: "Dispatch",
     description: "Dispatcher working board: assignment queues, live trips, fleet availability, and open complaints.",
   },
@@ -1461,6 +1465,203 @@ export const extensionPaths = {
         "200": { description: "Attendance summary" },
         "401": unauthorized,
         "403": forbidden,
+      },
+    },
+  },
+  "/api/driver-shifts/templates": {
+    get: {
+      tags: ["Driver Shifts"],
+      summary: "List driver shift periods",
+      description: "Returns configured named shifts used when assigning drivers. Defaults to active periods only.",
+      security,
+      parameters: [
+        {
+          name: "include_inactive",
+          in: "query",
+          schema: { type: "boolean" },
+          description: "Include deactivated periods",
+        },
+      ],
+      responses: {
+        "200": { description: "Shift templates" },
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+    post: {
+      tags: ["Driver Shifts"],
+      summary: "Create a driver shift period",
+      security,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["name", "start_time", "end_time"],
+              properties: {
+                name: { type: "string" },
+                start_time: { type: "string", example: "06:00" },
+                end_time: { type: "string", example: "14:00" },
+                active: { type: "boolean" },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "201": { description: "Period created" },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+  },
+  "/api/driver-shifts/templates/{id}": {
+    patch: {
+      tags: ["Driver Shifts"],
+      summary: "Update a driver shift period",
+      security,
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+      requestBody: {
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                name: { type: "string" },
+                start_time: { type: "string" },
+                end_time: { type: "string" },
+                active: { type: "boolean" },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "200": { description: "Period updated" },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+    delete: {
+      tags: ["Driver Shifts"],
+      summary: "Delete a driver shift period",
+      security,
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+      responses: {
+        "200": { description: "Period deleted" },
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+        "409": { description: "Period is still assigned to drivers" },
+      },
+    },
+  },
+  "/api/driver-shifts": {
+    get: {
+      tags: ["Driver Shifts"],
+      summary: "List driver shift roster",
+      description:
+        "Lists hired drivers and their assigned shift for a work date (Africa/Addis_Ababa). Defaults to today.",
+      security,
+      parameters: [
+        { name: "date", in: "query", schema: { type: "string", format: "date" }, description: "Work date (YYYY-MM-DD)" },
+        {
+          name: "shift",
+          in: "query",
+          schema: { type: "string" },
+          description: "Shift template id, slug, or `unassigned`",
+        },
+        { name: "search", in: "query", schema: { type: "string" } },
+        { $ref: "#/components/parameters/Page" },
+        { $ref: "#/components/parameters/Limit" },
+      ],
+      responses: {
+        "200": { description: "Shift roster" },
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+    put: {
+      tags: ["Driver Shifts"],
+      summary: "Assign or clear a driver shift",
+      security,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              required: ["driver_user_id"],
+              properties: {
+                driver_user_id: { type: "string", format: "uuid" },
+                work_date: { type: "string", format: "date" },
+                shift_template_id: {
+                  type: "string",
+                  nullable: true,
+                  description: "Shift template id or slug. Null clears the assignment.",
+                },
+                notes: { type: "string", nullable: true },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "200": { description: "Shift assignment saved" },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
+      },
+    },
+  },
+  "/api/driver-shifts/summary": {
+    get: {
+      tags: ["Driver Shifts"],
+      summary: "Summarize driver shift coverage for a work date",
+      security,
+      parameters: [
+        { name: "date", in: "query", schema: { type: "string", format: "date" } },
+      ],
+      responses: {
+        "200": { description: "Shift coverage summary" },
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+  },
+  "/api/driver-shifts/week": {
+    get: {
+      tags: ["Driver Shifts"],
+      summary: "List driver shift coverage for an ISO week",
+      description: "Returns Monday–Sunday coverage counts and a full hired-driver roster for the week containing the given date.",
+      security,
+      parameters: [
+        { name: "date", in: "query", schema: { type: "string", format: "date" } },
+        { name: "search", in: "query", schema: { type: "string" } },
+      ],
+      responses: {
+        "200": { description: "Week shift roster" },
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+  },
+  "/api/driver-shifts/{id}": {
+    delete: {
+      tags: ["Driver Shifts"],
+      summary: "Clear a driver shift assignment",
+      security,
+      parameters: [{ name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }],
+      responses: {
+        "200": { description: "Assignment cleared" },
+        "401": unauthorized,
+        "403": forbidden,
+        "404": notFound,
       },
     },
   },
