@@ -11,7 +11,7 @@ import {
 import type { DbUser } from "../db/types";
 import type { AuthTokenResponse, Permission, RoleSlug, User } from "@smart-dispatch/types";
 import { findUserByEmail, findUserById, findUserByMobileNumber, updateUser, updateUserPassword } from "../models/user.model";
-import { findDriverByLicenseNumber, findDriverByUserId, getDriverRatingSummary } from "../models/driver.model";
+import { findDriverByLicenseNumber, findDriverByUserId, getDriverPerformanceSummary, getDriverRatingSummary } from "../models/driver.model";
 import { findPermissionsByUserId } from "../models/permission.model";
 import { toPublicPermission } from "../mappers/permission.mapper";
 import { toPublicDriverProfile } from "../mappers/driver.mapper";
@@ -59,7 +59,7 @@ function isAccountUsable(user: DbUser) {
 }
 
 async function toSafeUser(user: DbUser): Promise<User> {
-  const [roles, driverProfile, requesterProfile, assignedVehicle, driverRating] = await Promise.all([
+  const [roles, driverProfile, requesterProfile, assignedVehicle, driverRating, driverPerformance] = await Promise.all([
     findRolesByUserId(user.id),
     findDriverByUserId(user.id),
     findRequesterProfileByUserId(user.id),
@@ -68,6 +68,7 @@ async function toSafeUser(user: DbUser): Promise<User> {
       select: { id: true, plateNumber: true, make: true, model: true },
     }),
     getDriverRatingSummary(user.id),
+    getDriverPerformanceSummary(user.id),
   ]);
 
   return {
@@ -77,7 +78,7 @@ async function toSafeUser(user: DbUser): Promise<User> {
     middle_name: user.middleName,
     last_name: user.lastName,
     mobile_number: user.mobileNumber,
-    driver: driverProfile ? toPublicDriverProfile(driverProfile, driverRating) : null,
+    driver: driverProfile ? toPublicDriverProfile(driverProfile, driverRating, driverPerformance) : null,
     assigned_vehicle: assignedVehicle
       ? {
           id: assignedVehicle.id,

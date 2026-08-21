@@ -86,6 +86,18 @@ export const openApiSpec = {
                   count: { type: "integer", example: 12 },
                 },
               },
+              performance: {
+                type: "object",
+                properties: {
+                  trips_assigned: { type: "integer", example: 40 },
+                  trips_completed: { type: "integer", example: 36 },
+                  trips_no_show: { type: "integer", example: 2 },
+                  completion_rate: { type: "number", nullable: true, example: 0.947 },
+                  on_time_rate: { type: "number", nullable: true, example: 0.88 },
+                  complaints: { type: "integer", example: 1 },
+                  attendance_rate: { type: "number", nullable: true, example: 0.93 },
+                },
+              },
             },
           },
           assigned_vehicle: {

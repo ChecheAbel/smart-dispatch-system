@@ -2475,6 +2475,61 @@
         "unmarkedDescription": "Hired drivers without a record yet"
       }
     },
+    "performance": {
+      "eyebrow": "Workforce",
+      "title": "Driver performance",
+      "description": "Trip completion, on-time starts, complaints, and attendance for hired drivers over the last 30 days.",
+      "searchPlaceholder": "Search by name, email, or mobile...",
+      "itemLabel": "driver",
+      "columns": {
+        "name": "Driver",
+        "rating": "Rating",
+        "completed": "Completed",
+        "completionRate": "Completion",
+        "noShows": "No-shows",
+        "onTime": "On-time",
+        "complaints": "Complaints",
+        "attendance": "Attendance"
+      },
+      "empty": {
+        "title": "No drivers found",
+        "description": "Hired drivers will appear here with trip and attendance metrics once they start taking trips.",
+        "searchDescription": "Try a different search term."
+      },
+      "export": {
+        "button": "Export",
+        "excel": "Export Excel",
+        "pdf": "Export PDF",
+        "empty": "No driver performance data to export.",
+        "generatedOn": "Generated on {date}",
+        "footerBrand": "Smart Dispatch System",
+        "pageLabel": "Page {page} of {pages}",
+        "toast": {
+          "success": {
+            "title": "Export ready",
+            "description": "The driver performance file has been downloaded."
+          },
+          "failed": {
+            "title": "Export failed",
+            "description": "Could not export driver performance. Please try again."
+          }
+        },
+        "columns": {
+          "name": "Driver",
+          "email": "Email",
+          "mobile": "Mobile",
+          "rating": "Rating",
+          "completed": "Completed trips",
+          "completionRate": "Completion rate",
+          "noShows": "No-shows",
+          "onTime": "On-time starts",
+          "complaints": "Complaints",
+          "attendance": "Attendance (30 days)",
+          "vehicle": "Assigned vehicle",
+          "status": "Status"
+        }
+      }
+    },
     "toast": {
       "loadFailed": {
         "title": "Could not load driver",

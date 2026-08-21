@@ -2475,6 +2475,61 @@
         "unmarkedDescription": "ገና መዝገብ የሌላቸው የተቀጠሩ አሽከርካሪዎች"
       }
     },
+    "performance": {
+      "eyebrow": "ሰራተኞች",
+      "title": "የአሽከርካሪ አፈጻጸም",
+      "description": "የተጠናቀቁ ጉዞዎች፣ በሰዓቱ መጀመር፣ ቅሬታዎች እና የመጨረሻዎቹ 30 ቀናት መገኘት።",
+      "searchPlaceholder": "በስም፣ ኢሜይል ወይም ሞባይል ይፈልጉ...",
+      "itemLabel": "አሽከርካሪ",
+      "columns": {
+        "name": "አሽከርካሪ",
+        "rating": "ደረጃ",
+        "completed": "የተጠናቀቁ",
+        "completionRate": "ማጠናቀቅ",
+        "noShows": "ያልተገኙ",
+        "onTime": "በሰዓቱ",
+        "complaints": "ቅሬታዎች",
+        "attendance": "መገኘት"
+      },
+      "empty": {
+        "title": "ምንም አሽከርካሪ አልተገኘም",
+        "description": "የተቀጠሩ አሽከርካሪዎች ጉዞ መውሰድ ሲጀምሩ የጉዞ እና የመገኘት መለኪያዎች እዚህ ይታያሉ።",
+        "searchDescription": "ሌላ የፍለጋ ቃል ይሞክሩ።"
+      },
+      "export": {
+        "button": "አውርድ",
+        "excel": "ኤክሴል አውርድ",
+        "pdf": "ፒዲኤፍ አውርድ",
+        "empty": "የሚወርድ የአሽከርካሪ አፈጻጸም መረጃ የለም።",
+        "generatedOn": "በ {date} ተፈጥሯል",
+        "footerBrand": "ስማርት ዲስፓች ሲስተም",
+        "pageLabel": "ገጽ {page} ከ {pages}",
+        "toast": {
+          "success": {
+            "title": "ወርዷል",
+            "description": "የአሽከርካሪ አፈጻጸም ፋይል ወርዷል።"
+          },
+          "failed": {
+            "title": "ማውረድ አልተሳካም",
+            "description": "የአሽከርካሪ አፈጻጸም ማውረድ አልተቻለም። እባክዎ እንደገና ይሞክሩ።"
+          }
+        },
+        "columns": {
+          "name": "አሽከርካሪ",
+          "email": "ኢሜይል",
+          "mobile": "ሞባይል",
+          "rating": "ደረጃ",
+          "completed": "የተጠናቀቁ ጉዞዎች",
+          "completionRate": "የማጠናቀቅ መጠን",
+          "noShows": "ያልተገኙ",
+          "onTime": "በሰዓቱ መጀመር",
+          "complaints": "ቅሬታዎች",
+          "attendance": "መገኘት (30 ቀናት)",
+          "vehicle": "የተመደበ ተሽከርካሪ",
+          "status": "ሁኔታ"
+        }
+      }
+    },
     "toast": {
       "loadFailed": {
         "title": "አሽከርካሪ መጫን አልተቻለም",

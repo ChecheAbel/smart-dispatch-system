@@ -1,6 +1,6 @@
-import type { DriverRatingSummary, RoleSlug, User } from "@smart-dispatch/types";
+import type { DriverPerformance, DriverRatingSummary, RoleSlug, User } from "@smart-dispatch/types";
 import type { RequesterProfile as DbRequesterProfile } from "../generated/prisma";
-import { getDriverRatingSummaries } from "../models/driver.model";
+import { getDriverPerformanceSummaries, getDriverRatingSummaries } from "../models/driver.model";
 import { toPublicDriverProfile } from "./driver.mapper";
 import { toPublicRequesterProfile } from "./requester-profile.mapper";
 
@@ -33,6 +33,7 @@ type UserWithRelations = {
 export function toPublicUser(
   user: UserWithRelations,
   rating?: DriverRatingSummary | null,
+  performance?: DriverPerformance | null,
 ): User {
   return {
     id: user.id,
@@ -41,7 +42,7 @@ export function toPublicUser(
     middle_name: user.middleName,
     last_name: user.lastName,
     mobile_number: user.mobileNumber,
-    driver: user.driverProfile ? toPublicDriverProfile(user.driverProfile, rating) : null,
+    driver: user.driverProfile ? toPublicDriverProfile(user.driverProfile, rating, performance) : null,
     assigned_vehicle: user.assignedVehicle
       ? {
           id: user.assignedVehicle.id,
@@ -62,9 +63,12 @@ export function toPublicUser(
 
 export async function toPublicUsers(users: UserWithRelations[]): Promise<User[]> {
   const driverIds = users.filter((user) => user.driverProfile).map((user) => user.id);
-  const summaries = await getDriverRatingSummaries(driverIds);
+  const [ratings, performances] = await Promise.all([
+    getDriverRatingSummaries(driverIds),
+    getDriverPerformanceSummaries(driverIds),
+  ]);
 
-  return users.map((user) => toPublicUser(user, summaries.get(user.id)));
+  return users.map((user) => toPublicUser(user, ratings.get(user.id), performances.get(user.id)));
 }
 
 export async function toPublicUserWithRating(user: UserWithRelations): Promise<User> {

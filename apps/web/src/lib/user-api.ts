@@ -39,6 +39,23 @@ export async function fetchUsers(params: FetchUsersParams = {}) {
   return unwrapPaginatedApiResponse<User>(data);
 }
 
+export async function fetchAllUsers(params: Omit<FetchUsersParams, "page" | "limit"> = {}) {
+  const limit = 100;
+  let page = 1;
+  const users: User[] = [];
+
+  while (true) {
+    const result = await fetchUsers({ ...params, page, limit });
+    users.push(...result.data);
+    if (!result.pagination.has_next) {
+      break;
+    }
+    page += 1;
+  }
+
+  return users;
+}
+
 export async function fetchUserById(id: string) {
   const { data } = await apiClient.get(`/api/users/${id}`);
   return unwrapApiResponse<{ user: User }>(data).user;

@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
+  Activity,
   Award,
   Bell,
   Circle,
@@ -44,6 +45,8 @@ const MENU_ICON_MAP: Record<string, LucideIcon> = {
   drivers: IdCard,
   "drivers-directory": IdCard,
   "drivers-attendance": Clock3,
+  activity: Activity,
+  "drivers-performance": Activity,
   "clipboard-check": ClipboardCheck,
   "clipboard-list": ClipboardList,
   shield: Shield,

@@ -12,7 +12,7 @@ const DEFAULT_PERMISSIONS = [
   { slug: "users.delete", module: "users", action: "delete", description: "Delete users" },
   { slug: "user_registrations.read", module: "user_registrations", action: "read", description: "View customer registration applications" },
   { slug: "user_registrations.write", module: "user_registrations", action: "write", description: "Approve or reject customer registration applications" },
-  { slug: "drivers.read", module: "drivers", action: "read", description: "View hired drivers and attendance" },
+  { slug: "drivers.read", module: "drivers", action: "read", description: "View hired drivers, attendance, and performance" },
   { slug: "drivers.write", module: "drivers", action: "write", description: "Manage hired drivers and attendance records" },
   { slug: "roles.read", module: "roles", action: "read", description: "View roles" },
   { slug: "roles.write", module: "roles", action: "write", description: "Create and update roles" },
@@ -201,6 +201,17 @@ const DEFAULT_MENUS = [
     translations: [
       { locale: "en", label: "Attendance" },
       { locale: "am", label: "መገኘት" },
+    ],
+  },
+  {
+    slug: "drivers-performance",
+    path: "/admin/drivers/performance",
+    icon: "activity",
+    sortOrder: 30,
+    parentSlug: "drivers",
+    translations: [
+      { locale: "en", label: "Performance" },
+      { locale: "am", label: "አፈጻጸም" },
     ],
   },
   {

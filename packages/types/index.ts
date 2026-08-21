@@ -32,6 +32,17 @@ export interface DriverRatingSummary {
   count: number;
 }
 
+/** Trip, punctuality, complaint, and attendance metrics for a driver. */
+export interface DriverPerformance {
+  trips_assigned: number;
+  trips_completed: number;
+  trips_no_show: number;
+  completion_rate: number | null;
+  on_time_rate: number | null;
+  complaints: number;
+  attendance_rate: number | null;
+}
+
 /** Driver-specific profile linked to a user account. */
 export interface DriverProfile {
   license_number: string;
@@ -39,6 +50,7 @@ export interface DriverProfile {
   license_photo_back_url: string | null;
   created_at: string;
   rating: DriverRatingSummary;
+  performance: DriverPerformance;
 }
 
 /** Vehicle currently assigned as a driver's default unit. */

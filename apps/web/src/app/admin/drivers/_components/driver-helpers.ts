@@ -16,6 +16,14 @@ export function formatAssignedVehicle(vehicle: AssignedVehicleSummary | null | u
   return name ? `${vehicle.plate_number} · ${name}` : vehicle.plate_number;
 }
 
+export function formatPercent(rate: number | null | undefined) {
+  if (rate == null || Number.isNaN(rate)) {
+    return null;
+  }
+
+  return `${Math.round(rate * 100)}%`;
+}
+
 export function statusBadgeClass(status: AccountStatus) {
   switch (status) {
     case "active":
