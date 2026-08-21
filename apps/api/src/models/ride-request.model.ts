@@ -997,37 +997,7 @@ export async function findReminderDueRideRequests(
   });
 }
 
-const EXPIRED_RIDE_REQUEST_BATCH = 50;
-
-export function buildExpiredRideRequestReason(scheduledAt: Date | null) {
-  if (!scheduledAt) {
-    return "Automatically cancelled because the scheduled pickup time has passed.";
-  }
-
-  const when = scheduledAt.toLocaleString("en-GB", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-
-  return `Automatically cancelled because the scheduled pickup time (${when}) has passed.`;
-}
-
-export async function findExpiredUnstartedRideRequests(asOf: Date = new Date()) {
-  return prisma.rideRequest.findMany({
-    where: {
-      status: { in: ["pending", "confirmed"] },
-      scheduledAt: { lt: asOf },
-    },
-    orderBy: [{ scheduledAt: "asc" }, { createdAt: "asc" }],
-    take: EXPIRED_RIDE_REQUEST_BATCH,
-    select: {
-      id: true,
-      status: true,
-      scheduledAt: true,
-      assignedDriverUserId: true,
-    },
-  });
-}
+const STALE_IN_PROGRESS_RIDE_BATCH = 50;
 
 export const AUTO_COMPLETED_TRIP_NOTE =
   "Automatically completed because the driver did not mark the trip complete after the scheduled end.";
@@ -1055,7 +1025,7 @@ export async function findStaleInProgressRideRequests(asOf: Date = new Date()) {
       });
       return Boolean(endAt && endAt.getTime() < asOf.getTime());
     })
-    .slice(0, EXPIRED_RIDE_REQUEST_BATCH);
+    .slice(0, STALE_IN_PROGRESS_RIDE_BATCH);
 }
 
 export async function wasRideRequestNotificationSent(
