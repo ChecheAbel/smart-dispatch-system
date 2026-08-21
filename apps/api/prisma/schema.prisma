@@ -913,6 +913,8 @@ model Invoice {
   periodStart          DateTime              @map("period_start") @db.Date
   periodEnd            DateTime              @map("period_end") @db.Date
   subtotal             Decimal               @db.Decimal(14, 2)
+  vatRate              Decimal               @default(0) @map("vat_rate") @db.Decimal(5, 2)
+  vatAmount            Decimal               @default(0) @map("vat_amount") @db.Decimal(14, 2)
   totalAmount          Decimal               @map("total_amount") @db.Decimal(14, 2)
   currency             String                @default("ETB") @db.VarChar(3)
   paymentTermsDays     Int?                  @map("payment_terms_days")

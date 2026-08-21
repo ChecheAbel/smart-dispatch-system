@@ -67,6 +67,8 @@ export function toCustomerInvoice(invoice: DbInvoice, options?: { locale?: strin
     period_start: publicInvoice.period_start,
     period_end: publicInvoice.period_end,
     subtotal: publicInvoice.subtotal,
+    vat_rate: publicInvoice.vat_rate,
+    vat_amount: publicInvoice.vat_amount,
     total_amount: publicInvoice.total_amount,
     currency: publicInvoice.currency,
     payment_terms_days: publicInvoice.payment_terms_days,

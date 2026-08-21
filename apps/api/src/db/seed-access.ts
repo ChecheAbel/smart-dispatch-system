@@ -797,6 +797,8 @@ const DEFAULT_ENDPOINTS: Array<{
   { slug: "invoices.issue", method: "POST", path: "/api/invoices/:id/issue", description: "Issue draft invoice", permissionSlug: "invoices.write" },
   { slug: "invoices.mark_paid", method: "POST", path: "/api/invoices/:id/mark-paid", description: "Mark invoice as paid", permissionSlug: "invoices.write" },
   { slug: "invoices.void", method: "POST", path: "/api/invoices/:id/void", description: "Void invoice", permissionSlug: "invoices.delete" },
+  { slug: "system_settings.vat.get", method: "GET", path: "/api/admin/system-settings/vat", description: "Get invoice VAT settings", permissionSlug: "system_settings.read" },
+  { slug: "system_settings.vat.update", method: "PATCH", path: "/api/admin/system-settings/vat", description: "Update invoice VAT settings", permissionSlug: "system_settings.write" },
   { slug: "ride_requests.form_options", method: "GET", path: "/api/ride-requests/form-options", description: "Ride request form options", permissionSlug: "customer_requests.read" },
   { slug: "ride_requests.list", method: "GET", path: "/api/ride-requests", description: "List ride requests", permissionSlug: "customer_requests.read" },
   { slug: "ride_requests.get", method: "GET", path: "/api/ride-requests/:id", description: "Get ride request", permissionSlug: "customer_requests.read" },

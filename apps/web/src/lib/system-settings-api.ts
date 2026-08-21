@@ -1,4 +1,4 @@
-import type { BrandingSettings } from "@smart-dispatch/types";
+import type { BrandingSettings, VatSettings } from "@smart-dispatch/types";
 import { apiClient } from "./api-client";
 import { unwrapApiResponse } from "./api-response";
 
@@ -13,7 +13,7 @@ export type DeadlineSettings = {
   inspection_due_soon_days: number;
 };
 
-export type { BrandingSettings };
+export type { BrandingSettings, VatSettings };
 
 export async function fetchDeadlineSettings() {
   const { data } = await apiClient.get("/api/admin/system-settings/deadline");
@@ -26,6 +26,16 @@ export async function updateDeadlineSettings(input: DeadlineSettings) {
     input,
   );
   return unwrapApiResponse<DeadlineSettings>(data);
+}
+
+export async function fetchVatSettings() {
+  const { data } = await apiClient.get("/api/admin/system-settings/vat");
+  return unwrapApiResponse<VatSettings>(data);
+}
+
+export async function updateVatSettings(input: VatSettings) {
+  const { data } = await apiClient.patch("/api/admin/system-settings/vat", input);
+  return unwrapApiResponse<VatSettings>(data);
 }
 
 export async function fetchRideRequestDeadlineSettings() {

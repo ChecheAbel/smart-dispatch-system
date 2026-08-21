@@ -1034,6 +1034,7 @@
       "lineItemAmount": "Amount",
       "lineItemCompleted": "Completed",
       "subtotal": "Subtotal",
+      "vat": "VAT ({rate}%)",
       "total": "Total due",
       "notFound": "Invoice not found.",
       "loading": "Loading invoice…",
@@ -5574,6 +5575,7 @@
       "paymentTerms": "Payment terms",
       "paymentTermsValue": "Net {days} days",
       "subtotal": "Subtotal",
+      "vat": "VAT ({rate}%)",
       "total": "Total",
       "issuedAt": "Issued",
       "dueAt": "Due date",
@@ -5954,7 +5956,7 @@
       },
       "billing": {
         "title": "Invoices",
-        "description": "When issued invoices should enter the due-soon window."
+        "description": "When issued invoices should enter the due-soon window, and whether VAT is added to new invoices."
       },
       "compliance": {
         "title": "Vehicle compliance",
@@ -5997,6 +5999,17 @@
         "description": "Define how many days before due date an invoice enters the due-soon window.",
         "helper": "Used for invoice reminders, dashboard flags, and payment workflows.",
         "label": "Due-soon window"
+      },
+      "vat": {
+        "title": "VAT",
+        "description": "Add VAT on top of the invoice subtotal for newly generated invoices.",
+        "helper": "Only applies to new invoices.",
+        "label": "Add VAT to invoices",
+        "rateLabel": "VAT rate",
+        "enabledOn": "New invoices add VAT to the subtotal.",
+        "enabledOff": "New invoices are billed without VAT.",
+        "preview": "{rate}% added on new invoices",
+        "previewOff": "VAT is off"
       },
       "insurance_due_soon_days": {
         "title": "Insurance compliance",

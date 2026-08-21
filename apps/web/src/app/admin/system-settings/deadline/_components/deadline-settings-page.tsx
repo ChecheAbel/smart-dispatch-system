@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import { useAuth, useLocale } from "@/components/shared/providers";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
@@ -30,8 +31,11 @@ import {
 } from "@/lib/admin-theme";
 import {
   fetchDeadlineSettings,
+  fetchVatSettings,
   updateDeadlineSettings,
+  updateVatSettings,
   type DeadlineSettings,
+  type VatSettings,
 } from "@/lib/system-settings-api";
 
 type DeadlineFieldKey =
@@ -196,6 +200,11 @@ function SectionHeader({
   );
 }
 
+const DEFAULT_VAT: VatSettings = {
+  enabled: false,
+  rate_percent: 15,
+};
+
 function DeadlineFieldRow({
   field,
   value,
@@ -316,6 +325,8 @@ export function DeadlineSettingsPage() {
 
   const [values, setValues] = useState(DEFAULT_VALUES);
   const [savedValues, setSavedValues] = useState(DEFAULT_VALUES);
+  const [vat, setVat] = useState<VatSettings>(DEFAULT_VAT);
+  const [savedVat, setSavedVat] = useState<VatSettings>(DEFAULT_VAT);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -325,12 +336,14 @@ export function DeadlineSettingsPage() {
     let active = true;
     setLoading(true);
 
-    void fetchDeadlineSettings()
-      .then((result) => {
+    void Promise.all([fetchDeadlineSettings(), fetchVatSettings()])
+      .then(([result, vatResult]) => {
         if (!active) return;
         const next = settingsToForm(result);
         setValues(next);
         setSavedValues(next);
+        setVat(vatResult);
+        setSavedVat(vatResult);
       })
       .catch(() => {
         if (!active) return;
@@ -360,8 +373,11 @@ export function DeadlineSettingsPage() {
   );
 
   const isDirty = useMemo(
-    () => FIELDS.some((field) => values[field.key] !== savedValues[field.key]),
-    [values, savedValues],
+    () =>
+      FIELDS.some((field) => values[field.key] !== savedValues[field.key]) ||
+      vat.enabled !== savedVat.enabled ||
+      vat.rate_percent !== savedVat.rate_percent,
+    [values, savedValues, vat, savedVat],
   );
 
   async function handleSave() {
@@ -391,31 +407,48 @@ export function DeadlineSettingsPage() {
       return;
     }
 
+    const vatRate = Number(vat.rate_percent);
+    if (!Number.isFinite(vatRate) || vatRate < 0 || vatRate > 100) {
+      showErrorToast({
+        title: copy.toast.invalidValues.title,
+        description: copy.toast.invalidValues.description,
+      });
+      return;
+    }
+
     setSaving(true);
 
     try {
-      const saved = await updateDeadlineSettings({
-        ride_request_cancel_grace_minutes: Math.trunc(
-          Number(values.ride_request_cancel_grace_minutes),
-        ),
-        ride_request_edit_grace_minutes: Math.trunc(
-          Number(values.ride_request_edit_grace_minutes),
-        ),
-        ride_request_reminder_hours: Math.trunc(Number(values.ride_request_reminder_hours)),
-        dispatch_escalate_dispatcher_minutes: Math.trunc(
-          Number(values.dispatch_escalate_dispatcher_minutes),
-        ),
-        dispatch_escalate_supervisor_minutes: Math.trunc(
-          Number(values.dispatch_escalate_supervisor_minutes),
-        ),
-        invoice_due_soon_days: Math.trunc(Number(values.invoice_due_soon_days)),
-        insurance_due_soon_days: Math.trunc(Number(values.insurance_due_soon_days)),
-        inspection_due_soon_days: Math.trunc(Number(values.inspection_due_soon_days)),
-      });
+      const [saved, savedVatResult] = await Promise.all([
+        updateDeadlineSettings({
+          ride_request_cancel_grace_minutes: Math.trunc(
+            Number(values.ride_request_cancel_grace_minutes),
+          ),
+          ride_request_edit_grace_minutes: Math.trunc(
+            Number(values.ride_request_edit_grace_minutes),
+          ),
+          ride_request_reminder_hours: Math.trunc(Number(values.ride_request_reminder_hours)),
+          dispatch_escalate_dispatcher_minutes: Math.trunc(
+            Number(values.dispatch_escalate_dispatcher_minutes),
+          ),
+          dispatch_escalate_supervisor_minutes: Math.trunc(
+            Number(values.dispatch_escalate_supervisor_minutes),
+          ),
+          invoice_due_soon_days: Math.trunc(Number(values.invoice_due_soon_days)),
+          insurance_due_soon_days: Math.trunc(Number(values.insurance_due_soon_days)),
+          inspection_due_soon_days: Math.trunc(Number(values.inspection_due_soon_days)),
+        }),
+        updateVatSettings({
+          enabled: vat.enabled,
+          rate_percent: Math.round(vatRate * 100) / 100,
+        }),
+      ]);
 
       const next = settingsToForm(saved);
       setValues(next);
       setSavedValues(next);
+      setVat(savedVatResult);
+      setSavedVat(savedVatResult);
 
       showSuccessToast({
         title: copy.toast.updateSuccess.title,
@@ -514,6 +547,62 @@ export function DeadlineSettingsPage() {
                       }
                     />
                   ))}
+
+                  {section.id === "billing" ? (
+                    <div className="rounded-xl bg-[#f8fafb]/80 px-4 py-4 sm:px-5 dark:bg-muted/40">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0 flex-1">
+                          <label
+                            htmlFor="invoice-vat-enabled"
+                            className="text-sm font-semibold text-[var(--brand-primary)] dark:text-foreground"
+                          >
+                            {copy.modules.vat.label}
+                          </label>
+                          <p className="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-muted-foreground">
+                            {copy.modules.vat.helper}
+                          </p>
+                          <p className="mt-2 text-xs text-slate-400 dark:text-muted-foreground/80">
+                            {vat.enabled
+                              ? formatMessage(copy.modules.vat.preview, { rate: vat.rate_percent })
+                              : copy.modules.vat.previewOff}
+                          </p>
+                        </div>
+                        <Switch
+                          id="invoice-vat-enabled"
+                          checked={vat.enabled}
+                          disabled={formDisabled}
+                          onCheckedChange={(checked) =>
+                            setVat((current) => ({ ...current, enabled: checked }))
+                          }
+                        />
+                      </div>
+                      <p className="mt-2 text-xs text-slate-500 dark:text-muted-foreground">
+                        {vat.enabled ? copy.modules.vat.enabledOn : copy.modules.vat.enabledOff}
+                      </p>
+                      <div className="mt-4 flex items-center gap-2 sm:w-[10.5rem] sm:ml-auto">
+                        <Input
+                          id="invoice-vat-rate"
+                          type="number"
+                          min={0}
+                          max={100}
+                          step={0.01}
+                          value={String(vat.rate_percent)}
+                          onChange={(event) =>
+                            setVat((current) => ({
+                              ...current,
+                              rate_percent: Number(event.target.value),
+                            }))
+                          }
+                          disabled={formDisabled || !vat.enabled}
+                          className={cn(adminInputClass, "w-full tabular-nums")}
+                          aria-label={copy.modules.vat.rateLabel}
+                        />
+                        <span className="w-10 shrink-0 text-xs font-medium text-slate-500 dark:text-muted-foreground">
+                          %
+                        </span>
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               </section>
             );

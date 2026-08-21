@@ -6,8 +6,10 @@ import { requirePermission } from "../middleware/require-permission";
 import {
   getBrandingSettings,
   getDeadlineSettings,
+  getVatSettings,
   updateBrandingSettings,
   updateDeadlineSettings,
+  updateVatSettings,
   type BrandingSettings,
 } from "../models/app-setting.model";
 import { handleRouteError, sendError, sendSuccess } from "../utils/response";
@@ -182,6 +184,44 @@ router.patch(
       });
 
       return sendSuccess(res, getDeadlineSettings());
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.get(
+  "/vat",
+  requirePermission("system_settings.read"),
+  async (_req: Request, res: Response) => {
+    try {
+      return sendSuccess(res, getVatSettings());
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.patch(
+  "/vat",
+  requirePermission("system_settings.write"),
+  async (req: Request, res: Response) => {
+    try {
+      const enabled = req.body?.enabled === true;
+      const rateRaw =
+        typeof req.body?.rate_percent === "number"
+          ? req.body.rate_percent
+          : Number(req.body?.rate_percent);
+      const rate_percent = Number.isFinite(rateRaw)
+        ? Math.round(rateRaw * 100) / 100
+        : null;
+
+      if (rate_percent == null || rate_percent < 0 || rate_percent > 100) {
+        return sendError(res, "Enter a VAT rate between 0 and 100.", 400);
+      }
+
+      const vat = await updateVatSettings({ enabled, rate_percent });
+      return sendSuccess(res, vat);
     } catch (error) {
       return handleRouteError(res, error);
     }

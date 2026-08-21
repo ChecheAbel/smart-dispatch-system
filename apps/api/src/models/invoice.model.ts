@@ -24,6 +24,8 @@ export type CreateInvoiceInput = {
   periodStart: Date;
   periodEnd: Date;
   subtotal: number;
+  vatRate?: number;
+  vatAmount?: number;
   totalAmount: number;
   currency: string;
   paymentTermsDays?: number | null;
@@ -307,6 +309,8 @@ export async function createInvoice(input: CreateInvoiceInput) {
         periodStart: input.periodStart,
         periodEnd: input.periodEnd,
         subtotal: input.subtotal,
+        vatRate: input.vatRate ?? 0,
+        vatAmount: input.vatAmount ?? 0,
         totalAmount: input.totalAmount,
         currency: input.currency.trim().toUpperCase(),
         paymentTermsDays: input.paymentTermsDays ?? null,

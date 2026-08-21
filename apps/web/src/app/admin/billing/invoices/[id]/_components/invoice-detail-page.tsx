@@ -237,6 +237,12 @@ export function InvoiceDetailPage() {
             }
           />
           <QuickFact label={copy.detail.subtotal} value={formatMoney(invoice.subtotal, invoice.currency, locale)} />
+          {invoice.vat_rate > 0 ? (
+            <QuickFact
+              label={formatMessage(copy.detail.vat, { rate: invoice.vat_rate })}
+              value={formatMoney(invoice.vat_amount, invoice.currency, locale)}
+            />
+          ) : null}
           <QuickFact label={copy.detail.total} value={formatMoney(invoice.total_amount, invoice.currency, locale)} />
           <QuickFact label={copy.detail.issuedAt} value={formatDate(invoice.issued_at, locale)} />
           <QuickFact label={copy.detail.dueAt} value={formatDate(invoice.due_at, locale)} />

@@ -11,6 +11,7 @@ export const APP_SETTING_KEYS = {
   insuranceDueSoonDays: "insurance_due_soon_days",
   inspectionDueSoonDays: "inspection_due_soon_days",
   branding: "branding",
+  invoiceVat: "invoice_vat",
 } as const;
 
 type DeadlineSettingKey =
@@ -32,6 +33,11 @@ export type DeadlineSettings = {
   invoice_due_soon_days: number;
   insurance_due_soon_days: number;
   inspection_due_soon_days: number;
+};
+
+export type VatSettings = {
+  enabled: boolean;
+  rate_percent: number;
 };
 
 export type BrandingSettings = {
@@ -56,6 +62,11 @@ const DEFAULT_DEADLINE_SETTINGS: DeadlineSettings = {
   inspection_due_soon_days: 30,
 };
 
+export const DEFAULT_VAT_SETTINGS: VatSettings = {
+  enabled: false,
+  rate_percent: 15,
+};
+
 export const DEFAULT_BRANDING_SETTINGS: BrandingSettings = {
   company_name: "Ethiopian Investment Holdings",
   product_name: "Smart Dispatch",
@@ -69,6 +80,7 @@ export const DEFAULT_BRANDING_SETTINGS: BrandingSettings = {
 
 let cachedSettings: DeadlineSettings = { ...DEFAULT_DEADLINE_SETTINGS };
 let cachedBranding: BrandingSettings = { ...DEFAULT_BRANDING_SETTINGS };
+let cachedVat: VatSettings = { ...DEFAULT_VAT_SETTINGS };
 
 export function getDeadlineSettings() {
   return cachedSettings;
@@ -76,6 +88,10 @@ export function getDeadlineSettings() {
 
 export function getBrandingSettings() {
   return cachedBranding;
+}
+
+export function getVatSettings() {
+  return cachedVat;
 }
 
 function toPositiveInteger(
@@ -181,7 +197,42 @@ async function upsertSetting(
   `;
 }
 
-async function upsertJsonSetting(key: string, value: BrandingSettings) {
+function parseVatValue(value: Prisma.JsonValue | undefined): VatSettings {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return { ...DEFAULT_VAT_SETTINGS };
+  }
+
+  const record = value as Record<string, unknown>;
+  const rateRaw =
+    typeof record.rate_percent === "number"
+      ? record.rate_percent
+      : typeof record.rate_percent === "string"
+        ? Number(record.rate_percent)
+        : DEFAULT_VAT_SETTINGS.rate_percent;
+  const rate = Number.isFinite(rateRaw)
+    ? Math.round(rateRaw * 100) / 100
+    : DEFAULT_VAT_SETTINGS.rate_percent;
+
+  return {
+    enabled: record.enabled === true,
+    rate_percent: Math.min(100, Math.max(0, rate)),
+  };
+}
+
+export function applyVatToInvoiceSubtotal(subtotal: number, settings: VatSettings = cachedVat) {
+  const roundedSubtotal = Math.round(subtotal * 100) / 100;
+  const vatRate = settings.enabled ? settings.rate_percent : 0;
+  const vatAmount = Math.round(roundedSubtotal * (vatRate / 100) * 100) / 100;
+
+  return {
+    subtotal: roundedSubtotal,
+    vatRate,
+    vatAmount,
+    totalAmount: Math.round((roundedSubtotal + vatAmount) * 100) / 100,
+  };
+}
+
+async function upsertJsonSetting(key: string, value: unknown) {
   return prisma.$executeRaw`
     INSERT INTO "app_settings" ("key", "value", "created_at", "updated_at")
     VALUES (${key}, ${JSON.stringify(value)}::jsonb, NOW(), NOW())
@@ -201,6 +252,7 @@ export async function loadAppSettings() {
     insuranceDueSoonDays,
     inspectionDueSoonDays,
     brandingValue,
+    vatValue,
   ] = await Promise.all([
     readSetting(
       APP_SETTING_KEYS.rideRequestCancelGraceMinutes,
@@ -235,6 +287,7 @@ export async function loadAppSettings() {
       DEFAULT_DEADLINE_SETTINGS.inspection_due_soon_days,
     ),
     readJsonSetting(APP_SETTING_KEYS.branding),
+    readJsonSetting(APP_SETTING_KEYS.invoiceVat),
   ]);
 
   cachedSettings = {
@@ -252,6 +305,7 @@ export async function loadAppSettings() {
   };
 
   cachedBranding = parseBrandingValue(brandingValue);
+  cachedVat = parseVatValue(vatValue);
 
   await Promise.all([
     upsertSetting(APP_SETTING_KEYS.rideRequestCancelGraceMinutes, {
@@ -279,6 +333,7 @@ export async function loadAppSettings() {
       days: inspectionDueSoonDays,
     }),
     upsertJsonSetting(APP_SETTING_KEYS.branding, cachedBranding),
+    upsertJsonSetting(APP_SETTING_KEYS.invoiceVat, cachedVat),
   ]);
 
   return cachedSettings;
@@ -332,6 +387,12 @@ export async function updateBrandingSettings(input: BrandingSettings) {
 
   await upsertJsonSetting(APP_SETTING_KEYS.branding, cachedBranding);
   return cachedBranding;
+}
+
+export async function updateVatSettings(input: VatSettings) {
+  cachedVat = parseVatValue(input);
+  await upsertJsonSetting(APP_SETTING_KEYS.invoiceVat, cachedVat);
+  return cachedVat;
 }
 
 export function getRideRequestSettings() {

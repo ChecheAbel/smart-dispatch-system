@@ -108,6 +108,8 @@ export function toPublicInvoice(invoice: DbInvoice, options?: { locale?: string 
     period_start: formatContractDate(invoice.periodStart) ?? "",
     period_end: formatContractDate(invoice.periodEnd) ?? "",
     subtotal: Number(invoice.subtotal),
+    vat_rate: Number(invoice.vatRate),
+    vat_amount: Number(invoice.vatAmount),
     total_amount: Number(invoice.totalAmount),
     currency: invoice.currency,
     payment_terms_days: invoice.paymentTermsDays,

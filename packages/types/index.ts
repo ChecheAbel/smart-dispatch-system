@@ -1509,6 +1509,8 @@ export interface Invoice {
   period_start: string;
   period_end: string;
   subtotal: number;
+  vat_rate: number;
+  vat_amount: number;
   total_amount: number;
   currency: string;
   payment_terms_days: number | null;
@@ -1564,6 +1566,8 @@ export interface CustomerInvoice {
   period_start: string;
   period_end: string;
   subtotal: number;
+  vat_rate: number;
+  vat_amount: number;
   total_amount: number;
   currency: string;
   payment_terms_days: number | null;
@@ -1663,6 +1667,11 @@ export interface BrandingSettings {
   support_email: string | null;
   support_phone: string | null;
   website_url: string | null;
+}
+
+export interface VatSettings {
+  enabled: boolean;
+  rate_percent: number;
 }
 
 export interface BusinessTinLicense {

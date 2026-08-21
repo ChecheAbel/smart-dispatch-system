@@ -4442,6 +4442,85 @@ export const extensionPaths = {
       },
     },
   },
+  "/api/admin/system-settings/vat": {
+    get: {
+      tags: ["System Settings"],
+      summary: "Get invoice VAT settings",
+      description:
+        "Returns whether VAT is added to new invoices and the percentage rate used.",
+      security,
+      responses: {
+        "200": {
+          description: "Current VAT setting",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      enabled: { type: "boolean" },
+                      rate_percent: { type: "number" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+    patch: {
+      tags: ["System Settings"],
+      summary: "Update invoice VAT settings",
+      description:
+        "Updates whether VAT is added on new invoices and the percentage rate. Already issued invoices are not changed. Requires `system_settings.write`.",
+      security,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                enabled: { type: "boolean" },
+                rate_percent: { type: "number", minimum: 0, maximum: 100 },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: "Updated VAT setting",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      enabled: { type: "boolean" },
+                      rate_percent: { type: "number" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+  },
   "/api/ride-requests/driver/upcoming": {
     get: {
       tags: ["Admin Ride Requests"],

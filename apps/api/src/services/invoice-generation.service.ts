@@ -19,6 +19,7 @@ import {
   ensureContractEnrollment,
   findEnrollmentCoveringTrip,
 } from "../models/contract-enrollment.model";
+import { applyVatToInvoiceSubtotal } from "../models/app-setting.model";
 
 export type GenerateInvoiceOptions = {
   contractEnrollmentId: string;
@@ -114,7 +115,7 @@ export async function generateInvoiceForEnrollment(options: GenerateInvoiceOptio
   }
 
   const subtotal = lineItems.reduce((sum, item) => sum + item.lineTotal, 0);
-  const totalAmount = Math.round(subtotal * 100) / 100;
+  const totals = applyVatToInvoiceSubtotal(subtotal);
   const paymentTermsDays = contract.paymentTermsDays;
   const issuedAt = options.issue ? new Date() : null;
   const dueAt =
@@ -129,8 +130,10 @@ export async function generateInvoiceForEnrollment(options: GenerateInvoiceOptio
     requesterUserId: enrollment.requesterUserId,
     periodStart,
     periodEnd,
-    subtotal,
-    totalAmount,
+    subtotal: totals.subtotal,
+    vatRate: totals.vatRate,
+    vatAmount: totals.vatAmount,
+    totalAmount: totals.totalAmount,
     currency,
     paymentTermsDays,
     issuedAt,
@@ -215,6 +218,8 @@ export async function generateInvoiceForTrip(rideRequestId: string, options?: { 
 
   const referenceNumber = await generateInvoiceReferenceNumber();
 
+  const totals = applyVatToInvoiceSubtotal(snapshot.billableAmount);
+
   return createInvoice({
     referenceNumber,
     contractId: contract.id,
@@ -222,8 +227,10 @@ export async function generateInvoiceForTrip(rideRequestId: string, options?: { 
     requesterUserId: ride.requesterUserId,
     periodStart,
     periodEnd,
-    subtotal: snapshot.billableAmount,
-    totalAmount: snapshot.billableAmount,
+    subtotal: totals.subtotal,
+    vatRate: totals.vatRate,
+    vatAmount: totals.vatAmount,
+    totalAmount: totals.totalAmount,
     currency: snapshot.billableCurrency,
     paymentTermsDays,
     issuedAt,
