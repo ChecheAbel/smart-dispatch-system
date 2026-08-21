@@ -660,7 +660,7 @@ export async function updateRideRequestStatusAdmin(
     });
 
     if (status === "completed" && updated.contractId) {
-      await ensureTripBillingSnapshot(updated.id, tx);
+      await ensureTripBillingSnapshot(updated.id, { client: tx });
     }
 
     return updated;
@@ -703,6 +703,7 @@ async function markRideRequestNoShow(
         updateData.farePlanId = snapshot.farePlanId;
         updateData.distanceKm = snapshot.distanceKm;
         updateData.durationMinutes = snapshot.durationMinutes;
+        updateData.waitingMinutes = snapshot.waitingMinutes;
         updateData.billableAmount = new Prisma.Decimal(snapshot.billableAmount);
         updateData.billableCurrency = snapshot.billableCurrency;
         const tripNote = `No-show billed as trip: ${snapshot.billableAmount} ${snapshot.billableCurrency}.`;
@@ -888,6 +889,7 @@ export async function cancelRideRequestForUser(id: string, requesterUserId: stri
           updateData.farePlanId = snapshot.farePlanId;
           updateData.distanceKm = snapshot.distanceKm;
           updateData.durationMinutes = snapshot.durationMinutes;
+          updateData.waitingMinutes = snapshot.waitingMinutes;
           updateData.billableAmount = new Prisma.Decimal(snapshot.billableAmount);
           updateData.billableCurrency = snapshot.billableCurrency;
           const tripNote = `Late cancellation billed as trip: ${snapshot.billableAmount} ${snapshot.billableCurrency}.`;

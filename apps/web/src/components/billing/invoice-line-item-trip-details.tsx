@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, CalendarClock, Car, MapPin, Route, UserRound, Users } from "lucide-react";
+import { ArrowRight, CalendarClock, Car, Clock, MapPin, Route, UserRound, Users } from "lucide-react";
 import type { InvoiceLineItem, RideRequestStatus } from "@smart-dispatch/types";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,15 @@ export type InvoiceTripDetailsLabels = {
   unassigned: string;
   distance: string;
   duration: string;
+  waiting: string;
+  waitingFee: string;
+  fareBreakdown: string;
+  baseComponent: string;
+  distanceComponent: string;
+  timeComponent: string;
+  waitingComponent: string;
+  bookingFee: string;
+  minimumApplied: string;
   durationUnderOneMinute: string;
   durationOneMinute: string;
   durationMinutes: string;
@@ -42,6 +51,15 @@ type InvoiceLineItemTripDetailsProps = {
   className?: string;
 };
 
+type FareBreakdownSnapshot = {
+  baseComponent?: number;
+  distanceComponent?: number;
+  timeComponent?: number;
+  waitingComponent?: number;
+  bookingFee?: number;
+  minimumApplied?: boolean;
+};
+
 function formatTripMetricDistance(km: number | null) {
   if (km == null) return "";
   return `${km.toFixed(1)} km`;
@@ -54,6 +72,35 @@ function formatVehicleLine(
   return [vehicle.plate_number, makeModel].filter(Boolean).join(" · ");
 }
 
+function formatSnapshotMoney(amount: number, currency: string, locale: string) {
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    return `${amount.toFixed(2)} ${currency}`;
+  }
+}
+
+function readNumber(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function readPricingSnapshot(snapshot: Record<string, unknown> | null) {
+  if (!snapshot) return null;
+  const breakdown = snapshot.breakdown;
+  return {
+    currency: typeof snapshot.currency === "string" ? snapshot.currency : "ETB",
+    waitingMinutes: readNumber(snapshot.waiting_minutes),
+    breakdown:
+      breakdown && typeof breakdown === "object"
+        ? (breakdown as FareBreakdownSnapshot)
+        : null,
+  };
+}
+
 export function InvoiceLineItemTripDetails({
   item,
   locale,
@@ -63,6 +110,9 @@ export function InvoiceLineItemTripDetails({
 }: InvoiceLineItemTripDetailsProps) {
   const trip = item.ride_request;
   const shortId = trip.id.slice(0, 8).toUpperCase();
+  const snapshot = readPricingSnapshot(item.pricing_snapshot);
+  const waitingMinutes = item.waiting_minutes ?? snapshot?.waitingMinutes ?? null;
+  const currency = snapshot?.currency ?? "ETB";
 
   const metaItems = [
     {
@@ -137,9 +187,29 @@ export function InvoiceLineItemTripDetails({
             label: labels.duration,
             value: formatHumanDurationMinutes(item.duration_minutes, locale, labels),
           },
+          ...(waitingMinutes != null && waitingMinutes > 0
+            ? [
+                {
+                  key: "waiting",
+                  icon: Clock,
+                  label: labels.waiting,
+                  value: formatHumanDurationMinutes(waitingMinutes, locale, labels),
+                },
+              ]
+            : []),
         ]
       : []),
   ];
+
+  const breakdownRows = showBillingMetrics && snapshot?.breakdown
+    ? [
+        { key: "base", label: labels.baseComponent, amount: snapshot.breakdown.baseComponent ?? 0 },
+        { key: "distance", label: labels.distanceComponent, amount: snapshot.breakdown.distanceComponent ?? 0 },
+        { key: "time", label: labels.timeComponent, amount: snapshot.breakdown.timeComponent ?? 0 },
+        { key: "waiting", label: labels.waitingComponent, amount: snapshot.breakdown.waitingComponent ?? 0 },
+        { key: "booking", label: labels.bookingFee, amount: snapshot.breakdown.bookingFee ?? 0 },
+      ].filter((row) => row.amount > 0)
+    : [];
 
   return (
     <div
@@ -210,34 +280,34 @@ export function InvoiceLineItemTripDetails({
           );
         })}
       </div>
+
+      {breakdownRows.length > 0 ? (
+        <div className="mt-4 rounded-lg border border-slate-100 bg-white/80 px-3 py-3 dark:border-border dark:bg-white/[0.035]">
+          <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-slate-400">
+            {labels.fareBreakdown}
+          </p>
+          <dl className="mt-2 space-y-1.5">
+            {breakdownRows.map((row) => (
+              <div key={row.key} className="flex items-center justify-between gap-3 text-sm">
+                <dt className="text-slate-500">{row.label}</dt>
+                <dd className="font-medium tabular-nums text-slate-800">
+                  {formatSnapshotMoney(row.amount, currency, locale)}
+                </dd>
+              </div>
+            ))}
+          </dl>
+          {snapshot?.breakdown?.minimumApplied ? (
+            <p className="mt-2 text-xs text-slate-500">{labels.minimumApplied}</p>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   );
 }
 
 export function buildInvoiceTripDetailsLabels(
   detailCopy: {
-    tripDetails: {
-      requestId: string;
-      scheduled: string;
-      scheduledReturn: string;
-      started: string;
-      completed: string;
-      passengers: string;
-      driver: string;
-      vehicle: string;
-      farePlan: string;
-      pickup: string;
-      dropoff: string;
-      unassigned: string;
-      distance: string;
-      duration: string;
-      durationUnderOneMinute: string;
-      durationOneMinute: string;
-      durationMinutes: string;
-      durationOneHour: string;
-      durationHours: string;
-      durationHoursAndMinutes: string;
-    };
+    tripDetails: Omit<InvoiceTripDetailsLabels, "tripStatus">;
   },
   tripStatus?: Partial<Record<RideRequestStatus, string>>,
 ): InvoiceTripDetailsLabels {

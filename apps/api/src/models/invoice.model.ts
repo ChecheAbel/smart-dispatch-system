@@ -39,6 +39,7 @@ export type CreateInvoiceInput = {
     farePlanId?: string | null;
     distanceKm?: number | null;
     durationMinutes?: number | null;
+    waitingMinutes?: number | null;
     pricingSnapshot?: Record<string, unknown> | null;
   }>;
 };
@@ -321,6 +322,7 @@ export async function createInvoice(input: CreateInvoiceInput) {
             farePlanId: item.farePlanId ?? null,
             distanceKm: item.distanceKm ?? null,
             durationMinutes: item.durationMinutes ?? null,
+            waitingMinutes: item.waitingMinutes ?? null,
             pricingSnapshot: item.pricingSnapshot
               ? (item.pricingSnapshot as Prisma.InputJsonValue)
               : undefined,

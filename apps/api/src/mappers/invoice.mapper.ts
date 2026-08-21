@@ -45,6 +45,7 @@ function toPublicLineItem(
       : null,
     distance_km: item.distanceKm != null ? Number(item.distanceKm) : null,
     duration_minutes: item.durationMinutes,
+    waiting_minutes: item.waitingMinutes,
     pricing_snapshot: item.pricingSnapshot as Record<string, unknown> | null,
     ride_request: {
       id: item.rideRequest.id,

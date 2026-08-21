@@ -16,12 +16,15 @@ export type FarePlanRates = {
   perMinuteRate: Prisma.Decimal | number | null;
   minimumFare: Prisma.Decimal | number | null;
   bookingFee: Prisma.Decimal | number | null;
+  freeWaitingMinutes?: number | null;
+  waitingFeePerMinute?: Prisma.Decimal | number | null;
 };
 
 export type FareBreakdown = {
   baseComponent: number;
   distanceComponent: number;
   timeComponent: number;
+  waitingComponent: number;
   bookingFee: number;
   subtotal: number;
   minimumApplied: boolean;
@@ -32,6 +35,8 @@ export type CalculatedFare = {
   currency: string;
   distanceKm: number;
   durationMinutes: number;
+  waitingMinutes: number;
+  billableWaitingMinutes: number;
   breakdown: FareBreakdown;
 };
 
@@ -74,6 +79,30 @@ export function computeTripDurationMinutes(
   return Math.max(1, Math.ceil(diffMs / 60_000));
 }
 
+export function computePickupWaitingMinutes(
+  scheduledAt: Date | null | undefined,
+  startedAt: Date | null | undefined,
+) {
+  if (!scheduledAt || !startedAt) {
+    return 0;
+  }
+
+  const diffMs = startedAt.getTime() - scheduledAt.getTime();
+  if (diffMs <= 0) {
+    return 0;
+  }
+
+  return Math.ceil(diffMs / 60_000);
+}
+
+export function computeBillableWaitingMinutes(
+  waitingMinutes: number,
+  freeWaitingMinutes: number | null | undefined,
+) {
+  const freeMinutes = Math.max(0, freeWaitingMinutes ?? 0);
+  return Math.max(0, waitingMinutes - freeMinutes);
+}
+
 export function resolveTripDistanceKm(ride: {
   pickupLatitude: Prisma.Decimal | null;
   pickupLongitude: Prisma.Decimal | null;
@@ -103,13 +132,20 @@ export function resolveTripDistanceKm(ride: {
 
 export function calculateFareAmount(
   plan: FarePlanRates,
-  input: { distanceKm: number; durationMinutes: number },
+  input: { distanceKm: number; durationMinutes: number; waitingMinutes?: number },
 ): CalculatedFare {
   const baseFare = toNumber(plan.baseFare);
   const perKmRate = toNumber(plan.perKmRate);
   const perMinuteRate = toNumber(plan.perMinuteRate);
   const minimumFare = plan.minimumFare == null ? null : toNumber(plan.minimumFare);
   const bookingFee = toNumber(plan.bookingFee);
+  const waitingFeePerMinute = toNumber(plan.waitingFeePerMinute);
+  const waitingMinutes = Math.max(0, input.waitingMinutes ?? 0);
+  const billableWaitingMinutes = computeBillableWaitingMinutes(
+    waitingMinutes,
+    plan.freeWaitingMinutes,
+  );
+  const waitingComponent = billableWaitingMinutes * waitingFeePerMinute;
 
   let baseComponent = 0;
   let distanceComponent = 0;
@@ -145,28 +181,32 @@ export function calculateFareAmount(
       break;
   }
 
-  const subtotalBeforeMinimum = baseComponent + distanceComponent + timeComponent + bookingFee;
-  let amount = subtotalBeforeMinimum;
+  const subtotalBeforeMinimum =
+    baseComponent + distanceComponent + timeComponent + bookingFee;
+  let tripAmount = subtotalBeforeMinimum;
   let minimumApplied = false;
 
-  if (plan.pricingModel !== "hourly" && minimumFare != null && amount < minimumFare) {
-    amount = minimumFare;
+  if (plan.pricingModel !== "hourly" && minimumFare != null && tripAmount < minimumFare) {
+    tripAmount = minimumFare;
     minimumApplied = true;
   }
 
-  amount = roundMoney(amount);
+  const amount = roundMoney(tripAmount + waitingComponent);
 
   return {
     amount,
     currency: plan.currency.trim().toUpperCase() || "ETB",
     distanceKm: roundMoney(input.distanceKm),
     durationMinutes: input.durationMinutes,
+    waitingMinutes,
+    billableWaitingMinutes,
     breakdown: {
       baseComponent: roundMoney(baseComponent),
       distanceComponent: roundMoney(distanceComponent),
       timeComponent: roundMoney(timeComponent),
+      waitingComponent: roundMoney(waitingComponent),
       bookingFee: roundMoney(bookingFee),
-      subtotal: roundMoney(subtotalBeforeMinimum),
+      subtotal: roundMoney(subtotalBeforeMinimum + waitingComponent),
       minimumApplied,
     },
   };

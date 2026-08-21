@@ -81,16 +81,17 @@ export async function generateInvoiceForEnrollment(options: GenerateInvoiceOptio
 
   for (const trip of trips) {
     const snapshot =
-      trip.billableAmount != null && trip.billableCurrency
+      trip.billableAmount != null && !trip.farePlanId
         ? {
             farePlanId: trip.farePlanId,
             distanceKm: trip.distanceKm != null ? Number(trip.distanceKm) : null,
             durationMinutes: trip.durationMinutes,
+            waitingMinutes: trip.waitingMinutes,
             billableAmount: Number(trip.billableAmount),
-            billableCurrency: trip.billableCurrency,
+            billableCurrency: trip.billableCurrency ?? "ETB",
             pricingSnapshot: null,
           }
-        : ((await ensureTripBillingSnapshot(trip.id)) ??
+        : ((await ensureTripBillingSnapshot(trip.id, { recalculate: true })) ??
           (await computeTripBillingSnapshot(trip, contract.farePlanId)));
 
     if (!snapshot) {
@@ -107,6 +108,7 @@ export async function generateInvoiceForEnrollment(options: GenerateInvoiceOptio
       farePlanId: snapshot.farePlanId,
       distanceKm: snapshot.distanceKm,
       durationMinutes: snapshot.durationMinutes,
+      waitingMinutes: snapshot.waitingMinutes,
       pricingSnapshot: snapshot.pricingSnapshot,
     });
   }
@@ -173,16 +175,17 @@ export async function generateInvoiceForTrip(rideRequestId: string, options?: { 
   }
 
   const snapshot =
-    ride.billableAmount != null && ride.billableCurrency
+    ride.billableAmount != null && !ride.farePlanId
       ? {
           farePlanId: ride.farePlanId,
           distanceKm: ride.distanceKm != null ? Number(ride.distanceKm) : null,
           durationMinutes: ride.durationMinutes,
+          waitingMinutes: ride.waitingMinutes,
           billableAmount: Number(ride.billableAmount),
-          billableCurrency: ride.billableCurrency,
+          billableCurrency: ride.billableCurrency ?? "ETB",
           pricingSnapshot: null as null,
         }
-      : ((await ensureTripBillingSnapshot(ride.id)) ??
+      : ((await ensureTripBillingSnapshot(ride.id, { recalculate: true })) ??
         (await computeTripBillingSnapshot(ride, contract.farePlanId)));
 
   if (!snapshot) {
@@ -235,6 +238,7 @@ export async function generateInvoiceForTrip(rideRequestId: string, options?: { 
         farePlanId: snapshot.farePlanId,
         distanceKm: snapshot.distanceKm,
         durationMinutes: snapshot.durationMinutes,
+        waitingMinutes: snapshot.waitingMinutes,
         pricingSnapshot: snapshot.pricingSnapshot,
       },
     ],

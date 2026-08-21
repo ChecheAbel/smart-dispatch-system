@@ -948,6 +948,7 @@ model InvoiceLineItem {
   farePlanId      String?     @map("fare_plan_id") @db.Uuid
   distanceKm      Decimal?    @map("distance_km") @db.Decimal(10, 3)
   durationMinutes Int?        @map("duration_minutes")
+  waitingMinutes  Int?        @map("waiting_minutes")
   pricingSnapshot Json?       @map("pricing_snapshot") @db.JsonB
   createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz
   invoice         Invoice     @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
@@ -998,6 +999,7 @@ model RideRequest {
   farePlanId           String?                  @map("fare_plan_id") @db.Uuid
   distanceKm           Decimal?                 @map("distance_km") @db.Decimal(10, 3)
   durationMinutes      Int?                     @map("duration_minutes")
+  waitingMinutes       Int?                     @map("waiting_minutes")
   billableAmount       Decimal?                 @map("billable_amount") @db.Decimal(14, 2)
   billableCurrency     String?                  @map("billable_currency") @db.VarChar(3)
   createdAt            DateTime                 @default(now()) @map("created_at") @db.Timestamptz

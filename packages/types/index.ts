@@ -1490,6 +1490,7 @@ export interface InvoiceLineItem {
   fare_plan: InvoiceLineItemFarePlanSummary | null;
   distance_km: number | null;
   duration_minutes: number | null;
+  waiting_minutes: number | null;
   pricing_snapshot: Record<string, unknown> | null;
   ride_request: InvoiceLineItemRideSummary;
   created_at: string;
