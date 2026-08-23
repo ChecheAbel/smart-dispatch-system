@@ -438,9 +438,27 @@ The repo includes `docker-compose.yml` (web, API, Postgres). Compose now:
 
 - waits for Postgres to accept connections before starting the API
 - sets `UPLOAD_ROOT` and persists uploads (driver licenses, vehicle photos, branding, payment method logos)
-- bakes `NEXT_PUBLIC_API_URL` / `NEXT_PUBLIC_REALTIME_URL` into the **web image at build time** (Next.js cannot read those at runtime)
+- bakes `NEXT_PUBLIC_API_URL` into the **web image at build time** (Next.js cannot read it at runtime)
+
+The public API URL is **not** hardcoded in Compose. GitHub Actions injects it from repository secrets when building images. Locally, copy `.env.example` to `.env` next to `docker-compose.yml`.
+
+**GitHub Actions secrets**
+
+Repo **Settings → Secrets and variables → Actions**. Add:
+
+| Secret | Used for |
+| --- | --- |
+| `NEXT_PUBLIC_API_URL` | Public API origin baked into the web image (for example `https://api.your-domain.com`) |
+| `NEXT_PUBLIC_REALTIME_URL` | Optional; defaults to `NEXT_PUBLIC_API_URL` |
+| `APP_URL` | Frontend origin used in password-reset links |
+| `JWT_SECRET` | Signs access tokens |
+| `POSTGRES_PASSWORD` | Postgres and `DATABASE_URL` |
+
+The workflow `.github/workflows/docker.yml` runs `docker compose build` on `main` (and manual dispatch) with those secrets.
 
 ```bash
+# Local image build
+cp .env.example .env
 docker compose up --build -d
 ```
 
@@ -452,26 +470,21 @@ Services:
 | `api` | 4000 | Runs migrations + seed on boot; health at `/api/health` |
 | `postgres` | 5432 | Volume `pgdata` |
 
-Default compose URLs assume the **browser** can reach the API at `http://localhost:4000`. For a public host, create a `.env` next to `docker-compose.yml` and rebuild:
+Optional Compose `.env` values:
 
 ```bash
 NEXT_PUBLIC_API_URL=https://api.your-domain.com
 NEXT_PUBLIC_REALTIME_URL=https://api.your-domain.com
 JWT_SECRET=replace-me
 POSTGRES_PASSWORD=replace-me
-SEED_ADMIN_PASSWORD=replace-me
 APP_URL=https://dispatch.your-domain.com
-```
-
-```bash
-docker compose up --build -d
 ```
 
 **Before you treat this as production**
 
-1. Change `JWT_SECRET`, `POSTGRES_PASSWORD`, and `SEED_ADMIN_PASSWORD`.
+1. Change `JWT_SECRET` and `POSTGRES_PASSWORD`.
 2. Point `APP_URL` at the public web URL.
-3. Put TLS in front of both services (nginx, Caddy, or a cloud load balancer). Prefer one public origin that reverse-proxies `/` to web and `/api` + `/uploads` + `/api/ws` to the API so cookies and Socket.IO stay same-origin. In that setup, build web with `NEXT_PUBLIC_API_URL=/`.
+3. Put TLS in front of both services (nginx, Caddy, or a cloud load balancer). Prefer one public origin that reverse-proxies `/` to web and `/api` + `/uploads` + `/api/ws` to the API so cookies and Socket.IO stay same-origin. In that setup, set the GitHub secret `NEXT_PUBLIC_API_URL` to `/`.
 4. Do not expose Postgres publicly; keep `5432` bound to localhost or a private network.
 
 ### Option B — Build artifacts without Compose

@@ -28,10 +28,15 @@ RUN pnpm install
 COPY --from=builder /app/out/full/ .
 
 # NEXT_PUBLIC_* is inlined at build time. Runtime compose env cannot change it.
-ARG NEXT_PUBLIC_API_URL=http://localhost:4000
-ARG NEXT_PUBLIC_REALTIME_URL=http://localhost:4000
+# Pass via compose/GitHub Actions — do not bake a localhost default into the image.
+ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_REALTIME_URL
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_REALTIME_URL=$NEXT_PUBLIC_REALTIME_URL
+RUN if [ -z "$NEXT_PUBLIC_API_URL" ]; then \
+      echo "NEXT_PUBLIC_API_URL is required at web image build time (GitHub secret or .env)." >&2; \
+      exit 1; \
+    fi
 
 RUN pnpm turbo run build --filter=web...
 
