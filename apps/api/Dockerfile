@@ -30,14 +30,22 @@ RUN pnpm turbo run build --filter=api...
 FROM base AS runner
 WORKDIR /app
 
-# Don't run production as root
+RUN apk add --no-cache su-exec
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 expressjs
-USER expressjs
+
+ENV UPLOAD_ROOT=/var/smart-dispatch/uploads
+RUN mkdir -p /var/smart-dispatch/uploads \
+  && chown -R expressjs:nodejs /var/smart-dispatch/uploads
 
 COPY --from=installer /app/apps/api/package.json .
 COPY --from=installer /app/apps/api/dist ./dist
 COPY --from=installer /app/apps/api/prisma ./prisma
 COPY --from=installer /app/node_modules ./node_modules
+COPY apps/api/docker-entrypoint.sh ./docker-entrypoint.sh
+RUN chmod +x ./docker-entrypoint.sh
 
-CMD node dist/index.js
+EXPOSE 4000
+
+# Starts as root so a mounted volume can be chowned, then drops to expressjs.
+ENTRYPOINT ["./docker-entrypoint.sh"]

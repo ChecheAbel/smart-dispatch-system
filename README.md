@@ -434,7 +434,11 @@ Clear that demo set with `pnpm db:seed billing-demo-clear` (or `SEED_BILLING_DEM
 
 ### Option A — Docker Compose (single host)
 
-The repo includes `docker-compose.yml` (web, API, Postgres).
+The repo includes `docker-compose.yml` (web, API, Postgres). Compose now:
+
+- waits for Postgres to accept connections before starting the API
+- sets `UPLOAD_ROOT` and persists uploads (driver licenses, vehicle photos, branding, payment method logos)
+- bakes `NEXT_PUBLIC_API_URL` / `NEXT_PUBLIC_REALTIME_URL` into the **web image at build time** (Next.js cannot read those at runtime)
 
 ```bash
 docker compose up --build -d
@@ -445,41 +449,30 @@ Services:
 | Service | Host port | Notes |
 | --- | --- | --- |
 | `web` | 3000 | Next.js standalone |
-| `api` | 4000 | Runs migrations + seed on boot |
+| `api` | 4000 | Runs migrations + seed on boot; health at `/api/health` |
 | `postgres` | 5432 | Volume `pgdata` |
+
+Default compose URLs assume the **browser** can reach the API at `http://localhost:4000`. For a public host, create a `.env` next to `docker-compose.yml` and rebuild:
+
+```bash
+NEXT_PUBLIC_API_URL=https://api.your-domain.com
+NEXT_PUBLIC_REALTIME_URL=https://api.your-domain.com
+JWT_SECRET=replace-me
+POSTGRES_PASSWORD=replace-me
+SEED_ADMIN_PASSWORD=replace-me
+APP_URL=https://dispatch.your-domain.com
+```
+
+```bash
+docker compose up --build -d
+```
 
 **Before you treat this as production**
 
 1. Change `JWT_SECRET`, `POSTGRES_PASSWORD`, and `SEED_ADMIN_PASSWORD`.
 2. Point `APP_URL` at the public web URL.
-3. Mount a persistent volume for uploads and set `UPLOAD_ROOT` on the API service (the compose file does not set this yet).
-4. `NEXT_PUBLIC_API_URL` is compile-time. The compose file sets it as a **runtime** env on `web`, which Next.js will **not** pick up unless you also pass it as a **build arg** when building the image. For a machine where the browser can reach `:4000`, a typical pattern is:
-
-   ```bash
-   docker compose build \
-     --build-arg NEXT_PUBLIC_API_URL=https://api.your-domain.com \
-     web
-   ```
-
-   You will need to thread that arg into `apps/web/Dockerfile` (`ARG` / `ENV` before `pnpm turbo run build --filter=web...`) if it is not already there.
-5. Put TLS in front of both services (nginx, Caddy, or a cloud load balancer). Prefer one public origin that reverse-proxies `/` to web and `/api` + `/uploads` + `/api/ws` to the API so cookies and Socket.IO stay same-origin.
-6. Do not expose Postgres publicly; keep `5432` bound to localhost or a private network.
-
-**Compose env you should override** (example):
-
-```yaml
-# snippet — do not commit real secrets
-api:
-  environment:
-    DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/dispatch_db
-    JWT_SECRET: ${JWT_SECRET}
-    APP_URL: https://dispatch.example.com
-    UPLOAD_ROOT: /var/smart-dispatch/uploads
-    SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL}
-    SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD}
-  volumes:
-    - uploads:/var/smart-dispatch/uploads
-```
+3. Put TLS in front of both services (nginx, Caddy, or a cloud load balancer). Prefer one public origin that reverse-proxies `/` to web and `/api` + `/uploads` + `/api/ws` to the API so cookies and Socket.IO stay same-origin. In that setup, build web with `NEXT_PUBLIC_API_URL=/`.
+4. Do not expose Postgres publicly; keep `5432` bound to localhost or a private network.
 
 ### Option B — Build artifacts without Compose
 

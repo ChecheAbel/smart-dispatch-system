@@ -26,6 +26,13 @@ RUN pnpm install
 
 # Build the project
 COPY --from=builder /app/out/full/ .
+
+# NEXT_PUBLIC_* is inlined at build time. Runtime compose env cannot change it.
+ARG NEXT_PUBLIC_API_URL=http://localhost:4000
+ARG NEXT_PUBLIC_REALTIME_URL=http://localhost:4000
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_REALTIME_URL=$NEXT_PUBLIC_REALTIME_URL
+
 RUN pnpm turbo run build --filter=web...
 
 FROM base AS runner
