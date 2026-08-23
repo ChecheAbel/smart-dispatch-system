@@ -79,6 +79,15 @@ import { getOptionalString, getString, getStringArray, parseBoolean } from "../u
 import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
 import type { GeofenceCoordinate, GeofenceKind, GeofenceShape } from "@smart-dispatch/types";
 
+function uploadedVehicleFiles(req: Request): Express.Multer.File[] {
+  const files = req.files;
+  if (!files) {
+    return [];
+  }
+
+  return Array.isArray(files) ? files : Object.values(files).flat();
+}
+
 const router = Router();
 
 function parseIsoDate(value: unknown) {
@@ -1179,7 +1188,7 @@ router.post("/", requirePermission("vehicles.write"), (req: AuthenticatedRequest
       );
     }
 
-    if (((req.files as Express.Multer.File[]) ?? []).length > 8) {
+    if (uploadedVehicleFiles(req).length > 8) {
       return sendError(res, "You can upload a maximum of 8 vehicle images.", 400);
     }
 
@@ -1192,9 +1201,9 @@ router.post("/", requirePermission("vehicles.write"), (req: AuthenticatedRequest
       const status = parseVehicleStatus(req.body?.status);
       const year = parseYear(req.body?.year);
       const assignedDriverUserId = parseAssignedDriverUserId(req.body?.assigned_driver_user_id);
-      const uploadedImages = (req.files ?? [])
-        .filter((file): file is Express.Multer.File => Boolean(file))
-        .map((file) => buildVehiclePhotoUrl(file.filename));
+      const uploadedImages = uploadedVehicleFiles(req).map((file) =>
+        buildVehiclePhotoUrl(file.filename),
+      );
       const existingImages = getStringArray(req.body?.vehicle_images_existing);
 
       if (assignedDriverUserId) {
@@ -1284,7 +1293,7 @@ router.patch("/:id", requirePermission("vehicles.write", "compliance.write"), (r
       );
     }
 
-    if (((req.files as Express.Multer.File[]) ?? []).length > 8) {
+    if (uploadedVehicleFiles(req).length > 8) {
       return sendError(res, "You can upload a maximum of 8 vehicle images.", 400);
     }
 
@@ -1345,9 +1354,9 @@ router.patch("/:id", requirePermission("vehicles.write", "compliance.write"), (r
       }
 
       const assignedDriverUserId = parseAssignedDriverUserId(req.body?.assigned_driver_user_id);
-      const uploadedImages = (req.files ?? [])
-        .filter((file): file is Express.Multer.File => Boolean(file))
-        .map((file) => buildVehiclePhotoUrl(file.filename));
+      const uploadedImages = uploadedVehicleFiles(req).map((file) =>
+        buildVehiclePhotoUrl(file.filename),
+      );
       const body = (req.body ?? {}) as Record<string, unknown>;
       const shouldUpdateImages =
         parseBoolean(body.replace_vehicle_images) === true ||

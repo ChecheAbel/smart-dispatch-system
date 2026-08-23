@@ -225,12 +225,12 @@ export function NotificationTemplatesSettings({
   const templatesByModule = useMemo(() => {
     const grouped = new Map<NotificationModule, Map<string, NotificationTemplate[]>>();
 
-    for (const module of NOTIFICATION_MODULE_ORDER) {
+    for (const notificationModule of NOTIFICATION_MODULE_ORDER) {
       const eventMap = new Map<string, NotificationTemplate[]>();
-      for (const event of MODULE_EVENTS[module]) {
+      for (const event of MODULE_EVENTS[notificationModule]) {
         eventMap.set(event, []);
       }
-      grouped.set(module, eventMap);
+      grouped.set(notificationModule, eventMap);
     }
 
     for (const template of templates) {

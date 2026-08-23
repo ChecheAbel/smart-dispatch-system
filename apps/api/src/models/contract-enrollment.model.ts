@@ -192,9 +192,7 @@ function invoiceOverlapsEnrollment(
 function toEnrollmentInvoiceListItem(
   invoice: CustomerEnrollmentInvoiceSummary,
 ): DbCustomerContractEnrollment["invoices"][number] {
-  const { contractId: _contractId, periodStart: _periodStart, periodEnd: _periodEnd, ...summary } =
-    invoice;
-  return summary;
+  return invoice;
 }
 
 async function attachUnlinkedInvoicesToEnrollments(

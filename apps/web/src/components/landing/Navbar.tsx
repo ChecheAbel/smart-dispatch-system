@@ -93,9 +93,9 @@ export default function Navbar() {
               : "max-w-7xl px-4 sm:px-6 h-[72px] bg-transparent border-transparent"
           )}
         >
-          <a href="/" className="flex items-center group shrink-0 min-w-0 z-10">
+          <Link href="/" className="flex items-center group shrink-0 min-w-0 z-10">
             <BrandLogo priority className="group-hover:opacity-80 transition-opacity drop-shadow-md" />
-          </a>
+          </Link>
 
           <nav
             aria-label={copy.nav.mainNav}

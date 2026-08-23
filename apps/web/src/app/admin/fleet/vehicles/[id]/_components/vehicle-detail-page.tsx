@@ -227,14 +227,14 @@ export function VehicleDetailPage({ vehicleId }: VehicleDetailPageProps) {
         canViewFleetOps
           ? {
               id: "schedule" as const,
-              label: (detail.tabs as any).schedule || "Schedule",
+              label: detail.tabs.schedule,
               icon: Calendar,
             }
           : null,
         canViewFleetOps
           ? {
               id: "tracking" as const,
-              label: (detail.tabs as any).tracking || "Live Tracking",
+              label: detail.tabs.tracking,
               icon: MapPin,
             }
           : null,

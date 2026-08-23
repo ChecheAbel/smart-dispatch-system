@@ -34,7 +34,7 @@ function parseSelectedVehicles(value: unknown) {
     
     const vehicleTypeId = getOptionalString((item as any).vehicle_type_id) ?? getOptionalString((item as any).vehicleTypeId);
     const vehicleClassId = getOptionalString((item as any).vehicle_class_id) ?? getOptionalString((item as any).vehicleClassId);
-    let quantity = typeof (item as any).quantity === "number" ? (item as any).quantity : 1;
+    const quantity = typeof (item as any).quantity === "number" ? (item as any).quantity : 1;
     
     if (vehicleTypeId && vehicleClassId) {
       parsed.push({ vehicleTypeId, vehicleClassId, quantity });

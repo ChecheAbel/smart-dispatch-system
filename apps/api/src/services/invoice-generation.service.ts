@@ -201,7 +201,7 @@ export async function generateInvoiceForTrip(rideRequestId: string, options?: { 
   );
   const periodEnd = periodStart;
 
-  let enrollment =
+  const enrollment =
     (await findEnrollmentCoveringTrip(contract.id, ride.requesterUserId, completedDay)) ??
     (await ensureContractEnrollment({
       contractId: contract.id,
