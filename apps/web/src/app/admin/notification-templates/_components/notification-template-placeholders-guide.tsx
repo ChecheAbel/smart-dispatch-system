@@ -2,7 +2,6 @@
 
 import {
   NOTIFICATION_TEMPLATE_PLACEHOLDERS,
-  type NotificationModule,
 } from "@smart-dispatch/types";
 import { Braces, ChevronDown } from "lucide-react";
 import { useState } from "react";
@@ -15,10 +14,11 @@ import { cn } from "@/lib/utils";
 import {
   getModuleDefinition,
   NOTIFICATION_MODULE_ORDER,
+  type ConfigurableNotificationModule,
 } from "./notification-template-modules";
 
 type NotificationTemplatePlaceholdersGuideProps = {
-  module?: NotificationModule;
+  module?: ConfigurableNotificationModule;
   defaultOpen?: boolean;
   className?: string;
 };

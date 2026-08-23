@@ -1251,7 +1251,8 @@
         "confirmed": "Confirmed",
         "in_progress": "In progress",
         "completed": "Completed",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "no_show": "No-show"
       },
       "vehicleStatuses": {
         "active": "Active",

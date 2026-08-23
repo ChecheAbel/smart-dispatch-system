@@ -32,10 +32,11 @@ import { PaymentMethodLogo } from "@/components/billing/payment-method-logo";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { formatMessage, getCustomerInvoicesMessages } from "@/translations";
 import { cn } from "@/lib/utils";
+import type { SupportedLocale } from "@/lib/locale";
 
 type InvoicePaymentSectionProps = {
   invoice: CustomerInvoice;
-  locale: string;
+  locale: SupportedLocale;
   onInvoiceUpdated?: (invoice: CustomerInvoice) => void;
 };
 

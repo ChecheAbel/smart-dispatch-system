@@ -1,6 +1,7 @@
 "use client";
 
-import type { NotificationModule, NotificationTemplate } from "@smart-dispatch/types";
+import type { NotificationTemplate } from "@smart-dispatch/types";
+import type { ConfigurableNotificationModule } from "./notification-template-modules";
 import { useLocale } from "@/components/shared/providers";
 import { Label } from "@/components/ui/label";
 import {
@@ -24,10 +25,10 @@ import {
 } from "./notification-template-modules";
 
 type NotificationTemplateModuleNavProps = {
-  activeModule: NotificationModule;
+  activeModule: ConfigurableNotificationModule;
   templates: NotificationTemplate[];
   formState: Record<string, { is_enabled: boolean }>;
-  onSelectModule: (module: NotificationModule) => void;
+  onSelectModule: (module: ConfigurableNotificationModule) => void;
   className?: string;
 };
 
@@ -39,7 +40,7 @@ function getCategoryLabel(
 }
 
 function getModuleCopy(
-  module: NotificationModule,
+  module: ConfigurableNotificationModule,
   copy: ReturnType<typeof getAdminNotificationTemplatesMessages>,
 ) {
   const { copyKey } = getModuleDefinition(module);
@@ -84,7 +85,7 @@ export function NotificationTemplateModuleNav({
             value={activeModule}
             onValueChange={(value) => {
               if (value) {
-                onSelectModule(value as NotificationModule);
+                onSelectModule(value as ConfigurableNotificationModule);
               }
             }}
           >

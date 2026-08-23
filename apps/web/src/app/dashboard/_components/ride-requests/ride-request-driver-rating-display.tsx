@@ -65,7 +65,7 @@ export function RideRequestDriverRatingSection({
 }: {
   request: {
     status: string;
-    assigned_driver: { name: string } | null;
+    assigned_driver?: { name: string } | null;
     driver_rating: RideRequestDriverRating | null;
     can_rate_driver: boolean;
   };

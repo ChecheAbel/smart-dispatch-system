@@ -285,6 +285,7 @@ type AdminSelectFieldProps = {
   items: Array<{ label: string; value: string }>;
   disabled?: boolean;
   placeholder?: string;
+  required?: boolean;
   containerClassName?: string;
 };
 
@@ -300,6 +301,7 @@ export function AdminSelectField({
   items,
   disabled,
   placeholder,
+  required,
   containerClassName,
 }: AdminSelectFieldProps) {
   return (
@@ -321,6 +323,7 @@ export function AdminSelectField({
         <SelectTrigger
           id={id}
           aria-invalid={Boolean(error)}
+          aria-required={required || undefined}
           className={cn(
             adminInputClass,
             "w-full",

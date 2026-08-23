@@ -96,9 +96,10 @@ function getEventTitle(
   }
 
   // Union-indexed event maps share no common keys, so cast for a string lookup.
-  const events = templatesCopy.events[log.module] as
-    | Record<string, { title: string } | undefined>
-    | undefined;
+  const events =
+    log.module === "system"
+      ? undefined
+      : (templatesCopy.events[log.module] as Record<string, { title: string } | undefined> | undefined);
 
   return events?.[log.event]?.title ?? log.event;
 }

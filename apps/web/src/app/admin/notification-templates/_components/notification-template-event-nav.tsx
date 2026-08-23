@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import type { NotificationModule, NotificationTemplate } from "@smart-dispatch/types";
+import type { NotificationTemplate } from "@smart-dispatch/types";
+import type { ConfigurableNotificationModule } from "./notification-template-modules";
 import { useLocale } from "@/components/shared/providers";
 import { Input } from "@/components/ui/input";
 import {
@@ -22,7 +23,7 @@ import {
 } from "./notification-template-shared";
 
 type NotificationTemplateEventNavProps = {
-  module: NotificationModule;
+  module: ConfigurableNotificationModule;
   activeEvent: string;
   templates: NotificationTemplate[];
   formState: Record<string, { is_enabled: boolean }>;
@@ -33,7 +34,7 @@ type NotificationTemplateEventNavProps = {
 type EventCopy = { title: string; description: string };
 
 function getEventCopy(
-  module: NotificationModule,
+  module: ConfigurableNotificationModule,
   event: string,
   copy: ReturnType<typeof getAdminNotificationTemplatesMessages>,
 ): EventCopy {
@@ -42,7 +43,7 @@ function getEventCopy(
 }
 
 function getGroupLabel(
-  module: NotificationModule,
+  module: ConfigurableNotificationModule,
   groupId: string,
   copy: ReturnType<typeof getAdminNotificationTemplatesMessages>,
 ) {

@@ -1,11 +1,12 @@
 import type {
   NotificationChannel,
-  NotificationModule,
   NotificationTemplate,
   NotificationTemplateRecipient,
 } from "@smart-dispatch/types";
 
-export const MODULE_EVENTS: Record<Exclude<NotificationModule, "system">, string[]> = {
+import type { ConfigurableNotificationModule } from "./notification-template-modules";
+
+export const MODULE_EVENTS: Record<ConfigurableNotificationModule, string[]> = {
   ride_requests: [
     "created",
     "confirmed",
@@ -30,7 +31,7 @@ export const MODULE_EVENTS: Record<Exclude<NotificationModule, "system">, string
 export const CHANNEL_ORDER: NotificationChannel[] = ["email", "sms", "push"];
 
 export const EVENT_GROUPS: Record<
-  Exclude<NotificationModule, "system">,
+  ConfigurableNotificationModule,
   { id: string; events: string[] }[]
 > = {
   ride_requests: [
@@ -51,7 +52,7 @@ export const EVENT_GROUPS: Record<
 const DRIVER_EVENTS = new Set(["assigned", "rerouted", "started", "completed"]);
 
 export function shouldShowTemplate(
-  module: NotificationModule,
+  module: ConfigurableNotificationModule,
   event: string,
   recipient: NotificationTemplateRecipient,
 ) {
@@ -91,7 +92,7 @@ export function shouldShowTemplate(
 }
 
 export function getVisibleEventTemplates(
-  module: NotificationModule,
+  module: ConfigurableNotificationModule,
   event: string,
   templates: NotificationTemplate[],
 ) {
@@ -104,7 +105,7 @@ export function getVisibleEventTemplates(
 }
 
 export function getEventChannelStats(
-  module: NotificationModule,
+  module: ConfigurableNotificationModule,
   event: string,
   templates: NotificationTemplate[],
   formState: Record<string, { is_enabled: boolean }>,
@@ -118,7 +119,7 @@ export function getEventChannelStats(
 }
 
 export function getModuleChannelStats(
-  module: NotificationModule,
+  module: ConfigurableNotificationModule,
   templates: NotificationTemplate[],
   formState: Record<string, { is_enabled: boolean }>,
 ) {

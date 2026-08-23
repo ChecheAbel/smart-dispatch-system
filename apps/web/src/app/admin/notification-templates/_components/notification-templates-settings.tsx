@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, MessageSquare, Save, Smartphone } from "lucide-react";
 import type {
   NotificationChannel,
-  NotificationModule,
   NotificationTemplate,
   NotificationTemplateRecipient,
 } from "@smart-dispatch/types";
@@ -37,6 +36,7 @@ import {
   getModuleDefinition,
   NOTIFICATION_MODULE_ORDER,
   parseNotificationModule,
+  type ConfigurableNotificationModule,
 } from "./notification-template-modules";
 import {
   CHANNEL_ORDER,
@@ -87,7 +87,7 @@ function RulesSkeleton() {
   );
 }
 
-function parseEvent(module: NotificationModule, value: string | null): string {
+function parseEvent(module: ConfigurableNotificationModule, value: string | null): string {
   const events = MODULE_EVENTS[module];
   return value && events.includes(value) ? value : events[0];
 }
@@ -223,7 +223,7 @@ export function NotificationTemplatesSettings({
   }, [copy.errors.loadFailed, copy.toast.loadFailed.title]);
 
   const templatesByModule = useMemo(() => {
-    const grouped = new Map<NotificationModule, Map<string, NotificationTemplate[]>>();
+    const grouped = new Map<ConfigurableNotificationModule, Map<string, NotificationTemplate[]>>();
 
     for (const notificationModule of NOTIFICATION_MODULE_ORDER) {
       const eventMap = new Map<string, NotificationTemplate[]>();
@@ -234,6 +234,10 @@ export function NotificationTemplatesSettings({
     }
 
     for (const template of templates) {
+      if (template.module === "system") {
+        continue;
+      }
+
       const eventMap = grouped.get(template.module);
       if (!eventMap) {
         continue;
@@ -284,14 +288,14 @@ export function NotificationTemplatesSettings({
     [activeEvent, activeModule, formState, templates],
   );
 
-  function updateRoute(module: NotificationModule, event: string) {
+  function updateRoute(module: ConfigurableNotificationModule, event: string) {
     const params = new URLSearchParams(searchParams.toString());
     params.set("module", module);
     params.set("event", event);
     router.replace(`/admin/notification-templates?${params.toString()}`, { scroll: false });
   }
 
-  function selectModule(module: NotificationModule) {
+  function selectModule(module: ConfigurableNotificationModule) {
     updateRoute(module, MODULE_EVENTS[module][0]);
   }
 

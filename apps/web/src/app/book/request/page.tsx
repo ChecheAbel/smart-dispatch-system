@@ -948,7 +948,7 @@ function VehicleRequestPageContent() {
                   <DropdownMenuItem
                     className="cursor-pointer rounded-md px-2 py-1.5 text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-[#dfe5eb] dark:hover:bg-white/[0.06]"
                     render={
-                      <Link href={user.roles.includes("admin") || user.roles.includes("super_admin") ? "/admin" : "/dashboard"} />
+                      <Link href={user.roles.includes("admin") ? "/admin" : "/dashboard"} />
                     }
                   >
                     <LayoutDashboard className="mr-2 h-4 w-4" />

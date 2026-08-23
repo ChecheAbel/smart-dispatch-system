@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import type { NotificationModule } from "@smart-dispatch/types";
 
+export type ConfigurableNotificationModule = Exclude<NotificationModule, "system">;
+
 export type NotificationModuleCategory = "operations" | "accounts" | "compliance";
 
 export type NotificationModuleCopyKey =
@@ -22,7 +24,7 @@ export type NotificationModuleCopyKey =
   | "geofencing";
 
 export type NotificationModuleDefinition = {
-  id: NotificationModule;
+  id: ConfigurableNotificationModule;
   category: NotificationModuleCategory;
   copyKey: NotificationModuleCopyKey;
   icon: LucideIcon;
@@ -84,12 +86,12 @@ export const NOTIFICATION_MODULE_CATEGORIES: NotificationModuleCategory[] = [
   "compliance",
 ];
 
-export function parseNotificationModule(value: string | null): NotificationModule {
+export function parseNotificationModule(value: string | null): ConfigurableNotificationModule {
   const match = NOTIFICATION_MODULE_DEFINITIONS.find((definition) => definition.id === value);
   return match?.id ?? NOTIFICATION_MODULE_DEFINITIONS[0].id;
 }
 
-export function getModuleDefinition(module: NotificationModule): NotificationModuleDefinition {
+export function getModuleDefinition(module: ConfigurableNotificationModule): NotificationModuleDefinition {
   const definition = NOTIFICATION_MODULE_DEFINITIONS.find((item) => item.id === module);
   if (!definition) {
     throw new Error(`Unknown notification module: ${module}`);

@@ -209,8 +209,8 @@ export function VehicleDetailOverviewTab({ vehicle, copy, locale, canWrite, onNa
                 <ShieldCheck className="size-6 text-slate-300" />
               </div>
               <div className="space-y-1">
-                <p className="text-sm font-medium text-slate-700">{copy.vehicleImagesEmpty}</p>
-                <p className="text-xs text-slate-500">{copy.vehicleImages}</p>
+                <p className="text-sm font-medium text-slate-700">{copy.form.vehicleImagesEmpty}</p>
+                <p className="text-xs text-slate-500">{copy.form.vehicleImages}</p>
               </div>
             </div>
           </div>

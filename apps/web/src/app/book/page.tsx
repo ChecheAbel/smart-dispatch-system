@@ -125,7 +125,7 @@ const staggerContainer = {
 
 const cardVariant = {
   hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
+  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
 };
 
 function PublicVehiclesPageContent() {
@@ -302,7 +302,7 @@ function PublicVehiclesPageContent() {
                       <p className="truncate text-xs text-slate-500">{user.email}</p>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer rounded-md px-2 py-1.5 text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-[#dfe5eb] dark:hover:bg-white/[0.06]" render={<Link href={user.roles.includes("admin") || user.roles.includes("super_admin") ? "/admin" : "/dashboard"} />}>
+                    <DropdownMenuItem className="cursor-pointer rounded-md px-2 py-1.5 text-sm text-slate-700 transition-colors hover:bg-slate-100 dark:text-[#dfe5eb] dark:hover:bg-white/[0.06]" render={<Link href={user.roles.includes("admin") ? "/admin" : "/dashboard"} />}>
                       <LayoutDashboard className="h-4 w-4 mr-2 text-[#C9B87A]" />
                       Console Dashboard
                     </DropdownMenuItem>
@@ -387,7 +387,13 @@ function PublicVehiclesPageContent() {
               ) : null}
             </div>
 
-            <Select key={`type-select-${types.length}`} value={selectedType} onValueChange={setSelectedType}>
+            <Select
+              key={`type-select-${types.length}`}
+              value={selectedType}
+              onValueChange={(value) => {
+                if (value) setSelectedType(value);
+              }}
+            >
               <SelectTrigger className="h-11 w-full rounded-xl border-0 bg-slate-50 px-3.5 text-sm font-medium text-[#1C3A34] shadow-none hover:bg-slate-100/80 focus-visible:ring-2 focus-visible:ring-[#1C3A34]/15 dark:bg-[#11161d] dark:text-[#e8ecf1] dark:hover:bg-[#202731] dark:focus-visible:ring-[#C9B87A]/25 lg:h-12">
                 <span className="truncate">
                   {selectedType === "all-types-placeholder"
@@ -407,7 +413,13 @@ function PublicVehiclesPageContent() {
               </SelectContent>
             </Select>
 
-            <Select key={`class-select-${classes.length}`} value={selectedClass} onValueChange={setSelectedClass}>
+            <Select
+              key={`class-select-${classes.length}`}
+              value={selectedClass}
+              onValueChange={(value) => {
+                if (value) setSelectedClass(value);
+              }}
+            >
               <SelectTrigger className="h-11 w-full rounded-xl border-0 bg-slate-50 px-3.5 text-sm font-medium text-[#1C3A34] shadow-none hover:bg-slate-100/80 focus-visible:ring-2 focus-visible:ring-[#1C3A34]/15 dark:bg-[#11161d] dark:text-[#e8ecf1] dark:hover:bg-[#202731] dark:focus-visible:ring-[#C9B87A]/25 lg:h-12">
                 <span className="truncate">
                   {selectedClass === "all-classes-placeholder"

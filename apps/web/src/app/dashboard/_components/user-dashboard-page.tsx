@@ -376,13 +376,15 @@ export function UserDashboardPage() {
       "in_progress",
       "completed",
       "cancelled",
+      "no_show",
     ];
-    const labels: Record<string, string> = {
+    const labels: Record<RideRequestStatus, string> = {
       pending: locale === "am" ? "በመጠባበቅ ላይ" : "Pending",
       confirmed: locale === "am" ? "የተረጋገጠ" : "Confirmed",
       in_progress: locale === "am" ? "በሂደት ላይ" : "In progress",
       completed: locale === "am" ? "የተጠናቀቀ" : "Completed",
       cancelled: locale === "am" ? "የተሰረዘ" : "Cancelled",
+      no_show: locale === "am" ? "አልታየም" : "No-show",
     };
     return statuses.map((status) => {
       const count = periodRequests.filter((r) => r.status === status).length;

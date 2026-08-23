@@ -1251,7 +1251,8 @@
         "confirmed": "የተረጋገጠ",
         "in_progress": "በመስራት ላይ",
         "completed": "ተጠናቋል",
-        "cancelled": "ተሰርዟል"
+        "cancelled": "ተሰርዟል",
+        "no_show": "አልታየም"
       },
       "vehicleStatuses": {
         "active": "ንቁ",
