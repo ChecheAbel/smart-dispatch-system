@@ -150,10 +150,7 @@ export async function seedRegions() {
 
     await prisma.region.upsert({
       where: { slug: region.slug },
-      update: {
-        translations,
-        isActive: true,
-      },
+      update: {},
       create: {
         slug: region.slug,
         translations,

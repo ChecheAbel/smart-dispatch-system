@@ -1,5 +1,43 @@
 import { prisma } from "../db/prisma";
 
+export async function ensureRolePermissions(
+  roleId: string,
+  permissionIds: string[],
+  options?: { addMissing?: boolean },
+) {
+  const uniquePermissionIds = [...new Set(permissionIds)];
+  const existingCount = await prisma.rolePermission.count({ where: { roleId } });
+
+  if (existingCount === 0) {
+    await setRolePermissions(roleId, uniquePermissionIds);
+    return {
+      initialized: true as const,
+      skipped: false as const,
+      added: uniquePermissionIds.length,
+      applied: uniquePermissionIds.length,
+    };
+  }
+
+  if (!options?.addMissing || uniquePermissionIds.length === 0) {
+    return { initialized: false as const, skipped: true as const, added: 0, applied: existingCount };
+  }
+
+  const result = await prisma.rolePermission.createMany({
+    data: uniquePermissionIds.map((permissionId) => ({
+      roleId,
+      permissionId,
+    })),
+    skipDuplicates: true,
+  });
+
+  return {
+    initialized: false as const,
+    skipped: result.count === 0,
+    added: result.count,
+    applied: existingCount + result.count,
+  };
+}
+
 export async function setRolePermissions(roleId: string, permissionIds: string[]) {
   const uniquePermissionIds = [...new Set(permissionIds)];
 

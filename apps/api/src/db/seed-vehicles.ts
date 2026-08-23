@@ -206,16 +206,7 @@ export async function seedVehicles() {
 
     await prisma.vehicle.upsert({
       where: { plateNumber },
-      update: {
-        chassisNumber,
-        vehicleTypeId: vehicleType.id,
-        vehicleClassId: vehicleClass.id,
-        make: vehicle.make,
-        model: vehicle.model,
-        year: vehicle.year,
-        status: vehicle.status ?? VehicleStatus.active,
-        notes: vehicle.notes ?? null,
-      },
+      update: {},
       create: {
         plateNumber,
         chassisNumber,

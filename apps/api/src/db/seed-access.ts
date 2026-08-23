@@ -1,7 +1,7 @@
 import type { HttpMethod } from "../generated/prisma";
 import { prisma } from "../db/prisma";
-import { setMenuPermissions } from "../models/menu-permission.model";
-import { setRolePermissions } from "../models/role-permission.model";
+import { ensureMenuPermissions } from "../models/menu-permission.model";
+import { ensureRolePermissions, setRolePermissions } from "../models/role-permission.model";
 import { inferMenuPermissionSlugs } from "../utils/infer-menu-permissions";
 import { menuTranslationInputsToMap } from "../types/menu-translations";
 import type { Prisma } from "../generated/prisma";
@@ -893,14 +893,7 @@ async function seedMenus() {
 
     const record = await prisma.menu.upsert({
       where: { slug: menu.slug },
-      update: {
-        path: menu.path,
-        icon: menu.icon,
-        parentId,
-        sortOrder: menu.sortOrder,
-        translations,
-        isActive: true,
-      },
+      update: {},
       create: {
         slug: menu.slug,
         path: menu.path,
@@ -916,7 +909,7 @@ async function seedMenus() {
       .map((slug) => permissionBySlug.get(slug))
       .filter((id): id is string => Boolean(id));
 
-    await setMenuPermissions(record.id, menuPermissionIds);
+    await ensureMenuPermissions(record.id, menuPermissionIds);
 
     menuIdBySlug.set(menu.slug, record.id);
   }
@@ -975,8 +968,16 @@ async function seedAdminRolePermissions(permissionIds: string[]) {
   const adminRole = await prisma.role.findUnique({ where: { slug: "admin" } });
   if (!adminRole) return;
 
-  await setRolePermissions(adminRole.id, permissionIds);
-  console.log(`[Seed] Administrator role synced with ${permissionIds.length} permissions`);
+  const result = await ensureRolePermissions(adminRole.id, permissionIds, { addMissing: true });
+  if (result.initialized) {
+    console.log(`[Seed] Administrator role granted ${result.applied} permissions`);
+    return;
+  }
+  if (result.added > 0) {
+    console.log(`[Seed] Administrator role gained ${result.added} new permission(s)`);
+    return;
+  }
+  console.log("[Seed] Administrator role permissions left unchanged");
 }
 
 async function seedUserRolePermissions() {
@@ -1001,12 +1002,17 @@ async function seedUserRolePermissions() {
     orderBy: { slug: "asc" },
   });
 
-  await setRolePermissions(
+  const result = await ensureRolePermissions(
     userRole.id,
     permissions.map((permission) => permission.id),
   );
 
-  console.log(`[Seed] User role synced with ${permissions.length} customer portal permissions`);
+  if (result.skipped) {
+    console.log("[Seed] User role permissions left unchanged");
+    return;
+  }
+
+  console.log(`[Seed] User role granted ${result.applied} customer portal permissions`);
 }
 
 async function seedDriverRolePermissions() {
@@ -1020,12 +1026,17 @@ async function seedDriverRolePermissions() {
     orderBy: { slug: "asc" },
   });
 
-  await setRolePermissions(
+  const result = await ensureRolePermissions(
     driverRole.id,
     permissions.map((permission) => permission.id),
   );
 
-  console.log(`[Seed] Driver role synced with ${permissions.length} driver API permissions`);
+  if (result.skipped) {
+    console.log("[Seed] Driver role permissions left unchanged");
+    return;
+  }
+
+  console.log(`[Seed] Driver role granted ${result.applied} driver API permissions`);
 }
 
 /** Re-assigns every default platform permission to the admin role. */

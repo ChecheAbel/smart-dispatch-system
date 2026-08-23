@@ -21,6 +21,8 @@ RUN npm install -g pnpm
 COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
+# postinstall runs `prisma generate`; schema is not in the json prune output
+COPY --from=builder /app/out/full/apps/api/prisma ./apps/api/prisma
 RUN pnpm install
 
 # Build the project

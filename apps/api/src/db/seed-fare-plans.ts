@@ -136,23 +136,7 @@ export async function seedFarePlans() {
 
     await prisma.farePlan.upsert({
       where: { slug: farePlan.slug },
-      update: {
-        translations,
-        vehicleTypeId: vehicleType?.id ?? null,
-        vehicleClassId: vehicleClass?.id ?? null,
-        regionId: region?.id ?? null,
-        pricingModel: farePlan.pricingModel,
-        currency: farePlan.currency,
-        baseFare: farePlan.baseFare,
-        perKmRate: farePlan.perKmRate,
-        perMinuteRate: farePlan.perMinuteRate,
-        minimumFare: farePlan.minimumFare,
-        bookingFee: farePlan.bookingFee,
-        freeWaitingMinutes: farePlan.freeWaitingMinutes,
-        waitingFeePerMinute: farePlan.waitingFeePerMinute,
-        priority: farePlan.priority,
-        isActive: true,
-      },
+      update: {},
       create: {
         slug: farePlan.slug,
         translations,

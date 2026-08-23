@@ -73,10 +73,7 @@ export async function seedVehicleClasses() {
 
     await prisma.vehicleClass.upsert({
       where: { slug: vehicleClass.slug },
-      update: {
-        translations,
-        isActive: true,
-      },
+      update: {},
       create: {
         slug: vehicleClass.slug,
         translations,

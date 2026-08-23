@@ -115,17 +115,6 @@ async function upsertLocation(regionId: string, location: SeedLocation) {
   });
 
   if (existing) {
-    await prisma.location.update({
-      where: { id: existing.id },
-      data: {
-        translations,
-        latitude: location.latitude,
-        longitude: location.longitude,
-        canPickup: true,
-        canDropoff: true,
-        isActive: true,
-      },
-    });
     return;
   }
 

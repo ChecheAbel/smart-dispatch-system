@@ -577,6 +577,12 @@ Confirm the server is up and `DATABASE_URL` matches user, password, host, port, 
 **Admin login fails**  
 Seed only creates the admin when **both** `SEED_ADMIN_EMAIL` and `SEED_ADMIN_PASSWORD` are set, and only on first insert (existing users keep their password). Use `pnpm db:restore-admin` if the user exists but lost the admin role.
 
+**Role permissions keep resetting**  
+Startup seed no longer replaces role permission lists. User and driver roles are seeded only when empty. The admin role only **gains** newly added permissions; it does not drop ones you removed. To fully reset the admin permission set, run `pnpm db:restore-admin`.
+
+**Seeded catalog edits keep reverting**  
+Startup seed now only **creates missing** roles, menus, regions, locations, vehicle types/classes, vehicles, and fare plans. Existing rows (including prices, plates, menu labels, SMS provider) are left as you saved them. New seed items still appear. Permissions and API endpoints remain code-owned and can update.
+
 **Web loads but API calls 404**  
 Start the API on port 4000. Local Next rewrites are hardcoded to `http://localhost:4000`.
 

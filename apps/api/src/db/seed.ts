@@ -218,7 +218,7 @@ async function seedRoles() {
 
     await prisma.role.upsert({
       where: { slug: role.slug },
-      update: { translations },
+      update: {},
       create: {
         slug: role.slug,
         translations,

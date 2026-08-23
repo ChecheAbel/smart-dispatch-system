@@ -118,7 +118,7 @@ export async function ensureNotificationConfigurations() {
   for (const channel of ["email", "sms"] as const) {
     await prisma.notificationConfiguration.upsert({
       where: { channel },
-      update: channel === "sms" ? { provider: "afrosms" } : {},
+      update: {},
       create: {
         channel,
         isEnabled: false,
