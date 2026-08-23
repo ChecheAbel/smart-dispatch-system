@@ -1069,6 +1069,7 @@
         "cbeTitle": "ሲቢኢ ብር",
         "cbeDescription": "በኢትዮጵያ ንግድ ባንክ (ሲቢኢ ብር) ያስተላልፉ።",
         "cbeSheetDescription": "ትክክለኛውን መጠን ወደ ከታች ያለው ሂሳብ ያስተላልፉ እና ማጣቀሻውን እንደ ምክንያት ይጠቀሙ።",
+        "customSheetDescription": "ትክክለኛውን መጠን በከታች ባሉ ዝርዝሮች በመጠቀም ያስተላልፉ እና የደረሰኝ ማጣቀሻዎን ያካትቱ።",
         "telebirrSteps": [
           "በስልክዎ ላይ የቴሌብር መተግበሪያ ይክፈቱ (ወይም USSD {short_code} ይደውሉ)።",
           "ነጋዴ ይክፈሉ ወይም ወደ አጭር ኮድ {short_code} ገንዘብ ይላኩ።",
@@ -1081,7 +1082,12 @@
           "መጠኑ {amount} መሆኑን ያረጋግጡ።",
           "ምክንያት/አጭር ማብራሪያ ላይ {reference} ይጠቀሙና ይላኩ።"
         ],
-        "configPending": "",
+        "customSteps": [
+          "ለ {method} የባንክ ወይም የክፍያ መተግበሪያዎን ይክፈቱ።",
+          "በተሰጡት የሂሳብ ዝርዝሮች {amount} ያስተላልፉ።",
+          "በማስታወሻ ውስጥ {reference} ያስገቡና ክፍያውን ያረጋግጡ።"
+        ],
+        "configPending": "ክፍያ ገና አልተዋቀረም",
         "merchantCodePending": "የቴሌብር አጭር ኮድዎ",
         "accountPending": "ከታች የተሰጠው የሲቢኢ ሂሳብ",
         "configPendingNotice": "የክፍያ ሂሳብ ዝርዝሮች ገና አልተዋቀሩም። እባክዎ ድጋፍ ያግኙ ወይም የደረሰኝ ማጣቀሻ በመጠቀም በዲስፓች ቢሮ ይክፈሉ።",
@@ -6159,6 +6165,143 @@
       "logoUploadFailed": {
         "title": "አርማ መጫን አልተቻለም",
         "description": "እባክዎ በትክክለኛ የምስል ፋይል እንደገና ይሞክሩ።"
+      }
+    }
+  },
+  "adminPaymentGatewaySettings": {
+    "eyebrow": "የስርዓት ቅንብሮች",
+    "title": "የክፍያ መግቢያ",
+    "description": "በደረሰኞች ላይ ለደንበኞች የሚታዩ የክፍያ ዘዴዎችን ያክሉ፣ ያስወግዱ እና ያዋቅሩ።",
+    "loading": "የክፍያ መግቢያ ቅንብሮችን በመጫን ላይ...",
+    "accessDenied": {
+      "eyebrow": "መዳረሻ ተከልክሏል",
+      "title": "ፈቃድ የለዎትም",
+      "description": "ይህንን ገጽ ለመክፈት የስርዓት ቅንብሮችን የማየት መብት ያስፈልጋል። እባክዎ አስተዳዳሪን ለእርስዎ ሚና system_settings.read ፈቃድ እንዲሰጥዎ ይጠይቁ።",
+      "sessionHint": "ፈቃዶች በቅርቡ ከተቀየሩ፣ እባክዎ ክፍለ-ጊዜዎን ለማደስ በመጀመሪያ ዘግተው ይውጡና እንደገና ይግቡ።",
+      "permissionNote": "መዳረሻ በሚናዎ ፈቃዶች የሚቆጣጠር ነው።",
+      "goToDashboard": "ወደ ዳሽቦርድ ሂድ"
+    },
+    "add": {
+      "title": "የክፍያ ዘዴዎች",
+      "description": "ደንበኞች በደረሰኝ ላይ የሚያዩትን የክፍያ ዘዴዎች ይፍጠሩ።",
+      "button": "የክፍያ ዘዴ አክል"
+    },
+    "empty": {
+      "title": "ምንም የክፍያ ዘዴ የለም",
+      "description": "እዚህ ምንም ስላልተዋቀረ የደንበኛ ደረሰኞች አሁን የክፍያ መንገድ አያሳዩም። የክፍያ መመሪያ ለማሳየት ዘዴ ያክሉ።"
+    },
+    "kinds": {
+      "telebirr": "ቴሌብር",
+      "cbe": "CBE Birr",
+      "custom": "ብጁ"
+    },
+    "fields": {
+      "enabled": "ነቅቷል",
+      "name": "የማሳያ ስም",
+      "description": "አጭር መግለጫ",
+      "logo": "አርማ",
+      "details": "የክፍያ ዝርዝሮች",
+      "customField": "መስክ",
+      "fieldKey": "ቁልፍ",
+      "fieldLabel": "መለያ",
+      "fieldValue": "እሴት"
+    },
+    "placeholders": {
+      "name": "ለምሳሌ ቴሌብር፣ CBE Birr፣ ዳሽን ባንክ",
+      "description": "ለደንበኞች ከዘዴው ስም ስር ይታያል",
+      "fieldKey": "ለምሳሌ merchant_id",
+      "fieldLabel": "ለምሳሌ የመለያ ቁጥር",
+      "fieldValue": "ለምሳሌ 123456"
+    },
+    "status": {
+      "on": "ንቁ",
+      "off": "ጠፍቷል",
+      "incomplete": "ያልተሟላ"
+    },
+    "actions": {
+      "remove": "ዘዴን አስወግድ",
+      "edit": "ዘዴን አርትዕ",
+      "addField": "ጥንድ አክል"
+    },
+    "form": {
+      "createTitle": "የክፍያ ዘዴ አክል",
+      "editTitle": "የክፍያ ዘዴን አርትዕ",
+      "createDescription": "የዚህን የክፍያ ዘዴ ስም፣ አርማ እና የቁልፍ-እሴት ዝርዝሮች ያስገቡ።",
+      "editDescription": "የዚህን የክፍያ ዘዴ ዝርዝሮች እና የውህደት ቁልፍ-እሴት ጥንዶች ያዘምኑ።",
+      "kind": "የዘዴ አይነት",
+      "kindHint": "ቅድመ-ቅንብሮች የተለመዱ መስኮችን ይሞላሉ። ብጁ የራስዎን መለያዎች እና እሴቶች እንዲገልጹ ያስችላል።",
+      "create": "ዘዴ አክል",
+      "creating": "በመጨመር ላይ…",
+      "save": "ዘዴን አስቀምጥ",
+      "saving": "በማስቀመጥ ላይ…",
+      "cancel": "ሰርዝ",
+      "nameRequired": "የማሳያ ስም ያስገቡ።",
+      "fieldLabelRequired": "እያንዳንዱ መስክ መለያ ያስፈልገዋል።",
+      "fieldKeyRequired": "እያንዳንዱ ጥንድ ቁልፍ ያስፈልገዋል።",
+      "duplicateFieldKey": "እያንዳንዱ ቁልፍ ልዩ መሆን አለበት።",
+      "detailsRequired": "ይህ ዘዴ ሲነቃ ቢያንስ አንድ የቁልፍ-እሴት ጥንድ ያክሉ።",
+      "detailsHint": "የራስዎን ቁልፎች እና እሴቶች ያክሉ። ቁልፎቹ ይህ ዘዴ ከክፍያ አቅራቢ ጋር ሲገናኝ ይጠቀማሉ።",
+      "emptyDetails": "እስካሁን ዝርዝር የለም። ለዚህ ዘዴ የቁልፍ-እሴት ጥንድ ያክሉ።",
+      "duplicatePreset": "ይህ አቅራቢ አስቀድሞ በዝርዝርዎ ውስጥ አለ።",
+      "logoHint": "ደንበኞች በደረሰኝ ላይ የሚያዩት አርማ። JPG፣ PNG ወይም WEBP፣ እስከ 5 MB።",
+      "logoUpload": "አርማ ስቀል",
+      "logoReplace": "አርማ ቀይር",
+      "logoRemove": "አርማ አስወግድ",
+      "logoInvalid": "አርማው JPG፣ PNG ወይም WEBP መሆን አለበት።",
+      "logoTooLarge": "አርማው 5 MB ወይም ያነሰ መሆን አለበት።"
+    },
+    "delete": {
+      "title": "{name} ይወገድ?",
+      "description": "ይህ የክፍያ ዘዴ ከአስተዳዳሪ ቅንብሮች እና ከደንበኛ ደረሰኞች ይወገዳል።",
+      "confirm": "አስወግድ",
+      "cancel": "ሰርዝ",
+      "deleting": "በማስወገድ ላይ…"
+    },
+    "configure": {
+      "title": "የክፍያ ዘዴዎችን አስቀምጥ",
+      "description": "ለውጦች ወዲያውኑ በደንበኛ የደረሰኝ ክፍያ ማያ ገጾች ላይ ይተገበራሉ።",
+      "saveButton": "ለውጦችን አስቀምጥ",
+      "savingButton": "በማስቀመጥ ላይ…",
+      "unsavedChanges": "ያልተቀመጡ ለውጦች አሉዎት",
+      "allSaved": "ሁሉም ለውጦች ተቀምጠዋል",
+      "readOnlyHint": "የማየት ብቻ መብት አለዎት። ለመጻፍ ፈቃድ አስተዳዳሪን ይጠይቁ።"
+    },
+    "toast": {
+      "loadFailed": {
+        "title": "የክፍያ መግቢያ ቅንብሮችን መጫን አልተቻለም",
+        "description": "እባክዎ እንደገና ይሞክሩ ወይም ገጹን ያድሱ።"
+      },
+      "updateSuccess": {
+        "title": "የክፍያ መግቢያ ተዘምኗል",
+        "description": "የደንበኛ የክፍያ ዘዴዎች በተሳካ ሁኔታ ተቀምጠዋል።"
+      },
+      "created": {
+        "title": "የክፍያ ዘዴ ተጨምሯል",
+        "description": "ሲነቃ ደንበኞች ይህን ዘዴ በደረሰኞች ላይ ያያሉ።"
+      },
+      "updated": {
+        "title": "የክፍያ ዘዴ ተዘምኗል",
+        "description": "የክፍያ ዝርዝሮቹ ተቀምጠዋል።"
+      },
+      "deleted": {
+        "title": "የክፍያ ዘዴ ተወግዷል",
+        "description": "ይህ ዘዴ ለደንበኞች አይታይም።"
+      },
+      "updateFailed": {
+        "title": "የክፍያ መግቢያን ማስቀመጥ አልተቻለም",
+        "description": "እባክዎ እሴቶቹን ያረጋግጡና እንደገና ይሞክሩ።"
+      },
+      "duplicatePreset": {
+        "title": "ዘዴው አስቀድሞ ተጨምሯል",
+        "description": "ያ አቅራቢ አስቀድሞ በዝርዝርዎ ውስጥ አለ።"
+      },
+      "nameRequired": {
+        "title": "የማሳያ ስም ያስፈልጋል",
+        "description": "እያንዳንዱ የክፍያ ዘዴ ስም ያስፈልገዋል።"
+      },
+      "requiredField": {
+        "title": "አስፈላጊ ዝርዝር ጠፍቷል",
+        "description": "ነቅተው ያሉ ዘዴዎች ለ {field} እሴት ያስፈልጋቸዋል።"
       }
     }
   },

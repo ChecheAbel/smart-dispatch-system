@@ -1069,6 +1069,7 @@
         "cbeTitle": "CBE Birr",
         "cbeDescription": "Transfer via Commercial Bank of Ethiopia (CBE Birr).",
         "cbeSheetDescription": "Transfer the exact amount to the account below and use the invoice reference as the reason.",
+        "customSheetDescription": "Transfer the exact amount using the details below and include your invoice reference.",
         "telebirrSteps": [
           "Open the Telebirr app on your phone (or dial {short_code} for USSD where available).",
           "Choose Pay Merchant or Send Money to the short code {short_code}.",
@@ -1081,7 +1082,12 @@
           "Enter {amount} as the amount.",
           "Use {reference} as the payment reason or narration, then submit."
         ],
-        "configPending": "",
+        "customSteps": [
+          "Open your banking or payment app for {method}.",
+          "Transfer {amount} using the account details shown.",
+          "Put {reference} in the remark or reason field, then confirm the payment."
+        ],
+        "configPending": "Payment is not configured yet",
         "merchantCodePending": "your Telebirr merchant code",
         "accountPending": "the CBE account shown below",
         "configPendingNotice": "Payment account details are not configured yet. Please contact support or pay at the dispatch office using your invoice reference.",
@@ -6159,6 +6165,143 @@
       "logoUploadFailed": {
         "title": "Could not upload logo",
         "description": "Please try again with a valid image file."
+      }
+    }
+  },
+  "adminPaymentGatewaySettings": {
+    "eyebrow": "System settings",
+    "title": "Payment Gateway",
+    "description": "Add, remove, and configure payment methods shown to customers on invoices.",
+    "loading": "Loading payment gateway settings...",
+    "accessDenied": {
+      "eyebrow": "Access denied",
+      "title": "You do not have permission",
+      "description": "View access to system settings is required to open this page. Ask an administrator to grant the system_settings.read permission for your role.",
+      "sessionHint": "If permissions were changed recently, sign out and sign in again to refresh your session.",
+      "permissionNote": "Access is controlled by your role permissions.",
+      "goToDashboard": "Go to dashboard"
+    },
+    "add": {
+      "title": "Payment methods",
+      "description": "Create the payment methods customers will see on invoices.",
+      "button": "Add payment method"
+    },
+    "empty": {
+      "title": "No payment methods yet",
+      "description": "Customer invoices currently show no way to pay because nothing is configured here. Add a method to show payment instructions."
+    },
+    "kinds": {
+      "telebirr": "Telebirr",
+      "cbe": "CBE Birr",
+      "custom": "Custom"
+    },
+    "fields": {
+      "enabled": "Enabled",
+      "name": "Display name",
+      "description": "Short description",
+      "logo": "Logo",
+      "details": "Payment details",
+      "customField": "Field",
+      "fieldKey": "Key",
+      "fieldLabel": "Label",
+      "fieldValue": "Value"
+    },
+    "placeholders": {
+      "name": "e.g. Telebirr, CBE Birr, Dashen Bank",
+      "description": "Shown under the method name for customers",
+      "fieldKey": "e.g. merchant_id",
+      "fieldLabel": "e.g. Account number",
+      "fieldValue": "e.g. 123456"
+    },
+    "status": {
+      "on": "Active",
+      "off": "Off",
+      "incomplete": "Incomplete"
+    },
+    "actions": {
+      "remove": "Remove method",
+      "edit": "Edit method",
+      "addField": "Add pair"
+    },
+    "form": {
+      "createTitle": "Add payment method",
+      "editTitle": "Edit payment method",
+      "createDescription": "Enter the name, logo, and key-value details for this payment method.",
+      "editDescription": "Update this payment method’s details and integration key-value pairs.",
+      "kind": "Method type",
+      "kindHint": "Presets fill common fields. Custom lets you define your own labels and values.",
+      "create": "Add method",
+      "creating": "Adding…",
+      "save": "Save method",
+      "saving": "Saving…",
+      "cancel": "Cancel",
+      "nameRequired": "Enter a display name.",
+      "fieldLabelRequired": "Every field needs a label.",
+      "fieldKeyRequired": "Every pair needs a key.",
+      "duplicateFieldKey": "Each key must be unique.",
+      "detailsRequired": "Add at least one key-value pair when this method is enabled.",
+      "detailsHint": "Add your own keys and values. Keys will be used when this method is connected to a payment provider.",
+      "emptyDetails": "No details yet. Add a key-value pair for this method.",
+      "duplicatePreset": "This provider is already in your list.",
+      "logoHint": "Shown on customer invoices. JPG, PNG, or WEBP, up to 5 MB.",
+      "logoUpload": "Upload logo",
+      "logoReplace": "Replace logo",
+      "logoRemove": "Remove logo",
+      "logoInvalid": "Logo must be a JPG, PNG, or WEBP image.",
+      "logoTooLarge": "Logo must be 5 MB or smaller."
+    },
+    "delete": {
+      "title": "Remove {name}?",
+      "description": "This payment method will be removed from admin settings and customer invoices.",
+      "confirm": "Remove",
+      "cancel": "Cancel",
+      "deleting": "Removing…"
+    },
+    "configure": {
+      "title": "Save payment methods",
+      "description": "Changes apply immediately to customer invoice payment screens.",
+      "saveButton": "Save changes",
+      "savingButton": "Saving…",
+      "unsavedChanges": "You have unsaved changes",
+      "allSaved": "All changes saved",
+      "readOnlyHint": "You have view-only access. Ask an administrator to grant write permission."
+    },
+    "toast": {
+      "loadFailed": {
+        "title": "Could not load payment gateway settings",
+        "description": "Please try again or refresh the page."
+      },
+      "updateSuccess": {
+        "title": "Payment gateway updated",
+        "description": "Customer payment methods have been saved successfully."
+      },
+      "created": {
+        "title": "Payment method added",
+        "description": "Customers will see this method on invoices when it is enabled."
+      },
+      "updated": {
+        "title": "Payment method updated",
+        "description": "The payment details have been saved."
+      },
+      "deleted": {
+        "title": "Payment method removed",
+        "description": "This method is no longer shown to customers."
+      },
+      "updateFailed": {
+        "title": "Could not save payment gateway",
+        "description": "Please verify the values and try again."
+      },
+      "duplicatePreset": {
+        "title": "Method already added",
+        "description": "That provider is already in your list."
+      },
+      "nameRequired": {
+        "title": "Display name required",
+        "description": "Every payment method needs a name."
+      },
+      "requiredField": {
+        "title": "Missing required detail",
+        "description": "Enabled methods need a value for {field}."
       }
     }
   },

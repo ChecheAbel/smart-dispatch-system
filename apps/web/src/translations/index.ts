@@ -40,6 +40,7 @@ import type {
   AdminProfileMessages,
   AdminDeadlineSettingsMessages,
   AdminBrandingSettingsMessages,
+  AdminPaymentGatewaySettingsMessages,
   AdminAuthMessages,
   CustomerAuthMessages,
   LandingMessages,
@@ -90,6 +91,7 @@ export type {
   AdminProfileMessages,
   AdminDeadlineSettingsMessages,
   AdminBrandingSettingsMessages,
+  AdminPaymentGatewaySettingsMessages,
   AdminAuthMessages,
   CustomerAuthMessages,
   LandingMessages,
@@ -285,6 +287,12 @@ export function getAdminBrandingSettingsMessages(
   locale: SupportedLocale,
 ): AdminBrandingSettingsMessages {
   return getTranslations(locale).adminBrandingSettings;
+}
+
+export function getAdminPaymentGatewaySettingsMessages(
+  locale: SupportedLocale,
+): AdminPaymentGatewaySettingsMessages {
+  return getTranslations(locale).adminPaymentGatewaySettings;
 }
 
 export function getAdminAuthMessages(locale: SupportedLocale): AdminAuthMessages {

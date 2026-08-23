@@ -42,6 +42,10 @@ import { requestLogger } from "./middleware/request-logger";
 import { ensureDriverLicenseUploadDir, getDriverLicenseUploadDir } from "./utils/driver-license-upload";
 import { ensureVehicleUploadDir, getVehicleUploadDir } from "./utils/vehicle-photo-upload";
 import { ensureBrandingUploadDir, getBrandingUploadDir } from "./utils/brand-logo-upload";
+import {
+  ensurePaymentMethodLogoUploadDir,
+  getPaymentMethodLogoUploadDir,
+} from "./utils/payment-method-logo-upload";
 import { loadAppSettings } from "./models/app-setting.model";
 import { sendSuccess } from "./utils/response";
 
@@ -60,6 +64,8 @@ ensureVehicleUploadDir();
 app.use("/uploads/vehicles", express.static(getVehicleUploadDir()));
 ensureBrandingUploadDir();
 app.use("/uploads/branding", express.static(getBrandingUploadDir()));
+ensurePaymentMethodLogoUploadDir();
+app.use("/uploads/payment-methods", express.static(getPaymentMethodLogoUploadDir()));
 
 registerAuthRoutes(app);
 registerUserRoutes(app);

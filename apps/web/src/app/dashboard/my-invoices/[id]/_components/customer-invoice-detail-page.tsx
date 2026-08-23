@@ -43,7 +43,7 @@ const STATUS_BADGE_CLASS: Record<CustomerVisibleInvoiceStatus, string> = {
   void: "border-red-200 bg-red-50 text-red-700",
 };
 
-const PAYMENT_METHOD_LOGOS: Partial<Record<InvoicePaymentMethod, string>> = {
+const PAYMENT_METHOD_LOGOS: Record<string, string> = {
   telebirr: "/providers/telebirr.webp",
   cbe_birr: "/providers/cbe-birr.webp",
 };
@@ -255,7 +255,8 @@ export function CustomerInvoiceDetailPage() {
               method={invoice.payment_method}
               value={
                 invoice.payment_method
-                  ? copy.detail.paymentMethods[invoice.payment_method]
+                  ? (copy.detail.paymentMethods as Record<string, string>)[invoice.payment_method] ??
+                    invoice.payment_method
                   : copy.detail.paymentMethods.notRecorded
               }
             />

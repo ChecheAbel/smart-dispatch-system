@@ -121,6 +121,37 @@ export const extensionParameters = {
 } as const;
 
 export const extensionSchemas = {
+  CustomerPaymentOptions: {
+    type: "object",
+    properties: {
+      methods: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            id: { type: "string" },
+            kind: { type: "string", enum: ["telebirr", "cbe_birr", "custom"] },
+            name: { type: "string" },
+            description: { type: "string", nullable: true },
+            enabled: { type: "boolean" },
+            sort_order: { type: "integer" },
+            logo_url: { type: "string", nullable: true },
+            fields: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  key: { type: "string" },
+                  label: { type: "string" },
+                  value: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
   BusinessTinLicense: {
     type: "object",
     properties: {
@@ -4513,6 +4544,124 @@ export const extensionPaths = {
                     properties: {
                       enabled: { type: "boolean" },
                       rate_percent: { type: "number" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+  },
+  "/api/admin/system-settings/payment-gateway": {
+    get: {
+      tags: ["System Settings"],
+      summary: "Get payment gateway settings",
+      description:
+        "Returns payment methods shown to customers when paying invoices.",
+      security,
+      responses: {
+        "200": {
+          description: "Current payment gateway settings",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      payment_gateway: { $ref: "#/components/schemas/CustomerPaymentOptions" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+    patch: {
+      tags: ["System Settings"],
+      summary: "Update payment gateway settings",
+      description:
+        "Updates customer invoice payment methods. Requires `system_settings.write`.",
+      security,
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: { $ref: "#/components/schemas/CustomerPaymentOptions" },
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: "Updated payment gateway settings",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      payment_gateway: { $ref: "#/components/schemas/CustomerPaymentOptions" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "400": badRequest,
+        "401": unauthorized,
+        "403": forbidden,
+      },
+    },
+  },
+  "/api/admin/system-settings/payment-gateway/logo": {
+    post: {
+      tags: ["System Settings"],
+      summary: "Upload a payment method logo",
+      description:
+        "Uploads a JPG, PNG, or WEBP logo for a payment method. Requires `system_settings.write`. Pass the returned `logo_url` on the method when saving payment gateway settings.",
+      security,
+      requestBody: {
+        required: true,
+        content: {
+          "multipart/form-data": {
+            schema: {
+              type: "object",
+              required: ["logo"],
+              properties: {
+                logo: { type: "string", format: "binary" },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "200": {
+          description: "Uploaded logo URL",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      logo_url: { type: "string" },
                     },
                   },
                 },

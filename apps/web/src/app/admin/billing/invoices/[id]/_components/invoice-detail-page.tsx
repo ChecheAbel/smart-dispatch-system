@@ -253,7 +253,8 @@ export function InvoiceDetailPage() {
                 label={copy.detail.paymentMethod}
                 value={
                   invoice.payment_method
-                    ? copy.detail.paymentMethods[invoice.payment_method]
+                    ? (copy.detail.paymentMethods as Record<string, string>)[invoice.payment_method] ??
+                      invoice.payment_method
                     : copy.detail.paymentMethods.notRecorded
                 }
               />

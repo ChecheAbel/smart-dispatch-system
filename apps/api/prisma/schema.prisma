@@ -895,40 +895,32 @@ enum InvoiceStatus {
   @@map("invoice_status")
 }
 
-enum InvoicePaymentMethod {
-  telebirr
-  cbe_birr
-  manual
-
-  @@map("invoice_payment_method")
-}
-
 model Invoice {
-  id                   String                @id @default(uuid()) @db.Uuid
-  referenceNumber      String                @unique @map("reference_number") @db.VarChar(50)
-  status               InvoiceStatus         @default(draft)
-  contractId           String                @map("contract_id") @db.Uuid
-  contractEnrollmentId String?               @map("contract_enrollment_id") @db.Uuid
-  requesterUserId      String                @map("requester_user_id") @db.Uuid
-  periodStart          DateTime              @map("period_start") @db.Date
-  periodEnd            DateTime              @map("period_end") @db.Date
-  subtotal             Decimal               @db.Decimal(14, 2)
-  vatRate              Decimal               @default(0) @map("vat_rate") @db.Decimal(5, 2)
-  vatAmount            Decimal               @default(0) @map("vat_amount") @db.Decimal(14, 2)
-  totalAmount          Decimal               @map("total_amount") @db.Decimal(14, 2)
-  currency             String                @default("ETB") @db.VarChar(3)
-  paymentTermsDays     Int?                  @map("payment_terms_days")
-  issuedAt             DateTime?             @map("issued_at") @db.Timestamptz
-  dueAt                DateTime?             @map("due_at") @db.Timestamptz
-  paidAt               DateTime?             @map("paid_at") @db.Timestamptz
-  paymentMethod        InvoicePaymentMethod? @map("payment_method")
-  voidedAt             DateTime?             @map("voided_at") @db.Timestamptz
-  notes                String?               @db.Text
-  createdAt            DateTime              @default(now()) @map("created_at") @db.Timestamptz
-  updatedAt            DateTime              @updatedAt @map("updated_at") @db.Timestamptz
-  contract             Contract              @relation(fields: [contractId], references: [id], onDelete: Restrict)
-  contractEnrollment   ContractEnrollment?   @relation(fields: [contractEnrollmentId], references: [id], onDelete: SetNull)
-  requester            User                  @relation("InvoiceRequester", fields: [requesterUserId], references: [id], onDelete: Restrict)
+  id                   String    @id @default(uuid()) @db.Uuid
+  referenceNumber      String    @unique @map("reference_number") @db.VarChar(50)
+  status               InvoiceStatus @default(draft)
+  contractId           String    @map("contract_id") @db.Uuid
+  contractEnrollmentId String?   @map("contract_enrollment_id") @db.Uuid
+  requesterUserId      String    @map("requester_user_id") @db.Uuid
+  periodStart          DateTime  @map("period_start") @db.Date
+  periodEnd            DateTime  @map("period_end") @db.Date
+  subtotal             Decimal   @db.Decimal(14, 2)
+  vatRate              Decimal   @default(0) @map("vat_rate") @db.Decimal(5, 2)
+  vatAmount            Decimal   @default(0) @map("vat_amount") @db.Decimal(14, 2)
+  totalAmount          Decimal   @map("total_amount") @db.Decimal(14, 2)
+  currency             String    @default("ETB") @db.VarChar(3)
+  paymentTermsDays     Int?      @map("payment_terms_days")
+  issuedAt             DateTime? @map("issued_at") @db.Timestamptz
+  dueAt                DateTime? @map("due_at") @db.Timestamptz
+  paidAt               DateTime? @map("paid_at") @db.Timestamptz
+  paymentMethod        String?   @map("payment_method") @db.VarChar(50)
+  voidedAt             DateTime? @map("voided_at") @db.Timestamptz
+  notes                String?   @db.Text
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz
+  contract             Contract  @relation(fields: [contractId], references: [id], onDelete: Restrict)
+  contractEnrollment   ContractEnrollment? @relation(fields: [contractEnrollmentId], references: [id], onDelete: SetNull)
+  requester            User      @relation("InvoiceRequester", fields: [requesterUserId], references: [id], onDelete: Restrict)
   lineItems            InvoiceLineItem[]
 
   @@index([contractId])

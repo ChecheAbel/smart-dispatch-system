@@ -1,5 +1,19 @@
 import { prisma } from "../db/prisma";
 import { Prisma } from "../generated/prisma";
+import type {
+  CustomerPaymentOptions,
+  PaymentGatewayField,
+  PaymentGatewayKind,
+  PaymentGatewayMethod,
+} from "@smart-dispatch/types";
+import {
+  createPaymentGatewayId,
+  createPaymentGatewayMethod,
+  defaultDescriptionForKind,
+  defaultFieldsForKind,
+  defaultNameForKind,
+  getPaymentGatewayDefaultsFromEnv,
+} from "../config/customer-payment-options";
 
 export const APP_SETTING_KEYS = {
   rideRequestCancelGraceMinutes: "ride_request_cancel_grace_minutes",
@@ -12,6 +26,7 @@ export const APP_SETTING_KEYS = {
   inspectionDueSoonDays: "inspection_due_soon_days",
   branding: "branding",
   invoiceVat: "invoice_vat",
+  paymentGateway: "payment_gateway",
 } as const;
 
 type DeadlineSettingKey =
@@ -51,6 +66,8 @@ export type BrandingSettings = {
   website_url: string | null;
 };
 
+export type PaymentGatewaySettings = CustomerPaymentOptions;
+
 const DEFAULT_DEADLINE_SETTINGS: DeadlineSettings = {
   ride_request_cancel_grace_minutes: 15,
   ride_request_edit_grace_minutes: 15,
@@ -81,6 +98,7 @@ export const DEFAULT_BRANDING_SETTINGS: BrandingSettings = {
 let cachedSettings: DeadlineSettings = { ...DEFAULT_DEADLINE_SETTINGS };
 let cachedBranding: BrandingSettings = { ...DEFAULT_BRANDING_SETTINGS };
 let cachedVat: VatSettings = { ...DEFAULT_VAT_SETTINGS };
+let cachedPaymentGateway: PaymentGatewaySettings = getPaymentGatewayDefaultsFromEnv();
 
 export function getDeadlineSettings() {
   return cachedSettings;
@@ -92,6 +110,10 @@ export function getBrandingSettings() {
 
 export function getVatSettings() {
   return cachedVat;
+}
+
+export function getPaymentGatewaySettings() {
+  return cachedPaymentGateway;
 }
 
 function toPositiveInteger(
@@ -219,6 +241,213 @@ function parseVatValue(value: Prisma.JsonValue | undefined): VatSettings {
   };
 }
 
+function parseGatewayKind(value: unknown): PaymentGatewayKind {
+  if (value === "telebirr" || value === "cbe_birr" || value === "custom") {
+    return value;
+  }
+  return "custom";
+}
+
+function parseGatewayFields(value: unknown, kind: PaymentGatewayKind): PaymentGatewayField[] {
+  if (!Array.isArray(value)) {
+    return defaultFieldsForKind(kind);
+  }
+
+  if (value.length === 0) {
+    return kind === "custom" ? [] : defaultFieldsForKind(kind);
+  }
+
+  const fields = value.flatMap((item) => {
+    if (typeof item !== "object" || item === null || Array.isArray(item)) {
+      return [];
+    }
+    const record = item as Record<string, unknown>;
+    const key = typeof record.key === "string" ? record.key.trim() : "";
+    if (!key) {
+      return [];
+    }
+    const label =
+      typeof record.label === "string" && record.label.trim()
+        ? record.label.trim()
+        : key;
+    const fieldValue = typeof record.value === "string" ? record.value : "";
+    return [{ key, label, value: fieldValue }];
+  });
+
+  if (fields.length > 0) return fields;
+  return kind === "custom" ? [] : defaultFieldsForKind(kind);
+}
+
+const MAX_PAYMENT_METHOD_LOGO_URL_LENGTH = 512;
+
+function parsePaymentMethodLogoUrl(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.length > MAX_PAYMENT_METHOD_LOGO_URL_LENGTH) {
+    return null;
+  }
+  if (
+    trimmed.startsWith("/uploads/payment-methods/") ||
+    trimmed.startsWith("/providers/")
+  ) {
+    return trimmed;
+  }
+  return null;
+}
+
+function parseGatewayMethod(
+  value: unknown,
+  index: number,
+): PaymentGatewayMethod | null {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return null;
+  }
+
+  const record = value as Record<string, unknown>;
+  const kind = parseGatewayKind(record.kind);
+  const id =
+    typeof record.id === "string" && record.id.trim()
+      ? record.id.trim()
+        : createPaymentGatewayId(kind);
+  const name =
+    typeof record.name === "string" && record.name.trim()
+      ? record.name.trim()
+      : defaultNameForKind(kind);
+  const description =
+    record.description === null
+      ? null
+      : typeof record.description === "string"
+        ? record.description.trim() || null
+        : defaultDescriptionForKind(kind);
+  const sortOrder =
+    typeof record.sort_order === "number" && Number.isFinite(record.sort_order)
+      ? Math.trunc(record.sort_order)
+      : index;
+  const logoUrl = parsePaymentMethodLogoUrl(record.logo_url);
+
+  return {
+    id,
+    kind,
+    name,
+    description,
+    logo_url: logoUrl,
+    enabled: record.enabled === undefined ? true : record.enabled === true,
+    sort_order: sortOrder,
+    fields: parseGatewayFields(record.fields, kind),
+  };
+}
+
+function migrateLegacyPaymentGateway(
+  record: Record<string, unknown>,
+  fallback: PaymentGatewaySettings,
+): PaymentGatewaySettings | null {
+  if (!("telebirr" in record) && !("cbe_birr" in record)) {
+    return null;
+  }
+
+  const legacyTelebirr =
+    typeof record.telebirr === "object" && record.telebirr !== null && !Array.isArray(record.telebirr)
+      ? (record.telebirr as Record<string, unknown>)
+      : null;
+  const legacyCbe =
+    typeof record.cbe_birr === "object" && record.cbe_birr !== null && !Array.isArray(record.cbe_birr)
+      ? (record.cbe_birr as Record<string, unknown>)
+      : null;
+
+  const methods: PaymentGatewayMethod[] = [];
+
+  if (legacyTelebirr) {
+    const defaults = fallback.methods.find((method) => method.kind === "telebirr");
+    methods.push(
+      createPaymentGatewayMethod("telebirr", {
+        id: "telebirr",
+        enabled:
+          legacyTelebirr.enabled === undefined
+            ? (defaults?.enabled ?? true)
+            : legacyTelebirr.enabled === true,
+        sort_order: 0,
+        fields: [
+          {
+            key: "merchant_name",
+            label: "Merchant name",
+            value:
+              typeof legacyTelebirr.merchant_name === "string"
+                ? legacyTelebirr.merchant_name
+                : "",
+          },
+          {
+            key: "short_code",
+            label: "Short code",
+            value:
+              typeof legacyTelebirr.short_code === "string" ? legacyTelebirr.short_code : "",
+          },
+          {
+            key: "ussd",
+            label: "USSD",
+            value:
+              typeof legacyTelebirr.ussd === "string" && legacyTelebirr.ussd.trim()
+                ? legacyTelebirr.ussd
+                : "*127#",
+          },
+        ],
+      }),
+    );
+  }
+
+  if (legacyCbe) {
+    const defaults = fallback.methods.find((method) => method.kind === "cbe_birr");
+    methods.push(
+      createPaymentGatewayMethod("cbe_birr", {
+        id: "cbe_birr",
+        enabled:
+          legacyCbe.enabled === undefined
+            ? (defaults?.enabled ?? true)
+            : legacyCbe.enabled === true,
+        sort_order: 1,
+        fields: [
+          {
+            key: "account_name",
+            label: "Account name",
+            value: typeof legacyCbe.account_name === "string" ? legacyCbe.account_name : "",
+          },
+          {
+            key: "account_number",
+            label: "Account number",
+            value:
+              typeof legacyCbe.account_number === "string" ? legacyCbe.account_number : "",
+          },
+        ],
+      }),
+    );
+  }
+
+  return methods.length > 0 ? { methods } : null;
+}
+
+export function parsePaymentGatewayValue(
+  value: Prisma.JsonValue | undefined,
+  fallback: PaymentGatewaySettings = getPaymentGatewayDefaultsFromEnv(),
+): PaymentGatewaySettings {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return structuredClone(fallback);
+  }
+
+  const record = value as Record<string, unknown>;
+
+  if (Array.isArray(record.methods)) {
+    const methods = record.methods
+      .map((item, index) => parseGatewayMethod(item, index))
+      .filter((item): item is PaymentGatewayMethod => Boolean(item))
+      .sort((left, right) => left.sort_order - right.sort_order)
+      .map((method, index) => ({ ...method, sort_order: index }));
+
+    return { methods };
+  }
+
+  const legacy = migrateLegacyPaymentGateway(record, fallback);
+  return legacy ?? structuredClone(fallback);
+}
+
 export function applyVatToInvoiceSubtotal(subtotal: number, settings: VatSettings = cachedVat) {
   const roundedSubtotal = Math.round(subtotal * 100) / 100;
   const vatRate = settings.enabled ? settings.rate_percent : 0;
@@ -242,6 +471,7 @@ async function upsertJsonSetting(key: string, value: unknown) {
 }
 
 export async function loadAppSettings() {
+  const envPaymentDefaults = getPaymentGatewayDefaultsFromEnv();
   const [
     rideRequestCancelGraceMinutes,
     rideRequestEditGraceMinutes,
@@ -253,6 +483,7 @@ export async function loadAppSettings() {
     inspectionDueSoonDays,
     brandingValue,
     vatValue,
+    paymentGatewayValue,
   ] = await Promise.all([
     readSetting(
       APP_SETTING_KEYS.rideRequestCancelGraceMinutes,
@@ -288,6 +519,7 @@ export async function loadAppSettings() {
     ),
     readJsonSetting(APP_SETTING_KEYS.branding),
     readJsonSetting(APP_SETTING_KEYS.invoiceVat),
+    readJsonSetting(APP_SETTING_KEYS.paymentGateway),
   ]);
 
   cachedSettings = {
@@ -306,6 +538,7 @@ export async function loadAppSettings() {
 
   cachedBranding = parseBrandingValue(brandingValue);
   cachedVat = parseVatValue(vatValue);
+  cachedPaymentGateway = parsePaymentGatewayValue(paymentGatewayValue, envPaymentDefaults);
 
   await Promise.all([
     upsertSetting(APP_SETTING_KEYS.rideRequestCancelGraceMinutes, {
@@ -334,6 +567,7 @@ export async function loadAppSettings() {
     }),
     upsertJsonSetting(APP_SETTING_KEYS.branding, cachedBranding),
     upsertJsonSetting(APP_SETTING_KEYS.invoiceVat, cachedVat),
+    upsertJsonSetting(APP_SETTING_KEYS.paymentGateway, cachedPaymentGateway),
   ]);
 
   return cachedSettings;
@@ -393,6 +627,12 @@ export async function updateVatSettings(input: VatSettings) {
   cachedVat = parseVatValue(input);
   await upsertJsonSetting(APP_SETTING_KEYS.invoiceVat, cachedVat);
   return cachedVat;
+}
+
+export async function updatePaymentGatewaySettings(input: PaymentGatewaySettings) {
+  cachedPaymentGateway = parsePaymentGatewayValue(input, getPaymentGatewayDefaultsFromEnv());
+  await upsertJsonSetting(APP_SETTING_KEYS.paymentGateway, cachedPaymentGateway);
+  return cachedPaymentGateway;
 }
 
 export function getRideRequestSettings() {

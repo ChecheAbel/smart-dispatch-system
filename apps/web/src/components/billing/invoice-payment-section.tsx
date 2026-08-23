@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 import { Check, Copy } from "lucide-react";
-import type { CustomerInvoice, CustomerPaymentMethodId, CustomerPaymentOptions } from "@smart-dispatch/types";
+import type {
+  CustomerInvoice,
+  CustomerPaymentMethodId,
+  CustomerPaymentOptions,
+  PaymentGatewayMethod,
+} from "@smart-dispatch/types";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -20,14 +24,14 @@ import {
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
 import { confirmCustomerInvoicePayment, fetchCustomerPaymentOptions } from "@/lib/customer-billing-api";
+import {
+  getMethodFieldValue,
+  isMethodReady,
+} from "@/lib/payment-gateway";
+import { PaymentMethodLogo } from "@/components/billing/payment-method-logo";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { formatMessage, getCustomerInvoicesMessages } from "@/translations";
 import { cn } from "@/lib/utils";
-
-const PAYMENT_PROVIDER_LOGOS: Record<CustomerPaymentMethodId, { src: string; width: number; height: number }> = {
-  telebirr: { src: "/providers/telebirr.webp", width: 140, height: 48 },
-  cbe_birr: { src: "/providers/cbe-birr.webp", width: 140, height: 48 },
-};
 
 type InvoicePaymentSectionProps = {
   invoice: CustomerInvoice;
@@ -43,13 +47,53 @@ function formatMoney(amount: number, currency: string, locale: string) {
   }).format(amount);
 }
 
+function buildSteps(
+  method: PaymentGatewayMethod,
+  payCopy: ReturnType<typeof getCustomerInvoicesMessages>["detail"]["payment"],
+  amountLabel: string,
+  reference: string,
+) {
+  const shortCode = getMethodFieldValue(method, "short_code") || payCopy.merchantCodePending;
+  const account =
+    getMethodFieldValue(method, "account_number") || payCopy.accountPending;
+
+  if (method.kind === "telebirr") {
+    return payCopy.telebirrSteps.map((step) =>
+      formatMessage(step, {
+        amount: amountLabel,
+        reference,
+        short_code: shortCode,
+      }),
+    );
+  }
+
+  if (method.kind === "cbe_birr") {
+    return payCopy.cbeSteps.map((step) =>
+      formatMessage(step, {
+        amount: amountLabel,
+        reference,
+        account,
+      }),
+    );
+  }
+
+  return payCopy.customSteps.map((step) =>
+    formatMessage(step, {
+      amount: amountLabel,
+      reference,
+      account,
+      method: method.name,
+    }),
+  );
+}
+
 export function InvoicePaymentSection({ invoice, locale, onInvoiceUpdated }: InvoicePaymentSectionProps) {
   const copy = getCustomerInvoicesMessages(locale);
   const payCopy = copy.detail.payment;
   const [options, setOptions] = useState<CustomerPaymentOptions | null>(null);
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState(false);
-  const [activeMethod, setActiveMethod] = useState<CustomerPaymentMethodId | null>(null);
+  const [activeMethodId, setActiveMethodId] = useState<CustomerPaymentMethodId | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const amountLabel = formatMoney(invoice.total_amount, invoice.currency, locale);
@@ -75,6 +119,13 @@ export function InvoicePaymentSection({ invoice, locale, onInvoiceUpdated }: Inv
     };
   }, []);
 
+  const visibleMethods = useMemo(
+    () => (options?.methods ?? []).filter((method) => method.enabled),
+    [options],
+  );
+
+  const activeMethod = visibleMethods.find((method) => method.id === activeMethodId) ?? null;
+
   async function copyValue(field: string, value: string) {
     try {
       await navigator.clipboard.writeText(value);
@@ -92,10 +143,10 @@ export function InvoicePaymentSection({ invoice, locale, onInvoiceUpdated }: Inv
     setConfirming(true);
     try {
       const result = await confirmCustomerInvoicePayment(invoice.id, {
-        payment_method: activeMethod,
+        payment_method: activeMethod.id,
         locale,
       });
-      setActiveMethod(null);
+      setActiveMethodId(null);
       onInvoiceUpdated?.(result.invoice);
       showSuccessToast({ title: payCopy.paymentConfirmed });
     } catch {
@@ -105,106 +156,24 @@ export function InvoicePaymentSection({ invoice, locale, onInvoiceUpdated }: Inv
     }
   }
 
-  const methods: Array<{
-    id: CustomerPaymentMethodId;
-    title: string;
-    description: string;
-    enabled: boolean;
-  }> = [
-    {
-      id: "telebirr",
-      title: payCopy.telebirrTitle,
-      description: payCopy.telebirrDescription,
-      enabled: options?.telebirr.enabled ?? true,
-    },
-    {
-      id: "cbe_birr",
-      title: payCopy.cbeTitle,
-      description: payCopy.cbeDescription,
-      enabled: options?.cbe_birr.enabled ?? true,
-    },
-  ];
-
-  const visibleMethods = methods.filter((method) => method.enabled);
-  if (invoice.status !== "issued" || (!loading && visibleMethods.length === 0)) {
+  if (invoice.status !== "issued") {
     return null;
   }
 
-  const telebirr = options?.telebirr;
-  const cbe = options?.cbe_birr;
-
-  const sheetTitle =
-    activeMethod === "telebirr"
-      ? payCopy.telebirrTitle
-      : activeMethod === "cbe_birr"
-        ? payCopy.cbeTitle
-        : "";
-
-  const sheetDescription =
-    activeMethod === "telebirr"
-      ? payCopy.telebirrSheetDescription
-      : activeMethod === "cbe_birr"
-        ? payCopy.cbeSheetDescription
-        : "";
-
-  const steps =
-    activeMethod === "telebirr"
-      ? payCopy.telebirrSteps.map((step) =>
-          formatMessage(step, {
-            amount: amountLabel,
-            reference: invoice.reference_number,
-            short_code: telebirr?.short_code ?? payCopy.merchantCodePending,
-          }),
-        )
-      : activeMethod === "cbe_birr"
-        ? payCopy.cbeSteps.map((step) =>
-            formatMessage(step, {
-              amount: amountLabel,
-              reference: invoice.reference_number,
-              account: cbe?.account_number ?? payCopy.accountPending,
-            }),
-          )
-        : [];
-
-  const detailRows: Array<{ key: string; label: string; value: string; mono?: boolean }> = [];
-  if (activeMethod === "telebirr") {
-    if (telebirr?.merchant_name) {
-      detailRows.push({ key: "merchant", label: payCopy.merchantLabel, value: telebirr.merchant_name });
-    }
-    if (telebirr?.short_code) {
-      detailRows.push({
-        key: "telebirr-code",
-        label: payCopy.telebirrShortCodeLabel,
-        value: telebirr.short_code,
+  const detailRows =
+    activeMethod?.fields
+      .filter((field) => field.value.trim())
+      .map((field) => ({
+        key: field.key,
+        label: field.label,
+        value: field.value.trim(),
         mono: true,
-      });
-    }
-    if (telebirr?.ussd) {
-      detailRows.push({
-        key: "telebirr-ussd",
-        label: payCopy.telebirrUssdLabel,
-        value: telebirr.ussd,
-        mono: true,
-      });
-    }
-  }
-  if (activeMethod === "cbe_birr") {
-    if (cbe?.account_name) {
-      detailRows.push({ key: "cbe-name", label: payCopy.accountNameLabel, value: cbe.account_name });
-    }
-    if (cbe?.account_number) {
-      detailRows.push({
-        key: "cbe-account",
-        label: payCopy.accountNumberLabel,
-        value: cbe.account_number,
-        mono: true,
-      });
-    }
-  }
+      })) ?? [];
 
-  const showConfigNotice =
-    (activeMethod === "telebirr" && !telebirr?.short_code) ||
-    (activeMethod === "cbe_birr" && !cbe?.account_number);
+  const steps = activeMethod
+    ? buildSteps(activeMethod, payCopy, amountLabel, invoice.reference_number)
+    : [];
+  const showConfigNotice = activeMethod ? !isMethodReady(activeMethod) : false;
 
   return (
     <>
@@ -217,6 +186,31 @@ export function InvoicePaymentSection({ invoice, locale, onInvoiceUpdated }: Inv
 
         {loading ? (
           <p className="px-5 py-6 text-sm text-slate-500">{payCopy.loading}</p>
+        ) : visibleMethods.length === 0 ? (
+          <div className="space-y-4 px-5 py-5">
+            <div>
+              <p className={adminEyebrowClass}>{payCopy.amountLabel}</p>
+              <p className="mt-1 text-2xl font-extrabold tabular-nums tracking-tight text-[#1C3A34]">
+                {amountLabel}
+              </p>
+            </div>
+            <CopyLine
+              label={payCopy.referenceLabel}
+              value={invoice.reference_number}
+              fieldKey="reference"
+              copiedField={copiedField}
+              onCopy={copyValue}
+              mono
+            />
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+              {payCopy.configPending ? (
+                <p className="text-sm font-semibold text-amber-950">{payCopy.configPending}</p>
+              ) : null}
+              <p className="mt-0.5 text-sm leading-relaxed text-amber-800">
+                {payCopy.configPendingNotice}
+              </p>
+            </div>
+          </div>
         ) : (
           <div
             className={cn(
@@ -224,36 +218,36 @@ export function InvoicePaymentSection({ invoice, locale, onInvoiceUpdated }: Inv
               visibleMethods.length > 1 ? "grid-cols-2" : "grid-cols-1 sm:max-w-xs",
             )}
           >
-            {visibleMethods.map((method) => {
-              return (
-                <button
-                  key={method.id}
-                  type="button"
-                  onClick={() => setActiveMethod(method.id)}
-                  className="flex min-h-[7.5rem] flex-col items-start gap-2 rounded-lg border border-slate-200/80 p-3 text-left transition-colors hover:border-[#C9B87A]/40 hover:bg-[#C9B87A]/5 sm:min-h-0 sm:p-4"
-                >
-                  <PaymentProviderLogo methodId={method.id} title={method.title} size="card" />
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-semibold text-[#1C3A34] sm:text-base">
-                      {method.title}
-                    </span>
+            {visibleMethods.map((method) => (
+              <button
+                key={method.id}
+                type="button"
+                onClick={() => setActiveMethodId(method.id)}
+                className="flex min-h-[7.5rem] flex-col items-start gap-2 rounded-lg border border-slate-200/80 p-3 text-left transition-colors hover:border-[#C9B87A]/40 hover:bg-[#C9B87A]/5 sm:min-h-0 sm:p-4"
+              >
+                <PaymentMethodLogo method={method} size="sm" />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-sm font-semibold text-[#1C3A34] sm:text-base">
+                    {method.name}
+                  </span>
+                  {method.description ? (
                     <span className="mt-1 line-clamp-2 text-[11px] leading-snug text-slate-500 sm:text-xs">
                       {method.description}
                     </span>
-                  </span>
-                  <span className="mt-auto text-sm font-semibold tabular-nums text-[#1C3A34]">
-                    {amountLabel}
-                  </span>
-                </button>
-              );
-            })}
+                  ) : null}
+                </span>
+                <span className="mt-auto text-sm font-semibold tabular-nums text-[#1C3A34]">
+                  {amountLabel}
+                </span>
+              </button>
+            ))}
           </div>
         )}
 
         <p className="border-t border-slate-100 px-5 py-3 text-xs text-slate-500">{payCopy.referenceHint}</p>
       </section>
 
-      <Sheet open={activeMethod !== null} onOpenChange={(open) => !open && setActiveMethod(null)}>
+      <Sheet open={activeMethod !== null} onOpenChange={(open) => !open && setActiveMethodId(null)}>
         <SheetContent
           side="right"
           className="flex w-full flex-col gap-0 overflow-hidden p-0 data-[side=right]:sm:max-w-md"
@@ -262,11 +256,11 @@ export function InvoicePaymentSection({ invoice, locale, onInvoiceUpdated }: Inv
             <>
               <SheetHeader className="shrink-0 border-b border-slate-200/80 px-6 py-5 text-left">
                 <div className="flex flex-col gap-3">
-                  <PaymentProviderLogo methodId={activeMethod} title={sheetTitle} size="sheet" />
+                  <PaymentMethodLogo method={activeMethod} size="md" />
                   <div className="space-y-1">
-                    <SheetTitle className={adminHeadingClass}>{sheetTitle}</SheetTitle>
+                    <SheetTitle className={adminHeadingClass}>{activeMethod.name}</SheetTitle>
                     <SheetDescription className="text-sm leading-relaxed text-slate-500">
-                      {sheetDescription}
+                      {activeMethod.description || payCopy.customSheetDescription}
                     </SheetDescription>
                   </div>
                 </div>
@@ -334,7 +328,7 @@ export function InvoicePaymentSection({ invoice, locale, onInvoiceUpdated }: Inv
                 <Button
                   type="button"
                   className={cn(adminPrimaryButtonClass, "w-full")}
-                  disabled={confirming}
+                  disabled={confirming || showConfigNotice}
                   onClick={() => void handleConfirmPayment()}
                 >
                   {confirming ? payCopy.confirmingPayment : payCopy.confirmPayment}
@@ -345,31 +339,6 @@ export function InvoicePaymentSection({ invoice, locale, onInvoiceUpdated }: Inv
         </SheetContent>
       </Sheet>
     </>
-  );
-}
-
-function PaymentProviderLogo({
-  methodId,
-  title,
-  size,
-}: {
-  methodId: CustomerPaymentMethodId;
-  title: string;
-  size: "card" | "sheet";
-}) {
-  const logo = PAYMENT_PROVIDER_LOGOS[methodId];
-
-  return (
-    <Image
-      src={logo.src}
-      alt={title}
-      width={logo.width}
-      height={logo.height}
-      className={cn(
-        "w-auto object-contain object-left",
-        size === "card" ? "h-7 max-w-[7.5rem] sm:h-8" : "h-9 max-w-[9rem]",
-      )}
-    />
   );
 }
 

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import { Check, ChevronDown, Copy } from "lucide-react";
 import type {
   CustomerInvoice,
@@ -27,19 +26,16 @@ import {
   confirmCustomerInvoicesPayment,
   fetchCustomerPaymentOptions,
 } from "@/lib/customer-billing-api";
+import {
+  getMethodFieldValue,
+  isMethodReady,
+} from "@/lib/payment-gateway";
+import { PaymentMethodLogo } from "@/components/billing/payment-method-logo";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { formatMessage, getCustomerInvoicesMessages } from "@/translations";
 import type { SupportedLocale } from "@/lib/locale";
 import { formatGlobalDate } from "@/lib/ethiopian-calendar";
 import { cn } from "@/lib/utils";
-
-const PAYMENT_PROVIDER_LOGOS: Record<
-  CustomerPaymentMethodId,
-  { src: string; width: number; height: number }
-> = {
-  telebirr: { src: "/providers/telebirr.webp", width: 140, height: 48 },
-  cbe_birr: { src: "/providers/cbe-birr.webp", width: 140, height: 48 },
-};
 
 type BulkInvoicePaymentSheetProps = {
   invoices: CustomerInvoice[];
@@ -79,7 +75,7 @@ export function BulkInvoicePaymentSheet({
   const [options, setOptions] = useState<CustomerPaymentOptions | null>(null);
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState(false);
-  const [activeMethod, setActiveMethod] = useState<CustomerPaymentMethodId | null>(null);
+  const [activeMethodId, setActiveMethodId] = useState<CustomerPaymentMethodId | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [expandedInvoiceId, setExpandedInvoiceId] = useState<string | null>(null);
 
@@ -93,7 +89,7 @@ export function BulkInvoicePaymentSheet({
 
   useEffect(() => {
     if (!open) {
-      setActiveMethod(null);
+      setActiveMethodId(null);
       setCopiedField(null);
       setExpandedInvoiceId(null);
       return;
@@ -136,6 +132,12 @@ export function BulkInvoicePaymentSheet({
     }
   }
 
+  const visibleMethods = useMemo(
+    () => (options?.methods ?? []).filter((method) => method.enabled),
+    [options],
+  );
+  const activeMethod = visibleMethods.find((method) => method.id === activeMethodId) ?? null;
+
   async function handleConfirmPayment() {
     if (!activeMethod || confirming || invoices.length === 0) return;
 
@@ -143,7 +145,7 @@ export function BulkInvoicePaymentSheet({
     try {
       const result = await confirmCustomerInvoicesPayment({
         invoice_ids: invoices.map((invoice) => invoice.id),
-        payment_method: activeMethod,
+        payment_method: activeMethod.id,
         locale,
       });
       onOpenChange(false);
@@ -158,102 +160,56 @@ export function BulkInvoicePaymentSheet({
     }
   }
 
-  const methods: Array<{
-    id: CustomerPaymentMethodId;
-    title: string;
-    description: string;
-    enabled: boolean;
-  }> = [
-    {
-      id: "telebirr",
-      title: payCopy.telebirrTitle,
-      description: payCopy.telebirrDescription,
-      enabled: options?.telebirr.enabled ?? true,
-    },
-    {
-      id: "cbe_birr",
-      title: payCopy.cbeTitle,
-      description: payCopy.cbeDescription,
-      enabled: options?.cbe_birr.enabled ?? true,
-    },
-  ];
+  const sheetTitle = activeMethod?.name ?? bulkCopy.sheetTitle;
+  const sheetDescription = activeMethod
+    ? activeMethod.description || payCopy.customSheetDescription
+    : formatMessage(bulkCopy.sheetDescription, { count: invoices.length });
 
-  const visibleMethods = methods.filter((method) => method.enabled);
-  const telebirr = options?.telebirr;
-  const cbe = options?.cbe_birr;
+  const shortCode =
+    (activeMethod && getMethodFieldValue(activeMethod, "short_code")) ||
+    payCopy.merchantCodePending;
+  const account =
+    (activeMethod && getMethodFieldValue(activeMethod, "account_number")) ||
+    payCopy.accountPending;
 
-  const sheetTitle =
-    activeMethod === "telebirr"
-      ? payCopy.telebirrTitle
-      : activeMethod === "cbe_birr"
-        ? payCopy.cbeTitle
-        : bulkCopy.sheetTitle;
-
-  const sheetDescription =
-    activeMethod === "telebirr"
-      ? payCopy.telebirrSheetDescription
-      : activeMethod === "cbe_birr"
-        ? payCopy.cbeSheetDescription
-        : formatMessage(bulkCopy.sheetDescription, { count: invoices.length });
-
-  const steps =
-    activeMethod === "telebirr"
+  const steps = !activeMethod
+    ? []
+    : activeMethod.kind === "telebirr"
       ? payCopy.telebirrSteps.map((step) =>
           formatMessage(step, {
             amount: amountLabel,
             reference: referenceList,
-            short_code: telebirr?.short_code ?? payCopy.merchantCodePending,
+            short_code: shortCode,
           }),
         )
-      : activeMethod === "cbe_birr"
+      : activeMethod.kind === "cbe_birr"
         ? payCopy.cbeSteps.map((step) =>
             formatMessage(step, {
               amount: amountLabel,
               reference: referenceList,
-              account: cbe?.account_number ?? payCopy.accountPending,
+              account,
             }),
           )
-        : [];
+        : payCopy.customSteps.map((step) =>
+            formatMessage(step, {
+              amount: amountLabel,
+              reference: referenceList,
+              account,
+              method: activeMethod.name,
+            }),
+          );
 
-  const detailRows: Array<{ key: string; label: string; value: string; mono?: boolean }> = [];
-  if (activeMethod === "telebirr") {
-    if (telebirr?.merchant_name) {
-      detailRows.push({ key: "merchant", label: payCopy.merchantLabel, value: telebirr.merchant_name });
-    }
-    if (telebirr?.short_code) {
-      detailRows.push({
-        key: "telebirr-code",
-        label: payCopy.telebirrShortCodeLabel,
-        value: telebirr.short_code,
+  const detailRows =
+    activeMethod?.fields
+      .filter((field) => field.value.trim())
+      .map((field) => ({
+        key: field.key,
+        label: field.label,
+        value: field.value.trim(),
         mono: true,
-      });
-    }
-    if (telebirr?.ussd) {
-      detailRows.push({
-        key: "telebirr-ussd",
-        label: payCopy.telebirrUssdLabel,
-        value: telebirr.ussd,
-        mono: true,
-      });
-    }
-  }
-  if (activeMethod === "cbe_birr") {
-    if (cbe?.account_name) {
-      detailRows.push({ key: "cbe-name", label: payCopy.accountNameLabel, value: cbe.account_name });
-    }
-    if (cbe?.account_number) {
-      detailRows.push({
-        key: "cbe-account",
-        label: payCopy.accountNumberLabel,
-        value: cbe.account_number,
-        mono: true,
-      });
-    }
-  }
+      })) ?? [];
 
-  const showConfigNotice =
-    (activeMethod === "telebirr" && !telebirr?.short_code) ||
-    (activeMethod === "cbe_birr" && !cbe?.account_number);
+  const showConfigNotice = activeMethod ? !isMethodReady(activeMethod) : false;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -264,7 +220,7 @@ export function BulkInvoicePaymentSheet({
         <SheetHeader className="shrink-0 border-b border-slate-200/80 px-6 py-5 text-left">
           <div className="flex flex-col gap-3">
             {activeMethod ? (
-              <PaymentProviderLogo methodId={activeMethod} title={sheetTitle} />
+              <PaymentMethodLogo method={activeMethod} size="md" />
             ) : null}
             <div className="space-y-1">
               <SheetTitle className={adminHeadingClass}>{sheetTitle}</SheetTitle>
@@ -401,15 +357,17 @@ export function BulkInvoicePaymentSheet({
                     <button
                       key={method.id}
                       type="button"
-                      onClick={() => setActiveMethod(method.id)}
+                      onClick={() => setActiveMethodId(method.id)}
                       className="flex min-h-[7.5rem] flex-col items-start gap-2 rounded-lg border border-slate-200/80 p-3 text-left transition-colors hover:border-[#C9B87A]/40 hover:bg-[#C9B87A]/5"
                     >
-                      <PaymentProviderLogo methodId={method.id} title={method.title} />
+                      <PaymentMethodLogo method={method} />
                       <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-semibold text-[#1C3A34]">{method.title}</span>
-                        <span className="mt-1 line-clamp-2 text-[11px] leading-snug text-slate-500">
-                          {method.description}
-                        </span>
+                        <span className="block text-sm font-semibold text-[#1C3A34]">{method.name}</span>
+                        {method.description ? (
+                          <span className="mt-1 line-clamp-2 text-[11px] leading-snug text-slate-500">
+                            {method.description}
+                          </span>
+                        ) : null}
                       </span>
                     </button>
                   ))}
@@ -474,7 +432,7 @@ export function BulkInvoicePaymentSheet({
             <Button
               type="button"
               className={cn(adminPrimaryButtonClass, "w-full")}
-              disabled={confirming}
+              disabled={confirming || showConfigNotice}
               onClick={() => void handleConfirmPayment()}
             >
               {confirming ? payCopy.confirmingPayment : bulkCopy.confirmPayment}
@@ -484,7 +442,7 @@ export function BulkInvoicePaymentSheet({
               variant="outline"
               className="w-full"
               disabled={confirming}
-              onClick={() => setActiveMethod(null)}
+              onClick={() => setActiveMethodId(null)}
             >
               {bulkCopy.backToMethods}
             </Button>
@@ -492,26 +450,6 @@ export function BulkInvoicePaymentSheet({
         ) : null}
       </SheetContent>
     </Sheet>
-  );
-}
-
-function PaymentProviderLogo({
-  methodId,
-  title,
-}: {
-  methodId: CustomerPaymentMethodId;
-  title: string;
-}) {
-  const logo = PAYMENT_PROVIDER_LOGOS[methodId];
-
-  return (
-    <Image
-      src={logo.src}
-      alt={title}
-      width={logo.width}
-      height={logo.height}
-      className="h-8 w-auto max-w-[8rem] object-contain object-left"
-    />
   );
 }
 

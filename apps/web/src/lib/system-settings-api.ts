@@ -1,4 +1,11 @@
-import type { BrandingSettings, VatSettings } from "@smart-dispatch/types";
+import type {
+  BrandingSettings,
+  CustomerPaymentOptions,
+  PaymentGatewayField,
+  PaymentGatewayKind,
+  PaymentGatewayMethod,
+  VatSettings,
+} from "@smart-dispatch/types";
 import { apiClient } from "./api-client";
 import { unwrapApiResponse } from "./api-response";
 
@@ -13,7 +20,14 @@ export type DeadlineSettings = {
   inspection_due_soon_days: number;
 };
 
-export type { BrandingSettings, VatSettings };
+export type {
+  BrandingSettings,
+  CustomerPaymentOptions as PaymentGatewaySettings,
+  PaymentGatewayField,
+  PaymentGatewayKind,
+  PaymentGatewayMethod,
+  VatSettings,
+};
 
 export async function fetchDeadlineSettings() {
   const { data } = await apiClient.get("/api/admin/system-settings/deadline");
@@ -74,4 +88,30 @@ export async function uploadBrandLogo(file: File) {
   );
   const payload = unwrapApiResponse<{ branding: BrandingSettings }>(data);
   return payload.branding;
+}
+
+export async function fetchPaymentGatewaySettings() {
+  const { data } = await apiClient.get("/api/admin/system-settings/payment-gateway");
+  const payload = unwrapApiResponse<{ payment_gateway: CustomerPaymentOptions }>(data);
+  return payload.payment_gateway;
+}
+
+export async function updatePaymentGatewaySettings(input: CustomerPaymentOptions) {
+  const { data } = await apiClient.patch(
+    "/api/admin/system-settings/payment-gateway",
+    input,
+  );
+  const payload = unwrapApiResponse<{ payment_gateway: CustomerPaymentOptions }>(data);
+  return payload.payment_gateway;
+}
+
+export async function uploadPaymentMethodLogo(file: File) {
+  const formData = new FormData();
+  formData.append("logo", file);
+  const { data } = await apiClient.post(
+    "/api/admin/system-settings/payment-gateway/logo",
+    formData,
+  );
+  const payload = unwrapApiResponse<{ logo_url: string }>(data);
+  return payload.logo_url;
 }

@@ -23,6 +23,7 @@ export type AdminMaintenanceWorkTypesMessages = Translations["adminMaintenanceWo
 export type AdminComplianceMessages = Translations["adminCompliance"];
 export type AdminDeadlineSettingsMessages = Translations["adminDeadlineSettings"];
 export type AdminBrandingSettingsMessages = Translations["adminBrandingSettings"];
+export type AdminPaymentGatewaySettingsMessages = Translations["adminPaymentGatewaySettings"];
 
 export type AdminVehicleClassesMessages = Translations["adminVehicleClasses"];
 export type AdminVehiclesMessages = Translations["adminVehicles"];

@@ -1424,7 +1424,7 @@ export interface ContractEnrollment {
 }
 
 export type InvoiceStatus = "draft" | "issued" | "paid" | "void";
-export type InvoicePaymentMethod = "telebirr" | "cbe_birr" | "manual";
+export type InvoicePaymentMethod = string;
 
 export interface InvoiceContractSummary {
   id: string;
@@ -1640,8 +1640,32 @@ export type ApiResponse<T> =
   | ApiPaginatedResponse<T>
   | ApiErrorResponse;
 
-export type CustomerPaymentMethodId = "telebirr" | "cbe_birr";
+export type CustomerPaymentMethodId = string;
 
+export type PaymentGatewayKind = "telebirr" | "cbe_birr" | "custom";
+
+export type PaymentGatewayField = {
+  key: string;
+  label: string;
+  value: string;
+};
+
+export type PaymentGatewayMethod = {
+  id: string;
+  kind: PaymentGatewayKind;
+  name: string;
+  description: string | null;
+  logo_url: string | null;
+  enabled: boolean;
+  sort_order: number;
+  fields: PaymentGatewayField[];
+};
+
+export type CustomerPaymentOptions = {
+  methods: PaymentGatewayMethod[];
+};
+
+/** @deprecated Prefer PaymentGatewayMethod fields. Kept for migration helpers. */
 export interface CustomerTelebirrPaymentConfig {
   enabled: boolean;
   merchant_name: string | null;
@@ -1649,15 +1673,11 @@ export interface CustomerTelebirrPaymentConfig {
   ussd: string | null;
 }
 
+/** @deprecated Prefer PaymentGatewayMethod fields. Kept for migration helpers. */
 export interface CustomerCbePaymentConfig {
   enabled: boolean;
   account_name: string | null;
   account_number: string | null;
-}
-
-export interface CustomerPaymentOptions {
-  telebirr: CustomerTelebirrPaymentConfig;
-  cbe_birr: CustomerCbePaymentConfig;
 }
 
 export interface BrandingSettings {

@@ -23,7 +23,7 @@ import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
 import { getOptionalString } from "../utils/validation";
 import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
-import { getCustomerPaymentOptions } from "../config/customer-payment-options";
+import { getPaymentGatewaySettings } from "../models/app-setting.model";
 import {
   markInvoicePaidForRequester,
   markInvoicesPaidForRequester,
@@ -188,7 +188,7 @@ router.get(
       }
 
       return sendSuccess(res, {
-        payment_options: getCustomerPaymentOptions(),
+        payment_options: getPaymentGatewaySettings(),
       });
     } catch (error) {
       return handleRouteError(res, error);
@@ -197,10 +197,14 @@ router.get(
 );
 
 function parsePaymentMethod(value: unknown): CustomerPaymentMethodId | null {
-  if (value === "telebirr" || value === "cbe_birr") {
-    return value;
-  }
-  return null;
+  if (typeof value !== "string") return null;
+  const methodId = value.trim();
+  if (!methodId) return null;
+
+  const configured = getPaymentGatewaySettings().methods.find(
+    (method) => method.id === methodId && method.enabled,
+  );
+  return configured ? methodId : null;
 }
 
 function mapCustomerPaymentError(error: unknown) {

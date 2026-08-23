@@ -6,11 +6,15 @@ import { requirePermission } from "../middleware/require-permission";
 import {
   getBrandingSettings,
   getDeadlineSettings,
+  getPaymentGatewaySettings,
   getVatSettings,
+  parsePaymentGatewayValue,
   updateBrandingSettings,
   updateDeadlineSettings,
+  updatePaymentGatewaySettings,
   updateVatSettings,
   type BrandingSettings,
+  type PaymentGatewaySettings,
 } from "../models/app-setting.model";
 import { handleRouteError, sendError, sendSuccess } from "../utils/response";
 import { getOptionalString, getString } from "../utils/validation";
@@ -19,6 +23,11 @@ import {
   buildBrandLogoUrl,
   removeBrandLogoFile,
 } from "../utils/brand-logo-upload";
+import {
+  buildPaymentMethodLogoUrl,
+  paymentMethodLogoUpload,
+  removePaymentMethodLogoFile,
+} from "../utils/payment-method-logo-upload";
 
 const router = Router();
 const publicRouter = Router();
@@ -225,6 +234,104 @@ router.patch(
     } catch (error) {
       return handleRouteError(res, error);
     }
+  },
+);
+
+function parsePaymentGatewayBody(body: Record<string, unknown>): PaymentGatewaySettings | null {
+  if (!Array.isArray(body.methods)) {
+    return null;
+  }
+
+  const parsed = parsePaymentGatewayValue({ methods: body.methods });
+
+  const ids = new Set<string>();
+  for (const method of parsed.methods) {
+    if (!method.name.trim()) {
+      return null;
+    }
+    if (ids.has(method.id)) {
+      return null;
+    }
+    ids.add(method.id);
+
+    if (method.fields.some((field) => !field.key.trim())) {
+      return null;
+    }
+  }
+
+  return parsed;
+}
+
+router.get(
+  "/payment-gateway",
+  requirePermission("system_settings.read"),
+  async (_req: Request, res: Response) => {
+    try {
+      return sendSuccess(res, { payment_gateway: getPaymentGatewaySettings() });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.patch(
+  "/payment-gateway",
+  requirePermission("system_settings.write"),
+  async (req: Request, res: Response) => {
+    try {
+      const parsed = parsePaymentGatewayBody((req.body ?? {}) as Record<string, unknown>);
+      if (!parsed) {
+        return sendError(res, "Enter valid payment gateway methods.", 400);
+      }
+
+      const previous = getPaymentGatewaySettings();
+      const paymentGateway = await updatePaymentGatewaySettings(parsed);
+
+      const nextLogoUrls = new Set(
+        paymentGateway.methods
+          .map((method) => method.logo_url)
+          .filter((url): url is string => Boolean(url)),
+      );
+      for (const method of previous.methods) {
+        if (method.logo_url && !nextLogoUrls.has(method.logo_url)) {
+          removePaymentMethodLogoFile(method.logo_url);
+        }
+      }
+
+      return sendSuccess(res, { payment_gateway: paymentGateway });
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.post(
+  "/payment-gateway/logo",
+  requirePermission("system_settings.write"),
+  (req: Request, res: Response) => {
+    paymentMethodLogoUpload.single("logo")(req, res, (uploadError) => {
+      if (uploadError) {
+        if (uploadError instanceof multer.MulterError) {
+          if (uploadError.code === "LIMIT_FILE_SIZE") {
+            return sendError(res, "Payment method logo must be 5 MB or smaller.", 400);
+          }
+          return sendError(res, uploadError.message, 400);
+        }
+
+        return sendError(
+          res,
+          uploadError instanceof Error ? uploadError.message : "Upload failed.",
+          400,
+        );
+      }
+
+      const file = req.file;
+      if (!file) {
+        return sendError(res, "Payment method logo file is required.", 400);
+      }
+
+      return sendSuccess(res, { logo_url: buildPaymentMethodLogoUrl(file.filename) });
+    });
   },
 );
 
