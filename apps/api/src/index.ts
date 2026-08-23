@@ -51,6 +51,17 @@ import { sendSuccess } from "./utils/response";
 
 dotenv.config();
 
+function requireEnv(name: string) {
+  const value = process.env[name]?.trim();
+  if (!value) {
+    throw new Error(`${name} is required. Set it in apps/api/.env or the Compose environment.`);
+  }
+}
+
+requireEnv("NOTIFICATION_BROADCAST_URL");
+requireEnv("NOTIFICATION_APPLICATION_ID");
+requireEnv("ETRADE_REGISTRATION_URL");
+
 const app = express();
 const server = http.createServer(app);
 const port = process.env.PORT || 4000;

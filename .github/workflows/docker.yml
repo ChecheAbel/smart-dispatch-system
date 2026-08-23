@@ -18,9 +18,12 @@ jobs:
           APP_URL: ${{ secrets.APP_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          NOTIFICATION_BROADCAST_URL: ${{ secrets.NOTIFICATION_BROADCAST_URL }}
+          NOTIFICATION_APPLICATION_ID: ${{ secrets.NOTIFICATION_APPLICATION_ID }}
+          ETRADE_REGISTRATION_URL: ${{ secrets.ETRADE_REGISTRATION_URL }}
         run: |
           missing=0
-          for name in NEXT_PUBLIC_API_URL APP_URL JWT_SECRET POSTGRES_PASSWORD; do
+          for name in NEXT_PUBLIC_API_URL APP_URL JWT_SECRET POSTGRES_PASSWORD NOTIFICATION_BROADCAST_URL NOTIFICATION_APPLICATION_ID ETRADE_REGISTRATION_URL; do
             eval "value=\${$name}"
             if [ -z "$value" ]; then
               echo "Add repository secret $name (Settings → Secrets and variables → Actions)." >&2
@@ -36,4 +39,7 @@ jobs:
           APP_URL: ${{ secrets.APP_URL }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          NOTIFICATION_BROADCAST_URL: ${{ secrets.NOTIFICATION_BROADCAST_URL }}
+          NOTIFICATION_APPLICATION_ID: ${{ secrets.NOTIFICATION_APPLICATION_ID }}
+          ETRADE_REGISTRATION_URL: ${{ secrets.ETRADE_REGISTRATION_URL }}
         run: docker compose build

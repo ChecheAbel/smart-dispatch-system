@@ -11,9 +11,6 @@ import { normalizeEthiopianTin } from "../utils/validation";
 
 dns.setDefaultResultOrder("ipv4first");
 
-const DEFAULT_ETRADE_REGISTRATION_URL =
-  "https://invoice-api-apiproxy-grykeb-14616c-196-188-249-221.sslip.io/bo-dev/api/etrade/registration";
-
 export class BusinessTinLookupError extends Error {
   constructor(
     message: string,
@@ -40,10 +37,15 @@ type EtradeRegistration = {
 };
 
 function getEtradeRegistrationUrl() {
-  return (
-    process.env.ETRADE_REGISTRATION_URL?.trim().replace(/\/+$/, "") ||
-    DEFAULT_ETRADE_REGISTRATION_URL
-  );
+  const configured = process.env.ETRADE_REGISTRATION_URL?.trim().replace(/\/+$/, "");
+  if (!configured) {
+    throw new BusinessTinLookupError(
+      "ETRADE_REGISTRATION_URL is required. Set it in apps/api/.env or the Compose environment.",
+      500,
+    );
+  }
+
+  return configured;
 }
 
 function getEtradeLicenseUrl() {

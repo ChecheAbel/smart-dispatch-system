@@ -230,10 +230,6 @@ async function seedRoles() {
 async function seedAdminUser() {
   const email = process.env.SEED_ADMIN_EMAIL?.trim().toLowerCase();
   const password = process.env.SEED_ADMIN_PASSWORD;
-  const firstName = process.env.SEED_ADMIN_FIRST_NAME ?? "System";
-  const middleName = process.env.SEED_ADMIN_MIDDLE_NAME?.trim() || null;
-  const lastName = process.env.SEED_ADMIN_LAST_NAME ?? "Administrator";
-  const mobileNumber = process.env.SEED_ADMIN_MOBILE ?? "+251900000000";
 
   if (!email || !password) return;
 
@@ -263,10 +259,10 @@ async function seedAdminUser() {
     data: {
       email,
       passwordHash,
-      firstName,
-      middleName,
-      lastName,
-      mobileNumber,
+      firstName: "System",
+      middleName: null,
+      lastName: "Administrator",
+      mobileNumber: "+251900000000",
       accountStatus: "active",
       accountActivation: "activated",
       authRoles: {

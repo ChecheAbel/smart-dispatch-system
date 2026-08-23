@@ -284,9 +284,6 @@ JWT_SECRET=change-this-in-production
 APP_URL=http://localhost:3000
 SEED_ADMIN_EMAIL=admin@example.com
 SEED_ADMIN_PASSWORD=changeme123
-SEED_ADMIN_FIRST_NAME=System
-SEED_ADMIN_LAST_NAME=Administrator
-SEED_ADMIN_MOBILE=+251900000000
 ```
 
 Optional but recommended: set `UPLOAD_ROOT` to an absolute path **outside** the repo so license photos, vehicle images, branding, and payment logos persist (for example `~/uploads/smart-dispatch`). If unset, uploads default under the API working directory.
@@ -334,12 +331,11 @@ The web app does **not** need its own `.env` for local work. `next.config.ts` pr
 | `UPLOAD_ROOT` | No | Absolute directory for uploaded files |
 | `SEED_ADMIN_EMAIL` | For first admin | Creates/links an administrator on seed |
 | `SEED_ADMIN_PASSWORD` | For first admin | Admin password (only used when the user is created) |
-| `SEED_ADMIN_FIRST_NAME` / `LAST_NAME` / `MIDDLE_NAME` / `MOBILE` | No | Admin profile defaults |
-| `NOTIFICATION_BROADCAST_URL` | No | External push broadcast base URL |
-| `NOTIFICATION_APPLICATION_ID` | No | App id for that service |
+| `NOTIFICATION_BROADCAST_URL` | **Yes** | External push broadcast base URL |
+| `NOTIFICATION_APPLICATION_ID` | **Yes** | App id for that service |
 | `NOTIFICATION_BROADCAST_API_KEY` | No | Optional bearer token |
 | `NOTIFICATION_BROADCAST_CHANNELS` | No | Comma-separated; default `fcm` |
-| `ETRADE_REGISTRATION_URL` | No | Business TIN lookup |
+| `ETRADE_REGISTRATION_URL` | **Yes** | Business TIN lookup |
 | `ETRADE_LICENSE_URL` | No | Trade license lookup (defaults beside registration URL) |
 | `ETRADE_REGISTRATION_API_KEY` | No | Optional proxy token |
 | `RIDE_REQUEST_REMINDER_ENABLED` | No | Default on |
@@ -453,6 +449,9 @@ Repo **Settings → Secrets and variables → Actions**. Add:
 | `APP_URL` | Frontend origin used in password-reset links |
 | `JWT_SECRET` | Signs access tokens |
 | `POSTGRES_PASSWORD` | Postgres and `DATABASE_URL` |
+| `NOTIFICATION_BROADCAST_URL` | Push notification service base URL |
+| `NOTIFICATION_APPLICATION_ID` | Push notification application id |
+| `ETRADE_REGISTRATION_URL` | Business TIN lookup |
 
 The workflow `.github/workflows/docker.yml` runs `docker compose build` on `main` (and manual dispatch) with those secrets.
 
@@ -478,6 +477,9 @@ NEXT_PUBLIC_REALTIME_URL=https://api.your-domain.com
 JWT_SECRET=replace-me
 POSTGRES_PASSWORD=replace-me
 APP_URL=https://dispatch.your-domain.com
+NOTIFICATION_BROADCAST_URL=https://notifications.example.com
+NOTIFICATION_APPLICATION_ID=your-notification-app-id
+ETRADE_REGISTRATION_URL=https://etrade.example.com/api/etrade/registration
 ```
 
 **Before you treat this as production**

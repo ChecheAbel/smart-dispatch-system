@@ -31,6 +31,9 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - APP_URL=${APP_URL}
       - UPLOAD_ROOT=/var/smart-dispatch/uploads
+      - NOTIFICATION_BROADCAST_URL=${NOTIFICATION_BROADCAST_URL}
+      - NOTIFICATION_APPLICATION_ID=${NOTIFICATION_APPLICATION_ID}
+      - ETRADE_REGISTRATION_URL=${ETRADE_REGISTRATION_URL}
     volumes:
       - uploads:/var/smart-dispatch/uploads
     depends_on:
