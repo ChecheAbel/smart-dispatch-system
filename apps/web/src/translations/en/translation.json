@@ -6307,6 +6307,7 @@
     }
   },
   "landing": {
+    "skipToContent": "Skip to main content",
     "nav": {
       "howItWorks": "How it Works",
       "features": "Features",
@@ -6324,7 +6325,41 @@
       "titleSuffix": "& Fleet Platform",
       "subtitle": "A localized, enterprise-grade platform for corporate contracts, booking dispatches, driver shifts, and ETB invoicing, built specifically for Ethiopian transport agencies.",
       "seeHowItWorks": "See How It Works",
-      "exploreFeatures": "Explore Features"
+      "exploreFeatures": "Explore Features",
+      "previewKicker": "Operator view",
+      "previewTitle": "Dispatch at a glance",
+      "previewCaption": "A static preview of assignment, availability, and the next trip — not a live feed.",
+      "tripAssigned": "Bole to UN ECA",
+      "tripAssignedMeta": "Executive sedan · assigned",
+      "tripQueued": "Airport pickup",
+      "tripQueuedMeta": "Waiting for nearest compliant vehicle",
+      "boardLabel": "On shift",
+      "boardValue": "Ready for assignment",
+      "focusLabel": "Priority",
+      "focusValue": "Proximity and compliance"
+    },
+    "proof": {
+      "eyebrow": "One operating picture",
+      "title": "From request to invoice",
+      "subtitle": "The platform covers the full trip lifecycle for Ethiopian corporate transport — without extra tools.",
+      "items": [
+        {
+          "title": "Corporate booking",
+          "body": "Employees request a ride in a destination-first portal."
+        },
+        {
+          "title": "Smart assignment",
+          "body": "The nearest compliant vehicle is matched to the trip."
+        },
+        {
+          "title": "ETB invoicing",
+          "body": "Completed trips become accurate Birr invoices."
+        },
+        {
+          "title": "Fleet compliance",
+          "body": "Inspections, insurance, and permits stay in view."
+        }
+      ]
     },
     "process": {
       "eyebrow": "Seamless Experience",
@@ -6421,7 +6456,17 @@
       "companyPlaceholder": "Your mobility company",
       "emailPlaceholder": "you@company.com",
       "messagePlaceholder": "Tell us about your fleet size, use case, or questions about booking, dispatch, billing…",
-      "submit": "Send Message"
+      "submit": "Send Message",
+      "required": "required",
+      "errorHeading": "There is a problem",
+      "errors": {
+        "name": "Enter your full name.",
+        "email": "Enter a valid work email address.",
+        "message": "Enter a message so we know how to help."
+      },
+      "successMailto": "Your email app should open with this message ready to send.",
+      "successFallback": "No support inbox is configured yet. Book a trip or use the organisation contact link in the footer.",
+      "bookInstead": "Book a trip"
     },
     "footer": {
       "brandDescription": "An all-in-one platform for booking, dispatch, fleet and driver management, billing, and invoicing. Built for modern mobility.",

@@ -1,138 +1,145 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Car, Activity, MapPin } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Car, MapPin, Radio } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { goldCtaClass, ghostCtaClass, landingShell } from "@/components/landing/landing-ui";
 import { useLandingMessages } from "@/hooks/use-landing-messages";
 
 export default function Hero() {
   const copy = useLandingMessages();
+  const reduceMotion = useReducedMotion();
 
   return (
-    <section className="relative w-full min-h-[100dvh] flex items-center justify-center overflow-hidden bg-transparent pt-24 sm:pt-32 pb-12 sm:pb-16 -mt-px">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.1, 0.15, 0.1],
-            rotate: [0, 90, 0],
-          }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-[20%] -left-[10%] w-[70vw] h-[70vw] bg-[radial-gradient(ellipse_at_center,_var(--brand-accent)_0%,_transparent_50%)] rounded-full blur-[120px]"
-        />
-        <motion.div
-          animate={{
-            scale: [1, 1.3, 1],
-            opacity: [0.05, 0.1, 0.05],
-            rotate: [0, -90, 0],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-[20%] -right-[10%] w-[60vw] h-[60vw] bg-[radial-gradient(ellipse_at_center,_var(--brand-primary)_0%,_transparent_50%)] rounded-full blur-[100px]"
-        />
-        
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,#000_40%,transparent_100%)] opacity-50" />
+    <section className="relative flex min-h-[min(100svh,52rem)] items-center overflow-hidden bg-transparent pt-28 pb-16 sm:pt-32 sm:pb-20">
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(201,184,122,0.16),transparent_42%),radial-gradient(ellipse_at_bottom_left,rgba(0,0,0,0.22),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-size-[4rem_4rem] mask-[radial-gradient(ellipse_70%_60%_at_50%_40%,#000_40%,transparent_100%)]" />
       </div>
 
-      <div className="absolute inset-0 pointer-events-none hidden lg:block overflow-hidden">
-        <motion.div
-          animate={{ y: [0, -20, 0], rotate: [0, 5, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-[25%] left-[10%] flex items-center gap-3 rounded-2xl border border-white/10 bg-[#122622]/60 p-4 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#171c24]/80"
-        >
-          <div className="h-10 w-10 rounded-full bg-[var(--brand-accent)]/20 flex items-center justify-center">
-            <Car className="h-5 w-5 text-[var(--brand-accent)]" />
-          </div>
-          <div>
-            <div className="h-2 w-16 bg-white/20 rounded mb-2" />
-            <div className="h-2 w-10 bg-white/10 rounded" />
-          </div>
-        </motion.div>
-
-        <motion.div
-          animate={{ y: [0, 20, 0], rotate: [0, -5, 0] }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-          className="absolute top-[40%] right-[10%] flex items-center gap-3 rounded-2xl border border-white/10 bg-[#122622]/60 p-4 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#171c24]/80"
-        >
-          <div className="h-10 w-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
-            <Activity className="h-5 w-5 text-emerald-400" />
-          </div>
-          <div>
-            <div className="h-2 w-20 bg-white/20 rounded mb-2" />
-            <div className="h-2 w-12 bg-white/10 rounded" />
-          </div>
-        </motion.div>
-
-        <motion.div
-          animate={{ y: [0, -15, 0] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 2 }}
-          className="absolute bottom-[25%] left-[15%] flex items-center gap-3 rounded-2xl border border-white/10 bg-[#122622]/60 p-4 shadow-2xl backdrop-blur-xl dark:border-white/10 dark:bg-[#171c24]/80"
-        >
-          <div className="h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center">
-            <MapPin className="h-5 w-5 text-blue-400" />
-          </div>
-          <div>
-            <div className="h-2 w-14 bg-white/20 rounded mb-2" />
-            <div className="h-2 w-8 bg-white/10 rounded" />
-          </div>
-        </motion.div>
-      </div>
-
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 text-center flex flex-col items-center justify-center h-full gap-8 sm:gap-12">
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.1, ease: "easeOut" }}
-          className="text-4xl leading-[1.1] sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight max-w-5xl drop-shadow-2xl"
-        >
-          {copy.hero.titlePrefix}{" "}
-          <br className="hidden sm:block" />
-          <span className="relative inline-block mt-2 sm:mt-4">
-            <span className="bg-gradient-to-r from-[var(--brand-accent)] via-[#FFF2C2] to-[var(--brand-accent)] bg-clip-text text-transparent bg-[length:200%_auto] animate-pulse">
-              {copy.hero.titleHighlight}
-            </span>
-            <motion.span 
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: 1, delay: 0.8, ease: "easeInOut" }}
-              className="absolute -bottom-2 lg:-bottom-4 left-0 right-0 h-[3px] lg:h-[4px] bg-gradient-to-r from-transparent via-[var(--brand-accent)] to-transparent origin-left rounded-full" 
-            />
-          </span>
-          <br className="hidden sm:block" /> {copy.hero.titleSuffix}
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="text-lg sm:text-xl lg:text-2xl text-white/70 max-w-3xl leading-relaxed font-light tracking-wide px-4"
-        >
-          {copy.hero.subtitle}
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
-          className="flex flex-col sm:flex-row gap-5 sm:gap-8 justify-center w-full max-w-md sm:max-w-none sm:w-auto mt-6"
-        >
-          <a
-            href="#process"
-            className="group relative w-full sm:w-auto bg-gradient-to-b from-[var(--brand-accent)] to-[#A4945A] hover:from-[#d9ca8e] hover:to-[#B6A46A] text-[var(--brand-primary)] font-bold text-[17px] px-10 py-4 sm:py-5 rounded-full tracking-wide transition-all duration-300 hover:shadow-[0_0_40px_-5px_rgba(201,184,122,0.5)] hover:-translate-y-1 text-center overflow-hidden"
+      <div className={`${landingShell} relative z-10 grid items-center gap-12 lg:grid-cols-[minmax(0,1.1fr)_minmax(20rem,0.9fr)] lg:gap-16`}>
+        <div className="max-w-2xl">
+          <motion.p
+            initial={reduceMotion ? false : { opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-3 text-xs font-semibold tracking-[0.22em] text-[var(--brand-accent)] uppercase"
           >
-            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out rounded-full" />
-            <span className="relative z-10 flex items-center justify-center gap-3">
+            {copy.hero.titlePrefix}
+          </motion.p>
+          <span
+            className="mb-5 block h-px w-12 bg-[var(--brand-accent)]"
+            aria-hidden="true"
+          />
+          <motion.h1
+            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: reduceMotion ? 0 : 0.05 }}
+            className="text-4xl leading-[1.12] font-semibold tracking-tight text-balance text-white sm:text-5xl lg:text-6xl"
+          >
+            {copy.hero.titleHighlight}
+            <span className="mt-2 block font-medium text-white/88">
+              {copy.hero.titleSuffix}
+            </span>
+          </motion.h1>
+          <motion.p
+            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: reduceMotion ? 0 : 0.1 }}
+            className="mt-6 max-w-xl text-base leading-relaxed text-white/82 sm:text-lg"
+          >
+            {copy.hero.subtitle}
+          </motion.p>
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: reduceMotion ? 0 : 0.16 }}
+            className="mt-8 flex w-full max-w-md flex-col gap-3 sm:max-w-none sm:flex-row"
+          >
+            <Link href="/book" className={goldCtaClass}>
+              {copy.nav.bookNow}
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
+            <a href="#process" className={ghostCtaClass}>
               {copy.hero.seeHowItWorks}
-              <svg className="w-5 h-5 transition-transform group-hover:translate-x-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </span>
-          </a>
-          <a
-            href="#features"
-            className="w-full sm:w-auto border border-white/20 hover:border-[var(--brand-accent)]/50 text-white font-semibold text-[17px] px-10 py-4 sm:py-5 rounded-full tracking-wide transition-all duration-300 hover:bg-white/5 backdrop-blur-md text-center hover:-translate-y-1"
-          >
-            {copy.hero.exploreFeatures}
-          </a>
-        </motion.div>
+            </a>
+          </motion.div>
+        </div>
+
+        <motion.aside
+          initial={reduceMotion ? false : { opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: reduceMotion ? 0 : 0.12 }}
+          aria-label={copy.hero.previewTitle}
+        >
+          <Card className="gap-0 overflow-hidden rounded-3xl border-white/15 bg-[#122622]/85 py-0 text-white shadow-2xl ring-white/10 backdrop-blur-xl dark:border-white/10 dark:bg-[#171c24]/90">
+            <div className="h-1 w-full bg-[var(--brand-accent)]" aria-hidden="true" />
+            <CardContent className="p-5 sm:p-6">
+              <Badge
+                variant="outline"
+                className="h-auto border-[var(--brand-accent)]/40 bg-[var(--brand-accent)]/10 px-2.5 py-1 text-[10px] font-semibold tracking-[0.18em] text-[var(--brand-accent)] uppercase"
+              >
+                {copy.hero.previewKicker}
+              </Badge>
+              <h2 className="mt-3 text-xl font-semibold tracking-tight text-white">
+                {copy.hero.previewTitle}
+              </h2>
+              <p className="mt-2 text-sm leading-relaxed text-white/75">
+                {copy.hero.previewCaption}
+              </p>
+
+              <ul className="mt-5 space-y-3">
+                <li className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
+                  <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-accent)]/15">
+                    <Car className="size-5 text-[var(--brand-accent)]" aria-hidden="true" />
+                  </span>
+                  <span>
+                    <span className="block font-semibold text-white">
+                      {copy.hero.tripAssigned}
+                    </span>
+                    <span className="block text-sm text-white/70">
+                      {copy.hero.tripAssignedMeta}
+                    </span>
+                  </span>
+                </li>
+                <li className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/5 p-3">
+                  <span className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/10">
+                    <MapPin className="size-5 text-white" aria-hidden="true" />
+                  </span>
+                  <span>
+                    <span className="block font-semibold text-white">
+                      {copy.hero.tripQueued}
+                    </span>
+                    <span className="block text-sm text-white/70">
+                      {copy.hero.tripQueuedMeta}
+                    </span>
+                  </span>
+                </li>
+              </ul>
+
+              <dl className="mt-5 grid grid-cols-2 gap-3">
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+                  <dt className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-white/65 uppercase">
+                    <Radio className="size-3.5" aria-hidden="true" />
+                    {copy.hero.boardLabel}
+                  </dt>
+                  <dd className="mt-1 text-sm font-semibold text-white">
+                    {copy.hero.boardValue}
+                  </dd>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+                  <dt className="text-xs font-semibold tracking-wide text-white/65 uppercase">
+                    {copy.hero.focusLabel}
+                  </dt>
+                  <dd className="mt-1 text-sm font-semibold text-white">
+                    {copy.hero.focusValue}
+                  </dd>
+                </div>
+              </dl>
+            </CardContent>
+          </Card>
+        </motion.aside>
       </div>
     </section>
   );

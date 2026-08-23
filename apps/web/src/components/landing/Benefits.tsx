@@ -1,58 +1,64 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { ShieldCheck, Map, BarChart3 } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { BarChart3, Map, ShieldCheck } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { SectionIntro, landingSection, landingShell } from "@/components/landing/landing-ui";
 import { useLandingMessages } from "@/hooks/use-landing-messages";
 
 const BENEFIT_ICONS = [Map, ShieldCheck, BarChart3] as const;
 
 export default function Benefits() {
   const copy = useLandingMessages();
+  const reduceMotion = useReducedMotion();
 
   return (
-    <section id="benefits" className="relative overflow-hidden bg-slate-50 py-20 sm:py-32 dark:bg-[#11161d]">
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(28,58,52,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(28,58,52,0.03)_1px,transparent_1px)] bg-[size:64px_64px] opacity-50 [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_20%,transparent_100%)] dark:bg-[linear-gradient(to_right,rgba(201,184,122,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(201,184,122,0.06)_1px,transparent_1px)]" />
+    <section
+      id="benefits"
+      className={`${landingSection} overflow-hidden bg-[#f7f6f2] dark:bg-[#11161d]`}
+    >
+      <div
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(28,58,52,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(28,58,52,0.04)_1px,transparent_1px)] bg-size-[4rem_4rem] mask-[radial-gradient(ellipse_60%_60%_at_50%_50%,#000_20%,transparent_100%)] dark:bg-[linear-gradient(to_right,rgba(201,184,122,0.06)_1px,transparent_1px),linear-gradient(to_bottom,rgba(201,184,122,0.06)_1px,transparent_1px)]"
+        aria-hidden="true"
+      />
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mb-16 text-center sm:mb-24">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
-          >
-            <p className="mb-4 text-[10px] font-bold tracking-[0.25em] text-[var(--brand-accent)] uppercase drop-shadow-sm sm:text-xs">{copy.benefits.eyebrow}</p>
-            <h2 className="px-2 text-3xl font-extrabold tracking-tight text-[var(--brand-primary)] drop-shadow-xl sm:text-4xl lg:text-5xl dark:text-[#eef1f5]">
-              {copy.benefits.title}
-            </h2>
-            <p className="mx-auto mt-5 max-w-2xl px-2 text-base leading-relaxed font-light text-slate-500 sm:text-lg lg:text-xl dark:text-[#8f99a6]">
-              {copy.benefits.subtitle}
-            </p>
-          </motion.div>
-        </div>
+      <div className={`relative z-10 ${landingShell}`}>
+        <SectionIntro
+          eyebrow={copy.benefits.eyebrow}
+          title={copy.benefits.title}
+          subtitle={copy.benefits.subtitle}
+        />
 
-        <div className="grid grid-cols-1 gap-6 sm:gap-10 md:grid-cols-3">
+        <div className="mt-12 grid grid-cols-1 gap-5 sm:mt-16 md:grid-cols-3">
           {copy.benefits.items.map((benefit, i) => {
             const Icon = BENEFIT_ICONS[i];
 
             return (
               <motion.div
                 key={benefit.title}
-                initial={{ opacity: 0, y: 30 }}
+                initial={reduceMotion ? false : { opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.7, delay: i * 0.2 }}
-                className="group rounded-3xl border border-slate-200 bg-white p-8 shadow-md transition-all duration-300 hover:border-[var(--brand-accent)]/30 hover:shadow-2xl dark:border-white/10 dark:bg-[#171c24] dark:shadow-black/25 dark:hover:border-[#C9B87A]/30"
+                viewport={{ once: true, margin: "-80px" }}
+                transition={{ duration: reduceMotion ? 0 : 0.45, delay: reduceMotion ? 0 : i * 0.08 }}
               >
-                <div className="relative mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-[var(--brand-accent)]/20 bg-[var(--brand-accent)]/10 bg-white shadow-[0_0_15px_-3px_rgba(201,184,122,0.3)] transition-transform duration-300 group-hover:scale-110 dark:border-[#C9B87A]/25 dark:bg-[#11161d]">
-                  <Icon className="h-8 w-8 text-[var(--brand-accent)]" strokeWidth={1.5} />
-                </div>
-                <h3 className="mb-4 text-2xl leading-tight font-bold text-[var(--brand-primary)] transition-colors group-hover:text-[var(--brand-accent)] dark:text-[#eef1f5]">
-                  {benefit.title}
-                </h3>
-                <p className="leading-relaxed font-light text-slate-500 dark:text-[#8f99a6]">
-                  {benefit.description}
-                </p>
+                <Card className="h-full gap-0 overflow-hidden rounded-2xl border-slate-200/80 bg-white py-0 shadow-none ring-slate-900/5 dark:border-white/10 dark:bg-[#171c24] dark:ring-white/5">
+                  <div className="h-1 w-full bg-[var(--brand-accent)]/80" aria-hidden="true" />
+                  <CardContent className="p-6 sm:p-8">
+                    <span className="mb-5 flex size-12 items-center justify-center rounded-xl border border-[var(--brand-accent)]/25 bg-[#f7f6f2] dark:bg-[#11161d]">
+                      <Icon
+                        className="size-6 text-[var(--brand-accent)]"
+                        strokeWidth={1.5}
+                        aria-hidden="true"
+                      />
+                    </span>
+                    <h3 className="text-xl font-semibold tracking-tight text-[var(--brand-primary)] dark:text-[#eef1f5]">
+                      {benefit.title}
+                    </h3>
+                    <p className="mt-3 leading-relaxed text-slate-600 dark:text-[#c5ced8]">
+                      {benefit.description}
+                    </p>
+                  </CardContent>
+                </Card>
               </motion.div>
             );
           })}

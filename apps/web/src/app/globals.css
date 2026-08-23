@@ -48,6 +48,10 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+html {
+  scroll-padding-top: 6rem;
+}
+
 :root {
   --brand-primary: #1c3a34;
   --brand-accent: #c9b87a;
@@ -396,6 +400,26 @@
     opacity: 1 !important;
     transform: none !important;
   }
+}
+
+.skip-to-content {
+  position: absolute;
+  left: 1rem;
+  top: -5rem;
+  z-index: 100;
+  border-radius: 999px;
+  background: var(--brand-accent);
+  color: var(--brand-primary);
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.skip-to-content:focus {
+  top: 1rem;
+  outline: 3px solid #fff;
+  outline-offset: 3px;
 }
 
 /* Admin console — overrides shadcn sidebar tokens (including portaled mobile sheet) */

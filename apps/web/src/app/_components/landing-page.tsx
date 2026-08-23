@@ -2,7 +2,7 @@
 
 import Navbar from "@/components/landing/Navbar";
 import Hero from "@/components/landing/Hero";
-import Process from "@/components/landing/Process";
+import Process, { Proof } from "@/components/landing/Process";
 import Features from "@/components/landing/Features";
 import Benefits from "@/components/landing/Benefits";
 import CTA from "@/components/landing/CTA";
@@ -14,27 +14,32 @@ import { LocaleProvider } from "@/components/shared/providers/locale-context";
 export function LandingPage() {
   return (
     <LocaleProvider>
-      <div className="min-h-screen bg-[var(--brand-primary)] text-white antialiased dark:bg-[#0d1117] dark:text-[#e8ecf1]">
+      <div className="min-h-screen scroll-pt-24 bg-[var(--brand-primary)] text-white antialiased dark:bg-[#0d1117] dark:text-[#e8ecf1]">
         <Navbar />
-        <div className="animate-landing-page-in bg-[var(--brand-primary)] dark:bg-[#0d1117]">
-          <Hero />
-        </div>
+        <main id="main-content">
+          <div className="animate-landing-page-in bg-[var(--brand-primary)] dark:bg-[#0d1117]">
+            <Hero />
+          </div>
+          <Reveal>
+            <Proof />
+          </Reveal>
+          <Reveal>
+            <Process />
+          </Reveal>
+          <Reveal>
+            <Features />
+          </Reveal>
+          <Reveal>
+            <Benefits />
+          </Reveal>
+          <Reveal>
+            <CTA />
+          </Reveal>
+          <Reveal>
+            <Contact />
+          </Reveal>
+        </main>
         <Reveal>
-          <Process />
-        </Reveal>
-        <Reveal delay={80}>
-          <Features />
-        </Reveal>
-        <Reveal delay={80}>
-          <Benefits />
-        </Reveal>
-        <Reveal delay={80}>
-          <CTA />
-        </Reveal>
-        <Reveal delay={80}>
-          <Contact />
-        </Reveal>
-        <Reveal delay={80}>
           <Footer />
         </Reveal>
       </div>

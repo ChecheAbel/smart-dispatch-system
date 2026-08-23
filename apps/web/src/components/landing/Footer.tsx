@@ -1,7 +1,7 @@
 "use client";
 
 import BrandLogo from "@/components/landing/BrandLogo";
-import { motion } from "framer-motion";
+import { landingNavLink, landingShell } from "@/components/landing/landing-ui";
 import { Globe, Mail, Phone } from "lucide-react";
 import { useBranding } from "@/components/shared/providers";
 import { useLandingMessages } from "@/hooks/use-landing-messages";
@@ -44,35 +44,29 @@ export default function Footer() {
   ] as const;
 
   return (
-    <footer className="relative overflow-hidden border-t border-white/5 bg-[var(--brand-primary)] pt-20 pb-6 text-white/60 sm:pt-28 sm:pb-8 dark:border-white/10 dark:bg-[#0d1117]">
-      <div className="absolute -bottom-1/2 left-1/2 -translate-x-1/2 w-full h-[500px] bg-[radial-gradient(ellipse_at_top,_color-mix(in_srgb,var(--brand-accent)_5%,transparent)_0%,_transparent_70%)] rounded-full pointer-events-none blur-3xl" />
+    <footer className="relative overflow-hidden border-t border-white/10 bg-[var(--brand-primary)] pt-16 pb-8 text-white/70 sm:pt-20 dark:border-white/10 dark:bg-[#0d1117]">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(to_right,transparent,var(--brand-accent),transparent)] opacity-70"
+        aria-hidden="true"
+      />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-10 sm:gap-14 pb-14 sm:pb-20 border-b border-white/10"
-        >
-          <div className="space-y-6 col-span-2 sm:col-span-2 md:col-span-1">
-            <BrandLogo className="h-10 sm:h-12 drop-shadow-xl" />
+      <div className={`${landingShell} relative z-10`}>
+        <div className="grid grid-cols-2 gap-10 border-b border-white/10 pb-12 sm:grid-cols-2 md:grid-cols-4 md:gap-12">
+          <div className="col-span-2 space-y-5 md:col-span-1">
+            <BrandLogo className="h-10 sm:h-12" />
             <div className="space-y-1">
               <p className="text-sm font-semibold text-white">{branding.product_name}</p>
-              <p className="text-[13px] text-white/50">{branding.company_name}</p>
+              <p className="text-sm text-white/55">{branding.company_name}</p>
             </div>
-            <p className="text-[13px] leading-relaxed text-white/50 font-light">
+            <p className="text-sm leading-relaxed text-white/60">
               {copy.footer.brandDescription}
             </p>
             {(branding.support_email || branding.support_phone || websiteHref) && (
-              <ul className="space-y-2.5 pt-1 text-[13px]">
+              <ul className="space-y-2.5 pt-1 text-sm">
                 {branding.support_email ? (
                   <li>
-                    <a
-                      href={`mailto:${branding.support_email}`}
-                      className="inline-flex items-center gap-2 text-white/60 transition-colors hover:text-[var(--brand-accent)]"
-                    >
-                      <Mail className="size-3.5 shrink-0" />
+                    <a href={`mailto:${branding.support_email}`} className={`inline-flex items-center gap-2 ${landingNavLink}`}>
+                      <Mail className="size-3.5 shrink-0" aria-hidden="true" />
                       {branding.support_email}
                     </a>
                   </li>
@@ -81,9 +75,9 @@ export default function Footer() {
                   <li>
                     <a
                       href={`tel:${branding.support_phone.replace(/\s+/g, "")}`}
-                      className="inline-flex items-center gap-2 text-white/60 transition-colors hover:text-[var(--brand-accent)]"
+                      className={`inline-flex items-center gap-2 ${landingNavLink}`}
                     >
-                      <Phone className="size-3.5 shrink-0" />
+                      <Phone className="size-3.5 shrink-0" aria-hidden="true" />
                       {branding.support_phone}
                     </a>
                   </li>
@@ -94,9 +88,9 @@ export default function Footer() {
                       href={websiteHref}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 text-white/60 transition-colors hover:text-[var(--brand-accent)]"
+                      className={`inline-flex items-center gap-2 ${landingNavLink}`}
                     >
-                      <Globe className="size-3.5 shrink-0" />
+                      <Globe className="size-3.5 shrink-0" aria-hidden="true" />
                       {websiteLabel}
                     </a>
                   </li>
@@ -105,47 +99,41 @@ export default function Footer() {
             )}
           </div>
 
-          <div>
-            <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-white mb-6">
+          <nav aria-label={copy.footer.platform}>
+            <h2 className="mb-5 text-xs font-semibold tracking-[0.22em] text-white uppercase">
               {copy.footer.platform}
-            </h4>
-            <ul className="space-y-4 text-[14px]">
+            </h2>
+            <ul className="space-y-3 text-sm">
               {platformLinks.map((link) => (
                 <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-white/60 hover:text-[var(--brand-accent)] transition-colors font-medium"
-                  >
+                  <a href={link.href} className={landingNavLink}>
                     {link.label}
                   </a>
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
 
-          <div>
-            <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-white mb-6">
+          <nav aria-label={copy.footer.financeConsole}>
+            <h2 className="mb-5 text-xs font-semibold tracking-[0.22em] text-white uppercase">
               {copy.footer.financeConsole}
-            </h4>
-            <ul className="space-y-4 text-[14px]">
+            </h2>
+            <ul className="space-y-3 text-sm">
               {financeLinks.map((link) => (
                 <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-white/60 hover:text-[var(--brand-accent)] transition-colors font-medium"
-                  >
+                  <a href={link.href} className={landingNavLink}>
                     {link.label}
                   </a>
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
 
-          <div>
-            <h4 className="text-[10px] font-bold uppercase tracking-[0.25em] text-white mb-6">
+          <nav aria-label={copy.footer.company}>
+            <h2 className="mb-5 text-xs font-semibold tracking-[0.22em] text-white uppercase">
               {copy.footer.company}
-            </h4>
-            <ul className="space-y-4 text-[14px]">
+            </h2>
+            <ul className="space-y-3 text-sm">
               {companyLinks.map((link) => (
                 <li key={link.label}>
                   {"external" in link && link.external ? (
@@ -153,45 +141,36 @@ export default function Footer() {
                       href={link.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-white/60 hover:text-[var(--brand-accent)] transition-colors font-medium"
+                      className={landingNavLink}
                     >
                       {link.label}
                     </a>
                   ) : (
-                    <a
-                      href={link.href}
-                      className="text-white/60 hover:text-[var(--brand-accent)] transition-colors font-medium"
-                    >
+                    <a href={link.href} className={landingNavLink}>
                       {link.label}
                     </a>
                   )}
                 </li>
               ))}
             </ul>
-          </div>
-        </motion.div>
+          </nav>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="pt-8 sm:pt-10 flex flex-col items-center gap-5 text-[12px] sm:text-[13px] text-white/40 text-center"
-        >
-          <span className="max-w-3xl leading-relaxed font-light">
+        <div className="flex flex-col items-center gap-4 pt-8 text-center text-xs text-white/45 sm:text-sm">
+          <p className="max-w-3xl leading-relaxed">
             {formatMessage(copy.footer.copyright, {
               year,
               company: branding.company_name,
               product: branding.product_name,
             })}
-          </span>
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 font-medium">
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4 font-medium">
             {websiteHref && websiteLabel ? (
               <a
                 href={websiteHref}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[var(--brand-accent)] transition-colors"
+                className={landingNavLink}
               >
                 {websiteLabel}
               </a>
@@ -200,35 +179,30 @@ export default function Footer() {
                 href="https://eih.et"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[var(--brand-accent)] transition-colors"
+                className={landingNavLink}
               >
                 eih.et
               </a>
             )}
-            <span className="text-white/10">|</span>
-            <span className="text-[color-mix(in_srgb,var(--brand-accent)_80%,transparent)] tracking-widest uppercase text-[10px]">
+            <span className="text-white/20" aria-hidden="true">
+              |
+            </span>
+            <span className="text-[10px] tracking-[0.2em] text-[var(--brand-accent)] uppercase">
               v2.0.0
             </span>
           </div>
-        </motion.div>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="pt-8 text-center text-[11px] text-white/30 tracking-widest uppercase"
-        >
-          {copy.footer.developedBy}{" "}
-          <a
-            href="https://cheche.com.et/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-white/60 font-bold hover:text-[var(--brand-accent)] transition-colors"
-          >
-            Cheche Technologies
-          </a>
-        </motion.p>
+          <p className="pt-2 text-[11px] tracking-[0.16em] text-white/35 uppercase">
+            {copy.footer.developedBy}{" "}
+            <a
+              href="https://cheche.com.et/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-white/70 hover:text-[var(--brand-accent)]"
+            >
+              Cheche Technologies
+            </a>
+          </p>
+        </div>
       </div>
     </footer>
   );

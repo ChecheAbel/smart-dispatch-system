@@ -1,72 +1,62 @@
 "use client";
 
-import { motion } from "framer-motion";
+import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
+import { goldCtaClass, ghostCtaClass, landingSection, landingShell } from "@/components/landing/landing-ui";
 import { useLandingMessages } from "@/hooks/use-landing-messages";
 
 export default function CTA() {
   const copy = useLandingMessages();
+  const reduceMotion = useReducedMotion();
 
   return (
-    <section className="relative overflow-hidden bg-[var(--brand-primary)] py-24 sm:py-32 lg:py-40 dark:bg-[#0d1117]">
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(201,184,122,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(201,184,122,0.05)_1px,transparent_1px)] bg-[size:80px_80px] opacity-30" />
-      
-      <motion.div 
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.03, 0.08, 0.03],
-        }}
-        transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[min(800px,100vw)] h-[min(800px,100vw)] bg-[radial-gradient(ellipse_at_center,_var(--brand-accent)_0%,_transparent_70%)] rounded-full blur-[100px] pointer-events-none" 
-      />
+    <section className={`${landingSection} bg-white dark:bg-[#0d1117]`}>
+      <div className={landingShell}>
+        <div className="relative overflow-hidden rounded-[2rem] border border-[var(--brand-accent)]/25 bg-[var(--brand-primary)] px-6 py-14 sm:px-12 sm:py-16 lg:px-16 dark:bg-[#122018]">
+          <div
+            className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(201,184,122,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(201,184,122,0.08)_1px,transparent_1px)] bg-size-[4.5rem_4.5rem] opacity-40"
+            aria-hidden="true"
+          />
+          {reduceMotion ? null : (
+            <motion.div
+              animate={{ opacity: [0.05, 0.12, 0.05] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+              className="pointer-events-none absolute top-1/2 left-1/2 size-[min(36rem,100vw)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,var(--brand-accent)_0%,transparent_70%)] blur-[100px]"
+              aria-hidden="true"
+            />
+          )}
 
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.8 }}
-        >
-          <p className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[var(--brand-accent)]/20 bg-[var(--brand-accent)]/5 backdrop-blur-md mb-6">
-            <span className="h-2 w-2 rounded-full bg-[var(--brand-accent)] animate-pulse" />
-            <span className="text-[var(--brand-accent)] font-bold text-[10px] sm:text-xs tracking-[0.25em] uppercase">{copy.cta.eyebrow}</span>
-          </p>
-          
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.1] mb-6 sm:mb-8 px-2 drop-shadow-2xl">
-            {copy.cta.titlePrefix}{" "}
-            <br className="hidden sm:block" />
-            <span className="relative inline-block mt-2">
-              <span className="bg-gradient-to-r from-[var(--brand-accent)] via-[#FFF2C2] to-[var(--brand-accent)] bg-clip-text text-transparent bg-[length:200%_auto] animate-pulse">
-                {copy.cta.titleHighlight}
-              </span>
-            </span>
-          </h2>
-          
-          <p className="text-white/60 text-base sm:text-xl max-w-2xl mx-auto leading-relaxed mb-10 sm:mb-12 px-2 font-light">
-            {copy.cta.subtitle}
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 justify-center max-w-md sm:max-w-none mx-auto">
-            <motion.a
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              href="/book"
-              className="relative w-full sm:w-auto bg-gradient-to-b from-[var(--brand-accent)] to-[#A4945A] hover:from-[#d9ca8e] hover:to-[#B6A46A] text-[var(--brand-primary)] font-bold text-[15px] px-10 py-4 sm:py-5 rounded-full tracking-wide transition-all duration-300 hover:shadow-[0_0_40px_-5px_rgba(201,184,122,0.5)] text-center overflow-hidden group"
-            >
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out rounded-full" />
-              <span className="relative z-10 flex items-center justify-center gap-2 text-lg">
+          <motion.div
+            initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: reduceMotion ? 0 : 0.5 }}
+            className="relative z-10 mx-auto max-w-3xl text-center"
+          >
+            <p className="mb-3 text-xs font-semibold tracking-[0.22em] text-[var(--brand-accent)] uppercase">
+              {copy.cta.eyebrow}
+            </p>
+            <span
+              className="mx-auto mb-5 block h-px w-12 bg-[var(--brand-accent)]/70"
+              aria-hidden="true"
+            />
+            <h2 className="text-3xl leading-tight font-semibold tracking-tight text-balance text-white sm:text-4xl lg:text-[2.75rem]">
+              {copy.cta.titlePrefix}{" "}
+              <span className="text-[var(--brand-accent)]">{copy.cta.titleHighlight}</span>
+            </h2>
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-white/80 sm:text-lg">
+              {copy.cta.subtitle}
+            </p>
+            <div className="mx-auto mt-8 flex max-w-md flex-col justify-center gap-3 sm:max-w-none sm:flex-row">
+              <Link href="/book" className={goldCtaClass}>
                 {copy.cta.bookNow}
-              </span>
-            </motion.a>
-            <motion.a
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              href="#features"
-              className="w-full sm:w-auto border border-white/20 hover:border-[var(--brand-accent)]/50 text-white font-semibold text-[15px] px-10 py-4 sm:py-5 rounded-full tracking-wide transition-all duration-300 hover:bg-white/5 backdrop-blur-md text-center text-lg"
-            >
-              {copy.cta.exploreFeatures}
-            </motion.a>
-          </div>
-        </motion.div>
+              </Link>
+              <a href="#features" className={ghostCtaClass}>
+                {copy.cta.exploreFeatures}
+              </a>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </section>
   );
