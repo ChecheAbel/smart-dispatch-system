@@ -366,11 +366,14 @@ Schema lives at `apps/api/prisma/schema.prisma`. Migrations live in `apps/api/pr
 
 **You usually do not run migrate by hand.** `apps/api` runs `prisma migrate deploy` and the default seeders every time the process starts.
 
+Do not ship `schema.prisma` changes without a file in `prisma/migrations/` (`db push` updates a local database only). GitHub Actions runs `pnpm db:check` on `main` and pull requests so this cannot happen again.
+
 From `apps/api`:
 
 ```bash
 pnpm db:generate          # Prisma client
 pnpm db:migrate           # prisma migrate dev (new migration during development)
+pnpm db:check             # fail if schema.prisma is ahead of prisma/migrations
 pnpm db:deploy            # prisma migrate deploy (CI / prod)
 pnpm db:seed              # full default seed
 pnpm db:seed --help       # list targets
