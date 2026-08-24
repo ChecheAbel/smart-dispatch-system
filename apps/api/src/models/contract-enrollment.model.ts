@@ -143,6 +143,9 @@ const customerEnrollmentInvoiceSelect = {
   dueAt: true,
   paidAt: true,
   issuedAt: true,
+  latePaymentType: true,
+  latePaymentFee: true,
+  penaltyAmount: true,
   contractId: true,
   periodStart: true,
   periodEnd: true,
@@ -161,6 +164,8 @@ const customerEnrollmentInclude = {
       status: true,
       billingInterval: true,
       paymentTermsDays: true,
+      latePaymentType: true,
+      latePaymentFee: true,
     },
   },
   invoices: {

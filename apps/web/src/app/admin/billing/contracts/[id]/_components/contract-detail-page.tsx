@@ -359,6 +359,32 @@ export function ContractDetailPage() {
               />
             ) : null}
             <InfoTile
+              label={copy.detail.latePayment}
+              value={
+                contract.late_payment_type === "percent_per_day" &&
+                contract.late_payment_fee != null
+                  ? formatMessage(copy.detail.latePaymentPercentPerDayValue, {
+                      percent: contract.late_payment_fee,
+                    })
+                  : contract.late_payment_type === "flat_per_day" &&
+                      contract.late_payment_fee != null
+                    ? formatMessage(copy.detail.latePaymentFlatPerDayValue, {
+                        amount: contract.late_payment_fee,
+                      })
+                    : contract.late_payment_type === "percent" &&
+                        contract.late_payment_fee != null
+                      ? formatMessage(copy.detail.latePaymentPercentValue, {
+                          percent: contract.late_payment_fee,
+                        })
+                      : contract.late_payment_type === "flat" &&
+                          contract.late_payment_fee != null
+                        ? formatMessage(copy.detail.latePaymentFlatValue, {
+                            amount: contract.late_payment_fee,
+                          })
+                        : copy.latePaymentTypes.none
+              }
+            />
+            <InfoTile
               label={copy.detail.bookingPolicy}
               value={contract.booking_policy?.name ?? copy.form.noBookingPolicy}
             />

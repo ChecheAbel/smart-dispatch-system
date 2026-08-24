@@ -2,7 +2,9 @@ import { Router, type Request, type Response } from "express";
 import type {
   ContractBillingInterval,
   ContractStatus,
+  LatePaymentType,
 } from "@smart-dispatch/types";
+import { isPercentLatePaymentType } from "@smart-dispatch/types";
 import type { Prisma } from "../generated/prisma";
 import { auditMutations } from "../middleware/audit-mutation";
 import {
@@ -53,6 +55,13 @@ const CONTRACT_BILLING_INTERVALS = new Set<ContractBillingInterval>([
   "quarterly",
   "annually",
 ]);
+const LATE_PAYMENT_TYPES = new Set<LatePaymentType>([
+  "none",
+  "flat",
+  "percent",
+  "flat_per_day",
+  "percent_per_day",
+]);
 
 router.use(authenticate, authorize("admin"), auditMutations());
 
@@ -96,6 +105,56 @@ function parseOptionalPaymentTermsDays(value: unknown) {
     return null;
   }
   return parsed;
+}
+
+function parseLatePaymentType(value: unknown): LatePaymentType | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== "string" || !value.trim()) return undefined;
+  const type = value.trim() as LatePaymentType;
+  return LATE_PAYMENT_TYPES.has(type) ? type : undefined;
+}
+
+function parseOptionalMoney(value: unknown) {
+  if (value === null) return null;
+  if (value === undefined) return undefined;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) return null;
+  return parsed;
+}
+
+function resolveLatePaymentPolicy(
+  type: LatePaymentType | undefined,
+  fee: number | null | undefined,
+  fallbackType: LatePaymentType = "none",
+  fallbackFee: number | null = null,
+): { type: LatePaymentType; fee: number | null; error: string | null } {
+  const resolvedType = type ?? fallbackType;
+  const resolvedFee = fee === undefined ? fallbackFee : fee;
+
+  if (resolvedType === "none") {
+    return { type: "none", fee: null, error: null };
+  }
+
+  if (resolvedFee == null) {
+    return {
+      type: resolvedType,
+      fee: null,
+      error:
+        isPercentLatePaymentType(resolvedType)
+          ? "Late payment percent is required."
+          : "Late payment fee is required.",
+    };
+  }
+
+  if (isPercentLatePaymentType(resolvedType) && (resolvedFee <= 0 || resolvedFee > 100)) {
+    return {
+      type: resolvedType,
+      fee: resolvedFee,
+      error: "Late payment percent must be greater than 0 and at most 100.",
+    };
+  }
+
+  return { type: resolvedType, fee: resolvedFee, error: null };
 }
 
 function validateContractScope(scope: {
@@ -286,6 +345,21 @@ router.post(
         );
       }
 
+      const latePaymentType = parseLatePaymentType(req.body?.late_payment_type) ?? "none";
+      if (req.body?.late_payment_type !== undefined && parseLatePaymentType(req.body?.late_payment_type) === undefined) {
+        return sendError(res, "Enter a valid late payment penalty type.", 400);
+      }
+      const latePaymentFeeRaw = req.body?.late_payment_fee;
+      const latePaymentFee =
+        latePaymentFeeRaw === undefined ? undefined : parseOptionalMoney(latePaymentFeeRaw);
+      if (latePaymentFeeRaw !== undefined && latePaymentFeeRaw !== null && latePaymentFee === null) {
+        return sendError(res, "Enter a valid late payment amount.", 400);
+      }
+      const latePayment = resolveLatePaymentPolicy(latePaymentType, latePaymentFee);
+      if (latePayment.error) {
+        return sendError(res, latePayment.error, 400);
+      }
+
       const contract = await createContract({
         title,
         status,
@@ -294,6 +368,8 @@ router.post(
         notes: getOptionalString(req.body?.notes),
         billingInterval,
         paymentTermsDays: resolvedPaymentTermsDays,
+        latePaymentType: latePayment.type,
+        latePaymentFee: latePayment.fee,
         regionIds: scope.regionIds,
         vehicleTypeIds: scope.vehicleTypeIds,
         vehicleClassIds: scope.vehicleClassIds,
@@ -386,6 +462,26 @@ router.patch(
         );
       }
 
+      if (req.body?.late_payment_type !== undefined && parseLatePaymentType(req.body?.late_payment_type) === undefined) {
+        return sendError(res, "Enter a valid late payment penalty type.", 400);
+      }
+      const latePaymentType = parseLatePaymentType(req.body?.late_payment_type);
+      const latePaymentFeeRaw = req.body?.late_payment_fee;
+      const latePaymentFee =
+        latePaymentFeeRaw === undefined ? undefined : parseOptionalMoney(latePaymentFeeRaw);
+      if (latePaymentFeeRaw !== undefined && latePaymentFeeRaw !== null && latePaymentFee === null) {
+        return sendError(res, "Enter a valid late payment amount.", 400);
+      }
+      const latePayment = resolveLatePaymentPolicy(
+        latePaymentType,
+        latePaymentFee,
+        existing.latePaymentType,
+        existing.latePaymentFee != null ? Number(existing.latePaymentFee) : null,
+      );
+      if (latePayment.error) {
+        return sendError(res, latePayment.error, 400);
+      }
+
       const bookingPolicyId = existing.bookingPolicyId
         ? undefined
         : await resolveDefaultBookingPolicyId();
@@ -402,6 +498,14 @@ router.patch(
         billingInterval,
         paymentTermsDays:
           paymentTermsDays === undefined ? undefined : paymentTermsDays,
+        latePaymentType:
+          req.body?.late_payment_type !== undefined || req.body?.late_payment_fee !== undefined
+            ? latePayment.type
+            : undefined,
+        latePaymentFee:
+          req.body?.late_payment_type !== undefined || req.body?.late_payment_fee !== undefined
+            ? latePayment.fee
+            : undefined,
         regionIds:
           req.body?.region_ids !== undefined ? scope?.regionIds : undefined,
         vehicleTypeIds:

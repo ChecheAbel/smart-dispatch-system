@@ -2,6 +2,7 @@ import type {
   ContractBillingInterval,
   CustomerPaymentMethodId,
   InvoicePaymentMethod,
+  LatePaymentType,
 } from "@smart-dispatch/types";
 import {
   createInvoice,
@@ -20,6 +21,10 @@ import {
   findEnrollmentCoveringTrip,
 } from "../models/contract-enrollment.model";
 import { applyVatToInvoiceSubtotal } from "../models/app-setting.model";
+import {
+  computeLatePaymentPenalty,
+  resolveLatePaymentPolicy,
+} from "./invoice-penalty.service";
 
 export type GenerateInvoiceOptions = {
   contractEnrollmentId: string;
@@ -31,6 +36,50 @@ function addDays(date: Date, days: number) {
   const next = new Date(date);
   next.setUTCDate(next.getUTCDate() + days);
   return next;
+}
+
+function latePaymentSnapshotFromContract(contract: {
+  latePaymentType: LatePaymentType;
+  latePaymentFee: { toString(): string } | number | null;
+}) {
+  return {
+    latePaymentType: contract.latePaymentType,
+    latePaymentFee:
+      contract.latePaymentFee != null ? Number(contract.latePaymentFee) : null,
+  };
+}
+
+function paymentPenaltySnapshot(invoice: {
+  status: "draft" | "issued" | "paid" | "void";
+  dueAt: Date | null;
+  totalAmount: { toString(): string } | number;
+  latePaymentType: LatePaymentType;
+  latePaymentFee: { toString(): string } | number | null;
+  penaltyAmount: { toString(): string } | number;
+  contract: {
+    latePaymentType: LatePaymentType;
+    latePaymentFee: { toString(): string } | number | null;
+  };
+}) {
+  const policy = resolveLatePaymentPolicy({
+    latePaymentType: invoice.latePaymentType,
+    latePaymentFee: invoice.latePaymentFee,
+    contract: invoice.contract,
+  });
+  const computed = computeLatePaymentPenalty({
+    status: invoice.status,
+    dueAt: invoice.dueAt,
+    totalAmount: Number(invoice.totalAmount),
+    latePaymentType: policy.type,
+    latePaymentFee: policy.fee,
+    storedPenaltyAmount: Number(invoice.penaltyAmount),
+  });
+
+  return {
+    latePaymentType: policy.type,
+    latePaymentFee: policy.fee,
+    penaltyAmount: computed.penaltyAmount,
+  };
 }
 
 function assertBillingIntervalSupportsPeriod(
@@ -136,6 +185,7 @@ export async function generateInvoiceForEnrollment(options: GenerateInvoiceOptio
     totalAmount: totals.totalAmount,
     currency,
     paymentTermsDays,
+    ...latePaymentSnapshotFromContract(contract),
     issuedAt,
     dueAt,
     status: options.issue ? "issued" : "draft",
@@ -233,6 +283,7 @@ export async function generateInvoiceForTrip(rideRequestId: string, options?: { 
     totalAmount: totals.totalAmount,
     currency: snapshot.billableCurrency,
     paymentTermsDays,
+    ...latePaymentSnapshotFromContract(contract),
     issuedAt,
     dueAt,
     status: options?.issue ? "issued" : "draft",
@@ -266,8 +317,13 @@ export async function issueInvoice(invoiceId: string) {
   const issuedAt = new Date();
   const dueAt =
     invoice.paymentTermsDays != null ? addDays(issuedAt, invoice.paymentTermsDays) : null;
+  const snapshot = latePaymentSnapshotFromContract(invoice.contract);
 
-  return updateInvoiceStatus(invoice.id, "issued", { issuedAt, dueAt });
+  return updateInvoiceStatus(invoice.id, "issued", {
+    issuedAt,
+    dueAt,
+    ...snapshot,
+  });
 }
 
 export async function markInvoicePaid(
@@ -287,6 +343,7 @@ export async function markInvoicePaid(
   return updateInvoiceStatus(invoice.id, "paid", {
     paidAt: new Date(),
     paymentMethod,
+    ...paymentPenaltySnapshot(invoice),
   });
 }
 
@@ -338,6 +395,7 @@ export async function markInvoicesPaidForRequester(
       updateInvoiceStatus(invoice.id, "paid", {
         paidAt,
         paymentMethod,
+        ...paymentPenaltySnapshot(invoice),
       }),
     ),
   );

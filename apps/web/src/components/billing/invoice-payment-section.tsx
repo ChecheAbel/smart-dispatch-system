@@ -97,7 +97,7 @@ export function InvoicePaymentSection({ invoice, locale, onInvoiceUpdated }: Inv
   const [activeMethodId, setActiveMethodId] = useState<CustomerPaymentMethodId | null>(null);
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  const amountLabel = formatMoney(invoice.total_amount, invoice.currency, locale);
+  const amountLabel = formatMoney(invoice.amount_due, invoice.currency, locale);
 
   useEffect(() => {
     let cancelled = false;
@@ -274,6 +274,13 @@ export function InvoicePaymentSection({ invoice, locale, onInvoiceUpdated }: Inv
                     <p className="mt-1 text-3xl font-extrabold tabular-nums tracking-tight text-[#1C3A34]">
                       {amountLabel}
                     </p>
+                    {invoice.penalty_amount > 0 ? (
+                      <p className="mt-1 text-xs font-medium text-amber-800">
+                        {formatMessage(payCopy.includesPenalty, {
+                          penalty: formatMoney(invoice.penalty_amount, invoice.currency, locale),
+                        })}
+                      </p>
+                    ) : null}
                   </div>
                   <CopyLine
                     label={payCopy.referenceLabel}

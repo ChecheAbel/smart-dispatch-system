@@ -5,10 +5,12 @@ import { FileText, MapPin, Receipt } from "lucide-react";
 import type {
   ContractBillingInterval,
   ContractStatus,
+  LatePaymentType,
   Region,
   VehicleClass,
   VehicleType,
 } from "@smart-dispatch/types";
+import { isPercentLatePaymentType } from "@smart-dispatch/types";
 import {
   AdminFormSection,
   AdminSelectField,
@@ -54,6 +56,8 @@ type FormState = {
   notes: string;
   billingInterval: ContractBillingInterval | "";
   paymentTermsDays: string;
+  latePaymentType: LatePaymentType;
+  latePaymentFee: string;
   regionIds: string[];
   vehicleTypeIds: string[];
   vehicleClassIds: string[];
@@ -65,6 +69,8 @@ const emptyForm: FormState = {
   notes: "",
   billingInterval: "",
   paymentTermsDays: "",
+  latePaymentType: "none",
+  latePaymentFee: "",
   regionIds: [],
   vehicleTypeIds: [],
   vehicleClassIds: [],
@@ -82,6 +88,13 @@ const CONTRACT_BILLING_INTERVALS: ContractBillingInterval[] = [
   "monthly",
   "quarterly",
   "annually",
+];
+const LATE_PAYMENT_TYPES: LatePaymentType[] = [
+  "none",
+  "flat",
+  "percent",
+  "flat_per_day",
+  "percent_per_day",
 ];
 
 function ScopeCheckboxGroup({
@@ -232,6 +245,9 @@ export function CreateContractSheet({
               contract.payment_terms_days != null
                 ? String(contract.payment_terms_days)
                 : "",
+            latePaymentType: contract.late_payment_type ?? "none",
+            latePaymentFee:
+              contract.late_payment_fee != null ? String(contract.late_payment_fee) : "",
             regionIds: contract.region_ids,
             vehicleTypeIds: contract.vehicle_type_ids,
             vehicleClassIds: contract.vehicle_class_ids,
@@ -309,6 +325,15 @@ export function CreateContractSheet({
       }
     }
 
+    if (form.latePaymentType !== "none") {
+      const fee = Number(form.latePaymentFee);
+      if (!form.latePaymentFee.trim() || !Number.isFinite(fee) || fee < 0) {
+        nextErrors.latePaymentFee = copy.errors.latePaymentFeeRequired;
+      } else if (isPercentLatePaymentType(form.latePaymentType) && (fee <= 0 || fee > 100)) {
+        nextErrors.latePaymentFee = copy.errors.latePaymentPercentInvalid;
+      }
+    }
+
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
       return;
@@ -324,6 +349,9 @@ export function CreateContractSheet({
       notes: form.notes.trim() || null,
       billing_interval: billingInterval,
       payment_terms_days: Number(form.paymentTermsDays),
+      late_payment_type: form.latePaymentType,
+      late_payment_fee:
+        form.latePaymentType === "none" ? null : Number(form.latePaymentFee),
       region_ids: form.regionIds,
       vehicle_type_ids: form.vehicleTypeIds,
       vehicle_class_ids: form.vehicleClassIds,
@@ -445,6 +473,7 @@ export function CreateContractSheet({
                 error={errors.billingInterval}
               />
               {form.billingInterval ? (
+                <>
                 <AdminTextField
                   id="contract-payment-terms"
                   label={copy.form.paymentTermsDays}
@@ -460,6 +489,62 @@ export function CreateContractSheet({
                   disabled={formDisabled}
                   error={errors.paymentTermsDays}
                 />
+                <AdminSelectField
+                  id="contract-late-payment-type"
+                  label={copy.form.latePaymentType}
+                  value={form.latePaymentType}
+                  onValueChange={(value) => {
+                    updateField("latePaymentType", value as LatePaymentType);
+                    if (value === "none") updateField("latePaymentFee", "");
+                  }}
+                  items={LATE_PAYMENT_TYPES.map((type) => ({
+                    value: type,
+                    label: copy.latePaymentTypes[type],
+                  }))}
+                  hint={copy.form.latePaymentTypeHint}
+                  disabled={formDisabled}
+                />
+                {form.latePaymentType !== "none" ? (
+                  <AdminTextField
+                    id="contract-late-payment-fee"
+                    label={
+                      form.latePaymentType === "percent_per_day"
+                        ? copy.form.latePaymentPercentPerDay
+                        : form.latePaymentType === "flat_per_day"
+                          ? copy.form.latePaymentFeePerDay
+                          : isPercentLatePaymentType(form.latePaymentType)
+                            ? copy.form.latePaymentPercent
+                            : copy.form.latePaymentFee
+                    }
+                    type="number"
+                    min={0}
+                    max={isPercentLatePaymentType(form.latePaymentType) ? 100 : undefined}
+                    step="0.01"
+                    value={form.latePaymentFee}
+                    onChange={(event) => updateField("latePaymentFee", event.target.value)}
+                    placeholder={
+                      form.latePaymentType === "percent_per_day"
+                        ? copy.form.latePaymentPercentPerDayPlaceholder
+                        : form.latePaymentType === "flat_per_day"
+                          ? copy.form.latePaymentFeePerDayPlaceholder
+                          : isPercentLatePaymentType(form.latePaymentType)
+                            ? copy.form.latePaymentPercentPlaceholder
+                            : copy.form.latePaymentFeePlaceholder
+                    }
+                    hint={
+                      form.latePaymentType === "percent_per_day"
+                        ? copy.form.latePaymentPercentPerDayHint
+                        : form.latePaymentType === "flat_per_day"
+                          ? copy.form.latePaymentFeePerDayHint
+                          : isPercentLatePaymentType(form.latePaymentType)
+                            ? copy.form.latePaymentPercentHint
+                            : copy.form.latePaymentFeeHint
+                    }
+                    disabled={formDisabled}
+                    error={errors.latePaymentFee}
+                  />
+                ) : null}
+                </>
               ) : null}
               {form.billingInterval === "at_contract_end" ? (
                 <p className="rounded-xl border border-[#C9B87A]/35 bg-[#C9B87A]/10 px-3.5 py-2.5 text-sm leading-relaxed text-[#6f6238] md:col-span-2 dark:text-[#d8c98e]">

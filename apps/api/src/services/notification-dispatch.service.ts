@@ -20,6 +20,10 @@ import {
 } from "../models/notification-template.model";
 import { queueNotificationDeliveryLog } from "../models/notification-delivery-log.model";
 import {
+  computeLatePaymentPenalty,
+  resolveLatePaymentPolicy,
+} from "./invoice-penalty.service";
+import {
   renderNotificationTemplate,
   validateNotificationTemplatePlaceholders,
 } from "./notification-template.service";
@@ -142,6 +146,8 @@ function buildInvoiceSampleContext(): TemplateContext {
     days_until_due: "3",
     days_overdue: "5",
     payment_terms_days: "14",
+    penalty_amount: "622.50",
+    amount_due: "13,072.50",
     reference: "INV-2026-0001",
   };
 }
@@ -302,6 +308,19 @@ function buildInvoiceContext(
   invoice: NonNullable<Awaited<ReturnType<typeof findInvoiceById>>>,
 ): TemplateContext {
   const profile = invoice.requester.requesterProfile;
+  const policy = resolveLatePaymentPolicy({
+    latePaymentType: invoice.latePaymentType,
+    latePaymentFee: invoice.latePaymentFee,
+    contract: invoice.contract,
+  });
+  const penalty = computeLatePaymentPenalty({
+    status: invoice.status,
+    dueAt: invoice.dueAt,
+    totalAmount: Number(invoice.totalAmount),
+    latePaymentType: policy.type,
+    latePaymentFee: policy.fee,
+    storedPenaltyAmount: Number(invoice.penaltyAmount),
+  });
 
   return {
     invoice_reference: invoice.referenceNumber,
@@ -319,6 +338,8 @@ function buildInvoiceContext(
     days_overdue: daysOverdue(invoice.dueAt),
     payment_terms_days:
       invoice.paymentTermsDays != null ? String(invoice.paymentTermsDays) : "—",
+    penalty_amount: formatMoneyAmount(penalty.penaltyAmount),
+    amount_due: formatMoneyAmount(penalty.amountDue),
     reference: invoice.referenceNumber,
   };
 }

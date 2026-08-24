@@ -32,11 +32,7 @@ export function CustomerInvoiceStats({ locale, refreshKey }: CustomerInvoiceStat
           fetchMyInvoices({ status: "issued", page: 1, limit: 100 }),
         ]);
 
-        const now = Date.now();
-        const overdue = issuedPage.data.filter((invoice) => {
-          if (!invoice.due_at) return false;
-          return new Date(invoice.due_at).getTime() < now;
-        }).length;
+        const overdue = issuedPage.data.filter((invoice) => invoice.is_overdue).length;
 
         if (!cancelled) {
           setStats({ total, outstanding, paid, overdue });

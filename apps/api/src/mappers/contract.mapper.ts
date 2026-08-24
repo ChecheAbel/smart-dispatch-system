@@ -80,6 +80,9 @@ export function toPublicContract(contract: DbContract, options?: { locale?: stri
     notes: contract.notes,
     billing_interval: contract.billingInterval as ContractBillingInterval,
     payment_terms_days: contract.paymentTermsDays,
+    late_payment_type: contract.latePaymentType,
+    late_payment_fee:
+      contract.latePaymentFee != null ? Number(contract.latePaymentFee) : null,
     region_ids: scope.regionIds,
     vehicle_type_ids: scope.vehicleTypeIds,
     vehicle_class_ids: scope.vehicleClassIds,

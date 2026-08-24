@@ -1,4 +1,4 @@
-import type { InvoicePaymentMethod, InvoiceStatus } from "@smart-dispatch/types";
+import type { InvoicePaymentMethod, InvoiceStatus, LatePaymentType } from "@smart-dispatch/types";
 import { Prisma } from "../generated/prisma";
 import { prisma } from "../db/prisma";
 import { getUtcToday } from "./contract.model";
@@ -29,6 +29,8 @@ export type CreateInvoiceInput = {
   totalAmount: number;
   currency: string;
   paymentTermsDays?: number | null;
+  latePaymentType?: LatePaymentType;
+  latePaymentFee?: number | null;
   issuedAt?: Date | null;
   dueAt?: Date | null;
   status?: InvoiceStatus;
@@ -54,6 +56,8 @@ const invoiceInclude = {
       title: true,
       billingInterval: true,
       paymentTermsDays: true,
+      latePaymentType: true,
+      latePaymentFee: true,
     },
   },
   contractEnrollment: {
@@ -314,6 +318,8 @@ export async function createInvoice(input: CreateInvoiceInput) {
         totalAmount: input.totalAmount,
         currency: input.currency.trim().toUpperCase(),
         paymentTermsDays: input.paymentTermsDays ?? null,
+        latePaymentType: input.latePaymentType ?? "none",
+        latePaymentFee: input.latePaymentFee ?? null,
         issuedAt: input.issuedAt ?? null,
         dueAt: input.dueAt ?? null,
         notes: input.notes ?? null,
@@ -349,6 +355,9 @@ export async function updateInvoiceStatus(
     paidAt?: Date | null;
     paymentMethod?: InvoicePaymentMethod | null;
     voidedAt?: Date | null;
+    latePaymentType?: LatePaymentType;
+    latePaymentFee?: number | null;
+    penaltyAmount?: number;
   },
 ) {
   return prisma.invoice.update({
@@ -360,6 +369,9 @@ export async function updateInvoiceStatus(
       paidAt: timestamps?.paidAt,
       paymentMethod: timestamps?.paymentMethod,
       voidedAt: timestamps?.voidedAt,
+      latePaymentType: timestamps?.latePaymentType,
+      latePaymentFee: timestamps?.latePaymentFee,
+      penaltyAmount: timestamps?.penaltyAmount,
     },
     include: invoiceInclude,
   });

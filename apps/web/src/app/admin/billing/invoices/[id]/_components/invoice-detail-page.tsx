@@ -182,6 +182,11 @@ export function InvoiceDetailPage() {
             <div className="flex flex-wrap items-center gap-3">
               <h1 className={adminHeadingClass}>{invoice.reference_number}</h1>
               <Badge className={STATUS_BADGE_CLASS[invoice.status]}>{copy.status[invoice.status]}</Badge>
+              {invoice.is_overdue ? (
+                <Badge className="border-amber-200 bg-amber-50 text-amber-900">
+                  {copy.detail.overdue}
+                </Badge>
+              ) : null}
             </div>
             <p className="mt-1 text-sm text-slate-500">
               {invoice.contract.title} · {invoice.requester.name}
@@ -244,6 +249,18 @@ export function InvoiceDetailPage() {
             />
           ) : null}
           <QuickFact label={copy.detail.total} value={formatMoney(invoice.total_amount, invoice.currency, locale)} />
+          {invoice.penalty_amount > 0 ? (
+            <QuickFact
+              label={copy.detail.latePenalty}
+              value={formatMoney(invoice.penalty_amount, invoice.currency, locale)}
+            />
+          ) : null}
+          {invoice.status === "issued" && invoice.penalty_amount > 0 ? (
+            <QuickFact
+              label={copy.detail.amountDue}
+              value={formatMoney(invoice.amount_due, invoice.currency, locale)}
+            />
+          ) : null}
           <QuickFact label={copy.detail.issuedAt} value={formatDate(invoice.issued_at, locale)} />
           <QuickFact label={copy.detail.dueAt} value={formatDate(invoice.due_at, locale)} />
           {invoice.status === "paid" ? (

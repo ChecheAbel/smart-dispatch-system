@@ -80,7 +80,7 @@ export function BulkInvoicePaymentSheet({
   const [expandedInvoiceId, setExpandedInvoiceId] = useState<string | null>(null);
 
   const totalAmount = useMemo(
-    () => invoices.reduce((sum, invoice) => sum + invoice.total_amount, 0),
+    () => invoices.reduce((sum, invoice) => sum + invoice.amount_due, 0),
     [invoices],
   );
   const currency = invoices[0]?.currency ?? "ETB";
@@ -279,7 +279,7 @@ export function BulkInvoicePaymentSheet({
                         </div>
                         <div className="flex shrink-0 items-start gap-2">
                           <p className="text-sm font-semibold tabular-nums text-slate-700">
-                            {formatMoney(invoice.total_amount, invoice.currency, locale)}
+                            {formatMoney(invoice.amount_due, invoice.currency, locale)}
                           </p>
                           <ChevronDown
                             className={cn(

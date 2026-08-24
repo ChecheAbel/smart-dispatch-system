@@ -1,4 +1,4 @@
-import type { ContractBillingInterval, ContractStatus } from "@smart-dispatch/types";
+import type { ContractBillingInterval, ContractStatus, LatePaymentType } from "@smart-dispatch/types";
 import { Prisma } from "../generated/prisma";
 import { prisma } from "../db/prisma";
 
@@ -10,6 +10,8 @@ export type CreateContractInput = {
   notes?: string | null;
   billingInterval?: ContractBillingInterval;
   paymentTermsDays?: number | null;
+  latePaymentType?: LatePaymentType;
+  latePaymentFee?: number | null;
   regionIds?: string[];
   vehicleTypeIds?: string[];
   vehicleClassIds?: string[];
@@ -24,6 +26,8 @@ export type UpdateContractInput = {
   notes?: string | null;
   billingInterval?: ContractBillingInterval;
   paymentTermsDays?: number | null;
+  latePaymentType?: LatePaymentType;
+  latePaymentFee?: number | null;
   regionIds?: string[];
   vehicleTypeIds?: string[];
   vehicleClassIds?: string[];
@@ -191,6 +195,8 @@ export async function createContract(input: CreateContractInput) {
       notes: input.notes?.trim() || null,
       billingInterval: input.billingInterval ?? "per_trip",
       paymentTermsDays: input.paymentTermsDays ?? null,
+      latePaymentType: input.latePaymentType ?? "none",
+      latePaymentFee: input.latePaymentFee ?? null,
       regionIds: toJsonIds(input.regionIds),
       vehicleTypeIds: toJsonIds(input.vehicleTypeIds),
       vehicleClassIds: toJsonIds(input.vehicleClassIds),
@@ -212,6 +218,8 @@ export async function updateContract(id: string, input: UpdateContractInput) {
       billingInterval: input.billingInterval,
       paymentTermsDays:
         input.paymentTermsDays === undefined ? undefined : input.paymentTermsDays,
+      latePaymentType: input.latePaymentType,
+      latePaymentFee: input.latePaymentFee === undefined ? undefined : input.latePaymentFee,
       regionIds: input.regionIds === undefined ? undefined : toJsonIds(input.regionIds),
       vehicleTypeIds: input.vehicleTypeIds === undefined ? undefined : toJsonIds(input.vehicleTypeIds),
       vehicleClassIds:

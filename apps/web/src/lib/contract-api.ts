@@ -1,4 +1,4 @@
-import type { Contract, ContractEnrollment, ContractStatus, ContractBillingInterval } from "@smart-dispatch/types";
+import type { Contract, ContractEnrollment, ContractStatus, ContractBillingInterval, LatePaymentType } from "@smart-dispatch/types";
 import { apiClient } from "./api-client";
 import { unwrapApiResponse, unwrapPaginatedApiResponse } from "./api-response";
 
@@ -17,6 +17,8 @@ export type CreateContractInput = {
   notes?: string | null;
   billing_interval?: ContractBillingInterval;
   payment_terms_days?: number | null;
+  late_payment_type?: LatePaymentType;
+  late_payment_fee?: number | null;
   region_ids?: string[];
   vehicle_type_ids?: string[];
   vehicle_class_ids?: string[];

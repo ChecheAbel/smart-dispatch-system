@@ -26,6 +26,7 @@ import {
   adminBadgeSuccessClass,
 } from "@/lib/admin-theme";
 import { fetchInvoices, issueInvoice, markInvoicePaid, voidInvoice } from "@/lib/invoice-api";
+import { invoiceListedAmount } from "@/lib/invoice-amounts";
 import { PERMISSIONS } from "@/lib/permissions";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { formatMessage, getAdminInvoicesMessages } from "@/translations";
@@ -200,7 +201,14 @@ export function InvoicesPage() {
         id: "total",
         header: copy.columns.total,
         cellClassName: "font-medium text-slate-800",
-        cell: (invoice) => formatMoney(invoice.total_amount, invoice.currency, locale),
+        cell: (invoice) => (
+          <div>
+            <p>{formatMoney(invoiceListedAmount(invoice), invoice.currency, locale)}</p>
+            {invoice.status === "issued" && invoice.penalty_amount > 0 ? (
+              <p className="text-xs font-medium text-red-700">{copy.columns.includesPenalty}</p>
+            ) : null}
+          </div>
+        ),
       },
       {
         id: "status",

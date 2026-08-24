@@ -37,6 +37,7 @@ import {
 } from "@/lib/admin-theme";
 import { USER_DASHBOARD_PATH } from "@/lib/auth-paths";
 import { fetchMyInvoices } from "@/lib/customer-billing-api";
+import { invoiceListedAmount } from "@/lib/invoice-amounts";
 import { PERMISSIONS } from "@/lib/permissions";
 import { showErrorToast } from "@/lib/toast";
 import { formatMessage, getCustomerInvoicesMessages } from "@/translations";
@@ -154,7 +155,7 @@ export function MyInvoicesPage() {
   const selectedInvoices = useMemo(() => [...selectedById.values()], [selectedById]);
   const selectedKeys = useMemo(() => new Set(selectedById.keys()), [selectedById]);
   const selectedTotal = useMemo(
-    () => selectedInvoices.reduce((sum, invoice) => sum + invoice.total_amount, 0),
+    () => selectedInvoices.reduce((sum, invoice) => sum + invoice.amount_due, 0),
     [selectedInvoices],
   );
   const selectedCurrency = selectedInvoices[0]?.currency ?? "ETB";
@@ -198,7 +199,16 @@ export function MyInvoicesPage() {
         id: "total",
         header: copy.columns.total,
         cellClassName: "font-medium text-slate-800",
-        cell: (invoice) => formatMoney(invoice.total_amount, invoice.currency, locale),
+        cell: (invoice) => (
+          <div>
+            <p>{formatMoney(invoiceListedAmount(invoice), invoice.currency, locale)}</p>
+            {invoice.status === "issued" && invoice.penalty_amount > 0 ? (
+              <p className="text-xs font-medium text-red-700 dark:text-red-300">
+                {copy.columns.includesPenalty}
+              </p>
+            ) : null}
+          </div>
+        ),
       },
       {
         id: "status",

@@ -956,6 +956,18 @@ export const extensionSchemas = {
         maximum: 365,
         nullable: true,
       },
+      late_payment_type: {
+        type: "string",
+        enum: ["none", "flat", "percent", "flat_per_day", "percent_per_day"],
+        description:
+          "Late payment penalty: one-time (flat/percent) or accruing each overdue calendar day (flat_per_day/percent_per_day).",
+      },
+      late_payment_fee: {
+        type: "number",
+        nullable: true,
+        description:
+          "Fixed amount or percent of invoice total. Per-day types multiply by calendar days overdue.",
+      },
       region_ids: { type: "array", items: { type: "string", format: "uuid" } },
       vehicle_type_ids: {
         type: "array",
@@ -1000,6 +1012,18 @@ export const extensionSchemas = {
         maximum: 365,
         nullable: true,
       },
+      late_payment_type: {
+        type: "string",
+        enum: ["none", "flat", "percent", "flat_per_day", "percent_per_day"],
+        description:
+          "Late payment penalty: one-time (flat/percent) or accruing each overdue calendar day (flat_per_day/percent_per_day).",
+      },
+      late_payment_fee: {
+        type: "number",
+        nullable: true,
+        description:
+          "Fixed amount or percent of invoice total. Per-day types multiply by calendar days overdue.",
+      },
       region_ids: { type: "array", items: { type: "string", format: "uuid" } },
       vehicle_type_ids: {
         type: "array",
@@ -1030,6 +1054,18 @@ export const extensionSchemas = {
         minimum: 0,
         maximum: 365,
         nullable: true,
+      },
+      late_payment_type: {
+        type: "string",
+        enum: ["none", "flat", "percent", "flat_per_day", "percent_per_day"],
+        description:
+          "Late payment penalty: one-time (flat/percent) or accruing each overdue calendar day (flat_per_day/percent_per_day).",
+      },
+      late_payment_fee: {
+        type: "number",
+        nullable: true,
+        description:
+          "Fixed amount or percent of invoice total. Per-day types multiply by calendar days overdue.",
       },
       region_ids: { type: "array", items: { type: "string", format: "uuid" } },
       vehicle_type_ids: {

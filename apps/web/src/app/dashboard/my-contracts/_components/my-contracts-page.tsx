@@ -18,6 +18,7 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { adminBadgeGoldClass, adminBadgeSuccessClass, adminHeadingClass } from "@/lib/admin-theme";
 import { fetchMyContractEnrollments, fetchMyContractSummary } from "@/lib/customer-billing-api";
 import { USER_DASHBOARD_PATH } from "@/lib/auth-paths";
+import { invoiceListedAmount } from "@/lib/invoice-amounts";
 import { PERMISSIONS } from "@/lib/permissions";
 import {
   formatMessage,
@@ -148,7 +149,7 @@ export function MyContractsPage() {
             >
               <p className="font-medium text-slate-800">{row.invoice.reference_number}</p>
               <p className="text-xs text-slate-500">
-                {formatMoney(row.invoice.total_amount, row.invoice.currency, locale)}
+                {formatMoney(invoiceListedAmount(row.invoice), row.invoice.currency, locale)}
               </p>
             </Link>
           ) : (
@@ -333,7 +334,7 @@ export function MyContractsPage() {
                       </div>
                       <p className="mt-4 text-[10px] font-semibold tracking-wide text-slate-400 uppercase">{copy.detail.invoiceAmount}</p>
                       <p className="mt-1 text-2xl font-extrabold text-[var(--brand-primary)] dark:text-foreground">
-                        {formatMoney(selectedEnrollment.invoice.total_amount, selectedEnrollment.invoice.currency, locale)}
+                        {formatMoney(invoiceListedAmount(selectedEnrollment.invoice), selectedEnrollment.invoice.currency, locale)}
                       </p>
                       <div className="mt-4 grid grid-cols-2 gap-4 border-t border-slate-100 pt-4 dark:border-border">
                         <SheetFact

@@ -1,8 +1,12 @@
-import type { Invoice, InvoiceLineItem, InvoiceStatus } from "@smart-dispatch/types";
+import type { Invoice, InvoiceLineItem, InvoiceStatus, LatePaymentType } from "@smart-dispatch/types";
 import type { DbInvoice } from "../models/invoice.model";
 import { formatContractDate } from "../models/contract.model";
 import { parseFarePlanTranslationsMap } from "../types/fare-plan-translations";
 import { DEFAULT_LOCALE, normalizeLocale } from "../utils/locale";
+import {
+  computeLatePaymentPenalty,
+  resolveLatePaymentPolicy,
+} from "../services/invoice-penalty.service";
 
 function formatPersonName(person: {
   firstName: string;
@@ -72,6 +76,34 @@ function toPublicLineItem(
   };
 }
 
+function invoicePenaltyFields(invoice: DbInvoice) {
+  const policy = resolveLatePaymentPolicy({
+    latePaymentType: invoice.latePaymentType as LatePaymentType,
+    latePaymentFee: invoice.latePaymentFee,
+    contract: {
+      latePaymentType: invoice.contract.latePaymentType as LatePaymentType,
+      latePaymentFee: invoice.contract.latePaymentFee,
+    },
+  });
+  const computed = computeLatePaymentPenalty({
+    status: invoice.status as InvoiceStatus,
+    dueAt: invoice.dueAt,
+    totalAmount: Number(invoice.totalAmount),
+    latePaymentType: policy.type,
+    latePaymentFee: policy.fee,
+    storedPenaltyAmount: Number(invoice.penaltyAmount),
+  });
+
+  return {
+    late_payment_type: policy.type,
+    late_payment_fee: policy.fee,
+    is_overdue: computed.isOverdue,
+    days_overdue: computed.daysOverdue,
+    penalty_amount: computed.penaltyAmount,
+    amount_due: computed.amountDue,
+  };
+}
+
 export function toPublicInvoice(invoice: DbInvoice, options?: { locale?: string }): Invoice {
   const profile = invoice.requester.requesterProfile;
 
@@ -86,6 +118,9 @@ export function toPublicInvoice(invoice: DbInvoice, options?: { locale?: string 
       title: invoice.contract.title,
       billing_interval: invoice.contract.billingInterval,
       payment_terms_days: invoice.contract.paymentTermsDays,
+      late_payment_type: invoice.contract.latePaymentType as LatePaymentType,
+      late_payment_fee:
+        invoice.contract.latePaymentFee != null ? Number(invoice.contract.latePaymentFee) : null,
     },
     contract_enrollment_id: invoice.contractEnrollmentId,
     contract_enrollment: invoice.contractEnrollment
@@ -113,6 +148,7 @@ export function toPublicInvoice(invoice: DbInvoice, options?: { locale?: string 
     total_amount: Number(invoice.totalAmount),
     currency: invoice.currency,
     payment_terms_days: invoice.paymentTermsDays,
+    ...invoicePenaltyFields(invoice),
     issued_at: invoice.issuedAt?.toISOString() ?? null,
     due_at: invoice.dueAt?.toISOString() ?? null,
     paid_at: invoice.paidAt?.toISOString() ?? null,

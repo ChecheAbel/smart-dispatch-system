@@ -432,6 +432,8 @@ export const INVOICE_NOTIFICATION_PLACEHOLDERS = [
   "days_until_due",
   "days_overdue",
   "payment_terms_days",
+  "penalty_amount",
+  "amount_due",
   "reference",
 ] as const;
 
@@ -1334,6 +1336,15 @@ export interface ContractFarePlanSummary {
 
 export type LateCancellationType = "none" | "charge_fee" | "bill_as_trip";
 export type NoShowType = LateCancellationType;
+export type LatePaymentType = "none" | "flat" | "percent" | "flat_per_day" | "percent_per_day";
+
+export function isPercentLatePaymentType(type: LatePaymentType) {
+  return type === "percent" || type === "percent_per_day";
+}
+
+export function isDailyLatePaymentType(type: LatePaymentType) {
+  return type === "flat_per_day" || type === "percent_per_day";
+}
 
 export interface BookingPolicyTranslation {
   locale: string;
@@ -1388,6 +1399,8 @@ export interface Contract {
   notes: string | null;
   billing_interval: ContractBillingInterval;
   payment_terms_days: number | null;
+  late_payment_type: LatePaymentType;
+  late_payment_fee: number | null;
   region_ids: string[];
   vehicle_type_ids: string[];
   vehicle_class_ids: string[];
@@ -1432,6 +1445,8 @@ export interface InvoiceContractSummary {
   title: string;
   billing_interval: ContractBillingInterval;
   payment_terms_days: number | null;
+  late_payment_type: LatePaymentType;
+  late_payment_fee: number | null;
 }
 
 export interface InvoiceEnrollmentSummary {
@@ -1516,6 +1531,12 @@ export interface Invoice {
   total_amount: number;
   currency: string;
   payment_terms_days: number | null;
+  late_payment_type: LatePaymentType;
+  late_payment_fee: number | null;
+  is_overdue: boolean;
+  days_overdue: number;
+  penalty_amount: number;
+  amount_due: number;
   issued_at: string | null;
   due_at: string | null;
   paid_at: string | null;
@@ -1539,6 +1560,9 @@ export interface CustomerInvoiceSummary {
   due_at: string | null;
   paid_at: string | null;
   issued_at: string | null;
+  is_overdue: boolean;
+  penalty_amount: number;
+  amount_due: number;
 }
 
 export interface CustomerContractEnrollment {
@@ -1548,6 +1572,8 @@ export interface CustomerContractEnrollment {
   created_at: string;
   contract: RideRequestContractSummary & {
     payment_terms_days: number | null;
+    late_payment_type: LatePaymentType;
+    late_payment_fee: number | null;
   };
   invoice: CustomerInvoiceSummary | null;
 }
@@ -1573,6 +1599,12 @@ export interface CustomerInvoice {
   total_amount: number;
   currency: string;
   payment_terms_days: number | null;
+  late_payment_type: LatePaymentType;
+  late_payment_fee: number | null;
+  is_overdue: boolean;
+  days_overdue: number;
+  penalty_amount: number;
+  amount_due: number;
   issued_at: string | null;
   due_at: string | null;
   paid_at: string | null;

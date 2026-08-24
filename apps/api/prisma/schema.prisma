@@ -818,6 +818,16 @@ enum LateCancellationType {
   @@map("late_cancellation_type")
 }
 
+enum LatePaymentType {
+  none
+  flat
+  percent
+  flat_per_day
+  percent_per_day
+
+  @@map("late_payment_type")
+}
+
 model BookingPolicy {
   id                     String                @id @default(uuid()) @db.Uuid
   slug                   String                @unique @db.VarChar(50)
@@ -849,6 +859,8 @@ model Contract {
   notes            String?                 @db.Text
   billingInterval  ContractBillingInterval @default(per_trip) @map("billing_interval")
   paymentTermsDays Int?                    @map("payment_terms_days")
+  latePaymentType  LatePaymentType         @default(none) @map("late_payment_type")
+  latePaymentFee   Decimal?                @map("late_payment_fee") @db.Decimal(12, 2)
   regionIds        Json                    @default("[]") @map("region_ids") @db.JsonB
   vehicleTypeIds   Json                    @default("[]") @map("vehicle_type_ids") @db.JsonB
   vehicleClassIds  Json                    @default("[]") @map("vehicle_class_ids") @db.JsonB
@@ -910,6 +922,9 @@ model Invoice {
   totalAmount          Decimal   @map("total_amount") @db.Decimal(14, 2)
   currency             String    @default("ETB") @db.VarChar(3)
   paymentTermsDays     Int?      @map("payment_terms_days")
+  latePaymentType      LatePaymentType @default(none) @map("late_payment_type")
+  latePaymentFee       Decimal?  @map("late_payment_fee") @db.Decimal(12, 2)
+  penaltyAmount        Decimal   @default(0) @map("penalty_amount") @db.Decimal(14, 2)
   issuedAt             DateTime? @map("issued_at") @db.Timestamptz
   dueAt                DateTime? @map("due_at") @db.Timestamptz
   paidAt               DateTime? @map("paid_at") @db.Timestamptz

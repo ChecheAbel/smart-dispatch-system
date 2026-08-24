@@ -431,14 +431,14 @@ const INVOICE_RULES: NotificationTemplateSeed[] = [
     channel: "email",
     recipient: "requester",
     subject: "Overdue invoice: {invoice_reference}",
-    body: "Hello {customer_name}, invoice {invoice_reference} for {total_amount} {currency} was due on {due_at} and is now {days_overdue} days overdue. Contract: {contract_title}.",
+    body: "Hello {customer_name}, invoice {invoice_reference} for {total_amount} {currency} was due on {due_at} and is now {days_overdue} days overdue. Amount due is now {amount_due} {currency}, including a late payment penalty of {penalty_amount} {currency}. Contract: {contract_title}.",
   },
   {
     module: "invoices",
     event: "overdue",
     channel: "sms",
     recipient: "requester",
-    body: "Smart Dispatch: invoice {invoice_reference} is {days_overdue} days overdue. Amount {total_amount} {currency}.",
+    body: "Smart Dispatch: invoice {invoice_reference} is {days_overdue} days overdue. Amount due {amount_due} {currency} (includes {penalty_amount} {currency} penalty).",
   },
 ];
 
