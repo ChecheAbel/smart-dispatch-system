@@ -56,6 +56,20 @@ const labelClassName = "block text-xs font-semibold text-slate-600 mb-2.5 dark:t
 const errorInputClassName =
   "border-red-300 bg-red-50/60 focus:border-red-400 focus:ring-red-200/60 dark:border-red-400/40 dark:bg-red-950/25 dark:text-red-200 dark:focus:border-red-400 dark:focus:ring-red-400/20";
 const errorLabelClassName = "text-red-700 dark:text-red-300";
+const tinLockedInputClassName =
+  "cursor-not-allowed bg-slate-50 text-slate-700 focus:border-slate-200 focus:ring-0 dark:!bg-[#0d1117] dark:text-[#c7ced7] dark:focus:border-white/10 dark:focus:ring-0";
+
+type TinLockedFields = {
+  organizationName: boolean;
+  registrationNumber: boolean;
+  organizationAddress: boolean;
+};
+
+const emptyTinLocks: TinLockedFields = {
+  organizationName: false,
+  registrationNumber: false,
+  organizationAddress: false,
+};
 
 type FormState = {
   segment: RequesterSegment;
@@ -759,6 +773,7 @@ export default function UserRegisterForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
+  const [tinLockedFields, setTinLockedFields] = useState<TinLockedFields>(emptyTinLocks);
 
   const fillFromTin = useCallback((fields: BusinessTinAutofillFields) => {
     setForm((current) => ({
@@ -767,6 +782,11 @@ export default function UserRegisterForm() {
       registrationNumber: fields.registrationNumber,
       organizationAddress: fields.organizationAddress,
     }));
+    setTinLockedFields({
+      organizationName: Boolean(fields.organizationName.trim()),
+      registrationNumber: Boolean(fields.registrationNumber.trim()),
+      organizationAddress: Boolean(fields.organizationAddress.trim()),
+    });
     setFieldErrors((current) => {
       const next = { ...current };
       if (fields.organizationName) delete next.organizationName;
@@ -790,7 +810,40 @@ export default function UserRegisterForm() {
   const activeSegment = selectedSegment ?? form.segment;
 
   function updateField<K extends keyof FormState>(field: K, value: FormState[K]) {
-    setForm((current) => ({ ...current, [field]: value }));
+    if (
+      (field === "organizationName" && tinLockedFields.organizationName) ||
+      (field === "registrationNumber" && tinLockedFields.registrationNumber) ||
+      (field === "organizationAddress" && tinLockedFields.organizationAddress)
+    ) {
+      return;
+    }
+
+    if (field === "taxId") {
+      const shouldClearLockedFields =
+        tinLockedFields.organizationName ||
+        tinLockedFields.registrationNumber ||
+        tinLockedFields.organizationAddress;
+
+      setForm((current) => ({
+        ...current,
+        taxId: value,
+        ...(shouldClearLockedFields
+          ? {
+              organizationName: tinLockedFields.organizationName ? "" : current.organizationName,
+              registrationNumber: tinLockedFields.registrationNumber
+                ? ""
+                : current.registrationNumber,
+              organizationAddress: tinLockedFields.organizationAddress
+                ? ""
+                : current.organizationAddress,
+            }
+          : {}),
+      }));
+      if (shouldClearLockedFields) setTinLockedFields(emptyTinLocks);
+    } else {
+      setForm((current) => ({ ...current, [field]: value }));
+    }
+
     setFieldErrors((current) => {
       if (!current[field]) return current;
       const next = { ...current };
@@ -834,6 +887,9 @@ export default function UserRegisterForm() {
       }
 
       setFieldErrors({});
+      if (form.segment !== selectedSegment) {
+        setTinLockedFields(emptyTinLocks);
+      }
       setForm((current) => ({
         ...current,
         segment: selectedSegment!,
@@ -1317,9 +1373,23 @@ export default function UserRegisterForm() {
                     value={form.organizationName}
                     onChange={(event) => updateField("organizationName", event.target.value)}
                     disabled={isSubmitting}
+                    readOnly={tinLockedFields.organizationName}
+                    aria-readonly={tinLockedFields.organizationName}
+                    title={tinLockedFields.organizationName ? copy.tinLookup.lockedFromTin : undefined}
                     placeholder={copy.placeholders.organizationName}
-                    className={cn(inputClassName, fieldErrors.organizationName && errorInputClassName)}
+                    className={cn(
+                      inputClassName,
+                      tinLockedFields.organizationName && "pr-11",
+                      tinLockedFields.organizationName && tinLockedInputClassName,
+                      fieldErrors.organizationName && errorInputClassName,
+                    )}
                   />
+                  {tinLockedFields.organizationName ? (
+                    <Lock
+                      className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                      aria-hidden
+                    />
+                  ) : null}
                 </div>
                 {fieldErrors.organizationName ? (
                   <p className="mt-1.5 text-xs text-red-600">{fieldErrors.organizationName}</p>
@@ -1388,18 +1458,35 @@ export default function UserRegisterForm() {
                     >
                       {copy.fields.registrationNumber}
                     </label>
-                    <input
-                      id="user-registration-number"
-                      type="text"
-                      value={form.registrationNumber}
-                      onChange={(event) => updateField("registrationNumber", event.target.value)}
-                      disabled={isSubmitting}
-                      placeholder={copy.placeholders.registrationNumber}
-                      className={cn(
-                        plainInputClassName,
-                        fieldErrors.registrationNumber && errorInputClassName,
-                      )}
-                    />
+                    <div className="relative">
+                      <input
+                        id="user-registration-number"
+                        type="text"
+                        value={form.registrationNumber}
+                        onChange={(event) => updateField("registrationNumber", event.target.value)}
+                        disabled={isSubmitting}
+                        readOnly={tinLockedFields.registrationNumber}
+                        aria-readonly={tinLockedFields.registrationNumber}
+                        title={
+                          tinLockedFields.registrationNumber
+                            ? copy.tinLookup.lockedFromTin
+                            : undefined
+                        }
+                        placeholder={copy.placeholders.registrationNumber}
+                        className={cn(
+                          plainInputClassName,
+                          tinLockedFields.registrationNumber && "pr-11",
+                          tinLockedFields.registrationNumber && tinLockedInputClassName,
+                          fieldErrors.registrationNumber && errorInputClassName,
+                        )}
+                      />
+                      {tinLockedFields.registrationNumber ? (
+                        <Lock
+                          className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400"
+                          aria-hidden
+                        />
+                      ) : null}
+                    </div>
                     {fieldErrors.registrationNumber ? (
                       <p className="mt-1.5 text-xs text-red-600">{fieldErrors.registrationNumber}</p>
                     ) : null}
@@ -1425,13 +1512,26 @@ export default function UserRegisterForm() {
                     value={form.organizationAddress}
                     onChange={(event) => updateField("organizationAddress", event.target.value)}
                     disabled={isSubmitting}
+                    readOnly={tinLockedFields.organizationAddress}
+                    aria-readonly={tinLockedFields.organizationAddress}
+                    title={
+                      tinLockedFields.organizationAddress ? copy.tinLookup.lockedFromTin : undefined
+                    }
                     placeholder={copy.placeholders.organizationAddress}
                     className={cn(
                       inputClassName,
                       "min-h-[96px] resize-none py-3",
+                      tinLockedFields.organizationAddress && "pr-11",
+                      tinLockedFields.organizationAddress && tinLockedInputClassName,
                       fieldErrors.organizationAddress && errorInputClassName,
                     )}
                   />
+                  {tinLockedFields.organizationAddress ? (
+                    <Lock
+                      className="pointer-events-none absolute right-4 top-4 h-4 w-4 text-slate-400"
+                      aria-hidden
+                    />
+                  ) : null}
                 </div>
                 {fieldErrors.organizationAddress ? (
                   <p className="mt-1.5 text-xs text-red-600">{fieldErrors.organizationAddress}</p>
