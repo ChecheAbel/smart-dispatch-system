@@ -403,6 +403,28 @@ export async function markInvoicesPaidForRequester(
   return findInvoicesForRequester(uniqueIds, requesterUserId);
 }
 
+export async function fulfillIssuedInvoicesAsPaid(
+  invoiceIds: string[],
+  paymentMethod: CustomerPaymentMethodId,
+) {
+  const uniqueIds = [...new Set(invoiceIds.map((id) => id.trim()).filter(Boolean))];
+  const { findInvoiceById, updateInvoiceStatus } = await import("../models/invoice.model");
+  const paidAt = new Date();
+
+  for (const invoiceId of uniqueIds) {
+    const invoice = await findInvoiceById(invoiceId);
+    if (!invoice) continue;
+    if (invoice.status === "paid") continue;
+    if (invoice.status !== "issued") continue;
+
+    await updateInvoiceStatus(invoice.id, "paid", {
+      paidAt,
+      paymentMethod,
+      ...paymentPenaltySnapshot(invoice),
+    });
+  }
+}
+
 export async function voidInvoice(invoiceId: string) {
   const { findInvoiceById, updateInvoiceStatus } = await import("../models/invoice.model");
   const invoice = await findInvoiceById(invoiceId);

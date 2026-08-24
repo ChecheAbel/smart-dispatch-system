@@ -23,10 +23,11 @@ import {
   adminHeadingClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
-import { confirmCustomerInvoicePayment, fetchCustomerPaymentOptions } from "@/lib/customer-billing-api";
+import { confirmCustomerInvoicePayment, completeStripeInvoiceCheckout, fetchCustomerPaymentOptions, startStripeInvoiceCheckout } from "@/lib/customer-billing-api";
 import {
   getMethodFieldValue,
   isMethodReady,
+  isOnlineCheckoutKind,
 } from "@/lib/payment-gateway";
 import { PaymentMethodLogo } from "@/components/billing/payment-method-logo";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
@@ -54,29 +55,17 @@ function buildSteps(
   amountLabel: string,
   reference: string,
 ) {
-  const shortCode = getMethodFieldValue(method, "short_code") || payCopy.merchantCodePending;
+  if (method.kind === "stripe") {
+    return payCopy.stripeSteps.map((step) =>
+      formatMessage(step, {
+        amount: amountLabel,
+        reference,
+      }),
+    );
+  }
+
   const account =
     getMethodFieldValue(method, "account_number") || payCopy.accountPending;
-
-  if (method.kind === "telebirr") {
-    return payCopy.telebirrSteps.map((step) =>
-      formatMessage(step, {
-        amount: amountLabel,
-        reference,
-        short_code: shortCode,
-      }),
-    );
-  }
-
-  if (method.kind === "cbe_birr") {
-    return payCopy.cbeSteps.map((step) =>
-      formatMessage(step, {
-        amount: amountLabel,
-        reference,
-        account,
-      }),
-    );
-  }
 
   return payCopy.customSteps.map((step) =>
     formatMessage(step, {
@@ -98,6 +87,38 @@ export function InvoicePaymentSection({ invoice, locale, onInvoiceUpdated }: Inv
   const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const amountLabel = formatMoney(invoice.amount_due, invoice.currency, locale);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("checkout") !== "success") return;
+    const sessionId = params.get("session_id");
+    if (!sessionId) return;
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        const result = await completeStripeInvoiceCheckout(sessionId, locale);
+        const updated = result.invoices.find((item) => item.id === invoice.id);
+        if (!cancelled && updated) {
+          onInvoiceUpdated?.(updated);
+          showSuccessToast({ title: payCopy.paymentConfirmed });
+        }
+      } catch {
+        if (!cancelled) {
+          showErrorToast({ title: payCopy.paymentConfirmFailed });
+        }
+      } finally {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("checkout");
+        url.searchParams.delete("session_id");
+        window.history.replaceState({}, "", `${url.pathname}${url.search}`);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [invoice.id, locale, onInvoiceUpdated, payCopy.paymentConfirmFailed, payCopy.paymentConfirmed]);
 
   useEffect(() => {
     let cancelled = false;
@@ -143,6 +164,19 @@ export function InvoicePaymentSection({ invoice, locale, onInvoiceUpdated }: Inv
 
     setConfirming(true);
     try {
+      if (isOnlineCheckoutKind(activeMethod.kind)) {
+        const path = `/dashboard/my-invoices/${invoice.id}`;
+        const result = await startStripeInvoiceCheckout({
+          invoice_ids: [invoice.id],
+          payment_method: activeMethod.id,
+          success_path: path,
+          cancel_path: path,
+          locale,
+        });
+        window.location.assign(result.checkout_url);
+        return;
+      }
+
       const result = await confirmCustomerInvoicePayment(invoice.id, {
         payment_method: activeMethod.id,
         locale,
@@ -339,7 +373,13 @@ export function InvoicePaymentSection({ invoice, locale, onInvoiceUpdated }: Inv
                   disabled={confirming || showConfigNotice}
                   onClick={() => void handleConfirmPayment()}
                 >
-                  {confirming ? payCopy.confirmingPayment : payCopy.confirmPayment}
+                  {confirming
+                    ? isOnlineCheckoutKind(activeMethod.kind)
+                      ? payCopy.redirectingToStripe
+                      : payCopy.confirmingPayment
+                    : isOnlineCheckoutKind(activeMethod.kind)
+                      ? payCopy.payWithStripe
+                      : payCopy.confirmPayment}
                 </Button>
               </SheetFooter>
             </>

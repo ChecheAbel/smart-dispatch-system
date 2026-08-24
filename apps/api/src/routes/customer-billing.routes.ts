@@ -25,9 +25,17 @@ import { getOptionalString } from "../utils/validation";
 import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
 import { getPaymentGatewaySettings } from "../models/app-setting.model";
 import {
+  isOnlineCheckoutKind,
+  toPublicPaymentGatewaySettings,
+} from "../config/customer-payment-options";
+import {
   markInvoicePaidForRequester,
   markInvoicesPaidForRequester,
 } from "../services/invoice-generation.service";
+import {
+  completeStripeInvoiceCheckoutSession,
+  createStripeInvoiceCheckoutSession,
+} from "../services/stripe-invoice-checkout.service";
 import type { CustomerPaymentMethodId } from "@smart-dispatch/types";
 
 const router = Router();
@@ -188,7 +196,7 @@ router.get(
       }
 
       return sendSuccess(res, {
-        payment_options: getPaymentGatewaySettings(),
+        payment_options: toPublicPaymentGatewaySettings(getPaymentGatewaySettings()),
       });
     } catch (error) {
       return handleRouteError(res, error);
@@ -219,9 +227,29 @@ function mapCustomerPaymentError(error: unknown) {
       return { message: "Select at least one invoice to pay.", status: 400 };
     case "INVOICE_CURRENCY_MISMATCH":
       return { message: "Selected invoices must share the same currency.", status: 409 };
+    case "STRIPE_NOT_CONFIGURED":
+      return { message: "Stripe is not configured yet.", status: 400 };
+    case "STRIPE_CHECKOUT_REQUIRED":
+      return { message: "Pay this invoice with Stripe Checkout.", status: 400 };
+    case "STRIPE_AMOUNT_INVALID":
+      return { message: "The amount is too small to pay with Stripe.", status: 400 };
+    case "STRIPE_CHECKOUT_FAILED":
+      return { message: "Could not start Stripe Checkout.", status: 502 };
+    case "STRIPE_SESSION_UNPAID":
+      return { message: "Stripe payment is not complete yet.", status: 409 };
+    case "STRIPE_SESSION_MISMATCH":
+      return { message: "This Stripe session does not belong to you.", status: 403 };
+    case "STRIPE_SESSION_INVALID":
+      return { message: "Invalid Stripe checkout session.", status: 400 };
     default:
       return null;
   }
+}
+
+function configuredMethod(methodId: string) {
+  return getPaymentGatewaySettings().methods.find(
+    (method) => method.id === methodId && method.enabled,
+  );
 }
 
 function parseInvoiceIds(value: unknown) {
@@ -232,6 +260,81 @@ function parseInvoiceIds(value: unknown) {
     .filter(Boolean);
   return ids.length > 0 ? ids : null;
 }
+
+router.post(
+  "/invoices/stripe-checkout",
+  requirePermission("customer_invoices.read"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      const paymentMethod = parsePaymentMethod(req.body?.payment_method);
+      if (!paymentMethod) {
+        return sendError(res, "Invalid payment method.", 400);
+      }
+
+      const invoiceIds = parseInvoiceIds(req.body?.invoice_ids);
+      if (!invoiceIds) {
+        return sendError(res, "invoice_ids must be a non-empty array.", 400);
+      }
+
+      const checkout = await createStripeInvoiceCheckoutSession({
+        invoiceIds,
+        paymentMethodId: paymentMethod,
+        requesterUserId: userId,
+        customerEmail: req.user?.email,
+        successPath: req.body?.success_path,
+        cancelPath: req.body?.cancel_path,
+        locale: getRequestLocale(req),
+      });
+
+      return sendSuccess(res, checkout);
+    } catch (error) {
+      const mapped = mapCustomerPaymentError(error);
+      if (mapped) {
+        return sendError(res, mapped.message, mapped.status);
+      }
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.post(
+  "/invoices/stripe-complete",
+  requirePermission("customer_invoices.read"),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const locale = getRequestLocale(req);
+      const userId = req.user?.id;
+      if (!userId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      const sessionId =
+        typeof req.body?.session_id === "string" ? req.body.session_id.trim() : "";
+      if (!sessionId) {
+        return sendError(res, "session_id is required.", 400);
+      }
+
+      const invoices = await completeStripeInvoiceCheckoutSession({
+        sessionId,
+        requesterUserId: userId,
+        locale,
+      });
+
+      return sendSuccess(res, { invoices });
+    } catch (error) {
+      const mapped = mapCustomerPaymentError(error);
+      if (mapped) {
+        return sendError(res, mapped.message, mapped.status);
+      }
+      return handleRouteError(res, error);
+    }
+  },
+);
 
 router.post(
   "/invoices/confirm-payments",
@@ -252,6 +355,11 @@ router.post(
       const invoiceIds = parseInvoiceIds(req.body?.invoice_ids);
       if (!invoiceIds) {
         return sendError(res, "invoice_ids must be a non-empty array.", 400);
+      }
+
+      const method = configuredMethod(paymentMethod);
+      if (method && isOnlineCheckoutKind(method.kind)) {
+        return sendError(res, "Pay these invoices with Stripe Checkout.", 400);
       }
 
       const invoices = await markInvoicesPaidForRequester(invoiceIds, userId, paymentMethod);
@@ -283,6 +391,11 @@ router.post(
       const paymentMethod = parsePaymentMethod(req.body?.payment_method);
       if (!paymentMethod) {
         return sendError(res, "Invalid payment method.", 400);
+      }
+
+      const method = configuredMethod(paymentMethod);
+      if (method && isOnlineCheckoutKind(method.kind)) {
+        return sendError(res, "Pay this invoice with Stripe Checkout.", 400);
       }
 
       await markInvoicePaidForRequester(req.params.id, userId, paymentMethod);

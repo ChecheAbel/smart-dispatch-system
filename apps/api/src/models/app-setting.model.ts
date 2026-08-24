@@ -242,9 +242,7 @@ function parseVatValue(value: Prisma.JsonValue | undefined): VatSettings {
 }
 
 function parseGatewayKind(value: unknown): PaymentGatewayKind {
-  if (value === "telebirr" || value === "cbe_birr" || value === "custom") {
-    return value;
-  }
+  if (value === "stripe") return "stripe";
   return "custom";
 }
 
@@ -357,10 +355,12 @@ function migrateLegacyPaymentGateway(
   const methods: PaymentGatewayMethod[] = [];
 
   if (legacyTelebirr) {
-    const defaults = fallback.methods.find((method) => method.kind === "telebirr");
+    const defaults = fallback.methods.find((method) => method.id === "telebirr");
     methods.push(
-      createPaymentGatewayMethod("telebirr", {
+      createPaymentGatewayMethod("custom", {
         id: "telebirr",
+        name: "Telebirr",
+        description: "Pay from the Telebirr app or USSD.",
         enabled:
           legacyTelebirr.enabled === undefined
             ? (defaults?.enabled ?? true)
@@ -395,10 +395,12 @@ function migrateLegacyPaymentGateway(
   }
 
   if (legacyCbe) {
-    const defaults = fallback.methods.find((method) => method.kind === "cbe_birr");
+    const defaults = fallback.methods.find((method) => method.id === "cbe_birr");
     methods.push(
-      createPaymentGatewayMethod("cbe_birr", {
+      createPaymentGatewayMethod("custom", {
         id: "cbe_birr",
+        name: "CBE Birr",
+        description: "Transfer via Commercial Bank of Ethiopia (CBE Birr).",
         enabled:
           legacyCbe.enabled === undefined
             ? (defaults?.enabled ?? true)

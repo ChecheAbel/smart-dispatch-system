@@ -5,25 +5,26 @@ import type {
   PaymentGatewayMethod,
 } from "@smart-dispatch/types";
 
+export const SECRET_PAYMENT_FIELD_KEYS = ["secret_key", "webhook_secret"] as const;
+
+export function isSecretPaymentFieldKey(key: string) {
+  return SECRET_PAYMENT_FIELD_KEYS.includes(key as (typeof SECRET_PAYMENT_FIELD_KEYS)[number]);
+}
+
+export function isOnlineCheckoutKind(kind: PaymentGatewayKind) {
+  return kind === "stripe";
+}
+
 export function createPaymentGatewayId(kind: PaymentGatewayKind) {
-  if (kind === "telebirr") return "telebirr";
-  if (kind === "cbe_birr") return "cbe_birr";
+  if (kind === "stripe") return "stripe";
   return `custom_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
 export function defaultFieldsForKind(kind: PaymentGatewayKind): PaymentGatewayField[] {
-  if (kind === "telebirr") {
+  if (kind === "stripe") {
     return [
-      { key: "merchant_name", label: "Merchant name", value: "" },
-      { key: "short_code", label: "Short code", value: "" },
-      { key: "ussd", label: "USSD", value: "*127#" },
-    ];
-  }
-
-  if (kind === "cbe_birr") {
-    return [
-      { key: "account_name", label: "Account name", value: "" },
-      { key: "account_number", label: "Account number", value: "" },
+      { key: "secret_key", label: "Secret key", value: "" },
+      { key: "webhook_secret", label: "Webhook secret", value: "" },
     ];
   }
 
@@ -31,20 +32,18 @@ export function defaultFieldsForKind(kind: PaymentGatewayKind): PaymentGatewayFi
 }
 
 export function defaultNameForKind(kind: PaymentGatewayKind) {
-  if (kind === "telebirr") return "Telebirr";
-  if (kind === "cbe_birr") return "CBE Birr";
-  return "Bank transfer";
+  if (kind === "stripe") return "Stripe";
+  return "Payment method";
 }
 
 export function defaultDescriptionForKind(kind: PaymentGatewayKind) {
-  if (kind === "telebirr") return "Pay from the Telebirr app or USSD.";
-  if (kind === "cbe_birr") return "Transfer via Commercial Bank of Ethiopia (CBE Birr).";
+  if (kind === "stripe") return "Pay internationally with Visa, Mastercard, and other cards.";
   return "Transfer using the account details below.";
 }
 
 export function requiredFieldKeyForKind(kind: PaymentGatewayKind) {
-  if (kind === "telebirr") return "short_code";
-  return "account_number";
+  if (kind === "stripe") return "secret_key";
+  return "";
 }
 
 function fieldValue(fields: PaymentGatewayField[], key: string) {
@@ -83,7 +82,7 @@ export function getPaymentGatewayFieldValue(
 }
 
 export function requiredFieldLabel(method: PaymentGatewayMethod) {
-  if (method.kind === "custom") {
+  if (method.kind !== "stripe") {
     return method.fields[0]?.label || "payment details";
   }
   const required = requiredFieldKeyForKind(method.kind);
@@ -92,9 +91,21 @@ export function requiredFieldLabel(method: PaymentGatewayMethod) {
 
 export function isPaymentGatewayMethodReady(method: PaymentGatewayMethod) {
   if (!method.enabled) return false;
-  if (method.kind === "custom") {
-    return method.fields.some((field) => field.value.trim().length > 0);
+  if (method.kind === "stripe") {
+    return Boolean(getPaymentGatewayFieldValue(method, "secret_key")?.startsWith("sk_"));
   }
-  const required = requiredFieldKeyForKind(method.kind);
-  return Boolean(getPaymentGatewayFieldValue(method, required));
+  return method.fields.some((field) => field.value.trim().length > 0);
+}
+
+export function toPublicPaymentGatewaySettings(
+  settings: CustomerPaymentOptions,
+): CustomerPaymentOptions {
+  return {
+    methods: settings.methods.map((method) => ({
+      ...method,
+      fields: isOnlineCheckoutKind(method.kind)
+        ? []
+        : method.fields.filter((field) => !isSecretPaymentFieldKey(field.key)),
+    })),
+  };
 }

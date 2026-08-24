@@ -1674,7 +1674,7 @@ export type ApiResponse<T> =
 
 export type CustomerPaymentMethodId = string;
 
-export type PaymentGatewayKind = "telebirr" | "cbe_birr" | "custom";
+export type PaymentGatewayKind = "stripe" | "custom";
 
 export type PaymentGatewayField = {
   key: string;

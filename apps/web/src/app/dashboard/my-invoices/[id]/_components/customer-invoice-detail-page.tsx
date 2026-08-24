@@ -43,6 +43,7 @@ const STATUS_BADGE_CLASS: Record<CustomerVisibleInvoiceStatus, string> = {
 const PAYMENT_METHOD_LOGOS: Record<string, string> = {
   telebirr: "/providers/telebirr.webp",
   cbe_birr: "/providers/cbe-birr.webp",
+  stripe: "/providers/stripe.svg",
 };
 
 function formatDate(value: string | null, locale: string) {

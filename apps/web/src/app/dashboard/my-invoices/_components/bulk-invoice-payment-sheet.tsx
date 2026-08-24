@@ -25,10 +25,12 @@ import {
 import {
   confirmCustomerInvoicesPayment,
   fetchCustomerPaymentOptions,
+  startStripeInvoiceCheckout,
 } from "@/lib/customer-billing-api";
 import {
   getMethodFieldValue,
   isMethodReady,
+  isOnlineCheckoutKind,
 } from "@/lib/payment-gateway";
 import { PaymentMethodLogo } from "@/components/billing/payment-method-logo";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
@@ -143,6 +145,18 @@ export function BulkInvoicePaymentSheet({
 
     setConfirming(true);
     try {
+      if (isOnlineCheckoutKind(activeMethod.kind)) {
+        const result = await startStripeInvoiceCheckout({
+          invoice_ids: invoices.map((invoice) => invoice.id),
+          payment_method: activeMethod.id,
+          success_path: "/dashboard/my-invoices",
+          cancel_path: "/dashboard/my-invoices",
+          locale,
+        });
+        window.location.assign(result.checkout_url);
+        return;
+      }
+
       const result = await confirmCustomerInvoicesPayment({
         invoice_ids: invoices.map((invoice) => invoice.id),
         payment_method: activeMethod.id,
@@ -165,39 +179,27 @@ export function BulkInvoicePaymentSheet({
     ? activeMethod.description || payCopy.customSheetDescription
     : formatMessage(bulkCopy.sheetDescription, { count: invoices.length });
 
-  const shortCode =
-    (activeMethod && getMethodFieldValue(activeMethod, "short_code")) ||
-    payCopy.merchantCodePending;
   const account =
     (activeMethod && getMethodFieldValue(activeMethod, "account_number")) ||
     payCopy.accountPending;
 
   const steps = !activeMethod
     ? []
-    : activeMethod.kind === "telebirr"
-      ? payCopy.telebirrSteps.map((step) =>
+    : activeMethod.kind === "stripe"
+      ? payCopy.stripeSteps.map((step) =>
           formatMessage(step, {
             amount: amountLabel,
             reference: referenceList,
-            short_code: shortCode,
           }),
         )
-      : activeMethod.kind === "cbe_birr"
-        ? payCopy.cbeSteps.map((step) =>
-            formatMessage(step, {
-              amount: amountLabel,
-              reference: referenceList,
-              account,
-            }),
-          )
-        : payCopy.customSteps.map((step) =>
-            formatMessage(step, {
-              amount: amountLabel,
-              reference: referenceList,
-              account,
-              method: activeMethod.name,
-            }),
-          );
+      : payCopy.customSteps.map((step) =>
+          formatMessage(step, {
+            amount: amountLabel,
+            reference: referenceList,
+            account,
+            method: activeMethod.name,
+          }),
+        );
 
   const detailRows =
     activeMethod?.fields
@@ -435,7 +437,13 @@ export function BulkInvoicePaymentSheet({
               disabled={confirming || showConfigNotice}
               onClick={() => void handleConfirmPayment()}
             >
-              {confirming ? payCopy.confirmingPayment : bulkCopy.confirmPayment}
+              {confirming
+                ? isOnlineCheckoutKind(activeMethod.kind)
+                  ? payCopy.redirectingToStripe
+                  : payCopy.confirmingPayment
+                : isOnlineCheckoutKind(activeMethod.kind)
+                  ? payCopy.payWithStripe
+                  : bulkCopy.confirmPayment}
             </Button>
             <Button
               type="button"

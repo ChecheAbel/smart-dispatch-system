@@ -21,7 +21,7 @@ import {
   adminIconBoxClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
-import { hasRequiredDetails, isMethodReady, requiredFieldLabel } from "@/lib/payment-gateway";
+import { hasRequiredDetails, isMethodReady, isSecretPaymentFieldKey, maskSecretPaymentFieldValue, requiredFieldLabel } from "@/lib/payment-gateway";
 import {
   fetchPaymentGatewaySettings,
   updatePaymentGatewaySettings,
@@ -311,7 +311,9 @@ export function PaymentGatewaySettingsPage() {
                             {field.key}
                           </dt>
                           <dd className="mt-0.5 break-all font-mono text-sm text-slate-700 dark:text-foreground">
-                            {field.value}
+                            {isSecretPaymentFieldKey(field.key)
+                              ? maskSecretPaymentFieldValue(field.value)
+                              : field.value}
                           </dd>
                         </div>
                       ))}

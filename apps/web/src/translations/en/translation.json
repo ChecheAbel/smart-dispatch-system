@@ -1033,6 +1033,7 @@
       "paymentMethods": {
         "telebirr": "Telebirr",
         "cbe_birr": "CBE Birr",
+        "stripe": "Stripe",
         "manual": "Marked paid by an administrator",
         "notRecorded": "Not recorded"
       },
@@ -1072,7 +1073,7 @@
       "noLineItems": "No trip line items on this invoice.",
       "payment": {
         "eyebrow": "Pay invoice",
-        "title": "Pay with mobile money or bank transfer",
+        "title": "Choose how to pay",
         "description": "Choose a payment method below. Always include your invoice reference so we can match your payment.",
         "loading": "Loading payment options…",
         "referenceHint": "After you pay in your app, tap the button below to mark this invoice as paid.",
@@ -1082,35 +1083,22 @@
         "merchantLabel": "Merchant",
         "accountNameLabel": "Account name",
         "accountNumberLabel": "Account number",
-        "telebirrTitle": "Telebirr",
-        "telebirrDescription": "Pay from the Telebirr app or USSD.",
-        "telebirrSheetDescription": "Send the exact amount and add the invoice reference in the payment remark.",
-        "telebirrShortCodeLabel": "Telebirr short code",
-        "telebirrUssdLabel": "USSD",
-        "cbeTitle": "CBE Birr",
-        "cbeDescription": "Transfer via Commercial Bank of Ethiopia (CBE Birr).",
-        "cbeSheetDescription": "Transfer the exact amount to the account below and use the invoice reference as the reason.",
         "customSheetDescription": "Transfer the exact amount using the details below and include your invoice reference.",
-        "telebirrSteps": [
-          "Open the Telebirr app on your phone (or dial {short_code} for USSD where available).",
-          "Choose Pay Merchant or Send Money to the short code {short_code}.",
-          "Enter {amount} as the amount.",
-          "Put {reference} in the remark or reason field, then confirm the payment."
-        ],
-        "cbeSteps": [
-          "Open CBE Birr or your CBE mobile banking app.",
-          "Start a transfer to account number {account}.",
-          "Enter {amount} as the amount.",
-          "Use {reference} as the payment reason or narration, then submit."
-        ],
         "customSteps": [
           "Open your banking or payment app for {method}.",
           "Transfer {amount} using the account details shown.",
           "Put {reference} in the remark or reason field, then confirm the payment."
         ],
+        "stripeSteps": [
+          "Select Pay with card to open Stripe Checkout.",
+          "Pay {amount} with Visa, Mastercard, or another supported international card.",
+          "You will return here after payment. Invoice {reference} is marked paid automatically."
+        ],
+        "payWithStripe": "Pay with card",
+        "redirectingToStripe": "Redirecting to Stripe…",
         "configPending": "Payment is not configured yet",
-        "merchantCodePending": "your Telebirr merchant code",
-        "accountPending": "the CBE account shown below",
+        "merchantCodePending": "the merchant code shown below",
+        "accountPending": "the account details shown below",
         "configPendingNotice": "Payment account details are not configured yet. Please contact support or pay at the dispatch office using your invoice reference.",
         "copy": "Copy",
         "copied": "Copied",
@@ -5653,6 +5641,7 @@
       "paymentMethods": {
         "telebirr": "Telebirr",
         "cbe_birr": "CBE Birr",
+        "stripe": "Stripe",
         "manual": "Marked paid by an administrator",
         "notRecorded": "Not recorded"
       },
@@ -6247,9 +6236,8 @@
       "description": "Customer invoices currently show no way to pay because nothing is configured here. Add a method to show payment instructions."
     },
     "kinds": {
-      "telebirr": "Telebirr",
-      "cbe": "CBE Birr",
-      "custom": "Custom"
+      "stripe": "Stripe",
+      "custom": "Manual transfer"
     },
     "fields": {
       "enabled": "Enabled",
@@ -6285,7 +6273,7 @@
       "createDescription": "Enter the name, logo, and key-value details for this payment method.",
       "editDescription": "Update this payment method’s details and integration key-value pairs.",
       "kind": "Method type",
-      "kindHint": "Presets fill common fields. Custom lets you define your own labels and values.",
+      "kindHint": "Manual transfer shows account details on the invoice. The customer pays outside the app, then confirms. Stripe opens card checkout.",
       "create": "Add method",
       "creating": "Adding…",
       "save": "Save method",
@@ -6299,6 +6287,17 @@
       "detailsHint": "Add your own keys and values. Keys will be used when this method is connected to a payment provider.",
       "emptyDetails": "No details yet. Add a key-value pair for this method.",
       "duplicatePreset": "This provider is already in your list.",
+      "stripeHint": "Use a Stripe secret key (sk_test_ or sk_live_) from Developers → API keys. Add webhook endpoint /api/webhooks/stripe for checkout.session.completed.",
+      "stripeDetailsTitle": "Stripe credentials",
+      "stripeDetailsHint": "These keys stay in admin settings. Customers only see the Stripe checkout button.",
+      "stripeSecretKey": "Secret key",
+      "stripeSecretKeyPlaceholder": "sk_test_... or sk_live_...",
+      "stripeSecretKeyHint": "From Stripe Dashboard → Developers → API keys. Must start with sk_test_ or sk_live_.",
+      "stripeWebhookSecret": "Webhook secret",
+      "stripeWebhookSecretPlaceholder": "whsec_...",
+      "stripeWebhookSecretHint": "Optional. Use the signing secret from the webhook endpoint in Stripe.",
+      "stripeWebhookUrl": "Webhook URL",
+      "stripeWebhookUrlHint": "In Stripe Dashboard → Developers → Webhooks, add this URL and listen for checkout.session.completed.",
       "logoHint": "Shown on customer invoices. JPG, PNG, or WEBP, up to 5 MB.",
       "logoUpload": "Upload logo",
       "logoReplace": "Replace logo",

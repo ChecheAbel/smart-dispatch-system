@@ -130,7 +130,7 @@ export const extensionSchemas = {
           type: "object",
           properties: {
             id: { type: "string" },
-            kind: { type: "string", enum: ["telebirr", "cbe_birr", "custom"] },
+            kind: { type: "string", enum: ["stripe", "custom"] },
             name: { type: "string" },
             description: { type: "string", nullable: true },
             enabled: { type: "boolean" },

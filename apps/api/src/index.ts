@@ -26,6 +26,7 @@ import { registerBookingPolicyRoutes } from "./routes/booking-policy.routes";
 import { registerContractRoutes } from "./routes/contract.routes";
 import { registerInvoiceRoutes } from "./routes/invoice.routes";
 import { registerCustomerBillingRoutes } from "./routes/customer-billing.routes";
+import { registerStripeWebhookRoutes } from "./routes/stripe-webhook.routes";
 import { registerRideRequestRoutes } from "./routes/ride-request.routes";
 import { registerAdminRideRequestRoutes } from "./routes/admin-ride-request.routes";
 import { registerDispatchOverviewRoutes } from "./routes/dispatch-overview.routes";
@@ -68,6 +69,7 @@ const port = process.env.PORT || 4000;
 
 app.use(cors());
 app.use(requestLogger);
+registerStripeWebhookRoutes(app);
 app.use(express.json());
 ensureDriverLicenseUploadDir();
 app.use("/uploads/driver-licenses", express.static(getDriverLicenseUploadDir()));

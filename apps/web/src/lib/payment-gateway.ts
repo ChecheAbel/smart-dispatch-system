@@ -5,25 +5,33 @@ import type {
   PaymentGatewaySettings,
 } from "@/lib/system-settings-api";
 
+export const PAYMENT_GATEWAY_KINDS: PaymentGatewayKind[] = ["stripe", "custom"];
+
+export function isOnlineCheckoutKind(kind: PaymentGatewayKind) {
+  return kind === "stripe";
+}
+
+export function isSecretPaymentFieldKey(key: string) {
+  return key === "secret_key" || key === "webhook_secret";
+}
+
+export function maskSecretPaymentFieldValue(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return "";
+  if (trimmed.length <= 8) return "••••••••";
+  return `${trimmed.slice(0, 7)}…${trimmed.slice(-4)}`;
+}
+
 export function createClientPaymentGatewayId(kind: PaymentGatewayKind) {
-  if (kind === "telebirr") return "telebirr";
-  if (kind === "cbe_birr") return "cbe_birr";
+  if (kind === "stripe") return "stripe";
   return `custom_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
 export function defaultFieldsForKind(kind: PaymentGatewayKind): PaymentGatewayField[] {
-  if (kind === "telebirr") {
+  if (kind === "stripe") {
     return [
-      { key: "merchant_name", label: "Merchant name", value: "" },
-      { key: "short_code", label: "Short code", value: "" },
-      { key: "ussd", label: "USSD", value: "*127#" },
-    ];
-  }
-
-  if (kind === "cbe_birr") {
-    return [
-      { key: "account_name", label: "Account name", value: "" },
-      { key: "account_number", label: "Account number", value: "" },
+      { key: "secret_key", label: "Secret key", value: "" },
+      { key: "webhook_secret", label: "Webhook secret", value: "" },
     ];
   }
 
@@ -31,20 +39,18 @@ export function defaultFieldsForKind(kind: PaymentGatewayKind): PaymentGatewayFi
 }
 
 export function defaultNameForKind(kind: PaymentGatewayKind) {
-  if (kind === "telebirr") return "Telebirr";
-  if (kind === "cbe_birr") return "CBE Birr";
-  return "Bank transfer";
+  if (kind === "stripe") return "Stripe";
+  return "Payment method";
 }
 
 export function defaultDescriptionForKind(kind: PaymentGatewayKind) {
-  if (kind === "telebirr") return "Pay from the Telebirr app or USSD.";
-  if (kind === "cbe_birr") return "Transfer via Commercial Bank of Ethiopia (CBE Birr).";
+  if (kind === "stripe") return "Pay internationally with Visa, Mastercard, and other cards.";
   return "Transfer using the account details below.";
 }
 
 export function requiredFieldKeyForKind(kind: PaymentGatewayKind) {
-  if (kind === "telebirr") return "short_code";
-  return "account_number";
+  if (kind === "stripe") return "secret_key";
+  return "";
 }
 
 export function createPaymentGatewayMethod(
@@ -71,7 +77,7 @@ export function getMethodFieldValue(method: PaymentGatewayMethod, key: string) {
 }
 
 export function requiredFieldLabel(method: PaymentGatewayMethod) {
-  if (method.kind === "custom") {
+  if (method.kind !== "stripe") {
     return method.fields[0]?.label || "payment details";
   }
   const required = requiredFieldKeyForKind(method.kind);
@@ -79,10 +85,10 @@ export function requiredFieldLabel(method: PaymentGatewayMethod) {
 }
 
 export function hasRequiredDetails(method: PaymentGatewayMethod) {
-  if (method.kind === "custom") {
-    return method.fields.some((field) => field.value.trim().length > 0);
+  if (method.kind === "stripe") {
+    return getMethodFieldValue(method, "secret_key").startsWith("sk_");
   }
-  return Boolean(getMethodFieldValue(method, requiredFieldKeyForKind(method.kind)));
+  return method.fields.some((field) => field.value.trim().length > 0);
 }
 
 export function isMethodReady(method: PaymentGatewayMethod) {
@@ -126,10 +132,17 @@ export function normalizePaymentField(
 }
 
 export function providerLogoForKind(kind: PaymentGatewayKind) {
-  if (kind === "telebirr") {
+  if (kind === "stripe") {
+    return { src: "/providers/stripe.svg", width: 140, height: 48 } as const;
+  }
+  return null;
+}
+
+export function providerLogoForMethodId(methodId: string) {
+  if (methodId === "telebirr") {
     return { src: "/providers/telebirr.webp", width: 140, height: 48 } as const;
   }
-  if (kind === "cbe_birr") {
+  if (methodId === "cbe_birr") {
     return { src: "/providers/cbe-birr.webp", width: 140, height: 48 } as const;
   }
   return null;
@@ -159,9 +172,15 @@ export function paymentMethodAssetUrl(logoUrl: string) {
   return `${base}${logoUrl.startsWith("/") ? logoUrl : `/${logoUrl}`}`;
 }
 
-export function methodLogoSrc(method: Pick<PaymentGatewayMethod, "kind" | "logo_url">) {
+export function methodLogoSrc(
+  method: Pick<PaymentGatewayMethod, "kind" | "logo_url"> & { id?: string },
+) {
   const uploaded = method.logo_url?.trim();
   if (uploaded) return paymentMethodAssetUrl(uploaded);
+  if (method.id) {
+    const byId = providerLogoForMethodId(method.id);
+    if (byId) return byId.src;
+  }
   return providerLogoForKind(method.kind)?.src ?? null;
 }
 

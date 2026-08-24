@@ -97,6 +97,38 @@ export async function confirmCustomerInvoicesPayment(
   return unwrapApiResponse<{ invoices: CustomerInvoice[] }>(data);
 }
 
+export async function startStripeInvoiceCheckout(params: {
+  invoice_ids: string[];
+  payment_method: CustomerPaymentMethodId;
+  success_path: string;
+  cancel_path: string;
+  locale?: string;
+}) {
+  const { data } = await apiClient.post(
+    "/api/me/invoices/stripe-checkout",
+    {
+      invoice_ids: params.invoice_ids,
+      payment_method: params.payment_method,
+      success_path: params.success_path,
+      cancel_path: params.cancel_path,
+    },
+    { params: { locale: params.locale } },
+  );
+  return unwrapApiResponse<{ checkout_url: string; session_id: string }>(data);
+}
+
+export async function completeStripeInvoiceCheckout(
+  sessionId: string,
+  locale?: string,
+) {
+  const { data } = await apiClient.post(
+    "/api/me/invoices/stripe-complete",
+    { session_id: sessionId },
+    { params: { locale } },
+  );
+  return unwrapApiResponse<{ invoices: CustomerInvoice[] }>(data);
+}
+
 export async function fetchMyInvoiceCount(params: Pick<FetchMyInvoicesParams, "status"> = {}) {
   const result = await fetchMyInvoices({ page: 1, limit: 1, ...params });
   return result.pagination.total;

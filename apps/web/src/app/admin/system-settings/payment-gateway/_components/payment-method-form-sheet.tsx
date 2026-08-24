@@ -2,14 +2,16 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ImageIcon, Plus, Trash2, Upload } from "lucide-react";
-import type { PaymentGatewayField, PaymentGatewayMethod } from "@/lib/system-settings-api";
+import type { PaymentGatewayField, PaymentGatewayKind, PaymentGatewayMethod } from "@/lib/system-settings-api";
 import { uploadPaymentMethodLogo } from "@/lib/system-settings-api";
-import { getAdminPaymentGatewaySettingsMessages } from "@/translations";
+import { formatMessage, getAdminPaymentGatewaySettingsMessages } from "@/translations";
+import { showErrorToast } from "@/lib/toast";
 import { adminHeadingClass, adminInputClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { AdminSelectField } from "@/components/shared/admin-form-field";
 import {
   Sheet,
   SheetContent,
@@ -20,8 +22,10 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import {
+  PAYMENT_GATEWAY_KINDS,
   createPaymentGatewayMethod,
   hasRequiredDetails,
+  isSecretPaymentFieldKey,
   methodLogoSrc,
   nextCustomFieldKey,
   normalizePaymentField,
@@ -104,26 +108,26 @@ export function PaymentMethodFormSheet({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<FormState>(emptyForm);
+  const [kind, setKind] = useState<PaymentGatewayKind>("custom");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setForm(emptyForm());
+      setKind("custom");
       setLogoFile(null);
       setLogoPreview(null);
-      setError(null);
       setSubmitting(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
     setForm(method ? formFromMethod(method) : emptyForm());
+    setKind(method?.kind ?? "custom");
     setLogoFile(null);
     setLogoPreview(null);
-    setError(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   }, [open, method]);
 
@@ -133,9 +137,26 @@ export function PaymentMethodFormSheet({
     };
   }, [logoPreview]);
 
+  function handleKindChange(nextKind: PaymentGatewayKind) {
+    setKind(nextKind);
+    const preset = createPaymentGatewayMethod(nextKind);
+    setForm((current) => ({
+      ...current,
+      name: preset.name,
+      description: preset.description ?? "",
+      fields:
+        preset.fields.length > 0
+          ? preset.fields.map((field) => ({
+              id: field.key,
+              key: field.key,
+              value: "",
+            }))
+          : [emptyPair()],
+    }));
+  }
+
   function updateForm<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
-    setError(null);
   }
 
   function updatePair(id: string, patch: Partial<Pick<FormPair, "key" | "value">>) {
@@ -143,7 +164,31 @@ export function PaymentMethodFormSheet({
       ...current,
       fields: current.fields.map((field) => (field.id === id ? { ...field, ...patch } : field)),
     }));
-    setError(null);
+  }
+
+  function fieldValueByKey(key: string) {
+    return form.fields.find((field) => field.key === key)?.value ?? "";
+  }
+
+  function setFieldValueByKey(key: string, value: string) {
+    setForm((current) => {
+      const existing = current.fields.some((field) => field.key === key);
+      if (existing) {
+        return {
+          ...current,
+          fields: current.fields.map((field) =>
+            field.key === key ? { ...field, value } : field,
+          ),
+        };
+      }
+      return {
+        ...current,
+        fields: [
+          ...current.fields.filter((field) => field.key.trim()),
+          { id: key, key, value },
+        ],
+      };
+    });
   }
 
   function addPair() {
@@ -158,20 +203,25 @@ export function PaymentMethodFormSheet({
       ...current,
       fields: current.fields.filter((field) => field.id !== id),
     }));
-    setError(null);
   }
 
   function handleLogoSelected(file: File | null) {
     if (!file) return;
 
     if (!isAllowedLogoType(file)) {
-      setError(formCopy.logoInvalid);
+      showErrorToast({
+        title: copy.toast.requiredField.title,
+        description: formCopy.logoInvalid,
+      });
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
 
     if (file.size > PAYMENT_METHOD_LOGO_MAX_BYTES) {
-      setError(formCopy.logoTooLarge);
+      showErrorToast({
+        title: copy.toast.requiredField.title,
+        description: formCopy.logoTooLarge,
+      });
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -181,7 +231,6 @@ export function PaymentMethodFormSheet({
       return URL.createObjectURL(file);
     });
     setLogoFile(file);
-    setError(null);
   }
 
   function removeLogo() {
@@ -196,16 +245,24 @@ export function PaymentMethodFormSheet({
 
   const previewSrc =
     logoPreview ??
-    (form.logo_url ? methodLogoSrc({ kind: "custom", logo_url: form.logo_url }) : null);
+    methodLogoSrc({ kind, logo_url: form.logo_url, id: method?.id });
   const hasLogo = Boolean(previewSrc);
+  const isStripe = kind === "stripe";
+  const apiBase = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000").replace(
+    /\/+$/,
+    "",
+  );
+  const stripeWebhookUrl = `${apiBase || "http://localhost:4000"}/api/webhooks/stripe`;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError(null);
 
     const name = form.name.trim();
     if (!name) {
-      setError(formCopy.nameRequired);
+      showErrorToast({
+        title: copy.toast.nameRequired.title,
+        description: copy.toast.nameRequired.description,
+      });
       return;
     }
 
@@ -216,21 +273,35 @@ export function PaymentMethodFormSheet({
     for (const pair of filledPairs) {
       const normalized = normalizePaymentField(pair.key, pair.value);
       if (!normalized) {
-        setError(formCopy.fieldKeyRequired);
+        showErrorToast({
+          title: copy.toast.requiredField.title,
+          description: formCopy.fieldKeyRequired,
+        });
         return;
       }
       if (seenKeys.has(normalized.key)) {
-        setError(formCopy.duplicateFieldKey);
+        showErrorToast({
+          title: copy.toast.requiredField.title,
+          description: formCopy.duplicateFieldKey,
+        });
         return;
       }
       seenKeys.add(normalized.key);
       fields.push(normalized);
     }
 
+    if (!isEdit && kind === "stripe" && existingMethods.some((item) => item.kind === "stripe")) {
+      showErrorToast({
+        title: copy.toast.duplicatePreset.title,
+        description: copy.toast.duplicatePreset.description,
+      });
+      return;
+    }
+
     setSubmitting(true);
     try {
       const logoUrl = logoFile ? await uploadPaymentMethodLogo(logoFile) : form.logo_url;
-      const nextMethod = createPaymentGatewayMethod("custom", {
+      const nextMethod = createPaymentGatewayMethod(kind, {
         id: method?.id,
         name,
         description: form.description.trim() || null,
@@ -241,14 +312,25 @@ export function PaymentMethodFormSheet({
       });
 
       if (nextMethod.enabled && !hasRequiredDetails(nextMethod)) {
-        setError(formCopy.detailsRequired);
+        showErrorToast({
+          title: copy.toast.requiredField.title,
+          description:
+            kind === "stripe"
+              ? formatMessage(copy.toast.requiredField.description, {
+                  field: formCopy.stripeSecretKey,
+                })
+              : formCopy.detailsRequired,
+        });
         return;
       }
 
       await onSubmit(nextMethod);
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : copy.toast.updateFailed.description);
+      showErrorToast({
+        title: copy.toast.updateFailed.title,
+        description: err instanceof Error ? err.message : copy.toast.updateFailed.description,
+      });
     } finally {
       setSubmitting(false);
     }
@@ -271,6 +353,82 @@ export function PaymentMethodFormSheet({
 
         <form id={formId} onSubmit={(event) => void handleSubmit(event)} className="space-y-6 px-6 py-5">
           <section className="space-y-4">
+            <AdminSelectField
+              id="payment-method-kind"
+              label={formCopy.kind}
+              hint={isStripe ? formCopy.stripeHint : formCopy.kindHint}
+              value={kind}
+              disabled={submitting || isEdit}
+              items={PAYMENT_GATEWAY_KINDS.map((item) => ({
+                value: item,
+                label: copy.kinds[item],
+              }))}
+              onValueChange={(value) => {
+                if (value === "stripe" || value === "custom") {
+                  handleKindChange(value);
+                }
+              }}
+            />
+
+            {isStripe ? (
+              <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-4">
+                <div>
+                  <p className={cn("text-sm font-semibold", adminHeadingClass)}>
+                    {formCopy.stripeDetailsTitle}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                    {formCopy.stripeDetailsHint}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="stripe-secret-key">{formCopy.stripeSecretKey}</Label>
+                  <Input
+                    id="stripe-secret-key"
+                    type="password"
+                    value={fieldValueByKey("secret_key")}
+                    onChange={(event) => setFieldValueByKey("secret_key", event.target.value)}
+                    placeholder={formCopy.stripeSecretKeyPlaceholder}
+                    className={adminInputClass}
+                    disabled={submitting}
+                    autoComplete="new-password"
+                    spellCheck={false}
+                  />
+                  <p className="text-xs leading-relaxed text-slate-500">
+                    {formCopy.stripeSecretKeyHint}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="stripe-webhook-secret">{formCopy.stripeWebhookSecret}</Label>
+                  <Input
+                    id="stripe-webhook-secret"
+                    type="password"
+                    value={fieldValueByKey("webhook_secret")}
+                    onChange={(event) => setFieldValueByKey("webhook_secret", event.target.value)}
+                    placeholder={formCopy.stripeWebhookSecretPlaceholder}
+                    className={adminInputClass}
+                    disabled={submitting}
+                    autoComplete="new-password"
+                    spellCheck={false}
+                  />
+                  <p className="text-xs leading-relaxed text-slate-500">
+                    {formCopy.stripeWebhookSecretHint}
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="stripe-webhook-url">{formCopy.stripeWebhookUrl}</Label>
+                  <Input
+                    id="stripe-webhook-url"
+                    value={stripeWebhookUrl}
+                    readOnly
+                    className={cn(adminInputClass, "font-mono text-xs")}
+                  />
+                  <p className="text-xs leading-relaxed text-slate-500">
+                    {formCopy.stripeWebhookUrlHint}
+                  </p>
+                </div>
+              </div>
+            ) : null}
+
             <div className="space-y-2">
               <Label htmlFor="payment-method-name">{copy.fields.name}</Label>
               <Input
@@ -371,11 +529,16 @@ export function PaymentMethodFormSheet({
             </div>
           </section>
 
+          {isStripe ? null : (
           <section className="space-y-3">
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className={cn("text-sm font-semibold", adminHeadingClass)}>{copy.fields.details}</p>
-                <p className="mt-1 text-xs leading-relaxed text-slate-500">{formCopy.detailsHint}</p>
+                <p className={cn("text-sm font-semibold", adminHeadingClass)}>
+                  {copy.fields.details}
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                  {formCopy.detailsHint}
+                </p>
               </div>
               <Button
                 type="button"
@@ -441,6 +604,7 @@ export function PaymentMethodFormSheet({
                           className={cn(adminInputClass, "h-9")}
                           disabled={submitting}
                           autoComplete="off"
+                          type={isSecretPaymentFieldKey(field.key) ? "password" : "text"}
                         />
                         <Button
                           type="button"
@@ -460,12 +624,7 @@ export function PaymentMethodFormSheet({
               </div>
             )}
           </section>
-
-          {error ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
-            </div>
-          ) : null}
+          )}
         </form>
 
         <SheetFooter className="mt-auto flex-row justify-end gap-2 border-t border-slate-100 bg-white px-6 py-4">

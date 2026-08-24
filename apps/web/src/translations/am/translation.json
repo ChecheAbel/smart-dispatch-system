@@ -1072,7 +1072,7 @@
       "noLineItems": "በዚህ ደረሰኝ ላይ የጉዞ ዝርዝሮች የሉም።",
       "payment": {
         "eyebrow": "ደረሰኝ ይክፈሉ",
-        "title": "በሞባይል ገንዘብ ወይም በባንክ ይክፈሉ",
+        "title": "እንዴት እንደሚከፍሉ ይምረጡ",
         "description": "ከታች ያለውን የክፍያ ዘዴ ይምረጡ። ክፍያዎን ለማመሳሰል የደረሰኝ ማጣቀሻ ሁልጊዜ ያስገቡ።",
         "loading": "የክፍያ አማራጮች በመጫን ላይ…",
         "referenceHint": "በመተግበሪያዎ ከከፈሉ በኋላ ደረሰኙ እንደተከፈለ ለማስቀመጥ ከታች ያለውን ቁልፍ ይጫኑ።",
@@ -1082,35 +1082,22 @@
         "merchantLabel": "ነጋዴ",
         "accountNameLabel": "የሂሳብ ስም",
         "accountNumberLabel": "የሂሳብ ቁጥር",
-        "telebirrTitle": "ቴሌብር",
-        "telebirrDescription": "ከቴሌብር መተግበሪያ ወይም USSD ይክፈሉ።",
-        "telebirrSheetDescription": "ትክክለኛውን መጠን ይላኩ እና በክፍያ ማስታወሻ ውስጥ የደረሰኝ ማጣቀሻ ያስገቡ።",
-        "telebirrShortCodeLabel": "የቴሌብር አጭር ኮድ",
-        "telebirrUssdLabel": "USSD",
-        "cbeTitle": "ሲቢኢ ብር",
-        "cbeDescription": "በኢትዮጵያ ንግድ ባንክ (ሲቢኢ ብር) ያስተላልፉ።",
-        "cbeSheetDescription": "ትክክለኛውን መጠን ወደ ከታች ያለው ሂሳብ ያስተላልፉ እና ማጣቀሻውን እንደ ምክንያት ይጠቀሙ።",
         "customSheetDescription": "ትክክለኛውን መጠን በከታች ባሉ ዝርዝሮች በመጠቀም ያስተላልፉ እና የደረሰኝ ማጣቀሻዎን ያካትቱ።",
-        "telebirrSteps": [
-          "በስልክዎ ላይ የቴሌብር መተግበሪያ ይክፈቱ (ወይም USSD {short_code} ይደውሉ)።",
-          "ነጋዴ ይክፈሉ ወይም ወደ አጭር ኮድ {short_code} ገንዘብ ይላኩ።",
-          "መጠኑ {amount} መሆኑን ያረጋግጡ።",
-          "በማስታወሻ ውስጥ {reference} ያስገቡና ክፍያውን ያረጋግጡ።"
-        ],
-        "cbeSteps": [
-          "ሲቢኢ ብር ወይም የሲቢኢ ሞባይል ባንኪንግ መተግበሪያ ይክፈቱ።",
-          "ወደ ሂሳብ ቁጥር {account} ማስተላለፍ ይጀምሩ።",
-          "መጠኑ {amount} መሆኑን ያረጋግጡ።",
-          "ምክንያት/አጭር ማብራሪያ ላይ {reference} ይጠቀሙና ይላኩ።"
-        ],
         "customSteps": [
           "ለ {method} የባንክ ወይም የክፍያ መተግበሪያዎን ይክፈቱ።",
           "በተሰጡት የሂሳብ ዝርዝሮች {amount} ያስተላልፉ።",
           "በማስታወሻ ውስጥ {reference} ያስገቡና ክፍያውን ያረጋግጡ።"
         ],
+        "stripeSteps": [
+          "በካርድ ይክፈሉ የሚለውን በመምረጥ ወደ Stripe Checkout ይሂዱ።",
+          "{amount} በቪዛ፣ ማስተርካርድ ወይም በሌላ ዓለም አቀፍ ካርድ ይክፈሉ።",
+          "ከክፍያ በኋላ ወደዚህ ይመለሳሉ። ደረሰኝ {reference} በራሱ እንደተከፈለ ይመዘገባል።"
+        ],
+        "payWithStripe": "በካርድ ይክፈሉ",
+        "redirectingToStripe": "ወደ Stripe በመሄድ ላይ…",
         "configPending": "ክፍያ ገና አልተዋቀረም",
-        "merchantCodePending": "የቴሌብር አጭር ኮድዎ",
-        "accountPending": "ከታች የተሰጠው የሲቢኢ ሂሳብ",
+        "merchantCodePending": "ከታች የተሰጠው የነጋዴ ኮድ",
+        "accountPending": "ከታች የተሰጡት የሂሳብ ዝርዝሮች",
         "configPendingNotice": "የክፍያ ሂሳብ ዝርዝሮች ገና አልተዋቀሩም። እባክዎ ድጋፍ ያግኙ ወይም የደረሰኝ ማጣቀሻ በመጠቀም በዲስፓች ቢሮ ይክፈሉ።",
         "copy": "ቅዳ",
         "copied": "ተቀድቷል",
@@ -6247,9 +6234,8 @@
       "description": "እዚህ ምንም ስላልተዋቀረ የደንበኛ ደረሰኞች አሁን የክፍያ መንገድ አያሳዩም። የክፍያ መመሪያ ለማሳየት ዘዴ ያክሉ።"
     },
     "kinds": {
-      "telebirr": "ቴሌብር",
-      "cbe": "CBE Birr",
-      "custom": "ብጁ"
+      "stripe": "ስትራይፕ",
+      "custom": "በእጅ ማስተላለፍ"
     },
     "fields": {
       "enabled": "ነቅቷል",
@@ -6285,7 +6271,7 @@
       "createDescription": "የዚህን የክፍያ ዘዴ ስም፣ አርማ እና የቁልፍ-እሴት ዝርዝሮች ያስገቡ።",
       "editDescription": "የዚህን የክፍያ ዘዴ ዝርዝሮች እና የውህደት ቁልፍ-እሴት ጥንዶች ያዘምኑ።",
       "kind": "የዘዴ አይነት",
-      "kindHint": "ቅድመ-ቅንብሮች የተለመዱ መስኮችን ይሞላሉ። ብጁ የራስዎን መለያዎች እና እሴቶች እንዲገልጹ ያስችላል።",
+      "kindHint": "በእጅ ማስተላለፍ በደረሰኝ ላይ የሂሳብ ዝርዝሮችን ያሳያል። ደንበኛው ከመተግበሪያው ውጭ ይከፍላልና ያረጋግጣል። ስትራይፕ የካርድ ክፍያ ይከፍታል።",
       "create": "ዘዴ አክል",
       "creating": "በመጨመር ላይ…",
       "save": "ዘዴን አስቀምጥ",
@@ -6299,6 +6285,17 @@
       "detailsHint": "የራስዎን ቁልፎች እና እሴቶች ያክሉ። ቁልፎቹ ይህ ዘዴ ከክፍያ አቅራቢ ጋር ሲገናኝ ይጠቀማሉ።",
       "emptyDetails": "እስካሁን ዝርዝር የለም። ለዚህ ዘዴ የቁልፍ-እሴት ጥንድ ያክሉ።",
       "duplicatePreset": "ይህ አቅራቢ አስቀድሞ በዝርዝርዎ ውስጥ አለ።",
+      "stripeHint": "ከ Stripe Developers → API keys የሚገኝ secret key (sk_test_ ወይም sk_live_) ያስገቡ። ለ checkout.session.completed የwebhook መንገድ /api/webhooks/stripe ያክሉ።",
+      "stripeDetailsTitle": "የስትራይፕ መረጃዎች",
+      "stripeDetailsHint": "እነዚህ ቁልፎች በአስተዳዳሪ ቅንብሮች ውስጥ ይቀመጣሉ። ደንበኞች የስትራይፕ ክፍያ ቁልፍን ብቻ ያያሉ።",
+      "stripeSecretKey": "ሚስጢራዊ ቁልፍ",
+      "stripeSecretKeyPlaceholder": "sk_test_... ወይም sk_live_...",
+      "stripeSecretKeyHint": "ከ Stripe Dashboard → Developers → API keys። በ sk_test_ ወይም sk_live_ መጀመር አለበት።",
+      "stripeWebhookSecret": "የWebhook ሚስጢር",
+      "stripeWebhookSecretPlaceholder": "whsec_...",
+      "stripeWebhookSecretHint": "አማራጭ። ከ Stripe webhook endpoint የሚገኘውን signing secret ይጠቀሙ።",
+      "stripeWebhookUrl": "የWebhook አድራሻ",
+      "stripeWebhookUrlHint": "በ Stripe Dashboard → Developers → Webhooks ይህን URL ያክሉ እና checkout.session.completed ያዳምጡ።",
       "logoHint": "ደንበኞች በደረሰኝ ላይ የሚያዩት አርማ። JPG፣ PNG ወይም WEBP፣ እስከ 5 MB።",
       "logoUpload": "አርማ ስቀል",
       "logoReplace": "አርማ ቀይር",
