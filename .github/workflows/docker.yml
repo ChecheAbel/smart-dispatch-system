@@ -1,4 +1,4 @@
-name: Docker
+name: Deploy
 
 on:
   push:
@@ -6,33 +6,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Require deploy secrets
-        env:
-          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
-          APP_URL: ${{ secrets.APP_URL }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
-          NOTIFICATION_BROADCAST_URL: ${{ secrets.NOTIFICATION_BROADCAST_URL }}
-          NOTIFICATION_APPLICATION_ID: ${{ secrets.NOTIFICATION_APPLICATION_ID }}
-          ETRADE_REGISTRATION_URL: ${{ secrets.ETRADE_REGISTRATION_URL }}
-        run: |
-          missing=0
-          for name in NEXT_PUBLIC_API_URL APP_URL JWT_SECRET POSTGRES_PASSWORD NOTIFICATION_BROADCAST_URL NOTIFICATION_APPLICATION_ID ETRADE_REGISTRATION_URL; do
-            eval "value=\${$name}"
-            if [ -z "$value" ]; then
-              echo "Add repository secret $name (Settings → Secrets and variables → Actions)." >&2
-              missing=1
-            fi
-          done
-          exit $missing
-
-      - name: Build images
+      - name: Deploy to DigitalOcean Droplet
+        uses: appleboy/ssh-action@v1.0.3
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
           NEXT_PUBLIC_REALTIME_URL: ${{ secrets.NEXT_PUBLIC_REALTIME_URL || secrets.NEXT_PUBLIC_API_URL }}
@@ -42,4 +21,26 @@ jobs:
           NOTIFICATION_BROADCAST_URL: ${{ secrets.NOTIFICATION_BROADCAST_URL }}
           NOTIFICATION_APPLICATION_ID: ${{ secrets.NOTIFICATION_APPLICATION_ID }}
           ETRADE_REGISTRATION_URL: ${{ secrets.ETRADE_REGISTRATION_URL }}
-        run: docker compose build
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          envs: NEXT_PUBLIC_API_URL,NEXT_PUBLIC_REALTIME_URL,APP_URL,JWT_SECRET,POSTGRES_PASSWORD,NOTIFICATION_BROADCAST_URL,NOTIFICATION_APPLICATION_ID,ETRADE_REGISTRATION_URL
+          script: |
+            cd ~/app
+            git pull origin main
+
+            # Generate the server .env dynamically from GitHub Secrets
+            cat <<EOF > .env
+            NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+            NEXT_PUBLIC_REALTIME_URL=$NEXT_PUBLIC_REALTIME_URL
+            APP_URL=$APP_URL
+            JWT_SECRET=$JWT_SECRET
+            POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+            NOTIFICATION_BROADCAST_URL=$NOTIFICATION_BROADCAST_URL
+            NOTIFICATION_APPLICATION_ID=$NOTIFICATION_APPLICATION_ID
+            ETRADE_REGISTRATION_URL=$ETRADE_REGISTRATION_URL
+            EOF
+
+            # Build and deploy all services
+            docker compose up -d --build --remove-orphans
