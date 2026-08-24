@@ -15,6 +15,10 @@ export function isOnlineCheckoutKind(kind: PaymentGatewayKind) {
   return kind === "stripe";
 }
 
+export function isStripeCheckoutMethod(method: Pick<PaymentGatewayMethod, "kind" | "id">) {
+  return method.kind === "stripe" || method.id === "stripe";
+}
+
 export function createPaymentGatewayId(kind: PaymentGatewayKind) {
   if (kind === "stripe") return "stripe";
   return `custom_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -91,7 +95,8 @@ export function requiredFieldLabel(method: PaymentGatewayMethod) {
 
 export function isPaymentGatewayMethodReady(method: PaymentGatewayMethod) {
   if (!method.enabled) return false;
-  if (method.kind === "stripe") {
+  if (isStripeCheckoutMethod(method)) {
+    if (method.fields.length === 0) return true;
     return Boolean(getPaymentGatewayFieldValue(method, "secret_key")?.startsWith("sk_"));
   }
   return method.fields.some((field) => field.value.trim().length > 0);
@@ -103,7 +108,8 @@ export function toPublicPaymentGatewaySettings(
   return {
     methods: settings.methods.map((method) => ({
       ...method,
-      fields: isOnlineCheckoutKind(method.kind)
+      kind: isStripeCheckoutMethod(method) ? "stripe" : method.kind,
+      fields: isStripeCheckoutMethod(method)
         ? []
         : method.fields.filter((field) => !isSecretPaymentFieldKey(field.key)),
     })),

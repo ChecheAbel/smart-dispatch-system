@@ -25,7 +25,7 @@ import { getOptionalString } from "../utils/validation";
 import { handleRouteError, sendError, sendPaginatedSuccess, sendSuccess } from "../utils/response";
 import { getPaymentGatewaySettings } from "../models/app-setting.model";
 import {
-  isOnlineCheckoutKind,
+  isStripeCheckoutMethod,
   toPublicPaymentGatewaySettings,
 } from "../config/customer-payment-options";
 import {
@@ -358,7 +358,7 @@ router.post(
       }
 
       const method = configuredMethod(paymentMethod);
-      if (method && isOnlineCheckoutKind(method.kind)) {
+      if (method && isStripeCheckoutMethod(method)) {
         return sendError(res, "Pay these invoices with Stripe Checkout.", 400);
       }
 
@@ -394,7 +394,7 @@ router.post(
       }
 
       const method = configuredMethod(paymentMethod);
-      if (method && isOnlineCheckoutKind(method.kind)) {
+      if (method && isStripeCheckoutMethod(method)) {
         return sendError(res, "Pay this invoice with Stripe Checkout.", 400);
       }
 

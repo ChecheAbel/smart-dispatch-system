@@ -11,6 +11,10 @@ export function isOnlineCheckoutKind(kind: PaymentGatewayKind) {
   return kind === "stripe";
 }
 
+export function isStripeCheckoutMethod(method: Pick<PaymentGatewayMethod, "kind" | "id">) {
+  return method.kind === "stripe" || method.id === "stripe";
+}
+
 export function isSecretPaymentFieldKey(key: string) {
   return key === "secret_key" || key === "webhook_secret";
 }
@@ -85,14 +89,20 @@ export function requiredFieldLabel(method: PaymentGatewayMethod) {
 }
 
 export function hasRequiredDetails(method: PaymentGatewayMethod) {
-  if (method.kind === "stripe") {
+  if (isStripeCheckoutMethod(method)) {
     return getMethodFieldValue(method, "secret_key").startsWith("sk_");
   }
   return method.fields.some((field) => field.value.trim().length > 0);
 }
 
 export function isMethodReady(method: PaymentGatewayMethod) {
-  return method.enabled && hasRequiredDetails(method);
+  if (!method.enabled) return false;
+  if (isStripeCheckoutMethod(method)) {
+    // Customer payment-options omit Stripe secrets. An enabled Stripe method is ready to check out.
+    if (method.fields.length === 0) return true;
+    return getMethodFieldValue(method, "secret_key").startsWith("sk_");
+  }
+  return hasRequiredDetails(method);
 }
 
 export function nextCustomFieldKey() {

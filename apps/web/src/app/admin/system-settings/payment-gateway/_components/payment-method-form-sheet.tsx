@@ -290,7 +290,12 @@ export function PaymentMethodFormSheet({
       fields.push(normalized);
     }
 
-    if (!isEdit && kind === "stripe" && existingMethods.some((item) => item.kind === "stripe")) {
+    const looksLikeStripe =
+      kind === "stripe" ||
+      fields.some((field) => field.key === "secret_key" && field.value.trim().startsWith("sk_"));
+    const nextKind: PaymentGatewayKind = looksLikeStripe ? "stripe" : kind;
+
+    if (!isEdit && nextKind === "stripe" && existingMethods.some((item) => item.kind === "stripe" || item.id === "stripe")) {
       showErrorToast({
         title: copy.toast.duplicatePreset.title,
         description: copy.toast.duplicatePreset.description,
@@ -301,8 +306,8 @@ export function PaymentMethodFormSheet({
     setSubmitting(true);
     try {
       const logoUrl = logoFile ? await uploadPaymentMethodLogo(logoFile) : form.logo_url;
-      const nextMethod = createPaymentGatewayMethod(kind, {
-        id: method?.id,
+      const nextMethod = createPaymentGatewayMethod(nextKind, {
+        id: nextKind === "stripe" ? "stripe" : method?.id,
         name,
         description: form.description.trim() || null,
         enabled: form.enabled,
@@ -315,7 +320,7 @@ export function PaymentMethodFormSheet({
         showErrorToast({
           title: copy.toast.requiredField.title,
           description:
-            kind === "stripe"
+            nextKind === "stripe"
               ? formatMessage(copy.toast.requiredField.description, {
                   field: formCopy.stripeSecretKey,
                 })
@@ -358,7 +363,7 @@ export function PaymentMethodFormSheet({
               label={formCopy.kind}
               hint={isStripe ? formCopy.stripeHint : formCopy.kindHint}
               value={kind}
-              disabled={submitting || isEdit}
+              disabled={submitting || (isEdit && kind === "stripe")}
               items={PAYMENT_GATEWAY_KINDS.map((item) => ({
                 value: item,
                 label: copy.kinds[item],

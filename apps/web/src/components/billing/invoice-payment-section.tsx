@@ -27,7 +27,7 @@ import { confirmCustomerInvoicePayment, completeStripeInvoiceCheckout, fetchCust
 import {
   getMethodFieldValue,
   isMethodReady,
-  isOnlineCheckoutKind,
+  isStripeCheckoutMethod,
 } from "@/lib/payment-gateway";
 import { PaymentMethodLogo } from "@/components/billing/payment-method-logo";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
@@ -55,7 +55,7 @@ function buildSteps(
   amountLabel: string,
   reference: string,
 ) {
-  if (method.kind === "stripe") {
+  if (isStripeCheckoutMethod(method)) {
     return payCopy.stripeSteps.map((step) =>
       formatMessage(step, {
         amount: amountLabel,
@@ -164,7 +164,7 @@ export function InvoicePaymentSection({ invoice, locale, onInvoiceUpdated }: Inv
 
     setConfirming(true);
     try {
-      if (isOnlineCheckoutKind(activeMethod.kind)) {
+      if (isStripeCheckoutMethod(activeMethod)) {
         const path = `/dashboard/my-invoices/${invoice.id}`;
         const result = await startStripeInvoiceCheckout({
           invoice_ids: [invoice.id],
@@ -374,10 +374,10 @@ export function InvoicePaymentSection({ invoice, locale, onInvoiceUpdated }: Inv
                   onClick={() => void handleConfirmPayment()}
                 >
                   {confirming
-                    ? isOnlineCheckoutKind(activeMethod.kind)
+                    ? isStripeCheckoutMethod(activeMethod)
                       ? payCopy.redirectingToStripe
                       : payCopy.confirmingPayment
-                    : isOnlineCheckoutKind(activeMethod.kind)
+                    : isStripeCheckoutMethod(activeMethod)
                       ? payCopy.payWithStripe
                       : payCopy.confirmPayment}
                 </Button>

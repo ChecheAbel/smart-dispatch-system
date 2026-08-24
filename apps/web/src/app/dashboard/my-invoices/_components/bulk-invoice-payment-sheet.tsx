@@ -30,7 +30,7 @@ import {
 import {
   getMethodFieldValue,
   isMethodReady,
-  isOnlineCheckoutKind,
+  isStripeCheckoutMethod,
 } from "@/lib/payment-gateway";
 import { PaymentMethodLogo } from "@/components/billing/payment-method-logo";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
@@ -145,7 +145,7 @@ export function BulkInvoicePaymentSheet({
 
     setConfirming(true);
     try {
-      if (isOnlineCheckoutKind(activeMethod.kind)) {
+      if (isStripeCheckoutMethod(activeMethod)) {
         const result = await startStripeInvoiceCheckout({
           invoice_ids: invoices.map((invoice) => invoice.id),
           payment_method: activeMethod.id,
@@ -185,7 +185,7 @@ export function BulkInvoicePaymentSheet({
 
   const steps = !activeMethod
     ? []
-    : activeMethod.kind === "stripe"
+    : isStripeCheckoutMethod(activeMethod)
       ? payCopy.stripeSteps.map((step) =>
           formatMessage(step, {
             amount: amountLabel,
@@ -438,10 +438,10 @@ export function BulkInvoicePaymentSheet({
               onClick={() => void handleConfirmPayment()}
             >
               {confirming
-                ? isOnlineCheckoutKind(activeMethod.kind)
+                ? isStripeCheckoutMethod(activeMethod)
                   ? payCopy.redirectingToStripe
                   : payCopy.confirmingPayment
-                : isOnlineCheckoutKind(activeMethod.kind)
+                : isStripeCheckoutMethod(activeMethod)
                   ? payCopy.payWithStripe
                   : bulkCopy.confirmPayment}
             </Button>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { CircleAlert, CircleCheck, Clock3, Eye, MoreHorizontal, Receipt, Wallet } from "lucide-react";
 import type { CustomerInvoice, CustomerVisibleInvoiceStatus } from "@smart-dispatch/types";
@@ -36,10 +36,10 @@ import {
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
 import { USER_DASHBOARD_PATH } from "@/lib/auth-paths";
-import { fetchMyInvoices } from "@/lib/customer-billing-api";
+import { completeStripeInvoiceCheckout, fetchMyInvoices } from "@/lib/customer-billing-api";
 import { invoiceListedAmount } from "@/lib/invoice-amounts";
 import { PERMISSIONS } from "@/lib/permissions";
-import { showErrorToast } from "@/lib/toast";
+import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { formatMessage, getCustomerInvoicesMessages } from "@/translations";
 import { cn } from "@/lib/utils";
 import { formatContractTermRange } from "@/app/dashboard/_components/ride-requests/ride-request-utils";
@@ -151,6 +151,37 @@ export function MyInvoicesPage() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [selectedById, setSelectedById] = useState<Map<string, CustomerInvoice>>(new Map());
   const [paySheetOpen, setPaySheetOpen] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("checkout") !== "success") return;
+    const sessionId = params.get("session_id");
+    if (!sessionId) return;
+
+    let cancelled = false;
+    void (async () => {
+      try {
+        await completeStripeInvoiceCheckout(sessionId, locale);
+        if (!cancelled) {
+          showSuccessToast({ title: copy.detail.payment.paymentConfirmed });
+          setRefreshKey((value) => value + 1);
+        }
+      } catch {
+        if (!cancelled) {
+          showErrorToast({ title: copy.detail.payment.paymentConfirmFailed });
+        }
+      } finally {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("checkout");
+        url.searchParams.delete("session_id");
+        window.history.replaceState({}, "", `${url.pathname}${url.search}`);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [copy.detail.payment.paymentConfirmFailed, copy.detail.payment.paymentConfirmed, locale]);
 
   const selectedInvoices = useMemo(() => [...selectedById.values()], [selectedById]);
   const selectedKeys = useMemo(() => new Set(selectedById.keys()), [selectedById]);

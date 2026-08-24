@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import type { CustomerPaymentMethodId, PaymentGatewayMethod } from "@smart-dispatch/types";
 import {
   getPaymentGatewayFieldValue,
-  isOnlineCheckoutKind,
+  isStripeCheckoutMethod,
   isPaymentGatewayMethodReady,
 } from "../config/customer-payment-options";
 import { toCustomerInvoices } from "../mappers/customer-billing.mapper";
@@ -78,7 +78,7 @@ function configuredStripeMethod(methodId: string) {
   const method = getPaymentGatewaySettings().methods.find(
     (item) => item.id === methodId && item.enabled,
   );
-  if (!method || !isOnlineCheckoutKind(method.kind) || !isPaymentGatewayMethodReady(method)) {
+  if (!method || !isStripeCheckoutMethod(method) || !isPaymentGatewayMethodReady(method)) {
     throw new Error("STRIPE_NOT_CONFIGURED");
   }
   return method;
@@ -214,7 +214,7 @@ export async function completeStripeInvoiceCheckoutSession(input: {
   }
 
   const stripeMethods = getPaymentGatewaySettings().methods.filter(
-    (method) => method.kind === "stripe" && getPaymentGatewayFieldValue(method, "secret_key"),
+    (method) => isStripeCheckoutMethod(method) && getPaymentGatewayFieldValue(method, "secret_key"),
   );
   if (stripeMethods.length === 0) {
     throw new Error("STRIPE_NOT_CONFIGURED");
@@ -246,7 +246,7 @@ export async function handleStripeWebhook(rawBody: Buffer, signature: string | u
   }
 
   const stripeMethods = getPaymentGatewaySettings().methods.filter(
-    (method) => method.kind === "stripe",
+    (method) => isStripeCheckoutMethod(method),
   );
   if (stripeMethods.length === 0) {
     throw new Error("STRIPE_NOT_CONFIGURED");

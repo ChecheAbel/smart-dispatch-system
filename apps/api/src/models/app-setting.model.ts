@@ -13,6 +13,7 @@ import {
   defaultFieldsForKind,
   defaultNameForKind,
   getPaymentGatewayDefaultsFromEnv,
+  isSecretPaymentFieldKey,
 } from "../config/customer-payment-options";
 
 export const APP_SETTING_KEYS = {
@@ -113,7 +114,7 @@ export function getVatSettings() {
 }
 
 export function getPaymentGatewaySettings() {
-  return cachedPaymentGateway;
+  return parsePaymentGatewayValue(cachedPaymentGateway, getPaymentGatewayDefaultsFromEnv());
 }
 
 function toPositiveInteger(
@@ -246,6 +247,23 @@ function parseGatewayKind(value: unknown): PaymentGatewayKind {
   return "custom";
 }
 
+function looksLikeStripeMethod(record: Record<string, unknown>, fields: PaymentGatewayField[]) {
+  if (parseGatewayKind(record.kind) === "stripe") return true;
+  if (typeof record.id === "string" && record.id.trim() === "stripe") return true;
+  return fields.some((field) => field.key === "secret_key" && field.value.trim().startsWith("sk_"));
+}
+
+function mergeStripeFields(fields: PaymentGatewayField[]) {
+  const byKey = new Map(fields.map((field) => [field.key, field]));
+  const merged = defaultFieldsForKind("stripe").map((field) => byKey.get(field.key) ?? field);
+  for (const field of fields) {
+    if (!merged.some((item) => item.key === field.key)) {
+      merged.push(field);
+    }
+  }
+  return merged;
+}
+
 function parseGatewayFields(value: unknown, kind: PaymentGatewayKind): PaymentGatewayField[] {
   if (!Array.isArray(value)) {
     return defaultFieldsForKind(kind);
@@ -302,10 +320,16 @@ function parseGatewayMethod(
   }
 
   const record = value as Record<string, unknown>;
-  const kind = parseGatewayKind(record.kind);
+  const preliminaryKind = parseGatewayKind(record.kind);
+  const parsedFields = parseGatewayFields(record.fields, preliminaryKind);
+  const kind: PaymentGatewayKind = looksLikeStripeMethod(record, parsedFields)
+    ? "stripe"
+    : "custom";
   const id =
-    typeof record.id === "string" && record.id.trim()
-      ? record.id.trim()
+    kind === "stripe"
+      ? "stripe"
+      : typeof record.id === "string" && record.id.trim()
+        ? record.id.trim()
         : createPaymentGatewayId(kind);
   const name =
     typeof record.name === "string" && record.name.trim()
@@ -331,7 +355,7 @@ function parseGatewayMethod(
     logo_url: logoUrl,
     enabled: record.enabled === undefined ? true : record.enabled === true,
     sort_order: sortOrder,
-    fields: parseGatewayFields(record.fields, kind),
+    fields: kind === "stripe" ? mergeStripeFields(parsedFields) : parsedFields,
   };
 }
 
@@ -443,7 +467,15 @@ export function parsePaymentGatewayValue(
       .sort((left, right) => left.sort_order - right.sort_order)
       .map((method, index) => ({ ...method, sort_order: index }));
 
-    return { methods };
+    let seenStripe = false;
+    return {
+      methods: methods.filter((method) => {
+        if (method.kind !== "stripe") return true;
+        if (seenStripe) return false;
+        seenStripe = true;
+        return true;
+      }),
+    };
   }
 
   const legacy = migrateLegacyPaymentGateway(record, fallback);
@@ -631,8 +663,38 @@ export async function updateVatSettings(input: VatSettings) {
   return cachedVat;
 }
 
+function restoreMaskedPaymentSecrets(
+  next: PaymentGatewaySettings,
+  previous: PaymentGatewaySettings,
+): PaymentGatewaySettings {
+  return {
+    methods: next.methods.map((method) => {
+      const prior =
+        previous.methods.find((item) => item.id === method.id) ??
+        (method.kind === "stripe"
+          ? previous.methods.find((item) => item.kind === "stripe")
+          : undefined);
+      if (!prior) return method;
+      return {
+        ...method,
+        fields: method.fields.map((field) => {
+          if (!isSecretPaymentFieldKey(field.key)) return field;
+          const trimmed = field.value.trim();
+          const masked = trimmed.includes("…") || trimmed.includes("•") || /^\*+$/.test(trimmed);
+          if (!masked) return field;
+          const previousValue =
+            prior.fields.find((item) => item.key === field.key)?.value ?? field.value;
+          return { ...field, value: previousValue };
+        }),
+      };
+    }),
+  };
+}
+
 export async function updatePaymentGatewaySettings(input: PaymentGatewaySettings) {
-  cachedPaymentGateway = parsePaymentGatewayValue(input, getPaymentGatewayDefaultsFromEnv());
+  const previous = cachedPaymentGateway;
+  const parsed = parsePaymentGatewayValue(input, getPaymentGatewayDefaultsFromEnv());
+  cachedPaymentGateway = restoreMaskedPaymentSecrets(parsed, previous);
   await upsertJsonSetting(APP_SETTING_KEYS.paymentGateway, cachedPaymentGateway);
   return cachedPaymentGateway;
 }

@@ -317,7 +317,7 @@ export function AdminSelectField({
       <Select
         items={items}
         value={value}
-        onValueChange={(nextValue) => onValueChange(nextValue ?? "")}
+        onValueChange={(nextValue) => onValueChange(typeof nextValue === "string" ? nextValue : "")}
         disabled={disabled}
       >
         <SelectTrigger
