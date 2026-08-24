@@ -1033,6 +1033,7 @@
       "paymentMethods": {
         "telebirr": "ቴሌብር",
         "cbe_birr": "ሲቢኢ ብር",
+        "stripe": "ስትራይፕ",
         "manual": "በአስተዳዳሪ እንደተከፈለ ተመዝግቧል",
         "notRecorded": "አልተመዘገበም"
       },
@@ -5640,6 +5641,7 @@
       "paymentMethods": {
         "telebirr": "ቴሌብር",
         "cbe_birr": "ሲቢኢ ብር",
+        "stripe": "ስትራይፕ",
         "manual": "በአስተዳዳሪ እንደተከፈለ ምልክት ተደርጓል",
         "notRecorded": "አልተመዘገበም"
       },
