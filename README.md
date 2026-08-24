@@ -366,7 +366,7 @@ Schema lives at `apps/api/prisma/schema.prisma`. Migrations live in `apps/api/pr
 
 **You usually do not run migrate by hand.** `apps/api` runs `prisma migrate deploy` and the default seeders every time the process starts.
 
-Do not ship `schema.prisma` changes without a file in `prisma/migrations/` (`db push` updates a local database only). GitHub Actions runs `pnpm db:check` on `main` and pull requests so this cannot happen again.
+Do not ship `schema.prisma` changes without a file in `prisma/migrations/` (`db push` updates a local database only). The CI workflow runs `pnpm db:check` on pull requests and before deploy on `main`.
 
 From `apps/api`:
 
@@ -456,7 +456,7 @@ Repo **Settings → Secrets and variables → Actions**. Add:
 | `NOTIFICATION_APPLICATION_ID` | Push notification application id |
 | `ETRADE_REGISTRATION_URL` | Business TIN lookup |
 
-The workflow `.github/workflows/docker.yml` runs `docker compose build` on `main` (and manual dispatch) with those secrets.
+The workflow `.github/workflows/docker.yml` runs the Prisma migration check on pull requests and `main`. On `main` (and manual dispatch) it then deploys with `docker compose build` using those secrets. Deploy does not start unless the schema check passes.
 
 ```bash
 # Local image build
