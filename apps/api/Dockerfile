@@ -1,34 +1,34 @@
 FROM node:20-alpine AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
-# This Dockerfile is optimized for monorepo using turborepo
+# 1. Prune the monorepo workspace for api
 FROM base AS builder
 RUN apk add --no-cache libc6-compat
-RUN apk update
-# Set working directory
 WORKDIR /app
-RUN npm install -g pnpm turbo
+RUN npm install -g turbo
 COPY . .
 RUN turbo prune api --docker
 
-# Add lockfile and package.json's of isolated subworkspace
+# 2. Install dependencies & build
 FROM base AS installer
 RUN apk add --no-cache libc6-compat
-RUN apk update
 WORKDIR /app
-RUN npm install -g pnpm
 
-# First install the dependencies (as they change less often)
-COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-# postinstall runs `prisma generate`; schema is not in the json prune output
+# Copy schema so postinstall / prisma generate runs cleanly
 COPY --from=builder /app/out/full/apps/api/prisma ./apps/api/prisma
 RUN pnpm install --frozen-lockfile
 
-# Build the project
 COPY --from=builder /app/out/full/ .
 RUN pnpm turbo run build --filter=api...
 
+# Create an isolated production deployment bundle with resolved node_modules
+RUN pnpm --filter=api --prod deploy /app/deployed
+
+# 3. Production runner
 FROM base AS runner
 WORKDIR /app
 
@@ -36,23 +36,15 @@ RUN apk add --no-cache su-exec
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 expressjs
 
-ENV UPLOAD_ROOT=/var/smart-dispatch/uploads
-RUN mkdir -p /var/smart-dispatch/uploads \
-  && chown -R expressjs:nodejs /var/smart-dispatch/uploads
-
-# Copy built application & schemas
-COPY --from=installer /app/apps/api/package.json ./package.json
+# Copy isolated dependencies and project files
+COPY --from=installer /app/deployed .
 COPY --from=installer /app/apps/api/dist ./dist
 COPY --from=installer /app/apps/api/prisma ./prisma
 
-# Copy BOTH root and workspace node_modules so pnpm symlinks resolve properly
-COPY --from=installer /app/node_modules ./node_modules
-COPY --from=installer /app/apps/api/node_modules ./apps/api/node_modules
-
+# Copy your entrypoint script
 COPY apps/api/docker-entrypoint.sh ./docker-entrypoint.sh
 RUN chmod +x ./docker-entrypoint.sh
 
 EXPOSE 4000
 
-# Starts as root so a mounted volume can be chowned, then drops to expressjs.
 ENTRYPOINT ["./docker-entrypoint.sh"]
