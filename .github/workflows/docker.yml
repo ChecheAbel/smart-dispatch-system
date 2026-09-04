@@ -73,8 +73,10 @@ jobs:
           key: ${{ secrets.DROPLET_SSH_KEY }}
           envs: NEXT_PUBLIC_API_URL,NEXT_PUBLIC_REALTIME_URL,APP_URL,JWT_SECRET,POSTGRES_PASSWORD,NOTIFICATION_BROADCAST_URL,NOTIFICATION_APPLICATION_ID,ETRADE_REGISTRATION_URL,SEED_ADMIN_EMAIL,SEED_ADMIN_PASSWORD
           script_stop: true
+          request_pty: true
+          command_timeout: 30m
           script: |
-            set -ex
+            set -e
             cd ~/app
             git pull origin main
 
@@ -92,20 +94,5 @@ jobs:
             SEED_ADMIN_PASSWORD=$SEED_ADMIN_PASSWORD
             EOF
 
-            # Determine docker compose executable (handles permissions and standalone docker-compose)
-            if docker compose version >/dev/null 2>&1; then
-              DOCKER_COMPOSE="docker compose"
-            elif sudo -n docker compose version >/dev/null 2>&1; then
-              DOCKER_COMPOSE="sudo -E docker compose"
-            elif docker-compose version >/dev/null 2>&1; then
-              DOCKER_COMPOSE="docker-compose"
-            elif sudo -n docker-compose version >/dev/null 2>&1; then
-              DOCKER_COMPOSE="sudo -E docker-compose"
-            else
-              echo "Attempting to fix docker compose CLI permissions..."
-              sudo -n chmod +x /usr/libexec/docker/cli-plugins/docker-compose /usr/local/lib/docker/cli-plugins/docker-compose ~/.docker/cli-plugins/docker-compose 2>/dev/null || true
-              DOCKER_COMPOSE="docker compose"
-            fi
-
             # Build and deploy all services
-            $DOCKER_COMPOSE up -d --build --remove-orphans
+            docker compose up -d --build --remove-orphans
