@@ -3575,6 +3575,16 @@
     "description": "ከመልዕክት አብነቶች እና ከadmin ብሮድካስት የተላኩ፣ የተዘለሉ እና የከሰሉ ኢሜይል፣ ኤስኤምኤስ እና ፑሽ ማድረሶችን ይከታተሉ።",
     "searchPlaceholder": "በተቀባይ፣ ክስተት፣ ስህተት ወይም ማጣቀሻ ይፈልጉ...",
     "itemLabel": "ማድረስ",
+    "stats": {
+      "total": "ጠቅላላ ማድረሶች",
+      "totalDescription": "ሁሉም የኢሜይል፣ ኤስኤምኤስ እና ፑሽ ሙከራዎች",
+      "sent": "በተሳካ ሁኔታ ደርሷል",
+      "sentDescription": "ያለ ምንም ስህተት የተላኩ",
+      "failed": "ያልተሳኩ ማድረሶች",
+      "failedDescription": "ግምገማ የሚያስፈልጋቸው የስህተት ማድረሶች",
+      "skipped": "የተዘለሉ ማሳወቂያዎች",
+      "skippedDescription": "በደንብ ወይም በተጠቃሚ ምርጫ የታገዱ"
+    },
     "filters": {
       "status": "ሁኔታ",
       "statusAll": "ሁሉም ሁኔታዎች",
@@ -3589,7 +3599,15 @@
       "dateFrom": "ከቀን",
       "dateTo": "እስከ ቀን",
       "pickDate": "ቀን ይምረጡ",
-      "clearDates": "ቀኖችን አጽዳ"
+      "clearDates": "ቀኖችን አጽዳ",
+      "resetFilters": "ማጣሪያዎችን ዳግም አስጀምር",
+      "activeFilters": "ንቁ",
+      "today": "ዛሬ",
+      "last7Days": "ያለፉት 7 ቀናት",
+      "last30Days": "ያለፉት 30 ቀናት",
+      "quickPresets": "ፈጣን ቀናት፦",
+      "toggleFilters": "ማጣሪያዎች",
+      "collapseFilters": "ማጣሪያዎችን ደብቅ"
     },
     "columns": {
       "time": "ሰዓት",
@@ -3642,7 +3660,8 @@
     },
     "actions": {
       "view": "ዝርዝር ይመልከቱ",
-      "menuLabel": "ለማድረስ መዝገብ ድርጊቶች"
+      "menuLabel": "ለማድረስ መዝገብ ድርጊቶች",
+      "refresh": "ምዝግቦችን አድስ"
     },
     "detail": {
       "title": "የማድረስ ዝርዝር",
@@ -3660,7 +3679,18 @@
       "error": "ስህተት",
       "kind": "የማድረስ አይነት",
       "createdAt": "በተመዘገበበት",
-      "close": "ዝጋ"
+      "close": "ዝጋ",
+      "copy": "ገልብጥ",
+      "copied": "ተገልብጧል",
+      "copyJson": "JSON ገልብጥ",
+      "copyError": "ስህተትን ገልብጥ",
+      "copyContact": "አድራሻ ገልብጥ",
+      "copyId": "መለያ ገልብጥ",
+      "diagnosis": "የስህተት ምክንያት",
+      "overview": "የማድረስ አጠቃላይ እይታ",
+      "payload": "የመልእክት ይዘት",
+      "technicalDetails": "ቴክኒካዊ መለያዎች",
+      "logId": "የማድረሻ ምዝግብ መለያ"
     },
     "accessDenied": {
       "eyebrow": "መዳረሻ ተከልክሏል",

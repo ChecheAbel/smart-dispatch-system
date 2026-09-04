@@ -3575,6 +3575,16 @@
     "description": "Track sent, skipped, and failed email, SMS, and push deliveries from message templates and admin broadcasts.",
     "searchPlaceholder": "Search by recipient, event, error, or reference...",
     "itemLabel": "delivery",
+    "stats": {
+      "total": "Total deliveries",
+      "totalDescription": "All email, SMS, and push attempts",
+      "sent": "Delivered successfully",
+      "sentDescription": "Dispatched without provider errors",
+      "failed": "Failed deliveries",
+      "failedDescription": "Delivery errors requiring review",
+      "skipped": "Skipped notifications",
+      "skippedDescription": "Suppressed by rules or preferences"
+    },
     "filters": {
       "status": "Status",
       "statusAll": "All statuses",
@@ -3589,7 +3599,15 @@
       "dateFrom": "From date",
       "dateTo": "To date",
       "pickDate": "Pick a date",
-      "clearDates": "Clear dates"
+      "clearDates": "Clear dates",
+      "resetFilters": "Reset filters",
+      "activeFilters": "active",
+      "today": "Today",
+      "last7Days": "Last 7 days",
+      "last30Days": "Last 30 days",
+      "quickPresets": "Quick dates:",
+      "toggleFilters": "Filters",
+      "collapseFilters": "Hide filters"
     },
     "columns": {
       "time": "Time",
@@ -3642,7 +3660,8 @@
     },
     "actions": {
       "view": "View details",
-      "menuLabel": "Actions for delivery log"
+      "menuLabel": "Actions for delivery log",
+      "refresh": "Refresh logs"
     },
     "detail": {
       "title": "Delivery details",
@@ -3660,7 +3679,18 @@
       "error": "Error",
       "kind": "Delivery type",
       "createdAt": "Logged at",
-      "close": "Close"
+      "close": "Close",
+      "copy": "Copy",
+      "copied": "Copied",
+      "copyJson": "Copy JSON",
+      "copyError": "Copy error",
+      "copyContact": "Copy contact",
+      "copyId": "Copy record ID",
+      "diagnosis": "Failure diagnosis",
+      "overview": "Delivery overview",
+      "payload": "Message content",
+      "technicalDetails": "Technical identifiers",
+      "logId": "Delivery log ID"
     },
     "accessDenied": {
       "eyebrow": "Access denied",
