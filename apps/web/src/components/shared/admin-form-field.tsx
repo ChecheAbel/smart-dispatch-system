@@ -356,6 +356,7 @@ type AdminFormSectionProps = {
   step?: number;
   children: React.ReactNode;
   className?: string;
+  footer?: React.ReactNode;
 };
 
 export function AdminFormSection({
@@ -366,6 +367,7 @@ export function AdminFormSection({
   step,
   children,
   className,
+  footer,
 }: AdminFormSectionProps) {
   return (
     <section
@@ -397,6 +399,11 @@ export function AdminFormSection({
         </div>
       </div>
       <div className="space-y-5">{children}</div>
+      {footer ? (
+        <div className="-mx-5 -mb-5 mt-6 rounded-b-xl border-t border-slate-100 bg-slate-50/50 p-4 dark:border-border dark:bg-card/50 sm:-mx-6 sm:-mb-6 sm:px-6">
+          {footer}
+        </div>
+      ) : null}
     </section>
   );
 }

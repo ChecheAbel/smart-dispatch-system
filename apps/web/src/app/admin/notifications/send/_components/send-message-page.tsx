@@ -3,7 +3,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import {
-  ArrowLeft,
   Check,
   Loader2,
   Mail,
@@ -297,18 +296,7 @@ export function SendMessagePage() {
   }
 
   return (
-    <div className="space-y-6 pb-24">
-      {/* Top Breadcrumb / Back Link */}
-      <div className="flex items-center justify-between">
-        <Link
-          href="/admin/notifications"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="size-3.5" />
-          Back to notification channels
-        </Link>
-      </div>
-
+    <div className="space-y-6">
       <form onSubmit={handleSubmit} className="space-y-4">
         <AdminFormSection
           id="send-channels"
@@ -433,6 +421,31 @@ export function SendMessagePage() {
           step={3}
           title={copy.sections.message.title}
           description={copy.sections.message.description}
+          footer={
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300">
+                <span className="font-semibold text-slate-900 dark:text-foreground">Summary:</span>
+                <span>{reviewSummary ?? "Select channels and recipients to continue"}</span>
+              </div>
+              <Button
+                type="submit"
+                disabled={
+                  !canWrite ||
+                  sending ||
+                  channels.length === 0 ||
+                  (!audience && selectedUsers.length === 0)
+                }
+                className={cn(adminPrimaryButtonClass, "w-full sm:w-auto")}
+              >
+                {sending ? (
+                  <Loader2 className="size-4 animate-spin mr-1.5" />
+                ) : (
+                  <Send className="size-4 mr-1.5" />
+                )}
+                {sending ? copy.form.sending : copy.form.review}
+              </Button>
+            </div>
+          }
         >
           <div className="space-y-4">
             {needsTitle ? (
@@ -474,26 +487,6 @@ export function SendMessagePage() {
             />
           </div>
         </AdminFormSection>
-
-        <div
-          className={cn(
-            adminCardClass,
-            "sticky bottom-4 z-10 flex flex-col gap-3 rounded-2xl border p-4 shadow-lg sm:flex-row sm:items-center sm:justify-between sm:px-6",
-          )}
-        >
-          <div className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300">
-            <span className="font-semibold text-slate-900 dark:text-foreground">Summary:</span>
-            <span>{reviewSummary ?? "Select channels and recipients to continue"}</span>
-          </div>
-          <Button
-            type="submit"
-            disabled={!canWrite || sending || channels.length === 0 || (!audience && selectedUsers.length === 0)}
-            className={cn(adminPrimaryButtonClass, "w-full sm:w-auto")}
-          >
-            {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
-            {sending ? copy.form.sending : copy.form.review}
-          </Button>
-        </div>
       </form>
 
       <Dialog
