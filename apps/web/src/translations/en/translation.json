@@ -6088,6 +6088,7 @@
       "rangeInfo": "Allowed range: {min}–{max} {suffix}",
       "saveButton": "Save changes",
       "savingButton": "Saving…",
+      "discardButton": "Discard changes",
       "unsavedChanges": "You have unsaved changes",
       "allSaved": "All changes saved",
       "readOnlyHint": "You have view-only access. Ask an administrator to grant write permission."

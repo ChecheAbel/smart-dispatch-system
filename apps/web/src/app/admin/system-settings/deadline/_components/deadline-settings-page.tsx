@@ -2,12 +2,15 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  AlertCircle,
   BellRing,
   CarFront,
+  CheckCircle2,
   Clock3,
   FileText,
   Loader2,
   Megaphone,
+  RotateCcw,
   Save,
   ShieldCheck,
 } from "lucide-react";
@@ -176,25 +179,47 @@ function formatPreview(value: string, unit: DeadlineUnit, copy: DeadlineCopy) {
   return formatMessage(copy.previews[unit], { value: parsed });
 }
 
+const PRESETS: Partial<Record<DeadlineFieldKey, number[]>> = {
+  ride_request_cancel_grace_minutes: [5, 15, 30, 60],
+  ride_request_edit_grace_minutes: [5, 15, 30, 60],
+  ride_request_reminder_hours: [1, 2, 4, 12, 24],
+  dispatch_escalate_dispatcher_minutes: [5, 10, 15, 30],
+  dispatch_escalate_supervisor_minutes: [15, 30, 45, 60],
+  invoice_due_soon_days: [3, 7, 14, 30],
+  insurance_due_soon_days: [15, 30, 60, 90],
+  inspection_due_soon_days: [15, 30, 60, 90],
+};
+
 function SectionHeader({
   icon: Icon,
   title,
   description,
+  count,
 }: {
   icon: typeof Clock3;
   title: string;
   description: string;
+  count?: number;
 }) {
   return (
-    <div className="flex items-start gap-3">
-      <div className={adminIconBoxClass}>
-        <Icon className="size-4" />
-      </div>
-      <div className="min-w-0">
-        <h2 className={cn("text-base font-bold", adminHeadingClass)}>{title}</h2>
-        <p className="mt-0.5 text-sm leading-relaxed text-slate-500 dark:text-muted-foreground">
-          {description}
-        </p>
+    <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start gap-3">
+        <div className={adminIconBoxClass}>
+          <Icon className="size-4" />
+        </div>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <h2 className={cn("text-base font-bold", adminHeadingClass)}>{title}</h2>
+            {count !== undefined ? (
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-semibold text-slate-600 dark:bg-muted dark:text-muted-foreground">
+                {count} {count === 1 ? "rule" : "rules"}
+              </span>
+            ) : null}
+          </div>
+          <p className="mt-0.5 text-xs sm:text-sm leading-relaxed text-slate-500 dark:text-muted-foreground">
+            {description}
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -223,17 +248,22 @@ function DeadlineFieldRow({
   const fieldCopy = copy.modules[field.key];
   const unitLabel = copy.units[field.unit];
   const emphasized = Boolean(field.emphasized);
+  const presets = PRESETS[field.key];
+
+  const numVal = Number(value);
+  const isInvalid = value !== "" && (!Number.isFinite(numVal) || numVal < field.min || numVal > field.max);
 
   return (
     <div
       className={cn(
-        "rounded-xl px-4 py-4 sm:px-5",
+        "rounded-xl border p-4 transition-colors sm:px-5 sm:py-4",
         emphasized
-          ? "border border-[color-mix(in_srgb,var(--brand-accent)_35%,transparent)] bg-[color-mix(in_srgb,var(--brand-accent)_8%,white)] dark:border-[var(--brand-accent)]/35 dark:bg-[var(--brand-accent)]/10"
-          : "bg-[#f8fafb]/80 dark:bg-muted/40",
+          ? "border-[color-mix(in_srgb,var(--brand-accent)_35%,transparent)] bg-[color-mix(in_srgb,var(--brand-accent)_8%,white)] dark:border-[var(--brand-accent)]/35 dark:bg-[var(--brand-accent)]/10"
+          : "border-slate-200/70 bg-slate-50/50 hover:border-slate-300/80 dark:border-border dark:bg-muted/20",
+        isInvalid && "border-rose-300 bg-rose-50/20 dark:border-rose-900/50 dark:bg-rose-950/20",
       )}
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             {emphasized ? (
@@ -254,20 +284,47 @@ function DeadlineFieldRow({
               {fieldCopy.label}
             </label>
           </div>
-          <p className="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-muted-foreground">
+          <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-muted-foreground">
             {fieldCopy.helper}
           </p>
-          <p className="mt-2 text-xs text-slate-400 dark:text-muted-foreground/80">
+          <p className="mt-1.5 text-[11px] text-slate-400 dark:text-muted-foreground/80">
             {formatMessage(copy.configure.rangeInfo, {
               min: field.min,
               max: field.max,
               suffix: unitLabel,
             })}
           </p>
+
+          {presets && presets.length > 0 ? (
+            <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+              <span className="text-[10px] font-medium text-slate-400 dark:text-muted-foreground">
+                Presets:
+              </span>
+              {presets.map((preset) => {
+                const isSelected = value === String(preset);
+                return (
+                  <button
+                    key={preset}
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => onChange(String(preset))}
+                    className={cn(
+                      "rounded-md px-1.5 py-0.5 text-[10px] font-semibold transition-colors",
+                      isSelected
+                        ? "bg-[#1C3A34] text-white dark:bg-[var(--brand-accent)] dark:text-black shadow-xs"
+                        : "border border-slate-200/80 bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:border-border dark:bg-muted/60 dark:text-slate-300 dark:hover:bg-accent",
+                    )}
+                  >
+                    {preset} {field.unit === "minutes" ? "min" : field.unit === "hours" ? "hr" : "d"}
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
         </div>
 
-        <div className="flex shrink-0 flex-col gap-1.5 sm:w-[10.5rem]">
-          <div className="flex items-center gap-2">
+        <div className="flex shrink-0 flex-col gap-1 sm:w-[10.5rem]">
+          <div className="relative flex items-center">
             <Input
               id={field.key}
               type="number"
@@ -277,16 +334,29 @@ function DeadlineFieldRow({
               onChange={(event) => onChange(event.target.value)}
               disabled={disabled}
               placeholder={field.placeholder}
-              className={cn(adminInputClass, "w-full tabular-nums")}
+              className={cn(
+                adminInputClass,
+                "w-full pr-14 tabular-nums font-semibold",
+                isInvalid && "border-rose-400 focus-visible:ring-rose-400/30 dark:border-rose-500",
+              )}
               aria-label={fieldCopy.label}
             />
-            <span className="w-10 shrink-0 text-xs font-medium text-slate-500 dark:text-muted-foreground">
+            <span className="pointer-events-none absolute right-3 text-xs font-semibold text-slate-400 select-none dark:text-muted-foreground">
               {unitLabel}
             </span>
           </div>
-          <p className="text-right text-[11px] font-medium text-slate-400 dark:text-muted-foreground/80 sm:pr-12">
-            {preview}
-          </p>
+          <div className="flex items-center justify-between text-[11px]">
+            {isInvalid ? (
+              <span className="font-medium text-rose-500 dark:text-rose-400">
+                Range: {field.min}–{field.max}
+              </span>
+            ) : (
+              <span />
+            )}
+            <span className="font-medium text-slate-400 dark:text-muted-foreground/80">
+              {preview}
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -295,23 +365,28 @@ function DeadlineFieldRow({
 
 function DeadlineSettingsSkeleton() {
   return (
-    <div className="space-y-5">
-      {[0, 1, 2].map((section) => (
-        <div key={section} className={cn(adminCardClass, "overflow-hidden rounded-xl p-5 sm:p-6")}>
-          <div className="flex items-start gap-3">
-            <Skeleton className="size-9 rounded-lg" />
-            <div className="space-y-2">
-              <Skeleton className="h-4 w-36" />
-              <Skeleton className="h-3 w-64" />
+    <div className={cn(adminCardClass, "overflow-hidden rounded-2xl border shadow-xs")}>
+      <div className="divide-y divide-slate-100 dark:divide-border">
+        {[0, 1, 2, 3].map((section) => (
+          <div key={section} className="space-y-4 p-5 sm:p-6">
+            <div className="flex items-start gap-3">
+              <Skeleton className="size-9 rounded-xl" />
+              <div className="space-y-1.5">
+                <Skeleton className="h-4 w-36" />
+                <Skeleton className="h-3.5 w-64" />
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <Skeleton className="h-24 w-full rounded-xl" />
+              <Skeleton className="h-24 w-full rounded-xl" />
             </div>
           </div>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <Skeleton className="h-28 w-full rounded-xl" />
-            <Skeleton className="h-28 w-full rounded-xl" />
-            {section === 0 ? <Skeleton className="h-28 w-full rounded-xl sm:col-span-2" /> : null}
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
+      <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 p-4 sm:px-6 dark:border-border dark:bg-muted/20">
+        <Skeleton className="h-4 w-36" />
+        <Skeleton className="h-9 w-28 rounded-xl" />
+      </div>
     </div>
   );
 }
@@ -334,7 +409,6 @@ export function DeadlineSettingsPage() {
     if (!canRead) return;
 
     let active = true;
-    setLoading(true);
 
     void Promise.all([fetchDeadlineSettings(), fetchVatSettings()])
       .then(([result, vatResult]) => {
@@ -379,6 +453,11 @@ export function DeadlineSettingsPage() {
       vat.rate_percent !== savedVat.rate_percent,
     [values, savedValues, vat, savedVat],
   );
+
+  function handleDiscard() {
+    setValues(savedValues);
+    setVat(savedVat);
+  }
 
   async function handleSave() {
     if (!canWrite || !isDirty) return;
@@ -471,39 +550,62 @@ export function DeadlineSettingsPage() {
   const formDisabled = saving || !canWrite;
 
   return (
-    <div className="min-w-0 space-y-6 pb-24">
+    <div className="min-w-0 space-y-6 pb-6">
       {loading ? (
         <DeadlineSettingsSkeleton />
       ) : (
-        <div className="space-y-5">
-          {SECTIONS.map((section) => {
-            const Icon = section.icon;
-            const sectionCopy = copy.sections[section.id];
-            const sectionFields = FIELDS.filter((field) => field.section === section.id);
-            const standardFields = sectionFields.filter((field) => !field.emphasized);
-            const emphasizedFields = sectionFields.filter((field) => field.emphasized);
+        <div className={cn(adminCardClass, "overflow-hidden rounded-2xl border shadow-xs")}>
+          <div className="divide-y divide-slate-100 dark:divide-border">
+            {SECTIONS.map((section) => {
+              const Icon = section.icon;
+              const sectionCopy = copy.sections[section.id];
+              const sectionFields = FIELDS.filter((field) => field.section === section.id);
+              const standardFields = sectionFields.filter((field) => !field.emphasized);
+              const emphasizedFields = sectionFields.filter((field) => field.emphasized);
 
-            return (
-              <section
-                key={section.id}
-                className={cn(adminCardClass, "overflow-hidden rounded-xl")}
-              >
-                <div className="border-b border-slate-100 px-5 py-5 dark:border-border sm:px-6">
+              return (
+                <section key={section.id} className="p-5 sm:p-6">
                   <SectionHeader
                     icon={Icon}
                     title={sectionCopy.title}
                     description={sectionCopy.description}
+                    count={section.id === "billing" ? sectionFields.length + 1 : sectionFields.length}
                   />
-                </div>
 
-                <div className="space-y-3 p-4 sm:p-5">
-                  <div
-                    className={cn(
-                      "grid gap-3",
-                      standardFields.length > 1 ? "sm:grid-cols-2" : "grid-cols-1",
-                    )}
-                  >
-                    {standardFields.map((field) => (
+                  {section.id === "dispatch" &&
+                  Number(values.dispatch_escalate_supervisor_minutes) <
+                    Number(values.dispatch_escalate_dispatcher_minutes) ? (
+                    <div className="mt-4 flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50/80 px-4 py-3 text-xs font-medium text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-300">
+                      <AlertCircle className="size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+                      <span>
+                        Supervisor escalation delay should be greater than or equal to dispatcher escalation delay.
+                      </span>
+                    </div>
+                  ) : null}
+
+                  <div className="mt-5 space-y-3.5">
+                    <div
+                      className={cn(
+                        "grid gap-3",
+                        standardFields.length > 1 ? "sm:grid-cols-2" : "grid-cols-1",
+                      )}
+                    >
+                      {standardFields.map((field) => (
+                        <DeadlineFieldRow
+                          key={field.key}
+                          field={field}
+                          value={values[field.key]}
+                          preview={previews[field.key]}
+                          copy={copy}
+                          disabled={formDisabled}
+                          onChange={(next) =>
+                            setValues((current) => ({ ...current, [field.key]: next }))
+                          }
+                        />
+                      ))}
+                    </div>
+
+                    {emphasizedFields.map((field) => (
                       <DeadlineFieldRow
                         key={field.key}
                         field={field}
@@ -516,127 +618,152 @@ export function DeadlineSettingsPage() {
                         }
                       />
                     ))}
-                  </div>
 
-                  {emphasizedFields.map((field) => (
-                    <DeadlineFieldRow
-                      key={field.key}
-                      field={field}
-                      value={values[field.key]}
-                      preview={previews[field.key]}
-                      copy={copy}
-                      disabled={formDisabled}
-                      onChange={(next) =>
-                        setValues((current) => ({ ...current, [field.key]: next }))
-                      }
-                    />
-                  ))}
+                    {section.id === "billing" ? (
+                      <div className="rounded-xl border border-slate-200/70 bg-slate-50/50 p-4 transition-colors sm:px-5 sm:py-4 dark:border-border dark:bg-muted/20">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <label
+                                htmlFor="invoice-vat-enabled"
+                                className="text-sm font-semibold text-[var(--brand-primary)] dark:text-foreground cursor-pointer"
+                              >
+                                {copy.modules.vat.label}
+                              </label>
+                              <span
+                                className={cn(
+                                  "rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                                  vat.enabled
+                                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                                    : "bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400",
+                                )}
+                              >
+                                {vat.enabled ? copy.modules.vat.enabledOn : copy.modules.vat.enabledOff}
+                              </span>
+                            </div>
+                            <p className="mt-1 text-xs leading-relaxed text-slate-500 dark:text-muted-foreground">
+                              {copy.modules.vat.helper}
+                            </p>
+                            <p className="mt-1.5 text-[11px] text-slate-400 dark:text-muted-foreground/80">
+                              {vat.enabled
+                                ? formatMessage(copy.modules.vat.preview, { rate: vat.rate_percent })
+                                : copy.modules.vat.previewOff}
+                            </p>
+                          </div>
 
-                  {section.id === "billing" ? (
-                    <div className="rounded-xl bg-[#f8fafb]/80 px-4 py-4 sm:px-5 dark:bg-muted/40">
-                      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="min-w-0 flex-1">
-                          <label
-                            htmlFor="invoice-vat-enabled"
-                            className="text-sm font-semibold text-[var(--brand-primary)] dark:text-foreground"
-                          >
-                            {copy.modules.vat.label}
-                          </label>
-                          <p className="mt-1.5 text-sm leading-relaxed text-slate-500 dark:text-muted-foreground">
-                            {copy.modules.vat.helper}
-                          </p>
-                          <p className="mt-2 text-xs text-slate-400 dark:text-muted-foreground/80">
-                            {vat.enabled
-                              ? formatMessage(copy.modules.vat.preview, { rate: vat.rate_percent })
-                              : copy.modules.vat.previewOff}
-                          </p>
+                          <div className="flex flex-col items-end gap-2.5 sm:w-[10.5rem]">
+                            <Switch
+                              id="invoice-vat-enabled"
+                              checked={vat.enabled}
+                              disabled={formDisabled}
+                              onCheckedChange={(checked) =>
+                                setVat((current) => ({ ...current, enabled: checked }))
+                              }
+                            />
+                            {vat.enabled ? (
+                              <div className="relative flex w-full items-center">
+                                <Input
+                                  id="invoice-vat-rate"
+                                  type="number"
+                                  min={0}
+                                  max={100}
+                                  step={0.01}
+                                  value={String(vat.rate_percent)}
+                                  onChange={(event) =>
+                                    setVat((current) => ({
+                                      ...current,
+                                      rate_percent: Number(event.target.value),
+                                    }))
+                                  }
+                                  disabled={formDisabled || !vat.enabled}
+                                  className={cn(
+                                    adminInputClass,
+                                    "w-full pr-8 tabular-nums font-semibold",
+                                    (Number(vat.rate_percent) < 0 || Number(vat.rate_percent) > 100) &&
+                                      "border-rose-400 focus-visible:ring-rose-400/30 dark:border-rose-500",
+                                  )}
+                                  aria-label={copy.modules.vat.rateLabel}
+                                />
+                                <span className="pointer-events-none absolute right-3 text-xs font-semibold text-slate-400 select-none dark:text-muted-foreground">
+                                  %
+                                </span>
+                              </div>
+                            ) : null}
+                          </div>
                         </div>
-                        <Switch
-                          id="invoice-vat-enabled"
-                          checked={vat.enabled}
-                          disabled={formDisabled}
-                          onCheckedChange={(checked) =>
-                            setVat((current) => ({ ...current, enabled: checked }))
-                          }
-                        />
                       </div>
-                      <p className="mt-2 text-xs text-slate-500 dark:text-muted-foreground">
-                        {vat.enabled ? copy.modules.vat.enabledOn : copy.modules.vat.enabledOff}
-                      </p>
-                      <div className="mt-4 flex items-center gap-2 sm:w-[10.5rem] sm:ml-auto">
-                        <Input
-                          id="invoice-vat-rate"
-                          type="number"
-                          min={0}
-                          max={100}
-                          step={0.01}
-                          value={String(vat.rate_percent)}
-                          onChange={(event) =>
-                            setVat((current) => ({
-                              ...current,
-                              rate_percent: Number(event.target.value),
-                            }))
-                          }
-                          disabled={formDisabled || !vat.enabled}
-                          className={cn(adminInputClass, "w-full tabular-nums")}
-                          aria-label={copy.modules.vat.rateLabel}
-                        />
-                        <span className="w-10 shrink-0 text-xs font-medium text-slate-500 dark:text-muted-foreground">
-                          %
-                        </span>
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
-              </section>
-            );
-          })}
-        </div>
-      )}
+                    ) : null}
+                  </div>
+                </section>
+              );
+            })}
+          </div>
 
-      {!loading && canWrite ? (
-        <div className="sticky bottom-4 z-10">
-          <div
-            className={cn(
-              adminCardClass,
-              "flex items-center justify-between gap-3 rounded-xl border px-4 py-3 shadow-md sm:px-5",
-              isDirty
-                ? "border-[color-mix(in_srgb,var(--brand-accent)_40%,transparent)] dark:border-[var(--brand-accent)]/40"
-                : "border-slate-200/80 dark:border-border",
-            )}
-          >
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-[var(--brand-primary)] dark:text-foreground">
-                {isDirty ? copy.configure.unsavedChanges : copy.configure.allSaved}
-              </p>
-              <p className="mt-0.5 hidden text-xs text-slate-500 dark:text-muted-foreground sm:block">
-                {copy.configure.description}
-              </p>
-            </div>
-            <Button
-              type="button"
-              onClick={() => void handleSave()}
-              disabled={saving || !isDirty}
-              className={cn(adminPrimaryButtonClass, "shrink-0")}
-            >
+          {/* Integrated Settings Card Footer: Save Changes Bar */}
+          <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/70 p-4 dark:border-border dark:bg-muted/20 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-4">
+            <div className="flex items-center gap-2.5 min-w-0">
               {saving ? (
-                <Loader2 className="size-4 animate-spin" />
+                <Loader2 className="size-4 shrink-0 animate-spin text-[#1C3A34] dark:text-[var(--brand-accent)]" />
+              ) : isDirty ? (
+                <span className="relative flex size-2.5 shrink-0">
+                  <span className="absolute inline-flex size-full animate-ping rounded-full bg-amber-400 opacity-75" />
+                  <span className="relative inline-flex size-2.5 rounded-full bg-amber-500" />
+                </span>
               ) : (
-                <Save className="size-4" />
+                <CheckCircle2 className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
               )}
-              {saving ? copy.configure.savingButton : copy.configure.saveButton}
-            </Button>
+              <div className="min-w-0">
+                <p className="truncate text-xs font-bold text-slate-800 dark:text-slate-200">
+                  {saving
+                    ? "Saving deadline settings…"
+                    : isDirty
+                      ? copy.configure.unsavedChanges ?? "You have unsaved changes"
+                      : copy.configure.allSaved ?? "All changes saved"}
+                </p>
+                <p className="hidden truncate text-[11px] text-slate-500 dark:text-muted-foreground sm:block">
+                  {copy.configure.description}
+                </p>
+              </div>
+            </div>
+
+            {canWrite ? (
+              <div className="flex items-center gap-2.5 self-end sm:self-auto shrink-0">
+                {isDirty ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleDiscard}
+                    disabled={saving}
+                    className="h-9 rounded-xl text-xs font-medium text-slate-600 hover:bg-slate-200/60 dark:text-slate-300 dark:hover:bg-accent"
+                  >
+                    <RotateCcw className="size-3.5" />
+                    {copy.configure.discardButton ?? "Discard"}
+                  </Button>
+                ) : null}
+
+                <Button
+                  type="button"
+                  onClick={() => void handleSave()}
+                  disabled={saving || !isDirty}
+                  className={cn(adminPrimaryButtonClass, "h-9 rounded-xl px-4 text-xs font-semibold shadow-xs")}
+                >
+                  {saving ? (
+                    <Loader2 className="size-3.5 animate-spin" />
+                  ) : (
+                    <Save className="size-3.5" />
+                  )}
+                  {saving ? copy.configure.savingButton : copy.configure.saveButton}
+                </Button>
+              </div>
+            ) : (
+              <p className="text-xs text-slate-500 dark:text-muted-foreground">
+                {copy.configure.readOnlyHint}
+              </p>
+            )}
           </div>
         </div>
-      ) : null}
-
-      {!loading && !canWrite ? (
-        <div className={cn(adminCardClass, "rounded-xl px-5 py-3.5")}>
-          <p className="text-sm text-slate-500 dark:text-muted-foreground">
-            {copy.configure.readOnlyHint}
-          </p>
-        </div>
-      ) : null}
+      )}
     </div>
   );
 }
