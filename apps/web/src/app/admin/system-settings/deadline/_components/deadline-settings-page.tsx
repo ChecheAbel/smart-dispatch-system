@@ -472,22 +472,6 @@ export function DeadlineSettingsPage() {
 
   return (
     <div className="min-w-0 space-y-6 pb-24">
-      <div className="min-w-0">
-        <div className="flex items-start gap-3">
-          <div className={adminIconBoxClass}>
-            <Clock3 className="size-5" />
-          </div>
-          <div className="min-w-0">
-            <h1 className={cn("text-2xl font-extrabold tracking-tight", adminHeadingClass)}>
-              {copy.title}
-            </h1>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-500 dark:text-muted-foreground">
-              {copy.description}
-            </p>
-          </div>
-        </div>
-      </div>
-
       {loading ? (
         <DeadlineSettingsSkeleton />
       ) : (

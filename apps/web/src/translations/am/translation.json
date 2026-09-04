@@ -6156,18 +6156,28 @@
       "uploading": "በመጫን ላይ…",
       "hint": "JPG፣ PNG ወይም WEBP እስከ 5 ሜባ።",
       "replace": "አርማ ቀይር",
-      "dropHint": "አዲስ አርማ ለመጫን ጠቅ ያድርጉ"
+      "dropHint": "አዲስ አርማ ለመጫን እዚህ ይጣሉ ወይም ጠቅ ያድርጉ",
+      "resetDefault": "ወደ ነባሪ መልስ"
     },
     "preview": {
       "title": "ቀጥታ ቅድመ-እይታ",
       "description": "እንደሚያስተካክሉ ይዘምናል። በምርቱ ላይ ለመተግበር ያስቀምጡ።",
       "onDark": "ጨለማ ሼል",
-      "onLight": "ብርሃን ሼል"
+      "onLight": "ብርሃን ሼል",
+      "liveSync": "ቀጥታ ማመሳሰል",
+      "tabs": {
+        "shell": "የፖርታል ሼል",
+        "auth": "የመግቢያ ስክሪን",
+        "tokens": "የገጽታ ቶከኖች"
+      }
     },
     "configure": {
       "description": "ለውጦቹ በማረፊያ፣ በመግቢያ እና በዳሽቦርድ ሼሎች ላይ ይተገበራሉ።",
       "saveButton": "ለውጦችን አስቀምጥ",
       "savingButton": "በማስቀመጥ ላይ…",
+      "discardButton": "ለውጦችን ሰርዝ",
+      "unsavedChanges": "ያልተቀመጡ ለውጦች አሉዎት",
+      "allSaved": "ሁሉም ለውጦች ተቀምጠዋል",
       "readOnlyHint": "የማየት ብቻ መብት አለዎት። ለመጻፍ ፈቃድ እንዲሰጥዎ አስተዳዳሪን ይጠይቁ።"
     },
     "toast": {

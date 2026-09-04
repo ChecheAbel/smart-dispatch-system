@@ -2,19 +2,10 @@
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { MessagesSquare } from "lucide-react";
 import { useAuth, useLocale } from "@/components/shared/providers";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
-import {
-  adminHeadingClass,
-  adminIconBoxClass,
-} from "@/lib/admin-theme";
 import { PERMISSIONS } from "@/lib/permissions";
-import {
-  getAdminNotificationTemplatesMessages,
-  getAdminNotificationsMessages,
-} from "@/translations";
-import { cn } from "@/lib/utils";
+import { getAdminNotificationsMessages } from "@/translations";
 import { NotificationTemplatesSettings } from "./notification-templates-settings";
 import {
   NOTIFICATION_MODULE_ORDER,
@@ -28,7 +19,6 @@ export function NotificationTemplatesPage() {
   const { locale } = useLocale();
   const { hasPermission } = useAuth();
   const accessCopy = getAdminNotificationsMessages(locale);
-  const copy = getAdminNotificationTemplatesMessages(locale);
   const canRead = hasPermission(PERMISSIONS.notifications.read);
   const canWrite = hasPermission(PERMISSIONS.notifications.write);
 
@@ -48,22 +38,6 @@ export function NotificationTemplatesPage() {
 
   return (
     <div className="min-w-0 space-y-6">
-      <div className="min-w-0">
-        <div className="flex items-start gap-3">
-          <div className={adminIconBoxClass}>
-            <MessagesSquare className="size-5" />
-          </div>
-          <div className="min-w-0">
-            <h1 className={cn("text-2xl font-extrabold tracking-tight", adminHeadingClass)}>
-              {copy.title}
-            </h1>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-500">
-              {copy.description}
-            </p>
-          </div>
-        </div>
-      </div>
-
       <NotificationTemplatesSettings canWrite={canWrite} />
     </div>
   );

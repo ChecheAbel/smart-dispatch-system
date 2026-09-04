@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Bell, Check, Mail, MessageSquare, Smartphone } from "lucide-react";
+import { Check, Mail, MessageSquare, Smartphone } from "lucide-react";
 import { useAuth, useLocale } from "@/components/shared/providers";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import {
   adminCardClass,
   adminHeadingClass,
-  adminIconBoxClass,
 } from "@/lib/admin-theme";
 import { PERMISSIONS } from "@/lib/permissions";
 import { getAdminNotificationsMessages } from "@/translations";
@@ -95,22 +94,6 @@ export function NotificationsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <div className="flex items-start gap-3">
-          <div className={adminIconBoxClass}>
-            <Bell className="size-5" />
-          </div>
-          <div className="min-w-0">
-            <h1 className={cn("text-2xl font-extrabold tracking-tight", adminHeadingClass)}>
-              {copy.title}
-            </h1>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-500">
-              {copy.description}
-            </p>
-          </div>
-        </div>
-      </div>
-
       <section className="space-y-3">
         <div className="space-y-1">
           <h2 className={cn("text-sm font-bold", adminHeadingClass)}>{copy.channels.title}</h2>

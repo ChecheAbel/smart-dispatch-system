@@ -6156,18 +6156,28 @@
       "uploading": "Uploading…",
       "hint": "JPG, PNG, or WEBP up to 5 MB.",
       "replace": "Replace logo",
-      "dropHint": "Click to upload a new mark"
+      "dropHint": "Click or drop a new mark here",
+      "resetDefault": "Reset to default"
     },
     "preview": {
       "title": "Live preview",
       "description": "Updates as you edit. Save to apply across the product.",
       "onDark": "Dark shell",
-      "onLight": "Light shell"
+      "onLight": "Light shell",
+      "liveSync": "Live sync",
+      "tabs": {
+        "shell": "Portal shell",
+        "auth": "Sign-in screen",
+        "tokens": "Theme tokens"
+      }
     },
     "configure": {
       "description": "Changes apply across landing, auth, and dashboard shells.",
       "saveButton": "Save changes",
       "savingButton": "Saving…",
+      "discardButton": "Discard changes",
+      "unsavedChanges": "You have unsaved changes",
+      "allSaved": "All changes saved",
       "readOnlyHint": "You have view-only access. Ask an administrator to grant write permission."
     },
     "toast": {
