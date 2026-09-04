@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import {
+  ArrowLeft,
   Check,
   Loader2,
   Mail,
@@ -297,23 +298,15 @@ export function SendMessagePage() {
 
   return (
     <div className="space-y-6 pb-24">
-      <div>
-        <p className="text-[10px] font-bold tracking-[0.18em] text-[var(--brand-accent)] uppercase">
-          {copy.eyebrow}
-        </p>
-        <div className="mt-2 flex items-start gap-3">
-          <div className={adminIconBoxClass}>
-            <Send className="size-5" />
-          </div>
-          <div className="min-w-0">
-            <h1 className={cn("text-2xl font-extrabold tracking-tight", adminHeadingClass)}>
-              {copy.title}
-            </h1>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-slate-500">
-              {copy.description}
-            </p>
-          </div>
-        </div>
+      {/* Top Breadcrumb / Back Link */}
+      <div className="flex items-center justify-between">
+        <Link
+          href="/admin/notifications"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground transition-colors"
+        >
+          <ArrowLeft className="size-3.5" />
+          Back to notification channels
+        </Link>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -323,7 +316,7 @@ export function SendMessagePage() {
           title={copy.channels.title}
           description={copy.channels.description}
         >
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-3">
             {channelOptions.map((channel) => {
               const Icon = CHANNEL_ICONS[channel.id];
               const isActive = channels.includes(channel.id);
@@ -334,13 +327,10 @@ export function SendMessagePage() {
                 <div
                   key={channel.id}
                   className={cn(
-                    "rounded-lg border transition-colors",
+                    "group relative overflow-hidden rounded-xl border transition-all",
                     isActive
-                      ? "border-[#1C3A34]/25 bg-[#1C3A34]/[0.05] ring-1 ring-[#1C3A34]/10 dark:border-[#C9B87A]/60 dark:bg-[#C9B87A]/10 dark:ring-[#C9B87A]/20"
-                      : cn(
-                          "border-slate-200 bg-white dark:border-border dark:bg-muted/20",
-                          isReady && "hover:border-slate-300 dark:hover:border-border/80",
-                        ),
+                      ? "border-[#1C3A34]/30 bg-white shadow-[inset_3px_0_0_0_#C9B87A] dark:border-[var(--brand-accent)]/45 dark:bg-[#1d242d]"
+                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70 dark:border-border dark:bg-muted/20 dark:hover:border-border/80",
                   )}
                 >
                   <button
@@ -349,41 +339,67 @@ export function SendMessagePage() {
                     aria-pressed={isActive}
                     onClick={() => toggleChannel(channel.id)}
                     className={cn(
-                      "flex w-full items-start gap-3 px-3 py-3 text-left",
+                      "flex w-full items-start gap-3.5 p-4 text-left",
                       (!canWrite || !isReady) && "cursor-not-allowed opacity-70",
                     )}
                   >
-                    <span
+                    <div
                       className={cn(
-                        "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-md border",
+                        "flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors",
                         isActive
-                          ? "border-[#1C3A34] bg-[#1C3A34] text-white dark:border-[#C9B87A] dark:bg-[#C9B87A] dark:text-[#151a21]"
-                          : "border-slate-300 bg-white text-transparent dark:border-border dark:bg-transparent",
+                          ? "bg-[#1C3A34] text-white dark:bg-[var(--brand-accent)] dark:text-[#10211d]"
+                          : "bg-[#1C3A34]/[0.08] text-[#1C3A34] group-hover:bg-[#1C3A34]/[0.12] dark:bg-[var(--brand-accent)]/12 dark:text-[var(--brand-accent)]",
                       )}
                     >
-                      <Check className="size-3" aria-hidden />
-                    </span>
-                    <Icon className="mt-0.5 size-4 shrink-0 text-[#1C3A34] dark:text-[var(--brand-accent)]" />
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-semibold text-slate-900 dark:text-foreground">
-                        {channel.title}
-                      </span>
-                      <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">
-                        {status === "loading"
-                          ? copy.channels.checking
-                          : isReady
-                            ? copy.channels.ready
-                            : copy.channels.unavailable}
-                      </span>
-                    </span>
+                      <Icon className="size-4" />
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="block text-sm font-bold text-slate-900 dark:text-foreground">
+                          {channel.title}
+                        </span>
+                        {isActive ? (
+                          <span className="flex size-4.5 items-center justify-center rounded-full bg-[#1C3A34] text-white dark:bg-[var(--brand-accent)] dark:text-[#10211d]">
+                            <Check className="size-3" aria-hidden />
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <div className="mt-1 flex items-center gap-1.5">
+                        <span
+                          className={cn(
+                            "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold",
+                            status === "loading"
+                              ? "bg-slate-100 text-slate-600 dark:bg-muted dark:text-slate-300"
+                              : isReady
+                                ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                                : "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300",
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "size-1 rounded-full",
+                              isReady ? "bg-emerald-500" : "bg-amber-500",
+                            )}
+                          />
+                          {status === "loading"
+                            ? copy.channels.checking
+                            : isReady
+                              ? copy.channels.ready
+                              : copy.channels.unavailable}
+                        </span>
+                      </div>
+                    </div>
                   </button>
+
                   {status === "unavailable" ? (
-                    <div className="border-t border-slate-100 px-3 py-2 dark:border-border">
+                    <div className="border-t border-slate-100 bg-slate-50/70 px-4 py-2 dark:border-border dark:bg-muted/30">
                       <Link
                         href={CHANNEL_SETUP_HREF[channel.id]}
-                        className="text-xs font-semibold text-[#1C3A34] hover:underline dark:text-[#d8c77f]"
+                        className="text-xs font-semibold text-[#1C3A34] hover:underline dark:text-[var(--brand-accent)]"
                       >
-                        {copy.channels.setup}
+                        {copy.channels.setup} →
                       </Link>
                     </div>
                   ) : null}
@@ -462,11 +478,18 @@ export function SendMessagePage() {
         <div
           className={cn(
             adminCardClass,
-            "sticky bottom-3 z-10 flex flex-col gap-3 rounded-xl border p-3 sm:flex-row sm:items-center sm:justify-between sm:px-4",
+            "sticky bottom-4 z-10 flex flex-col gap-3 rounded-2xl border p-4 shadow-lg sm:flex-row sm:items-center sm:justify-between sm:px-6",
           )}
         >
-          <p className="min-w-0 text-sm text-slate-600 dark:text-muted-foreground">{reviewSummary}</p>
-          <Button type="submit" disabled={!canWrite || sending} className={adminPrimaryButtonClass}>
+          <div className="flex items-center gap-2 text-xs font-medium text-slate-600 dark:text-slate-300">
+            <span className="font-semibold text-slate-900 dark:text-foreground">Summary:</span>
+            <span>{reviewSummary ?? "Select channels and recipients to continue"}</span>
+          </div>
+          <Button
+            type="submit"
+            disabled={!canWrite || sending || channels.length === 0 || (!audience && selectedUsers.length === 0)}
+            className={cn(adminPrimaryButtonClass, "w-full sm:w-auto")}
+          >
             {sending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
             {sending ? copy.form.sending : copy.form.review}
           </Button>

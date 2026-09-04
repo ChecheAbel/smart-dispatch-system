@@ -2795,6 +2795,8 @@
     "eyebrow": "System settings",
     "title": "Notifications",
     "description": "Configure email, SMS, and mobile push delivery for outbound notifications.",
+    "broadcastAction": "Send broadcast",
+    "logsAction": "Delivery logs",
     "channels": {
       "title": "Delivery channel",
       "description": "Choose which provider credentials or broadcast tools you want to configure.",

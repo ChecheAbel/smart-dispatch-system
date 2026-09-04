@@ -1,7 +1,18 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
-import { Loader2, Mail, Phone, Search, Users, X } from "lucide-react";
+import {
+  CarFront,
+  Check,
+  Headphones,
+  Loader2,
+  Mail,
+  Phone,
+  Search,
+  User as UserIcon,
+  Users,
+  X,
+} from "lucide-react";
 import type { RoleSlug, User } from "@smart-dispatch/types";
 import { AdminField, AdminFormSection } from "@/components/shared/admin-form-field";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -125,16 +136,19 @@ export function MessageRecipientPicker({
       id: "drivers" as const,
       label: copy.audience.drivers,
       description: copy.audience.driversHint,
+      icon: CarFront,
     },
     {
       id: "customers" as const,
       label: copy.audience.customers,
       description: copy.audience.customersHint,
+      icon: Users,
     },
     {
       id: "dispatchers" as const,
       label: copy.audience.dispatchers,
       description: copy.audience.dispatchersHint,
+      icon: Headphones,
     },
   ];
 
@@ -283,13 +297,15 @@ export function MessageRecipientPicker({
       icon={Users}
     >
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-2">
+        {/* Recipient Mode Segmented Switcher */}
+        <div className="inline-flex w-full rounded-xl border border-slate-200/80 bg-slate-100/70 p-1 dark:border-border dark:bg-muted/30">
           {(
             [
-              { id: "group", label: copy.form.modeGroup },
-              { id: "people", label: copy.form.modePeople },
+              { id: "group", label: copy.form.modeGroup, icon: Users },
+              { id: "people", label: copy.form.modePeople, icon: UserIcon },
             ] as const
           ).map((option) => {
+            const Icon = option.icon;
             const isActive = mode === option.id;
 
             return (
@@ -300,13 +316,14 @@ export function MessageRecipientPicker({
                 aria-pressed={isActive}
                 onClick={() => selectMode(option.id)}
                 className={cn(
-                  "rounded-lg border px-3 py-2 text-sm font-semibold transition-colors",
+                  "flex flex-1 items-center justify-center gap-2 rounded-lg py-2 text-xs font-bold transition-all",
                   isActive
-                    ? "border-[#1C3A34]/25 bg-[#1C3A34]/[0.05] text-[#1C3A34] ring-1 ring-[#1C3A34]/10 dark:border-[#C9B87A]/60 dark:bg-[#C9B87A]/10 dark:text-foreground dark:ring-[#C9B87A]/20"
-                    : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-border dark:bg-muted/20 dark:text-muted-foreground",
+                    ? "bg-white text-slate-900 shadow-xs dark:bg-card dark:text-foreground"
+                    : "text-slate-600 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground",
                   !canWrite && "cursor-not-allowed opacity-60",
                 )}
               >
+                <Icon className="size-3.5" />
                 {option.label}
               </button>
             );
@@ -314,8 +331,9 @@ export function MessageRecipientPicker({
         </div>
 
         {mode === "group" ? (
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-3">
             {audienceOptions.map((option) => {
+              const Icon = option.icon;
               const isActive = audience === option.id;
 
               return (
@@ -326,17 +344,39 @@ export function MessageRecipientPicker({
                   aria-pressed={isActive}
                   onClick={() => selectAudience(option.id)}
                   className={cn(
-                    "rounded-lg border px-3 py-3 text-left transition-colors",
+                    "group relative flex flex-col justify-between rounded-xl border p-4 text-left transition-all",
                     isActive
-                      ? "border-[#1C3A34]/25 bg-[#1C3A34]/[0.05] ring-1 ring-[#1C3A34]/10 dark:border-[#C9B87A]/60 dark:bg-[#C9B87A]/10 dark:ring-[#C9B87A]/20"
-                      : "border-slate-200 bg-white hover:border-slate-300 dark:border-border dark:bg-muted/20 dark:hover:border-border/80",
+                      ? "border-[#1C3A34]/30 bg-white shadow-[inset_3px_0_0_0_#C9B87A] dark:border-[var(--brand-accent)]/45 dark:bg-[#1d242d]"
+                      : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50/70 dark:border-border dark:bg-muted/20 dark:hover:border-border/80 dark:hover:bg-muted/30",
                     !canWrite && "cursor-not-allowed opacity-60",
                   )}
                 >
-                  <p className="text-sm font-semibold text-slate-900 dark:text-foreground">
-                    {option.label}
-                  </p>
-                  <p className="mt-1 text-xs leading-relaxed text-slate-500">{option.description}</p>
+                  <div className="flex items-start justify-between gap-2 pb-3">
+                    <div
+                      className={cn(
+                        "flex size-9 items-center justify-center rounded-lg transition-colors",
+                        isActive
+                          ? "bg-[#1C3A34] text-white dark:bg-[var(--brand-accent)] dark:text-[#10211d]"
+                          : "bg-[#1C3A34]/[0.08] text-[#1C3A34] group-hover:bg-[#1C3A34]/[0.12] dark:bg-[var(--brand-accent)]/12 dark:text-[var(--brand-accent)]",
+                      )}
+                    >
+                      <Icon className="size-4" />
+                    </div>
+                    {isActive ? (
+                      <span className="flex size-5 items-center justify-center rounded-full bg-[#1C3A34] text-white dark:bg-[var(--brand-accent)] dark:text-[#10211d]">
+                        <Check className="size-3" />
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-bold text-slate-900 dark:text-foreground">
+                      {option.label}
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-500 line-clamp-2 dark:text-muted-foreground">
+                      {option.description}
+                    </p>
+                  </div>
                 </button>
               );
             })}
