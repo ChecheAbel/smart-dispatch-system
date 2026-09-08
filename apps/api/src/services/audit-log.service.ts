@@ -72,7 +72,11 @@ function singularizeResource(segment: string) {
 }
 
 function normalizeModule(segment: string) {
-  return segment.replace(/-/g, "_");
+  const mod = segment.replace(/-/g, "_");
+  if (mod === "admin_ride_requests") {
+    return "ride_requests";
+  }
+  return mod;
 }
 
 function inferAction(method: string, segments: string[]): AuditAction {

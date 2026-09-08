@@ -5787,9 +5787,19 @@
       "auth": "Authentication",
       "audit_logs": "Audit logs",
       "vehicle_types": "Vehicle types",
+      "vehicle_classes": "Vehicle classes",
       "vehicles": "Vehicles",
+      "maintenance_work_types": "Maintenance work types",
       "regions": "Regions",
-      "locations": "Locations"
+      "locations": "Locations",
+      "ride_requests": "Ride requests",
+      "contracts": "Contracts",
+      "invoices": "Invoices",
+      "fare_plans": "Fare plans",
+      "booking_policies": "Booking policies",
+      "driver_shifts": "Driver shifts",
+      "driver_attendance": "Driver attendance",
+      "complaints": "Complaints"
     },
     "empty": {
       "title": "No audit entries found",

@@ -5787,9 +5787,19 @@
       "auth": "ማረጋገጫ",
       "audit_logs": "የኦዲት መዝገቦች",
       "vehicle_types": "የተሽከርካሪ አይነቶች",
+      "vehicle_classes": "የተሽከርካሪ ክፍሎች",
       "vehicles": "ተሽከርካሪዎች",
+      "maintenance_work_types": "የጥገና ስራ አይነቶች",
       "regions": "ክልሎች",
-      "locations": "ቦታዎች"
+      "locations": "ቦታዎች",
+      "ride_requests": "የጉዞ ጥያቄዎች",
+      "contracts": "ውሎች",
+      "invoices": "ደረሰኞች",
+      "fare_plans": "የዋጋ እቅዶች",
+      "booking_policies": "የቦታ ማስያዣ ፖሊሲዎች",
+      "driver_shifts": "የአሽከርካሪ ፈረቃዎች",
+      "driver_attendance": "የአሽከርካሪ ክትትል",
+      "complaints": "ቅሬታዎች"
     },
     "empty": {
       "title": "የኦዲት መዝገቦች አልተገኙም",
