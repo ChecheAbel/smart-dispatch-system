@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { ClipboardList, ShieldCheck } from "lucide-react";
-import type { Vehicle } from "@smart-dispatch/types";
+import { Car, ClipboardList, Loader2, ShieldCheck } from "lucide-react";
+import type { Vehicle, VehicleComplianceStatus } from "@smart-dispatch/types";
 import { useLocale } from "@/components/shared/providers";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -21,7 +20,7 @@ import {
   insuranceFormToPayload,
   vehicleToComplianceForm,
 } from "@/lib/vehicle-compliance-form";
-import { expiryToneClass, getExpiryTone } from "@/lib/vehicle-compliance";
+import { getExpiryTone } from "@/lib/vehicle-compliance";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import {
   formatMessage,
@@ -41,6 +40,7 @@ import {
   InspectionComplianceFields,
   InsuranceComplianceFields,
 } from "./compliance-form-fields";
+import { ComplianceStatusBadge } from "./compliance-status-badge";
 
 type ComplianceSheetType = "insurance" | "inspection";
 
@@ -111,6 +111,7 @@ export function UpdateComplianceSheet({
   const expiryField =
     type === "insurance" ? vehicle?.insurance_expires_at : vehicle?.inspection_expires_at;
   const tone = getExpiryTone(expiryField);
+  const statusKey = (tone === "dueSoon" ? "due_soon" : tone === "notSet" ? "not_set" : tone) as VehicleComplianceStatus;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -118,39 +119,46 @@ export function UpdateComplianceSheet({
         side="right"
         className="flex w-full flex-col gap-0 overflow-y-auto p-0 data-[side=right]:sm:max-w-lg"
       >
-        <SheetHeader className="border-b border-slate-100 px-6 py-5">
-          <SheetTitle className={adminHeadingClass}>{sheetCopy.title}</SheetTitle>
-          <SheetDescription className="leading-relaxed">{sheetCopy.description}</SheetDescription>
+        <SheetHeader className="border-b border-slate-100 bg-slate-50/50 px-6 py-5 dark:border-border dark:bg-card">
+          <div className="flex items-center gap-3">
+            <div className={adminIconBoxClass}>
+              <Icon className="size-4.5" />
+            </div>
+            <div>
+              <SheetTitle className={adminHeadingClass}>{sheetCopy.title}</SheetTitle>
+              <SheetDescription className="mt-0.5 text-xs text-slate-500 dark:text-muted-foreground">
+                {sheetCopy.description}
+              </SheetDescription>
+            </div>
+          </div>
         </SheetHeader>
 
-        <form id={formId} onSubmit={handleSubmit} className="space-y-5 px-6 py-5">
+        <form id={formId} onSubmit={handleSubmit} className="flex-1 space-y-5 px-6 py-5">
           {vehicle ? (
-            <Card className={cn(adminCardClass, "gap-0 overflow-hidden py-0 shadow-none ring-0")}>
-              <div className="flex items-start justify-between gap-3 border-b border-slate-100 px-4 py-4">
-                <div className="flex min-w-0 items-start gap-3">
-                  <div className={cn(adminIconBoxClass, "shrink-0")}>
-                    <Icon className="size-4" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold tracking-wide text-slate-400 uppercase">
-                      {sheetCopy.vehicleLabel}
-                    </p>
-                    <p className="mt-1 font-mono text-lg font-bold tracking-wide text-[#1C3A34]">
+            <Card className={cn(adminCardClass, "overflow-hidden rounded-xl border border-slate-200/90 shadow-xs dark:border-border")}>
+              {/* Vehicle Identity Header */}
+              <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/70 px-4 py-3.5 dark:border-border dark:bg-muted/40">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <div className="flex items-center gap-1.5 rounded-md border border-slate-200 bg-white px-2.5 py-1 shadow-2xs dark:border-border dark:bg-card">
+                    <Car className="size-3.5 text-slate-400" />
+                    <span className="font-mono text-xs font-bold tracking-wider text-[#1C3A34] dark:text-foreground">
                       {vehicle.plate_number}
-                    </p>
-                    <p className="mt-0.5 text-sm text-slate-500">
-                      {[vehicle.vehicle_type?.name, vehicle.vehicle_class?.name]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
+                    </span>
                   </div>
+                  <p className="truncate text-xs text-slate-500 dark:text-muted-foreground">
+                    {[vehicle.vehicle_type?.name, vehicle.vehicle_class?.name]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
                 </div>
-                <Badge variant="outline" className={expiryToneClass(tone)}>
-                  {vehicleDetail.overview.expiryStatus[tone]}
-                </Badge>
+                <ComplianceStatusBadge
+                  status={statusKey}
+                  label={vehicleDetail.overview.expiryStatus[tone]}
+                />
               </div>
 
-              <div className="px-4 py-4">
+              {/* Form fields body */}
+              <div className="p-4 sm:p-5">
                 {type === "insurance" ? (
                   <InsuranceComplianceFields
                     idPrefix="compliance-sheet"
@@ -173,13 +181,13 @@ export function UpdateComplianceSheet({
           ) : null}
         </form>
 
-        <SheetFooter className="mt-auto flex-row justify-end gap-2 border-t border-slate-100 bg-white px-6 py-4">
+        <SheetFooter className="mt-auto flex-row justify-end gap-2 border-t border-slate-100 bg-white px-6 py-4 dark:border-border dark:bg-card">
           <Button
             type="button"
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={submitting}
-            className="border-slate-200"
+            className="border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-border dark:text-muted-foreground"
           >
             {sheetCopy.cancel}
           </Button>
@@ -189,7 +197,14 @@ export function UpdateComplianceSheet({
             disabled={submitting || !vehicle}
             className={adminPrimaryButtonClass}
           >
-            {submitting ? sheetCopy.saving : sheetCopy.save}
+            {submitting ? (
+              <>
+                <Loader2 className="size-3.5 animate-spin" />
+                {sheetCopy.saving}
+              </>
+            ) : (
+              sheetCopy.save
+            )}
           </Button>
         </SheetFooter>
       </SheetContent>

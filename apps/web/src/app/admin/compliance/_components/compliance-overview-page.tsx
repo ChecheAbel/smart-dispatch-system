@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   adminCardClass,
+  adminEyebrowClass,
   adminHeadingClass,
   adminIconBoxClass,
 } from "@/lib/admin-theme";
@@ -26,26 +27,14 @@ import { canReadCompliance } from "@/lib/permissions";
 import { fetchVehicleComplianceSummary } from "@/lib/vehicle-api";
 import { formatMessage, getAdminComplianceMessages } from "@/translations";
 import { cn } from "@/lib/utils";
+import { COMPLIANCE_STATUS_CONFIG } from "./compliance-status-badge";
 
 const STATUS_ORDER: VehicleComplianceStatus[] = ["expired", "due_soon", "ok", "not_set"];
-
-const STATUS_CARD_CLASS: Record<VehicleComplianceStatus, string> = {
-  expired: "border-red-200/80 bg-red-50/50 hover:bg-red-50 dark:border-red-400/25 dark:bg-red-400/10 dark:hover:bg-red-400/15",
-  due_soon: "border-amber-200/80 bg-amber-50/50 hover:bg-amber-50 dark:border-amber-400/25 dark:bg-amber-400/10 dark:hover:bg-amber-400/15",
-  ok: "border-emerald-200/80 bg-emerald-50/50 hover:bg-emerald-50 dark:border-emerald-400/25 dark:bg-emerald-400/10 dark:hover:bg-emerald-400/15",
-  not_set: "border-slate-200/80 bg-slate-50/80 hover:bg-slate-50 dark:border-border dark:bg-muted/40 dark:hover:bg-muted/55",
-};
-
-const STATUS_COUNT_CLASS: Record<VehicleComplianceStatus, string> = {
-  expired: "text-red-700 dark:text-red-300",
-  due_soon: "text-amber-800 dark:text-amber-200",
-  ok: "text-emerald-800 dark:text-emerald-200",
-  not_set: "text-slate-700 dark:text-muted-foreground",
-};
 
 type ComplianceReportType = "insurance" | "inspection";
 
 type StatsCopy = ReturnType<typeof getAdminComplianceMessages>["stats"];
+type StatusCopy = ReturnType<typeof getAdminComplianceMessages>["status"];
 type OverviewCopy = ReturnType<typeof getAdminComplianceMessages>["overview"];
 
 function statusLabel(status: VehicleComplianceStatus, stats: StatsCopy) {
@@ -66,6 +55,7 @@ function ComplianceDomainSection({
   summary,
   totalVehicles,
   statsCopy,
+  statusCopy,
   overviewCopy,
   loading,
 }: {
@@ -75,6 +65,7 @@ function ComplianceDomainSection({
   summary: VehicleComplianceSummary[ComplianceReportType];
   totalVehicles: number;
   statsCopy: StatsCopy;
+  statusCopy: StatusCopy;
   overviewCopy: OverviewCopy;
   loading: boolean;
 }) {
@@ -84,22 +75,42 @@ function ComplianceDomainSection({
   const validPercent =
     totalVehicles > 0 ? Math.round((summary.ok / totalVehicles) * 100) : 0;
 
+  // Proportion calculation for visual bar
+  const okPct = totalVehicles > 0 ? (summary.ok / totalVehicles) * 100 : 0;
+  const duePct = totalVehicles > 0 ? (summary.due_soon / totalVehicles) * 100 : 0;
+  const expPct = totalVehicles > 0 ? (summary.expired / totalVehicles) * 100 : 0;
+  const notSetPct = totalVehicles > 0 ? (summary.not_set / totalVehicles) * 100 : 0;
+
   return (
-    <section className={cn(adminCardClass, "overflow-hidden rounded-xl")}>
-      <div className="flex flex-col gap-4 border-b border-slate-200/80 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:border-border">
+    <section className={cn(adminCardClass, "flex flex-col overflow-hidden rounded-xl border border-slate-200/90 shadow-sm dark:border-border")}>
+      <div className="flex flex-col gap-4 border-b border-slate-100 bg-white px-5 py-4.5 sm:flex-row sm:items-center sm:justify-between sm:px-6 dark:border-border/60 dark:bg-card">
         <div className="flex min-w-0 items-start gap-3">
-          <div className={adminIconBoxClass}>
-            <Icon className="size-4" />
+          <div className={cn(adminIconBoxClass, "mt-0.5 shrink-0")}>
+            <Icon className="size-4.5" />
           </div>
           <div className="min-w-0">
-            <h2 className={cn("text-base font-semibold", adminHeadingClass)}>{title}</h2>
-            <p className="mt-0.5 text-sm text-slate-500 dark:text-muted-foreground">{description}</p>
+            <div className="flex items-center gap-2">
+              <h2 className={cn("text-base font-bold", adminHeadingClass)}>{title}</h2>
+              {!loading && (
+                <span className={cn(
+                  "rounded-full px-2 py-0.5 text-[11px] font-semibold tracking-wide border",
+                  validPercent >= 90
+                    ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300"
+                    : validPercent >= 70
+                      ? "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300"
+                      : "border-red-200 bg-red-50 text-red-700 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-300"
+                )}>
+                  {validPercent}% {statsCopy.ok}
+                </span>
+              )}
+            </div>
+            <p className="mt-0.5 text-xs text-slate-500 dark:text-muted-foreground">{description}</p>
           </div>
         </div>
         <Button
           variant="outline"
           size="sm"
-          className="shrink-0 self-start sm:self-center"
+          className="h-8.5 shrink-0 gap-1.5 self-start rounded-lg border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 hover:bg-slate-50 sm:self-center dark:border-border dark:bg-card dark:text-muted-foreground"
           render={<Link href={basePath} />}
           nativeButton={false}
         >
@@ -108,57 +119,124 @@ function ComplianceDomainSection({
         </Button>
       </div>
 
-      <div className="space-y-4 px-5 py-4 sm:px-6 sm:py-5">
-        {loading ? (
-          <Skeleton className="h-4 w-64" />
-        ) : (
-          <p className="text-sm text-slate-600 dark:text-muted-foreground">
-            {formatMessage(overviewCopy.compliantSummary, {
-              valid: String(summary.ok),
-              total: String(totalVehicles),
-            })}{" "}
-            <span className="text-slate-400 dark:text-muted-foreground/70">({validPercent}%)</span>
-            {issues > 0 ? (
-              <>
-                {" · "}
-                <span className="font-medium text-amber-800 dark:text-amber-200">
-                  {formatMessage(overviewCopy.needsAction, { count: String(issues) })}
-                </span>
-              </>
-            ) : (
-              <>
-                {" · "}
-                <span className="font-medium text-emerald-700 dark:text-emerald-300">
-                  {overviewCopy.allCompliant}
-                </span>
-              </>
-            )}
-          </p>
-        )}
+      <div className="flex flex-1 flex-col justify-between space-y-4 p-5 sm:p-6">
+        <div>
+          {loading ? (
+            <Skeleton className="h-4 w-64" />
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs text-slate-600 dark:text-muted-foreground">
+                <p>
+                  {formatMessage(overviewCopy.compliantSummary, {
+                    valid: String(summary.ok),
+                    total: String(totalVehicles),
+                  })}
+                  {issues > 0 ? (
+                    <>
+                      {" · "}
+                      <span className="font-semibold text-amber-700 dark:text-amber-300">
+                        {formatMessage(overviewCopy.needsAction, { count: String(issues) })}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      {" · "}
+                      <span className="font-semibold text-emerald-700 dark:text-emerald-300">
+                        {overviewCopy.allCompliant}
+                      </span>
+                    </>
+                  )}
+                </p>
+                <span className="font-semibold text-slate-700 dark:text-foreground">{validPercent}%</span>
+              </div>
+
+              {/* Stacked Progress Bar */}
+              <div className="flex h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-muted">
+                {okPct > 0 && (
+                  <div
+                    style={{ width: `${okPct}%` }}
+                    className="h-full bg-emerald-500 transition-all duration-500"
+                    title={`${statsCopy.ok}: ${summary.ok}`}
+                  />
+                )}
+                {duePct > 0 && (
+                  <div
+                    style={{ width: `${duePct}%` }}
+                    className="h-full bg-amber-500 transition-all duration-500"
+                    title={`${statsCopy.dueSoon}: ${summary.due_soon}`}
+                  />
+                )}
+                {expPct > 0 && (
+                  <div
+                    style={{ width: `${expPct}%` }}
+                    className="h-full bg-red-500 transition-all duration-500"
+                    title={`${statsCopy.expired}: ${summary.expired}`}
+                  />
+                )}
+                {notSetPct > 0 && (
+                  <div
+                    style={{ width: `${notSetPct}%` }}
+                    className="h-full bg-slate-300 dark:bg-slate-600 transition-all duration-500"
+                    title={`${statsCopy.notSet}: ${summary.not_set}`}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {STATUS_ORDER.map((status) => {
             const count = summary[status];
+            const config = COMPLIANCE_STATUS_CONFIG[status];
 
             return (
               <Link
                 key={status}
                 href={`${basePath}?status=${status}`}
                 className={cn(
-                  "rounded-lg border px-3 py-3 transition-colors",
-                  STATUS_CARD_CLASS[status],
+                  "group relative flex flex-col justify-between rounded-xl border p-3.5 transition-all hover:shadow-xs",
+                  config.cardBorderClass,
+                  config.cardBgClass,
                 )}
               >
-                <p className="text-xs font-medium text-slate-600 dark:text-muted-foreground">
-                  {statusLabel(status, statsCopy)}
-                </p>
+                <div className="flex items-center justify-between gap-1">
+                  <div className="flex min-w-0 items-center gap-1.5">
+                    <span
+                      className={cn(
+                        "size-1.5 shrink-0 rounded-full",
+                        config.dotClass,
+                        config.pulse && "animate-pulse",
+                      )}
+                    />
+                    <p
+                      className="min-w-0 truncate text-xs font-medium text-slate-600 dark:text-muted-foreground"
+                      title={status === "due_soon" ? statsCopy.dueSoon : statusLabel(status, statsCopy)}
+                    >
+                      {status === "due_soon" ? (
+                        <>
+                          {/* Full descriptive label on wide single-column cards */}
+                          <span className="hidden sm:max-xl:inline min-[1750px]:inline">
+                            {statsCopy.dueSoon}
+                          </span>
+                          {/* Concise label on smaller cards (mobile & 2-column desktop) */}
+                          <span className="inline sm:max-xl:hidden min-[1750px]:hidden">
+                            {statusCopy.due_soon}
+                          </span>
+                        </>
+                      ) : (
+                        statusLabel(status, statsCopy)
+                      )}
+                    </p>
+                  </div>
+                </div>
                 {loading ? (
-                  <Skeleton className="mt-2 h-7 w-10" />
+                  <Skeleton className="mt-2.5 h-7 w-10" />
                 ) : (
                   <p
                     className={cn(
-                      "mt-1 text-2xl font-bold tabular-nums tracking-tight",
-                      STATUS_COUNT_CLASS[status],
+                      "mt-2 text-2xl font-extrabold tabular-nums tracking-tight transition-transform group-hover:translate-x-0.5",
+                      config.textClass,
                     )}
                   >
                     {count}
@@ -218,7 +296,8 @@ export function ComplianceOverviewPage() {
 
   return (
     <div className="w-full max-w-none space-y-6">
-      <header className="space-y-1">
+      <header className="space-y-1.5">
+        <p className={cn(adminEyebrowClass, "text-xs")}>{copy.eyebrow}</p>
         <h1 className={cn("text-2xl font-bold tracking-tight sm:text-[1.75rem]", adminHeadingClass)}>
           {copy.overview.title}
         </h1>
@@ -228,13 +307,20 @@ export function ComplianceOverviewPage() {
       </header>
 
       {!loading && data.vehicles_needing_attention > 0 ? (
-        <div className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50/80 px-4 py-3 text-sm text-amber-900 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-100">
-          <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-          <p>
-            {formatMessage(copy.overview.attentionMessage, {
-              count: String(data.vehicles_needing_attention),
-            })}
-          </p>
+        <div className="flex items-center gap-3.5 rounded-xl border border-amber-300/80 bg-gradient-to-r from-amber-50/90 via-amber-50/50 to-white p-4 text-sm text-amber-950 shadow-xs dark:border-amber-400/30 dark:from-amber-400/10 dark:via-amber-400/5 dark:to-transparent dark:text-amber-100">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-500/15 text-amber-700 dark:bg-amber-400/20 dark:text-amber-300">
+            <AlertTriangle className="size-4.5" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-amber-900 dark:text-amber-200">
+              {formatMessage(copy.overview.attentionMessage, {
+                count: String(data.vehicles_needing_attention),
+              })}
+            </p>
+            <p className="mt-0.5 text-xs text-amber-800/80 dark:text-amber-300/80">
+              {copy.overview.description}
+            </p>
+          </div>
         </div>
       ) : null}
 
@@ -248,6 +334,11 @@ export function ComplianceOverviewPage() {
         />
         <StatCard
           title={copy.stats.needsAttention}
+          titleAccessory={
+            data.vehicles_needing_attention > 0 ? (
+              <span className="inline-flex size-2 rounded-full bg-amber-500 animate-pulse" />
+            ) : undefined
+          }
           value={data.vehicles_needing_attention}
           description={copy.stats.needsAttentionDescription}
           icon={AlertTriangle}
@@ -255,6 +346,9 @@ export function ComplianceOverviewPage() {
         />
         <StatCard
           title={copy.stats.insuranceNotSet}
+          titleAccessory={
+            <span className="inline-flex size-2 rounded-full bg-slate-400" />
+          }
           value={data.insurance.not_set}
           description={copy.stats.insuranceNotSetDescription}
           icon={ShieldCheck}
@@ -263,6 +357,9 @@ export function ComplianceOverviewPage() {
         />
         <StatCard
           title={copy.stats.inspectionNotSet}
+          titleAccessory={
+            <span className="inline-flex size-2 rounded-full bg-slate-400" />
+          }
           value={data.inspection.not_set}
           description={copy.stats.inspectionNotSetDescription}
           icon={ClipboardList}
@@ -271,7 +368,7 @@ export function ComplianceOverviewPage() {
         />
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-2">
         <ComplianceDomainSection
           type="insurance"
           title={copy.overview.insuranceSection}
@@ -279,6 +376,7 @@ export function ComplianceOverviewPage() {
           summary={data.insurance}
           totalVehicles={data.total_vehicles}
           statsCopy={copy.stats}
+          statusCopy={copy.status}
           overviewCopy={copy.overview}
           loading={loading}
         />
@@ -289,6 +387,7 @@ export function ComplianceOverviewPage() {
           summary={data.inspection}
           totalVehicles={data.total_vehicles}
           statsCopy={copy.stats}
+          statusCopy={copy.status}
           overviewCopy={copy.overview}
           loading={loading}
         />

@@ -83,3 +83,13 @@ export const adminToastSuccessClass =
   "border-l-[3px] border-l-[var(--brand-accent)]";
 
 export const adminToastErrorClass = "border-l-[3px] border-l-red-400";
+
+export const adminFieldErrorClass =
+  "border-red-300 bg-red-50/60 text-red-900 placeholder:text-red-400 focus-visible:border-red-400 focus-visible:ring-red-200/60 dark:border-red-400/40 dark:bg-red-950/25 dark:text-red-200 dark:placeholder:text-red-300/60";
+
+export const adminInputGroupErrorClass =
+  "border-red-300 bg-red-50/60 text-red-900 focus-within:border-red-400 focus-within:ring-3 focus-within:ring-red-200/60 dark:border-red-400/40 dark:bg-red-950/25 dark:text-red-200";
+
+export const adminLabelErrorClass = "text-red-700 dark:text-red-400";
+
+export const adminErrorMessageClass = "text-xs font-medium text-red-600 dark:text-red-400";

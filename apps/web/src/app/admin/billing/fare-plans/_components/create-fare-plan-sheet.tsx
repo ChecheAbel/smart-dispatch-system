@@ -1,8 +1,35 @@
 "use client";
 
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
-import { Coins, Languages, MapPin, Receipt, Settings2 } from "lucide-react";
-import type { FarePlan, PricingModel, Region, VehicleType, VehicleClass } from "@smart-dispatch/types";
+import {
+  ArrowRight,
+  Calculator,
+  CalendarClock,
+  CarFront,
+  Check,
+  ChevronDown,
+  Clock,
+  Coins,
+  Gauge,
+  Info,
+  Languages,
+  Layers,
+  MapPin,
+  Milestone,
+  Receipt,
+  Settings2,
+  Sliders,
+  Sparkles,
+  Timer,
+  Zap,
+} from "lucide-react";
+import type {
+  FarePlan,
+  PricingModel,
+  Region,
+  VehicleType,
+  VehicleClass,
+} from "@smart-dispatch/types";
 import {
   createFarePlan,
   fetchFarePlanById,
@@ -13,9 +40,13 @@ import { fetchActiveVehicleTypes } from "@/lib/vehicle-type-api";
 import { fetchActiveVehicleClasses } from "@/lib/vehicle-class-api";
 import {
   adminCardClass,
+  adminErrorMessageClass,
+  adminFieldErrorClass,
   adminHeadingClass,
   adminIconBoxClass,
   adminInputClass,
+  adminInputGroupErrorClass,
+  adminLabelErrorClass,
   adminPrimaryButtonClass,
 } from "@/lib/admin-theme";
 import { LOCALE_OPTIONS } from "@/lib/locale";
@@ -46,10 +77,10 @@ import {
 import { cn } from "@/lib/utils";
 
 const PRICING_MODELS: PricingModel[] = [
-  "flat",
+  "distance_time",
   "distance",
   "time",
-  "distance_time",
+  "flat",
   "hourly",
 ];
 
@@ -178,11 +209,53 @@ function parseOptionalInt(value: string) {
 }
 
 const fieldClassName = adminInputClass;
-const fieldErrorClassName =
-  "border-red-300 bg-red-50/60 text-red-900 placeholder:text-red-400 focus-visible:border-red-400 focus-visible:ring-red-200/60";
-const selectTriggerClassName = cn(fieldClassName, "w-full");
+const fieldErrorClassName = adminFieldErrorClass;
+const selectTriggerClassName = cn(fieldClassName, "w-full transition-all hover:border-slate-300 dark:hover:border-slate-600");
 const textareaClassName =
-  "flex min-h-[88px] w-full resize-y rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50";
+  "flex min-h-[90px] w-full resize-y rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:border-border dark:bg-muted/55 dark:text-foreground";
+
+function getPricingModelMeta(isAm: boolean): Record<
+  PricingModel,
+  {
+    icon: typeof Gauge;
+    formula: string;
+    subtitle: string;
+  }
+> {
+  return {
+    distance_time: {
+      icon: Gauge,
+      formula: isAm ? "መሰረታዊ + (ኪ.ሜ × ዋጋ) + (ደቂቃ × ዋጋ)" : "Base + (km × rate) + (min × rate)",
+      subtitle: isAm
+        ? "ለከተማ ታክሲ ጉዞዎች ርቀት እና የቆይታ ጊዜ የተጣመሩበት።"
+        : "Distance & duration combined for urban taxi rides.",
+    },
+    distance: {
+      icon: Milestone,
+      formula: isAm ? "መሰረታዊ + (ኪ.ሜ × ዋጋ)" : "Base + (km × rate)",
+      subtitle: isAm ? "በተሸፈነው ርቀት ብቻ የሚወሰን ክፍያ።" : "Fare driven strictly by distance covered.",
+    },
+    time: {
+      icon: Clock,
+      formula: isAm ? "መሰረታዊ + (ደቂቃ × ዋጋ)" : "Base + (min × rate)",
+      subtitle: isAm ? "በወሰደው የጉዞ ጊዜ የሚወሰን ክፍያ።" : "Fare driven by elapsed trip duration.",
+    },
+    flat: {
+      icon: Coins,
+      formula: isAm ? "ቋሚ የተወሰነ ዋጋ" : "Fixed Flat Amount",
+      subtitle: isAm
+        ? "ርቀት ወይም ጊዜ ሳይታይ የተረጋገጠ ቋሚ ዋጋ።"
+        : "Guaranteed single rate regardless of distance/time.",
+    },
+    hourly: {
+      icon: CalendarClock,
+      formula: isAm ? "የሰዓት ዋጋ × ሰዓታት" : "Hourly Rate × Hours",
+      subtitle: isAm
+        ? "ከዝቅተኛ የቦታ ማስያዣ ሰዓት ጋር በሰዓት የሚሰላ።"
+        : "Billed per hour with minimum booking duration.",
+    },
+  };
+}
 
 function FormSection({
   icon: Icon,
@@ -196,17 +269,17 @@ function FormSection({
   children: ReactNode;
 }) {
   return (
-    <Card className={cn(adminCardClass, "gap-0 overflow-hidden py-0 shadow-none ring-0")}>
-      <div className="flex items-start gap-3 border-b border-slate-100 px-5 py-4">
-        <div className={cn(adminIconBoxClass, "shrink-0")}>
-          <Icon className="size-4" />
+    <Card className={cn(adminCardClass, "group gap-0 overflow-hidden rounded-xl border border-slate-200/90 py-0 shadow-sm transition-all duration-200 hover:border-slate-300/90 dark:border-border")}>
+      <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50/50 px-5 py-3.5 dark:border-border/60 dark:bg-muted/20">
+        <div className={cn(adminIconBoxClass, "size-8 shrink-0 p-0 flex items-center justify-center rounded-lg")}>
+          <Icon className="size-4 text-[var(--brand-primary)] dark:text-[var(--brand-accent)]" />
         </div>
-        <div className="min-w-0 flex-1 space-y-1">
-          <p className={cn("text-sm font-semibold leading-snug", adminHeadingClass)}>{title}</p>
-          <p className="text-xs leading-relaxed text-slate-500">{description}</p>
+        <div>
+          <p className={cn("text-sm font-semibold tracking-tight", adminHeadingClass)}>{title}</p>
+          <p className="text-xs text-slate-500 dark:text-muted-foreground">{description}</p>
         </div>
       </div>
-      <div className="space-y-5 px-5 py-5">{children}</div>
+      <div className="space-y-4 px-5 py-4">{children}</div>
     </Card>
   );
 }
@@ -219,6 +292,8 @@ function CurrencyInput({
   error,
   min = "0",
   step = "0.01",
+  unitSuffix,
+  placeholder = "0.00",
 }: {
   id: string;
   currency: string;
@@ -227,20 +302,22 @@ function CurrencyInput({
   error?: boolean;
   min?: string;
   step?: string;
+  unitSuffix?: string;
+  placeholder?: string;
 }) {
   const currencyCode = currency.trim().toUpperCase() || "ETB";
 
   return (
     <div
       className={cn(
-        "flex overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50",
+        "group flex items-center overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-all duration-150 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/40 dark:border-border dark:bg-muted/50",
         error &&
-          "border-red-300 bg-red-50/60 focus-within:border-red-400 focus-within:ring-red-200/60",
+          "border-red-300 bg-red-50/60 focus-within:border-red-400 focus-within:ring-red-200/60 dark:border-red-500/50 dark:bg-red-950/20",
       )}
     >
       <span
         aria-hidden
-        className="flex shrink-0 items-center border-r border-slate-200 bg-slate-50 px-3 text-sm font-medium text-slate-600 tabular-nums"
+        className="flex h-10 shrink-0 items-center border-r border-slate-200 bg-slate-50/80 px-3 text-xs font-semibold uppercase tracking-wider text-slate-600 tabular-nums dark:border-border dark:bg-muted/70 dark:text-muted-foreground"
       >
         {currencyCode}
       </span>
@@ -251,11 +328,20 @@ function CurrencyInput({
         step={step}
         value={value}
         onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
         className={cn(
-          "h-10 rounded-none border-0 bg-transparent px-3.5 shadow-none focus-visible:ring-0",
-          error && "text-red-900 placeholder:text-red-400",
+          "h-10 rounded-none border-0 bg-transparent px-3 text-sm font-medium tabular-nums shadow-none focus-visible:ring-0",
+          error && "text-red-900 placeholder:text-red-400 dark:text-red-200",
         )}
       />
+      {unitSuffix ? (
+        <span
+          aria-hidden
+          className="flex h-10 shrink-0 items-center border-l border-slate-100 bg-slate-50/40 px-2.5 text-xs font-medium text-slate-500 dark:border-border dark:bg-muted/40 dark:text-muted-foreground"
+        >
+          {unitSuffix}
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -268,6 +354,7 @@ export function CreateFarePlanSheet({
   onSuccess,
 }: CreateFarePlanSheetProps) {
   const { locale } = useLocale();
+  const isAm = locale === "am";
   const copy = getAdminFarePlansMessages(locale);
   const formCopy = copy.form;
   const toastCopy = copy.toast;
@@ -281,6 +368,66 @@ export function CreateFarePlanSheet({
   const [vehicleTypes, setVehicleTypes] = useState<VehicleType[]>([]);
   const [vehicleClasses, setVehicleClasses] = useState<VehicleClass[]>([]);
   const [regions, setRegions] = useState<Region[]>([]);
+
+  // UI state for language tab
+  const [activeLangTab, setActiveLangTab] = useState<"en" | "am">("en");
+
+  // UI state for Live Fare Simulator
+  const [showSimulator, setShowSimulator] = useState(false);
+  const [simDistance, setSimDistance] = useState<number>(5);
+  const [simDuration, setSimDuration] = useState<number>(15);
+  const [simWaiting, setSimWaiting] = useState<number>(5);
+  const [simHours, setSimHours] = useState<number>(2);
+
+  const pricingModelMeta = useMemo(() => getPricingModelMeta(isAm), [isAm]);
+
+  const simUi = useMemo(
+    () => ({
+      title: isAm ? "የቀጥታ የክፍያ ማስመሰያ እና ቅድመ-እይታ" : "Live Fare Simulator & Preview",
+      subtitle: isAm
+        ? "ተመኖችን ሲያስተካክሉ የጉዞ ስሌቶችን ወዲያውኑ ይሞክሩ"
+        : "Test trip calculations reactively as you adjust rates",
+      toggle: showSimulator ? (isAm ? "አሳንስ" : "Collapse") : (isAm ? "ዘርጋ" : "Expand"),
+      duration: isAm ? "የቆይታ ጊዜ፦" : "Duration:",
+      hours: isAm ? "ሰዓታት" : "Hours",
+      distance: isAm ? "ርቀት" : "Distance",
+      time: isAm ? "ጊዜ" : "Time",
+      waiting: isAm ? "መጠባበቂያ" : "Waiting",
+      km: isAm ? "ኪ.ሜ" : "km",
+      min: isAm ? "ደቂቃ" : "min",
+      baseOrFlat: isAm ? "መሰረታዊ / ቋሚ" : "Base / Flat",
+      billedHours: isAm ? "የተሰላ ሰዓታት" : "Billed Hours",
+      distanceCost: isAm ? "የርቀት ወጪ" : "Distance Cost",
+      durationCost: isAm ? "የጊዜ ወጪ" : "Duration Cost",
+      bookingFee: isAm ? "የቦታ ማስያዣ ክፍያ" : "Booking Fee",
+      estimatedFare: isAm ? "የተገመተ የናሙና ክፍያ፦" : "Estimated Sample Fare:",
+      clampedFloor: (cur: string, fee: string) =>
+        isAm ? `(በዝቅተኛ ገደብ ተወስኗል፦ ${cur} ${fee})` : `(Clamped to Minimum Floor: ${cur} ${fee})`,
+    }),
+    [isAm, showSimulator],
+  );
+
+  const unitLabels = useMemo(
+    () => ({
+      perKm: isAm ? "/ ኪ.ሜ" : "/ km",
+      perMin: isAm ? "/ ደቂቃ" : "/ min",
+      perHr: isAm ? "/ ሰዓት" : "/ hr",
+      flat: isAm ? "ቋሚ" : "flat",
+      base: isAm ? "መሰረታዊ" : "base",
+      minFloor: isAm ? "ዝቅተኛ" : "min floor",
+      perRide: isAm ? "በጉዞ" : "per ride",
+      minsFree: isAm ? "ደቂቃ ነፃ" : "mins free",
+      hoursMin: isAm ? "ሰዓታት ዝቅተኛ" : "hours min.",
+      postGrace: isAm ? "ከነፃ ጊዜ በኋላ" : "Post-grace",
+      serviceSurcharge: isAm ? "ተጨማሪ ክፍያ" : "Service surcharge",
+      rentalDuration: isAm ? "የኪራይ ቆይታ" : "Rental duration",
+      priceFloor: isAm ? "ዝቅተኛ ዋጋ" : "Price floor",
+      per60Mins: isAm ? "በ60 ደቂቃ" : "Per 60 mins",
+      singleCharge: isAm ? "አንድ ክፍያ" : "Single charge",
+      initialFlagfall: isAm ? "የመነሻ ክፍያ" : "Initial flagfall",
+    }),
+    [isAm],
+  );
 
   const isHourly = form.pricingModel === "hourly";
   const isFlat = form.pricingModel === "flat";
@@ -299,19 +446,6 @@ export function CreateFarePlanSheet({
     if (isHourly) return formCopy.perHourRate;
     return formCopy.baseFare;
   }, [formCopy.baseFare, formCopy.flatFare, formCopy.perHourRate, isFlat, isHourly]);
-
-  const pricingModelHelp = form.pricingModel
-    ? copy.pricingModelHelp[form.pricingModel as PricingModel]
-    : null;
-
-  const pricingModelItems = useMemo(
-    () =>
-      PRICING_MODELS.map((model) => ({
-        label: copy.pricingModels[model],
-        value: model,
-      })),
-    [copy.pricingModels],
-  );
 
   const vehicleTypeItems = useMemo(
     () => [
@@ -349,7 +483,7 @@ export function CreateFarePlanSheet({
   const currencyItems = useMemo(() => {
     const items: Array<{ value: string; label: string }> = CURRENCY_CODES.map((code) => ({
       value: code,
-      label: formCopy.currencies[code],
+      label: formCopy.currencies[code] ?? code,
     }));
 
     if (form.currency && !CURRENCY_CODES.includes(form.currency as (typeof CURRENCY_CODES)[number])) {
@@ -366,6 +500,8 @@ export function CreateFarePlanSheet({
       setError(null);
       setSubmitting(false);
       setLoading(false);
+      setActiveLangTab("en");
+      setShowSimulator(false);
       return;
     }
 
@@ -458,6 +594,84 @@ export function CreateFarePlanSheet({
     setError(null);
   }
 
+  // Live Fare Simulator Calculation
+  const simulationCalculation = useMemo(() => {
+    const cur = form.currency.trim().toUpperCase() || "ETB";
+    const base = Number(form.baseFare) || 0;
+    const kmRate = Number(form.perKmRate) || 0;
+    const minRate = Number(form.perMinuteRate) || 0;
+    const bookingFee = Number(form.bookingFee) || 0;
+    const freeMins = Number(form.freeWaitingMinutes) || 0;
+    const waitFeePerMin = Number(form.waitingFeePerMinute) || 0;
+    const minFare = Number(form.minimumFare) || 0;
+    const minHours = Number(form.minimumHours) || 0;
+
+    let subtotal = 0;
+    let distanceCharge = 0;
+    let durationCharge = 0;
+    let waitingCharge = 0;
+    let effectiveHours = simHours;
+    let minimumApplied = false;
+
+    const billableWaitingMins = Math.max(0, simWaiting - freeMins);
+    waitingCharge = billableWaitingMins * waitFeePerMin;
+
+    if (form.pricingModel === "flat") {
+      subtotal = base + bookingFee;
+    } else if (form.pricingModel === "hourly") {
+      effectiveHours = Math.max(simHours, minHours > 0 ? minHours : 1);
+      const hourlyCharge = effectiveHours * base;
+      subtotal = hourlyCharge + bookingFee;
+    } else if (form.pricingModel === "distance") {
+      distanceCharge = simDistance * kmRate;
+      subtotal = base + distanceCharge + bookingFee + waitingCharge;
+    } else if (form.pricingModel === "time") {
+      durationCharge = simDuration * minRate;
+      subtotal = base + durationCharge + bookingFee + waitingCharge;
+    } else {
+      // default: distance_time
+      distanceCharge = simDistance * kmRate;
+      durationCharge = simDuration * minRate;
+      subtotal = base + distanceCharge + durationCharge + bookingFee + waitingCharge;
+    }
+
+    let total = subtotal;
+    if (form.pricingModel !== "hourly" && minFare > 0 && subtotal < minFare) {
+      total = minFare;
+      minimumApplied = true;
+    }
+
+    return {
+      cur,
+      base,
+      distanceCharge,
+      durationCharge,
+      waitingCharge,
+      billableWaitingMins,
+      bookingFee,
+      subtotal: Math.round(subtotal * 100) / 100,
+      total: Math.round(total * 100) / 100,
+      minimumApplied,
+      minFare,
+      effectiveHours,
+    };
+  }, [
+    form.pricingModel,
+    form.currency,
+    form.baseFare,
+    form.perKmRate,
+    form.perMinuteRate,
+    form.bookingFee,
+    form.freeWaitingMinutes,
+    form.waitingFeePerMinute,
+    form.minimumFare,
+    form.minimumHours,
+    simDistance,
+    simDuration,
+    simWaiting,
+    simHours,
+  ]);
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
@@ -469,6 +683,7 @@ export function CreateFarePlanSheet({
 
     if (!enName) {
       nextErrors.enName = formCopy.errors.enNameRequired;
+      setActiveLangTab("en");
     }
 
     if (!form.pricingModel) {
@@ -614,87 +829,695 @@ export function CreateFarePlanSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="flex w-full flex-col gap-0 overflow-y-auto border-l border-slate-200 p-0 data-[side=right]:sm:max-w-2xl data-[side=right]:lg:max-w-3xl"
+        className="flex w-full flex-col gap-0 overflow-hidden border-l border-slate-200 bg-[#f8fafb] p-0 data-[side=right]:sm:max-w-2xl data-[side=right]:lg:max-w-3xl dark:border-border dark:bg-background"
       >
-        <SheetHeader className="border-b border-slate-200 px-6 py-5">
-          <SheetTitle className={adminHeadingClass}>
-            {isEdit ? formCopy.editTitle : formCopy.createTitle}
-          </SheetTitle>
-          <SheetDescription>
-            {isEdit ? formCopy.editDescription : formCopy.createDescription}
-          </SheetDescription>
-        </SheetHeader>
+        {/* Top Gradient Banner & Header */}
+        <div className="relative border-b border-slate-200 bg-white dark:border-border dark:bg-card">
+          <div className="h-1.5 w-full bg-gradient-to-r from-[var(--brand-primary)] via-[#28574d] to-[var(--brand-accent)]" />
+          <SheetHeader className="px-6 py-4 sm:px-7">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex size-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--brand-primary)_10%,transparent)] ring-1 ring-[var(--brand-primary)]/20 dark:bg-accent">
+                  <Coins className="size-5 text-[var(--brand-primary)] dark:text-[var(--brand-accent)]" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <SheetTitle className={cn("text-lg font-bold tracking-tight", adminHeadingClass)}>
+                      {isEdit ? formCopy.editTitle : formCopy.createTitle}
+                    </SheetTitle>
+                  </div>
+                  <SheetDescription className="text-xs text-slate-500 dark:text-muted-foreground">
+                    {isEdit ? formCopy.editDescription : formCopy.createDescription}
+                  </SheetDescription>
+                </div>
+              </div>
+            </div>
+          </SheetHeader>
+        </div>
 
-        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
-          <div className="space-y-4 px-6 py-5">
+        {/* Scrollable Form Content */}
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5 sm:px-7">
             {loading ? (
-              <p className="text-sm text-slate-500">{formCopy.loading}</p>
+              <div className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white p-8 text-sm text-slate-500 dark:border-border dark:bg-card dark:text-muted-foreground">
+                <div className="size-4 animate-spin rounded-full border-2 border-[var(--brand-primary)] border-t-transparent" />
+                {formCopy.loading}
+              </div>
             ) : null}
 
             {error ? (
-              <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-                {error}
-              </p>
+              <div className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50/90 p-4 text-sm text-red-800 dark:border-red-500/40 dark:bg-red-950/30 dark:text-red-300">
+                <Info className="mt-0.5 size-4 shrink-0 text-red-600 dark:text-red-400" />
+                <div className="space-y-0.5">
+                  <p className="font-semibold">{isAm ? "ክንውኑ አልተሳካም" : "Action Failed"}</p>
+                  <p className="text-xs leading-relaxed">{error}</p>
+                </div>
+              </div>
             ) : null}
 
+            {/* SECTION 1: Identity & Localization with Segmented Tabs */}
             <FormSection
               icon={Languages}
               title={formCopy.sections.identity}
               description={formCopy.sections.identityDescription}
             >
-              {LOCALE_OPTIONS.map((option) => {
-                const isEnglish = option.value === "en";
-                const nameKey = isEnglish ? "enName" : "amName";
-                const descriptionKey = isEnglish ? "enDescription" : "amDescription";
+              {/* Language Switcher Tabs */}
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-border/60">
+                <div className="flex items-center gap-1.5 rounded-lg bg-slate-100/90 p-1 dark:bg-muted/60">
+                  <button
+                    type="button"
+                    onClick={() => setActiveLangTab("en")}
+                    className={cn(
+                      "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all",
+                      activeLangTab === "en"
+                        ? "bg-white text-[var(--brand-primary)] shadow-sm dark:bg-card dark:text-foreground"
+                        : "text-slate-500 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground",
+                    )}
+                  >
+                    <span>English</span>
+                    {form.enName.trim() ? (
+                      <Check className="size-3 text-emerald-600 dark:text-emerald-400" />
+                    ) : null}
+                  </button>
 
-                return (
-                  <div key={option.value} className="space-y-4 rounded-lg border border-slate-100 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
-                      {option.label}
-                    </p>
-                    <div className="space-y-2">
-                      <Label htmlFor={`fare-plan-${nameKey}`}>
-                        {formCopy.name}
-                        {!isEnglish ? ` ${formCopy.optional}` : null}
+                  <button
+                    type="button"
+                    onClick={() => setActiveLangTab("am")}
+                    className={cn(
+                      "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-all",
+                      activeLangTab === "am"
+                        ? "bg-white text-[var(--brand-primary)] shadow-sm dark:bg-card dark:text-foreground"
+                        : "text-slate-500 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground",
+                    )}
+                  >
+                    <span>አማርኛ</span>
+                    {form.amName.trim() ? (
+                      <Check className="size-3 text-emerald-600 dark:text-emerald-400" />
+                    ) : null}
+                  </button>
+                </div>
+
+                <span className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                  {activeLangTab === "en"
+                    ? (isAm ? "ዋና ስም (የግዴታ)" : "Primary Name (Required)")
+                    : (isAm ? "የአማርኛ ትርጉም (አማራጭ)" : "Amharic Translation (Optional)")}
+                </span>
+              </div>
+
+              {/* Active Tab Panel */}
+              {activeLangTab === "en" ? (
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="fare-plan-enName" className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                        {formCopy.name} (English) <span className="text-red-500">*</span>
                       </Label>
-                      <Input
-                        id={`fare-plan-${nameKey}`}
-                        value={form[nameKey]}
-                        onChange={(event) => updateField(nameKey, event.target.value)}
-                        placeholder={
-                          isEnglish ? formCopy.namePlaceholderEn : formCopy.namePlaceholderAm
-                        }
-                        className={cn(fieldClassName, fieldErrors[nameKey] && fieldErrorClassName)}
-                      />
-                      {fieldErrors[nameKey] ? (
-                        <p className="text-xs text-red-600">{fieldErrors[nameKey]}</p>
-                      ) : null}
+                      <span className="text-[11px] text-slate-400">
+                        {isAm ? "የግዴታ ዋና ስም" : "Required"}
+                      </span>
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor={`fare-plan-${descriptionKey}`}>
-                        {formCopy.description} {formCopy.optional}
-                      </Label>
-                      <textarea
-                        id={`fare-plan-${descriptionKey}`}
-                        value={form[descriptionKey]}
-                        onChange={(event) => updateField(descriptionKey, event.target.value)}
-                        placeholder={formCopy.descriptionPlaceholder}
-                        className={textareaClassName}
-                      />
-                    </div>
+                    <Input
+                      id="fare-plan-enName"
+                      value={form.enName}
+                      onChange={(event) => updateField("enName", event.target.value)}
+                      placeholder={formCopy.namePlaceholderEn}
+                      className={cn(fieldClassName, fieldErrors.enName && fieldErrorClassName)}
+                    />
+                    {fieldErrors.enName ? (
+                      <p className="text-xs font-medium text-red-600 dark:text-red-400">{fieldErrors.enName}</p>
+                    ) : (
+                      <p className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                        {isAm
+                          ? "ለደንበኞች የሚታይ የታሪፍ ስም (ለምሳሌ \"መደበኛ የቀን ታክሲ\" ወይም \"የአየር ማረፊያ ፈጣን\")።"
+                          : "Customer-facing fare name (e.g. \"Standard Daytime Taxi\" or \"Airport Shuttle Express\")."}
+                      </p>
+                    )}
                   </div>
-                );
-              })}
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="fare-plan-enDescription" className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                        {formCopy.description}
+                      </Label>
+                      <span className="text-[11px] text-slate-400">{formCopy.optional}</span>
+                    </div>
+                    <textarea
+                      id="fare-plan-enDescription"
+                      value={form.enDescription}
+                      onChange={(event) => updateField("enDescription", event.target.value)}
+                      placeholder={formCopy.descriptionPlaceholder}
+                      className={textareaClassName}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="fare-plan-amName" className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                        {formCopy.name} (አማርኛ)
+                      </Label>
+                      <span className="text-[11px] text-slate-400">{formCopy.optional}</span>
+                    </div>
+                    <Input
+                      id="fare-plan-amName"
+                      value={form.amName}
+                      onChange={(event) => updateField("amName", event.target.value)}
+                      placeholder={formCopy.namePlaceholderAm}
+                      className={cn(fieldClassName, fieldErrors.amName && fieldErrorClassName)}
+                    />
+                    {fieldErrors.amName ? (
+                      <p className="text-xs font-medium text-red-600 dark:text-red-400">{fieldErrors.amName}</p>
+                    ) : (
+                      <p className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                        {isAm
+                          ? "የታሪፍ ዕቅድ ስም በአማርኛ (ለምሳሌ \"መደበኛ የቀን ታክሲ\")።"
+                          : "Optional Amharic plan name (e.g. \"መደበኛ የቀን ታክሲ\")."}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="fare-plan-amDescription" className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                        {formCopy.description} (አማርኛ)
+                      </Label>
+                      <span className="text-[11px] text-slate-400">{formCopy.optional}</span>
+                    </div>
+                    <textarea
+                      id="fare-plan-amDescription"
+                      value={form.amDescription}
+                      onChange={(event) => updateField("amDescription", event.target.value)}
+                      placeholder={isAm ? "የታሪፍ ዕቅድ ማብራሪያ በአማርኛ..." : "Optional Amharic description..."}
+                      className={textareaClassName}
+                    />
+                  </div>
+                </div>
+              )}
             </FormSection>
 
+            {/* SECTION 2: Pricing Model Selection with Interactive Cards */}
+            <FormSection
+              icon={Coins}
+              title={formCopy.sections.pricing}
+              description={formCopy.sections.pricingDescription}
+            >
+              <div className="space-y-3">
+                <Label className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                  {formCopy.pricingModel} <span className="text-red-500">*</span>
+                </Label>
+
+                {/* Visual Grid of Model Cards */}
+                <div className="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
+                  {PRICING_MODELS.map((model) => {
+                    const isSelected = form.pricingModel === model;
+                    const meta = pricingModelMeta[model];
+                    const ModelIcon = meta.icon;
+
+                    return (
+                      <button
+                        key={model}
+                        type="button"
+                        onClick={() => {
+                          setForm((current) => {
+                            const next: FarePlanFormState = {
+                              ...current,
+                              pricingModel: model,
+                              minimumHours: model === "hourly" ? current.minimumHours : "",
+                            };
+
+                            if (
+                              model === "hourly" &&
+                              current.baseFare &&
+                              current.minimumFare &&
+                              !current.minimumHours
+                            ) {
+                              const base = Number(current.baseFare);
+                              const minimum = Number(current.minimumFare);
+                              if (Number.isFinite(base) && base > 0 && Number.isFinite(minimum)) {
+                                next.minimumHours = deriveMinimumHours(base, minimum);
+                              }
+                            }
+
+                            return next;
+                          });
+                          setFieldErrors((current) => {
+                            const next = { ...current };
+                            delete next.pricingModel;
+                            delete next.minimumFare;
+                            delete next.minimumHours;
+                            delete next.perMinuteRate;
+                            return next;
+                          });
+                          setError(null);
+                        }}
+                        className={cn(
+                          "relative flex flex-col items-start rounded-xl border p-3 text-left transition-all duration-200",
+                          isSelected
+                            ? "border-[var(--brand-primary)] bg-[color-mix(in_srgb,var(--brand-primary)_6%,white)] ring-2 ring-[var(--brand-primary)]/20 shadow-sm dark:border-[var(--brand-accent)] dark:bg-[color-mix(in_srgb,var(--brand-accent)_10%,transparent)] dark:ring-[var(--brand-accent)]/30"
+                            : "border-slate-200/90 bg-white hover:border-slate-300 hover:bg-slate-50/60 dark:border-border dark:bg-card dark:hover:bg-muted/40",
+                        )}
+                      >
+                        <div className="flex w-full items-center justify-between">
+                          <div
+                            className={cn(
+                              "flex size-7 items-center justify-center rounded-lg transition-colors",
+                              isSelected
+                                ? "bg-[var(--brand-primary)] text-white dark:bg-[var(--brand-accent)] dark:text-[#171a1f]"
+                                : "bg-slate-100 text-slate-600 dark:bg-muted dark:text-muted-foreground",
+                            )}
+                          >
+                            <ModelIcon className="size-3.5" />
+                          </div>
+
+                          {isSelected ? (
+                            <span className="flex size-4 items-center justify-center rounded-full bg-[var(--brand-primary)] text-white dark:bg-[var(--brand-accent)] dark:text-[#171a1f]">
+                              <Check className="size-2.5" />
+                            </span>
+                          ) : null}
+                        </div>
+
+                        <p className="mt-2 text-xs font-bold text-slate-900 dark:text-foreground">
+                          {copy.pricingModels[model]}
+                        </p>
+                        <p className="mt-0.5 line-clamp-2 text-[11px] leading-tight text-slate-500 dark:text-muted-foreground">
+                          {meta.subtitle}
+                        </p>
+
+                        <div className="mt-2.5 w-full border-t border-slate-100 pt-2 text-[10px] font-medium text-slate-400 dark:border-border/60">
+                          <span className="font-mono text-[9px] text-slate-500 dark:text-muted-foreground">{meta.formula}</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {fieldErrors.pricingModel ? (
+                  <p className="text-xs font-medium text-red-600 dark:text-red-400">{fieldErrors.pricingModel}</p>
+                ) : null}
+              </div>
+
+              {/* Currency & Base Fare Row */}
+              <div className="grid gap-4 pt-2 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="fare-plan-currency" className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                    {formCopy.currency}
+                  </Label>
+                  <Select
+                    items={currencyItems}
+                    value={form.currency}
+                    onValueChange={(value) => updateField("currency", value ?? "ETB")}
+                  >
+                    <SelectTrigger id="fare-plan-currency" className={selectTriggerClassName}>
+                      <SelectValue placeholder={formCopy.currencyPlaceholder} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {currencyItems.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                    {isAm
+                      ? "ለተሳፋሪ ደረሰኞች እና የክፍያ መጠየቂያዎች የሚያገለግል ገንዘብ።"
+                      : "Billing currency applied to passenger receipts and invoice charges."}
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="fare-plan-base-fare" className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                      {baseFareLabel} <span className="text-red-500">*</span>
+                    </Label>
+                    <span className="text-[11px] text-slate-400">
+                      {isHourly ? unitLabels.per60Mins : isFlat ? unitLabels.singleCharge : unitLabels.initialFlagfall}
+                    </span>
+                  </div>
+                  <CurrencyInput
+                    id="fare-plan-base-fare"
+                    currency={form.currency}
+                    value={form.baseFare}
+                    onChange={(value) => updateField("baseFare", value)}
+                    error={Boolean(fieldErrors.baseFare)}
+                    unitSuffix={isHourly ? unitLabels.perHr : isFlat ? unitLabels.flat : unitLabels.base}
+                    placeholder="0.00"
+                  />
+                  {fieldErrors.baseFare ? (
+                    <p className="text-xs font-medium text-red-600 dark:text-red-400">{fieldErrors.baseFare}</p>
+                  ) : (
+                    <p className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                      {isHourly ? formCopy.perHourRateHelp : (isAm ? "ከተለዋዋጭ ርቀት/ጊዜ በፊት የሚሰላ የመነሻ መጠን።" : "Base starting amount before variable mileage/time.")}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* Dynamic Rates depending on Pricing Model */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                {showPerKmRate ? (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="fare-plan-per-km" className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                      {formCopy.perKmRate}
+                    </Label>
+                    <CurrencyInput
+                      id="fare-plan-per-km"
+                      currency={form.currency}
+                      value={form.perKmRate}
+                      onChange={(value) => updateField("perKmRate", value)}
+                      error={Boolean(fieldErrors.perKmRate)}
+                      unitSuffix={unitLabels.perKm}
+                      placeholder="0.00"
+                    />
+                    {fieldErrors.perKmRate ? (
+                      <p className="text-xs font-medium text-red-600 dark:text-red-400">{fieldErrors.perKmRate}</p>
+                    ) : (
+                      <p className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                        {isAm ? "በጉዞው ወቅት ለተጓዘው እያንዳንዱ ኪሎሜትር የሚጠየቅ።" : "Charged per kilometer traveled during the ride."}
+                      </p>
+                    )}
+                  </div>
+                ) : null}
+
+                {showPerMinuteRate ? (
+                  <div className="space-y-1.5">
+                    <Label htmlFor="fare-plan-per-minute" className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                      {formCopy.perMinuteRate}
+                    </Label>
+                    <CurrencyInput
+                      id="fare-plan-per-minute"
+                      currency={form.currency}
+                      value={form.perMinuteRate}
+                      onChange={(value) => updateField("perMinuteRate", value)}
+                      error={Boolean(fieldErrors.perMinuteRate)}
+                      unitSuffix={unitLabels.perMin}
+                      placeholder="0.00"
+                    />
+                    {fieldErrors.perMinuteRate ? (
+                      <p className="text-xs font-medium text-red-600 dark:text-red-400">{fieldErrors.perMinuteRate}</p>
+                    ) : (
+                      <p className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                        {formCopy.perMinuteRateHelp}
+                      </p>
+                    )}
+                  </div>
+                ) : null}
+
+                {isHourly ? (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="fare-plan-minimum-hours" className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                        {formCopy.minimumHours}
+                      </Label>
+                      <span className="text-[11px] text-slate-400">{unitLabels.rentalDuration}</span>
+                    </div>
+                    <div
+                      className={cn(
+                        "flex items-center overflow-hidden rounded-lg border shadow-sm transition-colors",
+                        fieldErrors.minimumHours
+                          ? adminInputGroupErrorClass
+                          : "border-slate-200 bg-white focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/40 dark:border-border dark:bg-muted/50",
+                      )}
+                    >
+                      <Input
+                        id="fare-plan-minimum-hours"
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        value={form.minimumHours}
+                        onChange={(event) => updateField("minimumHours", event.target.value)}
+                        placeholder="1.0"
+                        aria-invalid={Boolean(fieldErrors.minimumHours)}
+                        className={cn(
+                          "h-10 rounded-none border-0 bg-transparent px-3 text-sm font-medium tabular-nums shadow-none focus-visible:ring-0",
+                          fieldErrors.minimumHours && "text-red-900 placeholder:text-red-400 dark:text-red-200",
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          "flex h-10 shrink-0 items-center border-l px-3 text-xs font-medium",
+                          fieldErrors.minimumHours
+                            ? "border-red-200 bg-red-100/50 text-red-700 dark:border-red-400/30 dark:bg-red-950/40 dark:text-red-300"
+                            : "border-slate-100 bg-slate-50/50 text-slate-500 dark:border-border dark:bg-muted/40 dark:text-muted-foreground",
+                        )}
+                      >
+                        {unitLabels.hoursMin}
+                      </span>
+                    </div>
+                    {fieldErrors.minimumHours ? (
+                      <p className="text-xs font-medium text-red-600 dark:text-red-400">{fieldErrors.minimumHours}</p>
+                    ) : (
+                      <p className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                        {formCopy.minimumHoursHelp}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="fare-plan-minimum" className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                        {formCopy.minimumFare}
+                      </Label>
+                      <span className="text-[11px] text-slate-400">{unitLabels.priceFloor}</span>
+                    </div>
+                    <CurrencyInput
+                      id="fare-plan-minimum"
+                      currency={form.currency}
+                      value={form.minimumFare}
+                      onChange={(value) => updateField("minimumFare", value)}
+                      error={Boolean(fieldErrors.minimumFare)}
+                      unitSuffix={unitLabels.minFloor}
+                      placeholder="0.00"
+                    />
+                    {fieldErrors.minimumFare ? (
+                      <p className="text-xs font-medium text-red-600 dark:text-red-400">{fieldErrors.minimumFare}</p>
+                    ) : (
+                      <p className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                        {isAm ? "የጉዞ ክፍያው ከዚህ መጠን በታች እንዳይወርድ ያረጋግጣል።" : "Guarantees the trip fare won't fall below this amount."}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="fare-plan-booking-fee" className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                      {formCopy.bookingFee}
+                    </Label>
+                    <span className="text-[11px] text-slate-400">{unitLabels.serviceSurcharge}</span>
+                  </div>
+                  <CurrencyInput
+                    id="fare-plan-booking-fee"
+                    currency={form.currency}
+                    value={form.bookingFee}
+                    onChange={(value) => updateField("bookingFee", value)}
+                    error={Boolean(fieldErrors.bookingFee)}
+                    unitSuffix={unitLabels.perRide}
+                    placeholder="0.00"
+                  />
+                  {fieldErrors.bookingFee ? (
+                    <p className="text-xs font-medium text-red-600 dark:text-red-400">{fieldErrors.bookingFee}</p>
+                  ) : (
+                    <p className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                      {isAm ? "በጠቅላላ ክፍያ ላይ የሚታከል ቋሚ የመድረክ ማስያዣ ክፍያ።" : "Fixed access or platform booking fee added to total."}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* LIVE FARE SIMULATOR PREVIEW */}
+              <div className="mt-3 overflow-hidden rounded-xl border border-slate-200/90 bg-gradient-to-br from-slate-50/80 via-white to-slate-50/50 p-3.5 shadow-sm dark:border-border dark:from-card dark:via-muted/20 dark:to-card">
+                <div
+                  className={cn(
+                    "flex items-center justify-between cursor-pointer select-none",
+                    showSimulator && "border-b border-slate-100 pb-3 dark:border-border/60",
+                  )}
+                  onClick={() => setShowSimulator((prev) => !prev)}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex size-7 items-center justify-center rounded-lg bg-[var(--brand-primary)] text-white dark:bg-[var(--brand-accent)] dark:text-[#171a1f]">
+                      <Calculator className="size-3.5" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-900 dark:text-foreground">
+                        {simUi.title}
+                      </p>
+                      <p className="text-[11px] text-slate-500 dark:text-muted-foreground">
+                        {simUi.subtitle}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowSimulator((prev) => !prev);
+                    }}
+                    className="h-7 px-2.5 text-[11px] font-medium text-slate-600 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground"
+                  >
+                    <Sliders className="size-3 mr-1" />
+                    {simUi.toggle}
+                  </Button>
+                </div>
+
+                {showSimulator ? (
+                  <div className="mt-3 space-y-3.5">
+                    {/* Controls */}
+                    <div className="grid grid-cols-3 gap-2.5">
+                      {form.pricingModel === "hourly" ? (
+                        <div className="col-span-3 space-y-1">
+                          <div className="flex justify-between text-[11px]">
+                            <span className="font-medium text-slate-600 dark:text-muted-foreground">{simUi.duration}</span>
+                            <span className="font-semibold text-slate-900 dark:text-foreground">{simHours} {simUi.hours}</span>
+                          </div>
+                          <input
+                            type="range"
+                            min="0.5"
+                            max="12"
+                            step="0.5"
+                            value={simHours}
+                            onChange={(e) => setSimHours(Number(e.target.value))}
+                            className="h-1.5 w-full cursor-pointer accent-[var(--brand-primary)] dark:accent-[var(--brand-accent)]"
+                          />
+                        </div>
+                      ) : (
+                        <>
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-[11px]">
+                              <span className="font-medium text-slate-600 dark:text-muted-foreground">{simUi.distance}</span>
+                              <span className="font-bold text-slate-900 dark:text-foreground">{simDistance} {simUi.km}</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="1"
+                              max="50"
+                              step="0.5"
+                              value={simDistance}
+                              onChange={(e) => setSimDistance(Number(e.target.value))}
+                              disabled={form.pricingModel === "flat" || form.pricingModel === "time"}
+                              className="h-1.5 w-full cursor-pointer accent-[var(--brand-primary)] disabled:opacity-40 dark:accent-[var(--brand-accent)]"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-[11px]">
+                              <span className="font-medium text-slate-600 dark:text-muted-foreground">{simUi.time}</span>
+                              <span className="font-bold text-slate-900 dark:text-foreground">{simDuration} {simUi.min}</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="1"
+                              max="90"
+                              step="1"
+                              value={simDuration}
+                              onChange={(e) => setSimDuration(Number(e.target.value))}
+                              disabled={form.pricingModel === "flat" || form.pricingModel === "distance"}
+                              className="h-1.5 w-full cursor-pointer accent-[var(--brand-primary)] disabled:opacity-40 dark:accent-[var(--brand-accent)]"
+                            />
+                          </div>
+
+                          <div className="space-y-1">
+                            <div className="flex justify-between text-[11px]">
+                              <span className="font-medium text-slate-600 dark:text-muted-foreground">{simUi.waiting}</span>
+                              <span className="font-bold text-slate-900 dark:text-foreground">{simWaiting} {simUi.min}</span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="30"
+                              step="1"
+                              value={simWaiting}
+                              onChange={(e) => setSimWaiting(Number(e.target.value))}
+                              disabled={form.pricingModel === "flat"}
+                              className="h-1.5 w-full cursor-pointer accent-[var(--brand-primary)] disabled:opacity-40 dark:accent-[var(--brand-accent)]"
+                            />
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Breakdown & Result */}
+                    <div className="rounded-lg bg-white p-3 border border-slate-200/70 dark:bg-card dark:border-border/70">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] pb-2 border-b border-slate-100 dark:border-border/50">
+                        <div>
+                          <p className="text-slate-400">{simUi.baseOrFlat}</p>
+                          <p className="font-semibold text-slate-800 dark:text-foreground">
+                            {simulationCalculation.cur} {simulationCalculation.base.toFixed(2)}
+                          </p>
+                        </div>
+                        {form.pricingModel === "hourly" ? (
+                          <div>
+                            <p className="text-slate-400">{simUi.billedHours}</p>
+                            <p className="font-semibold text-slate-800 dark:text-foreground">
+                              {simulationCalculation.effectiveHours}h
+                            </p>
+                          </div>
+                        ) : (
+                          <>
+                            <div>
+                              <p className="text-slate-400">{simUi.distanceCost}</p>
+                              <p className="font-semibold text-slate-800 dark:text-foreground">
+                                {simulationCalculation.cur} {simulationCalculation.distanceCharge.toFixed(2)}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-slate-400">{simUi.durationCost}</p>
+                              <p className="font-semibold text-slate-800 dark:text-foreground">
+                                {simulationCalculation.cur} {simulationCalculation.durationCharge.toFixed(2)}
+                              </p>
+                            </div>
+                          </>
+                        )}
+                        <div>
+                          <p className="text-slate-400">{simUi.bookingFee}</p>
+                          <p className="font-semibold text-slate-800 dark:text-foreground">
+                            {simulationCalculation.cur} {simulationCalculation.bookingFee.toFixed(2)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2.5">
+                        <div className="space-y-0.5">
+                          <span className="text-[11px] font-medium text-slate-500 dark:text-muted-foreground">
+                            {simUi.estimatedFare}
+                          </span>
+                          {simulationCalculation.minimumApplied ? (
+                            <p className="text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+                              {simUi.clampedFloor(simulationCalculation.cur, simulationCalculation.minFare.toFixed(2))}
+                            </p>
+                          ) : null}
+                        </div>
+
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-xs font-bold text-slate-400">{simulationCalculation.cur}</span>
+                          <span className="text-xl font-black tracking-tight text-[var(--brand-primary)] dark:text-[var(--brand-accent)]">
+                            {simulationCalculation.total.toFixed(2)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </FormSection>
+
+            {/* SECTION 3: Applicable Target Scope (Vehicle & Region) */}
             <FormSection
               icon={MapPin}
               title={formCopy.sections.scope}
               description={formCopy.sections.scopeDescription}
             >
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div className="space-y-2">
-                  <Label>{formCopy.vehicleType}</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                    {formCopy.vehicleType}
+                  </Label>
                   <Select
                     items={vehicleTypeItems}
                     value={form.vehicleTypeId || "all"}
@@ -716,10 +1539,15 @@ export function CreateFarePlanSheet({
                       </SelectGroup>
                     </SelectContent>
                   </Select>
+                  <p className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                    {isAm ? "በተሽከርካሪ አይነት ይለዩ (ለምሳሌ ሴዳን፣ ቫን)።" : "Filter by body/vehicle type (e.g. Sedan, Van)."}
+                  </p>
                 </div>
 
-                <div className="space-y-2">
-                  <Label>{formCopy.vehicleClass}</Label>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                    {formCopy.vehicleClass}
+                  </Label>
                   <Select
                     items={vehicleClassItems}
                     value={form.vehicleClassId || "all"}
@@ -741,10 +1569,15 @@ export function CreateFarePlanSheet({
                       </SelectGroup>
                     </SelectContent>
                   </Select>
+                  <p className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                    {isAm ? "በአገልግሎት ክፍል ይለዩ (ለምሳሌ ኢኮኖሚ፣ ቪአይፒ)።" : "Filter by service class (e.g. Economy, VIP)."}
+                  </p>
                 </div>
 
-                <div className="space-y-2 sm:col-span-2 lg:col-span-1">
-                  <Label>{formCopy.region}</Label>
+                <div className="space-y-1.5 sm:col-span-2 lg:col-span-1">
+                  <Label className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                    {formCopy.region}
+                  </Label>
                   <Select
                     items={regionItems}
                     value={form.regionId || "all"}
@@ -766,214 +1599,24 @@ export function CreateFarePlanSheet({
                       </SelectGroup>
                     </SelectContent>
                   </Select>
+                  <p className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                    {isAm ? "የዞን ወይም የከተማ ወሰን ክልል።" : "Zone or city boundary scope."}
+                  </p>
                 </div>
               </div>
             </FormSection>
 
-            <FormSection
-              icon={Coins}
-              title={formCopy.sections.pricing}
-              description={formCopy.sections.pricingDescription}
-            >
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2 sm:col-span-2">
-                  <Label>{formCopy.pricingModel}</Label>
-                  <Select
-                    items={pricingModelItems}
-                    value={form.pricingModel}
-                    onValueChange={(value) => {
-                      const model = (value ?? "") as PricingModel | "";
-                      setForm((current) => {
-                        const next: FarePlanFormState = {
-                          ...current,
-                          pricingModel: model,
-                          minimumHours: model === "hourly" ? current.minimumHours : "",
-                        };
-
-                        if (
-                          model === "hourly" &&
-                          current.baseFare &&
-                          current.minimumFare &&
-                          !current.minimumHours
-                        ) {
-                          const base = Number(current.baseFare);
-                          const minimum = Number(current.minimumFare);
-                          if (Number.isFinite(base) && base > 0 && Number.isFinite(minimum)) {
-                            next.minimumHours = deriveMinimumHours(base, minimum);
-                          }
-                        }
-
-                        return next;
-                      });
-                      setFieldErrors((current) => {
-                        const next = { ...current };
-                        delete next.pricingModel;
-                        delete next.minimumFare;
-                        delete next.minimumHours;
-                        delete next.perMinuteRate;
-                        return next;
-                      });
-                      setError(null);
-                    }}
-                  >
-                    <SelectTrigger
-                      className={cn(
-                        selectTriggerClassName,
-                        fieldErrors.pricingModel && fieldErrorClassName,
-                      )}
-                    >
-                      <SelectValue placeholder={formCopy.pricingModelPlaceholder} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {PRICING_MODELS.map((model) => (
-                          <SelectItem key={model} value={model}>
-                            {copy.pricingModels[model]}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  {fieldErrors.pricingModel ? (
-                    <p className="text-xs text-red-600">{fieldErrors.pricingModel}</p>
-                  ) : null}
-                  {pricingModelHelp ? (
-                    <p className="text-xs leading-relaxed text-slate-500">{pricingModelHelp}</p>
-                  ) : null}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="fare-plan-currency">{formCopy.currency}</Label>
-                  <Select
-                    items={currencyItems}
-                    value={form.currency}
-                    onValueChange={(value) => updateField("currency", value ?? "ETB")}
-                  >
-                    <SelectTrigger id="fare-plan-currency" className={selectTriggerClassName}>
-                      <SelectValue placeholder={formCopy.currencyPlaceholder} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {currencyItems.map((item) => (
-                          <SelectItem key={item.value} value={item.value}>
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="fare-plan-base-fare">{baseFareLabel}</Label>
-                  <CurrencyInput
-                    id="fare-plan-base-fare"
-                    currency={form.currency}
-                    value={form.baseFare}
-                    onChange={(value) => updateField("baseFare", value)}
-                    error={Boolean(fieldErrors.baseFare)}
-                  />
-                  {isHourly ? (
-                    <p className="text-xs text-slate-500">{formCopy.perHourRateHelp}</p>
-                  ) : null}
-                  {fieldErrors.baseFare ? (
-                    <p className="text-xs text-red-600">{fieldErrors.baseFare}</p>
-                  ) : null}
-                </div>
-
-                {showPerKmRate ? (
-                  <div className="space-y-2">
-                    <Label htmlFor="fare-plan-per-km">{formCopy.perKmRate}</Label>
-                    <CurrencyInput
-                      id="fare-plan-per-km"
-                      currency={form.currency}
-                      value={form.perKmRate}
-                      onChange={(value) => updateField("perKmRate", value)}
-                      error={Boolean(fieldErrors.perKmRate)}
-                    />
-                    {fieldErrors.perKmRate ? (
-                      <p className="text-xs text-red-600">{fieldErrors.perKmRate}</p>
-                    ) : null}
-                  </div>
-                ) : null}
-
-                {showPerMinuteRate ? (
-                  <div className="space-y-2">
-                    <Label htmlFor="fare-plan-per-minute">{formCopy.perMinuteRate}</Label>
-                    <CurrencyInput
-                      id="fare-plan-per-minute"
-                      currency={form.currency}
-                      value={form.perMinuteRate}
-                      onChange={(value) => updateField("perMinuteRate", value)}
-                      error={Boolean(fieldErrors.perMinuteRate)}
-                    />
-                    <p className="text-xs text-slate-500">{formCopy.perMinuteRateHelp}</p>
-                    {fieldErrors.perMinuteRate ? (
-                      <p className="text-xs text-red-600">{fieldErrors.perMinuteRate}</p>
-                    ) : null}
-                  </div>
-                ) : null}
-
-                {isHourly ? (
-                  <div className="space-y-2">
-                    <Label htmlFor="fare-plan-minimum-hours">{formCopy.minimumHours}</Label>
-                    <Input
-                      id="fare-plan-minimum-hours"
-                      type="number"
-                      min="0"
-                      step="0.5"
-                      value={form.minimumHours}
-                      onChange={(event) => updateField("minimumHours", event.target.value)}
-                      className={cn(
-                        fieldClassName,
-                        fieldErrors.minimumHours && fieldErrorClassName,
-                      )}
-                    />
-                    <p className="text-xs text-slate-500">{formCopy.minimumHoursHelp}</p>
-                    {fieldErrors.minimumHours ? (
-                      <p className="text-xs text-red-600">{fieldErrors.minimumHours}</p>
-                    ) : null}
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <Label htmlFor="fare-plan-minimum">{formCopy.minimumFare}</Label>
-                    <CurrencyInput
-                      id="fare-plan-minimum"
-                      currency={form.currency}
-                      value={form.minimumFare}
-                      onChange={(value) => updateField("minimumFare", value)}
-                      error={Boolean(fieldErrors.minimumFare)}
-                    />
-                    {fieldErrors.minimumFare ? (
-                      <p className="text-xs text-red-600">{fieldErrors.minimumFare}</p>
-                    ) : null}
-                  </div>
-                )}
-
-                <div className="space-y-2">
-                  <Label htmlFor="fare-plan-booking-fee">{formCopy.bookingFee}</Label>
-                  <CurrencyInput
-                    id="fare-plan-booking-fee"
-                    currency={form.currency}
-                    value={form.bookingFee}
-                    onChange={(value) => updateField("bookingFee", value)}
-                    error={Boolean(fieldErrors.bookingFee)}
-                  />
-                  {fieldErrors.bookingFee ? (
-                    <p className="text-xs text-red-600">{fieldErrors.bookingFee}</p>
-                  ) : null}
-                </div>
-              </div>
-            </FormSection>
-
+            {/* SECTION 4: Rules, Waiting & Dispatch Priority */}
             <FormSection
               icon={Settings2}
               title={formCopy.sections.rules}
               description={formCopy.sections.rulesDescription}
             >
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="fare-plan-priority">{formCopy.priority}</Label>
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div className="space-y-1.5">
+                  <Label htmlFor="fare-plan-priority" className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                    {formCopy.priority} <span className="text-red-500">*</span>
+                  </Label>
                   <Input
                     id="fare-plan-priority"
                     type="number"
@@ -983,54 +1626,108 @@ export function CreateFarePlanSheet({
                     onChange={(event) => updateField("priority", event.target.value)}
                     className={cn(fieldClassName, fieldErrors.priority && fieldErrorClassName)}
                   />
-                  <p className="text-xs text-slate-500">{formCopy.priorityHelp}</p>
                   {fieldErrors.priority ? (
-                    <p className="text-xs text-red-600">{fieldErrors.priority}</p>
-                  ) : null}
+                    <p className="text-xs font-medium text-red-600 dark:text-red-400">{fieldErrors.priority}</p>
+                  ) : (
+                    <p className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                      {formCopy.priorityHelp}
+                    </p>
+                  )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="fare-plan-waiting">{formCopy.freeWaitingMinutes}</Label>
-                  <Input
-                    id="fare-plan-waiting"
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={form.freeWaitingMinutes}
-                    onChange={(event) => updateField("freeWaitingMinutes", event.target.value)}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="fare-plan-waiting" className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                      {formCopy.freeWaitingMinutes}
+                    </Label>
+                    <Timer className="size-3 text-slate-400" />
+                  </div>
+                  <div
                     className={cn(
-                      fieldClassName,
-                      fieldErrors.freeWaitingMinutes && fieldErrorClassName,
+                      "flex items-center overflow-hidden rounded-lg border shadow-sm transition-colors",
+                      fieldErrors.freeWaitingMinutes
+                        ? adminInputGroupErrorClass
+                        : "border-slate-200 bg-white focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/40 dark:border-border dark:bg-muted/50",
                     )}
-                  />
-                  <p className="text-xs text-slate-500">{formCopy.freeWaitingMinutesHelp}</p>
+                  >
+                    <Input
+                      id="fare-plan-waiting"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={form.freeWaitingMinutes}
+                      onChange={(event) => updateField("freeWaitingMinutes", event.target.value)}
+                      aria-invalid={Boolean(fieldErrors.freeWaitingMinutes)}
+                      className={cn(
+                        "h-10 rounded-none border-0 bg-transparent px-3 text-sm font-medium tabular-nums shadow-none focus-visible:ring-0",
+                        fieldErrors.freeWaitingMinutes && "text-red-900 placeholder:text-red-400 dark:text-red-200",
+                      )}
+                    />
+                    <span
+                      className={cn(
+                        "flex h-10 shrink-0 items-center border-l px-2.5 text-xs font-medium",
+                        fieldErrors.freeWaitingMinutes
+                          ? "border-red-200 bg-red-100/50 text-red-700 dark:border-red-400/30 dark:bg-red-950/40 dark:text-red-300"
+                          : "border-slate-100 bg-slate-50/50 text-slate-500 dark:border-border dark:bg-muted/40 dark:text-muted-foreground",
+                      )}
+                    >
+                      {unitLabels.minsFree}
+                    </span>
+                  </div>
                   {fieldErrors.freeWaitingMinutes ? (
-                    <p className="text-xs text-red-600">{fieldErrors.freeWaitingMinutes}</p>
-                  ) : null}
+                    <p className="text-xs font-medium text-red-600 dark:text-red-400">{fieldErrors.freeWaitingMinutes}</p>
+                  ) : (
+                    <p className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                      {formCopy.freeWaitingMinutesHelp}
+                    </p>
+                  )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="fare-plan-waiting-fee">{formCopy.waitingFeePerMinute}</Label>
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="fare-plan-waiting-fee" className="text-xs font-semibold text-slate-700 dark:text-foreground">
+                      {formCopy.waitingFeePerMinute}
+                    </Label>
+                    <span className="text-[11px] text-slate-400">{unitLabels.postGrace}</span>
+                  </div>
                   <CurrencyInput
                     id="fare-plan-waiting-fee"
                     currency={form.currency}
                     value={form.waitingFeePerMinute}
                     onChange={(value) => updateField("waitingFeePerMinute", value)}
                     error={Boolean(fieldErrors.waitingFeePerMinute)}
+                    unitSuffix={unitLabels.perMin}
+                    placeholder="0.00"
                   />
-                  <p className="text-xs text-slate-500">{formCopy.waitingFeePerMinuteHelp}</p>
                   {fieldErrors.waitingFeePerMinute ? (
-                    <p className="text-xs text-red-600">{fieldErrors.waitingFeePerMinute}</p>
-                  ) : null}
+                    <p className="text-xs font-medium text-red-600 dark:text-red-400">{fieldErrors.waitingFeePerMinute}</p>
+                  ) : (
+                    <p className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                      {formCopy.waitingFeePerMinuteHelp}
+                    </p>
+                  )}
                 </div>
               </div>
 
-              <div className="flex items-center justify-between rounded-lg border border-slate-200 bg-[#f8fafb] px-4 py-3">
-                <div className="space-y-1">
-                  <p className="text-sm font-medium text-slate-900">{formCopy.isActiveTitle}</p>
-                  <p className="text-xs text-slate-500">
-                    {form.isActive ? formCopy.isActiveOn : formCopy.isActiveOff}
-                  </p>
+              {/* Active Toggle Card */}
+              <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-gradient-to-r from-slate-50 via-white to-slate-50 px-4 py-3 dark:border-border dark:bg-card">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={cn(
+                      "flex size-8 items-center justify-center rounded-lg transition-colors",
+                      form.isActive
+                        ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400"
+                        : "bg-slate-100 text-slate-500 dark:bg-muted dark:text-muted-foreground",
+                    )}
+                  >
+                    <Zap className="size-4" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-900 dark:text-foreground">{formCopy.isActiveTitle}</p>
+                    <p className="text-[11px] text-slate-500 dark:text-muted-foreground">
+                      {form.isActive ? formCopy.isActiveOn : formCopy.isActiveOff}
+                    </p>
+                  </div>
                 </div>
                 <Switch
                   checked={form.isActive}
@@ -1040,23 +1737,52 @@ export function CreateFarePlanSheet({
             </FormSection>
           </div>
 
-          <SheetFooter className="mt-auto border-t border-slate-200 px-6 py-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              {formCopy.cancel}
-            </Button>
-            <Button
-              type="submit"
-              className={adminPrimaryButtonClass}
-              disabled={submitting || loading}
-            >
-              {submitting
-                ? isEdit
-                  ? formCopy.saving
-                  : formCopy.creating
-                : isEdit
-                  ? formCopy.save
-                  : formCopy.create}
-            </Button>
+          {/* Sticky Sheet Footer */}
+          <SheetFooter className="mt-auto flex-row items-center justify-between border-t border-slate-200 bg-white px-6 py-4 shadow-sm sm:px-7 dark:border-border dark:bg-card">
+            {/* Quick summary pill */}
+            <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500 dark:text-muted-foreground">
+              <span className="font-semibold text-slate-700 dark:text-foreground">
+                {copy.pricingModels[form.pricingModel as PricingModel] || (isAm ? "የታሪፍ ዕቅድ" : "Fare Plan")}
+              </span>
+              <span>·</span>
+              <span className="font-mono uppercase font-medium">{form.currency || "ETB"}</span>
+              {form.baseFare ? (
+                <>
+                  <span>·</span>
+                  <span className="font-medium">
+                    {isAm ? `መሰረታዊ፦ ${form.baseFare} ${form.currency}` : `Base: ${form.baseFare} ${form.currency}`}
+                  </span>
+                </>
+              ) : null}
+            </div>
+
+            <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="h-10 px-4 rounded-lg font-medium text-slate-700 hover:bg-slate-50 dark:border-border dark:text-foreground dark:hover:bg-muted"
+              >
+                {formCopy.cancel}
+              </Button>
+              <Button
+                type="submit"
+                className={cn(adminPrimaryButtonClass, "min-w-[130px] font-semibold")}
+                disabled={submitting || loading}
+              >
+                {submitting ? (
+                  <span className="flex items-center gap-2">
+                    <span className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent dark:border-black dark:border-t-transparent" />
+                    {isEdit ? formCopy.saving : formCopy.creating}
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5">
+                    {isEdit ? formCopy.save : formCopy.create}
+                    <ArrowRight className="size-3.5" />
+                  </span>
+                )}
+              </Button>
+            </div>
           </SheetFooter>
         </form>
       </SheetContent>

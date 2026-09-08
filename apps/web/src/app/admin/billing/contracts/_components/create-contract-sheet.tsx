@@ -1,7 +1,21 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { FileText, MapPin, Receipt } from "lucide-react";
+import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import {
+  ArrowRight,
+  CalendarClock,
+  Check,
+  Clock,
+  Coins,
+  FileText,
+  Info,
+  Layers,
+  MapPin,
+  Percent,
+  Receipt,
+  ShieldCheck,
+  Sparkles,
+} from "lucide-react";
 import type {
   ContractBillingInterval,
   ContractStatus,
@@ -11,15 +25,19 @@ import type {
   VehicleType,
 } from "@smart-dispatch/types";
 import { isPercentLatePaymentType } from "@smart-dispatch/types";
-import {
-  AdminFormSection,
-  AdminSelectField,
-  AdminTextareaField,
-  AdminTextField,
-} from "@/components/shared/admin-form-field";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -28,7 +46,17 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { adminPrimaryButtonClass } from "@/lib/admin-theme";
+import {
+  adminCardClass,
+  adminErrorMessageClass,
+  adminFieldErrorClass,
+  adminHeadingClass,
+  adminIconBoxClass,
+  adminInputClass,
+  adminInputGroupErrorClass,
+  adminLabelErrorClass,
+  adminPrimaryButtonClass,
+} from "@/lib/admin-theme";
 import { useLocale } from "@/components/shared/providers";
 import {
   createContract,
@@ -68,7 +96,7 @@ const emptyForm: FormState = {
   status: "draft",
   notes: "",
   billingInterval: "",
-  paymentTermsDays: "",
+  paymentTermsDays: "30",
   latePaymentType: "none",
   latePaymentFee: "",
   regionIds: [],
@@ -82,6 +110,7 @@ const CONTRACT_STATUSES: ContractStatus[] = [
   "expired",
   "cancelled",
 ];
+
 const CONTRACT_BILLING_INTERVALS: ContractBillingInterval[] = [
   "per_trip",
   "at_contract_end",
@@ -89,6 +118,7 @@ const CONTRACT_BILLING_INTERVALS: ContractBillingInterval[] = [
   "quarterly",
   "annually",
 ];
+
 const LATE_PAYMENT_TYPES: LatePaymentType[] = [
   "none",
   "flat",
@@ -97,7 +127,78 @@ const LATE_PAYMENT_TYPES: LatePaymentType[] = [
   "percent_per_day",
 ];
 
-function ScopeCheckboxGroup({
+function getContractUiStrings(isAm: boolean) {
+  return {
+    actionFailed: isAm ? "እርምጃው አልተሳካም" : "Action Failed",
+    sections: {
+      basics: {
+        title: isAm ? "የውል መሠረታዊ መረጃ እና ሁኔታ" : "Contract Basics & Agreement Terms",
+        description: isAm
+          ? "የውሉን ስም፣ ሁኔታ እና የንግድ ውል ማስታወሻዎችን ይግለጹ።"
+          : "Define the agreement title, lifecycle status, and commercial remarks.",
+      },
+      billing: {
+        title: isAm ? "የክፍያ ዑደት እና የመክፈያ ውሎች" : "Billing Cycle & Payment Terms",
+        description: isAm
+          ? "ደረሰኞች መቼ እንደሚወጡ፣ የመክፈያ ጊዜ እና የዘገየ ክፍያ ቅጣቶችን ይወስኑ።"
+          : "Configure invoicing frequency, payment due windows, and overdue penalty policies.",
+        termsPresets: isAm ? "ፈጣን ቀናት:" : "Quick Terms:",
+        presetsList: [
+          { label: isAm ? "15 ቀናት" : "Net 15", value: "15" },
+          { label: isAm ? "30 ቀናት" : "Net 30", value: "30" },
+          { label: isAm ? "45 ቀናት" : "Net 45", value: "45" },
+          { label: isAm ? "60 ቀናት" : "Net 60", value: "60" },
+        ],
+        daysUnit: isAm ? "ቀናት" : "days",
+      },
+      scope: {
+        title: isAm ? "የተሸፈነ የሥራ ወሰን (ክልል እና ተሽከርካሪዎች)" : "Operational Scope & Fleet Eligibility",
+        description: isAm
+          ? "በዚህ ውል ስር ጉዞዎችን ለማካሄድ የተፈቀዱ ክልሎችን እና የተሽከርካሪ ዓይነቶችን ይምረጡ።"
+          : "Select approved service regions and eligible vehicle categories for this contract.",
+        selectAll: isAm ? "ሁሉንም ምረጥ" : "Select all",
+        clearAll: isAm ? "አጽዳ" : "Clear",
+        selectedBadge: (count: number, total: number) =>
+          isAm ? `${count} ከ ${total} ተመርጧል` : `${count} of ${total} selected`,
+      },
+    },
+    footerSummary: {
+      scopePill: (regions: number, types: number) =>
+        isAm
+          ? `${regions} ክልሎች · ${types} ተሽከርካሪዎች`
+          : `${regions} Regions · ${types} Vehicle Types`,
+    },
+  };
+}
+
+function FormSection({
+  icon: Icon,
+  title,
+  description,
+  children,
+}: {
+  icon: typeof FileText;
+  title: string;
+  description: string;
+  children: ReactNode;
+}) {
+  return (
+    <Card className={cn(adminCardClass, "group gap-0 overflow-hidden rounded-xl border border-slate-200/90 py-0 shadow-sm transition-all duration-200 hover:border-slate-300/90 dark:border-border")}>
+      <div className="flex items-center gap-3 border-b border-slate-100 bg-slate-50/50 px-5 py-3.5 dark:border-border/60 dark:bg-muted/20">
+        <div className={cn(adminIconBoxClass, "size-8 shrink-0 p-0 flex items-center justify-center rounded-lg")}>
+          <Icon className="size-4 text-[var(--brand-primary)] dark:text-[var(--brand-accent)]" />
+        </div>
+        <div>
+          <p className={cn("text-sm font-semibold tracking-tight", adminHeadingClass)}>{title}</p>
+          <p className="text-xs text-slate-500 dark:text-muted-foreground">{description}</p>
+        </div>
+      </div>
+      <div className="space-y-4 px-5 py-4">{children}</div>
+    </Card>
+  );
+}
+
+function ScopeCardSelector({
   label,
   items,
   selectedIds,
@@ -105,6 +206,7 @@ function ScopeCheckboxGroup({
   disabled,
   error,
   required,
+  ui,
 }: {
   label: string;
   items: Array<{ id: string; label: string }>;
@@ -113,23 +215,65 @@ function ScopeCheckboxGroup({
   disabled?: boolean;
   error?: string;
   required?: boolean;
+  ui: ReturnType<typeof getContractUiStrings>;
 }) {
+  const allSelected = items.length > 0 && selectedIds.length === items.length;
+
+  const handleSelectAll = () => {
+    if (allSelected) {
+      onChange([]);
+    } else {
+      onChange(items.map((i) => i.id));
+    }
+  };
+
   return (
-    <div className="space-y-3">
-      <Label className="text-sm font-semibold text-slate-800 dark:text-foreground">
-        {label}
-        {required ? <span className="text-red-600"> *</span> : null}
-      </Label>
+    <div
+      className={cn(
+        "flex flex-col rounded-xl border p-3.5 shadow-sm transition-all dark:bg-card",
+        error
+          ? "border-red-300 bg-red-50/30 ring-1 ring-red-300/60 dark:border-red-500/40 dark:bg-red-950/15 dark:ring-red-500/30"
+          : "border-slate-200/90 bg-white dark:border-border",
+      )}
+    >
       <div
         className={cn(
-          "max-h-52 space-y-2 overflow-y-auto rounded-xl border bg-slate-50/60 p-3 dark:bg-[#11161d]",
+          "flex items-center justify-between border-b pb-2.5",
           error
-            ? "border-red-300 dark:border-red-400/40"
-            : "border-slate-200 dark:border-border",
+            ? "border-red-200/70 dark:border-red-500/30"
+            : "border-slate-100 dark:border-border/60",
         )}
       >
+        <div>
+          <Label
+            className={cn(
+              "text-xs font-bold",
+              error ? adminLabelErrorClass : "text-slate-800 dark:text-foreground",
+            )}
+          >
+            {label}
+            {required ? <span className="text-red-500"> *</span> : null}
+          </Label>
+          <p className={cn("text-[10px]", error ? "text-red-500/80 dark:text-red-300/80" : "text-slate-400")}>
+            {ui.sections.scope.selectedBadge(selectedIds.length, items.length)}
+          </p>
+        </div>
+
+        {items.length > 0 ? (
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={handleSelectAll}
+            className="text-[11px] font-semibold text-[var(--brand-primary)] hover:underline dark:text-[var(--brand-accent)] disabled:opacity-50"
+          >
+            {allSelected ? ui.sections.scope.clearAll : ui.sections.scope.selectAll}
+          </button>
+        ) : null}
+      </div>
+
+      <div className="mt-2.5 max-h-52 space-y-1 overflow-y-auto pr-1">
         {items.length === 0 ? (
-          <p className="text-sm text-slate-500">—</p>
+          <p className="py-4 text-center text-xs text-slate-400">—</p>
         ) : (
           items.map((item) => {
             const checked = selectedIds.includes(item.id);
@@ -137,8 +281,11 @@ function ScopeCheckboxGroup({
               <label
                 key={item.id}
                 className={cn(
-                  "flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 hover:bg-white dark:hover:bg-white/[0.06]",
-                  disabled && "cursor-not-allowed opacity-60",
+                  "flex cursor-pointer select-none items-center gap-2.5 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors",
+                  checked
+                    ? "bg-[color-mix(in_srgb,var(--brand-primary)_8%,transparent)] text-slate-900 dark:bg-[color-mix(in_srgb,var(--brand-accent)_12%,transparent)] dark:text-foreground"
+                    : "text-slate-600 hover:bg-slate-50 dark:text-muted-foreground dark:hover:bg-muted/40",
+                  disabled && "cursor-not-allowed opacity-50",
                 )}
               >
                 <Checkbox
@@ -151,19 +298,29 @@ function ScopeCheckboxGroup({
                         : selectedIds.filter((id) => id !== item.id),
                     );
                   }}
+                  className="size-4"
                 />
-                <span className="text-sm text-slate-700 dark:text-foreground">
-                  {item.label}
-                </span>
+                <span className="truncate">{item.label}</span>
               </label>
             );
           })
         )}
       </div>
-      {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
+      {error ? (
+        <p className={cn("mt-2", adminErrorMessageClass)}>{error}</p>
+      ) : null}
     </div>
   );
 }
+
+const fieldClassName = cn(adminInputClass, "w-full");
+const selectTriggerClassName = cn(
+  adminInputClass,
+  "w-full transition-all hover:border-slate-300 dark:hover:border-slate-600",
+);
+const textareaClassName =
+  "flex min-h-[85px] w-full resize-y rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm shadow-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:border-border dark:bg-muted/55 dark:text-foreground";
 
 export function CreateContractSheet({
   open,
@@ -174,11 +331,12 @@ export function CreateContractSheet({
 }: CreateContractSheetProps) {
   const { locale } = useLocale();
   const copy = getAdminContractsMessages(locale);
+  const isAm = locale === "am";
+  const ui = useMemo(() => getContractUiStrings(isAm), [isAm]);
   const isEdit = mode === "edit";
+
   const [form, setForm] = useState<FormState>(emptyForm);
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof FormState, string>>
-  >({});
+  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [regions, setRegions] = useState<Region[]>([]);
@@ -289,6 +447,33 @@ export function CreateContractSheet({
     [vehicleClasses],
   );
 
+  const statusOptions = useMemo(
+    () =>
+      CONTRACT_STATUSES.map((status) => ({
+        value: status,
+        label: copy.status[status],
+      })),
+    [copy.status],
+  );
+
+  const billingIntervalOptions = useMemo(
+    () =>
+      CONTRACT_BILLING_INTERVALS.map((interval) => ({
+        value: interval,
+        label: copy.billingIntervals[interval],
+      })),
+    [copy.billingIntervals],
+  );
+
+  const latePaymentTypeOptions = useMemo(
+    () =>
+      LATE_PAYMENT_TYPES.map((type) => ({
+        value: type,
+        label: copy.latePaymentTypes[type],
+      })),
+    [copy.latePaymentTypes],
+  );
+
   function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
     setErrors((current) => ({ ...current, [key]: undefined }));
@@ -388,230 +573,431 @@ export function CreateContractSheet({
 
   const formDisabled = submitting || loading;
 
+  const isPercent = isPercentLatePaymentType(form.latePaymentType);
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="w-full overflow-y-auto data-[side=right]:sm:max-w-6xl"
+        className="flex w-full flex-col gap-0 overflow-hidden border-l border-slate-200 bg-[#f8fafb] p-0 data-[side=right]:sm:max-w-3xl data-[side=right]:lg:max-w-4xl dark:border-border dark:bg-background"
       >
-        <SheetHeader>
-          <SheetTitle>
-            {isEdit ? copy.form.editTitle : copy.form.createTitle}
-          </SheetTitle>
-          <SheetDescription>
-            {isEdit ? copy.form.editDescription : copy.form.createDescription}
-          </SheetDescription>
-        </SheetHeader>
+        {/* Top Gradient Banner & Header */}
+        <div className="relative border-b border-slate-200 bg-white dark:border-border dark:bg-card">
+          <div className="h-1.5 w-full bg-gradient-to-r from-[var(--brand-primary)] via-[#28574d] to-[var(--brand-accent)]" />
+          <SheetHeader className="px-6 py-4 sm:px-7">
+            <div className="flex items-center gap-3">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--brand-primary)_10%,transparent)] ring-1 ring-[var(--brand-primary)]/20 dark:bg-accent">
+                <FileText className="size-5 text-[var(--brand-primary)] dark:text-[var(--brand-accent)]" />
+              </div>
+              <div>
+                <SheetTitle className={cn("text-lg font-bold tracking-tight", adminHeadingClass)}>
+                  {isEdit ? copy.form.editTitle : copy.form.createTitle}
+                </SheetTitle>
+                <SheetDescription className="text-xs text-slate-500 dark:text-muted-foreground">
+                  {isEdit ? copy.form.editDescription : copy.form.createDescription}
+                </SheetDescription>
+              </div>
+            </div>
+          </SheetHeader>
+        </div>
 
+        {/* Form Container */}
         <form
-          className="space-y-8 px-6 pb-6"
           onSubmit={(event) => void handleSubmit(event)}
+          className="flex min-h-0 flex-1 flex-col overflow-hidden"
         >
-          <AdminFormSection
-            icon={FileText}
-            title={copy.form.title}
-            description={copy.eyebrow}
-          >
-            <AdminSelectField
-              id="contract-status"
-              label={copy.form.status}
-              value={form.status}
-              onValueChange={(value) =>
-                updateField("status", value as ContractStatus)
-              }
-              items={CONTRACT_STATUSES.map((status) => ({
-                value: status,
-                label: copy.status[status],
-              }))}
-              disabled={formDisabled}
-            />
-            <AdminTextField
-              id="contract-title"
-              label={copy.form.title}
-              value={form.title}
-              onChange={(event) => updateField("title", event.target.value)}
-              placeholder={copy.form.titlePlaceholder}
-              error={errors.title}
-              disabled={formDisabled}
-            />
-            <AdminTextareaField
-              id="contract-notes"
-              label={copy.form.notes}
-              value={form.notes}
-              onChange={(event) => updateField("notes", event.target.value)}
-              placeholder={copy.form.notesPlaceholder}
-              disabled={formDisabled}
-            />
-          </AdminFormSection>
+          <div className="flex-1 space-y-5 overflow-y-auto px-6 py-5 sm:px-7">
+            {loading ? (
+              <div className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white p-6 text-xs text-slate-500 dark:border-border dark:bg-card dark:text-muted-foreground">
+                <div className="size-4 animate-spin rounded-full border-2 border-[var(--brand-primary)] border-t-transparent" />
+                {copy.form.loading}
+              </div>
+            ) : null}
 
-          <AdminFormSection
-            icon={Receipt}
-            title={copy.form.billingTitle}
-            description={copy.form.billingDescription}
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              <AdminSelectField
-                id="contract-billing-interval"
-                label={copy.form.billingInterval}
-                value={form.billingInterval || null}
-                onValueChange={(value) => {
-                  setForm((current) => ({
-                    ...current,
-                    billingInterval: value as ContractBillingInterval,
-                  }));
-                  setErrors((current) => ({
-                    ...current,
-                    billingInterval: undefined,
-                  }));
-                }}
-                items={CONTRACT_BILLING_INTERVALS.map((interval) => ({
-                  value: interval,
-                  label: copy.billingIntervals[interval],
-                }))}
-                placeholder={copy.form.billingIntervalPlaceholder}
-                disabled={formDisabled}
-                error={errors.billingInterval}
-              />
-              {form.billingInterval ? (
-                <>
-                <AdminTextField
-                  id="contract-payment-terms"
-                  label={copy.form.paymentTermsDays}
-                  type="number"
-                  min={0}
-                  max={365}
-                  value={form.paymentTermsDays}
-                  onChange={(event) =>
-                    updateField("paymentTermsDays", event.target.value)
-                  }
-                  placeholder={copy.form.paymentTermsDaysPlaceholder}
-                  hint={copy.form.paymentTermsDaysHint}
-                  disabled={formDisabled}
-                  error={errors.paymentTermsDays}
-                />
-                <AdminSelectField
-                  id="contract-late-payment-type"
-                  label={copy.form.latePaymentType}
-                  value={form.latePaymentType}
-                  onValueChange={(value) => {
-                    updateField("latePaymentType", value as LatePaymentType);
-                    if (value === "none") updateField("latePaymentFee", "");
-                  }}
-                  items={LATE_PAYMENT_TYPES.map((type) => ({
-                    value: type,
-                    label: copy.latePaymentTypes[type],
-                  }))}
-                  hint={copy.form.latePaymentTypeHint}
-                  disabled={formDisabled}
-                />
-                {form.latePaymentType !== "none" ? (
-                  <AdminTextField
-                    id="contract-late-payment-fee"
-                    label={
-                      form.latePaymentType === "percent_per_day"
-                        ? copy.form.latePaymentPercentPerDay
-                        : form.latePaymentType === "flat_per_day"
-                          ? copy.form.latePaymentFeePerDay
-                          : isPercentLatePaymentType(form.latePaymentType)
-                            ? copy.form.latePaymentPercent
-                            : copy.form.latePaymentFee
-                    }
-                    type="number"
-                    min={0}
-                    max={isPercentLatePaymentType(form.latePaymentType) ? 100 : undefined}
-                    step="0.01"
-                    value={form.latePaymentFee}
-                    onChange={(event) => updateField("latePaymentFee", event.target.value)}
-                    placeholder={
-                      form.latePaymentType === "percent_per_day"
-                        ? copy.form.latePaymentPercentPerDayPlaceholder
-                        : form.latePaymentType === "flat_per_day"
-                          ? copy.form.latePaymentFeePerDayPlaceholder
-                          : isPercentLatePaymentType(form.latePaymentType)
-                            ? copy.form.latePaymentPercentPlaceholder
-                            : copy.form.latePaymentFeePlaceholder
-                    }
-                    hint={
-                      form.latePaymentType === "percent_per_day"
-                        ? copy.form.latePaymentPercentPerDayHint
-                        : form.latePaymentType === "flat_per_day"
-                          ? copy.form.latePaymentFeePerDayHint
-                          : isPercentLatePaymentType(form.latePaymentType)
-                            ? copy.form.latePaymentPercentHint
-                            : copy.form.latePaymentFeeHint
+            {/* SECTION 1: Agreement Basics */}
+            <FormSection
+              icon={FileText}
+              title={ui.sections.basics.title}
+              description={ui.sections.basics.description}
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <Label
+                      htmlFor="contract-title"
+                      className={cn(
+                        "text-xs font-semibold text-slate-700 dark:text-foreground",
+                        errors.title && adminLabelErrorClass,
+                      )}
+                    >
+                      {copy.form.title} <span className="text-red-500">*</span>
+                    </Label>
+                  </div>
+                  <Input
+                    id="contract-title"
+                    value={form.title}
+                    onChange={(event) => updateField("title", event.target.value)}
+                    placeholder={copy.form.titlePlaceholder}
+                    disabled={formDisabled}
+                    aria-invalid={Boolean(errors.title)}
+                    className={cn(fieldClassName, errors.title && adminFieldErrorClass)}
+                  />
+                  {errors.title ? (
+                    <p className={adminErrorMessageClass}>{errors.title}</p>
+                  ) : null}
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="contract-status"
+                    className="text-xs font-semibold text-slate-700 dark:text-foreground"
+                  >
+                    {copy.form.status} <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    items={statusOptions}
+                    value={form.status}
+                    onValueChange={(value) =>
+                      updateField("status", value as ContractStatus)
                     }
                     disabled={formDisabled}
-                    error={errors.latePaymentFee}
-                  />
+                  >
+                    <SelectTrigger
+                      id="contract-status"
+                      className={cn(selectTriggerClassName, errors.status && adminFieldErrorClass)}
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {statusOptions.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <Label
+                    htmlFor="contract-notes"
+                    className="text-xs font-semibold text-slate-700 dark:text-foreground"
+                  >
+                    {copy.form.notes}
+                  </Label>
+                  <span className="text-[11px] text-slate-400">{copy.form.optional}</span>
+                </div>
+                <textarea
+                  id="contract-notes"
+                  value={form.notes}
+                  onChange={(event) => updateField("notes", event.target.value)}
+                  placeholder={copy.form.notesPlaceholder}
+                  disabled={formDisabled}
+                  className={textareaClassName}
+                />
+              </div>
+            </FormSection>
+
+            {/* SECTION 2: Invoicing & Payment Terms */}
+            <FormSection
+              icon={Receipt}
+              title={ui.sections.billing.title}
+              description={ui.sections.billing.description}
+            >
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label
+                    htmlFor="contract-billing-interval"
+                    className={cn(
+                      "text-xs font-semibold text-slate-700 dark:text-foreground",
+                      errors.billingInterval && adminLabelErrorClass,
+                    )}
+                  >
+                    {copy.form.billingInterval} <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    items={billingIntervalOptions}
+                    value={form.billingInterval}
+                    onValueChange={(value) => {
+                      updateField("billingInterval", value as ContractBillingInterval);
+                    }}
+                    disabled={formDisabled}
+                  >
+                    <SelectTrigger
+                      id="contract-billing-interval"
+                      aria-invalid={Boolean(errors.billingInterval)}
+                      className={cn(
+                        selectTriggerClassName,
+                        errors.billingInterval && adminFieldErrorClass,
+                      )}
+                    >
+                      <SelectValue placeholder={copy.form.billingIntervalPlaceholder} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {billingIntervalOptions.map((item) => (
+                          <SelectItem key={item.value} value={item.value}>
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  {errors.billingInterval ? (
+                    <p className={adminErrorMessageClass}>{errors.billingInterval}</p>
+                  ) : null}
+                </div>
+
+                {form.billingInterval ? (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <Label
+                        htmlFor="contract-payment-terms"
+                        className={cn(
+                          "text-xs font-semibold text-slate-700 dark:text-foreground",
+                          errors.paymentTermsDays && adminLabelErrorClass,
+                        )}
+                      >
+                        {copy.form.paymentTermsDays} <span className="text-red-500">*</span>
+                      </Label>
+                      <span className="text-[11px] text-slate-400">{ui.sections.billing.daysUnit}</span>
+                    </div>
+                    <Input
+                      id="contract-payment-terms"
+                      type="number"
+                      min={0}
+                      max={365}
+                      value={form.paymentTermsDays}
+                      onChange={(event) => updateField("paymentTermsDays", event.target.value)}
+                      placeholder={copy.form.paymentTermsDaysPlaceholder}
+                      disabled={formDisabled}
+                      aria-invalid={Boolean(errors.paymentTermsDays)}
+                      className={cn(fieldClassName, errors.paymentTermsDays && adminFieldErrorClass)}
+                    />
+
+                    {/* Quick presets */}
+                    <div className="flex items-center gap-1.5 pt-0.5">
+                      <span className="text-[10px] text-slate-400">
+                        {ui.sections.billing.termsPresets}
+                      </span>
+                      {ui.sections.billing.presetsList.map((preset) => (
+                        <button
+                          key={preset.value}
+                          type="button"
+                          disabled={formDisabled}
+                          onClick={() => updateField("paymentTermsDays", preset.value)}
+                          className={cn(
+                            "rounded px-1.5 py-0.5 text-[10px] font-medium transition-colors",
+                            form.paymentTermsDays === preset.value
+                              ? "bg-[var(--brand-primary)] text-white dark:bg-[var(--brand-accent)] dark:text-[#171a1f]"
+                              : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-muted dark:text-muted-foreground",
+                          )}
+                        >
+                          {preset.label}
+                        </button>
+                      ))}
+                    </div>
+
+                    {errors.paymentTermsDays ? (
+                      <p className={adminErrorMessageClass}>
+                        {errors.paymentTermsDays}
+                      </p>
+                    ) : null}
+                  </div>
                 ) : null}
-                </>
-              ) : null}
+              </div>
+
               {form.billingInterval === "at_contract_end" ? (
-                <p className="rounded-xl border border-[#C9B87A]/35 bg-[#C9B87A]/10 px-3.5 py-2.5 text-sm leading-relaxed text-[#6f6238] md:col-span-2 dark:text-[#d8c98e]">
-                  {copy.form.atContractEndHint}
-                </p>
+                <div className="rounded-xl border border-amber-200 bg-amber-50/70 p-3 text-xs text-amber-900 dark:border-amber-500/30 dark:bg-amber-950/20 dark:text-amber-300">
+                  <p>{copy.form.atContractEndHint}</p>
+                </div>
               ) : null}
-            </div>
-          </AdminFormSection>
 
-          <AdminFormSection
-            icon={MapPin}
-            title={copy.form.scopeTitle}
-            description={copy.form.scopeDescription}
-          >
-            <div className="grid gap-4 lg:grid-cols-3">
-              <ScopeCheckboxGroup
-                label={copy.form.regions}
-                items={regionOptions}
-                selectedIds={form.regionIds}
-                onChange={(value) => updateField("regionIds", value)}
-                disabled={formDisabled}
-                required
-                error={errors.regionIds}
-              />
-              <ScopeCheckboxGroup
-                label={copy.form.vehicleTypes}
-                items={vehicleTypeOptions}
-                selectedIds={form.vehicleTypeIds}
-                onChange={(value) => updateField("vehicleTypeIds", value)}
-                disabled={formDisabled}
-                required
-                error={errors.vehicleTypeIds}
-              />
-              <ScopeCheckboxGroup
-                label={copy.form.vehicleClasses}
-                items={vehicleClassOptions}
-                selectedIds={form.vehicleClassIds}
-                onChange={(value) => updateField("vehicleClassIds", value)}
-                disabled={formDisabled}
-                required
-                error={errors.vehicleClassIds}
-              />
-            </div>
-          </AdminFormSection>
+              {/* Late Payment Surcharges */}
+              {form.billingInterval ? (
+                <div className="grid gap-4 pt-2 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="contract-late-payment-type"
+                      className="text-xs font-semibold text-slate-700 dark:text-foreground"
+                    >
+                      {copy.form.latePaymentType}
+                    </Label>
+                    <Select
+                      items={latePaymentTypeOptions}
+                      value={form.latePaymentType}
+                      onValueChange={(value) => {
+                        updateField("latePaymentType", value as LatePaymentType);
+                        if (value === "none") updateField("latePaymentFee", "");
+                      }}
+                      disabled={formDisabled}
+                    >
+                      <SelectTrigger id="contract-late-payment-type" className={selectTriggerClassName}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {latePaymentTypeOptions.map((item) => (
+                            <SelectItem key={item.value} value={item.value}>
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-[11px] text-slate-400 dark:text-muted-foreground">
+                      {copy.form.latePaymentTypeHint}
+                    </p>
+                  </div>
 
-          <SheetFooter className="px-0">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={submitting}
+                  {form.latePaymentType !== "none" ? (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <Label
+                          htmlFor="contract-late-payment-fee"
+                          className={cn(
+                            "text-xs font-semibold text-slate-700 dark:text-foreground",
+                            errors.latePaymentFee && adminLabelErrorClass,
+                          )}
+                        >
+                          {isPercent ? copy.form.latePaymentPercent : copy.form.latePaymentFee}{" "}
+                          <span className="text-red-500">*</span>
+                        </Label>
+                      </div>
+                      <div
+                        className={cn(
+                          "flex items-center overflow-hidden rounded-lg border shadow-sm transition-colors",
+                          errors.latePaymentFee
+                            ? adminInputGroupErrorClass
+                            : "border-slate-200 bg-white focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/40 dark:border-border dark:bg-muted/50",
+                        )}
+                      >
+                        <Input
+                          id="contract-late-payment-fee"
+                          type="number"
+                          min={0}
+                          max={isPercent ? 100 : undefined}
+                          step={isPercent ? "0.1" : "0.01"}
+                          value={form.latePaymentFee}
+                          onChange={(event) => updateField("latePaymentFee", event.target.value)}
+                          placeholder={isPercent ? "5.0" : "500.00"}
+                          disabled={formDisabled}
+                          aria-invalid={Boolean(errors.latePaymentFee)}
+                          className={cn(
+                            "h-10 rounded-none border-0 bg-transparent px-3 text-sm font-medium tabular-nums shadow-none focus-visible:ring-0",
+                            errors.latePaymentFee && "placeholder:text-red-400 text-red-900 dark:text-red-200",
+                          )}
+                        />
+                        <span
+                          className={cn(
+                            "flex h-10 shrink-0 items-center border-l px-3 text-xs font-bold",
+                            errors.latePaymentFee
+                              ? "border-red-200 bg-red-100/50 text-red-700 dark:border-red-400/30 dark:bg-red-950/40 dark:text-red-300"
+                              : "border-slate-100 bg-slate-50/80 text-slate-600 dark:border-border dark:bg-muted/60 dark:text-muted-foreground",
+                          )}
+                        >
+                          {isPercent ? "%" : "ETB"}
+                        </span>
+                      </div>
+                      {errors.latePaymentFee ? (
+                        <p className={adminErrorMessageClass}>
+                          {errors.latePaymentFee}
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
+            </FormSection>
+
+            {/* SECTION 3: Operational Scope Multi-Selectors */}
+            <FormSection
+              icon={MapPin}
+              title={ui.sections.scope.title}
+              description={ui.sections.scope.description}
             >
-              {copy.form.cancel}
-            </Button>
-            <Button
-              type="submit"
-              className={adminPrimaryButtonClass}
-              disabled={formDisabled}
-            >
-              {submitting
-                ? isEdit
-                  ? copy.form.saving
-                  : copy.form.creating
-                : isEdit
-                  ? copy.form.save
-                  : copy.form.create}
-            </Button>
+              <div className="grid gap-4 lg:grid-cols-3">
+                <ScopeCardSelector
+                  label={copy.form.regions}
+                  items={regionOptions}
+                  selectedIds={form.regionIds}
+                  onChange={(value) => updateField("regionIds", value)}
+                  disabled={formDisabled}
+                  required
+                  error={errors.regionIds}
+                  ui={ui}
+                />
+
+                <ScopeCardSelector
+                  label={copy.form.vehicleTypes}
+                  items={vehicleTypeOptions}
+                  selectedIds={form.vehicleTypeIds}
+                  onChange={(value) => updateField("vehicleTypeIds", value)}
+                  disabled={formDisabled}
+                  required
+                  error={errors.vehicleTypeIds}
+                  ui={ui}
+                />
+
+                <ScopeCardSelector
+                  label={copy.form.vehicleClasses}
+                  items={vehicleClassOptions}
+                  selectedIds={form.vehicleClassIds}
+                  onChange={(value) => updateField("vehicleClassIds", value)}
+                  disabled={formDisabled}
+                  required
+                  error={errors.vehicleClassIds}
+                  ui={ui}
+                />
+              </div>
+            </FormSection>
+          </div>
+
+          {/* Sticky Sheet Footer */}
+          <SheetFooter className="mt-auto flex-row items-center justify-between border-t border-slate-200 bg-white px-6 py-4 shadow-sm sm:px-7 dark:border-border dark:bg-card">
+            {/* Quick summary pill */}
+            <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500 dark:text-muted-foreground">
+              <span className="font-semibold text-slate-800 dark:text-foreground">
+                {form.billingInterval
+                  ? copy.billingIntervals[form.billingInterval]
+                  : (isAm ? "አዲስ ውል" : "Commercial Agreement")}
+              </span>
+              <span>·</span>
+              <span>{ui.footerSummary.scopePill(form.regionIds.length, form.vehicleTypeIds.length)}</span>
+            </div>
+
+            <div className="flex items-center gap-2.5 w-full sm:w-auto justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={submitting}
+                className="h-10 px-4 rounded-lg font-medium text-slate-700 hover:bg-slate-50 dark:border-border dark:text-foreground dark:hover:bg-muted"
+              >
+                {copy.form.cancel}
+              </Button>
+              <Button
+                type="submit"
+                className={cn(adminPrimaryButtonClass, "min-w-[130px] font-semibold")}
+                disabled={formDisabled}
+              >
+                {submitting ? (
+                  <span className="flex items-center gap-2">
+                    <span className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent dark:border-black dark:border-t-transparent" />
+                    {isEdit ? copy.form.saving : copy.form.creating}
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-1.5">
+                    {isEdit ? copy.form.save : copy.form.create}
+                    <ArrowRight className="size-3.5" />
+                  </span>
+                )}
+              </Button>
+            </div>
           </SheetFooter>
         </form>
       </SheetContent>

@@ -249,6 +249,15 @@ export function AdminTimePicker({
       : buildTimeValue(Number(draftHour), Number(draftMinute));
   }, [draftHour, draftMinute, draftPeriod, hour12]);
 
+  const periodItems = useMemo(
+    () =>
+      PERIOD_OPTIONS.map((period) => ({
+        value: period,
+        label: periodLabels[period],
+      })),
+    [periodLabels],
+  );
+
   const canApply =
     draftTimeValue !== undefined &&
     (!minTime || !isTimeBefore(draftTimeValue, minTime));
@@ -376,6 +385,7 @@ export function AdminTimePicker({
                   {periodLabel}
                 </Label>
                 <Select
+                  items={periodItems}
                   value={draftPeriod}
                   onValueChange={(value) =>
                     setDraftPeriod((value as TimePeriod | null) ?? "")
@@ -387,9 +397,9 @@ export function AdminTimePicker({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectGroup>
-                      {PERIOD_OPTIONS.map((period) => (
-                        <SelectItem key={period} value={period}>
-                          {periodLabels[period]}
+                      {periodItems.map((item) => (
+                        <SelectItem key={item.value} value={item.value}>
+                          {item.label}
                         </SelectItem>
                       ))}
                     </SelectGroup>

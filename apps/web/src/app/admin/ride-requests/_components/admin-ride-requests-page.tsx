@@ -1,8 +1,21 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
-import { ClipboardList, Eye, MoreHorizontal } from "lucide-react";
-import type { AdminRideRequest, RideRequestRequesterSummary, RideRequestStatus } from "@smart-dispatch/types";
+import {
+  Calendar,
+  CalendarClock,
+  CarFront,
+  Clock3,
+  Eye,
+  FileText,
+  RotateCcw,
+  Wallet,
+} from "lucide-react";
+import type {
+  AdminRideRequest,
+  RideRequestRequesterSummary,
+  RideRequestStatus,
+} from "@smart-dispatch/types";
 import { useAuth, useLocale } from "@/components/shared/providers";
 import {
   DataTable,
@@ -13,13 +26,6 @@ import {
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -36,9 +42,12 @@ import {
 import { RideRequestContractBadge } from "@/app/dashboard/_components/ride-requests/ride-request-contract-info";
 import { fetchAdminRideRequests } from "@/lib/admin-ride-request-api";
 import { PERMISSIONS } from "@/lib/permissions";
-import { adminBadgeGoldClass, adminFilterLabelClass } from "@/lib/admin-theme";
 import {
-  formatMessage,
+  adminEyebrowClass,
+  adminFilterLabelClass,
+  adminSelectTriggerClass,
+} from "@/lib/admin-theme";
+import {
   getAdminContractsMessages,
   getAdminRideRequestsMessages,
   getCustomerRequestsMessages,
@@ -59,66 +68,14 @@ const STATUS_FILTER_OPTIONS: RideRequestStatus[] = [
   "no_show",
 ];
 
-function formatRequesterName(requester?: RideRequestRequesterSummary) {
-  if (!requester) {
-    return "—";
-  }
-
-  return [requester.first_name, requester.middle_name, requester.last_name].filter(Boolean).join(" ");
-}
-
-function formatRoute(request: AdminRideRequest) {
-  const pickup = request.pickup_location?.name ?? request.pickup_address;
-  const dropoff = request.dropoff_location?.name ?? request.dropoff_address;
-  return `${pickup} → ${dropoff}`;
-}
-
-function formatAssignment(request: AdminRideRequest) {
-  const plate = request.assigned_vehicle?.plate_number;
-  const driver = request.assigned_driver?.name;
-
-  if (plate && driver) {
-    return `${plate} · ${driver}`;
-  }
-
-  return plate ?? driver ?? "—";
-}
-
-function RideRequestRowActions({
-  reviewLabel,
-  menuLabel,
-  onReview,
-}: {
-  reviewLabel: string;
-  menuLabel: string;
-  onReview: () => void;
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            className="text-slate-500 hover:bg-[#1C3A34]/6 hover:text-[#1C3A34]"
-            aria-label={menuLabel}
-          />
-        }
-      >
-        <MoreHorizontal className="size-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40">
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={onReview}>
-            <Eye />
-            {reviewLabel}
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
+const STATUS_DOT_CLASS: Record<RideRequestStatus, string> = {
+  pending: "bg-amber-500",
+  confirmed: "bg-sky-500",
+  in_progress: "bg-violet-500 animate-pulse",
+  completed: "bg-emerald-500",
+  cancelled: "bg-slate-400",
+  no_show: "bg-orange-500",
+};
 
 export function AdminRideRequestsPage() {
   const { locale } = useLocale();
@@ -170,19 +127,59 @@ export function AdminRideRequestsPage() {
       {
         id: "requester",
         header: copy.columns.requester,
-        cellClassName: "font-medium text-slate-800",
-        cell: (request) => formatRequesterName(request.requester),
+        cell: (request) => {
+          const req = request.requester;
+          if (!req) return <span className="text-slate-400">—</span>;
+
+          const fullName = [req.first_name, req.middle_name, req.last_name]
+            .filter(Boolean)
+            .join(" ");
+          const initial = req.first_name ? req.first_name.slice(0, 1).toUpperCase() : "?";
+          const contact = req.mobile_number || req.email;
+
+          return (
+            <div className="flex items-center gap-2.5">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--brand-primary)_10%,transparent)] text-xs font-bold text-[var(--brand-primary)] dark:bg-[color-mix(in_srgb,var(--brand-accent)_15%,transparent)] dark:text-[var(--brand-accent)]">
+                {initial}
+              </span>
+              <div className="min-w-0">
+                <p className="truncate text-xs font-bold text-slate-900 dark:text-foreground">
+                  {fullName || "—"}
+                </p>
+                {contact ? (
+                  <p className="truncate text-[11px] text-slate-400 dark:text-muted-foreground">
+                    {contact}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          );
+        },
       },
       {
         id: "route",
         header: copy.columns.route,
-        cellClassName: "max-w-[12rem] truncate text-slate-600",
-        cell: (request) => formatRoute(request),
+        cell: (request) => {
+          const pickup = request.pickup_location?.name ?? request.pickup_address;
+          const dropoff = request.dropoff_location?.name ?? request.dropoff_address;
+
+          return (
+            <div className="min-w-0 max-w-[14rem] space-y-1 text-xs">
+              <div className="flex items-center gap-1.5 truncate text-slate-800 dark:text-foreground">
+                <span className="size-1.5 shrink-0 rounded-full bg-emerald-500 shadow-2xs" />
+                <span className="truncate font-medium">{pickup}</span>
+              </div>
+              <div className="flex items-center gap-1.5 truncate text-slate-500 dark:text-muted-foreground">
+                <span className="size-1.5 shrink-0 rounded-full bg-rose-500 shadow-2xs" />
+                <span className="truncate">{dropoff}</span>
+              </div>
+            </div>
+          );
+        },
       },
       {
         id: "contract",
         header: copy.columns.contract,
-        cellClassName: "max-w-[8.5rem]",
         cell: (request) =>
           request.contract ? (
             <RideRequestContractBadge
@@ -191,42 +188,100 @@ export function AdminRideRequestsPage() {
               compact
             />
           ) : (
-            <span className="text-sm text-slate-400">{copy.columns.oneTimeBilling}</span>
+            <span className="inline-flex items-center gap-1 rounded-md border border-slate-200/80 bg-slate-50 px-2 py-0.5 text-[11px] font-medium text-slate-500 dark:border-border dark:bg-muted/40 dark:text-muted-foreground">
+              <Wallet className="size-3 text-slate-400" />
+              <span>{copy.columns.oneTimeBilling}</span>
+            </span>
           ),
       },
       {
         id: "scheduled",
         header: copy.columns.scheduled,
-        cellClassName: "text-slate-500",
         cell: (request) =>
-          request.scheduled_at
-            ? formatScheduledAt(request.scheduled_at, locale) +
-              (request.scheduled_return_at ? ` - ${formatScheduledAt(request.scheduled_return_at, locale)}` : "")
-            : "—",
+          request.scheduled_at ? (
+            <div className="flex items-start gap-1.5 text-xs text-slate-600 dark:text-muted-foreground">
+              <Clock3 className="mt-0.5 size-3.5 shrink-0 text-slate-400" />
+              <div className="whitespace-nowrap">
+                <p className="font-medium">{formatScheduledAt(request.scheduled_at, locale)}</p>
+                {request.scheduled_return_at ? (
+                  <p className="text-[10px] text-slate-400 dark:text-muted-foreground">
+                    ↩ {formatScheduledAt(request.scheduled_return_at, locale)}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          ) : (
+            <span className="text-slate-400">—</span>
+          ),
       },
       {
         id: "assignment",
         header: copy.columns.assignment,
-        cellClassName: "max-w-[11rem] truncate text-slate-600",
-        cell: (request) => formatAssignment(request),
+        cell: (request) => {
+          const plate = request.assigned_vehicle?.plate_number;
+          const driver = request.assigned_driver?.name;
+
+          if (plate || driver) {
+            return (
+              <div className="flex items-center gap-2">
+                <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-700 dark:bg-muted dark:text-foreground">
+                  <CarFront className="size-3.5" />
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate font-mono text-xs font-bold text-slate-900 dark:text-foreground">
+                    {plate || "—"}
+                  </p>
+                  <p className="truncate text-[11px] text-slate-500 dark:text-muted-foreground">
+                    {driver || "—"}
+                  </p>
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <span className="inline-flex items-center gap-1.5 rounded-md border border-amber-200/80 bg-amber-50/70 px-2 py-0.5 text-[11px] font-medium text-amber-800 dark:border-amber-400/30 dark:bg-amber-400/10 dark:text-amber-200">
+              <Clock3 className="size-3" />
+              <span>{locale === "am" ? "ያልተመደበ" : "Unassigned"}</span>
+            </span>
+          );
+        },
       },
       {
         id: "status",
         header: copy.columns.status,
-        cell: (request) => (
-          <Badge variant="outline" className={cn("text-xs", statusBadgeClass(request.status))}>
-            {requestCopy.status[request.status]}
-          </Badge>
-        ),
+        cell: (request) => {
+          const status = request.status;
+          const dotClass = STATUS_DOT_CLASS[status] || "bg-slate-400";
+
+          return (
+            <span
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap",
+                statusBadgeClass(status),
+                "dark:border-border dark:bg-muted/40 dark:text-foreground",
+              )}
+            >
+              <span className={cn("size-1.5 rounded-full shrink-0", dotClass)} />
+              <span>{requestCopy.status[status] || status}</span>
+            </span>
+          );
+        },
       },
       {
         id: "submitted",
         header: copy.columns.submitted,
-        cellClassName: "text-slate-500",
-        cell: (request) => formatSubmittedAt(request.created_at, locale),
+        cell: (request) => (
+          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-muted-foreground">
+            <Calendar className="size-3.5 shrink-0 text-slate-400" />
+            <span className="whitespace-nowrap">
+              {formatSubmittedAt(request.created_at, locale)}
+            </span>
+          </div>
+        ),
       },
     ],
-    [contractCopy.billingIntervals, copy.columns, locale, requestCopy],
+    [contractCopy.billingIntervals, copy.columns, locale, requestCopy.status],
   );
 
   const loadRideRequests = useCallback(
@@ -245,13 +300,18 @@ export function AdminRideRequestsPage() {
 
   const renderRowActions = useCallback(
     (request: AdminRideRequest, _context: DataTableRowContext<AdminRideRequest>) => (
-      <RideRequestRowActions
-        reviewLabel={copy.actions.review}
-        menuLabel={copy.actions.menuLabel}
-        onReview={() => openReview(request)}
-      />
+      <Button
+        size="sm"
+        variant="ghost"
+        className="h-8 gap-1.5 px-2.5 text-xs font-semibold text-[var(--brand-primary)] hover:bg-[color-mix(in_srgb,var(--brand-primary)_8%,transparent)] dark:text-[var(--brand-accent)] dark:hover:bg-[var(--brand-accent)]/10"
+        aria-label={copy.actions.review}
+        onClick={() => openReview(request)}
+      >
+        <Eye className="size-3.5" />
+        <span>{copy.actions.review}</span>
+      </Button>
     ),
-    [copy.actions.menuLabel, copy.actions.review, openReview],
+    [copy.actions.review, openReview],
   );
 
   if (!canRead) {
@@ -269,6 +329,7 @@ export function AdminRideRequestsPage() {
 
   return (
     <div className="min-w-0 max-w-full space-y-6">
+      {/* Interactive Metric Filter Cards */}
       <AdminRideRequestStats
         locale={locale}
         refreshKey={refreshKey}
@@ -276,9 +337,10 @@ export function AdminRideRequestsPage() {
         onFilterChange={setStatusFilter}
       />
 
+      {/* Main Ride Requests Table */}
       <DataTable
         key={`${locale}-${statusFilter}`}
-        eyebrow={<Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>}
+        eyebrow={<p className={cn(adminEyebrowClass, "text-xs")}>{copy.eyebrow}</p>}
         title={copy.title}
         titleClassName="text-2xl font-extrabold tracking-tight"
         description={copy.description}
@@ -291,42 +353,58 @@ export function AdminRideRequestsPage() {
         renderRowActions={renderRowActions}
         actionsColumnHeader={copy.columns.actions}
         minTableWidth="1240px"
-        emptyIcon={ClipboardList}
+        emptyIcon={FileText}
         emptyTitle={copy.empty.title}
         emptyDescription={copy.empty.description}
         emptySearchDescription={copy.empty.searchDescription}
         refreshDeps={[locale, refreshKey, statusFilter]}
         toolbarActions={
-          <Select
-            items={statusOptions}
-            value={statusFilter}
-            onValueChange={(value) => {
-              setStatusFilter((value as AdminRideRequestListFilter | null) ?? STATUS_FILTER_ALL);
-            }}
-          >
-            <SelectTrigger
-              id="admin-ride-request-status-filter"
-              aria-label={copy.filters.status}
-              className="h-10 w-full min-w-[11rem] rounded-lg border-slate-200 bg-white shadow-sm sm:w-[11rem]"
+          <div className="flex items-center gap-2">
+            {statusFilter !== STATUS_FILTER_ALL ? (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-10 gap-1 px-2.5 text-xs text-slate-500 hover:text-slate-900 dark:text-muted-foreground dark:hover:text-foreground"
+                onClick={() => setStatusFilter(STATUS_FILTER_ALL)}
+              >
+                <RotateCcw className="size-3.5" />
+                <span>{locale === "am" ? "አጽዳ" : "Reset"}</span>
+              </Button>
+            ) : null}
+
+            <Select
+              items={statusOptions}
+              value={statusFilter}
+              onValueChange={(value) => {
+                setStatusFilter((value as AdminRideRequestListFilter | null) ?? STATUS_FILTER_ALL);
+              }}
             >
-              <span className={cn("mr-1.5 shrink-0 text-slate-500", adminFilterLabelClass)}>
-                {copy.filters.status}:
-              </span>
-              <SelectValue placeholder={copy.filters.status} />
-            </SelectTrigger>
-            <SelectContent align="end">
-              <SelectGroup>
-                {statusOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+              <SelectTrigger
+                id="admin-ride-request-status-filter"
+                aria-label={copy.filters.status}
+                className={cn(adminSelectTriggerClass, "h-10 w-full min-w-[11.5rem] shadow-xs sm:w-[12rem]")}
+              >
+                <span className={cn("mr-1.5 shrink-0 text-slate-400 dark:text-muted-foreground", adminFilterLabelClass)}>
+                  {copy.filters.status}:
+                </span>
+                <SelectValue placeholder={copy.filters.status} />
+              </SelectTrigger>
+              <SelectContent align="end">
+                <SelectGroup>
+                  {statusOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
         }
       />
 
+      {/* Review & Reassignment Drawer */}
       <AdminRideRequestReviewSheet
         open={reviewOpen}
         onOpenChange={(open) => {
@@ -343,3 +421,4 @@ export function AdminRideRequestsPage() {
     </div>
   );
 }
+

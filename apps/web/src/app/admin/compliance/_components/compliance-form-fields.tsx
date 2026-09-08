@@ -1,4 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
+import { Calendar, FileText, ShieldCheck } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { AdminDatePicker } from "@/components/shared/admin-date-picker";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,10 +16,23 @@ import { cn } from "@/lib/utils";
 
 type ComplianceFieldLabels = ReturnType<typeof getAdminVehiclesMessages>["detail"];
 
-function FieldGroup({ title, children }: { title: string; children: React.ReactNode }) {
+function FieldGroup({
+  title,
+  icon: Icon,
+  children,
+}: {
+  title: string;
+  icon?: LucideIcon;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="space-y-4 rounded-xl border border-slate-100 bg-slate-50/40 p-4">
-      <p className="text-sm font-semibold text-slate-800">{title}</p>
+    <div className="space-y-4 rounded-xl border border-slate-200/80 bg-slate-50/50 p-4.5 dark:border-border dark:bg-muted/30">
+      <div className="flex items-center gap-2">
+        {Icon && <Icon className="size-4 text-slate-500 dark:text-muted-foreground" />}
+        <p className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-foreground">
+          {title}
+        </p>
+      </div>
       {children}
     </div>
   );
@@ -40,10 +55,13 @@ export function InsuranceComplianceFields({
 }: ComplianceFieldsProps) {
   return (
     <div className="space-y-5">
-      <FieldGroup title={detail.compliance.policyDetails}>
+      <FieldGroup title={detail.compliance.policyDetails} icon={ShieldCheck}>
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor={`${idPrefix}-insurance-provider`} className="text-sm font-medium text-slate-600">
+            <Label
+              htmlFor={`${idPrefix}-insurance-provider`}
+              className="text-xs font-semibold text-slate-700 dark:text-foreground"
+            >
               {detail.overview.insuranceProvider}
             </Label>
             <Input
@@ -58,7 +76,10 @@ export function InsuranceComplianceFields({
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor={`${idPrefix}-insurance-policy-number`} className="text-sm font-medium text-slate-600">
+            <Label
+              htmlFor={`${idPrefix}-insurance-policy-number`}
+              className="text-xs font-semibold text-slate-700 dark:text-foreground"
+            >
               {detail.overview.insurancePolicyNumber}
             </Label>
             <Input
@@ -69,13 +90,13 @@ export function InsuranceComplianceFields({
               }
               placeholder={detail.overview.insurancePolicyNumberPlaceholder}
               disabled={disabled}
-              className={cn(adminInputClass, "w-full")}
+              className={cn(adminInputClass, "w-full font-mono")}
             />
           </div>
         </div>
       </FieldGroup>
 
-      <FieldGroup title={detail.compliance.dates}>
+      <FieldGroup title={detail.compliance.dates} icon={Calendar}>
         <div className="space-y-4">
           <AdminDatePicker
             id={`${idPrefix}-insurance-issued-at`}
@@ -112,9 +133,12 @@ export function InsuranceComplianceFields({
         </div>
       </FieldGroup>
 
-      <FieldGroup title={detail.compliance.additionalNotes}>
+      <FieldGroup title={detail.compliance.additionalNotes} icon={FileText}>
         <div className="space-y-1.5">
-          <Label htmlFor={`${idPrefix}-insurance-notes`} className="text-sm font-medium text-slate-600">
+          <Label
+            htmlFor={`${idPrefix}-insurance-notes`}
+            className="text-xs font-semibold text-slate-700 dark:text-foreground"
+          >
             {detail.overview.insuranceNotes}
           </Label>
           <textarea
@@ -143,10 +167,13 @@ export function InspectionComplianceFields({
 }: ComplianceFieldsProps) {
   return (
     <div className="space-y-5">
-      <FieldGroup title={detail.compliance.policyDetails}>
+      <FieldGroup title={detail.compliance.policyDetails} icon={ShieldCheck}>
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label htmlFor={`${idPrefix}-inspection-center`} className="text-sm font-medium text-slate-600">
+            <Label
+              htmlFor={`${idPrefix}-inspection-center`}
+              className="text-xs font-semibold text-slate-700 dark:text-foreground"
+            >
               {detail.overview.inspectionCenter}
             </Label>
             <Input
@@ -163,7 +190,7 @@ export function InspectionComplianceFields({
           <div className="space-y-1.5">
             <Label
               htmlFor={`${idPrefix}-inspection-certificate-number`}
-              className="text-sm font-medium text-slate-600"
+              className="text-xs font-semibold text-slate-700 dark:text-foreground"
             >
               {detail.overview.inspectionCertificateNumber}
             </Label>
@@ -178,13 +205,13 @@ export function InspectionComplianceFields({
               }
               placeholder={detail.overview.inspectionCertificateNumberPlaceholder}
               disabled={disabled}
-              className={cn(adminInputClass, "w-full")}
+              className={cn(adminInputClass, "w-full font-mono")}
             />
           </div>
         </div>
       </FieldGroup>
 
-      <FieldGroup title={detail.compliance.dates}>
+      <FieldGroup title={detail.compliance.dates} icon={Calendar}>
         <div className="space-y-4">
           <AdminDatePicker
             id={`${idPrefix}-inspection-performed-at`}
@@ -221,9 +248,12 @@ export function InspectionComplianceFields({
         </div>
       </FieldGroup>
 
-      <FieldGroup title={detail.compliance.additionalNotes}>
+      <FieldGroup title={detail.compliance.additionalNotes} icon={FileText}>
         <div className="space-y-1.5">
-          <Label htmlFor={`${idPrefix}-inspection-notes`} className="text-sm font-medium text-slate-600">
+          <Label
+            htmlFor={`${idPrefix}-inspection-notes`}
+            className="text-xs font-semibold text-slate-700 dark:text-foreground"
+          >
             {detail.overview.inspectionNotes}
           </Label>
           <textarea

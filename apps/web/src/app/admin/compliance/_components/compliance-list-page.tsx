@@ -2,7 +2,15 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ClipboardList, Eye, MoreHorizontal, Pencil, ShieldCheck } from "lucide-react";
+import {
+  Building2,
+  Car,
+  ClipboardList,
+  Eye,
+  Pencil,
+  RotateCcw,
+  ShieldCheck,
+} from "lucide-react";
 import type { Vehicle, VehicleComplianceStatus } from "@smart-dispatch/types";
 import { useAuth, useLocale } from "@/components/shared/providers";
 import {
@@ -12,15 +20,7 @@ import {
   type DataTableRowContext,
 } from "@/components/shared/data-table";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -29,17 +29,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { adminBadgeGoldClass } from "@/lib/admin-theme";
+import { adminEyebrowClass, adminSelectTriggerClass } from "@/lib/admin-theme";
 import { canReadCompliance, canWriteCompliance } from "@/lib/permissions";
 import { fetchVehicles } from "@/lib/vehicle-api";
 import {
-  expiryToneClass,
   formatComplianceDate,
   getExpiryTone,
 } from "@/lib/vehicle-compliance";
-import { formatMessage, getAdminComplianceMessages } from "@/translations";
+import { getAdminComplianceMessages } from "@/translations";
+import { cn } from "@/lib/utils";
 import { UpdateComplianceSheet } from "./update-compliance-sheet";
 import { ComplianceStats } from "./compliance-stats";
+import { ComplianceStatusBadge } from "./compliance-status-badge";
 
 type ComplianceListType = "insurance" | "inspection";
 
@@ -70,35 +71,32 @@ function ComplianceRowActions({
   canWrite: boolean;
 }) {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            className="text-slate-500 hover:bg-[#1C3A34]/6 hover:text-[#1C3A34]"
-            aria-label={formatMessage(labels.menuLabel, { name: vehicle.plate_number })}
-          />
-        }
+    <div className="flex items-center justify-end gap-1">
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon-sm"
+        onClick={() => onView(vehicle)}
+        className="size-8 text-slate-500 hover:bg-[#1C3A34]/8 hover:text-[#1C3A34] dark:hover:bg-accent dark:hover:text-foreground"
+        title={labels.view}
+        aria-label={labels.view}
       >
-        <MoreHorizontal className="size-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => onView(vehicle)}>
-            <Eye />
-            {labels.view}
-          </DropdownMenuItem>
-          {canWrite ? (
-            <DropdownMenuItem onClick={() => onEdit(vehicle)}>
-              <Pencil />
-              {editLabel}
-            </DropdownMenuItem>
-          ) : null}
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
+        <Eye className="size-4" />
+      </Button>
+      {canWrite ? (
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          onClick={() => onEdit(vehicle)}
+          className="size-8 text-slate-500 hover:bg-[#1C3A34]/8 hover:text-[#1C3A34] dark:hover:bg-accent dark:hover:text-foreground"
+          title={editLabel}
+          aria-label={editLabel}
+        >
+          <Pencil className="size-4" />
+        </Button>
+      ) : null}
+    </div>
   );
 }
 
@@ -180,8 +178,9 @@ export function ComplianceListPage({ type }: ComplianceListPageProps) {
           <button
             type="button"
             onClick={() => openVehicle(vehicle)}
-            className="text-left font-medium text-[#1C3A34] hover:underline"
+            className="group inline-flex items-center gap-1.5 rounded-md border border-slate-200/90 bg-slate-50/80 px-2.5 py-1 font-mono text-xs font-bold tracking-wider text-[#1C3A34] transition-all hover:border-[#1C3A34]/30 hover:bg-[#1C3A34]/8 dark:border-border dark:bg-muted/50 dark:text-foreground dark:hover:bg-accent"
           >
+            <Car className="size-3.5 text-slate-400 group-hover:text-[#1C3A34] dark:group-hover:text-[var(--brand-accent)] transition-colors" />
             {vehicle.plate_number}
           </button>
         ),
@@ -193,20 +192,39 @@ export function ComplianceListPage({ type }: ComplianceListPageProps) {
         {
           id: "provider",
           header: copy.columns.provider,
-          cellClassName: "text-slate-600",
-          cell: (vehicle) => vehicle.insurance_provider || "—",
+          cell: (vehicle) =>
+            vehicle.insurance_provider ? (
+              <div className="flex items-center gap-1.5 font-medium text-slate-800 dark:text-foreground">
+                <Building2 className="size-3.5 text-slate-400 shrink-0" />
+                <span className="truncate">{vehicle.insurance_provider}</span>
+              </div>
+            ) : (
+              <span className="text-slate-400">—</span>
+            ),
         },
         {
           id: "policy",
           header: copy.columns.policyNumber,
-          cellClassName: "font-mono text-xs text-slate-600",
-          cell: (vehicle) => vehicle.insurance_policy_number || "—",
+          cell: (vehicle) =>
+            vehicle.insurance_policy_number ? (
+              <span className="inline-block rounded border border-slate-200/70 bg-slate-50 px-2 py-0.5 font-mono text-xs text-slate-700 dark:border-border dark:bg-muted/40 dark:text-muted-foreground">
+                {vehicle.insurance_policy_number}
+              </span>
+            ) : (
+              <span className="text-slate-400">—</span>
+            ),
         },
         {
           id: "issued",
           header: copy.columns.issuedAt,
-          cellClassName: "text-slate-500",
-          cell: (vehicle) => formatComplianceDate(vehicle.insurance_issued_at, locale) ?? "—",
+          cell: (vehicle) => {
+            const date = formatComplianceDate(vehicle.insurance_issued_at, locale);
+            return date ? (
+              <span className="text-xs text-slate-600 dark:text-muted-foreground">{date}</span>
+            ) : (
+              <span className="text-slate-400">—</span>
+            );
+          },
         },
       );
     } else {
@@ -214,20 +232,39 @@ export function ComplianceListPage({ type }: ComplianceListPageProps) {
         {
           id: "center",
           header: copy.columns.center,
-          cellClassName: "text-slate-600",
-          cell: (vehicle) => vehicle.inspection_center || "—",
+          cell: (vehicle) =>
+            vehicle.inspection_center ? (
+              <div className="flex items-center gap-1.5 font-medium text-slate-800 dark:text-foreground">
+                <Building2 className="size-3.5 text-slate-400 shrink-0" />
+                <span className="truncate">{vehicle.inspection_center}</span>
+              </div>
+            ) : (
+              <span className="text-slate-400">—</span>
+            ),
         },
         {
           id: "certificate",
           header: copy.columns.certificateNumber,
-          cellClassName: "font-mono text-xs text-slate-600",
-          cell: (vehicle) => vehicle.inspection_certificate_number || "—",
+          cell: (vehicle) =>
+            vehicle.inspection_certificate_number ? (
+              <span className="inline-block rounded border border-slate-200/70 bg-slate-50 px-2 py-0.5 font-mono text-xs text-slate-700 dark:border-border dark:bg-muted/40 dark:text-muted-foreground">
+                {vehicle.inspection_certificate_number}
+              </span>
+            ) : (
+              <span className="text-slate-400">—</span>
+            ),
         },
         {
           id: "performed",
           header: copy.columns.performedAt,
-          cellClassName: "text-slate-500",
-          cell: (vehicle) => formatComplianceDate(vehicle.inspection_performed_at, locale) ?? "—",
+          cell: (vehicle) => {
+            const date = formatComplianceDate(vehicle.inspection_performed_at, locale);
+            return date ? (
+              <span className="text-xs text-slate-600 dark:text-muted-foreground">{date}</span>
+            ) : (
+              <span className="text-slate-400">—</span>
+            );
+          },
         },
       );
     }
@@ -236,10 +273,24 @@ export function ComplianceListPage({ type }: ComplianceListPageProps) {
       {
         id: "expires",
         header: copy.columns.expiresAt,
-        cellClassName: "text-slate-700",
         cell: (vehicle) => {
           const value = vehicle[expiryField];
-          return formatComplianceDate(value, locale) ?? "—";
+          const date = formatComplianceDate(value, locale);
+          if (!date) return <span className="text-slate-400">—</span>;
+          const tone = getExpiryTone(value);
+          return (
+            <span
+              className={cn(
+                "text-xs font-semibold tabular-nums",
+                tone === "expired" && "text-red-700 dark:text-red-300",
+                tone === "dueSoon" && "text-amber-700 dark:text-amber-300",
+                tone === "ok" && "text-slate-700 dark:text-muted-foreground",
+                tone === "notSet" && "text-slate-400 dark:text-muted-foreground/60",
+              )}
+            >
+              {date}
+            </span>
+          );
         },
       },
       {
@@ -247,11 +298,12 @@ export function ComplianceListPage({ type }: ComplianceListPageProps) {
         header: copy.columns.status,
         cell: (vehicle) => {
           const tone = getExpiryTone(vehicle[expiryField]);
-          const statusKey = tone === "dueSoon" ? "due_soon" : tone === "notSet" ? "not_set" : tone;
+          const statusKey = (tone === "dueSoon" ? "due_soon" : tone === "notSet" ? "not_set" : tone) as VehicleComplianceStatus;
           return (
-            <Badge variant="outline" className={expiryToneClass(tone)}>
-              {copy.status[statusKey as VehicleComplianceStatus]}
-            </Badge>
+            <ComplianceStatusBadge
+              status={statusKey}
+              label={copy.status[statusKey]}
+            />
           );
         },
       },
@@ -304,7 +356,7 @@ export function ComplianceListPage({ type }: ComplianceListPageProps) {
 
       <DataTable
         key={`${locale}-${type}`}
-        eyebrow={<Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>}
+        eyebrow={<p className={cn(adminEyebrowClass, "text-xs")}>{copy.eyebrow}</p>}
         title={pageCopy.title}
         titleClassName="text-2xl font-extrabold tracking-tight"
         description={pageCopy.description}
@@ -323,35 +375,50 @@ export function ComplianceListPage({ type }: ComplianceListPageProps) {
         emptySearchDescription={copy.empty.searchDescription}
         refreshDeps={[locale, statusFilter, type, tableRefreshKey]}
         toolbarActions={
-          <Select
-            items={[
-              { label: copy.status.all, value: "all" },
-              ...COMPLIANCE_STATUSES.map((status) => ({
-                label: copy.status[status],
-                value: status,
-              })),
-            ]}
-            value={statusFilter}
-            onValueChange={(value) => handleStatusFilterChange(value ?? "all")}
-          >
-            <SelectTrigger
-              id="compliance-status-filter"
-              aria-label={copy.filters.status}
-              className="h-10 w-full min-w-[11rem] rounded-lg border-slate-200 bg-white shadow-sm sm:w-[11rem]"
+          <div className="flex items-center gap-2">
+            <Select
+              items={[
+                { label: copy.status.all, value: "all" },
+                ...COMPLIANCE_STATUSES.map((status) => ({
+                  label: copy.status[status],
+                  value: status,
+                })),
+              ]}
+              value={statusFilter}
+              onValueChange={(value) => handleStatusFilterChange(value ?? "all")}
             >
-              <SelectValue placeholder={copy.filters.status} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="all">{copy.status.all}</SelectItem>
-                {COMPLIANCE_STATUSES.map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {copy.status[status]}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+              <SelectTrigger
+                id="compliance-status-filter"
+                aria-label={copy.filters.status}
+                className={cn(adminSelectTriggerClass, "w-full min-w-[11.5rem] sm:w-[11.5rem]")}
+              >
+                <SelectValue placeholder={copy.filters.status} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="all">{copy.status.all}</SelectItem>
+                  {COMPLIANCE_STATUSES.map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {copy.status[status]}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+
+            {statusFilter !== "all" && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => handleStatusFilterChange("all")}
+                className="h-10 gap-1.5 rounded-lg border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50 dark:border-border dark:bg-card dark:text-muted-foreground"
+              >
+                <RotateCcw className="size-3.5" />
+                <span className="hidden sm:inline">{copy.status.all}</span>
+              </Button>
+            )}
+          </div>
         }
       />
 
