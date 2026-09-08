@@ -3,16 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { CalendarClock, Settings2 } from "lucide-react";
-import type { DriverShiftRosterItem, DriverShiftTemplate, DriverShiftWeek } from "@smart-dispatch/types";
+import type { DriverShiftTemplate, DriverShiftWeek } from "@smart-dispatch/types";
 import { AdminDatePicker } from "@/components/shared/admin-date-picker";
 import {
   DataTable,
-  type DataTableColumn,
   type DataTableFetchParams,
 } from "@/components/shared/data-table";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { useAuth, useLocale } from "@/components/shared/providers";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -23,7 +21,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { adminBadgeGoldClass, adminSelectTriggerClass } from "@/lib/admin-theme";
+import {
+  adminEyebrowClass,
+  adminSelectTriggerClass,
+} from "@/lib/admin-theme";
 import {
   assignDriverShift,
   fetchDriverShiftRoster,
@@ -34,17 +35,14 @@ import { PERMISSIONS } from "@/lib/permissions";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
 import { getAdminDriversMessages } from "@/translations";
-import { formatAssignedVehicle } from "../../_components/driver-helpers";
-import { ShiftAssignSelect } from "./shift-assign-select";
 import { ShiftPeriodsSheet } from "./shift-periods-sheet";
 import { ShiftStats } from "./shift-stats";
 import { ShiftWeekGrid } from "./shift-week-grid";
+import { useShiftColumns } from "./shift-columns";
 import {
   addCalendarDays,
   addisToday,
-  formatShiftHours,
   parseLocalDate,
-  shiftBadgeClass,
   shiftDotClass,
   shiftTemplateLabel,
   startOfIsoWeek,
@@ -153,70 +151,19 @@ export function DriverShiftsPage() {
     [shiftsCopy],
   );
 
-  const columns = useMemo<DataTableColumn<DriverShiftRosterItem>[]>(
-    () => [
-      {
-        id: "name",
-        header: shiftsCopy.columns.name,
-        cellClassName: "font-medium text-slate-800",
-        cell: (row) => row.driver.name,
-      },
-      {
-        id: "mobile",
-        header: shiftsCopy.columns.mobile,
-        cellClassName: "text-slate-500",
-        cell: (row) => row.driver.mobile_number,
-      },
-      {
-        id: "vehicle",
-        header: shiftsCopy.columns.vehicle,
-        cellClassName: "text-slate-600",
-        cell: (row) => formatAssignedVehicle(row.driver.assigned_vehicle) ?? "—",
-      },
-      {
-        id: "shift",
-        header: shiftsCopy.columns.shift,
-        cell: (row) => {
-          if (canWrite) {
-            return (
-              <ShiftAssignSelect
-                templates={templates}
-                value={row.assignment?.shift.id ?? null}
-                locale={locale}
-                unassignedLabel={shiftsCopy.unassigned}
-                templateLabels={shiftsCopy.templates}
-                onChange={(shiftTemplateId) => handleAssign(row.driver.id, workDate, shiftTemplateId)}
-              />
-            );
-          }
-
-          if (!row.assignment) {
-            return (
-              <Badge variant="outline" className={cn("text-xs", shiftBadgeClass(null))}>
-                {shiftsCopy.unassigned}
-              </Badge>
-            );
-          }
-
-          return (
-            <Badge variant="outline" className={cn("text-xs", shiftBadgeClass(row.assignment.shift.slug))}>
-              {shiftTemplateLabel(row.assignment.shift, shiftsCopy.templates)}
-            </Badge>
-          );
-        },
-      },
-      {
-        id: "hours",
-        header: shiftsCopy.columns.hours,
-        cellClassName: "tabular-nums text-slate-600",
-        cell: (row) =>
-          row.assignment
-            ? formatShiftHours(row.assignment.shift.start_time, row.assignment.shift.end_time, locale)
-            : "—",
-      },
-    ],
-    [canWrite, handleAssign, locale, shiftsCopy, templates, workDate],
+  const handleAssignDay = useCallback(
+    (driverUserId: string, shiftTemplateId: string | null) =>
+      handleAssign(driverUserId, workDate, shiftTemplateId),
+    [handleAssign, workDate],
   );
+
+  const { columns } = useShiftColumns({
+    copy,
+    locale,
+    templates,
+    canWrite,
+    onAssign: handleAssignDay,
+  });
 
   const loadRoster = useCallback(
     ({ page, limit, search }: DataTableFetchParams) =>
@@ -275,7 +222,7 @@ export function DriverShiftsPage() {
       {view === "day" ? (
         <DataTable
           key={`${locale}-${workDate}-${shiftFilter}`}
-          eyebrow={<Badge className={adminBadgeGoldClass}>{shiftsCopy.eyebrow}</Badge>}
+          eyebrow={<p className={cn(adminEyebrowClass, "text-xs")}>{shiftsCopy.eyebrow}</p>}
           title={shiftsCopy.title}
           titleClassName="text-2xl font-extrabold tracking-tight"
           description={shiftsCopy.description}

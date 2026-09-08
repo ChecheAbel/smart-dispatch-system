@@ -23,6 +23,7 @@ import type { SupportedLocale } from "@/lib/locale";
 import { cn } from "@/lib/utils";
 import { formatAssignedVehicle, statusBadgeClass } from "./driver-helpers";
 import { DriverRatingStars } from "./driver-rating";
+import { DriverStatusBadge } from "./driver-status-badge";
 
 function ProfileField({ label, value }: { label: string; value: string | null | undefined }) {
   return (
@@ -119,20 +120,26 @@ export function DriverDetailSheet({
           <SheetDescription className="leading-relaxed">{copy.detail.description}</SheetDescription>
           {user ? (
             <div className="flex flex-wrap items-center gap-2 pt-1">
-              <Badge variant="outline" className={cn("text-xs", statusBadgeClass(user.account_status))}>
-                {copy.status[user.account_status]}
-              </Badge>
-              <Badge
-                variant="outline"
+              <DriverStatusBadge
+                status={user.account_status}
+                label={copy.status[user.account_status]}
+              />
+              <span
                 className={cn(
-                  "text-xs",
+                  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold tracking-wide",
                   user.assigned_vehicle
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                    : "border-slate-200 bg-slate-50 text-slate-600",
+                    ? "border-emerald-200/90 bg-emerald-50/80 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300"
+                    : "border-amber-200/90 bg-amber-50/80 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300",
                 )}
               >
+                <span
+                  className={cn(
+                    "size-1.5 shrink-0 rounded-full",
+                    user.assigned_vehicle ? "bg-emerald-500" : "bg-amber-500",
+                  )}
+                />
                 {user.assigned_vehicle ? copy.assignment.assigned : copy.assignment.unassigned}
-              </Badge>
+              </span>
               {submittedAt ? (
                 <p className="text-xs font-medium text-slate-500">
                   {formatMessage(copy.detail.submittedAt, { date: submittedAt })}

@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { adminBadgeGoldClass, adminCardClass, adminSearchInputClass } from "@/lib/admin-theme";
+import { adminCardClass, adminEyebrowClass, adminSearchInputClass } from "@/lib/admin-theme";
 import { formatMessage } from "@/translations";
 import { cn } from "@/lib/utils";
 import { ShiftAssignSelect } from "./shift-assign-select";
@@ -17,6 +17,7 @@ import {
   driverInitials,
   formatShiftHours,
   formatWeekRange,
+  cellTone,
   isWeekend,
   shiftBadgeClass,
   shiftBarClass,
@@ -56,20 +57,6 @@ type ShiftWeekGridProps = {
   onToday: () => void;
   onAssign: (driverUserId: string, workDate: string, shiftTemplateId: string | null) => Promise<void>;
 };
-
-function cellTone(workDate: string, selectedDate: string) {
-  const today = addisToday();
-  if (workDate === selectedDate) {
-    return "bg-[color-mix(in_srgb,var(--brand-primary)_6%,transparent)]";
-  }
-  if (workDate === today) {
-    return "bg-amber-50/70 dark:bg-[var(--brand-accent)]/8";
-  }
-  if (isWeekend(workDate)) {
-    return "bg-slate-50/80 dark:bg-muted/25";
-  }
-  return "";
-}
 
 export function ShiftWeekGrid({
   week,
@@ -119,7 +106,7 @@ export function ShiftWeekGrid({
   return (
     <Card className={adminCardClass}>
       <CardHeader className="gap-4">
-        <Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>
+        <p className={cn(adminEyebrowClass, "text-xs")}>{copy.eyebrow}</p>
         <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
           <div className="min-w-0 space-y-2">
             <CardTitle className="text-2xl font-extrabold tracking-tight">{weekTitle}</CardTitle>
@@ -277,16 +264,16 @@ export function ShiftWeekGrid({
                   <tbody>
                     {roster.map((row) => (
                       <tr key={row.driver.id} className="align-middle">
-                        <td className="sticky left-0 z-10 border-b border-slate-100 bg-white px-4 py-2.5 dark:border-border dark:bg-card">
+                        <td className="sticky left-0 z-10 whitespace-nowrap border-b border-slate-100 bg-white px-4 py-2.5 dark:border-border dark:bg-card">
                           <div className="flex items-center gap-2.5">
-                            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--brand-primary)_10%,transparent)] text-[11px] font-bold text-[var(--brand-primary)]">
+                            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#1C3A34]/8 text-xs font-bold text-[#1C3A34] dark:bg-[var(--brand-accent)]/15 dark:text-[var(--brand-accent)]">
                               {driverInitials(row.driver.name)}
                             </span>
                             <div className="min-w-0">
-                              <div className="truncate font-medium text-slate-800 dark:text-foreground">
+                              <div className="truncate font-semibold text-slate-800 dark:text-foreground">
                                 {row.driver.name}
                               </div>
-                              <div className="truncate text-xs text-slate-500">
+                              <div className="truncate text-xs text-slate-500 dark:text-muted-foreground">
                                 {row.driver.assigned_vehicle?.plate_number ?? copy.unassigned}
                               </div>
                             </div>

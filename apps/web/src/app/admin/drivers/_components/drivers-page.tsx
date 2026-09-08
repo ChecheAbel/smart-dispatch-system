@@ -1,25 +1,15 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { Eye, IdCard, MoreHorizontal } from "lucide-react";
+import { useCallback, useState } from "react";
+import { IdCard, RotateCcw } from "lucide-react";
 import type { User } from "@smart-dispatch/types";
 import { useAuth, useLocale } from "@/components/shared/providers";
 import {
   DataTable,
-  type DataTableColumn,
   type DataTableFetchParams,
-  type DataTableRowContext,
 } from "@/components/shared/data-table";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Select,
   SelectContent,
@@ -28,64 +18,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { formatMessage, getAdminDriversMessages } from "@/translations";
+import { getAdminDriversMessages } from "@/translations";
 import { fetchUsers } from "@/lib/user-api";
 import { PERMISSIONS } from "@/lib/permissions";
-import { adminBadgeGoldClass } from "@/lib/admin-theme";
+import { adminEyebrowClass, adminSelectTriggerClass } from "@/lib/admin-theme";
 import { cn } from "@/lib/utils";
 import { DriverDetailSheet } from "./driver-detail-sheet";
-import { DriverRatingCell } from "./driver-rating";
 import { DriverStats } from "./driver-stats";
-import {
-  formatAssignedVehicle,
-  formatDriverName,
-  statusBadgeClass,
-  type DriverAssignmentFilter,
-  type DriverStatusFilter,
-} from "./driver-helpers";
+import { useDriverColumns } from "./driver-columns";
+import type { DriverAssignmentFilter, DriverStatusFilter } from "./driver-helpers";
 
 const STATUS_FILTERS: DriverStatusFilter[] = ["all", "active", "suspended", "deactivated"];
 const ASSIGNMENT_FILTERS: DriverAssignmentFilter[] = ["all", "assigned", "unassigned"];
-
-function DriverRowActions({
-  user,
-  viewLabel,
-  menuLabel,
-  onView,
-}: {
-  user: User;
-  viewLabel: string;
-  menuLabel: string;
-  onView: (user: User) => void;
-}) {
-  const name = formatDriverName(user);
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            className="text-slate-500 hover:bg-[#1C3A34]/6 hover:text-[#1C3A34]"
-            aria-label={formatMessage(menuLabel, { name })}
-          />
-        }
-      >
-        <MoreHorizontal className="size-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40">
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => onView(user)}>
-            <Eye />
-            {viewLabel}
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
 
 export function DriversPage() {
   const { locale } = useLocale();
@@ -96,68 +40,32 @@ export function DriversPage() {
   const [assignmentFilter, setAssignmentFilter] = useState<DriverAssignmentFilter>("all");
   const [detailOpen, setDetailOpen] = useState(false);
   const [detailUserId, setDetailUserId] = useState<string | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [refreshKey] = useState(0);
 
   const openDetail = useCallback((user: User) => {
     setDetailUserId(user.id);
     setDetailOpen(true);
   }, []);
 
-  const columns = useMemo<DataTableColumn<User>[]>(
-    () => [
-      {
-        id: "name",
-        header: copy.directory.columns.name,
-        cellClassName: "font-medium text-slate-800",
-        cell: (user) => formatDriverName(user),
-      },
-      {
-        id: "email",
-        header: copy.directory.columns.email,
-        cellClassName: "text-slate-500",
-        cell: (user) => user.email,
-      },
-      {
-        id: "mobile",
-        header: copy.directory.columns.mobile,
-        cellClassName: "text-slate-500",
-        cell: (user) => user.mobile_number,
-      },
-      {
-        id: "license",
-        header: copy.directory.columns.license,
-        cellClassName: "font-mono text-xs tracking-wide text-slate-600",
-        cell: (user) => user.driver?.license_number || "—",
-      },
-      {
-        id: "rating",
-        header: copy.directory.columns.rating,
-        cell: (user) => (
-          <DriverRatingCell
-            rating={user.driver?.rating}
-            unratedLabel={copy.directory.ratingUnrated}
-            countTemplate={copy.directory.ratingCount}
-          />
-        ),
-      },
-      {
-        id: "vehicle",
-        header: copy.directory.columns.vehicle,
-        cellClassName: "text-slate-600",
-        cell: (user) => formatAssignedVehicle(user.assigned_vehicle) ?? copy.assignment.unassigned,
-      },
-      {
-        id: "status",
-        header: copy.directory.columns.status,
-        cell: (user) => (
-          <Badge variant="outline" className={cn("text-xs", statusBadgeClass(user.account_status))}>
-            {copy.status[user.account_status]}
-          </Badge>
-        ),
-      },
-    ],
-    [copy],
+  const handleStatFilterChange = useCallback(
+    (status: DriverStatusFilter, assignment: DriverAssignmentFilter) => {
+      setStatusFilter(status);
+      setAssignmentFilter(assignment);
+    },
+    [],
   );
+
+  const handleResetFilters = useCallback(() => {
+    setStatusFilter("all");
+    setAssignmentFilter("all");
+  }, []);
+
+  const isFiltered = statusFilter !== "all" || assignmentFilter !== "all";
+
+  const { columns, renderRowActions } = useDriverColumns({
+    copy,
+    openDetail,
+  });
 
   const loadDrivers = useCallback(
     ({ page, limit, search }: DataTableFetchParams) =>
@@ -174,29 +82,33 @@ export function DriversPage() {
     [assignmentFilter, statusFilter],
   );
 
-  const renderRowActions = useCallback(
-    (user: User, _context: DataTableRowContext<User>) => (
-      <DriverRowActions
-        user={user}
-        viewLabel={copy.directory.actions.view}
-        menuLabel={copy.directory.actions.menuLabel}
-        onView={openDetail}
-      />
-    ),
-    [copy.directory.actions.menuLabel, copy.directory.actions.view, openDetail],
-  );
-
   if (!canRead) {
     return <PageAccessDenied copy={copy.accessDenied} />;
   }
 
+  const statusItems = STATUS_FILTERS.map((status) => ({
+    label: copy.directory.filters.statusOptions[status],
+    value: status,
+  }));
+
+  const assignmentItems = ASSIGNMENT_FILTERS.map((assignment) => ({
+    label: copy.directory.filters.assignmentOptions[assignment],
+    value: assignment,
+  }));
+
   return (
     <div className="space-y-6">
-      <DriverStats locale={locale} refreshKey={refreshKey} />
+      <DriverStats
+        locale={locale}
+        refreshKey={refreshKey}
+        activeStatus={statusFilter}
+        activeAssignment={assignmentFilter}
+        onFilterChange={handleStatFilterChange}
+      />
 
       <DataTable
         key={`${locale}-${statusFilter}-${assignmentFilter}`}
-        eyebrow={<Badge className={adminBadgeGoldClass}>{copy.directory.eyebrow}</Badge>}
+        eyebrow={<p className={cn(adminEyebrowClass, "text-xs")}>{copy.directory.eyebrow}</p>}
         title={copy.directory.title}
         titleClassName="text-2xl font-extrabold tracking-tight"
         description={copy.directory.description}
@@ -208,19 +120,16 @@ export function DriversPage() {
         showIndexColumn
         renderRowActions={renderRowActions}
         actionsColumnHeader={copy.directory.columns.actions}
-        minTableWidth="1180px"
+        minTableWidth="980px"
         emptyIcon={IdCard}
         emptyTitle={copy.directory.empty.title}
         emptyDescription={copy.directory.empty.description}
         emptySearchDescription={copy.directory.empty.searchDescription}
         refreshDeps={[locale, refreshKey, statusFilter, assignmentFilter]}
         toolbarActions={
-          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
             <Select
-              items={STATUS_FILTERS.map((status) => ({
-                label: copy.directory.filters.statusOptions[status],
-                value: status,
-              }))}
+              items={statusItems}
               value={statusFilter}
               onValueChange={(value) => {
                 setStatusFilter((value as DriverStatusFilter | null) ?? "all");
@@ -229,25 +138,23 @@ export function DriversPage() {
               <SelectTrigger
                 id="driver-status-filter"
                 aria-label={copy.directory.filters.status}
-                className="h-10 w-full min-w-[11rem] rounded-lg border-slate-200 bg-white shadow-sm sm:w-[11rem]"
+                className={cn(adminSelectTriggerClass, "w-full min-w-[11rem] sm:w-[11rem]")}
               >
                 <SelectValue placeholder={copy.directory.filters.status} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {STATUS_FILTERS.map((status) => (
-                    <SelectItem key={status} value={status}>
-                      {copy.directory.filters.statusOptions[status]}
+                  {statusItems.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>
+                      {item.label}
                     </SelectItem>
                   ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
+
             <Select
-              items={ASSIGNMENT_FILTERS.map((assignment) => ({
-                label: copy.directory.filters.assignmentOptions[assignment],
-                value: assignment,
-              }))}
+              items={assignmentItems}
               value={assignmentFilter}
               onValueChange={(value) => {
                 setAssignmentFilter((value as DriverAssignmentFilter | null) ?? "all");
@@ -256,20 +163,33 @@ export function DriversPage() {
               <SelectTrigger
                 id="driver-assignment-filter"
                 aria-label={copy.directory.filters.assignment}
-                className="h-10 w-full min-w-[13rem] rounded-lg border-slate-200 bg-white shadow-sm sm:w-[13rem]"
+                className={cn(adminSelectTriggerClass, "w-full min-w-[13rem] sm:w-[13rem]")}
               >
                 <SelectValue placeholder={copy.directory.filters.assignment} />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {ASSIGNMENT_FILTERS.map((assignment) => (
-                    <SelectItem key={assignment} value={assignment}>
-                      {copy.directory.filters.assignmentOptions[assignment]}
+                  {assignmentItems.map((item) => (
+                    <SelectItem key={item.value} value={item.value}>
+                      {item.label}
                     </SelectItem>
                   ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
+
+            {isFiltered && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleResetFilters}
+                className="h-10 gap-1.5 rounded-lg border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50 dark:border-border dark:bg-card dark:text-muted-foreground"
+              >
+                <RotateCcw className="size-3.5" />
+                <span className="hidden sm:inline">{copy.directory.filters.statusOptions.all}</span>
+              </Button>
+            )}
           </div>
         }
       />

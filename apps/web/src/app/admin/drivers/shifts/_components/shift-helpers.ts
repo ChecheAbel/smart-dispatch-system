@@ -177,3 +177,18 @@ export function shiftDotClass(slug: string | null | undefined) {
   }
   return paletteForSlug(slug)?.dot ?? "bg-slate-300";
 }
+
+export function cellTone(workDate: string, selectedDate: string) {
+  const today = addisToday();
+  if (workDate === selectedDate) {
+    return "bg-[color-mix(in_srgb,var(--brand-primary)_6%,transparent)]";
+  }
+  if (workDate === today) {
+    return "bg-amber-50/70 dark:bg-[var(--brand-accent)]/8";
+  }
+  if (isWeekend(workDate)) {
+    return "bg-slate-50/80 dark:bg-muted/25";
+  }
+  return "";
+}
+

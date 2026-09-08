@@ -334,11 +334,6 @@ export function ComplianceOverviewPage() {
         />
         <StatCard
           title={copy.stats.needsAttention}
-          titleAccessory={
-            data.vehicles_needing_attention > 0 ? (
-              <span className="inline-flex size-2 rounded-full bg-amber-500 animate-pulse" />
-            ) : undefined
-          }
           value={data.vehicles_needing_attention}
           description={copy.stats.needsAttentionDescription}
           icon={AlertTriangle}
@@ -346,9 +341,6 @@ export function ComplianceOverviewPage() {
         />
         <StatCard
           title={copy.stats.insuranceNotSet}
-          titleAccessory={
-            <span className="inline-flex size-2 rounded-full bg-slate-400" />
-          }
           value={data.insurance.not_set}
           description={copy.stats.insuranceNotSetDescription}
           icon={ShieldCheck}
@@ -357,9 +349,6 @@ export function ComplianceOverviewPage() {
         />
         <StatCard
           title={copy.stats.inspectionNotSet}
-          titleAccessory={
-            <span className="inline-flex size-2 rounded-full bg-slate-400" />
-          }
           value={data.inspection.not_set}
           description={copy.stats.inspectionNotSetDescription}
           icon={ClipboardList}

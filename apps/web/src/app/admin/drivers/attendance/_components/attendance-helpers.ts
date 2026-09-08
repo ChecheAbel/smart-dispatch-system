@@ -17,6 +17,11 @@ export function addisToday() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Africa/Addis_Ababa" }).format(new Date());
 }
 
+export function driverInitials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return `${parts[0]?.[0] ?? ""}${parts[1]?.[0] ?? parts[0]?.[1] ?? ""}`.toUpperCase();
+}
+
 export function formatAssignedVehicle(
   vehicle: { plate_number: string; make: string | null; model: string | null } | null,
 ) {

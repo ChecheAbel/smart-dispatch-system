@@ -6,10 +6,14 @@ import { StatCard } from "@/components/shared/stat-card";
 import { getAdminDriversMessages } from "@/translations";
 import { fetchUserCount } from "@/lib/user-api";
 import type { SupportedLocale } from "@/lib/locale";
+import type { DriverAssignmentFilter, DriverStatusFilter } from "./driver-helpers";
 
 type DriverStatsProps = {
   locale: SupportedLocale;
   refreshKey: number;
+  activeStatus?: DriverStatusFilter;
+  activeAssignment?: DriverAssignmentFilter;
+  onFilterChange?: (status: DriverStatusFilter, assignment: DriverAssignmentFilter) => void;
 };
 
 type DriverStatsState = {
@@ -31,7 +35,13 @@ const hiredDriverFilter = {
   account_activation: "activated" as const,
 };
 
-export function DriverStats({ locale, refreshKey }: DriverStatsProps) {
+export function DriverStats({
+  locale,
+  refreshKey,
+  activeStatus = "all",
+  activeAssignment = "all",
+  onFilterChange,
+}: DriverStatsProps) {
   const copy = getAdminDriversMessages(locale).directory;
   const [stats, setStats] = useState<DriverStatsState>(emptyStats);
   const [loading, setLoading] = useState(true);
@@ -79,6 +89,8 @@ export function DriverStats({ locale, refreshKey }: DriverStatsProps) {
         description={copy.stats.description}
         icon={IdCard}
         loading={loading}
+        active={activeStatus === "all" && activeAssignment === "all"}
+        onClick={onFilterChange ? () => onFilterChange("all", "all") : undefined}
       />
       <StatCard
         title={copy.stats.activeTitle}
@@ -86,6 +98,12 @@ export function DriverStats({ locale, refreshKey }: DriverStatsProps) {
         description={copy.stats.activeDescription}
         icon={UserCheck}
         loading={loading}
+        active={activeStatus === "active"}
+        onClick={
+          onFilterChange
+            ? () => onFilterChange(activeStatus === "active" ? "all" : "active", "all")
+            : undefined
+        }
       />
       <StatCard
         title={copy.stats.unassignedTitle}
@@ -93,6 +111,13 @@ export function DriverStats({ locale, refreshKey }: DriverStatsProps) {
         description={copy.stats.unassignedDescription}
         icon={UserMinus}
         loading={loading}
+        active={activeAssignment === "unassigned"}
+        onClick={
+          onFilterChange
+            ? () =>
+                onFilterChange("all", activeAssignment === "unassigned" ? "all" : "unassigned")
+            : undefined
+        }
       />
       <StatCard
         title={copy.stats.suspendedTitle}
@@ -100,6 +125,12 @@ export function DriverStats({ locale, refreshKey }: DriverStatsProps) {
         description={copy.stats.suspendedDescription}
         icon={UserX}
         loading={loading}
+        active={activeStatus === "suspended"}
+        onClick={
+          onFilterChange
+            ? () => onFilterChange(activeStatus === "suspended" ? "all" : "suspended", "all")
+            : undefined
+        }
       />
     </div>
   );

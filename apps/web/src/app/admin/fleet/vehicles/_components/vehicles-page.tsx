@@ -1,49 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { MoreHorizontal, Eye, Pencil, Plus, Trash2, Truck, UserRound } from "lucide-react";
-import type { Vehicle, VehicleStatus, VehicleType, VehicleClass } from "@smart-dispatch/types";
-import { useLocale, useAuth } from "@/components/shared/providers";
+import { useCallback, useEffect, useState } from "react";
+import { Plus, Truck } from "lucide-react";
+import type { Vehicle, VehicleClass, VehicleStatus, VehicleType } from "@smart-dispatch/types";
+import { useAuth, useLocale } from "@/components/shared/providers";
 import { useRouter } from "next/navigation";
 import {
   DataTable,
-  type DataTableColumn,
   type DataTableFetchParams,
   type DataTableRowContext,
 } from "@/components/shared/data-table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  formatMessage,
-  getAdminVehiclesMessages,
-  type AdminVehiclesMessages,
-} from "@/translations";
+import { formatMessage, getAdminVehiclesMessages } from "@/translations";
 import { deleteVehicle, fetchVehicles } from "@/lib/vehicle-api";
 import { fetchVehicleTypes } from "@/lib/vehicle-type-api";
 import { fetchVehicleClasses } from "@/lib/vehicle-class-api";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
-import {
-  adminBadgeGoldClass,
-  adminFilterLabelClass,
-  adminPrimaryButtonClass,
-} from "@/lib/admin-theme";
+import { adminEyebrowClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
 import { PERMISSIONS } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { DeleteConfirmModal } from "@/components/shared/delete-confirm-modal";
@@ -51,87 +24,8 @@ import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { CreateVehicleSheet } from "./create-vehicle-sheet";
 import { AssignVehicleDriverSheet } from "./assign-vehicle-driver-sheet";
 import { VehicleStats } from "./vehicle-stats";
-import { getVehiclePhotoUrl } from "@/lib/vehicle-photo";
-
-const VEHICLE_STATUSES: VehicleStatus[] = ["active", "maintenance", "retired"];
-
-function vehicleStatusBadgeClass(status: VehicleStatus) {
-  switch (status) {
-    case "active":
-      return "border-emerald-200 bg-emerald-50 text-emerald-800";
-    case "maintenance":
-      return "border-amber-200 bg-amber-50 text-amber-800";
-    case "retired":
-      return "border-slate-200 bg-slate-50 text-slate-600";
-  }
-}
-
-function VehicleRowActions({
-  vehicle,
-  labels,
-  onView,
-  onEdit,
-  onAssignDriver,
-  onDelete,
-  canEdit,
-  canAssignDriver,
-  canDelete,
-}: {
-  vehicle: Vehicle;
-  labels: AdminVehiclesMessages["actions"];
-  onView: (vehicle: Vehicle) => void;
-  onEdit: (vehicle: Vehicle) => void;
-  onAssignDriver: (vehicle: Vehicle) => void;
-  onDelete: (vehicle: Vehicle) => void;
-  canEdit: boolean;
-  canAssignDriver: boolean;
-  canDelete: boolean;
-}) {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            className="text-slate-500 hover:bg-[#1C3A34]/6 hover:text-[#1C3A34]"
-            aria-label={formatMessage(labels.menuLabel, { name: vehicle.plate_number })}
-          />
-        }
-      >
-        <MoreHorizontal className="size-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48">
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => onView(vehicle)}>
-            <Eye />
-            {labels.view}
-          </DropdownMenuItem>
-          {canEdit ? (
-            <DropdownMenuItem onClick={() => onEdit(vehicle)}>
-              <Pencil />
-              {labels.edit}
-            </DropdownMenuItem>
-          ) : null}
-          {canAssignDriver ? (
-            <DropdownMenuItem onClick={() => onAssignDriver(vehicle)}>
-              <UserRound />
-              {labels.assignDriver}
-            </DropdownMenuItem>
-          ) : null}
-          {(canEdit || canAssignDriver) && canDelete ? <DropdownMenuSeparator /> : null}
-          {canDelete ? (
-            <DropdownMenuItem variant="destructive" onClick={() => onDelete(vehicle)}>
-              <Trash2 />
-              {labels.delete}
-            </DropdownMenuItem>
-          ) : null}
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
+import { useVehicleColumns, VehicleRowActions } from "./vehicle-columns";
+import { VehicleFilterBar } from "./vehicle-filter-bar";
 
 export function VehiclesPage() {
   const router = useRouter();
@@ -142,7 +36,7 @@ export function VehiclesPage() {
   const canWrite = hasPermission(PERMISSIONS.vehicles.write);
   const canAssignDriver = hasPermission(PERMISSIONS.vehicles.assign_driver);
   const canDelete = hasPermission(PERMISSIONS.vehicles.delete);
-  const showRowActions = true;
+
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetMode, setSheetMode] = useState<"create" | "edit">("create");
   const [editingVehicleId, setEditingVehicleId] = useState<string | null>(null);
@@ -151,6 +45,7 @@ export function VehiclesPage() {
   const [assignDriverOpen, setAssignDriverOpen] = useState(false);
   const [assigningVehicle, setAssigningVehicle] = useState<Vehicle | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+
   const [typeFilter, setTypeFilter] = useState("all");
   const [classFilter, setClassFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -159,9 +54,7 @@ export function VehiclesPage() {
   const [vehicleClasses, setVehicleClasses] = useState<VehicleClass[]>([]);
 
   useEffect(() => {
-    if (!canRead) {
-      return;
-    }
+    if (!canRead) return;
 
     let cancelled = false;
 
@@ -184,7 +77,6 @@ export function VehiclesPage() {
     }
 
     void loadFilterOptions();
-
     return () => {
       cancelled = true;
     };
@@ -193,6 +85,14 @@ export function VehiclesPage() {
   function bumpRefresh() {
     setRefreshKey((current) => current + 1);
   }
+
+  const handleResetFilters = useCallback(() => {
+    setTypeFilter("all");
+    setClassFilter("all");
+    setStatusFilter("all");
+    setAssignmentFilter("all");
+    bumpRefresh();
+  }, []);
 
   function openCreateSheet() {
     setSheetMode("create");
@@ -223,137 +123,7 @@ export function VehiclesPage() {
     setAssignDriverOpen(true);
   }, []);
 
-  const vehicleColumns = useMemo<DataTableColumn<Vehicle>[]>(
-    () => {
-      const empty = copy.columnEmpty;
-      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
-
-      function emptyCellLabel(text: string) {
-        return <span className="text-sm text-slate-400 italic">{text}</span>;
-      }
-
-      return [
-      {
-        id: "image",
-        header: "",
-        cellClassName: "w-16",
-        cell: (vehicle) => {
-          const preview = vehicle.images?.[0];
-
-          if (!preview) {
-            return (
-              <div className="relative flex size-12 items-center justify-center overflow-hidden rounded-xl border border-dashed border-slate-200 bg-gradient-to-br from-slate-100 to-slate-50">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(28,58,52,0.08),_transparent_60%)]" />
-                <Truck className="relative size-5 text-slate-300" />
-              </div>
-            );
-          }
-
-          const photoUrl = getVehiclePhotoUrl(preview, apiBaseUrl);
-
-          return (
-            <div className="h-12 w-12 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
-              <img src={photoUrl ?? preview} alt={vehicle.plate_number} className="h-full w-full object-cover" />
-            </div>
-          );
-        },
-      },
-      {
-        id: "plate",
-        header: copy.columns.plate,
-        cellClassName: "text-slate-700",
-        cell: (vehicle) => (
-          <button
-            type="button"
-            onClick={() => openVehicleDetail(vehicle)}
-            className="text-left font-medium text-[#1C3A34] hover:underline"
-          >
-            {vehicle.plate_number}
-          </button>
-        ),
-      },
-      {
-        id: "chassis",
-        header: copy.columns.chassis,
-        cellClassName: "font-mono text-xs text-slate-600 tracking-wide",
-        cell: (vehicle) =>
-          vehicle.chassis_number
-            ? vehicle.chassis_number
-            : emptyCellLabel(empty.chassis),
-      },
-      {
-        id: "type",
-        header: copy.columns.type,
-        cellClassName: "text-slate-600",
-        cell: (vehicle) =>
-          vehicle.vehicle_type?.name
-            ? vehicle.vehicle_type.name
-            : emptyCellLabel(empty.type),
-      },
-      {
-        id: "class",
-        header: copy.columns.class,
-        cellClassName: "text-slate-600",
-        cell: (vehicle) =>
-          vehicle.vehicle_class?.name
-            ? vehicle.vehicle_class.name
-            : emptyCellLabel(empty.class),
-      },
-      {
-        id: "driver",
-        header: copy.columns.driver,
-        cellClassName: "align-top",
-        cell: (vehicle) => {
-          const hasDriver = Boolean(vehicle.assigned_driver);
-          const driver = vehicle.assigned_driver;
-
-          return (
-            <div className="flex w-full min-w-[9.5rem] max-w-[11rem] flex-col items-start gap-1.5 py-0.5">
-              {hasDriver && driver ? (
-                <>
-                  <div className="min-w-0 w-full">
-                    <p className="truncate text-sm font-medium leading-snug text-slate-800">
-                      {driver.name}
-                    </p>
-                    {driver.email ? (
-                      <p className="truncate text-xs leading-snug text-slate-500">{driver.email}</p>
-                    ) : null}
-                  </div>
-                  <Badge
-                    variant="outline"
-                    className="shrink-0 whitespace-nowrap border-emerald-200 bg-emerald-50 text-[10px] font-medium text-emerald-800"
-                  >
-                    {copy.driverStatus.assigned}
-                  </Badge>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm leading-snug text-slate-500">{empty.driver}</p>
-                  <Badge
-                    variant="outline"
-                    className="shrink-0 whitespace-nowrap border-amber-200 bg-amber-50 text-[10px] font-medium text-amber-800"
-                  >
-                    {copy.driverStatus.unassigned}
-                  </Badge>
-                </>
-              )}
-            </div>
-          );
-        },
-      },
-      {
-        id: "status",
-        header: copy.columns.status,
-        cell: (vehicle) => (
-          <Badge variant="outline" className={cn("text-xs", vehicleStatusBadgeClass(vehicle.status))}>
-            {copy.status[vehicle.status]}
-          </Badge>
-        ),
-      },
-    ];
-    },
-    [copy, openVehicleDetail],
-  );
+  const vehicleColumns = useVehicleColumns({ copy, openVehicleDetail });
 
   const loadVehicles = useCallback(
     ({ page, limit, search }: DataTableFetchParams) =>
@@ -372,21 +142,19 @@ export function VehiclesPage() {
   );
 
   const renderRowActions = useCallback(
-    (vehicle: Vehicle, _context: DataTableRowContext<Vehicle>) => {
-      return (
-        <VehicleRowActions
-          vehicle={vehicle}
-          labels={copy.actions}
-          onView={openVehicleDetail}
-          onEdit={openEditSheet}
-          onAssignDriver={openAssignDriverSheet}
-          onDelete={openDeleteModal}
-          canEdit={canWrite}
-          canAssignDriver={canAssignDriver}
-          canDelete={canDelete}
-        />
-      );
-    },
+    (vehicle: Vehicle, _context: DataTableRowContext<Vehicle>) => (
+      <VehicleRowActions
+        vehicle={vehicle}
+        labels={copy.actions}
+        onView={openVehicleDetail}
+        onEdit={openEditSheet}
+        onAssignDriver={openAssignDriverSheet}
+        onDelete={openDeleteModal}
+        canEdit={canWrite}
+        canAssignDriver={canAssignDriver}
+        canDelete={canDelete}
+      />
+    ),
     [
       copy.actions,
       openVehicleDetail,
@@ -409,7 +177,7 @@ export function VehiclesPage() {
 
       <DataTable
         key={locale}
-        eyebrow={<Badge className={adminBadgeGoldClass}>{copy.eyebrow}</Badge>}
+        eyebrow={<p className={cn(adminEyebrowClass, "text-xs")}>{copy.eyebrow}</p>}
         title={copy.title}
         titleClassName="text-2xl font-extrabold tracking-tight"
         description={copy.description}
@@ -419,7 +187,7 @@ export function VehiclesPage() {
         fetchData={loadVehicles}
         getRowKey={(vehicle) => vehicle.id}
         showIndexColumn
-        renderRowActions={showRowActions ? renderRowActions : undefined}
+        renderRowActions={renderRowActions}
         actionsColumnHeader={copy.columns.actions}
         toolbarActions={
           canWrite ? (
@@ -436,150 +204,32 @@ export function VehiclesPage() {
         emptySearchDescription={copy.empty.searchDescription}
         refreshDeps={[locale, refreshKey, typeFilter, classFilter, statusFilter, assignmentFilter]}
         filterBar={
-          <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-[repeat(4,minmax(0,1fr))]">
-            <div className="min-w-0 space-y-2">
-              <Label htmlFor="vehicle-type-filter" className={adminFilterLabelClass}>
-                {copy.filters.type}
-              </Label>
-              <Select
-                items={[
-                  { label: copy.filters.typeAll, value: "all" },
-                  ...vehicleTypes.map((vehicleType) => ({
-                    label: vehicleType.name,
-                    value: vehicleType.id,
-                  })),
-                ]}
-                value={typeFilter}
-                onValueChange={(value) => {
-                  setTypeFilter(value ?? "all");
-                  bumpRefresh();
-                }}
-              >
-                <SelectTrigger
-                  id="vehicle-type-filter"
-                  className="h-10 w-full rounded-lg border-slate-200 bg-white shadow-sm"
-                >
-                  <SelectValue placeholder={copy.filters.type} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="all">{copy.filters.typeAll}</SelectItem>
-                    {vehicleTypes.map((vehicleType) => (
-                      <SelectItem key={vehicleType.id} value={vehicleType.id}>
-                        {vehicleType.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="min-w-0 space-y-2">
-              <Label htmlFor="vehicle-class-filter" className={adminFilterLabelClass}>
-                {copy.filters.class}
-              </Label>
-              <Select
-                items={[
-                  { label: copy.filters.classAll, value: "all" },
-                  ...vehicleClasses.map((vehicleClass) => ({
-                    label: vehicleClass.name,
-                    value: vehicleClass.id,
-                  })),
-                ]}
-                value={classFilter}
-                onValueChange={(value) => {
-                  setClassFilter(value ?? "all");
-                  bumpRefresh();
-                }}
-              >
-                <SelectTrigger
-                  id="vehicle-class-filter"
-                  className="h-10 w-full rounded-lg border-slate-200 bg-white shadow-sm"
-                >
-                  <SelectValue placeholder={copy.filters.class} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="all">{copy.filters.classAll}</SelectItem>
-                    {vehicleClasses.map((vehicleClass) => (
-                      <SelectItem key={vehicleClass.id} value={vehicleClass.id}>
-                        {vehicleClass.name}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="min-w-0 space-y-2">
-              <Label htmlFor="vehicle-status-filter" className={adminFilterLabelClass}>
-                {copy.filters.status}
-              </Label>
-              <Select
-                items={[
-                  { label: copy.filters.statusAll, value: "all" },
-                  ...VEHICLE_STATUSES.map((status) => ({
-                    label: copy.status[status],
-                    value: status,
-                  })),
-                ]}
-                value={statusFilter}
-                onValueChange={(value) => {
-                  setStatusFilter(value ?? "all");
-                  bumpRefresh();
-                }}
-              >
-                <SelectTrigger
-                  id="vehicle-status-filter"
-                  className="h-10 w-full rounded-lg border-slate-200 bg-white shadow-sm"
-                >
-                  <SelectValue placeholder={copy.filters.status} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="all">{copy.filters.statusAll}</SelectItem>
-                    {VEHICLE_STATUSES.map((status) => (
-                      <SelectItem key={status} value={status}>
-                        {copy.status[status]}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="min-w-0 space-y-2">
-              <Label htmlFor="vehicle-assignment-filter" className={adminFilterLabelClass}>
-                {copy.filters.assignment}
-              </Label>
-              <Select
-                items={[
-                  { label: copy.filters.all, value: "all" },
-                  { label: copy.filters.assigned, value: "assigned" },
-                  { label: copy.filters.unassigned, value: "unassigned" },
-                ]}
-                value={assignmentFilter}
-                onValueChange={(value) => {
-                  setAssignmentFilter(value ?? "all");
-                  bumpRefresh();
-                }}
-              >
-                <SelectTrigger
-                  id="vehicle-assignment-filter"
-                  className="h-10 w-full rounded-lg border-slate-200 bg-white shadow-sm"
-                >
-                  <SelectValue placeholder={copy.filters.assignment} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    <SelectItem value="all">{copy.filters.all}</SelectItem>
-                    <SelectItem value="assigned">{copy.filters.assigned}</SelectItem>
-                    <SelectItem value="unassigned">{copy.filters.unassigned}</SelectItem>
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <VehicleFilterBar
+            copy={copy}
+            vehicleTypes={vehicleTypes}
+            vehicleClasses={vehicleClasses}
+            typeFilter={typeFilter}
+            classFilter={classFilter}
+            statusFilter={statusFilter}
+            assignmentFilter={assignmentFilter}
+            onTypeChange={(val) => {
+              setTypeFilter(val);
+              bumpRefresh();
+            }}
+            onClassChange={(val) => {
+              setClassFilter(val);
+              bumpRefresh();
+            }}
+            onStatusChange={(val) => {
+              setStatusFilter(val);
+              bumpRefresh();
+            }}
+            onAssignmentChange={(val) => {
+              setAssignmentFilter(val);
+              bumpRefresh();
+            }}
+            onReset={handleResetFilters}
+          />
         }
       />
 
@@ -608,9 +258,7 @@ export function VehiclesPage() {
           onOpenChange={setDeleteOpen}
           itemName={deletingVehicle?.plate_number}
           onConfirm={async () => {
-            if (!deletingVehicle) {
-              return;
-            }
+            if (!deletingVehicle) return;
 
             try {
               await deleteVehicle(deletingVehicle.id);

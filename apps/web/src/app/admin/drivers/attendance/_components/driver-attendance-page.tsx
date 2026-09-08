@@ -1,18 +1,15 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { format } from "date-fns";
 import { Clock3 } from "lucide-react";
-import type { DriverAttendanceRosterItem } from "@smart-dispatch/types";
 import { AdminDatePicker } from "@/components/shared/admin-date-picker";
 import {
   DataTable,
-  type DataTableColumn,
   type DataTableFetchParams,
 } from "@/components/shared/data-table";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { useAuth, useLocale } from "@/components/shared/providers";
-import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -22,7 +19,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { adminBadgeGoldClass, adminSelectTriggerClass } from "@/lib/admin-theme";
+import {
+  adminEyebrowClass,
+  adminSelectTriggerClass,
+} from "@/lib/admin-theme";
 import {
   fetchDriverAttendanceRoster,
   type DriverAttendanceStatusFilter,
@@ -31,13 +31,11 @@ import { PERMISSIONS } from "@/lib/permissions";
 import { cn } from "@/lib/utils";
 import { getAdminDriversMessages } from "@/translations";
 import { AttendanceStats } from "./attendance-stats";
+import { useAttendanceColumns } from "./attendance-columns";
 import {
   ATTENDANCE_STATUS_FILTERS,
   addisToday,
-  attendanceStatusClass,
   attendanceStatusDotClass,
-  formatAssignedVehicle,
-  formatAttendanceTime,
   type AttendanceStatusFilter,
 } from "./attendance-helpers";
 
@@ -55,59 +53,7 @@ export function DriverAttendancePage() {
   const [workDate, setWorkDate] = useState(addisToday);
   const [statusFilter, setStatusFilter] = useState<AttendanceStatusFilter>("all");
 
-  const columns = useMemo<DataTableColumn<DriverAttendanceRosterItem>[]>(
-    () => [
-      {
-        id: "name",
-        header: attendanceCopy.columns.name,
-        cellClassName: "font-medium text-slate-800",
-        cell: (row) => row.driver.name,
-      },
-      {
-        id: "mobile",
-        header: attendanceCopy.columns.mobile,
-        cellClassName: "text-slate-500",
-        cell: (row) => row.driver.mobile_number,
-      },
-      {
-        id: "vehicle",
-        header: attendanceCopy.columns.vehicle,
-        cellClassName: "text-slate-600",
-        cell: (row) => formatAssignedVehicle(row.driver.assigned_vehicle) ?? "—",
-      },
-      {
-        id: "status",
-        header: attendanceCopy.columns.status,
-        cell: (row) => {
-          const status = row.attendance?.status ?? "unmarked";
-          return (
-            <Badge variant="outline" className={cn("text-xs", attendanceStatusClass(status))}>
-              {attendanceCopy.status[status]}
-            </Badge>
-          );
-        },
-      },
-      {
-        id: "checkIn",
-        header: attendanceCopy.columns.checkIn,
-        cellClassName: "tabular-nums text-slate-600",
-        cell: (row) => formatAttendanceTime(row.attendance?.check_in_at ?? null, locale),
-      },
-      {
-        id: "checkOut",
-        header: attendanceCopy.columns.checkOut,
-        cellClassName: "tabular-nums text-slate-600",
-        cell: (row) => formatAttendanceTime(row.attendance?.check_out_at ?? null, locale),
-      },
-      {
-        id: "notes",
-        header: attendanceCopy.columns.notes,
-        cellClassName: "max-w-[220px] truncate text-slate-500",
-        cell: (row) => row.attendance?.notes || "—",
-      },
-    ],
-    [attendanceCopy, locale],
-  );
+  const { columns } = useAttendanceColumns({ copy, locale });
 
   const loadRoster = useCallback(
     ({ page, limit, search }: DataTableFetchParams) =>
@@ -131,7 +77,7 @@ export function DriverAttendancePage() {
 
       <DataTable
         key={`${locale}-${workDate}-${statusFilter}`}
-        eyebrow={<Badge className={adminBadgeGoldClass}>{attendanceCopy.eyebrow}</Badge>}
+        eyebrow={<p className={cn(adminEyebrowClass, "text-xs")}>{attendanceCopy.eyebrow}</p>}
         title={attendanceCopy.title}
         titleClassName="text-2xl font-extrabold tracking-tight"
         description={attendanceCopy.description}

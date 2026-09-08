@@ -1,17 +1,14 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
-import { Activity, ChevronDown, Download, Eye, FileSpreadsheet, FileText, Loader2, MoreHorizontal } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Activity, ChevronDown, Download, FileSpreadsheet, FileText, Loader2 } from "lucide-react";
 import type { User } from "@smart-dispatch/types";
 import {
   DataTable,
-  type DataTableColumn,
   type DataTableFetchParams,
-  type DataTableRowContext,
 } from "@/components/shared/data-table";
 import { PageAccessDenied } from "@/components/shared/page-access-denied";
 import { useAuth, useLocale } from "@/components/shared/providers";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -20,7 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { adminBadgeGoldClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
+import { adminEyebrowClass, adminPrimaryButtonClass } from "@/lib/admin-theme";
 import {
   exportDriverPerformanceExcel,
   exportDriverPerformancePdf,
@@ -29,58 +26,9 @@ import { fetchAllUsers, fetchUsers } from "@/lib/user-api";
 import { PERMISSIONS } from "@/lib/permissions";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
 import { cn } from "@/lib/utils";
-import { formatMessage, getAdminDriversMessages } from "@/translations";
+import { getAdminDriversMessages } from "@/translations";
 import { DriverDetailSheet } from "../../_components/driver-detail-sheet";
-import { DriverRatingCell } from "../../_components/driver-rating";
-import {
-  formatDriverName,
-  formatPercent,
-} from "../../_components/driver-helpers";
-
-function dash(value: string | number | null | undefined) {
-  if (value == null || value === "") return "—";
-  return String(value);
-}
-
-function DriverRowActions({
-  user,
-  viewLabel,
-  menuLabel,
-  onView,
-}: {
-  user: User;
-  viewLabel: string;
-  menuLabel: string;
-  onView: (user: User) => void;
-}) {
-  const name = formatDriverName(user);
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            className="text-slate-500 hover:bg-[#1C3A34]/6 hover:text-[#1C3A34]"
-            aria-label={formatMessage(menuLabel, { name })}
-          />
-        }
-      >
-        <MoreHorizontal className="size-4" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-40">
-        <DropdownMenuGroup>
-          <DropdownMenuItem onClick={() => onView(user)}>
-            <Eye />
-            {viewLabel}
-          </DropdownMenuItem>
-        </DropdownMenuGroup>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
+import { usePerformanceColumns } from "./performance-columns";
 
 export function DriverPerformancePage() {
   const { locale } = useLocale();
@@ -96,6 +44,11 @@ export function DriverPerformancePage() {
     setDetailUserId(user.id);
     setDetailOpen(true);
   }, []);
+
+  const { columns, renderRowActions } = usePerformanceColumns({
+    copy,
+    openDetail,
+  });
 
   const handleExport = useCallback(
     async (format: "excel" | "pdf") => {
@@ -146,65 +99,6 @@ export function DriverPerformancePage() {
     [copy.assignment, copy.directory.ratingUnrated, copy.status, locale, performanceCopy],
   );
 
-  const columns = useMemo<DataTableColumn<User>[]>(
-    () => [
-      {
-        id: "name",
-        header: performanceCopy.columns.name,
-        cellClassName: "font-medium text-slate-800",
-        cell: (user) => formatDriverName(user),
-      },
-      {
-        id: "rating",
-        header: performanceCopy.columns.rating,
-        cell: (user) => (
-          <DriverRatingCell
-            rating={user.driver?.rating}
-            unratedLabel={copy.directory.ratingUnrated}
-            countTemplate={copy.directory.ratingCount}
-          />
-        ),
-      },
-      {
-        id: "completed",
-        header: performanceCopy.columns.completed,
-        cellClassName: "tabular-nums text-slate-700",
-        cell: (user) => dash(user.driver?.performance.trips_completed ?? 0),
-      },
-      {
-        id: "completionRate",
-        header: performanceCopy.columns.completionRate,
-        cellClassName: "tabular-nums font-medium text-slate-800",
-        cell: (user) => dash(formatPercent(user.driver?.performance.completion_rate)),
-      },
-      {
-        id: "noShows",
-        header: performanceCopy.columns.noShows,
-        cellClassName: "tabular-nums text-slate-700",
-        cell: (user) => dash(user.driver?.performance.trips_no_show ?? 0),
-      },
-      {
-        id: "onTime",
-        header: performanceCopy.columns.onTime,
-        cellClassName: "tabular-nums text-slate-700",
-        cell: (user) => dash(formatPercent(user.driver?.performance.on_time_rate)),
-      },
-      {
-        id: "complaints",
-        header: performanceCopy.columns.complaints,
-        cellClassName: "tabular-nums text-slate-700",
-        cell: (user) => dash(user.driver?.performance.complaints ?? 0),
-      },
-      {
-        id: "attendance",
-        header: performanceCopy.columns.attendance,
-        cellClassName: "tabular-nums text-slate-700",
-        cell: (user) => dash(formatPercent(user.driver?.performance.attendance_rate)),
-      },
-    ],
-    [copy.directory.ratingCount, copy.directory.ratingUnrated, performanceCopy],
-  );
-
   const loadDrivers = useCallback(
     ({ page, limit, search }: DataTableFetchParams) =>
       fetchUsers({
@@ -217,18 +111,6 @@ export function DriverPerformancePage() {
     [],
   );
 
-  const renderRowActions = useCallback(
-    (user: User, _context: DataTableRowContext<User>) => (
-      <DriverRowActions
-        user={user}
-        viewLabel={copy.directory.actions.view}
-        menuLabel={copy.directory.actions.menuLabel}
-        onView={openDetail}
-      />
-    ),
-    [copy.directory.actions.menuLabel, copy.directory.actions.view, openDetail],
-  );
-
   if (!canRead) {
     return <PageAccessDenied copy={copy.accessDenied} />;
   }
@@ -237,7 +119,7 @@ export function DriverPerformancePage() {
     <div className="space-y-6">
       <DataTable
         key={locale}
-        eyebrow={<Badge className={adminBadgeGoldClass}>{performanceCopy.eyebrow}</Badge>}
+        eyebrow={<p className={cn(adminEyebrowClass, "text-xs")}>{performanceCopy.eyebrow}</p>}
         title={performanceCopy.title}
         titleClassName="text-2xl font-extrabold tracking-tight"
         description={performanceCopy.description}
