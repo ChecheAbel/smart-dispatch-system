@@ -4,6 +4,11 @@ import {
   extensionSchemas,
   extensionTags,
 } from "./openapi-extensions";
+import {
+  userNotificationPaths,
+  userNotificationSchemas,
+  userNotificationTag,
+} from "./user-notification-openapi";
 
 export const openApiSpec = {
   openapi: "3.1.0",
@@ -23,6 +28,7 @@ export const openApiSpec = {
     { name: "Menus", description: "Navigation menu management" },
     { name: "Endpoints", description: "API endpoint registry (admin only)" },
     ...extensionTags,
+    userNotificationTag,
   ],
   components: {
     securitySchemes: {
@@ -240,6 +246,7 @@ export const openApiSpec = {
         },
       },
       ...extensionSchemas,
+      ...userNotificationSchemas,
     },
     parameters: {
       Page: {
@@ -2647,5 +2654,6 @@ export const openApiSpec = {
       },
     },
     ...extensionPaths,
+    ...userNotificationPaths,
   },
 } as const;

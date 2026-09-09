@@ -2344,7 +2344,7 @@ export const extensionPaths = {
                 },
                 platform: {
                   type: "string",
-                  enum: ["android", "ios"],
+                  enum: ["android", "ios", "web"],
                   example: "android",
                 },
                 clientId: {
