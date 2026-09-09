@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import axios from "axios";
+import { apiClient } from "@/lib/api-client";
 
 export type WebPushPermissionStatus = "default" | "granted" | "denied" | "unsupported";
 
@@ -43,18 +43,10 @@ export function useWebPush(accessToken?: string | null) {
       }
 
       try {
-        await axios.post(
-          "/api/devices/tokens",
-          {
-            token: tokenString,
-            platform: "web",
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          },
-        );
+        await apiClient.post("/api/devices/tokens", {
+          token: tokenString,
+          platform: "web",
+        });
       } catch (error) {
         // Non-critical: token registration might fail if backend push service isn't active
         console.warn("[WebPush] Could not register token with backend:", error);
@@ -93,13 +85,43 @@ export function useWebPush(accessToken?: string | null) {
 
   const showDesktopNotification = useCallback(
     (title: string, options?: { body?: string; actionUrl?: string }) => {
-      if (typeof window === "undefined" || permission !== "granted") {
+      if (typeof window === "undefined") {
+        return;
+      }
+
+      // Check current browser permission directly to avoid stale React closures
+      const isGranted =
+        ("Notification" in window && Notification.permission === "granted") ||
+        permission === "granted";
+
+      if (!isGranted) {
         return;
       }
 
       const body = options?.body || "";
       const actionUrl = options?.actionUrl || "/admin";
 
+      // 1. Try standard Window Notification first for immediate OS floating overlay banner
+      try {
+        if ("Notification" in window) {
+          const notif = new Notification(title, {
+            body,
+            icon: "/logo.webp",
+            tag: options?.actionUrl || "smart-dispatch-alert",
+          });
+          notif.onclick = () => {
+            window.focus();
+            if (actionUrl) {
+              window.location.href = actionUrl;
+            }
+          };
+          return;
+        }
+      } catch {
+        // Some browsers on mobile require ServiceWorker showNotification
+      }
+
+      // 2. Fallback to Service Worker registration
       if (swRegistration && "showNotification" in swRegistration) {
         swRegistration.showNotification(title, {
           body,
@@ -107,17 +129,6 @@ export function useWebPush(accessToken?: string | null) {
           badge: "/logo.webp",
           data: { action_url: actionUrl },
         });
-      } else if ("Notification" in window) {
-        const notif = new Notification(title, {
-          body,
-          icon: "/logo.webp",
-        });
-        notif.onclick = () => {
-          window.focus();
-          if (actionUrl) {
-            window.location.href = actionUrl;
-          }
-        };
       }
     },
     [permission, swRegistration],

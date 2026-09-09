@@ -55,23 +55,21 @@ export async function sendInAppNotification(
     console.warn("Failed to emit socket notification to user:", input.userId, socketError);
   }
 
-  // 2. Broadcast push notification to registered devices (mobile and web) if configured
+  // 2. Broadcast push notification to registered devices (mobile and web) in background if configured
   if (input.sendPush !== false && isPushNotificationConfigured()) {
-    try {
-      await broadcastPushNotification({
-        targets: [toPushTarget(input.userId)],
-        title: input.title,
-        message: input.message,
-        data: {
-          notificationId: publicNotification.id,
-          category: input.category,
-          actionUrl: input.actionUrl || "",
-        },
-      });
-    } catch (pushError) {
-      // Non-fatal: push broadcast failures shouldn't prevent in-app notification creation
-      console.warn("Push broadcast failed for in-app notification:", pushError);
-    }
+    broadcastPushNotification({
+      targets: [toPushTarget(input.userId)],
+      title: input.title,
+      message: input.message,
+      data: {
+        notificationId: publicNotification.id,
+        category: input.category,
+        actionUrl: input.actionUrl || "",
+      },
+    }).catch((pushError) => {
+      // Non-fatal: external push service failures shouldn't affect in-app notifications
+      console.warn("Push broadcast failed for in-app notification:", pushError instanceof Error ? pushError.message : pushError);
+    });
   }
 
   return publicNotification;

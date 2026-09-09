@@ -222,4 +222,84 @@ export const userNotificationPaths = {
       },
     },
   },
+  "/api/user-notifications/test": {
+    post: {
+      tags: ["User Notifications"],
+      summary: "Trigger test notification",
+      description:
+        "Dispatches a test notification to the authenticated user across WebSocket, In-App persistence, and Browser Push. Useful for testing UI alerts, audio chimes, and push notifications.",
+      security: [{ bearerAuth: [] }],
+      requestBody: {
+        required: false,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                title: {
+                  type: "string",
+                  example: "Test Notification",
+                  description: "Optional custom notification title.",
+                },
+                message: {
+                  type: "string",
+                  example: "This is a test notification for real-time delivery.",
+                  description: "Optional custom notification body message.",
+                },
+                category: {
+                  type: "string",
+                  enum: [
+                    "ride_request",
+                    "dispatch_escalation",
+                    "compliance",
+                    "invoice",
+                    "geofence",
+                    "system",
+                  ],
+                  default: "system",
+                  example: "system",
+                },
+                priority: {
+                  type: "string",
+                  enum: ["low", "medium", "high", "urgent"],
+                  default: "medium",
+                  example: "medium",
+                },
+                actionUrl: {
+                  type: "string",
+                  default: "/admin",
+                  example: "/admin",
+                  description: "Optional URL path to navigate when clicking the notification.",
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        "201": {
+          description: "Test notification dispatched successfully",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  message: { type: "string", example: "Test notification dispatched successfully." },
+                  data: {
+                    type: "object",
+                    properties: {
+                      notification: { $ref: "#/components/schemas/InAppNotification" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        "401": unauthorized,
+      },
+    },
+  },
 } as const;
+

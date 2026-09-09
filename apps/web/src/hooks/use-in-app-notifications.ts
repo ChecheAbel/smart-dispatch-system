@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import axios from "axios";
 import { io, type Socket } from "socket.io-client";
 import {
   RealtimeEvents,
   REALTIME_NAMESPACE,
   type InAppNotification,
 } from "@smart-dispatch/types";
+import { apiClient } from "@/lib/api-client";
 import { getAccessToken } from "@/lib/auth-session";
 import { getRealtimeServerUrl } from "@/lib/realtime-url";
 import { showNotificationToast } from "@/lib/toast";
@@ -74,12 +74,10 @@ export function useInAppNotifications() {
     }
 
     try {
-      const response = await axios.get<{
+      const response = await apiClient.get<{
         success: boolean;
         data: { notifications: InAppNotification[]; unreadCount: number };
-      }>("/api/user-notifications?limit=30", {
-        headers: { Authorization: `Bearer ${currentToken}` },
-      });
+      }>("/api/user-notifications?limit=30");
 
       if (response.data.success && response.data.data) {
         setNotifications(response.data.data.notifications.slice(0, 30));
@@ -129,13 +127,11 @@ export function useInAppNotifications() {
         actionUrl: incoming.action_url,
       });
 
-      // Show desktop push notification if tab is hidden
-      if (typeof document !== "undefined" && document.visibilityState === "hidden") {
-        webPush.showDesktopNotification(incoming.title, {
-          body: incoming.message,
-          actionUrl: incoming.action_url || undefined,
-        });
-      }
+      // Show native OS desktop notification overlay (pops up over open applications)
+      webPush.showDesktopNotification(incoming.title, {
+        body: incoming.message,
+        actionUrl: incoming.action_url || undefined,
+      });
 
       // Update state: prepend and increment unread count (capped to 30 items)
       setNotifications((prev) => {
@@ -184,11 +180,7 @@ export function useInAppNotifications() {
     setUnreadCount((count) => Math.max(0, count - 1));
 
     try {
-      await axios.patch(
-        `/api/user-notifications/${id}/read`,
-        {},
-        { headers: { Authorization: `Bearer ${currentToken}` } },
-      );
+      await apiClient.patch(`/api/user-notifications/${id}/read`, {});
     } catch (err) {
       console.warn("[Notifications] Failed to mark as read:", err);
       // Revert if needed
@@ -207,11 +199,7 @@ export function useInAppNotifications() {
     setUnreadCount(0);
 
     try {
-      await axios.post(
-        "/api/user-notifications/read-all",
-        {},
-        { headers: { Authorization: `Bearer ${currentToken}` } },
-      );
+      await apiClient.post("/api/user-notifications/read-all", {});
     } catch (err) {
       console.warn("[Notifications] Failed to mark all as read:", err);
       void fetchNotifications();
