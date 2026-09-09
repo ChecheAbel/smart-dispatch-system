@@ -4,6 +4,7 @@ import { auditMutations } from "../middleware/audit-mutation";
 import { authenticate, type AuthenticatedRequest } from "../middleware/authenticate";
 import { authorize } from "../middleware/authorize";
 import { requirePermission } from "../middleware/require-permission";
+import { getPublicVehiclesCatalog } from "../services/public-vehicle.service";
 import { toPublicDriverOption, toPublicVehicle } from "../mappers/vehicle.mapper";
 import {
   toPublicVehicleHistoryEvent,
@@ -107,26 +108,17 @@ function exclusiveEndOfUtcDay(date: Date) {
 router.get("/public", async (req: Request, res: Response) => {
   try {
     const locale = parseLocale(req.query, req.headers["accept-language"]);
-    const [vehicles, types, classes, busyState] = await Promise.all([
-      listVehicles({}, { take: 1000 }),
-      listVehicleTypes({}),
-      listVehicleClasses({}),
-      listVehicleOperationalBusyState(),
-    ]);
-
-    return sendSuccess(res, {
-      vehicles: vehicles.map((v) => {
-        const isBusy = busyState.has(v.id);
-        const availableFrom = busyState.get(v.id) ?? null;
-        return toPublicVehicle(v, {
-          locale,
-          isAvailableNow: v.status === "active" && !isBusy,
-          availableFrom: availableFrom ? availableFrom.toISOString() : null,
-        });
-      }),
-      types: types.map((t) => toPublicVehicleType(t, { locale })),
-      classes: classes.map((c) => toPublicVehicleClass(c, { locale })),
+    const result = await getPublicVehiclesCatalog({
+      page: req.query.page as string | undefined,
+      limit: req.query.limit as string | undefined,
+      search: req.query.search as string | undefined,
+      vehicle_type_id: req.query.vehicle_type_id as string | undefined,
+      vehicle_class_id: req.query.vehicle_class_id as string | undefined,
+      availability: req.query.availability as string | undefined,
+      locale,
     });
+
+    return sendSuccess(res, result);
   } catch (error) {
     return handleRouteError(res, error);
   }

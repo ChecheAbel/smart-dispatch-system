@@ -2619,6 +2619,92 @@ export const extensionPaths = {
       },
     },
   },
+  "/api/vehicles/public": {
+    get: {
+      tags: ["Vehicles"],
+      summary: "Public vehicle catalog",
+      description:
+        "Public catalog endpoint for riders and guests. Supports server-side pagination, search (make, model, plate), vehicle type, vehicle class, and operational availability filtering with real-time assignment status.",
+      security: [],
+      parameters: [
+        { $ref: "#/components/parameters/Page" },
+        { $ref: "#/components/parameters/Limit" },
+        { $ref: "#/components/parameters/Locale" },
+        {
+          name: "search",
+          in: "query",
+          schema: { type: "string" },
+          description: "Search filter matching make, model, or plate number (case-insensitive)",
+        },
+        {
+          name: "vehicle_type_id",
+          in: "query",
+          schema: { type: "string", format: "uuid" },
+          description: "Filter by vehicle type ID",
+        },
+        {
+          name: "vehicle_class_id",
+          in: "query",
+          schema: { type: "string", format: "uuid" },
+          description: "Filter by vehicle class ID",
+        },
+        {
+          name: "availability",
+          in: "query",
+          schema: {
+            type: "string",
+            enum: ["all", "available", "busy"],
+            default: "all",
+          },
+          description:
+            "Operational availability: 'available' (active without active ride), 'busy' (assigned to confirmed/in-progress ride), or 'all'",
+        },
+      ],
+      responses: {
+        "200": {
+          description: "Paginated public vehicle catalog with filter options",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  success: { type: "boolean", enum: [true] },
+                  data: {
+                    type: "object",
+                    properties: {
+                      vehicles: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/Vehicle" },
+                      },
+                      types: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/VehicleTypeSummary" },
+                      },
+                      classes: {
+                        type: "array",
+                        items: { $ref: "#/components/schemas/VehicleClassSummary" },
+                      },
+                      pagination: {
+                        type: "object",
+                        properties: {
+                          page: { type: "integer", example: 1 },
+                          limit: { type: "integer", example: 12 },
+                          total: { type: "integer", example: 24 },
+                          totalPages: { type: "integer", example: 2 },
+                          hasNextPage: { type: "boolean", example: true },
+                          hasPrevPage: { type: "boolean", example: false },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
   "/api/vehicles": {
     get: {
       tags: ["Vehicles"],

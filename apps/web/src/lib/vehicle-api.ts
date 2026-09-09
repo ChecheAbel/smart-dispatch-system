@@ -247,11 +247,31 @@ export async function deleteVehicle(id: string) {
   return unwrapApiResponse<{ message: string }>(data);
 }
 
-export async function fetchPublicVehicles() {
-  const { data } = await apiClient.get("/api/vehicles/public");
-  return unwrapApiResponse<{
-    vehicles: Vehicle[];
-    types: import("@smart-dispatch/types").VehicleType[];
-    classes: import("@smart-dispatch/types").VehicleClass[];
-  }>(data);
+export type FetchPublicVehiclesParams = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  vehicle_type_id?: string;
+  vehicle_class_id?: string;
+  availability?: "all" | "available" | "busy";
+  locale?: string;
+};
+
+export type PublicVehiclesResponse = {
+  vehicles: Vehicle[];
+  types: import("@smart-dispatch/types").VehicleType[];
+  classes: import("@smart-dispatch/types").VehicleClass[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+};
+
+export async function fetchPublicVehicles(params: FetchPublicVehiclesParams = {}) {
+  const { data } = await apiClient.get("/api/vehicles/public", { params });
+  return unwrapApiResponse<PublicVehiclesResponse>(data);
 }

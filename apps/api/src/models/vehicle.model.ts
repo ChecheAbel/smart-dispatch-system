@@ -66,6 +66,8 @@ export type ListVehiclesFilter = {
   assignedOnly?: boolean;
   complianceType?: VehicleComplianceType;
   complianceStatus?: VehicleComplianceStatus;
+  idIn?: string[];
+  idNotIn?: string[];
 };
 
 export type VehicleComplianceType = "insurance" | "inspection";
@@ -207,6 +209,8 @@ function buildVehicleWhere(filter?: ListVehiclesFilter) {
           filter.complianceStatus,
         )
       : {}),
+    ...(filter?.idIn ? { id: { in: filter.idIn } } : {}),
+    ...(filter?.idNotIn ? { id: { notIn: filter.idNotIn } } : {}),
     ...(search
       ? {
           OR: [
