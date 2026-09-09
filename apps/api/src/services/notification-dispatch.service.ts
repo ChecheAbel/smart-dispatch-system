@@ -1,5 +1,6 @@
 import type {
   GeofencingNotificationEvent,
+  InAppNotificationCategory,
   InvoiceNotificationEvent,
   NotificationChannel,
   NotificationModule,
@@ -36,6 +37,7 @@ import {
   PushNotificationConfigurationError,
   PushNotificationDeliveryError,
 } from "./push-notification.service";
+import { sendInAppNotification } from "./in-app-notification.service";
 
 type TemplateContext = Record<string, string>;
 
@@ -518,6 +520,34 @@ async function dispatchPushNotifications(
       console.log(
         `[Push] Sent ${module}/${event}/${template.recipient} to user ${userId}.`,
       );
+
+      // Also persist and broadcast in-app notification in real-time
+      const inAppCategory: InAppNotificationCategory =
+        module === "ride_requests"
+          ? "ride_request"
+          : module === "invoices"
+            ? "invoice"
+            : module === "insurance" || module === "inspection"
+              ? "compliance"
+              : module === "geofencing"
+                ? "geofence"
+                : "system";
+
+      void sendInAppNotification({
+        userId,
+        title,
+        message,
+        category: inAppCategory,
+        actionUrl:
+          module === "invoices"
+            ? `/admin/billing/invoices/${entityId}`
+            : module === "ride_requests"
+              ? `/admin/ride-requests`
+              : `/admin`,
+        sendPush: false, // Already pushed above
+      }).catch((err) => {
+        console.warn("[InAppNotification] Failed to record in-app notification:", err);
+      });
     } catch (error) {
       const messageText =
         error instanceof PushNotificationConfigurationError ||

@@ -21,7 +21,6 @@ import { adminCardClass, adminHeadingClass, adminPrimaryButtonClass } from "@/li
 import { cn } from "@/lib/utils";
 import {
   fetchNotificationConfiguration,
-  sendTestSms,
   updateNotificationConfiguration,
 } from "@/lib/notification-api";
 import { showErrorToast, showSuccessToast } from "@/lib/toast";
@@ -44,11 +43,7 @@ const emptyForm: SmsFormState = {
   authToken: "",
 };
 
-type FieldErrors = Partial<
-  Record<"fromId" | "sender" | "authToken" | "testPhone", string>
->;
-
-const PHONE_PATTERN = /^\+[1-9]\d{7,14}$/;
+type FieldErrors = Partial<Record<"fromId" | "sender" | "authToken", string>>;
 
 function validateSmsForm(
   form: SmsFormState,
@@ -72,22 +67,7 @@ function validateSmsForm(
   return errors;
 }
 
-function validateTestPhone(
-  testPhone: string,
-  validation: ReturnType<typeof getAdminNotificationsSmsMessages>["validation"],
-): string | undefined {
-  const phone = testPhone.trim();
 
-  if (!phone) {
-    return validation.testPhoneRequired;
-  }
-
-  if (!PHONE_PATTERN.test(phone)) {
-    return validation.testPhoneInvalid;
-  }
-
-  return undefined;
-}
 
 function SmsSettingsSkeleton() {
   return <Skeleton className="h-[28rem] w-full rounded-xl" />;
@@ -102,12 +82,10 @@ export function SmsNotificationSettings({ canWrite }: SmsNotificationSettingsPro
   const copy = getAdminNotificationsSmsMessages(locale);
 
   const [form, setForm] = useState<SmsFormState>(emptyForm);
-  const [testPhone, setTestPhone] = useState("");
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [hasCredentials, setHasCredentials] = useState(false);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [testing, setTesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -165,20 +143,6 @@ export function SmsNotificationSettings({ canWrite }: SmsNotificationSettingsPro
 
       const next = { ...current };
       delete next[key as keyof FieldErrors];
-      return next;
-    });
-  }
-
-  function updateTestPhone(value: string) {
-    setTestPhone(value);
-    setError(null);
-    setFieldErrors((current) => {
-      if (!current.testPhone) {
-        return current;
-      }
-
-      const next = { ...current };
-      delete next.testPhone;
       return next;
     });
   }
@@ -241,46 +205,7 @@ export function SmsNotificationSettings({ canWrite }: SmsNotificationSettingsPro
     }
   }
 
-  async function handleTestSms() {
-    if (!canWrite || !hasCredentials) {
-      return;
-    }
 
-    const testPhoneError = validateTestPhone(testPhone, copy.validation);
-    if (testPhoneError) {
-      setFieldErrors((current) => ({ ...current, testPhone: testPhoneError }));
-      showErrorToast({
-        title: copy.validation.title,
-        description: copy.validation.description,
-      });
-      return;
-    }
-
-    setFieldErrors((current) => {
-      const next = { ...current };
-      delete next.testPhone;
-      return next;
-    });
-    setTesting(true);
-    setError(null);
-
-    try {
-      await sendTestSms({ to: testPhone.trim() });
-      showSuccessToast(copy.toast.testSuccess);
-    } catch (err) {
-      const message = err instanceof Error ? err.message : copy.toast.testFailed.description;
-      setError(message);
-      showErrorToast({
-        title: copy.toast.testFailed.title,
-        description: message,
-      });
-    } finally {
-      setTesting(false);
-    }
-  }
-
-  const canSendTest =
-    canWrite && hasCredentials && testPhone.trim().length > 0 && !submitting && !testing;
 
   if (loading) {
     return <SmsSettingsSkeleton />;
@@ -417,56 +342,7 @@ export function SmsNotificationSettings({ canWrite }: SmsNotificationSettingsPro
             {copy.sections.credentials.note}
           </div>
 
-          {/* Test SMS Section */}
-          {canWrite ? (
-            <div className="mt-4 rounded-xl border border-slate-200/80 bg-[#fbfcfc] p-4.5 dark:border-border dark:bg-muted/15">
-              <div className="flex items-center justify-between pb-3">
-                <div className="flex items-center gap-2">
-                  <Send className="size-4 text-[#1C3A34] dark:text-[var(--brand-accent)]" />
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-foreground">
-                    {copy.sections.test.title}
-                  </h4>
-                </div>
-                {!hasCredentials ? (
-                  <span className="text-[11px] font-medium text-amber-700 dark:text-amber-400">
-                    {copy.sections.test.saveFirst}
-                  </span>
-                ) : null}
-              </div>
 
-              <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-                <AdminTextField
-                  id="sms-test-phone"
-                  label={copy.sections.test.phone}
-                  hint={copy.sections.test.phoneHint}
-                  error={fieldErrors.testPhone}
-                  icon={Smartphone}
-                  value={testPhone}
-                  onChange={(event) => updateTestPhone(event.target.value)}
-                  placeholder={copy.sections.test.phonePlaceholder}
-                  disabled={!canWrite || testing || submitting}
-                />
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={!canSendTest}
-                  onClick={() => void handleTestSms()}
-                  className="h-10 gap-1.5 text-xs font-semibold text-slate-800 sm:mb-2 dark:border-border dark:text-slate-200"
-                >
-                  <Send className="size-3.5" />
-                  {testing ? copy.sections.test.sending : copy.sections.test.send}
-                </Button>
-              </div>
-
-              <div className="mt-2 rounded-lg border border-slate-200/70 bg-white p-2.5 text-xs text-slate-600 dark:border-border dark:bg-card dark:text-slate-300">
-                <span className="font-semibold text-slate-700 dark:text-slate-200">
-                  {copy.sections.test.fixedMessageLabel}:{" "}
-                </span>
-                <span className="italic">{copy.sections.test.fixedMessage}</span>
-              </div>
-            </div>
-          ) : null}
 
           {error ? (
             <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">
@@ -486,7 +362,7 @@ export function SmsNotificationSettings({ canWrite }: SmsNotificationSettingsPro
 
             <Button
               type="submit"
-              disabled={submitting || testing}
+              disabled={submitting}
               className={cn(adminPrimaryButtonClass, "w-full sm:w-auto")}
             >
               {submitting ? copy.form.saving : copy.form.save}

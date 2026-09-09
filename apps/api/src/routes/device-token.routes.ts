@@ -14,7 +14,7 @@ import { handleRouteError, sendError, sendSuccess } from "../utils/response";
 
 const router = Router();
 
-const PLATFORMS = new Set<PushDevicePlatform>(["android", "ios"]);
+const PLATFORMS = new Set<PushDevicePlatform>(["android", "ios", "web"]);
 
 function parsePlatform(value: unknown): PushDevicePlatform | null {
   if (typeof value !== "string") {
@@ -53,7 +53,7 @@ router.post(
       }
 
       if (!platform) {
-        return sendError(res, "platform must be android or ios.", 400);
+        return sendError(res, "platform must be android, ios, or web.", 400);
       }
 
       const clientId = toPushTarget(userId);

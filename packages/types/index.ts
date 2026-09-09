@@ -291,6 +291,35 @@ export interface NotificationDeliveryLog {
 
 export type NotificationChannel = "email" | "sms" | "push";
 
+export type PushDevicePlatform = "android" | "ios" | "web";
+
+export type InAppNotificationCategory =
+  | "ride_request"
+  | "dispatch_escalation"
+  | "compliance"
+  | "invoice"
+  | "geofence"
+  | "system";
+
+export type InAppNotificationPriority = "low" | "medium" | "high" | "urgent";
+
+export interface InAppNotification {
+  id: string;
+  user_id: string;
+  title: string;
+  message: string;
+  category: InAppNotificationCategory;
+  priority: InAppNotificationPriority;
+  action_url: string | null;
+  read_at: string | null;
+  created_at: string;
+}
+
+export interface InAppNotificationSummary {
+  unread_count: number;
+  total_count: number;
+}
+
 export interface NotificationConfiguration {
   id: string;
   channel: NotificationChannel;
@@ -749,6 +778,9 @@ export const RealtimeEvents = {
   TripsAdded: "trips.added",
   TripsUpdated: "trips.updated",
   TripsRemoved: "trips.removed",
+  NotificationReceived: "notification.received",
+  NotificationRead: "notification.read",
+  NotificationReadAll: "notification.read_all",
 } as const;
 
 export type RealtimeEntityType = "vehicle";

@@ -6596,5 +6596,37 @@
       "copyright": "© {year} {company}. {product}. All rights reserved.",
       "developedBy": "Designed and developed by"
     }
+  },
+  "inAppNotifications": {
+    "title": "Notifications",
+    "allTab": "All",
+    "unreadTab": "Unread",
+    "markAllAsRead": "Mark all as read",
+    "markAsRead": "Mark as read",
+    "view": "View",
+    "emptyTitle": "No notifications",
+    "emptyDescription": "You're all caught up! Important alerts and updates will appear here.",
+    "unreadCountBadge": "{{count}} unread",
+    "enableDesktopPush": "Enable Desktop Alerts",
+    "desktopPushDesc": "Get instant notifications for dispatches, SLA warnings, and vehicle updates even when the app is in the background.",
+    "desktopPushEnabled": "Desktop alerts enabled",
+    "desktopPushBlocked": "Desktop notifications are blocked in your browser settings.",
+    "testNotificationBtn": "Send Test Alert",
+    "testNotificationTitle": "Test Notification",
+    "testNotificationMessage": "Real-time web notification test successful!",
+    "justNow": "Just now",
+    "minutesAgo": "{{count}}m ago",
+    "hoursAgo": "{{count}}h ago",
+    "daysAgo": "{{count}}d ago",
+    "showMore": "Show more",
+    "showingCount": "Showing {{shown}} of {{total}}",
+    "categories": {
+      "ride_request": "Ride Request",
+      "dispatch_escalation": "Dispatch Escalation",
+      "compliance": "Compliance",
+      "invoice": "Invoice",
+      "geofence": "Geofence",
+      "system": "System"
+    }
   }
 }

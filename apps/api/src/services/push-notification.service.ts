@@ -2,9 +2,11 @@ import dns from "node:dns";
 
 dns.setDefaultResultOrder("ipv4first");
 
+import type { PushDevicePlatform } from "@smart-dispatch/types";
+
+export type { PushDevicePlatform };
 export type PushPersistence = "temporary" | "permanent";
 export type PushChannel = "websocket" | "fcm";
-export type PushDevicePlatform = "android" | "ios";
 
 export const PUSH_TEST_TITLE = "Smart Dispatch test";
 export const PUSH_TEST_MESSAGE =

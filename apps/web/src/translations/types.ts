@@ -45,3 +45,4 @@ export type AdminProfileMessages = Translations["adminProfile"];
 export type AdminAuthMessages = Translations["adminAuth"];
 export type CustomerAuthMessages = Translations["customerAuth"];
 export type LandingMessages = Translations["landing"];
+export type InAppNotificationsMessages = Translations["inAppNotifications"];

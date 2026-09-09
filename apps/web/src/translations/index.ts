@@ -44,6 +44,7 @@ import type {
   AdminAuthMessages,
   CustomerAuthMessages,
   LandingMessages,
+  InAppNotificationsMessages,
   Translations,
 } from "./types";
 
@@ -305,4 +306,8 @@ export function getCustomerAuthMessages(locale: SupportedLocale): CustomerAuthMe
 
 export function getLandingMessages(locale: SupportedLocale): LandingMessages {
   return getTranslations(locale).landing;
+}
+
+export function getInAppNotificationsMessages(locale: SupportedLocale): InAppNotificationsMessages {
+  return getTranslations(locale).inAppNotifications;
 }

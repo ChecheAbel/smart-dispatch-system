@@ -1,6 +1,7 @@
 import type { Namespace, Socket } from "socket.io";
 import {
   RealtimeEvents,
+  type InAppNotification,
   type RealtimeEntityRef,
   type RealtimeLocationPublishInput,
   type RealtimeSessionReady,
@@ -66,6 +67,9 @@ type RealtimeServerEvents = {
   [RealtimeEvents.LocationSubscribed]: (data: RealtimeEntityRef) => void;
   [RealtimeEvents.LocationUnsubscribed]: (data: RealtimeEntityRef) => void;
   [RealtimeEvents.GeofenceStatus]: (data: VehicleGeofenceStatusPayload) => void;
+  [RealtimeEvents.NotificationReceived]: (data: InAppNotification) => void;
+  [RealtimeEvents.NotificationRead]: (data: { id: string }) => void;
+  [RealtimeEvents.NotificationReadAll]: () => void;
 };
 
 let realtimeNamespace: Namespace<
@@ -155,23 +159,15 @@ function registerNamespace(io: ReturnType<typeof getSocketIo>) {
       const userId = socket.data.userId;
       const capabilities = await resolveSessionCapabilities(userId);
 
-      if (
-        !capabilities.canPublishLocation &&
-        !capabilities.canSubscribeLocation &&
-        !capabilities.canAccessTrips
-      ) {
-        socket.emit(RealtimeEvents.SessionError, "Forbidden.");
-        socket.disconnect(true);
-        return;
-      }
-
       socket.data.canPublishLocation = capabilities.canPublishLocation;
       socket.data.canSubscribeLocation = capabilities.canSubscribeLocation;
       socket.data.canAccessTrips = capabilities.canAccessTrips;
       socket.data.assignedVehicleId = capabilities.assignedVehicleId;
 
+      // Always join user room for real-time notifications
+      await socket.join(userRoom(userId));
+
       if (capabilities.canAccessTrips) {
-        await socket.join(userRoom(userId));
         await sendTripsSnapshot(socket, userId);
       }
 
@@ -355,6 +351,27 @@ export function broadcastRealtimeTripEvent(
   realtimeNamespace
     .to(userRoom(driverUserId))
     .emit(event.type === "added" ? RealtimeEvents.TripsAdded : RealtimeEvents.TripsUpdated, payload);
+}
+
+export function emitUserNotificationToUser(userId: string, notification: InAppNotification) {
+  if (!realtimeNamespace) {
+    return;
+  }
+  realtimeNamespace.to(userRoom(userId)).emit(RealtimeEvents.NotificationReceived, notification);
+}
+
+export function emitNotificationReadToUser(userId: string, notificationId: string) {
+  if (!realtimeNamespace) {
+    return;
+  }
+  realtimeNamespace.to(userRoom(userId)).emit(RealtimeEvents.NotificationRead, { id: notificationId });
+}
+
+export function emitNotificationReadAllToUser(userId: string) {
+  if (!realtimeNamespace) {
+    return;
+  }
+  realtimeNamespace.to(userRoom(userId)).emit(RealtimeEvents.NotificationReadAll);
 }
 
 export function registerRealtimeSocket() {

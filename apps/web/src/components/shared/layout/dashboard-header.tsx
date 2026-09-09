@@ -8,6 +8,7 @@ import {
   useAuth,
 } from "@/components/shared/providers/auth-context";
 import { LanguageSelector } from "@/components/shared/layout/language-selector";
+import { NotificationBell } from "@/components/shared/layout/notification-bell";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { useLocale, useNavigation } from "@/components/shared/providers";
 import { usePortalShell } from "@/components/shared/providers/portal-shell-context";
@@ -53,6 +54,7 @@ export function DashboardHeader() {
       </div>
 
       <div className={adminHeaderActionsClass}>
+        <NotificationBell />
         <LanguageSelector />
         <ThemeToggle placement="inline" />
 

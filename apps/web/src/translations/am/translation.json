@@ -6596,5 +6596,37 @@
       "copyright": "© {year} {company}። {product}። ሁሉም መብቶች የተጠበቁ ናቸው።",
       "developedBy": "የተሰራው እና የተጎበኘው በ"
     }
+  },
+  "inAppNotifications": {
+    "title": "ማሳወቂያዎች",
+    "allTab": "ሁሉም",
+    "unreadTab": "ያልተነበቡ",
+    "markAllAsRead": "ሁሉንም እንደተነበቡ ምልክት አድርግ",
+    "markAsRead": "እንደተነበበ ምልክት አድርግ",
+    "view": "ተመልከት",
+    "emptyTitle": "ምንም ማሳወቂያዎች የሉም",
+    "emptyDescription": "ሁሉንም አጠናቀዋል! አስፈላጊ ማንቂያዎች እና ማሻሻያዎች እዚህ ይታያሉ።",
+    "unreadCountBadge": "{{count}} ያልተነበቡ",
+    "enableDesktopPush": "የዴስክቶፕ ማንቂያዎችን አንቃ",
+    "desktopPushDesc": "አፕሊኬሽኑ ከበስተጀርባ በሚሆንበት ጊዜም ፈጣን የዲስፓች፣ የSLA እና የተሽከርካሪ ማሳወቂያዎችን ያግኙ።",
+    "desktopPushEnabled": "የዴስክቶፕ ማንቂያዎች ነቅተዋል",
+    "desktopPushBlocked": "የዴስክቶፕ ማሳወቂያዎች በአሳሽዎ ቅንብሮች ውስጥ ታግደዋል።",
+    "testNotificationBtn": "የሙከራ ማንቂያ ላክ",
+    "testNotificationTitle": "የሙከራ ማሳወቂያ",
+    "testNotificationMessage": "የቀጥታ ድር ማሳወቂያ ሙከራ በተሳካ ሁኔታ ተጠናቋል!",
+    "justNow": "አሁን",
+    "minutesAgo": "ከ{{count}} ደቂቃ በፊት",
+    "hoursAgo": "ከ{{count}} ሰዓት በፊት",
+    "daysAgo": "ከ{{count}} ቀናት በፊት",
+    "showMore": "ተጨማሪ አሳይ",
+    "showingCount": "ከ{{total}} ውስጥ {{shown}} ይታያሉ",
+    "categories": {
+      "ride_request": "የጉዞ ጥያቄ",
+      "dispatch_escalation": "የዲስፓች ማስጠንቀቂያ",
+      "compliance": "ተገዢነት",
+      "invoice": "ደረሰኝ",
+      "geofence": "ጂኦፌንስ",
+      "system": "ስርዓት"
+    }
   }
 }

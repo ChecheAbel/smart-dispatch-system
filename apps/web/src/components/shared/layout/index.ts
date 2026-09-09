@@ -5,3 +5,4 @@ export { DashboardSidebar } from "./dashboard-sidebar";
 export { DashboardSidebarNav } from "./dashboard-sidebar-nav";
 export { RouteGuard } from "./route-guard";
 export { LanguageSelector } from "./language-selector";
+export { NotificationBell } from "./notification-bell";
