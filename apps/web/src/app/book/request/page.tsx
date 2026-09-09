@@ -90,6 +90,13 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { LOCALE_OPTIONS, type SupportedLocale } from "@/lib/locale";
+import { LocationModeSwitch } from "@/components/shared/location-mode-switch";
+import {
+  ItineraryLegsBuilder,
+  convertStopsToLegsPayload,
+  type ItineraryStopItem,
+} from "@/components/shared/itinerary-legs-builder";
+import { BookingLiveSummary } from "./_components/booking-live-summary";
 
 const LazyCoordinateMapPicker = dynamic<CoordinateMapPickerProps>(
   () =>
@@ -389,52 +396,6 @@ const COPY = {
   },
 };
 
-
-
-// Inline mode-switch pill for saved vs custom location
-function LocationModeSwitch({
-  savedLabel,
-  customLabel,
-  useCustom,
-  onSelectSaved,
-  onSelectCustom,
-}: {
-  savedLabel: string;
-  customLabel: string;
-  useCustom: boolean;
-  onSelectSaved: () => void;
-  onSelectCustom: () => void;
-}) {
-  return (
-    <div className="inline-flex rounded-lg border border-slate-200 bg-slate-50/90 p-0.5 dark:border-white/10 dark:bg-[#11161d]" role="group">
-      <button
-        type="button"
-        onClick={onSelectSaved}
-        className={cn(
-          "rounded-md px-3 py-1.5 text-xs font-semibold transition-all",
-          !useCustom
-            ? "bg-white text-[#1C3A34] shadow-sm dark:bg-[#252c35] dark:text-[#e8ecf1]"
-            : "text-slate-500 hover:text-slate-700 dark:text-[#8f99a6] dark:hover:text-[#d8c77f]",
-        )}
-      >
-        {savedLabel}
-      </button>
-      <button
-        type="button"
-        onClick={onSelectCustom}
-        className={cn(
-          "rounded-md px-3 py-1.5 text-xs font-semibold transition-all",
-          useCustom
-            ? "bg-white text-[#1C3A34] shadow-sm dark:bg-[#252c35] dark:text-[#e8ecf1]"
-            : "text-slate-500 hover:text-slate-700 dark:text-[#8f99a6] dark:hover:text-[#d8c77f]",
-        )}
-      >
-        {customLabel}
-      </button>
-    </div>
-  );
-}
-
 function VehicleRequestPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -470,12 +431,41 @@ function VehicleRequestPageContent() {
   const [returnDate, setReturnDate] = useState<Date | undefined>(undefined);
   const [returnTime, setReturnTime] = useState<TimeValue | undefined>(undefined);
   const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [itineraryStops, setItineraryStops] = useState<ItineraryStopItem[]>([]);
   const [routePreviewOpen, setRoutePreviewOpen] = useState(true);
   const [routeCalculating, setRouteCalculating] = useState(false);
+
+  const routeWaypoints = useMemo(() => {
+    return itineraryStops
+      .filter(
+        (s): s is typeof s & { latitude: number; longitude: number } =>
+          typeof s.latitude === "number" && typeof s.longitude === "number",
+      )
+      .map((s, idx) => ({
+        latitude: s.latitude,
+        longitude: s.longitude,
+        name: `${idx + 1}. ${s.address || "Stop"}`,
+      }));
+  }, [itineraryStops]);
+
+  const totalStandbyMinutes = useMemo(
+    () => itineraryStops.reduce((sum, s) => sum + (s.plannedWaitMinutes || 0), 0),
+    [itineraryStops],
+  );
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [outcome, setOutcome] = useState<"success" | "error" | null>(null);
   const [outcomeMessage, setOutcomeMessage] = useState<string | null>(null);
+
+  const canSubmit = Boolean(
+    requestType &&
+      passengerName.trim() &&
+      mobileNumber.trim() &&
+      regionId &&
+      pickup.trim() &&
+      dropoff.trim() &&
+      !isSubmitting,
+  );
 
   useEffect(() => {
     const storedUser = getStoredUser();
@@ -798,6 +788,14 @@ function VehicleRequestPageContent() {
     setOutcomeMessage(null);
     setIsSubmitting(true);
 
+    const legsPayload = convertStopsToLegsPayload(
+      pickup.trim(),
+      dropoff.trim(),
+      itineraryStops,
+      pickupCoordinates,
+      dropoffCoordinates,
+    );
+
     try {
       await createRideRequest({
         pickup_address: pickup.trim(),
@@ -814,6 +812,7 @@ function VehicleRequestPageContent() {
         scheduled_return_at: scheduledReturnAt?.toISOString() ?? null,
         request_type: requestType,
         selected_vehicles: selectedVehicles,
+        legs: legsPayload.length > 0 ? legsPayload : undefined,
         notes: [
           `Passenger: ${passengerName.trim()}`,
           `Mobile: ${mobileNumber.trim()}`,
@@ -853,6 +852,7 @@ function VehicleRequestPageContent() {
     setScheduledTime(undefined);
     setReturnDate(undefined);
     setReturnTime(undefined);
+    setItineraryStops([]);
     setScheduleError(null);
     setOutcome(null);
     setOutcomeMessage(null);
@@ -1275,19 +1275,29 @@ function VehicleRequestPageContent() {
           </section>
         </div>
       ) : (
-        <div className="flex min-h-[calc(100vh-72px)] flex-1 flex-col lg:flex-row">
-          {selectedVehiclesPanel}
+        <div className="flex min-h-[calc(100vh-72px)] flex-1 flex-col bg-slate-50/80 dark:bg-[#0d1117]">
+          <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+            <div className="mb-6 flex items-center justify-between">
+              <Link
+                href="/book"
+                className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 transition-colors hover:text-[#1C3A34] dark:text-slate-400 dark:hover:text-[#e8ecf1]"
+              >
+                <ArrowLeft className="size-4" />
+                {copy.backToCatalog}
+              </Link>
+            </div>
 
-          <section className="flex w-full flex-1 flex-col bg-slate-50/80 px-6 py-8 dark:bg-[#0d1117] sm:px-8 lg:w-7/12 lg:px-10 lg:py-10 xl:px-12">
-            <div className="flex w-full flex-1 flex-col space-y-6">
-              <div>
-                <h2 className="text-2xl font-extrabold tracking-tight text-[#1C3A34] sm:text-3xl">
-                  {copy.requestBooking}
-                </h2>
-                <p className="mt-2 max-w-xl text-sm font-medium leading-relaxed text-slate-500">
-                  {copy.requestSubTitle}
-                </p>
-              </div>
+            <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 items-start">
+              {/* Left Column: Form Flow (7 cols) */}
+              <div className="space-y-6 lg:col-span-7">
+                <div>
+                  <h2 className="text-2xl font-extrabold tracking-tight text-[#1C3A34] sm:text-3xl dark:text-[#eef1f5]">
+                    {copy.requestBooking}
+                  </h2>
+                  <p className="mt-2 max-w-xl text-sm font-medium leading-relaxed text-slate-500 dark:text-slate-400">
+                    {copy.requestSubTitle}
+                  </p>
+                </div>
 
               {!user ? (
                 <div className="flex flex-1 items-center justify-center">
@@ -1359,7 +1369,7 @@ function VehicleRequestPageContent() {
                   </div>
                 </div>
               ) : (
-                <form onSubmit={handleBookingSubmit} className="mx-auto w-full max-w-2xl space-y-6">
+                <form id="booking-request-form" onSubmit={handleBookingSubmit} className="space-y-6">
                   <div className="flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-[#171c24]">
                     <div className="flex items-center gap-2.5">
                       {requestType === "single" ? (
@@ -1538,6 +1548,7 @@ function VehicleRequestPageContent() {
                               longitude={pickupCoordinates.longitude}
                               onCoordinatesChange={(lat, lng) => setPickupCoordinates({ latitude: lat, longitude: lng })}
                               visible={!loading}
+                              height={340}
                               defaultCenter={DEFAULT_MAP_CENTER}
                               title={copy.pickupMapLabel}
                               hint={copy.mapHint}
@@ -1627,6 +1638,7 @@ function VehicleRequestPageContent() {
                               longitude={dropoffCoordinates.longitude}
                               onCoordinatesChange={(lat, lng) => setDropoffCoordinates({ latitude: lat, longitude: lng })}
                               visible={!loading}
+                              height={340}
                               defaultCenter={DEFAULT_MAP_CENTER}
                               title={copy.dropoffMapLabel}
                               hint={copy.mapHint}
@@ -1645,88 +1657,18 @@ function VehicleRequestPageContent() {
                       )}
                     </div>
 
-                    {/* Route preview */}
-                    {hasRouteCoordinates ? (
-                      <Collapsible
-                        open={routePreviewOpen}
-                        onOpenChange={setRoutePreviewOpen}
-                        className="rounded-2xl border border-slate-200 bg-slate-50/80 dark:border-white/10 dark:bg-[#11161d]"
-                      >
-                        <CollapsibleTrigger
-                          className={cn(
-                            "flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left",
-                            "rounded-2xl transition-colors hover:bg-white/70 dark:hover:bg-white/[0.04]",
-                            "focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-[#1C3A34]/15 dark:focus-visible:ring-[#C9B87A]/30",
-                          )}
-                        >
-                          <div className="flex min-w-0 items-center gap-3">
-                            <div className="rounded-xl bg-[#1C3A34]/8 p-2.5 text-[#1C3A34] dark:bg-[#C9B87A]/12 dark:text-[#d8c77f]">
-                              <Route className="size-4" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-bold text-[#1C3A34] dark:text-[#eef1f5]">
-                                {copy.routePreviewTitle}
-                              </p>
-                              <p className="text-xs leading-relaxed text-slate-500 dark:text-[#8f99a6]">
-                                {routeCalculating
-                                  ? copy.routePreviewCalculating
-                                  : copy.routePreviewDesc}
-                              </p>
-                            </div>
-                          </div>
-                          {routeCalculating ? (
-                            <Loader2 className="size-4 shrink-0 animate-spin text-[#C9B87A]" />
-                          ) : (
-                            <ChevronDown
-                              className={cn(
-                                "size-4 shrink-0 text-slate-400 transition-transform dark:text-[#8f99a6]",
-                                routePreviewOpen && "rotate-180",
-                              )}
-                            />
-                          )}
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="border-t border-slate-200/80 px-4 py-4 dark:border-white/10">
-                          <LazyRideRequestRouteMap
-                            visible={routePreviewOpen}
-                            locale={locale}
-                            height={320}
-                            pickupLatitude={pickupCoordinates.latitude}
-                            pickupLongitude={pickupCoordinates.longitude}
-                            dropoffLatitude={dropoffCoordinates.latitude}
-                            dropoffLongitude={dropoffCoordinates.longitude}
-                            pickupName={pickup.trim() || copy.pickupPointLabel}
-                            dropoffName={dropoff.trim() || copy.dropoffPointLabel}
-                            pickupTypeLabel={copy.pickupPointLabel}
-                            dropoffTypeLabel={copy.dropoffPointLabel}
-                            loadingLabel={copy.routePreviewLoading}
-                            calculatingLabel={copy.routePreviewCalculating}
-                            emptyLabel={copy.routePreviewEmpty}
-                            recenterLabel={copy.routePreviewRecenter}
-                            distanceLabel={copy.routePreviewDistance}
-                            durationLabel={copy.routePreviewDuration}
-                            straightLineLabel={copy.routePreviewStraightLine}
-                            distanceUnitKm={copy.routePreviewDistanceUnitKm}
-                            distanceUnitM={copy.routePreviewDistanceUnitM}
-                            onRouteLoadingChange={setRouteCalculating}
-                          />
-                        </CollapsibleContent>
-                      </Collapsible>
-                    ) : regionId ? (
-                      <div className="flex items-start gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/60 px-4 py-3.5 dark:border-white/10 dark:bg-[#11161d]/70">
-                        <div className="rounded-xl bg-[#1C3A34]/8 p-2.5 text-[#1C3A34] dark:bg-[#C9B87A]/12 dark:text-[#d8c77f]">
-                          <Route className="size-4" />
-                        </div>
-                        <div className="min-w-0 pt-0.5">
-                          <p className="text-sm font-bold text-[#1C3A34] dark:text-[#eef1f5]">
-                            {copy.routePreviewTitle}
-                          </p>
-                          <p className="mt-0.5 text-xs leading-relaxed text-slate-500 dark:text-[#8f99a6]">
-                            {copy.routePreviewHint}
-                          </p>
-                        </div>
-                      </div>
-                    ) : null}
-
+                    {/* Multi-Leg Itinerary Stops */}
+                    <ItineraryLegsBuilder
+                      stops={itineraryStops}
+                      onChange={setItineraryStops}
+                      pickupAddress={pickup}
+                      dropoffAddress={dropoff}
+                      pickupCoordinates={pickupCoordinates}
+                      dropoffCoordinates={dropoffCoordinates}
+                      savedLocations={regionPickupLocations}
+                      locale={locale}
+                      disabled={isSubmitting}
+                    />
                   </div>
                 </AdminFormSection>
 
@@ -1864,10 +1806,10 @@ function VehicleRequestPageContent() {
                 </AdminFormSection>
 
 
-                  <div className="border-t border-slate-200 pt-6 dark:border-white/10">
+                  <div className="border-t border-slate-200 pt-6 dark:border-white/10 lg:hidden">
                     <button
                       type="submit"
-                      disabled={isSubmitting}
+                      disabled={isSubmitting || !canSubmit}
                       className="w-full rounded-xl bg-[#1C3A34] py-4 text-center text-sm font-extrabold text-white transition-colors hover:bg-[#254b43] disabled:cursor-not-allowed disabled:bg-slate-300 dark:bg-[#C9B87A] dark:text-[#171a1f] dark:hover:bg-[#d8c98e] dark:disabled:bg-muted dark:disabled:text-muted-foreground"
                     >
                       {isSubmitting ? copy.submitting : copy.submitRequest}
@@ -1876,9 +1818,33 @@ function VehicleRequestPageContent() {
                 </form>
               )}
             </div>
-          </section>
+
+            {/* Right Column: Sticky Live Summary (5 cols) */}
+            <div className="lg:col-span-5 lg:sticky lg:top-24">
+              <BookingLiveSummary
+                vehicles={vehicles}
+                pickupAddress={pickup}
+                dropoffAddress={dropoff}
+                pickupCoordinates={pickupCoordinates}
+                dropoffCoordinates={dropoffCoordinates}
+                waypoints={routeWaypoints}
+                standbyMinutes={totalStandbyMinutes}
+                locale={locale}
+                isSubmitting={isSubmitting}
+                onSubmit={() => {
+                  const form = document.getElementById("booking-request-form") as HTMLFormElement | null;
+                  if (form) {
+                    form.requestSubmit();
+                  }
+                }}
+                canSubmit={canSubmit}
+                submitButtonLabel={copy.submitRequest}
+              />
+            </div>
+          </div>
         </div>
-      )}
+      </div>
+    )}
     </div>
   );
 }

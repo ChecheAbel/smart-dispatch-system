@@ -8,6 +8,7 @@ import {
   Clock3,
   Eye,
   FileText,
+  Milestone,
   RotateCcw,
   Wallet,
 } from "lucide-react";
@@ -173,6 +174,14 @@ export function AdminRideRequestsPage() {
                 <span className="size-1.5 shrink-0 rounded-full bg-rose-500 shadow-2xs" />
                 <span className="truncate">{dropoff}</span>
               </div>
+              {request.legs && request.legs.length > 0 ? (
+                <div className="pt-0.5">
+                  <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#1C3A34]/10 px-2 py-0.5 text-[10px] font-bold text-[#1C3A34] dark:bg-[#C9B87A]/20 dark:text-[#d8c77f]">
+                    <Milestone className="size-3" />
+                    {request.legs.length} {locale === "am" ? "ማረፊያዎች" : request.legs.length === 1 ? "stop" : "stops"}
+                  </span>
+                </div>
+              ) : null}
             </div>
           );
         },

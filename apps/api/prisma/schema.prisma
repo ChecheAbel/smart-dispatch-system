@@ -1027,6 +1027,7 @@ model RideRequest {
   assignedDriver       User?                    @relation("RideRequestAssignedDriver", fields: [assignedDriverUserId], references: [id], onDelete: SetNull)
   driverRating         RideRequestDriverRating?
   complaints           Complaint[]
+  legs                 RideRequestLeg[]
 
   @@index([requesterUserId])
   @@index([vehicleClassId])
@@ -1038,6 +1039,33 @@ model RideRequest {
   @@index([dropoffLocationId])
   @@index([createdAt(sort: Desc)])
   @@map("ride_requests")
+}
+
+model RideRequestLeg {
+  id                  String            @id @default(uuid()) @db.Uuid
+  rideRequestId       String            @map("ride_request_id") @db.Uuid
+  sequenceOrder       Int               @map("sequence_order")
+  pickupAddress       String            @map("pickup_address") @db.VarChar(500)
+  pickupLatitude      Decimal?          @map("pickup_latitude") @db.Decimal(10, 7)
+  pickupLongitude     Decimal?          @map("pickup_longitude") @db.Decimal(10, 7)
+  dropoffAddress      String            @map("dropoff_address") @db.VarChar(500)
+  dropoffLatitude     Decimal?          @map("dropoff_latitude") @db.Decimal(10, 7)
+  dropoffLongitude    Decimal?          @map("dropoff_longitude") @db.Decimal(10, 7)
+  scheduledAt         DateTime?         @map("scheduled_at") @db.Timestamptz
+  estimatedDistanceKm Decimal?          @map("estimated_distance_km") @db.Decimal(10, 3)
+  actualDistanceKm    Decimal?          @map("actual_distance_km") @db.Decimal(10, 3)
+  plannedWaitMinutes  Int               @default(0) @map("planned_wait_minutes")
+  actualWaitMinutes   Int               @default(0) @map("actual_wait_minutes")
+  stopPurpose         String?           @map("stop_purpose") @db.VarChar(255)
+  status              RideRequestStatus @default(pending)
+  startedAt           DateTime?         @map("started_at") @db.Timestamptz
+  completedAt         DateTime?         @map("completed_at") @db.Timestamptz
+  createdAt           DateTime          @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt           DateTime          @updatedAt @map("updated_at") @db.Timestamptz
+  rideRequest         RideRequest       @relation(fields: [rideRequestId], references: [id], onDelete: Cascade)
+
+  @@index([rideRequestId, sequenceOrder])
+  @@map("ride_request_legs")
 }
 
 enum ComplaintCategory {

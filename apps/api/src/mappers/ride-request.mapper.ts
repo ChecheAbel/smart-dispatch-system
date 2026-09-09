@@ -159,6 +159,28 @@ type DbRideRequest = {
     driverUserId: string;
     createdAt: Date;
   } | null;
+  legs?: Array<{
+    id: string;
+    rideRequestId: string;
+    sequenceOrder: number;
+    pickupAddress: string;
+    pickupLatitude: Prisma.Decimal | null;
+    pickupLongitude: Prisma.Decimal | null;
+    dropoffAddress: string;
+    dropoffLatitude: Prisma.Decimal | null;
+    dropoffLongitude: Prisma.Decimal | null;
+    scheduledAt: Date | null;
+    estimatedDistanceKm: Prisma.Decimal | null;
+    actualDistanceKm: Prisma.Decimal | null;
+    plannedWaitMinutes: number;
+    actualWaitMinutes: number;
+    stopPurpose: string | null;
+    status: any;
+    startedAt: Date | null;
+    completedAt: Date | null;
+    createdAt?: Date;
+    updatedAt?: Date;
+  }>;
 };
 
 function decimalToNumber(value: Prisma.Decimal | null) {
@@ -427,6 +449,30 @@ export function toPublicRideRequest(
       rideRequest.status === "pending"
         ? getRideRequestEditDeadline(rideRequest.createdAt).toISOString()
         : null,
+    legs: rideRequest.legs
+      ? rideRequest.legs.map((leg) => ({
+          id: leg.id,
+          ride_request_id: leg.rideRequestId,
+          sequence_order: leg.sequenceOrder,
+          pickup_address: leg.pickupAddress,
+          pickup_latitude: decimalToNumber(leg.pickupLatitude),
+          pickup_longitude: decimalToNumber(leg.pickupLongitude),
+          dropoff_address: leg.dropoffAddress,
+          dropoff_latitude: decimalToNumber(leg.dropoffLatitude),
+          dropoff_longitude: decimalToNumber(leg.dropoffLongitude),
+          scheduled_at: leg.scheduledAt?.toISOString() ?? null,
+          estimated_distance_km: decimalToNumber(leg.estimatedDistanceKm),
+          actual_distance_km: decimalToNumber(leg.actualDistanceKm),
+          planned_wait_minutes: leg.plannedWaitMinutes ?? 0,
+          actual_wait_minutes: leg.actualWaitMinutes ?? 0,
+          stop_purpose: leg.stopPurpose,
+          status: leg.status,
+          started_at: leg.startedAt?.toISOString() ?? null,
+          completed_at: leg.completedAt?.toISOString() ?? null,
+          created_at: leg.createdAt?.toISOString(),
+          updated_at: leg.updatedAt?.toISOString(),
+        }))
+      : undefined,
   };
 }
 

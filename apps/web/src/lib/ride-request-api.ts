@@ -46,6 +46,7 @@ export type CreateRideRequestInput = {
     vehicle_class_id?: string | null;
     quantity: number;
   }>;
+  legs?: import("@smart-dispatch/types").CreateRideRequestLegInput[];
 };
 
 export type UpdateRideRequestInput = CreateRideRequestInput;

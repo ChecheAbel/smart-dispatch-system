@@ -71,6 +71,7 @@ import {
 import { syncDriverUpcomingTripsAfterChange } from "../services/driver-upcoming-trips-sync.service";
 import { queueRideRequestNotifications } from "../services/notification-dispatch.service";
 import { parseRideRequestPayload } from "../services/ride-request-payload.service";
+import { updateLegStatus } from "../services/itinerary-leg.service";
 import { validateRideRequestReferences } from "../services/ride-request-reference.service";
 import { paginate, parsePaginationQuery } from "../services/pagination.service";
 import { parseLocale } from "../utils/locale";
@@ -1023,6 +1024,7 @@ router.post(
         passengerCount: parsed.data.passengerCount,
         notes: parsed.data.notes,
         contractId: parsed.data.contractId,
+        legs: parsed.data.legs,
       };
 
       const requestsToCreate = [];
@@ -1334,6 +1336,42 @@ router.post(
         { ride_request: toPublicRideRequest(result, { locale }) },
         { status: 201, message: "Driver rating submitted." },
       );
+    } catch (error) {
+      return handleRouteError(res, error);
+    }
+  },
+);
+
+router.patch(
+  "/:id/legs/:legId/status",
+  requirePermission("driver.trip"),
+  auditMutations(),
+  async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { id, legId } = req.params;
+      const status = req.body?.status;
+      const actualWaitMinutes =
+        typeof req.body?.actual_wait_minutes === "number"
+          ? req.body.actual_wait_minutes
+          : undefined;
+      const actualDistanceKm =
+        typeof req.body?.actual_distance_km === "number"
+          ? req.body.actual_distance_km
+          : undefined;
+
+      if (!status) {
+        return sendError(res, "Status is required.", 400);
+      }
+
+      const updatedLeg = await updateLegStatus({
+        rideRequestId: id,
+        legId,
+        status,
+        actualWaitMinutes,
+        actualDistanceKm,
+      });
+
+      return sendSuccess(res, { leg: updatedLeg });
     } catch (error) {
       return handleRouteError(res, error);
     }

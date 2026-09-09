@@ -23,7 +23,48 @@ export type ParsedRideRequestPayload = {
     quantity: number;
   }>;
   requestType?: "single" | "contract";
+  legs?: Array<{
+    sequenceOrder?: number;
+    pickupAddress: string;
+    pickupLatitude?: number | null;
+    pickupLongitude?: number | null;
+    dropoffAddress: string;
+    dropoffLatitude?: number | null;
+    dropoffLongitude?: number | null;
+    scheduledAt?: Date | null;
+    plannedWaitMinutes?: number;
+    stopPurpose?: string | null;
+  }>;
 };
+
+function parseLegs(value: unknown) {
+  if (!Array.isArray(value) || value.length === 0) return undefined;
+
+  const parsed = [];
+  for (let i = 0; i < value.length; i++) {
+    const item = value[i];
+    if (typeof item !== "object" || !item) continue;
+
+    const pickupAddress = getString((item as any).pickup_address ?? (item as any).pickupAddress);
+    const dropoffAddress = getString((item as any).dropoff_address ?? (item as any).dropoffAddress);
+    if (!pickupAddress || !dropoffAddress) continue;
+
+    parsed.push({
+      sequenceOrder: typeof (item as any).sequence_order === "number" ? (item as any).sequence_order : i + 1,
+      pickupAddress,
+      pickupLatitude: parseCoordinate((item as any).pickup_latitude ?? (item as any).pickupLatitude),
+      pickupLongitude: parseCoordinate((item as any).pickup_longitude ?? (item as any).pickupLongitude),
+      dropoffAddress,
+      dropoffLatitude: parseCoordinate((item as any).dropoff_latitude ?? (item as any).dropoffLatitude),
+      dropoffLongitude: parseCoordinate((item as any).dropoff_longitude ?? (item as any).dropoffLongitude),
+      scheduledAt: parseScheduledAt((item as any).scheduled_at ?? (item as any).scheduledAt),
+      plannedWaitMinutes: typeof (item as any).planned_wait_minutes === "number" ? (item as any).planned_wait_minutes : 0,
+      stopPurpose: getOptionalString((item as any).stop_purpose ?? (item as any).stopPurpose),
+    });
+  }
+
+  return parsed.length > 0 ? parsed : undefined;
+}
 
 function parseSelectedVehicles(value: unknown) {
   if (!Array.isArray(value)) return undefined;
@@ -102,6 +143,7 @@ export function parseRideRequestPayload(body: unknown):
   const contractId = getOptionalString((body as { contract_id?: unknown })?.contract_id);
   const selectedVehicles = parseSelectedVehicles((body as { selected_vehicles?: unknown })?.selected_vehicles);
   const requestType = getOptionalString((body as { request_type?: unknown })?.request_type) as "single" | "contract" | undefined;
+  const legs = parseLegs((body as { legs?: unknown })?.legs);
 
   if (!pickupAddress) {
     return { ok: false, error: "Pickup address is required." };
@@ -142,6 +184,7 @@ export function parseRideRequestPayload(body: unknown):
       contractId: contractId ?? null,
       selectedVehicles,
       requestType,
+      legs,
     },
   };
 }

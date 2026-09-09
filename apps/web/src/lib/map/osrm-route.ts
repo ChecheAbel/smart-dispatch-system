@@ -60,12 +60,17 @@ export function formatRouteDuration(seconds: number, locale: string) {
   return `${new Intl.NumberFormat(locale).format(minutes)} min`;
 }
 
-export async function fetchDrivingRoute(
-  origin: LatLngPoint,
-  destination: LatLngPoint,
+export async function fetchMultiStopRoute(
+  points: LatLngPoint[],
   signal?: AbortSignal,
 ): Promise<DrivingRouteResult> {
-  const coordinates = `${origin.longitude},${origin.latitude};${destination.longitude},${destination.latitude}`;
+  if (points.length < 2) {
+    throw new Error("At least 2 points are required to calculate a route.");
+  }
+
+  const coordinates = points
+    .map((point) => `${point.longitude},${point.latitude}`)
+    .join(";");
   const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson`;
 
   const response = await fetch(url, { signal });
@@ -95,6 +100,14 @@ export async function fetchDrivingRoute(
     distanceMeters: route.distance,
     durationSeconds: route.duration,
   };
+}
+
+export async function fetchDrivingRoute(
+  origin: LatLngPoint,
+  destination: LatLngPoint,
+  signal?: AbortSignal,
+): Promise<DrivingRouteResult> {
+  return fetchMultiStopRoute([origin, destination], signal);
 }
 
 /** @deprecated Use fetchDrivingRoute instead. */

@@ -19,6 +19,19 @@ import { tryAutoInvoiceCompletedTrip } from "../services/invoice-automation.serv
 import { canEditRideRequest } from "../services/ride-request-policy.service";
 import { evaluateRideRequestCancellation, evaluateNoShowBilling } from "../services/booking-policy-enforcement.service";
 
+export type CreateRideRequestLegItemInput = {
+  sequenceOrder?: number;
+  pickupAddress: string;
+  pickupLatitude?: number | null;
+  pickupLongitude?: number | null;
+  dropoffAddress: string;
+  dropoffLatitude?: number | null;
+  dropoffLongitude?: number | null;
+  scheduledAt?: Date | null;
+  plannedWaitMinutes?: number;
+  stopPurpose?: string | null;
+};
+
 export type CreateRideRequestInput = {
   requesterUserId: string;
   vehicleTypeId?: string | null;
@@ -37,6 +50,7 @@ export type CreateRideRequestInput = {
   passengerCount: number;
   notes?: string | null;
   contractId?: string | null;
+  legs?: CreateRideRequestLegItemInput[];
 };
 
 export type UpdateRideRequestInput = Omit<CreateRideRequestInput, "requesterUserId">;
@@ -76,6 +90,9 @@ const rideRequestInclude = {
   region: true,
   pickupLocation: true,
   dropoffLocation: true,
+  legs: {
+    orderBy: { sequenceOrder: "asc" as const },
+  },
   requester: {
     select: {
       id: true,
@@ -270,11 +287,31 @@ function buildRideRequestData(input: UpdateRideRequestInput) {
 }
 
 export async function createRideRequest(input: CreateRideRequestInput) {
+  const hasLegs = Array.isArray(input.legs) && input.legs.length > 0;
+
   return prisma.rideRequest.create({
     data: {
       requesterUserId: input.requesterUserId,
       contractId: input.contractId ?? null,
       ...buildRideRequestData(input),
+      ...(hasLegs
+        ? {
+            legs: {
+              create: input.legs!.map((leg, index) => ({
+                sequenceOrder: leg.sequenceOrder ?? index + 1,
+                pickupAddress: leg.pickupAddress,
+                pickupLatitude: toDecimal(leg.pickupLatitude),
+                pickupLongitude: toDecimal(leg.pickupLongitude),
+                dropoffAddress: leg.dropoffAddress,
+                dropoffLatitude: toDecimal(leg.dropoffLatitude),
+                dropoffLongitude: toDecimal(leg.dropoffLongitude),
+                scheduledAt: leg.scheduledAt ?? null,
+                plannedWaitMinutes: leg.plannedWaitMinutes ?? 0,
+                stopPurpose: leg.stopPurpose?.trim() || null,
+              })),
+            },
+          }
+        : {}),
     },
     include: rideRequestInclude,
   });
@@ -308,11 +345,30 @@ export async function createBulkRideRequests(input: CreateBulkRideRequestsInput)
 
     const createdRequests = [];
     for (const req of input.requests) {
+      const hasLegs = Array.isArray(req.legs) && req.legs.length > 0;
       const created = await tx.rideRequest.create({
         data: {
           requesterUserId: req.requesterUserId,
           contractId: contractId ?? req.contractId ?? null,
           ...buildRideRequestData(req),
+          ...(hasLegs
+            ? {
+                legs: {
+                  create: req.legs!.map((leg, index) => ({
+                    sequenceOrder: leg.sequenceOrder ?? index + 1,
+                    pickupAddress: leg.pickupAddress,
+                    pickupLatitude: toDecimal(leg.pickupLatitude),
+                    pickupLongitude: toDecimal(leg.pickupLongitude),
+                    dropoffAddress: leg.dropoffAddress,
+                    dropoffLatitude: toDecimal(leg.dropoffLatitude),
+                    dropoffLongitude: toDecimal(leg.dropoffLongitude),
+                    scheduledAt: leg.scheduledAt ?? null,
+                    plannedWaitMinutes: leg.plannedWaitMinutes ?? 0,
+                    stopPurpose: leg.stopPurpose?.trim() || null,
+                  })),
+                },
+              }
+            : {}),
         },
         include: rideRequestInclude,
       });

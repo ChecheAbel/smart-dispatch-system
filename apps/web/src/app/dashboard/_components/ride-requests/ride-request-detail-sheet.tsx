@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentType, ReactNode } from "react";
+import { useMemo, type ComponentType, type ReactNode } from "react";
 import dynamic from "next/dynamic";
 import {
   CalendarClock,
@@ -50,6 +50,7 @@ import {
   RideRequestDriverRatingSection,
   type RideRequestDriverRatingDisplayLabels,
 } from "./ride-request-driver-rating-display";
+import { RideRequestItinerarySection } from "./ride-request-itinerary-section";
 
 const LazyRideRequestRouteMap = dynamic(
   () =>
@@ -248,6 +249,22 @@ export function RideRequestDetailSheet({
   const sheetTitle = title ?? historyCopy.detailTitle;
   const sheetDescription = description ?? historyCopy.detailDescription;
   const sheetEmptyTitle = emptyTitle ?? historyCopy.emptyTitle;
+
+  const routeWaypoints = useMemo(() => {
+    if (!request?.legs || request.legs.length === 0) return undefined;
+    return request.legs
+      .filter(
+        (leg) =>
+          (leg.dropoff_latitude ?? leg.pickup_latitude) != null &&
+          (leg.dropoff_longitude ?? leg.pickup_longitude) != null,
+      )
+      .map((leg, index) => ({
+        latitude: (leg.dropoff_latitude ?? leg.pickup_latitude)!,
+        longitude: (leg.dropoff_longitude ?? leg.pickup_longitude)!,
+        name: leg.dropoff_address || leg.pickup_address || `Stop #${index + 1}`,
+        typeLabel: leg.stop_purpose ?? undefined,
+      }));
+  }, [request?.legs]);
   const displayRequester = requester ?? request?.requester ?? undefined;
 
   if (!open) {
@@ -488,31 +505,48 @@ export function RideRequestDetailSheet({
           {driverRatingVariant === "admin" ? driverRatingSection : null}
 
           <DetailSection title={historyCopy.detailRouteSection} icon={Route}>
-            <div className="space-y-2">
-              <RouteStopDetail
-                kind="pickup"
-                label={historyCopy.detailPickupPoint}
-                savedLocationName={request.pickup_location?.name}
-                address={request.pickup_address}
-                latitude={request.pickup_latitude}
-                longitude={request.pickup_longitude}
-                savedLocationLabel={historyCopy.detailSavedLocation}
-                customLocationLabel={historyCopy.detailCustomLocation}
-                coordinatesLabel={historyCopy.detailCoordinates}
+            {request.legs && request.legs.length > 0 ? (
+              <RideRequestItinerarySection
+                legs={request.legs}
+                pickupAddress={request.pickup_location?.name ?? request.pickup_address}
+                dropoffAddress={request.dropoff_location?.name ?? request.dropoff_address}
+                pickupCoordinates={{
+                  latitude: request.pickup_latitude,
+                  longitude: request.pickup_longitude,
+                }}
+                dropoffCoordinates={{
+                  latitude: request.dropoff_latitude,
+                  longitude: request.dropoff_longitude,
+                }}
+                locale={locale}
               />
-              <div className="ml-3 h-4 w-px bg-gradient-to-b from-[#1C3A34]/30 to-[#C9B87A]/70" aria-hidden />
-              <RouteStopDetail
-                kind="dropoff"
-                label={historyCopy.detailDropoffPoint}
-                savedLocationName={request.dropoff_location?.name}
-                address={request.dropoff_address}
-                latitude={request.dropoff_latitude}
-                longitude={request.dropoff_longitude}
-                savedLocationLabel={historyCopy.detailSavedLocation}
-                customLocationLabel={historyCopy.detailCustomLocation}
-                coordinatesLabel={historyCopy.detailCoordinates}
-              />
-            </div>
+            ) : (
+              <div className="space-y-2">
+                <RouteStopDetail
+                  kind="pickup"
+                  label={historyCopy.detailPickupPoint}
+                  savedLocationName={request.pickup_location?.name}
+                  address={request.pickup_address}
+                  latitude={request.pickup_latitude}
+                  longitude={request.pickup_longitude}
+                  savedLocationLabel={historyCopy.detailSavedLocation}
+                  customLocationLabel={historyCopy.detailCustomLocation}
+                  coordinatesLabel={historyCopy.detailCoordinates}
+                />
+                <div className="ml-3 h-4 w-px bg-gradient-to-b from-[#1C3A34]/30 to-[#C9B87A]/70" aria-hidden />
+                <RouteStopDetail
+                  kind="dropoff"
+                  label={historyCopy.detailDropoffPoint}
+                  savedLocationName={request.dropoff_location?.name}
+                  address={request.dropoff_address}
+                  latitude={request.dropoff_latitude}
+                  longitude={request.dropoff_longitude}
+                  savedLocationLabel={historyCopy.detailSavedLocation}
+                  customLocationLabel={historyCopy.detailCustomLocation}
+                  coordinatesLabel={historyCopy.detailCoordinates}
+                />
+              </div>
+            )}
 
             <LazyRideRequestRouteMap
               visible={open}
@@ -522,6 +556,7 @@ export function RideRequestDetailSheet({
               pickupLongitude={request.pickup_longitude}
               dropoffLatitude={request.dropoff_latitude}
               dropoffLongitude={request.dropoff_longitude}
+              waypoints={routeWaypoints}
               pickupName={request.pickup_location?.name ?? request.pickup_address}
               dropoffName={request.dropoff_location?.name ?? request.dropoff_address}
               pickupTypeLabel={historyCopy.detailPickupPoint}

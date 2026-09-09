@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import { Eye, MoreHorizontal, Pencil, Route, Star, Trash2 } from "lucide-react";
+import { Eye, Milestone, MoreHorizontal, Pencil, Route, Star, Trash2 } from "lucide-react";
 import type { RideRequest, RideRequestStatus } from "@smart-dispatch/types";
 import { useLocale, usePermission } from "@/components/shared/providers";
 import {
@@ -155,7 +155,15 @@ export function RideRequestHistoryPage() {
         header: historyCopy.routeColumn,
         cell: (row) => (
           <div className="min-w-0 space-y-1">
-            <p className="truncate text-sm font-medium text-[#1C3A34]">{row.pickup_address}</p>
+            <div className="flex items-center gap-1.5">
+              <p className="truncate text-sm font-medium text-[#1C3A34]">{row.pickup_address}</p>
+              {row.legs && row.legs.length > 0 ? (
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#1C3A34]/10 px-2 py-0.5 text-[10px] font-bold text-[#1C3A34] dark:bg-[#C9B87A]/20 dark:text-[#d8c77f]">
+                  <Milestone className="size-3" />
+                  {row.legs.length} {locale === "am" ? "ማረፊያዎች" : row.legs.length === 1 ? "stop" : "stops"}
+                </span>
+              ) : null}
+            </div>
             <p className="truncate text-sm text-slate-500">{row.dropoff_address}</p>
             {row.contract ? (
               <RideRequestContractBadge

@@ -1323,6 +1323,43 @@ export interface RideRequest {
   can_cancel: boolean;
   cancel_deadline_at: string | null;
   edit_deadline_at: string | null;
+  legs?: RideRequestLeg[];
+}
+
+export interface RideRequestLeg {
+  id: string;
+  ride_request_id: string;
+  sequence_order: number;
+  pickup_address: string;
+  pickup_latitude: number | null;
+  pickup_longitude: number | null;
+  dropoff_address: string;
+  dropoff_latitude: number | null;
+  dropoff_longitude: number | null;
+  scheduled_at: string | null;
+  estimated_distance_km: number | null;
+  actual_distance_km: number | null;
+  planned_wait_minutes: number;
+  actual_wait_minutes: number;
+  stop_purpose: string | null;
+  status: RideRequestStatus;
+  started_at: string | null;
+  completed_at: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateRideRequestLegInput {
+  sequence_order?: number;
+  pickup_address: string;
+  pickup_latitude?: number | null;
+  pickup_longitude?: number | null;
+  dropoff_address: string;
+  dropoff_latitude?: number | null;
+  dropoff_longitude?: number | null;
+  scheduled_at?: string | null;
+  planned_wait_minutes?: number;
+  stop_purpose?: string | null;
 }
 
 export interface RideRequestDriverRating {

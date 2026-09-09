@@ -11,6 +11,7 @@ import {
 } from "@/lib/map/coordinates";
 import {
   fetchDrivingRoute,
+  fetchMultiStopRoute,
   formatRouteDistance,
   formatRouteDuration,
   haversineDistanceMeters,
@@ -31,7 +32,7 @@ type RouteMapPoint = {
   kind: "pickup" | "dropoff";
 };
 
-type RouteMapStats = {
+export type RouteMapStats = {
   distanceMeters: number;
   durationSeconds: number | null;
   isStraightLine: boolean;
@@ -59,7 +60,14 @@ type RideRequestRouteMapProps = {
   straightLineLabel?: string;
   distanceUnitKm?: string;
   distanceUnitM?: string;
+  waypoints?: Array<{
+    latitude: number;
+    longitude: number;
+    name: string;
+    typeLabel?: string;
+  }>;
   onRouteLoadingChange?: (loading: boolean) => void;
+  onRouteStatsChange?: (stats: RouteMapStats | null) => void;
 };
 
 function getRoutePoints(
@@ -71,6 +79,12 @@ function getRoutePoints(
   dropoffName: string,
   pickupTypeLabel: string,
   dropoffTypeLabel: string,
+  waypoints?: Array<{
+    latitude: number;
+    longitude: number;
+    name: string;
+    typeLabel?: string;
+  }>,
 ): RouteMapPoint[] {
   const points: RouteMapPoint[] = [];
 
@@ -80,6 +94,19 @@ function getRoutePoints(
       name: pickupName,
       typeLabel: pickupTypeLabel,
       kind: "pickup",
+    });
+  }
+
+  if (Array.isArray(waypoints)) {
+    waypoints.forEach((wp, idx) => {
+      if (isValidCoordinatePair(wp.latitude, wp.longitude)) {
+        points.push({
+          latLng: L.latLng(wp.latitude, wp.longitude),
+          name: wp.name,
+          typeLabel: wp.typeLabel || `Stop ${idx + 1}`,
+          kind: "dropoff",
+        });
+      }
     });
   }
 
@@ -177,7 +204,9 @@ export function RideRequestRouteMap({
   straightLineLabel = "Straight-line",
   distanceUnitKm = "km",
   distanceUnitM = "m",
+  waypoints,
   onRouteLoadingChange,
+  onRouteStatsChange,
 }: RideRequestRouteMapProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
@@ -192,6 +221,10 @@ export function RideRequestRouteMap({
   useEffect(() => {
     onRouteLoadingChange?.(routeLoading);
   }, [routeLoading, onRouteLoadingChange]);
+
+  useEffect(() => {
+    onRouteStatsChange?.(routeStats);
+  }, [routeStats, onRouteStatsChange]);
 
   const points = getRoutePoints(
     pickupLatitude,
@@ -240,6 +273,7 @@ export function RideRequestRouteMap({
         dropoffName,
         pickupTypeLabel,
         dropoffTypeLabel,
+        waypoints,
       );
 
       if (markersLayerRef.current) {
@@ -264,20 +298,15 @@ export function RideRequestRouteMap({
         markersLayerRef.current.addLayer(marker);
       }
 
-      if (nextPoints.length === 2) {
-        const [pickupPoint, dropoffPoint] = nextPoints;
+      if (nextPoints.length >= 2) {
         setRouteLoading(true);
 
         try {
-          const drivingRoute = await fetchDrivingRoute(
-            {
-              latitude: pickupPoint.latLng.lat,
-              longitude: pickupPoint.latLng.lng,
-            },
-            {
-              latitude: dropoffPoint.latLng.lat,
-              longitude: dropoffPoint.latLng.lng,
-            },
+          const drivingRoute = await fetchMultiStopRoute(
+            nextPoints.map((p) => ({
+              latitude: p.latLng.lat,
+              longitude: p.latLng.lng,
+            })),
             abortController.signal,
           );
 
@@ -323,17 +352,22 @@ export function RideRequestRouteMap({
             },
           ).addTo(map);
 
+          let totalStraightMeters = 0;
+          for (let i = 0; i < nextPoints.length - 1; i++) {
+            totalStraightMeters += haversineDistanceMeters(
+              {
+                latitude: nextPoints[i]!.latLng.lat,
+                longitude: nextPoints[i]!.latLng.lng,
+              },
+              {
+                latitude: nextPoints[i + 1]!.latLng.lat,
+                longitude: nextPoints[i + 1]!.latLng.lng,
+              },
+            );
+          }
+
           setRouteStats({
-            distanceMeters: haversineDistanceMeters(
-              {
-                latitude: pickupPoint.latLng.lat,
-                longitude: pickupPoint.latLng.lng,
-              },
-              {
-                latitude: dropoffPoint.latLng.lat,
-                longitude: dropoffPoint.latLng.lng,
-              },
-            ),
+            distanceMeters: totalStraightMeters,
             durationSeconds: null,
             isStraightLine: true,
           });
@@ -367,6 +401,7 @@ export function RideRequestRouteMap({
     pickupName,
     pickupTypeLabel,
     visible,
+    waypoints,
     locale,
     distanceUnitKm,
     distanceUnitM,
