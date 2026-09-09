@@ -1196,6 +1196,7 @@ router.patch(
         scheduledReturnAt: parsed.data.scheduledReturnAt,
         passengerCount: parsed.data.passengerCount,
         notes: parsed.data.notes,
+        legs: parsed.data.legs,
       });
 
       if (!result) {

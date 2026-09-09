@@ -53,16 +53,34 @@ export async function getRideRequestLegs(rideRequestId: string) {
   });
 }
 
-export function computeTotalLegsDistance(legs: Array<{ actualDistanceKm?: unknown; estimatedDistanceKm?: unknown }>) {
+export function computeTotalLegsDistance(
+  legs: Array<{
+    actualDistanceKm?: unknown;
+    estimatedDistanceKm?: unknown;
+    actual_distance_km?: unknown;
+    estimated_distance_km?: unknown;
+  }>,
+) {
   return legs.reduce((total, leg) => {
-    const val = Number(leg.actualDistanceKm ?? leg.estimatedDistanceKm ?? 0);
+    const actual = Number((leg as any).actualDistanceKm ?? (leg as any).actual_distance_km ?? 0);
+    const estimated = Number((leg as any).estimatedDistanceKm ?? (leg as any).estimated_distance_km ?? 0);
+    const val = actual > 0 ? actual : estimated;
     return total + (isNaN(val) ? 0 : val);
   }, 0);
 }
 
-export function computeTotalLegsWaitMinutes(legs: Array<{ actualWaitMinutes?: unknown; plannedWaitMinutes?: unknown }>) {
+export function computeTotalLegsWaitMinutes(
+  legs: Array<{
+    actualWaitMinutes?: unknown;
+    plannedWaitMinutes?: unknown;
+    actual_wait_minutes?: unknown;
+    planned_wait_minutes?: unknown;
+  }>,
+) {
   return legs.reduce((total, leg) => {
-    const val = Number(leg.actualWaitMinutes ?? leg.plannedWaitMinutes ?? 0);
+    const actual = Number((leg as any).actualWaitMinutes ?? (leg as any).actual_wait_minutes ?? 0);
+    const planned = Number((leg as any).plannedWaitMinutes ?? (leg as any).planned_wait_minutes ?? 0);
+    const val = actual > 0 ? actual : planned;
     return total + (isNaN(val) ? 0 : val);
   }, 0);
 }

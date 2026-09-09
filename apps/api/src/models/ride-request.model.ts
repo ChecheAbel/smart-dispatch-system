@@ -893,10 +893,42 @@ export async function updateRideRequestForUser(
     return { error: "This ride request can no longer be edited." as const };
   }
 
-  return prisma.rideRequest.update({
-    where: { id },
-    data: buildRideRequestData(input),
-    include: rideRequestInclude,
+  if (input.legs === undefined) {
+    return prisma.rideRequest.update({
+      where: { id },
+      data: buildRideRequestData(input),
+      include: rideRequestInclude,
+    });
+  }
+
+  return prisma.$transaction(async (tx) => {
+    await tx.rideRequestLeg.deleteMany({
+      where: { rideRequestId: id },
+    });
+
+    if (input.legs && input.legs.length > 0) {
+      await tx.rideRequestLeg.createMany({
+        data: input.legs.map((leg, index) => ({
+          rideRequestId: id,
+          sequenceOrder: leg.sequenceOrder ?? index + 1,
+          pickupAddress: leg.pickupAddress,
+          pickupLatitude: toDecimal(leg.pickupLatitude),
+          pickupLongitude: toDecimal(leg.pickupLongitude),
+          dropoffAddress: leg.dropoffAddress,
+          dropoffLatitude: toDecimal(leg.dropoffLatitude),
+          dropoffLongitude: toDecimal(leg.dropoffLongitude),
+          scheduledAt: leg.scheduledAt ?? null,
+          plannedWaitMinutes: leg.plannedWaitMinutes ?? 0,
+          stopPurpose: leg.stopPurpose?.trim() || null,
+        })),
+      });
+    }
+
+    return tx.rideRequest.update({
+      where: { id },
+      data: buildRideRequestData(input),
+      include: rideRequestInclude,
+    });
   });
 }
 

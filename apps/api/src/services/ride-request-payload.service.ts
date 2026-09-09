@@ -38,7 +38,9 @@ export type ParsedRideRequestPayload = {
 };
 
 function parseLegs(value: unknown) {
-  if (!Array.isArray(value) || value.length === 0) return undefined;
+  if (value === undefined) return undefined;
+  if (!Array.isArray(value)) return undefined;
+  if (value.length === 0) return [];
 
   const parsed = [];
   for (let i = 0; i < value.length; i++) {

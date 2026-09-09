@@ -56,6 +56,11 @@ import {
 } from "@/translations";
 import { cn } from "@/lib/utils";
 import {
+  ItineraryLegsBuilder,
+  convertStopsToLegsPayload,
+  type ItineraryStopItem,
+} from "@/components/shared/itinerary-legs-builder";
+import {
   buildLocationAddress,
   buildRideRequestNotes,
   buildVehicleTypeLabel,
@@ -194,6 +199,18 @@ export function EditRideRequestSheet({
   const [dropoffLocations, setDropoffLocations] = useState<RideRequestLocationOption[]>([]);
   const [routePreviewOpen, setRoutePreviewOpen] = useState(true);
   const [routeCalculating, setRouteCalculating] = useState(false);
+  const [itineraryStops, setItineraryStops] = useState<ItineraryStopItem[]>([]);
+
+  const routeWaypoints = useMemo(() => {
+    return itineraryStops
+      .filter((s) => isValidCoordinatePair(s.latitude ?? undefined, s.longitude ?? undefined))
+      .map((s, idx) => ({
+        latitude: s.latitude!,
+        longitude: s.longitude!,
+        name: s.address || `Stop #${idx + 1}`,
+        typeLabel: s.stopPurpose,
+      }));
+  }, [itineraryStops]);
 
   // Return window is only for at-contract-end (service-window) contracts, not per-trip.
   const showReturnSchedule = request?.contract?.billing_interval === "at_contract_end";
@@ -248,6 +265,24 @@ export function EditRideRequestSheet({
         const returnSchedule = splitScheduledDateTime(currentRequest.scheduled_return_at);
         setReturnDate(returnSchedule.date);
         setReturnTime(returnSchedule.time);
+
+        if (currentRequest.legs && currentRequest.legs.length > 0) {
+          setItineraryStops(
+            currentRequest.legs.map((leg, idx) => ({
+              id: leg.id || `stop-${idx}`,
+              address: leg.dropoff_address || leg.pickup_address,
+              locationId: null,
+              latitude: leg.dropoff_latitude ?? leg.pickup_latitude,
+              longitude: leg.dropoff_longitude ?? leg.pickup_longitude,
+              useCustom: true,
+              plannedWaitMinutes: leg.planned_wait_minutes ?? 0,
+              stopPurpose: leg.stop_purpose ?? "meeting",
+            })),
+          );
+        } else {
+          setItineraryStops([]);
+        }
+
         setRoutePreviewOpen(true);
       } catch (error) {
         if (!cancelled) {
@@ -568,6 +603,13 @@ export function EditRideRequestSheet({
           ? scheduledReturnAt?.toISOString() ?? null
           : request.scheduled_return_at,
         notes,
+        legs: convertStopsToLegsPayload(
+          pickupAddress,
+          dropoffAddress,
+          itineraryStops,
+          pickupCoordinates,
+          dropoffCoordinates,
+        ),
       });
 
       showSuccessToast({ title: historyCopy.toast.updated });
@@ -865,6 +907,18 @@ export function EditRideRequestSheet({
                       )}
                     </div>
 
+                    <ItineraryLegsBuilder
+                      stops={itineraryStops}
+                      onChange={setItineraryStops}
+                      pickupAddress={form.pickupAddress}
+                      dropoffAddress={form.dropoffAddress}
+                      pickupCoordinates={pickupCoordinates}
+                      dropoffCoordinates={dropoffCoordinates}
+                      savedLocations={pickupLocations}
+                      locale={locale}
+                      disabled={submitting}
+                    />
+
                     {hasRouteCoordinates ? (
                       <Collapsible
                         open={routePreviewOpen}
@@ -907,6 +961,7 @@ export function EditRideRequestSheet({
                             pickupLongitude={pickupCoordinates.longitude}
                             dropoffLatitude={dropoffCoordinates.latitude}
                             dropoffLongitude={dropoffCoordinates.longitude}
+                            waypoints={routeWaypoints}
                             pickupName={form.pickupAddress || historyCopy.detailPickupPoint}
                             dropoffName={form.dropoffAddress || historyCopy.detailDropoffPoint}
                             pickupTypeLabel={historyCopy.detailPickupPoint}

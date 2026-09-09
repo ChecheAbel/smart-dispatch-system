@@ -4,7 +4,7 @@ import { findActiveContractById } from "../models/contract.model";
 import { findFarePlanById, resolveFarePlan } from "../models/fare-plan.model";
 import {
   calculateFareAmount,
-  computePickupWaitingMinutes,
+  computeTripWaitingMinutes,
   computeTripDurationMinutes,
   resolveTripDistanceKm,
   type FarePlanRates,
@@ -31,6 +31,12 @@ type RideForBilling = {
   waitingMinutes?: number | null;
   billableAmount: Prisma.Decimal | null;
   billableCurrency: string | null;
+  legs?: Array<{
+    actualDistanceKm?: unknown;
+    estimatedDistanceKm?: unknown;
+    actualWaitMinutes?: unknown;
+    plannedWaitMinutes?: unknown;
+  }>;
 };
 
 export type TripBillingSnapshot = {
@@ -103,7 +109,7 @@ export async function computeTripBillingSnapshot(
   const durationMinutes =
     ride.durationMinutes ??
     computeTripDurationMinutes(ride.startedAt, ride.completedAt ?? new Date());
-  const waitingMinutes = computePickupWaitingMinutes(ride.scheduledAt, ride.startedAt);
+  const waitingMinutes = computeTripWaitingMinutes(ride.scheduledAt, ride.startedAt, ride.legs);
 
   const calculated = calculateFareAmount(toFarePlanRates(plan), {
     distanceKm,
@@ -146,6 +152,7 @@ export async function ensureTripBillingSnapshot(
   const client = options?.client ?? prisma;
   const ride = await client.rideRequest.findUnique({
     where: { id: rideRequestId },
+    include: { legs: true },
   });
 
   if (!ride || !ride.contractId) {

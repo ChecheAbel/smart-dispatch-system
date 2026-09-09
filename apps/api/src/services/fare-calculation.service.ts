@@ -1,5 +1,6 @@
 import type { PricingModel } from "@smart-dispatch/types";
 import type { Prisma } from "../generated/prisma";
+import { computeTotalLegsDistance, computeTotalLegsWaitMinutes } from "./itinerary-leg.service";
 
 const EARTH_RADIUS_KM = 6371;
 
@@ -95,6 +96,16 @@ export function computePickupWaitingMinutes(
   return Math.ceil(diffMs / 60_000);
 }
 
+export function computeTripWaitingMinutes(
+  scheduledAt: Date | null | undefined,
+  startedAt: Date | null | undefined,
+  legs?: Array<{ actualWaitMinutes?: unknown; plannedWaitMinutes?: unknown }>,
+) {
+  const pickupWaiting = computePickupWaitingMinutes(scheduledAt, startedAt);
+  const legsWaiting = Array.isArray(legs) && legs.length > 0 ? computeTotalLegsWaitMinutes(legs) : 0;
+  return pickupWaiting + legsWaiting;
+}
+
 export function computeBillableWaitingMinutes(
   waitingMinutes: number,
   freeWaitingMinutes: number | null | undefined,
@@ -108,7 +119,15 @@ export function resolveTripDistanceKm(ride: {
   pickupLongitude: Prisma.Decimal | null;
   dropoffLatitude: Prisma.Decimal | null;
   dropoffLongitude: Prisma.Decimal | null;
+  legs?: Array<{ actualDistanceKm?: unknown; estimatedDistanceKm?: unknown }>;
 }) {
+  if (Array.isArray(ride.legs) && ride.legs.length > 0) {
+    const legsDistance = computeTotalLegsDistance(ride.legs);
+    if (legsDistance > 0) {
+      return legsDistance;
+    }
+  }
+
   if (
     ride.pickupLatitude == null ||
     ride.pickupLongitude == null ||
