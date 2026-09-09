@@ -1,5 +1,7 @@
-import { MyContractsPage } from "@/app/dashboard/my-contracts/_components/my-contracts-page";
+import { redirect } from "next/navigation";
+import { USER_DASHBOARD_PATH } from "@/lib/auth-paths";
 
 export default function Page() {
-  return <MyContractsPage />;
+  redirect(USER_DASHBOARD_PATH);
 }
+

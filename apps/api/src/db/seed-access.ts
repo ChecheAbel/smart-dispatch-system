@@ -93,9 +93,13 @@ const REMOVED_MENU_SLUGS = [
   "customer-requests",
   "drivers-applications",
   "applications",
+  "customer-contracts",
 ] as const;
 
-const REMOVED_MENU_PATHS = ["/admin/drivers/applications"] as const;
+const REMOVED_MENU_PATHS = [
+  "/admin/drivers/applications",
+  "/dashboard/my-contracts",
+] as const;
 
 const REMOVED_PERMISSION_SLUGS = [
   "permissions.read",
@@ -647,17 +651,6 @@ const DEFAULT_MENUS = [
     ],
   },
   {
-    slug: "customer-contracts",
-    path: "/dashboard/my-contracts",
-    icon: "file-text",
-    sortOrder: 74,
-    parentSlug: null,
-    translations: [
-      { locale: "en", label: "My Contracts" },
-      { locale: "am", label: "ኮንትራቶቼ" },
-    ],
-  },
-  {
     slug: "customer-invoices",
     path: "/dashboard/my-invoices",
     icon: "receipt-text",
@@ -986,6 +979,16 @@ async function seedUserRolePermissions() {
   const userRole = await prisma.role.findUnique({ where: { slug: "user" } });
   if (!userRole) return;
 
+  const contractPerm = await prisma.permission.findUnique({ where: { slug: "customer_contracts.read" } });
+  if (contractPerm) {
+    await prisma.rolePermission.deleteMany({
+      where: {
+        roleId: userRole.id,
+        permissionId: contractPerm.id,
+      },
+    });
+  }
+
   const permissions = await prisma.permission.findMany({
     where: {
       slug: {
@@ -993,7 +996,6 @@ async function seedUserRolePermissions() {
           "customer_dashboard.read",
           "customer_requests.read",
           "customer_requests.write",
-          "customer_contracts.read",
           "customer_invoices.read",
           "customer_complaints.read",
           "customer_complaints.write",
