@@ -3,6 +3,7 @@ import type { DbInvoice } from "../models/invoice.model";
 import { formatContractDate } from "../models/contract.model";
 import { parseFarePlanTranslationsMap } from "../types/fare-plan-translations";
 import { DEFAULT_LOCALE, normalizeLocale } from "../utils/locale";
+import { toPublicRideRequestLeg } from "./ride-request.mapper";
 import {
   computeLatePaymentPenalty,
   resolveLatePaymentPolicy,
@@ -71,6 +72,9 @@ function toPublicLineItem(
             model: item.rideRequest.assignedVehicle.model,
           }
         : null,
+      legs: (item.rideRequest as any).legs
+        ? (item.rideRequest as any).legs.map(toPublicRideRequestLeg)
+        : undefined,
     },
     created_at: item.createdAt.toISOString(),
   };

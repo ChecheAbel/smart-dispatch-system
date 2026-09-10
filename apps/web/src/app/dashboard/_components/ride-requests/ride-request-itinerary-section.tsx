@@ -7,13 +7,18 @@ import { adminHeadingClass } from "@/lib/admin-theme";
 import { formatCoordinatePair, isValidCoordinatePair } from "@/lib/map/coordinates";
 import { cn } from "@/lib/utils";
 
+import { RideRequestLegActionMenu } from "./ride-request-leg-action-menu";
+
 interface RideRequestItinerarySectionProps {
+  rideRequestId?: string;
   legs: RideRequestLeg[];
   pickupAddress: string;
   dropoffAddress: string;
   pickupCoordinates?: { latitude?: number | null; longitude?: number | null };
   dropoffCoordinates?: { latitude?: number | null; longitude?: number | null };
   locale?: string;
+  canManageLegs?: boolean;
+  onLegUpdated?: () => void;
 }
 
 const PURPOSE_CONFIG: Record<
@@ -58,12 +63,15 @@ function getLegStatusPill(status: RideRequestStatus, locale = "en") {
 }
 
 export function RideRequestItinerarySection({
+  rideRequestId,
   legs,
   pickupAddress,
   dropoffAddress,
   pickupCoordinates,
   dropoffCoordinates,
   locale = "en",
+  canManageLegs = false,
+  onLegUpdated,
 }: RideRequestItinerarySectionProps) {
   const isAm = locale === "am";
 
@@ -153,10 +161,20 @@ export function RideRequestItinerarySection({
                     </span>
                   </div>
 
-                  <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium", statusPill.badgeClass)}>
-                    <span className={cn("size-1.5 rounded-full", statusPill.dotClass)} />
-                    {statusPill.label}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium", statusPill.badgeClass)}>
+                      <span className={cn("size-1.5 rounded-full", statusPill.dotClass)} />
+                      {statusPill.label}
+                    </span>
+                    {canManageLegs && rideRequestId ? (
+                      <RideRequestLegActionMenu
+                        rideRequestId={rideRequestId}
+                        leg={leg}
+                        locale={locale}
+                        onSuccess={onLegUpdated ?? (() => {})}
+                      />
+                    ) : null}
+                  </div>
                 </div>
 
                 {/* Stop Location */}
@@ -180,15 +198,15 @@ export function RideRequestItinerarySection({
                     </span>
                   </div>
 
-                  {leg.actual_wait_minutes > 0 && (
-                    <div className="flex items-center gap-1 rounded-md bg-sky-50 px-2 py-0.5 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300">
-                      <Timer className="size-3 text-sky-500" />
+                  {typeof leg.actual_wait_minutes === "number" && leg.actual_wait_minutes > 0 ? (
+                    <div className="flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                      <Timer className="size-3 text-emerald-600" />
                       <span>
-                        {isAm ? "ትክክለኛ ቆይታ፡" : "Actual:"}{" "}
+                        {isAm ? "ትክክለኛ ቆይታ፡" : "Actual wait:"}{" "}
                         <strong>{leg.actual_wait_minutes} {isAm ? "ደቂቃ" : "min"}</strong>
                       </span>
                     </div>
-                  )}
+                  ) : null}
 
                   {leg.estimated_distance_km ? (
                     <div className="flex items-center gap-1 rounded-md bg-slate-100 px-2 py-0.5 dark:bg-white/5">

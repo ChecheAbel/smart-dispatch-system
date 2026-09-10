@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import {
   Car,
   Calendar,
-  MapPin,
   User,
   ArrowLeft,
   ChevronRight,
@@ -47,15 +46,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { LOCALE_OPTIONS, type SupportedLocale } from "@/lib/locale";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
-import dynamic from "next/dynamic";
-
-const LazyVehicleLiveMap = dynamic(
-  () =>
-    import("@/components/book/vehicle-live-map").then(
-      (mod) => mod.VehicleLiveMap,
-    ),
-  { ssr: false },
-);
 
 // Localized translations for the detail page
 const COPY = {
@@ -78,8 +68,6 @@ const COPY = {
     overview: "Vehicle Overview / Notes",
     guaranteedService: "Corporate Managed Fleet",
     guaranteedServiceDesc: "This vehicle is corporate-insured, maintained regularly, and operated by professional smart dispatchers.",
-    liveLocation: "Live Location Tracking",
-    liveLocationDesc: "Current simulated GPS position of this VIP vehicle.",
   },
   am: {
     backToCatalog: "ወደ ካታሎግ ይመለሱ",
@@ -100,30 +88,8 @@ const COPY = {
     overview: "የተሽከርካሪ አጠቃላይ መግለጫ / ማስታወሻዎች",
     guaranteedService: "በድርጅት የሚተዳደር መርከቦች",
     guaranteedServiceDesc: "ይህ ተሽከርካሪ በድርጅት የተመዘገበ፣ በየጊዜው የሚጠገን እና በባለሙያ መላኪያዎች የሚሰራ ነው።",
-    liveLocation: "የቀጥታ መገኛ መከታተያ",
-    liveLocationDesc: "የዚህ ቪአይፒ ተሽከርካሪ ወቅታዊ የጂፒኤስ አቀማመጥ።",
   },
 };
-
-function getVehicleMockLocation(vehicleId: string) {
-  // deterministic mock locations around Addis Ababa center for VIP fleets
-  const locations = [
-    { latitude: 9.0234, longitude: 38.7504, name: "Bole Airport VIP Terminal" },
-    { latitude: 9.0105, longitude: 38.7612, name: "Kazanchis Diplomatic Quarter" },
-    { latitude: 9.0302, longitude: 38.7421, name: "Piazza Government Offices" },
-    { latitude: 8.9942, longitude: 38.7305, name: "Sarbet Corporate Hub" },
-    { latitude: 9.0187, longitude: 38.7523, name: "Meskel Square Fleet Depot" },
-    { latitude: 9.0289, longitude: 38.7891, name: "CMC Executive Residence Block" },
-    { latitude: 9.0112, longitude: 38.7812, name: "Megenagna Transit Gateway" },
-  ];
-
-  let hash = 0;
-  for (let i = 0; i < vehicleId.length; i++) {
-    hash = vehicleId.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const index = Math.abs(hash) % locations.length;
-  return locations[index];
-}
 
 function VehicleDetailPageContent({ id }: { id: string }) {
   const router = useRouter();
@@ -480,26 +446,6 @@ function VehicleDetailPageContent({ id }: { id: string }) {
               </div>
             </div>
 
-            {(() => {
-              const mockLoc = getVehicleMockLocation(vehicle.id);
-              return (
-                <div className="rounded-2xl border border-slate-200 bg-white p-5 text-left shadow-sm dark:border-white/10 dark:bg-[#171c24] dark:shadow-black/25 sm:p-6">
-                  <h3 className="mb-2 flex items-center gap-2 text-sm font-extrabold tracking-wider text-[#1C3A34] uppercase dark:text-[#eef1f5]">
-                    <MapPin className="h-4 w-4 animate-bounce text-[#8f7d45] dark:text-[#C9B87A]" />
-                    {copy.liveLocation}
-                  </h3>
-                  <p className="mb-4 text-xs leading-relaxed text-slate-500 dark:text-[#8f99a6]">
-                    {copy.liveLocationDesc} ({mockLoc.name})
-                  </p>
-                  <LazyVehicleLiveMap
-                    latitude={mockLoc.latitude}
-                    longitude={mockLoc.longitude}
-                    popupText={`${vehicle.make} ${vehicle.model} (${vehicle.plate_number})`}
-                    height={200}
-                  />
-                </div>
-              );
-            })()}
 
             <div className="flex items-start gap-4 rounded-2xl border border-[#1C3A34]/10 bg-[#1C3A34]/5 p-5 dark:border-[#C9B87A]/20 dark:bg-[#C9B87A]/[0.06]">
               <div className="shrink-0 rounded-xl bg-[#1C3A34] p-2.5 text-white dark:bg-[#C9B87A] dark:text-[#151a21]">

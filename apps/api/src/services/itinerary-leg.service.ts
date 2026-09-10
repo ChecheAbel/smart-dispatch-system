@@ -1,5 +1,15 @@
 import { prisma } from "../db/prisma";
 import type { RideRequestStatus } from "@smart-dispatch/types";
+import {
+  findRideRequestById,
+  updateRideRequestStatusAdmin,
+} from "../models/ride-request.model";
+import { toPublicRideRequestLeg } from "../mappers/ride-request.mapper";
+import {
+  broadcastRealtimeLegEvent,
+  broadcastRealtimeTripEvent,
+} from "../websocket/realtime.socket";
+import { ensureTripBillingSnapshot } from "./trip-billing.service";
 
 export type UpdateLegStatusInput = {
   rideRequestId: string;
@@ -40,10 +50,78 @@ export async function updateLegStatus(input: UpdateLegStatusInput) {
     data.actualDistanceKm = Math.max(0, input.actualDistanceKm);
   }
 
-  return prisma.rideRequestLeg.update({
+  const updatedLeg = await prisma.rideRequestLeg.update({
     where: { id: input.legId },
     data,
   });
+
+  // Trip State Machine Synchronization (Item 3)
+  const parent = await findRideRequestById(input.rideRequestId);
+  if (parent) {
+    if (input.status === "in_progress") {
+      if (["pending", "assigned", "confirmed"].includes(parent.status)) {
+        await updateRideRequestStatusAdmin(parent.id, "in_progress");
+      }
+    } else if (input.status === "completed") {
+      const allLegs = await prisma.rideRequestLeg.findMany({
+        where: { rideRequestId: input.rideRequestId },
+        orderBy: { sequenceOrder: "asc" },
+      });
+      const allFinished = allLegs.every(
+        (l) => l.status === "completed" || l.status === "cancelled",
+      );
+      if (allFinished && parent.status !== "completed") {
+        const totalDistance = computeTotalLegsDistance(allLegs);
+        const totalWaitMinutes = computeTotalLegsWaitMinutes(allLegs);
+
+        await updateRideRequestStatusAdmin(parent.id, "completed");
+
+        if (totalDistance > 0 || totalWaitMinutes > 0) {
+          await prisma.rideRequest.update({
+            where: { id: parent.id },
+            data: {
+              ...(totalDistance > 0 ? { distanceKm: totalDistance } : {}),
+              ...(totalWaitMinutes > 0 ? { waitingMinutes: totalWaitMinutes } : {}),
+            },
+          });
+        }
+
+        if (parent.contractId) {
+          try {
+            await ensureTripBillingSnapshot(parent.id, { recalculate: true });
+          } catch (err) {
+            console.warn("Failed to ensure billing snapshot for multi-leg completion:", err);
+          }
+        }
+      }
+    }
+  }
+
+  const freshParent = await findRideRequestById(input.rideRequestId);
+
+  // Real-time Broadcasting (Item 4)
+  try {
+    broadcastRealtimeLegEvent({
+      requesterUserId: freshParent?.requesterUserId ?? parent?.requesterUserId,
+      driverUserId: freshParent?.assignedDriverUserId ?? parent?.assignedDriverUserId,
+      payload: {
+        ride_request_id: input.rideRequestId,
+        leg: toPublicRideRequestLeg(updatedLeg),
+        parent_status: freshParent?.status ?? parent?.status ?? "pending",
+      },
+    });
+
+    if (freshParent && freshParent.assignedDriverUserId) {
+      broadcastRealtimeTripEvent(freshParent.assignedDriverUserId, {
+        type: "updated",
+        data: freshParent,
+      });
+    }
+  } catch (socketErr) {
+    console.warn("Failed to broadcast realtime leg event:", socketErr);
+  }
+
+  return updatedLeg;
 }
 
 export async function getRideRequestLegs(rideRequestId: string) {

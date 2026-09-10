@@ -17,12 +17,14 @@ import {
   createBulkRideRequests,
   findRideRequestForUser,
   findRideRequestForDriver,
+  findRideRequestById,
   listRideRequestsForDriver,
   listRideRequestsForUser,
   rateDriverForRideRequest,
   updateRideRequestForUser,
   updateRideRequestStatusAdmin,
 } from "../models/ride-request.model";
+import { userHasPermission } from "../models/permission.model";
 import { listVehicles, updateVehicle } from "../models/vehicle.model";
 import { toPublicVehicle } from "../mappers/vehicle.mapper";
 import { toPublicVehicleMaintenanceLog, toPublicVehicleFuelLog, toPublicVehicleFuelLogs } from "../mappers/vehicle-ops.mapper";
@@ -1345,11 +1347,27 @@ router.post(
 
 router.patch(
   "/:id/legs/:legId/status",
-  requirePermission("driver.trip"),
+  requirePermission("driver.trip", "ride_requests.write"),
   auditMutations(),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { id, legId } = req.params;
+      const userId = req.user?.id;
+      if (!userId) {
+        return sendError(res, "Unauthorized.", 401);
+      }
+
+      const hasAdminWrite = await userHasPermission(userId, "ride_requests.write");
+      if (!hasAdminWrite) {
+        const existing = await findRideRequestById(id);
+        if (!existing) {
+          return sendError(res, "Ride request not found.", 404);
+        }
+        if (existing.assignedDriverUserId !== userId) {
+          return sendError(res, "Ride request is not assigned to you.", 403);
+        }
+      }
+
       const status = req.body?.status;
       const actualWaitMinutes =
         typeof req.body?.actual_wait_minutes === "number"

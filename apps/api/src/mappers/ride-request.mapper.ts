@@ -1,5 +1,5 @@
 import type { Prisma } from "../generated/prisma";
-import type { AdminRideRequest, ContractBillingInterval, ContractStatus, RequesterSegment, RideRequest } from "@smart-dispatch/types";
+import type { AdminRideRequest, ContractBillingInterval, ContractStatus, RequesterSegment, RideRequest, RideRequestLeg } from "@smart-dispatch/types";
 import {
   parseVehicleClassTranslationsMap,
   vehicleClassTranslationsMapToArray,
@@ -449,30 +449,32 @@ export function toPublicRideRequest(
       rideRequest.status === "pending"
         ? getRideRequestEditDeadline(rideRequest.createdAt).toISOString()
         : null,
-    legs: rideRequest.legs
-      ? rideRequest.legs.map((leg) => ({
-          id: leg.id,
-          ride_request_id: leg.rideRequestId,
-          sequence_order: leg.sequenceOrder,
-          pickup_address: leg.pickupAddress,
-          pickup_latitude: decimalToNumber(leg.pickupLatitude),
-          pickup_longitude: decimalToNumber(leg.pickupLongitude),
-          dropoff_address: leg.dropoffAddress,
-          dropoff_latitude: decimalToNumber(leg.dropoffLatitude),
-          dropoff_longitude: decimalToNumber(leg.dropoffLongitude),
-          scheduled_at: leg.scheduledAt?.toISOString() ?? null,
-          estimated_distance_km: decimalToNumber(leg.estimatedDistanceKm),
-          actual_distance_km: decimalToNumber(leg.actualDistanceKm),
-          planned_wait_minutes: leg.plannedWaitMinutes ?? 0,
-          actual_wait_minutes: leg.actualWaitMinutes ?? 0,
-          stop_purpose: leg.stopPurpose,
-          status: leg.status,
-          started_at: leg.startedAt?.toISOString() ?? null,
-          completed_at: leg.completedAt?.toISOString() ?? null,
-          created_at: leg.createdAt?.toISOString(),
-          updated_at: leg.updatedAt?.toISOString(),
-        }))
-      : undefined,
+    legs: rideRequest.legs ? rideRequest.legs.map(toPublicRideRequestLeg) : undefined,
+  };
+}
+
+export function toPublicRideRequestLeg(leg: any): RideRequestLeg {
+  return {
+    id: leg.id,
+    ride_request_id: leg.rideRequestId,
+    sequence_order: leg.sequenceOrder,
+    pickup_address: leg.pickupAddress,
+    pickup_latitude: decimalToNumber(leg.pickupLatitude),
+    pickup_longitude: decimalToNumber(leg.pickupLongitude),
+    dropoff_address: leg.dropoffAddress,
+    dropoff_latitude: decimalToNumber(leg.dropoffLatitude),
+    dropoff_longitude: decimalToNumber(leg.dropoffLongitude),
+    scheduled_at: leg.scheduledAt instanceof Date ? leg.scheduledAt.toISOString() : (leg.scheduledAt ?? null),
+    estimated_distance_km: decimalToNumber(leg.estimatedDistanceKm),
+    actual_distance_km: decimalToNumber(leg.actualDistanceKm),
+    planned_wait_minutes: leg.plannedWaitMinutes ?? 0,
+    actual_wait_minutes: leg.actualWaitMinutes ?? 0,
+    stop_purpose: leg.stopPurpose,
+    status: leg.status,
+    started_at: leg.startedAt instanceof Date ? leg.startedAt.toISOString() : (leg.startedAt ?? null),
+    completed_at: leg.completedAt instanceof Date ? leg.completedAt.toISOString() : (leg.completedAt ?? null),
+    created_at: leg.createdAt instanceof Date ? leg.createdAt.toISOString() : leg.createdAt,
+    updated_at: leg.updatedAt instanceof Date ? leg.updatedAt.toISOString() : leg.updatedAt,
   };
 }
 

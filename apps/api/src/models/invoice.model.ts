@@ -112,6 +112,31 @@ const invoiceInclude = {
               model: true,
             },
           },
+          legs: {
+            orderBy: { sequenceOrder: "asc" as const },
+            select: {
+              id: true,
+              rideRequestId: true,
+              sequenceOrder: true,
+              pickupAddress: true,
+              pickupLatitude: true,
+              pickupLongitude: true,
+              dropoffAddress: true,
+              dropoffLatitude: true,
+              dropoffLongitude: true,
+              scheduledAt: true,
+              estimatedDistanceKm: true,
+              actualDistanceKm: true,
+              plannedWaitMinutes: true,
+              actualWaitMinutes: true,
+              stopPurpose: true,
+              status: true,
+              startedAt: true,
+              completedAt: true,
+              createdAt: true,
+              updatedAt: true,
+            },
+          },
         },
       },
       farePlan: {
@@ -428,6 +453,11 @@ export async function findUnbilledContractTrips(input: {
       ],
     },
     orderBy: [{ completedAt: "asc" }, { updatedAt: "asc" }, { createdAt: "asc" }],
+    include: {
+      legs: {
+        orderBy: { sequenceOrder: "asc" },
+      },
+    },
   });
 }
 

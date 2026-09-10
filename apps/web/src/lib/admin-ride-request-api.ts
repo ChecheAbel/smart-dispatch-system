@@ -1,4 +1,4 @@
-import type { AdminRideRequest, RideRequestStatus, Vehicle } from "@smart-dispatch/types";
+import type { AdminRideRequest, RideRequestLeg, RideRequestStatus, Vehicle } from "@smart-dispatch/types";
 import { apiClient } from "./api-client";
 import { unwrapApiResponse, unwrapPaginatedApiResponse } from "./api-response";
 
@@ -111,4 +111,22 @@ export async function updateAdminRideRequestStatus(
     { params: { locale: options.locale } },
   );
   return unwrapApiResponse<{ ride_request: AdminRideRequest }>(data).ride_request;
+}
+
+export type UpdateRideRequestLegStatusInput = {
+  status: RideRequestStatus;
+  actual_wait_minutes?: number;
+  actual_distance_km?: number;
+};
+
+export async function updateRideRequestLegStatus(
+  requestId: string,
+  legId: string,
+  input: UpdateRideRequestLegStatusInput,
+) {
+  const { data } = await apiClient.patch(
+    `/api/ride-requests/${requestId}/legs/${legId}/status`,
+    input,
+  );
+  return unwrapApiResponse<{ leg: RideRequestLeg }>(data).leg;
 }

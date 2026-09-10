@@ -279,6 +279,22 @@ export function AdminRideRequestReviewSheet({
           segmentLabels: copy.review.segment,
         }}
         onOpenChange={(next) => !isBusy && onOpenChange(next)}
+        canManageLegs={
+          canWrite &&
+          request != null &&
+          ["pending", "assigned", "confirmed", "in_progress"].includes(request.status)
+        }
+        onLegUpdated={async () => {
+          if (requestId) {
+            try {
+              const reloaded = await fetchAdminRideRequest(requestId, locale);
+              setRequest(reloaded);
+              onSuccess({ status: reloaded.status });
+            } catch {
+              // ignore
+            }
+          }
+        }}
         dispatchPanel={
           request ? (
             <div className="space-y-4">

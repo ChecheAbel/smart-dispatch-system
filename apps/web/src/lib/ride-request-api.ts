@@ -124,4 +124,6 @@ export async function rateRideRequestDriver(
   return unwrapApiResponse<{ ride_request: RideRequest }>(data).ride_request;
 }
 
+export { updateRideRequestLegStatus, type UpdateRideRequestLegStatusInput } from "./admin-ride-request-api";
+
 export type { ApiPaginatedResponse };

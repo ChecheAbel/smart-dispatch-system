@@ -205,6 +205,9 @@ export async function generateInvoiceForTrip(rideRequestId: string, options?: { 
         },
       },
       invoiceLineItem: true,
+      legs: {
+        orderBy: { sequenceOrder: "asc" },
+      },
     },
   });
 

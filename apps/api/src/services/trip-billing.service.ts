@@ -216,9 +216,35 @@ export function buildLineItemDescription(ride: {
   pickupAddress: string;
   dropoffAddress: string;
   completedAt: Date | null;
+  legs?: Array<{
+    dropoffAddress?: string | null;
+    plannedWaitMinutes?: number | null;
+    actualWaitMinutes?: number | null;
+    stopPurpose?: string | null;
+  }>;
 }) {
   const dateLabel = ride.completedAt
     ? ride.completedAt.toISOString().slice(0, 10)
     : "Trip";
+
+  if (Array.isArray(ride.legs) && ride.legs.length > 0) {
+    const stopsFormatted = ride.legs
+      .map((leg) => {
+        const address = leg.dropoffAddress?.trim();
+        if (!address) return null;
+        const wait = Number(leg.actualWaitMinutes ?? leg.plannedWaitMinutes ?? 0);
+        const waitSuffix = wait > 0 ? ` [${wait}m wait]` : "";
+        return `${address}${waitSuffix}`;
+      })
+      .filter(Boolean);
+
+    if (stopsFormatted.length > 0) {
+      return `${dateLabel}: ${ride.pickupAddress} → ${stopsFormatted.join(" → ")} → ${ride.dropoffAddress}`.slice(
+        0,
+        500,
+      );
+    }
+  }
+
   return `${dateLabel}: ${ride.pickupAddress} → ${ride.dropoffAddress}`.slice(0, 500);
 }

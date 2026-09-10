@@ -781,7 +781,14 @@ export const RealtimeEvents = {
   NotificationReceived: "notification.received",
   NotificationRead: "notification.read",
   NotificationReadAll: "notification.read_all",
+  LegUpdated: "trip.leg_updated",
 } as const;
+
+export interface RealtimeLegUpdatedPayload {
+  ride_request_id: string;
+  leg: RideRequestLeg;
+  parent_status: RideRequestStatus;
+}
 
 export type RealtimeEntityType = "vehicle";
 
@@ -1563,6 +1570,7 @@ export interface InvoiceLineItemRideSummary {
   status: RideRequestStatus;
   assigned_driver: InvoiceLineItemRideDriverSummary | null;
   assigned_vehicle: InvoiceLineItemRideVehicleSummary | null;
+  legs?: RideRequestLeg[];
 }
 
 export interface InvoiceLineItem {

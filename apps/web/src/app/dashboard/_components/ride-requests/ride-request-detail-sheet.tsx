@@ -114,6 +114,8 @@ type RideRequestDetailSheetProps = {
   dispatchPanel?: ReactNode;
   driverRatingVariant?: "customer" | "admin";
   driverRatingLabels?: RideRequestDriverRatingDisplayLabels;
+  canManageLegs?: boolean;
+  onLegUpdated?: () => void;
 };
 
 function DetailSection({
@@ -241,6 +243,8 @@ export function RideRequestDetailSheet({
   dispatchPanel,
   driverRatingVariant = "customer",
   driverRatingLabels,
+  canManageLegs,
+  onLegUpdated,
 }: RideRequestDetailSheetProps) {
   const historyCopy = getCustomerRequestHistoryMessages(locale as "en" | "am");
   const requestCopy = getCustomerRequestsMessages(locale as "en" | "am");
@@ -507,6 +511,7 @@ export function RideRequestDetailSheet({
           <DetailSection title={historyCopy.detailRouteSection} icon={Route}>
             {request.legs && request.legs.length > 0 ? (
               <RideRequestItinerarySection
+                rideRequestId={request.id}
                 legs={request.legs}
                 pickupAddress={request.pickup_location?.name ?? request.pickup_address}
                 dropoffAddress={request.dropoff_location?.name ?? request.dropoff_address}
@@ -519,6 +524,8 @@ export function RideRequestDetailSheet({
                   longitude: request.dropoff_longitude,
                 }}
                 locale={locale}
+                canManageLegs={canManageLegs}
+                onLegUpdated={onLegUpdated}
               />
             ) : (
               <div className="space-y-2">

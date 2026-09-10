@@ -7,6 +7,7 @@ import {
   type RealtimeSessionReady,
   type VehicleGeofenceStatusPayload,
   type VehicleLocationSnapshot,
+  type RealtimeLegUpdatedPayload,
 } from "@smart-dispatch/types";
 import { toPublicRideRequest } from "../mappers/ride-request.mapper";
 import { toPublicVehicleLocationSnapshot } from "../mappers/vehicle-location.mapper";
@@ -70,6 +71,7 @@ type RealtimeServerEvents = {
   [RealtimeEvents.NotificationReceived]: (data: InAppNotification) => void;
   [RealtimeEvents.NotificationRead]: (data: { id: string }) => void;
   [RealtimeEvents.NotificationReadAll]: () => void;
+  [RealtimeEvents.LegUpdated]: (data: RealtimeLegUpdatedPayload) => void;
 };
 
 let realtimeNamespace: Namespace<
@@ -372,6 +374,24 @@ export function emitNotificationReadAllToUser(userId: string) {
     return;
   }
   realtimeNamespace.to(userRoom(userId)).emit(RealtimeEvents.NotificationReadAll);
+}
+
+export function broadcastRealtimeLegEvent(params: {
+  requesterUserId?: string | null;
+  driverUserId?: string | null;
+  payload: RealtimeLegUpdatedPayload;
+}) {
+  if (!realtimeNamespace) {
+    return;
+  }
+  const { requesterUserId, driverUserId, payload } = params;
+  if (requesterUserId) {
+    realtimeNamespace.to(userRoom(requesterUserId)).emit(RealtimeEvents.LegUpdated, payload);
+  }
+  if (driverUserId) {
+    realtimeNamespace.to(userRoom(driverUserId)).emit(RealtimeEvents.LegUpdated, payload);
+  }
+  realtimeNamespace.emit(RealtimeEvents.LegUpdated, payload);
 }
 
 export function registerRealtimeSocket() {

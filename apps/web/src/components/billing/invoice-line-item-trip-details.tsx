@@ -123,79 +123,19 @@ export function InvoiceLineItemTripDetails({
         ? formatScheduledAt(trip.scheduled_at, locale)
         : "",
     },
-    ...(trip.scheduled_return_at
-      ? [
-          {
-            key: "return",
-            icon: CalendarClock,
-            label: labels.scheduledReturn,
-            value: formatScheduledAt(trip.scheduled_return_at, locale),
-          },
-        ]
-      : []),
-    {
-      key: "started",
-      icon: Route,
-      label: labels.started,
-      value: trip.started_at ? formatScheduledAt(trip.started_at, locale) : "",
-    },
-    {
-      key: "completed",
-      icon: CalendarClock,
-      label: labels.completed,
-      value: trip.completed_at ? formatScheduledAt(trip.completed_at, locale) : "",
-    },
-    {
-      key: "passengers",
-      icon: Users,
-      label: labels.passengers,
-      value: String(trip.passenger_count),
-    },
-    {
-      key: "driver",
-      icon: UserRound,
-      label: labels.driver,
-      value: trip.assigned_driver?.name ?? labels.unassigned,
-    },
-    {
-      key: "vehicle",
-      icon: Car,
-      label: labels.vehicle,
-      value: trip.assigned_vehicle ? formatVehicleLine(trip.assigned_vehicle) : labels.unassigned,
-    },
-    ...(item.fare_plan
-      ? [
-          {
-            key: "fare",
-            icon: Route,
-            label: labels.farePlan,
-            value: item.fare_plan.name,
-          },
-        ]
-      : []),
+    ...(trip.scheduled_return_at ? [{ key: "return", icon: CalendarClock, label: labels.scheduledReturn, value: formatScheduledAt(trip.scheduled_return_at, locale) }] : []),
+    { key: "started", icon: Route, label: labels.started, value: trip.started_at ? formatScheduledAt(trip.started_at, locale) : "" },
+    { key: "completed", icon: CalendarClock, label: labels.completed, value: trip.completed_at ? formatScheduledAt(trip.completed_at, locale) : "" },
+    { key: "passengers", icon: Users, label: labels.passengers, value: String(trip.passenger_count) },
+    { key: "driver", icon: UserRound, label: labels.driver, value: trip.assigned_driver?.name ?? labels.unassigned },
+    { key: "vehicle", icon: Car, label: labels.vehicle, value: trip.assigned_vehicle ? formatVehicleLine(trip.assigned_vehicle) : labels.unassigned },
+    ...(item.fare_plan ? [{ key: "fare", icon: Route, label: labels.farePlan, value: item.fare_plan.name }] : []),
     ...(showBillingMetrics
       ? [
-          {
-            key: "distance",
-            icon: Route,
-            label: labels.distance,
-            value: formatTripMetricDistance(item.distance_km),
-          },
-          {
-            key: "duration",
-            icon: Route,
-            label: labels.duration,
-            value: formatHumanDurationMinutes(item.duration_minutes, locale, labels),
-          },
+          { key: "distance", icon: Route, label: labels.distance, value: formatTripMetricDistance(item.distance_km) },
+          { key: "duration", icon: Route, label: labels.duration, value: formatHumanDurationMinutes(item.duration_minutes, locale, labels) },
           ...(waitingMinutes != null && waitingMinutes > 0
-            ? [
-                {
-                  key: "waiting",
-                  icon: Clock,
-                  label: labels.waiting,
-                  value: formatHumanDurationMinutes(waitingMinutes, locale, labels),
-                },
-              ]
+            ? [{ key: "waiting", icon: Clock, label: labels.waiting, value: formatHumanDurationMinutes(waitingMinutes, locale, labels) }]
             : []),
         ]
       : []),
@@ -260,6 +200,45 @@ export function InvoiceLineItemTripDetails({
           </div>
         </div>
       </div>
+
+      {trip.legs && trip.legs.length > 0 ? (
+        <div className="mt-3 rounded-lg border border-slate-200/60 bg-white/60 p-3 dark:border-border dark:bg-card/50">
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#1C3A34] dark:text-[#C9B87A]">
+            {locale === "am" ? "የጉዞ ማረፊያዎችና የቆይታ ጊዜ" : "Itinerary Stops & Standby Breakdown"} ({trip.legs.length})
+          </p>
+          <div className="space-y-1.5">
+            {trip.legs.map((leg, idx) => {
+              const wait = leg.actual_wait_minutes || leg.planned_wait_minutes || 0;
+              return (
+                <div
+                  key={leg.id || idx}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-md bg-slate-50 px-2.5 py-1.5 text-xs dark:bg-white/5"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="flex size-4 items-center justify-center rounded-full bg-[#C9B87A] text-[9px] font-bold text-[#171a1f]">
+                      {idx + 1}
+                    </span>
+                    <span className="font-medium text-slate-800 dark:text-slate-200">
+                      {leg.dropoff_address || leg.pickup_address}
+                    </span>
+                    {leg.stop_purpose ? (
+                      <span className="rounded bg-slate-200/70 px-1.5 py-0.5 text-[9px] font-medium text-slate-600 dark:bg-white/10 dark:text-slate-300">
+                        {leg.stop_purpose}
+                      </span>
+                    ) : null}
+                  </div>
+                  {wait > 0 ? (
+                    <span className="flex items-center gap-1 font-mono text-[11px] font-semibold text-slate-600 dark:text-slate-300">
+                      <Clock className="size-3 text-slate-400" />
+                      {wait} {locale === "am" ? "ደቂቃ" : "min wait"}
+                    </span>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
 
       <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {metaItems.map((row) => {
